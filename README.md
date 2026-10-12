@@ -61,9 +61,7 @@ secrets for the `production` environment:
 - `DEPLOY_KNOWN_HOSTS`: pinned `known_hosts` entry for the production server
 
 Set the optional `DEPLOY_PORT` environment variable when SSH does not use port
-22. After the secrets are configured, set the `DEPLOY_ENABLED` production
-environment variable to `true`. Until then, validation runs normally and the
-deployment job is skipped.
+22.
 
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static
