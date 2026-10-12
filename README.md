@@ -3,6 +3,12 @@
 The source for [shortbits.net](https://www.shortbits.net/), the terminal-themed
 internet presence of BitsofBitsofBits.
 
+## AI Notice
+
+Some features of this site were created and are maintained with the help of AI.
+While I don't generally support relying on AI in most commercial settings, this
+is a personal project and largely a learning exercise for me.
+
 ## Features
 
 - Responsive LinkTree-style social and project links
