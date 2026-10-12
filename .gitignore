@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+.vscode/
+node_modules/
+supabase/.temp/
+bitsofbits-achievements.json

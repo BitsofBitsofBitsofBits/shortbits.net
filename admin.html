@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#070b0f">
+    <title>BitsofBitsofBits // PRIVATE INBOX</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script src="theme-init.js?v=theme-1"></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="admin.js" defer></script>
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">RESTRICTED_PROCESS</p>
+          <h1>PRIVATE_INBOX</h1>
+        </div>
+        <a href="index.html">&lt; RETURN_HOME</a>
+      </header>
+
+      <section id="login-view" class="admin-panel" aria-labelledby="login-heading">
+        <div class="section-label">
+          <h2 id="login-heading">OWNER_AUTHENTICATION</h2>
+          <span>AUTHORIZED USER ONLY</span>
+        </div>
+        <form id="login-form" class="admin-form">
+          <label>
+            <span>EMAIL</span>
+            <input name="email" type="email" autocomplete="username" required>
+          </label>
+          <label>
+            <span>PASSWORD</span>
+            <input name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <p id="login-status" class="form-status" role="status" aria-live="polite"></p>
+          <button id="login-submit" type="submit">&gt; AUTHENTICATE</button>
+        </form>
+      </section>
+
+      <section id="inbox-view" class="admin-panel" aria-labelledby="inbox-heading" hidden>
+        <div class="inbox-toolbar">
+          <div>
+            <p class="eyebrow">AUTHENTICATED</p>
+            <h2 id="inbox-heading">INCOMING_PACKETS</h2>
+          </div>
+          <div class="inbox-actions">
+            <button id="refresh-messages" type="button">REFRESH</button>
+            <button id="logout-button" type="button">LOG_OUT</button>
+          </div>
+        </div>
+        <p id="inbox-status" class="form-status" role="status" aria-live="polite"></p>
+        <div id="message-list" class="message-list"></div>
+      </section>
+    </main>
+  </body>
+</html>

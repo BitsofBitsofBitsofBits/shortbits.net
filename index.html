@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="The terminal-shaped internet presence of Caleb K Masters: links, projects, musical bits, achievements, and a suspiciously opinionated avatar."
+    >
+    <meta name="author" content="Caleb K Masters">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#070b0f">
+    <meta property="og:type" content="profile">
+    <meta property="og:site_name" content="BitsofBitsofBits">
+    <meta property="og:title" content="BitsofBitsofBits // Internet Presence">
+    <meta property="og:description" content="Links, projects, musical bits, and questionable CSS from Caleb K Masters.">
+    <meta property="og:url" content="https://www.shortbits.net/">
+    <meta property="og:image" content="https://www.shortbits.net/images/social-preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="A green terminal window reading BitsofBitsofBits on a dark technical grid">
+    <meta property="profile:first_name" content="Caleb">
+    <meta property="profile:last_name" content="Masters">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BitsofBitsofBits // Internet Presence">
+    <meta name="twitter:description" content="Links, projects, musical bits, and questionable CSS.">
+    <meta name="twitter:image" content="https://www.shortbits.net/images/social-preview.png">
+    <link rel="canonical" href="https://www.shortbits.net/">
+    <title>BitsofBitsofBits // BITSOFWEBSITE</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script src="theme-init.js?v=theme-2"></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-1">
+    <script src="messages.js?v=messages-9" defer></script>
+    <script src="script.js?v=upgrade-1" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="contact.js?v=contact-3" defer></script>
+    <script src="spotify.js?v=spotify-6" defer></script>
+  </head>
+  <body>
+    <div id="name-field" class="name-field" aria-hidden="true"></div>
+    <div id="binary-rain" class="binary-rain" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <main id="interface-shell" class="shell">
+      <header class="system-bar" aria-label="System status">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span id="status-text">ONLINE</span>
+        </div>
+        <p id="process-title">~/internet/presence.exe</p>
+        <div class="window-controls">
+          <button id="minimize-button" class="window-button minimize-button" type="button" aria-label="Minimize interface">
+            <span class="control-icon" aria-hidden="true"></span>
+          </button>
+          <button id="maximize-button" class="window-button maximize-button" type="button" aria-label="Maximize interface" aria-pressed="false">
+            <span class="control-icon" aria-hidden="true"></span>
+          </button>
+          <button id="close-button" class="window-button close-button" type="button" aria-label="Close interface">
+            <span class="control-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <section
+        class="profile"
+        itemscope
+        itemtype="https://schema.org/Person"
+      >
+        <div id="avatar-wrap" class="avatar-wrap">
+          <button id="avatar-button" class="avatar" type="button" aria-label="Poke the bit avatar" data-reaction="[•_•]">
+            <span class="avatar-bit bit-a">1</span>
+            <span class="avatar-bit bit-b">0</span>
+            <span class="avatar-bit bit-c">1</span>
+            <span class="avatar-bit bit-d">0</span>
+            <span class="avatar-face" aria-hidden="true">
+              <span class="eye"></span>
+              <span class="eye"></span>
+              <span class="mouth"></span>
+            </span>
+            <span id="avatar-reaction" class="avatar-reaction" aria-hidden="true">[•_•]</span>
+          </button>
+          <span class="avatar-shadow" aria-hidden="true"></span>
+          <button id="avatar-departure" class="avatar-departure" type="button" hidden>
+            Fine. Poke the empty box yourself.
+          </button>
+        </div>
+
+        <div class="identity">
+          <p class="eyebrow">USER IDENTIFIED AS</p>
+          <h1
+            id="identity-name"
+            itemprop="alternateName"
+            title="Triple-click or hold for additional bits"
+            tabindex="0"
+            aria-label="BitsofBitsofBits. Hold for more bits."
+          >
+            <span>Bits</span><span class="dim">of</span><span>Bits</span><span class="dim">of</span><span>Bits</span>
+          </h1>
+          <div class="identity-tags">
+            <p class="pronouns" itemprop="name" aria-label="Name: Caleb K Masters">Caleb K Masters</p>
+            <p class="pronouns" aria-label="Pronouns: they/them">they/them</p>
+          </div>
+          <p class="bio" itemprop="description">
+            Person on the internet. Supporting Minecraft Education. 
+          </p>
+          <div class="command-line">
+            <span class="prompt" aria-hidden="true">&gt;</span>
+            <span id="typed-text"></span>
+            <span class="cursor" aria-hidden="true"></span>
+          </div>
+          <pre id="terminal-output" class="terminal-output" aria-live="polite" hidden></pre>
+        </div>
+      </section>
+
+      <section class="featured-section" aria-labelledby="featured-heading">
+        <div class="section-label">
+          <h2 id="featured-heading">FEATURED_PROCESS</h2>
+          <span>MANUALLY CURATED</span>
+        </div>
+        <article class="featured-project">
+          <div class="featured-project-copy">
+            <p class="featured-project-status">PID 0101 // RUNNING</p>
+            <h3>BITSOFBITS WEBSITE</h3>
+            <p>
+              Where I keep my personal projects and experiments, sharing them with the world.
+            </p>
+            <ul class="project-tags" aria-label="Technologies">
+              <li>HTML</li>
+              <li>CSS</li>
+              <li>JAVASCRIPT</li>
+              <li>SUPABASE</li>
+            </ul>
+          </div>
+          <div class="featured-project-actions">
+            <a href="https://github.com/BitsofBitsofBitsofBits" target="_blank" rel="noreferrer">GITHUB ↗</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="link-section" aria-labelledby="link-heading">
+        <div class="section-label">
+          <h2 id="link-heading">SELECT_DESTINATION</h2>
+          <span id="link-count">00 NODES</span>
+        </div>
+        <div id="link-grid" class="link-grid"></div>
+      </section>
+
+      <aside id="spotify-widget" class="spotify-widget" aria-label="Currently playing on Spotify" data-state="loading">
+        <img id="spotify-artwork" class="spotify-artwork" alt="" hidden>
+        <div class="spotify-placeholder" aria-hidden="true">
+          <img src="images/spotify.svg" alt="">
+        </div>
+        <div class="spotify-copy">
+          <p id="spotify-state" class="activity-label">CONNECTING TO SPOTIFY</p>
+          <p id="spotify-track" class="spotify-track">Locating musical bits...</p>
+          <p id="spotify-artist" class="spotify-artist">Please stand by</p>
+          <div class="spotify-timeline">
+            <span id="spotify-current-time">0:00</span>
+            <div id="spotify-progress" class="spotify-progress" aria-hidden="true"></div>
+            <span id="spotify-duration">0:00</span>
+          </div>
+        </div>
+        <a
+          id="spotify-track-link"
+          class="spotify-track-link"
+          href="https://open.spotify.com/"
+          target="_blank"
+          rel="noreferrer"
+          hidden
+        >OPEN ↗</a>
+      </aside>
+
+      <section class="contact-section" aria-labelledby="contact-heading">
+        <div class="section-label">
+          <h2 id="contact-heading">TRANSMIT_MESSAGE</h2>
+          <span>PRIVATE CHANNEL</span>
+        </div>
+        <form id="contact-form" class="contact-form">
+          <div class="contact-fields">
+            <label>
+              <span>NAME</span>
+              <input name="name" type="text" maxlength="100" autocomplete="name" required>
+            </label>
+            <label>
+              <span>EMAIL <em>// OPTIONAL</em></span>
+              <input name="email" type="email" maxlength="320" autocomplete="email">
+            </label>
+          </div>
+          <label>
+            <span>MESSAGE</span>
+            <textarea name="message" maxlength="2000" rows="5" required></textarea>
+          </label>
+          <label class="contact-honeypot" aria-hidden="true">
+            <span>WEBSITE</span>
+            <input name="website" type="text" tabindex="-1" autocomplete="off">
+          </label>
+          <div class="contact-actions">
+            <p id="contact-status" class="form-status" role="status" aria-live="polite">
+              Messages are encrypted in transit and visible only to the site owner. I probably won't read them all. Or reply at all.
+            </p>
+            <button id="contact-submit" type="submit">&gt; SEND_PACKET</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="now-playing" aria-label="Current activity">
+        <div class="activity-icon" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="activity-label">NOW PROCESSING</p>
+          <p id="activity-text" class="activity-text">A suspicious number of side projects</p>
+        </div>
+        <p class="uptime">UPTIME <span id="uptime">00:00:00</span></p>
+      </aside>
+
+      <footer>
+        <p>MADE WITH <span aria-label="love">♥</span> + QUESTIONABLE CSS</p>
+        <div class="footer-controls">
+          <button id="theme-button" type="button" aria-label="Change interface color">
+            ACCENT: <span id="theme-name">GREEN</span>
+          </button>
+          <button id="mode-button" type="button" aria-label="Switch between dark and light mode">
+            DISPLAY: <span id="mode-name">DARK</span>
+          </button>
+          <button id="achievements-button" type="button" aria-haspopup="dialog">
+            ACHIEVEMENTS: <span id="achievement-count">0</span>
+          </button>
+        </div>
+        <p>© <span id="year"></span> BITS_OF_BITS_OF_BITS</p>
+      </footer>
+      <div
+        id="forbidden-bit-dock"
+        class="forbidden-bit-dock"
+        aria-label="Detected anomalous Bits"
+      ></div>
+    </main>
+
+    <div id="achievement" class="achievement" role="status" aria-live="polite" hidden>
+      <span id="achievement-label">ACHIEVEMENT UNLOCKED</span>
+      <strong id="achievement-message">TOO MANY BITS</strong>
+    </div>
+
+    <section id="shutdown-screen" class="shutdown-screen" aria-live="polite" hidden>
+      <p class="shutdown-code">PROCESS_EXITED_WITH_CODE_0</p>
+      <div class="shutdown-face" aria-hidden="true">[×_×]</div>
+      <h2>You closed the internet.</h2>
+      <p id="shutdown-message">Great job. Everyone is going to be so mad.</p>
+      <dl class="session-report" aria-label="Session report">
+        <div><dt>LINKS OPENED</dt><dd id="report-links">0</dd></div>
+        <div><dt>COMMANDS ENTERED</dt><dd id="report-commands">0</dd></div>
+        <div><dt>AVATAR INCIDENTS</dt><dd id="report-avatar">0</dd></div>
+        <div><dt>SECRETS DISCOVERED</dt><dd id="report-secrets">0</dd></div>
+        <div><dt>PRODUCTIVITY</dt><dd>INCONCLUSIVE</dd></div>
+      </dl>
+      <button id="reboot-button" type="button">&gt; undo that immediately_</button>
+    </section>
+
+    <section
+      id="achievements-panel"
+      class="achievements-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="achievements-heading"
+      hidden
+    >
+      <div class="achievements-window">
+        <header>
+          <div>
+            <p>LOCAL_UNLOCK_CACHE</p>
+            <h2 id="achievements-heading">ACHIEVEMENTS</h2>
+            <p id="achievements-progress" class="achievements-progress">0 / 0 DISCOVERED</p>
+          </div>
+          <button id="achievements-close" type="button" aria-label="Close achievements">&times;</button>
+        </header>
+        <p id="achievements-empty" class="achievements-empty">No achievements unlocked yet. Can you find them all?</p>
+        <ol id="achievements-list" class="achievements-list"></ol>
+        <div class="achievement-data-controls">
+          <button id="achievements-export" type="button">EXPORT CACHE</button>
+          <button id="achievements-reset" type="button">RESET CACHE</button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="bios-panel"
+      class="system-overlay bios-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bios-heading"
+      hidden
+    >
+      <div class="system-window">
+        <header>
+          <p>BITSOFBITS BIOS UTILITY v0.2</p>
+          <button id="bios-close" type="button" aria-label="Exit BIOS">ESC</button>
+        </header>
+        <h2 id="bios-heading">SYSTEM CONFIGURATION</h2>
+        <dl class="bios-settings">
+          <div><dt>BIT COUNT</dt><dd>INFINITE</dd></div>
+          <div><dt>SASSY AVATAR</dt><dd>ENABLED</dd></div>
+          <div><dt>COMMON SENSE</dt><dd>NOT FOUND</dd></div>
+          <div><dt>BOOT DEVICE</dt><dd>THE INTERNET</dd></div>
+          <div><dt>PRONOUNS</dt><dd>THEY/THEM</dd></div>
+        </dl>
+        <p class="system-hint">Press ESC to save absolutely nothing and exit.</p>
+      </div>
+    </section>
+
+    <section
+      id="update-panel"
+      class="system-overlay update-panel"
+      role="status"
+      aria-labelledby="update-heading"
+      hidden
+    >
+      <div class="system-window">
+        <p class="system-kicker">TOTALLY LEGITIMATE SOFTWARE UPDATE</p>
+        <h2 id="update-heading">Installing additional Bits...</h2>
+        <div class="update-track" aria-hidden="true">
+          <span id="update-progress"></span>
+        </div>
+        <p id="update-status" role="status">0% // Please do not turn off the internet.</p>
+      </div>
+    </section>
+
+    <aside id="bits-assistant" class="bits-assistant" aria-labelledby="assistant-heading" hidden>
+      <p id="assistant-heading">It looks like you're trying to use the internet.</p>
+      <p>Would you like some Bits?</p>
+      <div>
+        <button class="assistant-answer" type="button">YES</button>
+        <button class="assistant-answer" type="button">NO</button>
+      </div>
+    </aside>
+
+    <aside id="cookie-notice" class="cookie-notice" aria-live="polite" hidden>
+      <p>This website uses cookies. Unfortunately, the avatar ate them.</p>
+      <button id="cookie-dismiss" type="button">UNDERSTANDABLE</button>
+    </aside>
+
+    <section
+      id="root-panel"
+      class="system-overlay root-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="root-heading"
+      hidden
+    >
+      <div class="system-window">
+        <p class="system-kicker">PRIVILEGE ESCALATION SUCCESSFUL</p>
+        <h2 id="root-heading">ROOT ACCESS GRANTED</h2>
+        <p>You followed the Bits all the way down.</p>
+        <pre aria-hidden="true">USER: BITS_OF_BITS_OF_BITS
+ACCESS: ABSURDLY UNRESTRICTED
+DIRECTORY: /dev/internet
+STATUS: probably fine</pre>
+        <button id="root-close" type="button">&gt; return_to_userland</button>
+      </div>
+    </section>
+  </body>
+</html>
