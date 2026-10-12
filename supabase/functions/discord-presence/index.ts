@@ -3,7 +3,6 @@ const allowedOrigins = new Set([
   "https://shortbits.net",
   "null",
 ]);
-const discordUserId = "202220288459538442";
 const presenceCacheTtlMs = 30_000;
 
 let cachedPresence: Record<string, unknown> | null = null;
@@ -54,6 +53,11 @@ function sanitizeActivity(activity: Record<string, unknown>): SanitizedActivity 
 }
 
 async function fetchPresence(): Promise<Record<string, unknown>> {
+  const discordUserId = Deno.env.get("DISCORD_USER_ID");
+  if (!discordUserId || !/^\d{17,20}$/.test(discordUserId)) {
+    throw new Error("DISCORD_USER_ID is missing or invalid.");
+  }
+
   const response = await fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`, {
     headers: { "Accept": "application/json" },
   });
