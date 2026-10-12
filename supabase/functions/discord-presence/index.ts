@@ -78,14 +78,6 @@ async function fetchPresence(): Promise<Record<string, unknown>> {
   const publicActivities = activities.filter((activity) => (
     activity.type !== 4 && activity.name !== "Spotify"
   ));
-  const clients = [
-    data.active_on_discord_desktop ? "desktop" : null,
-    data.active_on_discord_mobile ? "mobile" : null,
-    data.active_on_discord_web ? "web" : null,
-    data.active_on_discord_embedded ? "embedded" : null,
-    data.active_on_discord_vr ? "vr" : null,
-  ].filter(Boolean);
-
   return {
     enrolled: true,
     status: typeof data.discord_status === "string"
@@ -93,7 +85,6 @@ async function fetchPresence(): Promise<Record<string, unknown>> {
       : "offline",
     customStatus: customStatus?.state ?? null,
     activities: publicActivities,
-    clients,
   };
 }
 

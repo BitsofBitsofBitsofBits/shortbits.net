@@ -73,8 +73,7 @@ npx --yes supabase@latest functions deploy "discord-presence" `
 Set `DISCORD_USER_ID` as a Supabase function secret before deployment. It is a
 public Discord identifier used as configuration, not a bot token.
 
-The site displays public presence, custom status, activities, and active Discord
-clients. It intentionally does not expose voice channel or call membership.
+The site displays public presence, custom status, and activities.
 
 ## Deployment
 

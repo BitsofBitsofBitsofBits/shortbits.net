@@ -2,7 +2,6 @@ const discordRefreshIntervalMs = 60_000;
 const discordStatus = document.querySelector("#discord-presence-status");
 const discordCustomStatus = document.querySelector("#discord-custom-status");
 const discordActivity = document.querySelector("#discord-activity");
-const discordClients = document.querySelector("#discord-clients");
 
 let discordRefreshTimer;
 
@@ -17,7 +16,6 @@ function renderDiscordPresence(presence) {
     discordStatus.textContent = "SETUP REQUIRED";
     discordCustomStatus.textContent = "Join Lanyard to publish presence";
     discordActivity.textContent = "Unavailable";
-    discordClients.textContent = "None";
     return;
   }
 
@@ -26,9 +24,6 @@ function renderDiscordPresence(presence) {
   discordActivity.textContent = presence.activities?.length
     ? presence.activities.map(formatDiscordActivity).join(" | ")
     : "No public activity";
-  discordClients.textContent = presence.clients?.length
-    ? presence.clients.join(", ").toUpperCase()
-    : "NONE";
 }
 
 async function refreshDiscordPresence() {
@@ -55,7 +50,6 @@ async function refreshDiscordPresence() {
     discordStatus.textContent = "SIGNAL UNAVAILABLE";
     discordCustomStatus.textContent = "Presence could not be loaded";
     discordActivity.textContent = "Unavailable";
-    discordClients.textContent = "Unknown";
   } finally {
     discordRefreshTimer = window.setTimeout(
       refreshDiscordPresence,
