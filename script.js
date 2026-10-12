@@ -116,6 +116,7 @@ if (!window.BITS_THEMES) {
 const messages = window.BITS_MESSAGES;
 const activities = window.BITS_ACTIVITIES;
 const shutdownMessages = window.BITS_SHUTDOWN_MESSAGES;
+const stopCodes = window.BITS_STOP_CODES;
 
 function validateTextOptions(options, name) {
   if (!Array.isArray(options) || options.length === 0) {
@@ -146,6 +147,14 @@ if (
   throw new Error("BITS_SHUTDOWN_MESSAGES must contain at least one message.");
 }
 
+if (
+  !Array.isArray(stopCodes)
+  || stopCodes.length === 0
+  || stopCodes.some((code) => typeof code !== "string" || !code.trim())
+) {
+  throw new Error("BITS_STOP_CODES must contain at least one stop code.");
+}
+
 const linkGrid = document.querySelector("#link-grid");
 const linkCount = document.querySelector("#link-count");
 const typedText = document.querySelector("#typed-text");
@@ -166,6 +175,7 @@ const closeButton = document.querySelector("#close-button");
 const processTitle = document.querySelector("#process-title");
 const statusText = document.querySelector("#status-text");
 const shutdownScreen = document.querySelector("#shutdown-screen");
+const shutdownCode = document.querySelector("#shutdown-code");
 const shutdownMessage = document.querySelector("#shutdown-message");
 const rebootButton = document.querySelector("#reboot-button");
 const avatarWrap = document.querySelector("#avatar-wrap");
@@ -1186,6 +1196,15 @@ function triggerChaosMode() {
 const controlSequence = ["minimize", "maximize", "minimize", "close"];
 let recentControlSequence = [];
 let bootToBios = false;
+let previousStopCode;
+
+function pickStopCode() {
+  const availableCodes = stopCodes.filter((code) => code !== previousStopCode);
+  const code = availableCodes[Math.floor(Math.random() * availableCodes.length)]
+    || stopCodes[0];
+  previousStopCode = code;
+  return code;
+}
 
 function recordControl(name) {
   recentControlSequence.push(name);
@@ -1254,6 +1273,7 @@ closeButton.addEventListener("click", () => {
   shutdownMessage.textContent = shutdownMessages[
     Math.floor(Math.random() * shutdownMessages.length)
   ];
+  shutdownCode.textContent = `STOP CODE: ${pickStopCode()}`;
   reportLinks.textContent = String(sessionMetrics.linksOpened);
   reportCommands.textContent = String(sessionMetrics.commandsEntered);
   reportAvatar.textContent = String(sessionMetrics.avatarIncidents);
