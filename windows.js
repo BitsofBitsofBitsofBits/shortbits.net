@@ -4,10 +4,13 @@ const desktopWindowLaunchers = document.querySelectorAll("[data-window-target]")
 const desktopWindowMirrors = document.querySelectorAll("[data-window-mirror]");
 const desktopWindowImageMirrors = document.querySelectorAll("[data-window-mirror-image]");
 const desktopWindowMinimumVisiblePx = 56;
+const desktopWindowMinimumWidthPx = 280;
+const desktopWindowMinimumHeightPx = 120;
 const openedDesktopWindowIds = new Set();
 
 let activeDesktopWindow = null;
 let dragState = null;
+let resizeState = null;
 
 function updateDesktopWindowCount() {
   desktopWindowCount.textContent = String(
@@ -47,6 +50,26 @@ function positionDesktopWindow(windowElement, x, y) {
   const position = constrainDesktopWindow(windowElement, x, y);
   windowElement.style.left = `${position.x}px`;
   windowElement.style.top = `${position.y}px`;
+}
+
+function resizeDesktopWindow(windowElement, width, height) {
+  const clampedWidth = Math.min(
+    window.innerWidth - 16,
+    Math.max(desktopWindowMinimumWidthPx, width),
+  );
+  const clampedHeight = Math.min(
+    window.innerHeight - 16,
+    Math.max(desktopWindowMinimumHeightPx, height),
+  );
+  const rect = windowElement.getBoundingClientRect();
+
+  windowElement.style.width = `${clampedWidth}px`;
+  windowElement.style.height = `${clampedHeight}px`;
+  positionDesktopWindow(
+    windowElement,
+    Math.min(rect.left, window.innerWidth - clampedWidth - 8),
+    Math.min(rect.top, window.innerHeight - clampedHeight - 8),
+  );
 }
 
 function openDesktopWindow(windowElement, launcher = null) {
@@ -190,6 +213,80 @@ desktopWindows.forEach((windowElement) => {
   };
   dragHandle?.addEventListener("pointerup", finishDrag);
   dragHandle?.addEventListener("pointercancel", finishDrag);
+
+  const resizeHandle = windowElement.querySelector("[data-window-resize]");
+  resizeHandle?.addEventListener("pointerdown", (event) => {
+    if (
+      event.button !== 0
+      || windowElement.classList.contains("is-minimized")
+      || window.matchMedia("(max-width: 640px)").matches
+    ) {
+      return;
+    }
+
+    const rect = windowElement.getBoundingClientRect();
+    resizeState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startWidth: rect.width,
+      startHeight: rect.height,
+      windowElement,
+    };
+    resizeHandle.setPointerCapture(event.pointerId);
+    windowElement.classList.add("is-resizing");
+    focusDesktopWindow(windowElement);
+    event.preventDefault();
+  });
+
+  resizeHandle?.addEventListener("pointermove", (event) => {
+    if (!resizeState || resizeState.pointerId !== event.pointerId) {
+      return;
+    }
+    resizeDesktopWindow(
+      resizeState.windowElement,
+      resizeState.startWidth + event.clientX - resizeState.startX,
+      resizeState.startHeight + event.clientY - resizeState.startY,
+    );
+  });
+
+  const finishResize = (event) => {
+    if (!resizeState || resizeState.pointerId !== event.pointerId) {
+      return;
+    }
+    resizeState.windowElement.classList.remove("is-resizing");
+    resizeState = null;
+  };
+  resizeHandle?.addEventListener("pointerup", finishResize);
+  resizeHandle?.addEventListener("pointercancel", finishResize);
+  resizeHandle?.addEventListener("keydown", (event) => {
+    if (
+      !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+      || windowElement.classList.contains("is-minimized")
+    ) {
+      return;
+    }
+
+    const rect = windowElement.getBoundingClientRect();
+    const step = event.shiftKey ? 50 : 20;
+    const widthDelta = event.key === "ArrowLeft"
+      ? -step
+      : event.key === "ArrowRight"
+        ? step
+        : 0;
+    const heightDelta = event.key === "ArrowUp"
+      ? -step
+      : event.key === "ArrowDown"
+        ? step
+        : 0;
+    resizeDesktopWindow(
+      windowElement,
+      rect.width + widthDelta,
+      rect.height + heightDelta,
+    );
+    focusDesktopWindow(windowElement);
+    event.preventDefault();
+  });
 });
 
 desktopWindowMirrors.forEach((mirror) => {
