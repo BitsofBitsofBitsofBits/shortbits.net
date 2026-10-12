@@ -1,4 +1,5 @@
 const repositoryUrl = "https://github.com/BitsofBitsofBitsofBits/shortbits.net";
+const sourceUrl = `${repositoryUrl}/tree/main`;
 const siteUrl = "https://www.shortbits.net/";
 
 const links = [
@@ -1750,7 +1751,7 @@ function openSourceRepository() {
     3200,
     "view-source",
   );
-  window.open(repositoryUrl, "_blank", "noopener,noreferrer");
+  window.open(sourceUrl, "_blank", "noopener,noreferrer");
 }
 
 async function copySiteUrl() {
