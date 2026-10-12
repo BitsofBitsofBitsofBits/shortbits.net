@@ -290,7 +290,19 @@ window.BITS_MESSAGES = [
   { text: "RGB Vomit", weight: 1, colorful: true }, 
   { text: "I will blow you to bits", weight: 1 }, 
   { text: "I am but a collection of bits and bytes", weight: 1 }, 
-  { text: "Bits of Bits is repititive", weight: 0.5 }, 
+  { text: "Bits of Bits is repititive", weight: 0.5 },
+  { text: "Now available on GitHub!", weight: 1 },
+  { text: "Open Sourced!", weight: 1 },
+  { text: "Fork me on GitHub!", weight: 1 },
+  { text: "Star the repository!", weight: 1 },
+  { text: "Contribute to the project!", weight: 1 },
+  { text: "Check out the issues on GitHub!", weight: 1 },
+  { text: "Submit a pull request!", weight: 1 },
+  { text: "Review the documentation!", weight: 1 },
+  { text: "Report a bug!", weight: 1 },
+  { text: "Request a feature!", weight: 1 },
+  { text: "Join the discussion on GitHub!", weight: 1 },
+  { text: "Is looking at the code to find easter eggs cheating?", weight: 1 },
   {
     text: "the signal is glowing...",
     weight: 0.5,
@@ -341,7 +353,7 @@ window.BITS_MESSAGES = [
   { text: "There is no part of my soul I would not turn over for 5 points", weight: 1 }, 
   { text: "Sam is a Sick-Sick man!", weight: 1 }, 
   { text: "Noise Makes Some", weight: 1 }, 
-  
+
 ];
 
 // These rotate independently in the NOW PROCESSING panel.
