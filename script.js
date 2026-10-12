@@ -1,5 +1,5 @@
 const repositoryUrl = "https://github.com/BitsofBitsofBitsofBits/shortbits.net";
-const sourceUrl = `${repositoryUrl}?tab=readme-ov-file`;
+const sourceUrl = "https://github.com/BitsofBitsofBitsofBits?tab=repositories&q=shortbits.net";
 const siteUrl = "https://www.shortbits.net/";
 
 const links = [
