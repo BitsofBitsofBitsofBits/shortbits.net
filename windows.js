@@ -138,9 +138,10 @@ function syncDesktopWindowImage(mirror) {
     return;
   }
 
-  mirror.hidden = source.hidden || !source.currentSrc;
+  const sourceUrl = source.currentSrc || source.src;
+  mirror.hidden = source.hidden || !sourceUrl;
   if (!mirror.hidden) {
-    mirror.src = source.currentSrc;
+    mirror.src = sourceUrl;
     mirror.alt = source.alt;
   } else {
     mirror.removeAttribute("src");
