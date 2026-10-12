@@ -11,6 +11,8 @@ internet presence of BitsofBitsofBits.
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
+- Terminal-themed 404 recovery and generated production build metadata
+- Automated validation and SSH deployment through GitHub Actions
 
 ## Local development
 
@@ -48,3 +50,33 @@ npx --yes supabase@latest functions deploy "spotify-now-playing" `
 The production site is served as static files from `/srv/bitsofbits/`.
 When changing cached CSS or JavaScript, update its query-string version in the
 HTML before publishing.
+
+Pushes to `main` are validated and then deployed with
+`.github/workflows/site.yml`. Configure the following repository environment
+secrets for the `production` environment:
+
+- `DEPLOY_HOST`: production server hostname
+- `DEPLOY_USER`: SSH user with write access to `/srv/bitsofbits/`
+- `DEPLOY_SSH_KEY`: private Ed25519 key for that user
+- `DEPLOY_KNOWN_HOSTS`: pinned `known_hosts` entry for the production server
+
+Set the optional `DEPLOY_PORT` environment variable when SSH does not use port
+22. After the secrets are configured, set the `DEPLOY_ENABLED` production
+environment variable to `true`. Until then, validation runs normally and the
+deployment job is skipped.
+
+The workflow validates JavaScript and local asset references, scans for
+committed secrets, generates `build-info.json`, and uploads only public static
+site files. It does not delete other files from the production directory.
+
+The production web server must route missing paths to the themed error page
+while retaining the HTTP 404 status. For Nginx, add this inside the site's
+`server` block and reload Nginx:
+
+```nginx
+error_page 404 /404.html;
+
+location = /404.html {
+    internal;
+}
+```

@@ -1,0 +1,99 @@
+name: Validate and deploy site
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-site
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
+
+      - name: Validate site assets
+        run: node scripts/validate-site.mjs
+
+      - name: Scan committed content for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    if: >-
+      github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
+      && vars.DEPLOY_ENABLED == 'true'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Generate build metadata
+        shell: bash
+        run: |
+          cat > build-info.json <<EOF
+          {
+            "commit": "${GITHUB_SHA}",
+            "builtAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy static site
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          rsync \
+            --archive \
+            --checksum \
+            --compress \
+            --chmod=D755,F644 \
+            -e "ssh -p ${DEPLOY_PORT}" \
+            404.html \
+            admin.html \
+            build-info.json \
+            index.html \
+            ./*.js \
+            robots.txt \
+            sitemap.xml \
+            styles.css \
+            images \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"

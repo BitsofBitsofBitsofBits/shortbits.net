@@ -1,3 +1,6 @@
+const repositoryUrl = "https://github.com/BitsofBitsofBitsofBits/shortbits.net";
+const siteUrl = "https://www.shortbits.net/";
+
 const links = [
   {
     label: "GITHUB",
@@ -17,7 +20,7 @@ const links = [
   {
     label: "BLUESKY",
     description: "Flying blue Bits in the Sky",
-    url: "https://bsky.app/",
+    url: "https://bsky.app/profile/shortbits.net",
     icon: "BS",
     iconPath: "images/bluesky.svg",
     color: "#7aa7ff",
@@ -33,7 +36,7 @@ const links = [
   {
     label: "TWITCH",
     description: "Sometimes my Bits Twitch a little.",
-    url: "https://twitch.tv/",
+    url: "https://www.twitch.tv/bitsofbitsofbits",
     icon: "TV",
     iconPath: "images/twitch.svg",
     color: "#b99aff",
@@ -57,7 +60,7 @@ const links = [
   {
     label: "Spotify",
     description: "Musical Bits",
-    url: "https://open.spotify.com/",
+    url: "https://open.spotify.com/user/22fainfo6ycgibjw5xlhmp3ba",
     icon: "SP",
     iconPath: "images/spotify.svg",
     color: "#1db954",
@@ -211,6 +214,7 @@ const cookieNotice = document.querySelector("#cookie-notice");
 const cookieDismiss = document.querySelector("#cookie-dismiss");
 const rootPanel = document.querySelector("#root-panel");
 const rootClose = document.querySelector("#root-close");
+const buildLink = document.querySelector("#build-link");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const narrowViewport = window.matchMedia("(max-width: 700px)");
 const deviceMemory = navigator.deviceMemory ?? 8;
@@ -348,6 +352,8 @@ const achievementCatalog = [
   { id: "cursor-trail", hints: ["A process can follow your pointer.", "Try running a suspicious executable.", "Type cursor.exe."] },
   { id: "binary-translator", hints: ["The terminal speaks in eight-bit groups.", "01000010 begins something familiar.", "Type binary followed by 8-bit bytes."] },
   { id: "fake-system-crash", hints: ["A famously dangerous command is harmless here.", "Try deleting absolutely everything.", "Type rm -rf /."] },
+  { id: "view-source", hints: ["The source is not actually classified.", "The terminal can open the repository.", "Type source or repo."] },
+  { id: "page-not-found", hints: ["Not every route contains Bits.", "An actual missing page has its own reward.", "Visit a path that does not exist."] },
   { id: "bits-assistant", hints: ["Help arrives after prolonged hesitation.", "Remain inactive for a while.", "Wait for the Bits Assistant."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "avatar-escape", hints: ["Idle processes may wander.", "Leave the page alone for three minutes.", "Trigger avatar idle mode."] },
@@ -1690,6 +1696,8 @@ function renderHelpCommand() {
     "  help       list available processes",
     "  status     inspect this session",
     "  changelog  view recent patches",
+    "  source     open the source repository",
+    "  share      copy this site's address",
     "  clear      clear this output",
     "  whoami     identify the operator",
     "",
@@ -1712,7 +1720,7 @@ function renderDiagnosticsCommand() {
   )).length;
   renderTerminalOutput("status", [
     "BITSOFWEBSITE DIAGNOSTICS",
-    `  BUILD: upgrade-1`,
+    `  BUILD: ${buildLink.dataset.commit || "LOCAL"}`,
     `  DISPLAY PROFILE: ${performanceLite ? "LITE" : "FULL"}`,
     `  PROFILE REASON: ${performanceProfileReason.toUpperCase()}`,
     `  RGB PROCESS: ${document.documentElement.classList.contains("is-rgb-mode") ? "ACTIVE" : "IDLE"}`,
@@ -1726,12 +1734,48 @@ function renderDiagnosticsCommand() {
 function renderChangelogCommand() {
   renderTerminalOutput("changelog", [
     "RECENT PATCHES",
+    "  upgrade-5  source tools, build record, deployment automation",
     "  upgrade-1  diagnostics, hints, portfolio, accessibility",
     "  eggs-14    extended avatar refusal protocol",
     "  eggs-13    continuous RGB interpolation",
     "  eggs-12    adaptive low-power rendering",
     "  spotify-6  upstream cooldown protection",
   ]);
+}
+
+function openSourceRepository() {
+  showAchievement(
+    "SOURCE CODE ACCESSED",
+    "TRANSPARENCY PROTOCOL",
+    3200,
+    "view-source",
+  );
+  window.open(repositoryUrl, "_blank", "noopener,noreferrer");
+}
+
+async function copySiteUrl() {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(siteUrl);
+    } else {
+      const copyTarget = document.createElement("textarea");
+      copyTarget.value = siteUrl;
+      copyTarget.setAttribute("readonly", "");
+      copyTarget.style.position = "fixed";
+      copyTarget.style.opacity = "0";
+      document.body.append(copyTarget);
+      copyTarget.select();
+      const copied = document.execCommand("copy");
+      copyTarget.remove();
+      if (!copied) {
+        throw new Error("The browser rejected the fallback copy command.");
+      }
+    }
+    showAchievement("URL COPIED TO CLIPBOARD", "> share", 2600);
+  } catch (error) {
+    console.error("Unable to copy the site URL:", error);
+    showAchievement("COPY FAILED // shortbits.net", "> share", 3200);
+  }
 }
 
 function handleSecretCommand(rawCommand) {
@@ -1749,6 +1793,16 @@ function handleSecretCommand(rawCommand) {
 
   if (command === "changelog") {
     renderChangelogCommand();
+    return true;
+  }
+
+  if (command === "source" || command === "repo") {
+    openSourceRepository();
+    return true;
+  }
+
+  if (command === "share") {
+    copySiteUrl();
     return true;
   }
 
@@ -1821,6 +1875,9 @@ const commandSuggestions = [
   "help",
   "status",
   "changelog",
+  "source",
+  "repo",
+  "share",
   "clear",
   "whoami",
   "bios",
@@ -2158,8 +2215,45 @@ renderLinks();
 document.querySelectorAll(".featured-project-actions a").forEach((link) => {
   link.addEventListener("click", () => {
     sessionMetrics.linksOpened += 1;
+    if (link.matches("[data-source-link]")) {
+      showAchievement(
+        "SOURCE CODE ACCESSED",
+        "TRANSPARENCY PROTOCOL",
+        3200,
+        "view-source",
+      );
+    }
   });
 });
+
+async function loadBuildMetadata() {
+  if (window.location.protocol === "file:") {
+    return;
+  }
+
+  try {
+    const response = await fetch("build-info.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Build metadata returned HTTP ${response.status}.`);
+    }
+    const metadata = await response.json();
+    if (
+      typeof metadata.commit !== "string"
+      || !/^[0-9a-f]{7,40}$/i.test(metadata.commit)
+      || typeof metadata.builtAt !== "string"
+    ) {
+      throw new Error("Build metadata is malformed.");
+    }
+    const shortCommit = metadata.commit.slice(0, 7);
+    buildLink.textContent = `BUILD ${shortCommit.toUpperCase()}`;
+    buildLink.href = `${repositoryUrl}/commit/${metadata.commit}`;
+    buildLink.title = `Deployed ${new Date(metadata.builtAt).toLocaleString()}`;
+    buildLink.dataset.commit = shortCommit.toUpperCase();
+  } catch (error) {
+    console.warn("Unable to load build metadata:", error);
+  }
+}
+
 applyColorScheme(document.documentElement.dataset.colorScheme);
 renderMessageText(
   typedText,
@@ -2169,6 +2263,7 @@ renderMessageText(
 );
 applyTextFormat(typedText, currentMessage.format);
 document.querySelector("#year").textContent = new Date().getFullYear();
+loadBuildMetadata();
 setInterval(updateUptime, 1000);
 setTimeout(updateMessage, 250);
 setTimeout(updateActivity, 4000 + Math.random() * 4000);

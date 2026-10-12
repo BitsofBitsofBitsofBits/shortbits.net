@@ -29,15 +29,27 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-2"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-3">
-    <script src="messages.js?v=messages-9" defer></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-4">
+    <script src="messages.js?v=messages-10" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
-    <script src="script.js?v=upgrade-4" defer></script>
+    <script src="script.js?v=upgrade-5" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="spotify.js?v=spotify-6" defer></script>
   </head>
   <body>
+    <noscript>
+      <section class="noscript-fallback">
+        <h1>BITSOFBITS // LIMITED MODE</h1>
+        <p>JavaScript is offline, but the important Bits remain accessible.</p>
+        <nav aria-label="Essential links">
+          <a href="https://github.com/BitsofBitsofBits">GitHub</a>
+          <a href="https://www.linkedin.com/in/calebkmasters/">LinkedIn</a>
+          <a href="https://bsky.app/profile/shortbits.net">Bluesky</a>
+          <a href="https://discord.com/users/202220288459538442">Discord</a>
+        </nav>
+      </section>
+    </noscript>
     <div id="name-field" class="name-field" aria-hidden="true"></div>
     <div id="binary-rain" class="binary-rain" aria-hidden="true"></div>
     <div
@@ -139,7 +151,7 @@
             </ul>
           </div>
           <div class="featured-project-actions">
-            <a href="https://github.com/BitsofBitsofBitsofBits" target="_blank" rel="noreferrer">GITHUB ↗</a>
+            <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer" data-source-link>SOURCE ↗</a>
           </div>
         </article>
       </section>
@@ -234,7 +246,16 @@
             ACHIEVEMENTS: <span id="achievement-count">0</span>
           </button>
         </div>
-        <p>© <span id="year"></span> BITS_OF_BITS_OF_BITS</p>
+        <p>
+          © <span id="year"></span> BITS_OF_BITS_OF_BITS //
+          <a
+            id="build-link"
+            class="build-link"
+            href="https://github.com/BitsofBitsofBits/shortbits.net"
+            target="_blank"
+            rel="noreferrer"
+          >BUILD LOCAL</a>
+        </p>
       </footer>
     </main>
 
