@@ -2248,7 +2248,7 @@ async function loadBuildMetadata() {
     }
     const shortCommit = metadata.commit.slice(0, 7);
     buildLink.textContent = `BUILD ${shortCommit.toUpperCase()}`;
-    buildLink.href = `${repositoryUrl}/commit/${metadata.commit}`;
+    buildLink.href = repositoryUrl;
     buildLink.title = `Deployed ${new Date(metadata.builtAt).toLocaleString()}`;
     buildLink.dataset.commit = shortCommit.toUpperCase();
   } catch (error) {
