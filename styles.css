@@ -1486,16 +1486,19 @@ footer span {
 }
 
 .achievement {
-  position: relative;
-  z-index: 2;
+  position: fixed;
+  z-index: 35;
+  top: 16px;
+  left: 50%;
   width: min(440px, calc(100% - 32px));
-  margin: 16px auto 28px;
+  margin: 0;
   padding: 12px 16px;
   border: 1px solid var(--accent);
   color: var(--ink);
   background: var(--overlay-bg);
   box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.2);
   pointer-events: none;
+  transform: translateX(-50%);
   animation: achievement-in 220ms steps(3);
 }
 
@@ -2138,8 +2141,10 @@ html.is-root-mode .name-field {
 @keyframes achievement-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translate(-50%, -8px);
   }
+
+  to { transform: translateX(-50%); }
 }
 
 @keyframes spin-vinyl {
@@ -2315,6 +2320,11 @@ html.is-root-mode .name-field {
 }
 
 @media (max-width: 640px) {
+  .achievement {
+    top: 10px;
+    width: calc(100% - 20px);
+  }
+
   body:has(.forbidden-bit-dock:not(:empty)) {
     padding-bottom: 64px;
   }
