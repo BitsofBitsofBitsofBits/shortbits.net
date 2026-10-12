@@ -7,8 +7,8 @@ const spotifyProgress = document.querySelector("#spotify-progress");
 const spotifyCurrentTime = document.querySelector("#spotify-current-time");
 const spotifyDuration = document.querySelector("#spotify-duration");
 const spotifyLink = document.querySelector("#spotify-track-link");
-const spotifyRefreshIntervalMs = 15000;
-const spotifyMaximumRetryDelayMs = 24 * 60 * 60 * 1000;
+const spotifyRefreshIntervalMs = 30000;
+const spotifyMaximumRetryDelayMs = 2_147_000_000;
 
 let spotifyRefreshTimer;
 let spotifyRequestSequence = 0;
@@ -85,10 +85,22 @@ function renderSpotifyPlayback(playback) {
     spotifyArtwork.removeAttribute("src");
   }
 
+  const originCacheAgeMs = Number(playback.cacheAgeMs);
+  const servedAt = Number(playback.servedAt);
+  const deliveryAgeMs = Number.isFinite(servedAt)
+    ? Math.max(0, Date.now() - servedAt)
+    : 0;
+  const effectiveCacheAgeMs = Number.isFinite(originCacheAgeMs)
+    ? Math.max(0, originCacheAgeMs) + deliveryAgeMs
+    : 0;
+
   playbackClock = {
     durationMs: item.durationMs,
     isPlaying: playback.isPlaying,
-    progressMs: playback.progressMs,
+    progressMs: Math.min(
+      item.durationMs,
+      playback.progressMs + (playback.isPlaying ? effectiveCacheAgeMs : 0),
+    ),
     synchronizedAt: performance.now(),
   };
   updateSpotifyTimeline();
@@ -118,7 +130,6 @@ async function refreshSpotifyPlayback() {
     const response = await fetch(
       `${projectUrl}/functions/v1/spotify-now-playing`,
       {
-        cache: "no-store",
         headers: anonKey ? { "apikey": anonKey } : {},
       },
     );
@@ -128,6 +139,7 @@ async function refreshSpotifyPlayback() {
       if (response.status === 429) {
         const retryAfterSeconds = Number(playback.retryAfterSeconds);
         nextRefreshDelayMs = Number.isFinite(retryAfterSeconds)
+          && retryAfterSeconds > 0
           ? Math.min(
             spotifyMaximumRetryDelayMs,
             Math.max(spotifyRefreshIntervalMs, retryAfterSeconds * 1000),
@@ -146,6 +158,23 @@ async function refreshSpotifyPlayback() {
     }
 
     renderSpotifyPlayback(playback);
+    const retryAfterSeconds = Number(playback.retryAfterSeconds);
+    if (
+      playback.cacheStatus === "stale"
+      && Number.isFinite(retryAfterSeconds)
+      && retryAfterSeconds > 0
+    ) {
+      nextRefreshDelayMs = Math.min(
+        spotifyMaximumRetryDelayMs,
+        Math.max(spotifyRefreshIntervalMs, retryAfterSeconds * 1000),
+      );
+      console.warn(
+        `Spotify is cooling down; showing cached playback and retrying in ${Math.ceil(nextRefreshDelayMs / 1000)} seconds.`,
+      );
+      if (playback.item) {
+        spotifyState.textContent = "SIGNAL THROTTLED";
+      }
+    }
   } catch (error) {
     if (requestSequence !== spotifyRequestSequence) {
       return;

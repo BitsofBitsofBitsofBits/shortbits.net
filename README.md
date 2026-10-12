@@ -15,6 +15,13 @@ internet presence of BitsofBitsofBits.
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
 
+The Spotify integration polls from the browser every 30 seconds while updating
+the visible playback timeline locally once per second. The Edge Function caches
+successful playback for 30 seconds, coalesces simultaneous refreshes, and serves
+the last known playback while honoring Spotify's full `Retry-After` cooldown.
+This greatly reduces the number of separate upstream Spotify requests created
+by visitors and open tabs.
+
 ## Local development
 
 The public site is dependency-free. Serve the directory with any static server:

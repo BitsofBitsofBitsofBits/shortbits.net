@@ -3,7 +3,12 @@ const allowedOrigins = new Set([
   "https://shortbits.net",
   "null",
 ]);
+const spotifyPlaybackCacheTtlMs = 30_000;
+const spotifyDefaultRetryAfterSeconds = 60;
 let spotifyRateLimitedUntil = 0;
+let cachedPlayback: Record<string, unknown> | null = null;
+let cachedPlaybackAt = 0;
+let spotifyRequestInFlight: Promise<Response> | null = null;
 
 function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
@@ -18,38 +23,65 @@ function corsHeaders(request: Request): Record<string, string> {
   };
 }
 
-function jsonResponse(request: Request, body: unknown, status = 200): Response {
+function jsonResponse(
+  request: Request,
+  body: unknown,
+  status = 200,
+  cacheControl = "no-store",
+): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       ...corsHeaders(request),
-      "Cache-Control": "no-store",
+      "Cache-Control": cacheControl,
       "Content-Type": "application/json; charset=utf-8",
       "X-Content-Type-Options": "nosniff",
     },
   });
 }
 
-Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders(request) });
+function retryAfterSeconds(response: Response): number | null {
+  const value = response.headers.get("Retry-After");
+  if (!value) {
+    return null;
   }
 
-  if (request.method !== "GET") {
-    return jsonResponse(request, { error: "Method not allowed." }, 405);
+  const deltaSeconds = Number.parseInt(value, 10);
+  if (Number.isFinite(deltaSeconds) && deltaSeconds > 0) {
+    return deltaSeconds;
   }
 
-  const rateLimitSecondsRemaining = Math.ceil(
-    (spotifyRateLimitedUntil - Date.now()) / 1000,
+  const retryDate = Date.parse(value);
+  if (!Number.isFinite(retryDate)) {
+    return null;
+  }
+
+  return Math.max(1, Math.ceil((retryDate - Date.now()) / 1000));
+}
+
+function beginSpotifyCooldown(retryAfter: number | null): number {
+  const effectiveRetryAfter = retryAfter ?? spotifyDefaultRetryAfterSeconds;
+  spotifyRateLimitedUntil = Math.max(
+    spotifyRateLimitedUntil,
+    Date.now() + effectiveRetryAfter * 1000,
   );
-  if (rateLimitSecondsRemaining > 0) {
-    return jsonResponse(request, {
-      error: "Spotify playback is temporarily rate limited.",
-      upstreamStatus: 429,
-      retryAfterSeconds: rateLimitSecondsRemaining,
-    }, 429);
-  }
+  return effectiveRetryAfter;
+}
 
+function cachedPlaybackPayload(
+  cacheStatus: "hit" | "stale",
+  retryAfter: number | null = null,
+): Record<string, unknown> {
+  return {
+    ...cachedPlayback,
+    cacheStatus,
+    cacheAgeMs: Math.max(0, Date.now() - cachedPlaybackAt),
+    servedAt: Date.now(),
+    ...(retryAfter === null ? {} : { retryAfterSeconds: retryAfter }),
+  };
+}
+
+async function fetchSpotifyPlayback(request: Request): Promise<Response> {
   const clientId = Deno.env.get("SPOTIFY_CLIENT_ID");
   const clientSecret = Deno.env.get("SPOTIFY_CLIENT_SECRET");
   const refreshToken = Deno.env.get("SPOTIFY_REFRESH_TOKEN");
@@ -76,10 +108,14 @@ Deno.serve(async (request) => {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error("Spotify token refresh failed:", tokenResponse.status, tokenData.error);
+      const tokenRetryAfter = tokenResponse.status === 429
+        ? beginSpotifyCooldown(retryAfterSeconds(tokenResponse))
+        : null;
       return jsonResponse(request, {
         error: "Spotify authentication failed.",
         upstreamStatus: tokenResponse.status,
-      }, 502);
+        retryAfterSeconds: tokenRetryAfter,
+      }, tokenResponse.status === 429 ? 429 : 502);
     }
 
     const playbackResponse = await fetch(
@@ -95,19 +131,13 @@ Deno.serve(async (request) => {
 
     if (!playbackResponse.ok) {
       console.error("Spotify playback request failed:", playbackResponse.status);
-      const retryAfterSeconds = Number.parseInt(
-        playbackResponse.headers.get("Retry-After") ?? "",
-        10,
-      );
-      if (playbackResponse.status === 429 && Number.isFinite(retryAfterSeconds)) {
-        spotifyRateLimitedUntil = Date.now() + retryAfterSeconds * 1000;
-      }
+      const playbackRetryAfter = playbackResponse.status === 429
+        ? beginSpotifyCooldown(retryAfterSeconds(playbackResponse))
+        : null;
       return jsonResponse(request, {
         error: "Spotify playback is unavailable.",
         upstreamStatus: playbackResponse.status,
-        retryAfterSeconds: Number.isFinite(retryAfterSeconds)
-          ? retryAfterSeconds
-          : null,
+        retryAfterSeconds: playbackRetryAfter,
       }, playbackResponse.status === 429 ? 429 : 502);
     }
 
@@ -141,4 +171,79 @@ Deno.serve(async (request) => {
     console.error("Spotify function failed:", error);
     return jsonResponse(request, { error: "Spotify integration failed." }, 500);
   }
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders(request) });
+  }
+
+  if (request.method !== "GET") {
+    return jsonResponse(request, { error: "Method not allowed." }, 405);
+  }
+
+  const rateLimitSecondsRemaining = Math.ceil(
+    (spotifyRateLimitedUntil - Date.now()) / 1000,
+  );
+  if (rateLimitSecondsRemaining > 0) {
+    if (cachedPlayback) {
+      return jsonResponse(
+        request,
+        cachedPlaybackPayload("stale", rateLimitSecondsRemaining),
+      );
+    }
+    return jsonResponse(request, {
+      error: "Spotify playback is temporarily rate limited.",
+      upstreamStatus: 429,
+      retryAfterSeconds: rateLimitSecondsRemaining,
+    }, 429);
+  }
+
+  if (
+    cachedPlayback
+    && Date.now() - cachedPlaybackAt < spotifyPlaybackCacheTtlMs
+  ) {
+    return jsonResponse(
+      request,
+      cachedPlaybackPayload("hit"),
+      200,
+      "public, max-age=0, s-maxage=30, stale-while-revalidate=30",
+    );
+  }
+
+  if (!spotifyRequestInFlight) {
+    spotifyRequestInFlight = fetchSpotifyPlayback(request)
+      .finally(() => {
+        spotifyRequestInFlight = null;
+      });
+  }
+
+  const upstreamResponse = await spotifyRequestInFlight;
+  const upstreamBody = await upstreamResponse.clone().json();
+
+  if (upstreamResponse.ok) {
+    cachedPlayback = upstreamBody;
+    cachedPlaybackAt = Date.now();
+    return jsonResponse(
+      request,
+      cachedPlaybackPayload("hit"),
+      200,
+      "public, max-age=0, s-maxage=30, stale-while-revalidate=30",
+    );
+  }
+
+  if (upstreamResponse.status === 429 && cachedPlayback) {
+    const retryAfter = Number(upstreamBody.retryAfterSeconds);
+    return jsonResponse(
+      request,
+      cachedPlaybackPayload(
+        "stale",
+        Number.isFinite(retryAfter)
+          ? retryAfter
+          : spotifyDefaultRetryAfterSeconds,
+      ),
+    );
+  }
+
+  return jsonResponse(request, upstreamBody, upstreamResponse.status);
 });
