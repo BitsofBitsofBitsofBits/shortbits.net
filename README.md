@@ -14,6 +14,7 @@ is a personal project and largely a learning exercise for me.
 - Responsive LinkTree-style social and project links
 - Dark, light, accent, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
+- Cached Discord presence, custom status, and activity through Lanyard
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
@@ -59,6 +60,18 @@ npx --yes supabase@latest functions deploy "spotify-now-playing" `
   --project-ref "arjwrycitgobvlodmkeo" `
   --no-verify-jwt
 ```
+
+Discord presence requires the Discord account to be enrolled in Lanyard. Deploy
+its cached public-presence proxy with:
+
+```powershell
+npx --yes supabase@latest functions deploy "discord-presence" `
+  --project-ref "arjwrycitgobvlodmkeo" `
+  --no-verify-jwt
+```
+
+The site displays public presence, custom status, activities, and active Discord
+clients. It intentionally does not expose voice channel or call membership.
 
 ## Deployment
 
