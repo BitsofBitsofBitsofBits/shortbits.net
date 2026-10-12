@@ -936,6 +936,17 @@ function updateUptime() {
   });
 }
 
+function getForbiddenBitX() {
+  const shellWidth = interfaceShell.getBoundingClientRect().width;
+  const gutterWidth = Math.max(0, (window.innerWidth - shellWidth) / 2);
+  if (gutterWidth < 70) {
+    return "36px";
+  }
+
+  const gutterInset = 24 + Math.random() * Math.max(1, gutterWidth - 48);
+  return `${gutterInset}px`;
+}
+
 function releaseBit(forceForbidden = false) {
   const isForbidden = forceForbidden || Math.random() < 0.015;
   if (!isForbidden && binaryRain.childElementCount >= maximumFallingBits) {
@@ -946,7 +957,7 @@ function releaseBit(forceForbidden = false) {
   bit.textContent = isForbidden ? "2" : Math.random() < 0.5 ? "0" : "1";
   bit.style.setProperty(
     "--bit-x",
-    `${isForbidden ? 5 + Math.random() * 90 : Math.random() * 100}%`,
+    isForbidden ? getForbiddenBitX() : `${Math.random() * 100}%`,
   );
   bit.style.setProperty("--bit-size", `${0.65 + Math.random() * 0.7}rem`);
   bit.style.setProperty(
