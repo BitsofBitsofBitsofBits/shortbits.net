@@ -12,6 +12,7 @@ internet presence of BitsofBitsofBits.
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
 - Terminal-themed 404 recovery and generated production build metadata
+- Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
 
 ## Local development

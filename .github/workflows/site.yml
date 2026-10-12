@@ -91,6 +91,7 @@ jobs:
             ./*.js \
             robots.txt \
             sitemap.xml \
+            source.html \
             styles.css \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"

@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const htmlFiles = ["index.html", "admin.html", "404.html"];
+const htmlFiles = ["index.html", "admin.html", "404.html", "source.html"];
 const missingAssets = [];
 
 for (const htmlFile of htmlFiles) {

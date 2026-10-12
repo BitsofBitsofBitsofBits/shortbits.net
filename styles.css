@@ -1313,6 +1313,32 @@ footer span {
   color: var(--muted);
 }
 
+.source-window {
+  width: min(900px, 100%);
+}
+
+.source-file-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.source-file-list a {
+  display: block;
+  padding: 12px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.source-file-list a:hover,
+.source-file-list a:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .admin-shell {
   position: relative;
   z-index: 1;
