@@ -1959,6 +1959,7 @@ document.addEventListener("keydown", (event) => {
     && !event.altKey
     && /^[a-zA-Z0-9 ./-]$/.test(event.key)
   ) {
+    event.preventDefault();
     commandInput = `${commandInput}${event.key}`.slice(-48);
     processTitle.textContent = `> ${commandInput}_`;
   }
