@@ -29,10 +29,11 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-2"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-5">
+    <link rel="stylesheet" href="styles.css?v=upgrade-6">
     <script src="messages.js?v=messages-10" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
-    <script src="script.js?v=upgrade-11" defer></script>
+    <script src="script.js?v=upgrade-12" defer></script>
+    <script src="windows.js?v=windows-2" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="spotify.js?v=spotify-8" defer></script>
@@ -122,6 +123,9 @@
           <p class="bio" itemprop="description">
             Person on the internet. Supporting Minecraft Education. 
           </p>
+          <button class="mini-window-launch" type="button" data-window-target="about-window">
+            &gt; OPEN_ABOUT_WINDOW
+          </button>
           <div class="command-line">
             <span class="prompt" aria-hidden="true">&gt;</span>
             <span id="typed-text"></span>
@@ -152,6 +156,9 @@
           </div>
           <div class="featured-project-actions">
             <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer" data-source-link>SOURCE ↗</a>
+            <button class="mini-window-launch" type="button" data-window-target="source-window">
+              OPEN WINDOW
+            </button>
           </div>
         </article>
       </section>
@@ -179,14 +186,19 @@
             <span id="spotify-duration">0:00</span>
           </div>
         </div>
-        <a
-          id="spotify-track-link"
-          class="spotify-track-link"
-          href="https://open.spotify.com/"
-          target="_blank"
-          rel="noreferrer"
-          hidden
-        >OPEN ↗</a>
+        <div class="spotify-actions">
+          <a
+            id="spotify-track-link"
+            class="spotify-track-link"
+            href="https://open.spotify.com/"
+            target="_blank"
+            rel="noreferrer"
+            hidden
+          >OPEN ↗</a>
+          <button class="mini-window-launch spotify-window-launch" type="button" data-window-target="spotify-window">
+            POP OUT
+          </button>
+        </div>
       </aside>
 
       <section class="contact-section" aria-labelledby="contact-heading">
@@ -231,6 +243,9 @@
           <p id="activity-text" class="activity-text">A suspicious number of side projects</p>
         </div>
         <p class="uptime">UPTIME <span id="uptime">00:00:00</span></p>
+        <button class="mini-window-launch monitor-window-launch" type="button" data-window-target="monitor-window">
+          MONITOR
+        </button>
       </aside>
 
       <footer>
@@ -258,6 +273,125 @@
         </p>
       </footer>
     </main>
+
+    <section
+      id="about-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="about-window-title"
+      data-window
+      data-window-x="80"
+      data-window-y="90"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="about-window-title">ABOUT.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize About window">_</button>
+          <button type="button" data-window-close aria-label="Close About window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">USER_PROFILE // READ ONLY</p>
+        <h2>CALEB K MASTERS</h2>
+        <p>They/them. Person on the internet. Supporting Minecraft Education.</p>
+        <dl class="desktop-window-stats">
+          <div><dt>ALIAS</dt><dd>BitsofBitsofBits</dd></div>
+          <div><dt>STATUS</dt><dd>Probably compiling</dd></div>
+          <div><dt>CSS</dt><dd>Questionable</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section
+      id="spotify-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="spotify-window-title"
+      data-window
+      data-window-x="140"
+      data-window-y="150"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="spotify-window-title">SPOTIFY_SIGNAL.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Spotify window">_</button>
+          <button type="button" data-window-close aria-label="Close Spotify window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content desktop-spotify-content">
+        <img class="desktop-spotify-art" data-window-mirror-image="#spotify-artwork" alt="" hidden>
+        <div>
+          <p class="system-kicker" data-window-mirror="#spotify-state">CONNECTING TO SPOTIFY</p>
+          <h2 data-window-mirror="#spotify-track">Locating musical bits...</h2>
+          <p data-window-mirror="#spotify-artist">Please stand by</p>
+          <p class="desktop-spotify-time">
+            <span data-window-mirror="#spotify-current-time">0:00</span>
+            <span>/</span>
+            <span data-window-mirror="#spotify-duration">0:00</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="source-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="source-window-title"
+      data-window
+      data-window-x="200"
+      data-window-y="110"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="source-window-title">SOURCE_BROWSER.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Source window">_</button>
+          <button type="button" data-window-close aria-label="Close Source window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">PUBLIC_REPOSITORY</p>
+        <h2>SHORTBITS.NET</h2>
+        <p>Static HTML, questionable CSS, JavaScript, Supabase, and too many Bits.</p>
+        <nav class="desktop-window-actions" aria-label="Source actions">
+          <a href="https://github.com/BitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer">OPEN GITHUB ↗</a>
+          <a href="/source.html">BROWSE FILES</a>
+          <a href="https://github.com/BitsofBitsofBits/shortbits.net/archive/refs/heads/main.zip">DOWNLOAD ZIP</a>
+        </nav>
+      </div>
+    </section>
+
+    <section
+      id="monitor-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="monitor-window-title"
+      data-window
+      data-window-x="260"
+      data-window-y="170"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="monitor-window-title">SYSTEM_MONITOR.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize System Monitor window">_</button>
+          <button type="button" data-window-close aria-label="Close System Monitor window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">LIVE_DIAGNOSTICS</p>
+        <dl class="desktop-window-stats">
+          <div><dt>UPTIME</dt><dd data-window-mirror="#uptime">00:00:00</dd></div>
+          <div><dt>STATUS</dt><dd data-window-mirror="#status-text">ONLINE</dd></div>
+          <div><dt>SPOTIFY</dt><dd data-window-mirror="#spotify-state">CONNECTING</dd></div>
+          <div><dt>ACTIVITY</dt><dd data-window-mirror="#activity-text">Loading...</dd></div>
+          <div><dt>OPEN WINDOWS</dt><dd id="desktop-window-count">0</dd></div>
+        </dl>
+      </div>
+    </section>
 
     <div id="achievement" class="achievement" role="status" aria-live="polite" hidden>
       <span id="achievement-label">ACHIEVEMENT UNLOCKED</span>
