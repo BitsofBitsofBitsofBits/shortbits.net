@@ -44,12 +44,12 @@ function updateSpotifyTimeline() {
   spotifyProgress.style.setProperty("--spotify-progress", `${progress}%`);
 }
 
-function setSpotifyIdle(message) {
+function setSpotifyIdle(message, detail = "Check back when the bits are louder.") {
   hasSpotifyPlayback = false;
   spotifyWidget.dataset.state = "idle";
   spotifyState.textContent = "NO ACTIVE SIGNAL";
   spotifyTrack.textContent = message;
-  spotifyArtist.textContent = "Check back when the bits are louder.";
+  spotifyArtist.textContent = detail;
   spotifyArtwork.hidden = true;
   spotifyArtwork.removeAttribute("src");
   playbackClock = {
@@ -66,7 +66,7 @@ function renderSpotifyPlayback(playback) {
   const { item } = playback;
 
   if (!item) {
-    setSpotifyIdle("Nothing playing right now");
+    setSpotifyIdle("Nothing is playing rn");
     return;
   }
 
@@ -173,6 +173,11 @@ async function refreshSpotifyPlayback() {
       );
       if (playback.item) {
         spotifyState.textContent = "SIGNAL THROTTLED";
+      } else {
+        setSpotifyIdle(
+          "Spotify is cooling down",
+          "I sent too many bits to it.",
+        );
       }
     }
   } catch (error) {
@@ -187,7 +192,10 @@ async function refreshSpotifyPlayback() {
       if (hasSpotifyPlayback) {
         spotifyState.textContent = "SIGNAL THROTTLED";
       } else {
-        setSpotifyIdle("Spotify is cooling down");
+        setSpotifyIdle(
+          "Spotify is cooling down",
+          "I sent too many bits to it.",
+        );
       }
     } else {
       console.error("Unable to load Spotify playback:", error);
