@@ -29,12 +29,13 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-2"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-9">
+    <link rel="stylesheet" href="styles.css?v=upgrade-10">
     <script src="messages.js?v=messages-10" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="script.js?v=upgrade-15" defer></script>
     <script src="windows.js?v=windows-4" defer></script>
     <script src="supabase-config.js" defer></script>
+    <script src="about.js?v=about-1" defer></script>
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="spotify.js?v=spotify-9" defer></script>
@@ -298,10 +299,24 @@
         <p>They/them. Person on the internet. Supporting Minecraft Education.</p>
         <dl class="desktop-window-stats">
           <div><dt>ALIAS</dt><dd>BitsofBitsofBits</dd></div>
+          <div><dt>PRIMARY PROCESS</dt><dd>Minecraft Education Support</dd></div>
+          <div><dt>LOCAL TIME</dt><dd id="operator-local-time">SYNCHRONIZING</dd></div>
+          <div><dt>OPERATOR STATE</dt><dd id="operator-state">CALCULATING</dd></div>
+          <div><dt>PROCESSOR</dt><dd>1 HUMAN CORE</dd></div>
+          <div><dt>MEMORY</dt><dd>SELECTIVE</dd></div>
+          <div><dt>STORAGE</dt><dd>MOSTLY SCREENSHOTS</dd></div>
+          <div><dt>BIT DEPTH</dt><dd>TOO MANY</dd></div>
+          <div><dt>PERSONALITY CHECKSUM</dt><dd id="personality-checksum">CALCULATING</dd></div>
           <div><dt>DISCORD</dt><dd id="discord-presence-status">CONNECTING</dd></div>
           <div><dt>CUSTOM STATUS</dt><dd id="discord-custom-status">Locating status bits...</dd></div>
           <div><dt>ACTIVITY</dt><dd id="discord-activity">Checking public activities...</dd></div>
         </dl>
+        <div class="desktop-window-actions">
+          <button id="operator-query-button" type="button">QUERY OPERATOR</button>
+        </div>
+        <p id="operator-query-output" class="operator-query-output" role="status" aria-live="polite">
+          Operator query port ready.
+        </p>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize About window"></button>
     </section>

@@ -1872,6 +1872,10 @@ footer span {
   animation: desktop-window-open 180ms steps(3);
 }
 
+#about-window {
+  height: min(680px, calc(100vh - 32px));
+}
+
 .desktop-window[hidden] {
   display: none;
 }
@@ -2089,6 +2093,14 @@ footer span {
   overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 0.65rem;
+}
+
+.operator-query-output {
+  min-height: 3.3em;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.65;
 }
 
 .desktop-spotify-content {
