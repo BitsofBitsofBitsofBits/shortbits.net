@@ -1798,7 +1798,7 @@ footer span {
 .admin-shell {
   position: relative;
   z-index: 1;
-  width: min(900px, calc(100% - 32px));
+  width: min(1120px, calc(100% - 32px));
   margin: 48px auto;
   border: 1px solid var(--border);
   background: var(--admin-bg);
@@ -1855,6 +1855,119 @@ footer span {
 .message-actions {
   display: flex;
   gap: 8px;
+}
+
+.inbox-actions {
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-window-counter {
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.admin-window-counter strong {
+  color: var(--accent);
+}
+
+.admin-desktop-dashboard {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.admin-window-launchers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.admin-window-launchers button {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-window-launchers button:hover,
+.admin-window-launchers button:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.admin-window-launchers strong {
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.admin-window-launchers span {
+  overflow-wrap: anywhere;
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.admin-window-module {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-window-module .admin-form {
+  max-width: none;
+  margin: 0;
+}
+
+.admin-window-module .curated-admin-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.admin-window-content {
+  padding: 24px;
+}
+
+#admin-inbox-window {
+  --window-default-height: 650px;
+  --window-default-width: 900px;
+}
+
+#admin-pronouns-window {
+  --window-default-height: 720px;
+  --window-default-width: 800px;
+}
+
+#admin-playlists-window,
+#admin-songs-window {
+  --window-default-height: 720px;
+  --window-default-width: 1040px;
+}
+
+#admin-resume-window {
+  --window-default-height: 760px;
+  --window-default-width: 1180px;
+}
+
+#admin-now-window {
+  --window-default-height: 700px;
+  --window-default-width: 850px;
+}
+
+#admin-changelog-window {
+  --window-default-height: 760px;
+  --window-default-width: 1100px;
 }
 
 .message-list {
@@ -4112,6 +4225,15 @@ html.is-root-mode .name-field {
 
   .content-file-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-window-launchers {
+    grid-template-columns: 1fr;
+  }
+
+  .inbox-actions {
+    align-items: stretch;
+    justify-content: flex-start;
   }
 
   .resume-entry-list header {

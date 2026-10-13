@@ -428,6 +428,7 @@ async function showInbox() {
     loadNowContent(),
     loadChangelogContent(),
   ]);
+  window.dispatchEvent(new CustomEvent("admin:authenticated"));
 }
 
 function showLogin() {
@@ -867,6 +868,7 @@ if (adminClient) {
     }
 
     showLogin();
+    window.dispatchEvent(new CustomEvent("admin:logged-out"));
   });
 
   adminClient.auth.getSession().then(({ data, error }) => {
