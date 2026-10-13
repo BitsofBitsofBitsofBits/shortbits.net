@@ -38,6 +38,12 @@ is a personal project and largely a learning exercise for me.
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
+- An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
+  transient toast alerts, individual dismissal, and clear-all controls
+- Distinct decorative atmospheres for every interface theme, including circuit
+  pulses, aurora ribbons, petals, acrylic lighting, reveal sweeps, OLED stars,
+  color orbs, and phosphor effects. These respect decorative-effects, contrast,
+  reduced-motion, forced-colors, and performance preferences
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
 - Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,

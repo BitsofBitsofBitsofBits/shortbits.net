@@ -50,7 +50,9 @@ function applyAccessibilityPreference(key, value) {
   localStorage.setItem(`bits-${key}`, value);
   const datasetKey = key === "text-size" ? "textsize" : key;
   document.documentElement.dataset[datasetKey] = value;
-  window.dispatchEvent(new CustomEvent("bits:preferences-changed"));
+  window.dispatchEvent(new CustomEvent("bits:preferences-changed", {
+    detail: { key, value },
+  }));
   setSettingsStatus("Accessibility preferences saved.");
 }
 

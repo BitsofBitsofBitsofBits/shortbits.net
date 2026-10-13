@@ -30,11 +30,13 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-29">
+    <link rel="stylesheet" href="styles.css?v=upgrade-30">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
-    <script src="script.js?v=upgrade-21" defer></script>
+    <script src="notifications.js?v=notifications-1" defer></script>
+    <script src="theme-effects.js?v=theme-effects-1" defer></script>
+    <script src="script.js?v=upgrade-22" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
     <script src="supabase-config.js" defer></script>
@@ -60,6 +62,7 @@
       </section>
     </noscript>
     <div id="name-field" class="name-field" aria-hidden="true"></div>
+    <div id="theme-atmosphere" class="theme-atmosphere" aria-hidden="true"></div>
     <div id="binary-rain" class="binary-rain" aria-hidden="true"></div>
     <div
       id="forbidden-bit-dock"
@@ -321,6 +324,14 @@
           </button>
           <button id="achievements-button" type="button" aria-haspopup="dialog">
             ACHIEVEMENTS: <span id="achievement-count">0</span>
+          </button>
+          <button
+            id="notifications-button"
+            type="button"
+            data-window-target="notifications-window"
+            aria-label="Open notification center"
+          >
+            NOTICES: <span id="notification-unread-count">0</span>
           </button>
           <button id="settings-button" type="button" data-window-target="settings-window">
             SETTINGS
@@ -827,6 +838,46 @@
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize File Explorer window"></button>
     </section>
+
+    <section
+      id="notifications-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="notifications-window-title"
+      data-window
+      data-window-x="260"
+      data-window-y="100"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="notifications-window-title">NOTIFICATIONS.LOG</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Notifications window">_</button>
+          <button type="button" data-window-close aria-label="Close Notifications window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content notification-center-content">
+        <div class="notification-center-header">
+          <div>
+            <p class="system-kicker">EVENT_STREAM // LOCAL DEVICE</p>
+            <h2>NOTIFICATION CENTER</h2>
+          </div>
+          <button id="notifications-clear" type="button">CLEAR_ALL</button>
+        </div>
+        <p id="notifications-empty" class="content-window-empty">
+          No notifications. Suspiciously quiet.
+        </p>
+        <ol id="notifications-list" class="notifications-list"></ol>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Notifications window"></button>
+    </section>
+
+    <div
+      id="notification-toasts"
+      class="notification-toasts"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
 
     <section
       id="boot-screen"

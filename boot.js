@@ -47,6 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
       element.inert = false;
     });
     window.removeEventListener("keydown", handleBootKeydown, true);
+    if (shouldPlayBoot) {
+      window.BITS_NOTIFICATIONS?.notify({
+        title: "BOOT COMPLETE",
+        message: "Internet presence initialized successfully.",
+        type: "success",
+        dedupeKey: "boot-complete",
+      });
+    }
   }
 
   function handleBootKeydown(event) {

@@ -159,6 +159,11 @@ guestbookForm.addEventListener("submit", async (event) => {
       "Signature published to the internet.",
       "success",
     );
+    window.BITS_NOTIFICATIONS?.notify({
+      title: "GUESTBOOK SIGNED",
+      message: `Public signature published as ${name}.`,
+      type: "success",
+    });
     await loadGuestbook({ force: true });
   } catch (error) {
     console.error("Unable to publish Guestbook entry:", error);

@@ -465,7 +465,7 @@ function updateAchievementCount() {
 
 function recordAchievement(id, message, label) {
   if (unlockedAchievements.some((entry) => entry.id === id)) {
-    return;
+    return false;
   }
 
   unlockedAchievements.push({
@@ -477,6 +477,7 @@ function recordAchievement(id, message, label) {
   sessionMetrics.secretsDiscovered += 1;
   saveUnlockedAchievements();
   updateAchievementCount();
+  return true;
 }
 
 function showAchievement(
@@ -485,8 +486,16 @@ function showAchievement(
   duration = 3200,
   achievementId = null,
 ) {
-  if (achievementId) {
-    recordAchievement(achievementId, message, label);
+  const wasNewAchievement = achievementId
+    ? recordAchievement(achievementId, message, label)
+    : false;
+  if (wasNewAchievement) {
+    window.BITS_NOTIFICATIONS?.notify({
+      title: label,
+      message,
+      type: "achievement",
+      dedupeKey: `achievement-${achievementId}`,
+    });
   }
 
   window.clearTimeout(achievementTimer);
@@ -1152,6 +1161,12 @@ interfaceThemeSelect.addEventListener("change", () => {
   }
   interfaceThemeIndex = selectedIndex;
   applyInterfaceTheme(interfaceThemes[interfaceThemeIndex]);
+  window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+    detail: {
+      label: "INTERFACE THEME",
+      value: interfaceThemes[interfaceThemeIndex].name,
+    },
+  }));
 });
 
 accentSelect.value = document.documentElement.classList.contains("is-rgb-mode")
@@ -1160,6 +1175,9 @@ accentSelect.value = document.documentElement.classList.contains("is-rgb-mode")
 accentSelect.addEventListener("change", () => {
   if (accentSelect.value === "RGB") {
     setRgbMode(true);
+    window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+      detail: { label: "ACCENT", value: "RGB MODE" },
+    }));
     showAchievement(
       "RGB MODE ENABLED",
       "RGB MODE",
@@ -1178,6 +1196,9 @@ accentSelect.addEventListener("change", () => {
   }
   themeIndex = selectedIndex;
   setRgbMode(false);
+  window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+    detail: { label: "ACCENT", value: themes[themeIndex].name },
+  }));
 });
 
 modeButton.addEventListener("click", () => {
@@ -1185,6 +1206,9 @@ modeButton.addEventListener("click", () => {
     ? "light"
     : "dark";
   applyColorScheme(nextScheme);
+  window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+    detail: { label: "DISPLAY", value: nextScheme.toUpperCase() },
+  }));
   renderMessageText(
     typedText,
     currentMessageCharacters,
