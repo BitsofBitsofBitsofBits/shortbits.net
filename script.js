@@ -216,6 +216,8 @@ const cookieDismiss = document.querySelector("#cookie-dismiss");
 const rootPanel = document.querySelector("#root-panel");
 const rootClose = document.querySelector("#root-close");
 const buildLink = document.querySelector("#build-link");
+const sourceScanButton = document.querySelector("#source-scan-button");
+const sourceScanOutput = document.querySelector("#source-scan-output");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const narrowViewport = window.matchMedia("(max-width: 700px)");
 const deviceMemory = navigator.deviceMemory ?? 8;
@@ -2226,6 +2228,32 @@ document.querySelectorAll(".featured-project-actions a").forEach((link) => {
       );
     }
   });
+});
+
+const sillySourcePaths = [
+  "C:\\BITS\\BITS\\MORE_BITS\\probably-final.js",
+  "/dev/null/but-louder",
+  "~/projects/definitely-not-production/",
+  "A:\\DO_NOT_INSERT_DISC_47",
+  "cloud://somewhere-over-the-rainbow.css",
+];
+
+sourceScanButton.addEventListener("click", async () => {
+  sourceScanButton.disabled = true;
+  sourceScanButton.textContent = "SCANNING...";
+
+  const paths = prefersReducedMotion.matches
+    ? [sillySourcePaths[Math.floor(Math.random() * sillySourcePaths.length)]]
+    : sillySourcePaths;
+
+  for (const path of paths) {
+    sourceScanOutput.textContent = `CHECKING ${path}`;
+    await new Promise((resolve) => window.setTimeout(resolve, 280));
+  }
+
+  sourceScanOutput.textContent = "SCAN COMPLETE: 0 normal files, 100% Bits.";
+  sourceScanButton.textContent = "BROWSE AGAIN";
+  sourceScanButton.disabled = false;
 });
 
 async function loadBuildMetadata() {

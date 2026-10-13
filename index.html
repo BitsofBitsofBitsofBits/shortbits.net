@@ -29,10 +29,10 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-2"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-8">
+    <link rel="stylesheet" href="styles.css?v=upgrade-9">
     <script src="messages.js?v=messages-10" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
-    <script src="script.js?v=upgrade-13" defer></script>
+    <script src="script.js?v=upgrade-14" defer></script>
     <script src="windows.js?v=windows-4" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="discord.js?v=discord-2" defer></script>
@@ -362,9 +362,10 @@
         <p>Static HTML, questionable CSS, JavaScript, Supabase, and too many Bits.</p>
         <nav class="desktop-window-actions" aria-label="Source actions">
           <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer">OPEN GITHUB ↗</a>
-          <a href="/source.html">BROWSE FILES</a>
+          <button id="source-scan-button" type="button">BROWSE FILES</button>
           <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net/archive/refs/heads/main.zip">DOWNLOAD ZIP</a>
         </nav>
+        <p id="source-scan-output" class="source-scan-output" role="status" aria-live="polite"></p>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Source window"></button>
     </section>
