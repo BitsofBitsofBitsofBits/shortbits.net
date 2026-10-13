@@ -105,6 +105,16 @@ const themes = window.BITS_THEMES ?? [
     light: { accent: "#8a5b00", rgb: "138, 91, 0" },
   },
 ];
+const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
+  { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
+  { id: "aurora", name: "AURORA", darkColor: "#071018", lightColor: "#edf7f5" },
+  { id: "cozy-blossom", name: "COZY BLOSSOM", darkColor: "#1c1218", lightColor: "#fff4f1" },
+  { id: "mica", name: "MICA", darkColor: "#202124", lightColor: "#eef3f8" },
+  { id: "fluent", name: "FLUENT", darkColor: "#101722", lightColor: "#f3f8ff" },
+  { id: "midnight-oled", name: "MIDNIGHT OLED", darkColor: "#000000", lightColor: "#f7f7f7" },
+  { id: "macos", name: "MACOS", darkColor: "#18181a", lightColor: "#f5f5f7" },
+  { id: "terminal", name: "TERMINAL", darkColor: "#000500", lightColor: "#e8f4e8" },
+];
 
 if (!window.BITS_THEMES) {
   console.warn("theme-init.js did not load; using the built-in theme configuration.");
@@ -115,6 +125,9 @@ if (!window.BITS_THEMES) {
     : window.matchMedia("(prefers-color-scheme: light)").matches
       ? "light"
       : "dark";
+}
+if (!window.BITS_INTERFACE_THEMES) {
+  document.documentElement.dataset.interfaceTheme = "default";
 }
 
 const messages = window.BITS_MESSAGES;
@@ -166,6 +179,8 @@ const terminalOutput = document.querySelector("#terminal-output");
 const activityText = document.querySelector("#activity-text");
 const uptime = document.querySelector("#uptime");
 const commandLine = document.querySelector(".command-line");
+const interfaceThemeButton = document.querySelector("#interface-theme-button");
+const interfaceThemeName = document.querySelector("#interface-theme-name");
 const themeButton = document.querySelector("#theme-button");
 const themeName = document.querySelector("#theme-name");
 const modeButton = document.querySelector("#mode-button");
@@ -1032,6 +1047,12 @@ let themeIndex = Math.max(
   0,
   themes.findIndex((theme) => theme.name === localStorage.getItem("bits-accent")),
 );
+let interfaceThemeIndex = Math.max(
+  0,
+  interfaceThemes.findIndex(
+    (theme) => theme.id === document.documentElement.dataset.interfaceTheme,
+  ),
+);
 const rgbThemeSequence = ["CYAN", "VIOLET", "AMBER", "GREEN"];
 let recentThemeSequence = [];
 
@@ -1085,12 +1106,24 @@ function applyAccentTheme(theme) {
   localStorage.setItem("bits-accent", theme.name);
 }
 
+function updateBrowserThemeColor() {
+  const theme = interfaceThemes[interfaceThemeIndex];
+  const colorScheme = document.documentElement.dataset.colorScheme;
+  document.querySelector('meta[name="theme-color"]').content =
+    colorScheme === "light" ? theme.lightColor : theme.darkColor;
+}
+
+function applyInterfaceTheme(theme) {
+  document.documentElement.dataset.interfaceTheme = theme.id;
+  interfaceThemeName.textContent = theme.name;
+  localStorage.setItem("bits-interface-theme", theme.id);
+  updateBrowserThemeColor();
+}
+
 function applyColorScheme(colorScheme) {
   document.documentElement.dataset.colorScheme = colorScheme;
   modeName.textContent = colorScheme.toUpperCase();
-  document.querySelector('meta[name="theme-color"]').content = colorScheme === "light"
-    ? "#edf3ef"
-    : "#070b0f";
+  updateBrowserThemeColor();
   localStorage.setItem("bits-color-scheme", colorScheme);
   if (document.documentElement.classList.contains("is-rgb-mode")) {
     applyRgbAccent();
@@ -1098,6 +1131,12 @@ function applyColorScheme(colorScheme) {
     applyAccentTheme(themes[themeIndex]);
   }
 }
+
+interfaceThemeName.textContent = interfaceThemes[interfaceThemeIndex].name;
+interfaceThemeButton.addEventListener("click", () => {
+  interfaceThemeIndex = (interfaceThemeIndex + 1) % interfaceThemes.length;
+  applyInterfaceTheme(interfaceThemes[interfaceThemeIndex]);
+});
 
 themeButton.addEventListener("click", () => {
   themeIndex = (themeIndex + 1) % themes.length;
@@ -1674,6 +1713,7 @@ function renderDiagnosticsCommand() {
     `  BUILD: ${buildLink.dataset.commit || "LOCAL"}`,
     `  DISPLAY PROFILE: ${performanceLite ? "LITE" : "FULL"}`,
     `  PROFILE REASON: ${performanceProfileReason.toUpperCase()}`,
+    `  INTERFACE THEME: ${interfaceThemes[interfaceThemeIndex].name}`,
     `  RGB PROCESS: ${document.documentElement.classList.contains("is-rgb-mode") ? "ACTIVE" : "IDLE"}`,
     `  SPOTIFY SIGNAL: ${spotifyState.toUpperCase()}`,
     `  ACHIEVEMENTS: ${discoveredCount} / ${achievementCatalog.length}`,

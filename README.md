@@ -23,6 +23,9 @@ is a personal project and largely a learning exercise for me.
   internal scrollbars
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
+- Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,
+  Fluent, Midnight OLED, macOS, and Terminal. These remain independent from
+  accent colors, light/dark display mode, and RGB edges.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions

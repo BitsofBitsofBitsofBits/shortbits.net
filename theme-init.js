@@ -21,6 +21,17 @@ window.BITS_THEMES = [
   },
 ];
 
+window.BITS_INTERFACE_THEMES = [
+  { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
+  { id: "aurora", name: "AURORA", darkColor: "#071018", lightColor: "#edf7f5" },
+  { id: "cozy-blossom", name: "COZY BLOSSOM", darkColor: "#1c1218", lightColor: "#fff4f1" },
+  { id: "mica", name: "MICA", darkColor: "#202124", lightColor: "#eef3f8" },
+  { id: "fluent", name: "FLUENT", darkColor: "#101722", lightColor: "#f3f8ff" },
+  { id: "midnight-oled", name: "MIDNIGHT OLED", darkColor: "#000000", lightColor: "#f7f7f7" },
+  { id: "macos", name: "MACOS", darkColor: "#18181a", lightColor: "#f5f5f7" },
+  { id: "terminal", name: "TERMINAL", darkColor: "#000500", lightColor: "#e8f4e8" },
+];
+
 const storedScheme = localStorage.getItem("bits-color-scheme");
 const colorScheme = storedScheme === "light" || storedScheme === "dark"
   ? storedScheme
@@ -31,10 +42,16 @@ const storedAccent = localStorage.getItem("bits-accent");
 const initialTheme = window.BITS_THEMES.find((theme) => theme.name === storedAccent)
   ?? window.BITS_THEMES[0];
 const initialAccent = initialTheme[colorScheme];
+const storedInterfaceTheme = localStorage.getItem("bits-interface-theme");
+const initialInterfaceTheme = window.BITS_INTERFACE_THEMES.find(
+  (theme) => theme.id === storedInterfaceTheme,
+) ?? window.BITS_INTERFACE_THEMES[0];
 
 document.documentElement.dataset.colorScheme = colorScheme;
+document.documentElement.dataset.interfaceTheme = initialInterfaceTheme.id;
 document.documentElement.style.setProperty("--accent", initialAccent.accent);
 document.documentElement.style.setProperty("--accent-rgb", initialAccent.rgb);
-document.querySelector('meta[name="theme-color"]').content = colorScheme === "light"
-  ? "#edf3ef"
-  : "#070b0f";
+document.querySelector('meta[name="theme-color"]').content =
+  colorScheme === "light"
+    ? initialInterfaceTheme.lightColor
+    : initialInterfaceTheme.darkColor;
