@@ -100,6 +100,10 @@ Five manually curated playlist slots are stored in
 They load with the popup from Supabase's public read-only API and do not create
 additional Spotify API requests.
 
+Five manually curated song slots are stored in `spotify_featured_tracks` and
+use the same Admin Portal and public read-only pattern. Song data is loaded
+directly from Supabase, so it also creates no Spotify API requests.
+
 The public pronoun reference is stored in the `pronoun_profiles` Supabase table.
 Anonymous visitors can read its single profile row, while authenticated Admin
 Portal sessions can update it. Apply migrations with:

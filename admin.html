@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-14">
+    <link rel="stylesheet" href="styles.css?v=upgrade-15">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin.js?v=admin-3" defer></script>
+    <script src="admin.js?v=admin-4" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -91,7 +91,7 @@
             <span>FIVE MANUALLY CURATED SLOTS</span>
           </div>
           <form id="playlist-form" class="admin-form playlist-admin-form">
-            <div class="playlist-admin-grid">
+            <div class="curated-admin-grid">
               <fieldset>
                 <legend>SLOT 1</legend>
                 <label><span>TITLE</span><input name="playlist_1_title" maxlength="100"></label>
@@ -125,6 +125,54 @@
             </div>
             <p id="playlist-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="playlist-submit" type="submit">&gt; SAVE_PLAYLISTS</button>
+          </form>
+        </section>
+
+        <section class="profile-editor" aria-labelledby="track-editor-heading">
+          <div class="section-label">
+            <h2 id="track-editor-heading">FEATURED_SONGS</h2>
+            <span>FIVE MANUALLY CURATED SLOTS</span>
+          </div>
+          <form id="track-form" class="admin-form">
+            <div class="curated-admin-grid">
+              <fieldset>
+                <legend>SLOT 1</legend>
+                <label><span>TITLE</span><input name="track_1_title" maxlength="100"></label>
+                <label><span>ARTIST</span><input name="track_1_artist" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="track_1_url" type="url"></label>
+                <label class="admin-checkbox"><input name="track_1_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 2</legend>
+                <label><span>TITLE</span><input name="track_2_title" maxlength="100"></label>
+                <label><span>ARTIST</span><input name="track_2_artist" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="track_2_url" type="url"></label>
+                <label class="admin-checkbox"><input name="track_2_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 3</legend>
+                <label><span>TITLE</span><input name="track_3_title" maxlength="100"></label>
+                <label><span>ARTIST</span><input name="track_3_artist" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="track_3_url" type="url"></label>
+                <label class="admin-checkbox"><input name="track_3_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 4</legend>
+                <label><span>TITLE</span><input name="track_4_title" maxlength="100"></label>
+                <label><span>ARTIST</span><input name="track_4_artist" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="track_4_url" type="url"></label>
+                <label class="admin-checkbox"><input name="track_4_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 5</legend>
+                <label><span>TITLE</span><input name="track_5_title" maxlength="100"></label>
+                <label><span>ARTIST</span><input name="track_5_artist" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="track_5_url" type="url"></label>
+                <label class="admin-checkbox"><input name="track_5_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+            </div>
+            <p id="track-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="track-submit" type="submit">&gt; SAVE_SONGS</button>
           </form>
         </section>
       </section>

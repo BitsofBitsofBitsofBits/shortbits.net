@@ -11,6 +11,7 @@ const spotifyRecentTrack = document.querySelector("#spotify-recent-track");
 const spotifyTopTracks = document.querySelector("#spotify-top-tracks");
 const spotifyAllTimeTracks = document.querySelector("#spotify-all-time-tracks");
 const spotifyFeaturedPlaylists = document.querySelector("#spotify-featured-playlists");
+const spotifyFeaturedTracks = document.querySelector("#spotify-featured-tracks");
 const spotifyHistoryStatus = document.querySelector("#spotify-history-status");
 const spotifyRefreshIntervalMs = 30000;
 const spotifyHistoryRefreshIntervalMs = 300_000;
@@ -26,6 +27,8 @@ let spotifyHistoryLoadedAt = 0;
 let spotifyHistoryRequestInFlight = null;
 let featuredPlaylistsLoadedAt = 0;
 let featuredPlaylistsRequestInFlight = null;
+let featuredTracksLoadedAt = 0;
+let featuredTracksRequestInFlight = null;
 let playbackClock = {
   durationMs: 0,
   isPlaying: false,
@@ -263,6 +266,108 @@ function renderSpotifyPlayback(playback) {
 
       return featuredPlaylistsRequestInFlight;
     }
+
+  function isValidFeaturedTrack(track) {
+    return track
+      && Number.isInteger(track.position)
+      && track.position >= 1
+      && track.position <= 5
+      && typeof track.title === "string"
+      && track.title.trim().length > 0
+      && track.title.length <= 100
+      && typeof track.artist === "string"
+      && track.artist.trim().length > 0
+      && track.artist.length <= 100
+      && typeof track.spotify_url === "string"
+      && /^https:\/\/open\.spotify\.com\/track\/[A-Za-z0-9]+(?:\?.*)?$/.test(
+        track.spotify_url,
+      );
+  }
+
+  function renderFeaturedTracks(tracks) {
+    spotifyFeaturedTracks.replaceChildren();
+    tracks
+      .filter((track) => track.enabled && isValidFeaturedTrack(track))
+      .sort((first, second) => first.position - second.position)
+      .slice(0, 5)
+      .forEach((track) => {
+        const item = document.createElement("li");
+        item.value = track.position;
+        item.append(createSpotifyHistoryTrack({
+          title: track.title.trim(),
+          artists: [track.artist.trim()],
+          collection: null,
+          albumArt: null,
+          spotifyUrl: track.spotify_url,
+        }));
+        spotifyFeaturedTracks.append(item);
+      });
+
+    if (!spotifyFeaturedTracks.children.length) {
+      const empty = document.createElement("li");
+      empty.textContent = "Song slots are awaiting curation.";
+      spotifyFeaturedTracks.append(empty);
+    }
+  }
+
+  async function loadFeaturedTracks() {
+    if (
+      featuredTracksRequestInFlight
+      || Date.now() - featuredTracksLoadedAt < spotifyHistoryRefreshIntervalMs
+    ) {
+      return featuredTracksRequestInFlight;
+    }
+
+    const { url, anonKey } = window.SUPABASE_CONFIG || {};
+    if (!url || !anonKey) {
+      spotifyFeaturedTracks.replaceChildren();
+      const error = document.createElement("li");
+      error.textContent = "Featured songs are not configured.";
+      spotifyFeaturedTracks.append(error);
+      return;
+    }
+
+    featuredTracksRequestInFlight = (async () => {
+      try {
+        const response = await fetch(
+          `${url.replace(/\/$/, "")}/rest/v1/spotify_featured_tracks?select=position,title,artist,spotify_url,enabled&order=position.asc`,
+          {
+            headers: {
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`,
+            },
+          },
+        );
+        const tracks = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            tracks.message || `Featured songs returned ${response.status}.`,
+          );
+        }
+        if (
+          !Array.isArray(tracks)
+          || tracks.some((track) => (
+            typeof track.enabled !== "boolean"
+            || (track.enabled && !isValidFeaturedTrack(track))
+          ))
+        ) {
+          throw new Error("Featured song response is malformed.");
+        }
+        renderFeaturedTracks(tracks);
+        featuredTracksLoadedAt = Date.now();
+      } catch (error) {
+        console.error("Unable to load featured songs:", error);
+        spotifyFeaturedTracks.replaceChildren();
+        const unavailable = document.createElement("li");
+        unavailable.textContent = "Featured song signal temporarily unavailable.";
+        spotifyFeaturedTracks.append(unavailable);
+      } finally {
+        featuredTracksRequestInFlight = null;
+      }
+    })();
+
+    return featuredTracksRequestInFlight;
+  }
 
   function renderSpotifyRankings(history) {
     const topTracks = Array.isArray(history.topTracks) ? history.topTracks : [];
@@ -559,6 +664,7 @@ window.addEventListener("desktop-window:opened", (event) => {
   if (event.detail?.windowId === "spotify-window") {
     loadSpotifyHistory();
     loadFeaturedPlaylists();
+    loadFeaturedTracks();
   }
 });
 if (window.LANYARD_SPOTIFY) {

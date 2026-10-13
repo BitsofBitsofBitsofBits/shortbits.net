@@ -13,8 +13,13 @@ const pronounAdminStatus = document.querySelector("#pronoun-admin-status");
 const playlistForm = document.querySelector("#playlist-form");
 const playlistSubmit = document.querySelector("#playlist-submit");
 const playlistAdminStatus = document.querySelector("#playlist-admin-status");
+const trackForm = document.querySelector("#track-form");
+const trackSubmit = document.querySelector("#track-submit");
+const trackAdminStatus = document.querySelector("#track-admin-status");
 const spotifyPlaylistUrlPattern =
   /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/;
+const spotifyTrackUrlPattern =
+  /^https:\/\/open\.spotify\.com\/track\/[A-Za-z0-9]+(?:\?.*)?$/;
 const pronounProfileFields = [
   "display_name",
   "subject_pronoun",
@@ -185,6 +190,35 @@ async function loadFeaturedPlaylists() {
   setAdminStatus(playlistAdminStatus, "Curated playlist slots loaded.", "success");
 }
 
+async function loadFeaturedTracks() {
+  setAdminStatus(trackAdminStatus, "Loading curated song slots...");
+  const { data, error } = await adminClient
+    .from("spotify_featured_tracks")
+    .select("position, title, artist, spotify_url, enabled")
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Unable to load featured songs:", error);
+    setAdminStatus(
+      trackAdminStatus,
+      `Featured songs failed to load: ${error.message}`,
+      "error",
+    );
+    return;
+  }
+
+  for (let position = 1; position <= 5; position += 1) {
+    const track = data.find((entry) => entry.position === position);
+    trackForm.elements[`track_${position}_title`].value = track?.title ?? "";
+    trackForm.elements[`track_${position}_artist`].value = track?.artist ?? "";
+    trackForm.elements[`track_${position}_url`].value =
+      track?.spotify_url ?? "";
+    trackForm.elements[`track_${position}_enabled`].checked =
+      track?.enabled === true;
+  }
+  setAdminStatus(trackAdminStatus, "Curated song slots loaded.", "success");
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
@@ -192,6 +226,7 @@ async function showInbox() {
     loadMessages(),
     loadPronounProfile(),
     loadFeaturedPlaylists(),
+    loadFeaturedTracks(),
   ]);
 }
 
@@ -343,6 +378,73 @@ if (adminClient) {
     }
 
     setAdminStatus(playlistAdminStatus, "Curated playlists updated.", "success");
+  });
+
+  trackForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(trackForm);
+    const tracks = Array.from({ length: 5 }, (_, index) => {
+      const position = index + 1;
+      return {
+        position,
+        title: String(formData.get(`track_${position}_title`) ?? "").trim(),
+        artist: String(formData.get(`track_${position}_artist`) ?? "").trim(),
+        spotify_url: String(formData.get(`track_${position}_url`) ?? "").trim(),
+        enabled: formData.has(`track_${position}_enabled`),
+      };
+    });
+    const invalidTrack = tracks.find((track) => (
+      (
+        track.enabled
+        && (!track.title || !track.artist || !track.spotify_url)
+      )
+      || (
+        track.spotify_url
+        && !spotifyTrackUrlPattern.test(track.spotify_url)
+      )
+    ));
+    if (invalidTrack) {
+      setAdminStatus(
+        trackAdminStatus,
+        `Slot ${invalidTrack.position} needs a title, artist, and valid Spotify track URL.`,
+        "error",
+      );
+      return;
+    }
+
+    trackSubmit.disabled = true;
+    trackSubmit.textContent = "> SAVING...";
+    setAdminStatus(trackAdminStatus, "Writing curated song slots...");
+
+    const updatedAt = new Date().toISOString();
+    const results = await Promise.all(tracks.map((track) => (
+      adminClient
+        .from("spotify_featured_tracks")
+        .update({
+          title: track.title || null,
+          artist: track.artist || null,
+          spotify_url: track.spotify_url || null,
+          enabled: track.enabled,
+          updated_at: updatedAt,
+        })
+        .eq("position", track.position)
+    )));
+    const failedUpdate = results.find((result) => result.error);
+
+    trackSubmit.disabled = false;
+    trackSubmit.textContent = "> SAVE_SONGS";
+
+    if (failedUpdate) {
+      console.error("Unable to save featured songs:", failedUpdate.error);
+      setAdminStatus(
+        trackAdminStatus,
+        `Featured song update failed: ${failedUpdate.error.message}`,
+        "error",
+      );
+      return;
+    }
+
+    setAdminStatus(trackAdminStatus, "Curated songs updated.", "success");
   });
 
   logoutButton.addEventListener("click", async () => {

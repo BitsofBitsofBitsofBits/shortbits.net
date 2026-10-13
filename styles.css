@@ -958,13 +958,13 @@ h1 .dim {
   gap: 14px;
 }
 
-.playlist-admin-grid {
+.curated-admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
 }
 
-.playlist-admin-grid fieldset {
+.curated-admin-grid fieldset {
   display: grid;
   gap: 12px;
   min-width: 0;
@@ -973,7 +973,7 @@ h1 .dim {
   border: 1px solid var(--border);
 }
 
-.playlist-admin-grid legend {
+.curated-admin-grid legend {
   padding: 0 6px;
   color: var(--accent);
   font-size: 0.66rem;
@@ -2388,6 +2388,12 @@ footer span {
   @container (min-width: 1100px) {
     .spotify-ranking-columns {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 1400px) {
+    .spotify-ranking-columns {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 
