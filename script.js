@@ -2236,6 +2236,13 @@ const sillySourcePaths = [
   "~/projects/definitely-not-production/",
   "A:\\DO_NOT_INSERT_DISC_47",
   "cloud://somewhere-over-the-rainbow.css",
+  "C:\\Users\\Caleb\\Desktop\\new-folder-final-FINAL-2\\",
+  "/usr/share/misc/assorted-bits/",
+  "ram://temporarily-important/do-not-unplug.js",
+  "recycle-bin://that-one-working-version/",
+  "quantum://file-exists-and-does-not-exist.json",
+  "minecraft://redstone/website-backup/",
+  "void://please-hold/",
 ];
 
 sourceScanButton.addEventListener("click", async () => {
@@ -2243,14 +2250,23 @@ sourceScanButton.addEventListener("click", async () => {
   sourceScanButton.textContent = "SCANNING...";
 
   const paths = prefersReducedMotion.matches
-    ? [sillySourcePaths[Math.floor(Math.random() * sillySourcePaths.length)]]
+    ? sillySourcePaths.slice(0, 3)
     : sillySourcePaths;
 
-  for (const path of paths) {
-    sourceScanOutput.textContent = `CHECKING ${path}`;
-    await new Promise((resolve) => window.setTimeout(resolve, 280));
+  for (const [index, path] of paths.entries()) {
+    const progress = Math.round(((index + 1) / paths.length) * 94);
+    sourceScanOutput.textContent = `[${String(progress).padStart(2, "0")}%] CHECKING ${path}`;
+    await new Promise((resolve) => window.setTimeout(
+      resolve,
+      prefersReducedMotion.matches ? 500 : 620,
+    ));
   }
 
+  sourceScanOutput.textContent = "[99%] COUNTING LOOSE BITS...";
+  await new Promise((resolve) => window.setTimeout(
+    resolve,
+    prefersReducedMotion.matches ? 500 : 900,
+  ));
   sourceScanOutput.textContent = "SCAN COMPLETE: 0 normal files, 100% Bits.";
   sourceScanButton.textContent = "BROWSE AGAIN";
   sourceScanButton.disabled = false;
