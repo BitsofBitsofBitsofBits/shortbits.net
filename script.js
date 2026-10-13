@@ -247,14 +247,21 @@ let maximumFallingBits;
 let performanceProfileReason = "full effects";
 let framePerformanceMonitorState = "idle";
 
+function hasReducedMotionPreference() {
+  return (
+    document.documentElement.dataset.motion === "reduced"
+    || prefersReducedMotion.matches
+  );
+}
+
 function updatePerformanceProfile() {
   performanceLite = (
     narrowViewport.matches
-    || prefersReducedMotion.matches
+    || hasReducedMotionPreference()
     || constrainedHardware
     || runtimePerformanceLite
   );
-  if (prefersReducedMotion.matches) {
+  if (hasReducedMotionPreference()) {
     performanceProfileReason = "reduced motion preference";
   } else if (narrowViewport.matches) {
     performanceProfileReason = "narrow viewport";
@@ -330,6 +337,7 @@ function monitorFramePerformance() {
 updatePerformanceProfile();
 narrowViewport.addEventListener("change", updatePerformanceProfile);
 prefersReducedMotion.addEventListener("change", updatePerformanceProfile);
+window.addEventListener("bits:preferences-changed", updatePerformanceProfile);
 document.documentElement.classList.toggle("is-page-hidden", document.hidden);
 window.setTimeout(monitorFramePerformance, 1200);
 
@@ -1034,7 +1042,11 @@ function scheduleNextBit() {
     ? 900 + Math.random() * 1200
     : 500 + Math.random() * 900;
   setTimeout(() => {
-    if (!document.hidden) {
+    if (
+      !document.hidden
+      && !hasReducedMotionPreference()
+      && document.documentElement.dataset.effects !== "off"
+    ) {
       releaseBit();
     }
     scheduleNextBit();
@@ -1185,7 +1197,7 @@ function triggerChaosMode() {
   document.documentElement.classList.add("is-chaos-mode");
   showAchievement("TOO MANY BITS", "MAXIMUM BITS MODE", 5000, "maximum-bits");
 
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!hasReducedMotionPreference()) {
     for (let index = 0; index < 80; index += 1) {
       window.setTimeout(releaseBit, index * 24);
     }
@@ -1250,7 +1262,7 @@ maximizeButton.addEventListener("click", () => {
     : "~/internet/presence.exe";
   statusText.textContent = willMaximize ? "OVERCLOCKED" : "ONLINE";
 
-  if (willMaximize && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (willMaximize && !hasReducedMotionPreference()) {
     for (let index = 0; index < 24; index += 1) {
       setTimeout(releaseBit, index * 25);
     }
@@ -1604,7 +1616,7 @@ function setGravityMode(mode) {
     3600,
     mode === "gravity" ? "gravity" : "antigravity",
   );
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!hasReducedMotionPreference()) {
     for (let index = 0; index < 48; index += 1) {
       window.setTimeout(releaseBit, index * 18);
     }
@@ -2172,7 +2184,7 @@ function applyTemporalEggs(now = new Date()) {
       5000,
       `birthday-${now.getFullYear()}`,
     );
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!hasReducedMotionPreference()) {
       for (let index = 0; index < 80; index += 1) {
         window.setTimeout(releaseBit, index * 24);
       }
@@ -2243,7 +2255,7 @@ sourceScanButton.addEventListener("click", async () => {
   sourceScanButton.disabled = true;
   sourceScanButton.textContent = "SCANNING...";
 
-  const paths = prefersReducedMotion.matches
+  const paths = hasReducedMotionPreference()
     ? sillySourcePaths.slice(0, 3)
     : sillySourcePaths;
 
@@ -2252,14 +2264,14 @@ sourceScanButton.addEventListener("click", async () => {
     sourceScanOutput.textContent = `[${String(progress).padStart(2, "0")}%] CHECKING ${path}`;
     await new Promise((resolve) => window.setTimeout(
       resolve,
-      prefersReducedMotion.matches ? 500 : 620,
+      hasReducedMotionPreference() ? 500 : 620,
     ));
   }
 
   sourceScanOutput.textContent = "[99%] COUNTING LOOSE BITS...";
   await new Promise((resolve) => window.setTimeout(
     resolve,
-    prefersReducedMotion.matches ? 500 : 900,
+    hasReducedMotionPreference() ? 500 : 900,
   ));
   sourceScanOutput.textContent = "SCAN COMPLETE: 0 normal files, 100% Bits.";
   sourceScanButton.textContent = "BROWSE AGAIN";
@@ -2316,7 +2328,5 @@ if (sessionStorage.getItem("bits-cookie-notice-dismissed") !== "true") {
   }, 7000);
 }
 
-if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  scheduleNextBit();
-}
+scheduleNextBit();
 resetIdleTimer();

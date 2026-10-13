@@ -6,10 +6,55 @@ const desktopWindowImageMirrors = document.querySelectorAll("[data-window-mirror
 const desktopWindowMinimumWidthPx = 280;
 const desktopWindowMinimumHeightPx = 120;
 const openedDesktopWindowIds = new Set();
+const desktopWindowsBySlug = new Map(
+  desktopWindows.map((windowElement) => [
+    windowElement.id.replace(/-window$/, ""),
+    windowElement,
+  ]),
+);
 
 let activeDesktopWindow = null;
 let dragState = null;
 let resizeState = null;
+let isApplyingWindowUrl = false;
+
+function getDesktopWindowSlug(windowElement) {
+  return windowElement.id.replace(/-window$/, "");
+}
+
+function getOpenDesktopWindowSlugs() {
+  return desktopWindows
+    .filter((windowElement) => !windowElement.hidden)
+    .map(getDesktopWindowSlug);
+}
+
+function syncDesktopWindowUrl() {
+  if (isApplyingWindowUrl) {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  const openSlugs = getOpenDesktopWindowSlugs();
+  url.searchParams.delete("window");
+  url.searchParams.delete("windows");
+
+  if (openSlugs.length === 1) {
+    url.searchParams.set("window", openSlugs[0]);
+  } else if (openSlugs.length > 1) {
+    url.searchParams.set("windows", openSlugs.join(","));
+  }
+
+  window.history.replaceState(null, "", url);
+}
+
+function getLinkedDesktopWindowSlugs() {
+  const params = new URLSearchParams(window.location.search);
+  const values = [
+    ...params.getAll("window"),
+    ...(params.get("windows")?.split(",") ?? []),
+  ];
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
 
 function updateDesktopWindowCount() {
   desktopWindowCount.textContent = String(
@@ -115,7 +160,7 @@ function resizeDesktopWindowFromEdge(state, clientX, clientY) {
   state.windowElement.style.height = `${height}px`;
 }
 
-function openDesktopWindow(windowElement, launcher = null) {
+function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
   windowElement.hidden = false;
   windowElement.classList.remove("is-minimized");
   windowElement.dataset.launcherId = launcher?.id || "";
@@ -146,10 +191,13 @@ function openDesktopWindow(windowElement, launcher = null) {
       "window-shopper",
     );
   }
+  if (syncUrl) {
+    syncDesktopWindowUrl();
+  }
   windowElement.querySelector("[data-window-close]")?.focus();
 }
 
-function closeDesktopWindow(windowElement) {
+function closeDesktopWindow(windowElement, syncUrl = true) {
   windowElement.hidden = true;
   windowElement.classList.remove("is-minimized");
   updateDesktopWindowCount();
@@ -162,6 +210,44 @@ function closeDesktopWindow(windowElement) {
   if (activeDesktopWindow === windowElement) {
     activeDesktopWindow = null;
   }
+  if (syncUrl) {
+    syncDesktopWindowUrl();
+  }
+}
+
+function applyDesktopWindowUrl() {
+  isApplyingWindowUrl = true;
+  const linkedSlugs = getLinkedDesktopWindowSlugs();
+  const linkedWindows = new Set(
+    linkedSlugs
+      .map((slug) => desktopWindowsBySlug.get(slug))
+      .filter(Boolean),
+  );
+
+  desktopWindows.forEach((windowElement) => {
+    if (linkedWindows.has(windowElement)) {
+      openDesktopWindow(windowElement, null, false);
+    } else if (!windowElement.hidden) {
+      closeDesktopWindow(windowElement, false);
+    }
+  });
+  isApplyingWindowUrl = false;
+  updateDesktopWindowCount();
+}
+
+function resetDesktopWindowLayout() {
+  desktopWindows.forEach((windowElement) => {
+    windowElement.hidden = true;
+    windowElement.classList.remove("is-minimized", "is-dragging", "is-resizing");
+    windowElement.removeAttribute("style");
+    delete windowElement.dataset.positioned;
+    delete windowElement.dataset.launcherId;
+  });
+  activeDesktopWindow = null;
+  dragState = null;
+  resizeState = null;
+  updateDesktopWindowCount();
+  syncDesktopWindowUrl();
 }
 
 function toggleDesktopWindowMinimized(windowElement) {
@@ -392,6 +478,8 @@ window.addEventListener("resize", () => {
     });
 });
 
+window.addEventListener("popstate", applyDesktopWindowUrl);
+
 document.addEventListener("keydown", (event) => {
   const blockingInterface = document.querySelector(
     ".system-overlay:not([hidden]), #achievements-panel:not([hidden]), #shutdown-screen:not([hidden])",
@@ -406,4 +494,19 @@ document.addEventListener("keydown", (event) => {
   }
 }, { capture: true });
 
-updateDesktopWindowCount();
+window.BITS_DESKTOP_WINDOWS = {
+  getShareUrl() {
+    syncDesktopWindowUrl();
+    return window.location.href;
+  },
+  open(slug) {
+    const windowElement = desktopWindowsBySlug.get(slug);
+    if (!windowElement) {
+      throw new Error(`Unknown desktop window: ${slug}`);
+    }
+    openDesktopWindow(windowElement);
+  },
+  resetLayout: resetDesktopWindowLayout,
+};
+
+applyDesktopWindowUrl();

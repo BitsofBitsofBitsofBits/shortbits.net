@@ -18,9 +18,13 @@ is a personal project and largely a learning exercise for me.
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
-- Optional draggable mini-windows for profile, pronouns, Spotify, source, and diagnostics
-  that stay viewport-safe, resize from every edge and corner, and use themed
-  internal scrollbars
+- Optional draggable mini-windows for profile, pronouns, Spotify, source,
+  diagnostics, and settings that stay viewport-safe, resize from every edge
+  and corner, and use themed internal scrollbars
+- Shareable window URLs such as `?window=spotify` and
+  `?windows=about,spotify` that restore linked windows on load
+- A persistent control panel for appearance, reduced motion, larger text,
+  increased contrast, decorative effects, window-layout resets, and link copying
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
 - Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,

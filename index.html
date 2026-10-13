@@ -28,12 +28,13 @@
     <link rel="canonical" href="https://www.shortbits.net/">
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
-    <script src="theme-init.js?v=theme-4"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-23">
+    <script src="theme-init.js?v=theme-5"></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-24">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
-    <script src="script.js?v=upgrade-19" defer></script>
-    <script src="windows.js?v=windows-6" defer></script>
+    <script src="script.js?v=upgrade-20" defer></script>
+    <script src="windows.js?v=windows-7" defer></script>
+    <script src="settings.js?v=settings-1" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="about.js?v=about-3" defer></script>
     <script src="pronouns.js?v=pronouns-1" defer></script>
@@ -288,6 +289,9 @@
           <button id="achievements-button" type="button" aria-haspopup="dialog">
             ACHIEVEMENTS: <span id="achievement-count">0</span>
           </button>
+          <button id="settings-button" type="button" data-window-target="settings-window">
+            SETTINGS
+          </button>
         </div>
         <p>
           © <span id="year"></span> BITS_OF_BITS_OF_BITS //
@@ -530,6 +534,83 @@
         </dl>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize System Monitor window"></button>
+    </section>
+
+    <section
+      id="settings-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="settings-window-title"
+      data-window
+      data-window-x="220"
+      data-window-y="120"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="settings-window-title">CONTROL_PANEL.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Settings window">_</button>
+          <button type="button" data-window-close aria-label="Close Settings window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content settings-window-content">
+        <p class="system-kicker">LOCAL_PREFERENCES // PERSISTENT</p>
+        <h2>CONTROL PANEL</h2>
+        <div class="settings-groups">
+          <fieldset class="settings-group">
+            <legend>APPEARANCE</legend>
+            <label>
+              <span>INTERFACE THEME</span>
+              <select id="settings-theme"></select>
+            </label>
+            <label>
+              <span>ACCENT</span>
+              <select id="settings-accent"></select>
+            </label>
+            <label>
+              <span>DISPLAY</span>
+              <select id="settings-display">
+                <option value="dark">DARK</option>
+                <option value="light">LIGHT</option>
+              </select>
+            </label>
+          </fieldset>
+          <fieldset class="settings-group">
+            <legend>ACCESSIBILITY</legend>
+            <label>
+              <span>MOTION</span>
+              <select id="settings-motion">
+                <option value="system">FOLLOW SYSTEM</option>
+                <option value="reduced">REDUCED</option>
+              </select>
+            </label>
+            <label class="settings-check">
+              <input id="settings-large-text" type="checkbox">
+              <span>USE LARGER TEXT</span>
+            </label>
+            <label class="settings-check">
+              <input id="settings-high-contrast" type="checkbox">
+              <span>INCREASE CONTRAST</span>
+            </label>
+            <label class="settings-check">
+              <input id="settings-effects" type="checkbox">
+              <span>SHOW DECORATIVE EFFECTS</span>
+            </label>
+          </fieldset>
+          <fieldset class="settings-group settings-group-wide">
+            <legend>DESKTOP</legend>
+            <div class="settings-actions">
+              <button id="settings-copy-link" type="button">COPY OPEN WINDOWS LINK</button>
+              <button id="settings-reset-windows" type="button">RESET WINDOW LAYOUT</button>
+              <button id="settings-reset-all" type="button">RESET PREFERENCES</button>
+            </div>
+            <p id="settings-status" class="settings-status" role="status" aria-live="polite">
+              Preferences are saved in this browser.
+            </p>
+          </fieldset>
+        </div>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Settings window"></button>
     </section>
 
     <div id="achievement" class="achievement" role="status" aria-live="polite" hidden>

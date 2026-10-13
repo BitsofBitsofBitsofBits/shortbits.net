@@ -53,6 +53,14 @@ document.documentElement.classList.toggle(
   "is-rgb-mode",
   localStorage.getItem("bits-rgb-mode") === "true",
 );
+document.documentElement.dataset.motion =
+  localStorage.getItem("bits-motion") === "reduced" ? "reduced" : "system";
+document.documentElement.dataset.textsize =
+  localStorage.getItem("bits-text-size") === "large" ? "large" : "default";
+document.documentElement.dataset.contrast =
+  localStorage.getItem("bits-contrast") === "high" ? "high" : "default";
+document.documentElement.dataset.effects =
+  localStorage.getItem("bits-effects") === "off" ? "off" : "on";
 document.documentElement.style.setProperty("--accent", initialAccent.accent);
 document.documentElement.style.setProperty("--accent-rgb", initialAccent.rgb);
 document.querySelector('meta[name="theme-color"]').content =

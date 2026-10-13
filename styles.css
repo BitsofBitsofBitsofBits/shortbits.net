@@ -2001,7 +2001,8 @@ footer span {
 
 .footer-select-control,
 #mode-button,
-#achievements-button {
+#achievements-button,
+#settings-button {
   border: 1px solid var(--border);
   border-radius: var(--control-radius);
   color: var(--muted);
@@ -2046,7 +2047,9 @@ footer span {
 #mode-button:hover,
 #mode-button:focus-visible,
 #achievements-button:hover,
-#achievements-button:focus-visible {
+#achievements-button:focus-visible,
+#settings-button:hover,
+#settings-button:focus-visible {
   border-color: var(--accent);
   color: var(--ink);
   outline: none;
@@ -2054,7 +2057,8 @@ footer span {
 }
 
 #mode-button,
-#achievements-button {
+#achievements-button,
+#settings-button {
   padding: 6px 8px;
   cursor: pointer;
 }
@@ -2344,6 +2348,11 @@ footer span {
 #monitor-window {
   --window-default-height: 500px;
   --window-default-width: 620px;
+}
+
+#settings-window {
+  --window-default-height: 640px;
+  --window-default-width: 780px;
 }
 
 .desktop-window[hidden] {
@@ -2685,6 +2694,125 @@ footer span {
 .desktop-window-actions button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.settings-groups {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.settings-group {
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.settings-group legend {
+  padding: 0 7px;
+  color: var(--accent);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+}
+
+.settings-group label {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(150px, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+.settings-group label:last-child {
+  margin-bottom: 0;
+}
+
+.settings-group select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 28px 8px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--bg);
+  font: inherit;
+}
+
+.settings-group select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.settings-group .settings-check {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.settings-check input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.settings-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-actions button {
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-actions button:hover,
+.settings-actions button:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.settings-actions button:last-child {
+  border-color: #ff6d7a;
+  color: #ff6d7a;
+}
+
+.settings-status {
+  min-height: 1.5em;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.settings-status.is-error {
+  color: #ff6d7a;
+}
+
+@container (min-width: 620px) {
+  .settings-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-group-wide {
+    grid-column: 1 / -1;
+  }
+
+  .settings-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .source-scan-output {
@@ -3958,6 +4086,47 @@ html.is-root-mode .name-field {
   :focus-visible {
     outline: 3px solid Highlight;
   }
+}
+
+html[data-textsize="large"] {
+  font-size: 112.5%;
+}
+
+html[data-contrast="high"] {
+  --border: var(--accent);
+  --muted: var(--ink);
+}
+
+html[data-contrast="high"] .shell,
+html[data-contrast="high"] .desktop-window,
+html[data-contrast="high"] .system-window,
+html[data-contrast="high"] .achievements-window {
+  backdrop-filter: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+html[data-effects="off"] .name-field,
+html[data-effects="off"] .binary-rain,
+html[data-effects="off"] .noise,
+html[data-effects="off"] .scanlines {
+  display: none !important;
+}
+
+html[data-motion="reduced"] .name-field {
+  animation: none;
+}
+
+html[data-motion="reduced"] .binary-rain {
+  display: none;
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
