@@ -430,7 +430,7 @@ window.BITS_ACTIVITIES = [
   { text: "Forgetting to save your work", weight: 1 },
   { text: "Spilling coffee on the keyboard", weight: 1 },
   { text: "Angering the avatar", weight: 1 },
-
+  { text: "The lottery only exist to capture time travelers", weight: 1 }
 
 ];
 
