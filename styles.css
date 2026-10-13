@@ -2064,17 +2064,28 @@ footer span {
   margin-top: 24px;
 }
 
-.error-actions a {
+.error-actions a,
+.error-actions button {
   padding: 10px 14px;
   border: 1px solid var(--border);
   color: var(--accent);
+  background: transparent;
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .error-actions a:hover,
-.error-actions a:focus-visible {
+.error-actions a:focus-visible,
+.error-actions button:hover,
+.error-actions button:focus-visible {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+.error-actions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .error-achievement {
@@ -2343,6 +2354,18 @@ footer span {
   color: var(--muted);
   font-size: 0.75rem;
   line-height: 1.5;
+}
+
+.useless-footer-result {
+  min-height: 1.5em;
+  margin: 14px 0 0;
+  color: var(--accent);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.useless-source a {
+  color: inherit;
 }
 
 @media (max-width: 720px) {

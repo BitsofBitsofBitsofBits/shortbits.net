@@ -4,6 +4,10 @@ const uselessToolState = document.querySelector("#useless-tool-state");
 const uselessToolResult = document.querySelector("#useless-tool-result");
 const uselessToolProgress = document.querySelector("#useless-tool-progress");
 const uselessToolProgressFill = uselessToolProgress.querySelector("span");
+const uselessFooterButtons = [
+  ...document.querySelectorAll("[data-useless-footer-action]"),
+];
+const uselessFooterResult = document.querySelector("#useless-footer-result");
 const uselessBlameTargets = [
   "the most recent update",
   "the next update",
@@ -15,6 +19,26 @@ const uselessBlameTargets = [
 
 let downloadedBits = 0;
 let uselessOperationTimer;
+let uselessFooterTimer;
+
+const uselessFooterOperations = {
+  help: {
+    working: "LOCATING AN ADULTIER ADULT...",
+    complete: "ACTUAL HELP UNAVAILABLE. SUBSTITUTE HELP HAS BEEN DISPATCHED INSTEAD.",
+  },
+  restart: {
+    working: "ADDING MOMENTUM TO THE POWER CYCLE...",
+    complete: "RESTART INTENSITY INCREASED TO 104%. THE PROBLEM NOW FEELS REFRESHED.",
+  },
+  duck: {
+    working: "CONSULTING CERTIFIED RUBBER DUCK...",
+    complete: "DUCK SAYS: HAVE YOU TRIED EXPLAINING THE PROBLEM MORE SLOWLY?",
+  },
+  ticket: {
+    working: "PHOTOCOPYING THE ORIGINAL INCIDENT...",
+    complete: "DUPLICATE TICKET CREATED AND IMMEDIATELY CLOSED AS A DUPLICATE.",
+  },
+};
 
 const uselessOperations = {
   repair: {
@@ -95,5 +119,29 @@ function runUselessOperation(action) {
 uselessToolButtons.forEach((button) => {
   button.addEventListener("click", () => {
     runUselessOperation(button.dataset.uselessAction);
+  });
+});
+
+uselessFooterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const operation = uselessFooterOperations[button.dataset.uselessFooterAction];
+    if (!operation) {
+      throw new Error(
+        `Unknown useless footer operation: ${button.dataset.uselessFooterAction}`,
+      );
+    }
+
+    window.clearTimeout(uselessFooterTimer);
+    uselessFooterButtons.forEach((footerButton) => {
+      footerButton.disabled = true;
+    });
+    uselessFooterResult.textContent = operation.working;
+
+    uselessFooterTimer = window.setTimeout(() => {
+      uselessFooterResult.textContent = operation.complete;
+      uselessFooterButtons.forEach((footerButton) => {
+        footerButton.disabled = false;
+      });
+    }, 700);
   });
 });
