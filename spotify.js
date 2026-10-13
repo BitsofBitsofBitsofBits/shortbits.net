@@ -9,6 +9,7 @@ const spotifyDuration = document.querySelector("#spotify-duration");
 const spotifyLink = document.querySelector("#spotify-track-link");
 const spotifyRecentTrack = document.querySelector("#spotify-recent-track");
 const spotifyTopTracks = document.querySelector("#spotify-top-tracks");
+const spotifyAllTimeTracks = document.querySelector("#spotify-all-time-tracks");
 const spotifyHistoryStatus = document.querySelector("#spotify-history-status");
 const spotifyRefreshIntervalMs = 30000;
 const spotifyHistoryRefreshIntervalMs = 300_000;
@@ -142,6 +143,9 @@ function renderSpotifyPlayback(playback) {
   function renderSpotifyHistory(history) {
     const recentTrack = history.recentTrack;
     const topTracks = Array.isArray(history.topTracks) ? history.topTracks : [];
+    const allTimeTracks = Array.isArray(history.allTimeTracks)
+      ? history.allTimeTracks
+      : [];
 
     spotifyRecentTrack.replaceChildren();
     if (recentTrack && isValidHistoryTrack(recentTrack)) {
@@ -167,6 +171,19 @@ function renderSpotifyPlayback(playback) {
       const empty = document.createElement("li");
       empty.textContent = "No short-term top tracks were returned.";
       spotifyTopTracks.append(empty);
+    }
+
+    spotifyAllTimeTracks.replaceChildren();
+    allTimeTracks.filter(isValidHistoryTrack).slice(0, 5).forEach((track, index) => {
+      const item = document.createElement("li");
+      item.value = index + 1;
+      item.append(createSpotifyHistoryTrack(track));
+      spotifyAllTimeTracks.append(item);
+    });
+    if (!spotifyAllTimeTracks.children.length) {
+      const empty = document.createElement("li");
+      empty.textContent = "No long-term top tracks were returned.";
+      spotifyAllTimeTracks.append(empty);
     }
 
     spotifyHistoryStatus.textContent = history.cacheStatus === "stale"
@@ -204,7 +221,9 @@ function renderSpotifyPlayback(playback) {
         }
         if (
           !Array.isArray(history.topTracks)
+          || !Array.isArray(history.allTimeTracks)
           || history.topTracks.some((track) => !isValidHistoryTrack(track))
+          || history.allTimeTracks.some((track) => !isValidHistoryTrack(track))
           || (history.recentTrack && !isValidHistoryTrack(history.recentTrack))
         ) {
           throw new Error("Spotify history response is malformed.");

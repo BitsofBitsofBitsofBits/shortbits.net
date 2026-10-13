@@ -2230,6 +2230,10 @@ footer span {
   letter-spacing: 0.08em;
 }
 
+.spotify-history-subheading {
+  margin-top: 20px !important;
+}
+
 .spotify-history-list {
   display: grid;
   gap: 8px;

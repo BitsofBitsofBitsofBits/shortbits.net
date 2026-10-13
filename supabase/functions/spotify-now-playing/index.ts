@@ -161,21 +161,26 @@ async function fetchSpotifyHistory(request: Request): Promise<Response> {
     const spotifyHeaders = {
       "Authorization": `Bearer ${tokenData.access_token}`,
     };
-    const [recentResponse, topResponse] = await Promise.all([
+    const [recentResponse, topResponse, allTimeResponse] = await Promise.all([
       fetch("https://api.spotify.com/v1/me/player/recently-played?limit=1", {
         headers: spotifyHeaders,
       }),
       fetch("https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5", {
         headers: spotifyHeaders,
       }),
+      fetch("https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=5", {
+        headers: spotifyHeaders,
+      }),
     ]);
 
-    if (!recentResponse.ok || !topResponse.ok) {
-      const failedResponse = !recentResponse.ok ? recentResponse : topResponse;
+    if (!recentResponse.ok || !topResponse.ok || !allTimeResponse.ok) {
+      const failedResponse = [recentResponse, topResponse, allTimeResponse]
+        .find((response) => !response.ok) ?? recentResponse;
       console.error(
         "Spotify history request failed:",
         recentResponse.status,
         topResponse.status,
+        allTimeResponse.status,
       );
       const historyRetryAfter = failedResponse.status === 429
         ? beginSpotifyCooldown(retryAfterSeconds(failedResponse))
@@ -191,8 +196,10 @@ async function fetchSpotifyHistory(request: Request): Promise<Response> {
 
     const recentData = await recentResponse.json();
     const topData = await topResponse.json();
+    const allTimeData = await allTimeResponse.json();
     const recentEntry = Array.isArray(recentData.items) ? recentData.items[0] : null;
     const topItems = Array.isArray(topData.items) ? topData.items : [];
+    const allTimeItems = Array.isArray(allTimeData.items) ? allTimeData.items : [];
 
     return jsonResponse(request, {
       recentTrack: recentEntry?.track
@@ -204,7 +211,11 @@ async function fetchSpotifyHistory(request: Request): Promise<Response> {
         }
         : null,
       topTracks: topItems.slice(0, 5).map(sanitizeTrack),
-      timeRange: "short_term",
+      allTimeTracks: allTimeItems.slice(0, 5).map(sanitizeTrack),
+      timeRanges: {
+        topTracks: "short_term",
+        allTimeTracks: "long_term",
+      },
     });
   } catch (error) {
     console.error("Spotify history function failed:", error);

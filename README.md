@@ -89,10 +89,11 @@ The site displays public presence, custom status, and activities. A Lanyard
 WebSocket also pushes Spotify track and pause changes to the player while the
 existing cached Spotify API remains the authoritative fallback.
 
-The Spotify popup loads the most recently played track and five short-term top
-tracks only when opened. That history response is cached in the browser, Edge
-Function, and CDN for five minutes, so it does not change the now-playing poll
-rate.
+The Spotify popup loads the most recently played track, five short-term top
+tracks, and five long-term top tracks only when opened. Spotify's long-term
+range covers several years and is its closest available equivalent to all-time
+history. The response is cached in the browser, Edge Function, and CDN for five
+minutes, so it does not change the now-playing poll rate.
 
 The public pronoun reference is stored in the `pronoun_profiles` Supabase table.
 Anonymous visitors can read its single profile row, while authenticated Admin
