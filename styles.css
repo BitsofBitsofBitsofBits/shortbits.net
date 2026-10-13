@@ -1915,23 +1915,45 @@ footer span {
   animation: bsod-tear 3.8s steps(2) infinite;
 }
 
-.shutdown-screen::after {
+.shutdown-qr {
   position: absolute;
   right: clamp(20px, 5vw, 72px);
   bottom: clamp(18px, 4vw, 54px);
-  content: "STOP CODE: TOO_MANY_BITS";
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  max-width: 250px;
   color: rgba(255, 255, 255, 0.62);
   font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+  line-height: 1.4;
   letter-spacing: 0.08em;
-  pointer-events: none;
+  text-align: left;
+  text-decoration: none;
+}
+
+.shutdown-qr img {
+  width: clamp(64px, 8vw, 92px);
+  height: auto;
+  padding: 4px;
+  background: #fff;
+  image-rendering: pixelated;
+}
+
+.shutdown-qr:hover,
+.shutdown-qr:focus-visible {
+  color: #fff;
+}
+
+.shutdown-qr:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 5px;
 }
 
 .shutdown-screen[hidden] {
   display: none;
 }
 
-.shutdown-screen[hidden]::before,
-.shutdown-screen[hidden]::after {
+.shutdown-screen[hidden]::before {
   display: none;
 }
 
