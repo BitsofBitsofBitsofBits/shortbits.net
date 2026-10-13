@@ -29,13 +29,14 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-25">
+    <link rel="stylesheet" href="styles.css?v=upgrade-26">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="script.js?v=upgrade-20" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
     <script src="supabase-config.js" defer></script>
+    <script src="content.js?v=content-1" defer></script>
     <script src="about.js?v=about-3" defer></script>
     <script src="pronouns.js?v=pronouns-1" defer></script>
     <script src="discord.js?v=discord-3" defer></script>
@@ -170,6 +171,27 @@
             </button>
           </div>
         </article>
+      </section>
+
+      <section class="content-files-section" aria-labelledby="content-files-heading">
+        <div class="section-label">
+          <h2 id="content-files-heading">PUBLIC_FILES</h2>
+          <span>OPERATOR MAINTAINED</span>
+        </div>
+        <div class="content-file-grid">
+          <button type="button" data-window-target="resume-window">
+            <strong>CAREER.SYS</strong>
+            <span>Résumé and work history</span>
+          </button>
+          <button type="button" data-window-target="now-window">
+            <strong>NOW.TXT</strong>
+            <span>Current projects and interests</span>
+          </button>
+          <button type="button" data-window-target="changelog-window">
+            <strong>CHANGELOG.LOG</strong>
+            <span>Recent updates and deployments</span>
+          </button>
+        </div>
       </section>
 
       <section class="link-section" aria-labelledby="link-heading">
@@ -611,6 +633,104 @@
         </div>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Settings window"></button>
+    </section>
+
+    <section
+      id="resume-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="resume-window-title"
+      data-window
+      data-window-x="120"
+      data-window-y="80"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="resume-window-title">CAREER.SYS</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Résumé window">_</button>
+          <button type="button" data-window-close aria-label="Close Résumé window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">CAREER_PROFILE // PUBLIC</p>
+        <div id="resume-empty" class="content-window-empty">
+          Résumé data is awaiting operator input.
+        </div>
+        <div id="resume-content" hidden>
+          <h2 id="resume-headline"></h2>
+          <p id="resume-summary" class="content-window-summary"></p>
+          <dl class="content-window-meta">
+            <div id="resume-availability-row"><dt>AVAILABILITY</dt><dd id="resume-availability"></dd></div>
+            <div id="resume-location-row"><dt>LOCATION</dt><dd id="resume-location"></dd></div>
+            <div><dt>LAST UPDATED</dt><dd id="resume-updated"></dd></div>
+          </dl>
+          <a id="resume-download" class="content-window-link" target="_blank" rel="noreferrer" hidden>
+            OPEN RÉSUMÉ ↗
+          </a>
+          <ol id="resume-entries" class="resume-entry-list"></ol>
+        </div>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Résumé window"></button>
+    </section>
+
+    <section
+      id="now-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="now-window-title"
+      data-window
+      data-window-x="190"
+      data-window-y="120"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="now-window-title">NOW.TXT</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize NOW window">_</button>
+          <button type="button" data-window-close aria-label="Close NOW window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">CURRENT_STATE // PUBLIC</p>
+        <div id="now-empty" class="content-window-empty">
+          NOW.TXT is awaiting operator input.
+        </div>
+        <div id="now-content" hidden>
+          <h2 id="now-headline"></h2>
+          <p id="now-summary" class="content-window-summary"></p>
+          <dl id="now-fields" class="content-window-meta content-window-meta-stacked"></dl>
+          <p class="content-window-updated">LAST UPDATED <span id="now-updated"></span></p>
+        </div>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize NOW window"></button>
+    </section>
+
+    <section
+      id="changelog-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="changelog-window-title"
+      data-window
+      data-window-x="250"
+      data-window-y="90"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="changelog-window-title">CHANGELOG.LOG</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Changelog window">_</button>
+          <button type="button" data-window-close aria-label="Close Changelog window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">DEPLOYMENT_HISTORY // PUBLIC</p>
+        <div id="changelog-empty" class="content-window-empty">
+          Changelog entries are awaiting operator input.
+        </div>
+        <ol id="changelog-entries" class="changelog-entry-list" hidden></ol>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Changelog window"></button>
     </section>
 
     <div id="achievement" class="achievement" role="status" aria-live="polite" hidden>

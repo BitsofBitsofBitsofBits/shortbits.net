@@ -1,0 +1,261 @@
+const resumeEmpty = document.querySelector("#resume-empty");
+const resumeContent = document.querySelector("#resume-content");
+const resumeHeadline = document.querySelector("#resume-headline");
+const resumeSummary = document.querySelector("#resume-summary");
+const resumeAvailability = document.querySelector("#resume-availability");
+const resumeAvailabilityRow = document.querySelector("#resume-availability-row");
+const resumeLocation = document.querySelector("#resume-location");
+const resumeLocationRow = document.querySelector("#resume-location-row");
+const resumeUpdated = document.querySelector("#resume-updated");
+const resumeDownload = document.querySelector("#resume-download");
+const resumeEntries = document.querySelector("#resume-entries");
+const nowEmpty = document.querySelector("#now-empty");
+const nowContent = document.querySelector("#now-content");
+const nowHeadline = document.querySelector("#now-headline");
+const nowSummary = document.querySelector("#now-summary");
+const nowFields = document.querySelector("#now-fields");
+const nowUpdated = document.querySelector("#now-updated");
+const changelogEmpty = document.querySelector("#changelog-empty");
+const changelogEntries = document.querySelector("#changelog-entries");
+const publicContentWindowIds = new Set([
+  "resume-window",
+  "now-window",
+  "changelog-window",
+]);
+const publicContentCacheKey = "bits-public-content-v1";
+const publicContentCacheDurationMs = 300_000;
+
+let publicContentRequest;
+
+function formatContentDate(value, includeTime = false) {
+  const parsed = includeTime
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return includeTime
+    ? parsed.toLocaleString()
+    : parsed.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+}
+
+function getCachedPublicContent() {
+  const cachedValue = localStorage.getItem(publicContentCacheKey);
+  if (!cachedValue) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(cachedValue);
+    if (
+      typeof cached.cachedAt === "number"
+      && Date.now() - cached.cachedAt < publicContentCacheDurationMs
+      && cached.payload
+    ) {
+      return cached.payload;
+    }
+  } catch (error) {
+    console.warn("Unable to read cached public content:", error);
+  }
+  localStorage.removeItem(publicContentCacheKey);
+  return null;
+}
+
+async function fetchPublicContentTable(query) {
+  const { url, anonKey } = window.SUPABASE_CONFIG;
+  if (!url || !anonKey) {
+    throw new Error("Supabase public content configuration is missing.");
+  }
+  const response = await fetch(
+    `${url.replace(/\/$/, "")}/rest/v1/${query}`,
+    { headers: { apikey: anonKey } },
+  );
+  if (!response.ok) {
+    throw new Error(`Public content request failed with HTTP ${response.status}.`);
+  }
+  return response.json();
+}
+
+async function requestPublicContent() {
+  const cached = getCachedPublicContent();
+  if (cached) {
+    return cached;
+  }
+
+  const [resumeProfiles, resumeItems, nowProfiles, changelogItems] =
+    await Promise.all([
+      fetchPublicContentTable(
+        "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
+      ),
+      fetchPublicContentTable(
+        "site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc",
+      ),
+      fetchPublicContentTable(
+        "site_now?select=headline,summary,building,learning,playing,reading,updated_at&enabled=eq.true&id=eq.primary",
+      ),
+      fetchPublicContentTable(
+        "site_changelog?select=position,entry_date,title,summary&enabled=eq.true&order=position.asc",
+      ),
+    ]);
+  const payload = {
+    resumeProfile: resumeProfiles[0] ?? null,
+    resumeEntries: resumeItems,
+    nowProfile: nowProfiles[0] ?? null,
+    changelogEntries: changelogItems,
+  };
+  localStorage.setItem(publicContentCacheKey, JSON.stringify({
+    cachedAt: Date.now(),
+    payload,
+  }));
+  return payload;
+}
+
+function createResumeEntry(entry) {
+  const item = document.createElement("li");
+  const header = document.createElement("header");
+  const titleGroup = document.createElement("div");
+  const role = document.createElement("h3");
+  const organization = document.createElement("p");
+  const period = document.createElement("p");
+  const summary = document.createElement("p");
+  role.textContent = entry.role;
+  organization.textContent = entry.organization;
+  period.textContent = entry.period;
+  summary.textContent = entry.summary;
+  titleGroup.append(role, organization);
+  header.append(titleGroup, period);
+  item.append(header, summary);
+
+  if (entry.technologies) {
+    const technologies = document.createElement("p");
+    technologies.className = "resume-entry-technologies";
+    technologies.textContent = entry.technologies;
+    item.append(technologies);
+  }
+  return item;
+}
+
+function renderResume(profile, entries) {
+  if (!profile) {
+    resumeEmpty.textContent = "Résumé data is awaiting operator input.";
+    resumeEmpty.hidden = false;
+    resumeContent.hidden = true;
+    return;
+  }
+
+  resumeHeadline.textContent = profile.headline;
+  resumeSummary.textContent = profile.summary;
+  resumeAvailability.textContent = profile.availability ?? "";
+  resumeAvailabilityRow.hidden = !profile.availability;
+  resumeLocation.textContent = profile.location ?? "";
+  resumeLocationRow.hidden = !profile.location;
+  resumeUpdated.textContent = formatContentDate(profile.updated_at, true);
+  resumeDownload.hidden = !profile.resume_url;
+  if (profile.resume_url) {
+    resumeDownload.href = profile.resume_url;
+  } else {
+    resumeDownload.removeAttribute("href");
+  }
+  resumeEntries.replaceChildren(
+    ...entries.map(createResumeEntry),
+  );
+  resumeEntries.hidden = entries.length === 0;
+  resumeEmpty.hidden = true;
+  resumeContent.hidden = false;
+}
+
+function renderNow(profile) {
+  if (!profile) {
+    nowEmpty.textContent = "NOW.TXT is awaiting operator input.";
+    nowEmpty.hidden = false;
+    nowContent.hidden = true;
+    return;
+  }
+
+  nowHeadline.textContent = profile.headline;
+  nowSummary.textContent = profile.summary;
+  nowFields.replaceChildren();
+  [
+    ["BUILDING", profile.building],
+    ["LEARNING", profile.learning],
+    ["PLAYING", profile.playing],
+    ["READING / WATCHING", profile.reading],
+  ].forEach(([label, value]) => {
+    if (!value) {
+      return;
+    }
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const detail = document.createElement("dd");
+    term.textContent = label;
+    detail.textContent = value;
+    row.append(term, detail);
+    nowFields.append(row);
+  });
+  nowUpdated.textContent = formatContentDate(profile.updated_at, true);
+  nowEmpty.hidden = true;
+  nowContent.hidden = false;
+}
+
+function createChangelogEntry(entry) {
+  const item = document.createElement("li");
+  const date = document.createElement("time");
+  const copy = document.createElement("div");
+  const title = document.createElement("h3");
+  const summary = document.createElement("p");
+  date.dateTime = entry.entry_date;
+  date.textContent = formatContentDate(entry.entry_date);
+  title.textContent = entry.title;
+  summary.textContent = entry.summary;
+  copy.append(title, summary);
+  item.append(date, copy);
+  return item;
+}
+
+function renderChangelog(entries) {
+  changelogEntries.replaceChildren(...entries.map(createChangelogEntry));
+  changelogEntries.hidden = entries.length === 0;
+  changelogEmpty.hidden = entries.length > 0;
+  changelogEmpty.textContent = "Changelog entries are awaiting operator input.";
+}
+
+async function loadPublicContent() {
+  if (!publicContentRequest) {
+    resumeEmpty.textContent = "Synchronizing résumé data...";
+    nowEmpty.textContent = "Synchronizing NOW.TXT...";
+    changelogEmpty.textContent = "Synchronizing changelog entries...";
+    publicContentRequest = requestPublicContent()
+      .then((content) => {
+        renderResume(content.resumeProfile, content.resumeEntries);
+        renderNow(content.nowProfile);
+        renderChangelog(content.changelogEntries);
+      })
+      .catch((error) => {
+        console.error("Unable to load public content:", error);
+        resumeEmpty.textContent = "Résumé data is temporarily unavailable.";
+        nowEmpty.textContent = "NOW.TXT is temporarily unavailable.";
+        changelogEmpty.textContent = "Changelog data is temporarily unavailable.";
+        publicContentRequest = null;
+        throw error;
+      });
+  }
+  return publicContentRequest;
+}
+
+window.addEventListener("desktop-window:opened", (event) => {
+  if (publicContentWindowIds.has(event.detail.windowId)) {
+    loadPublicContent().catch(() => {});
+  }
+});
+
+if (
+  [...publicContentWindowIds].some(
+    (windowId) => !document.getElementById(windowId).hidden,
+  )
+) {
+  loadPublicContent().catch(() => {});
+}

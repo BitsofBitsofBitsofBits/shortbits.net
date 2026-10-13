@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-25">
+    <link rel="stylesheet" href="styles.css?v=upgrade-26">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin.js?v=admin-4" defer></script>
+    <script src="admin.js?v=admin-5" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -173,6 +173,58 @@
             </div>
             <p id="track-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="track-submit" type="submit">&gt; SAVE_SONGS</button>
+          </form>
+        </section>
+
+        <section class="profile-editor" aria-labelledby="resume-editor-heading">
+          <div class="section-label">
+            <h2 id="resume-editor-heading">RESUME_PROFILE</h2>
+            <span>PUBLIC CAREER DATA</span>
+          </div>
+          <form id="resume-form" class="admin-form content-admin-form">
+            <div class="content-admin-profile-grid">
+              <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
+              <label><span>AVAILABILITY</span><input name="availability" maxlength="120"></label>
+              <label><span>LOCATION</span><input name="location" maxlength="120"></label>
+              <label><span>RÉSUMÉ URL</span><input name="resume_url" type="url" maxlength="500"></label>
+            </div>
+            <label><span>SUMMARY</span><textarea name="summary" maxlength="1200"></textarea></label>
+            <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH RÉSUMÉ</span></label>
+            <div id="resume-entry-slots" class="curated-admin-grid"></div>
+            <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
+          </form>
+        </section>
+
+        <section class="profile-editor" aria-labelledby="now-editor-heading">
+          <div class="section-label">
+            <h2 id="now-editor-heading">NOW.TXT</h2>
+            <span>CURRENT OPERATOR STATE</span>
+          </div>
+          <form id="now-form" class="admin-form content-admin-form">
+            <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
+            <label><span>SUMMARY</span><textarea name="summary" maxlength="1000"></textarea></label>
+            <div class="content-admin-profile-grid">
+              <label><span>BUILDING</span><textarea name="building" maxlength="300"></textarea></label>
+              <label><span>LEARNING</span><textarea name="learning" maxlength="300"></textarea></label>
+              <label><span>PLAYING</span><textarea name="playing" maxlength="300"></textarea></label>
+              <label><span>READING / WATCHING</span><textarea name="reading" maxlength="300"></textarea></label>
+            </div>
+            <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH NOW.TXT</span></label>
+            <p id="now-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="now-submit" type="submit">&gt; SAVE_NOW</button>
+          </form>
+        </section>
+
+        <section class="profile-editor" aria-labelledby="changelog-editor-heading">
+          <div class="section-label">
+            <h2 id="changelog-editor-heading">CHANGELOG.LOG</h2>
+            <span>TEN ORDERED ENTRIES</span>
+          </div>
+          <form id="changelog-form" class="admin-form content-admin-form">
+            <div id="changelog-slots" class="curated-admin-grid"></div>
+            <p id="changelog-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="changelog-submit" type="submit">&gt; SAVE_CHANGELOG</button>
           </form>
         </section>
       </section>

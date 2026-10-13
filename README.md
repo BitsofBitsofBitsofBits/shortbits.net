@@ -25,6 +25,9 @@ is a personal project and largely a learning exercise for me.
   `?windows=about,spotify` that restore linked windows on load
 - A persistent control panel for appearance, reduced motion, larger text,
   increased contrast, decorative effects, window-layout resets, and link copying
+- Admin-managed `CAREER.SYS`, `NOW.TXT`, and `CHANGELOG.LOG` windows with
+  shareable URLs, responsive layouts, five-minute public caching, and clean
+  unpublished states
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
 - Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,
@@ -76,6 +79,11 @@ Generate and store a replacement token with `scripts/spotify-auth-helper.mjs`
 after setting `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the local
 shell. The helper completes OAuth locally and writes the refresh token directly
 to the linked Supabase project without printing it.
+
+The Admin Portal also manages the public résumé profile and six career entries,
+the singleton NOW profile, and ten ordered changelog entries. Draft rows remain
+hidden from anonymous Supabase clients through row-level security until their
+publish controls are enabled.
 
 Deploy the function with:
 
