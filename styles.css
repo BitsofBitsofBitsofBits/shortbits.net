@@ -329,6 +329,7 @@ html {
 }
 
 body {
+  display: flow-root;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
