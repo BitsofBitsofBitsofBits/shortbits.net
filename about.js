@@ -1,6 +1,7 @@
 const operatorTimeZone = "America/Chicago";
 const operatorLocalTime = document.querySelector("#operator-local-time");
 const operatorState = document.querySelector("#operator-state");
+const operatorAge = document.querySelector("#operator-age");
 const personalityChecksum = document.querySelector("#personality-checksum");
 const operatorQueryButton = document.querySelector("#operator-query-button");
 const operatorQueryOutput = document.querySelector("#operator-query-output");
@@ -11,6 +12,10 @@ const operatorTimeFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
   second: "2-digit",
   timeZoneName: "short",
+});
+const operatorYearFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: operatorTimeZone,
+  year: "numeric",
 });
 
 const operatorFacts = [
@@ -43,9 +48,42 @@ const operatorStates = [
 let lastOperatorFact = -1;
 let lastOperatorState = -1;
 
+function getCentralBirthdayInstant(year) {
+  return new Date(`${year}-06-26T00:31:00-05:00`);
+}
+
+function updateOperatorAge(now) {
+  const currentYear = Number(operatorYearFormatter.format(now));
+  let years = currentYear - 2002;
+  let anniversary = getCentralBirthdayInstant(currentYear);
+
+  if (now < anniversary) {
+    years -= 1;
+    anniversary = getCentralBirthdayInstant(currentYear - 1);
+  }
+
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((now.getTime() - anniversary.getTime()) / 1_000),
+  );
+  const days = Math.floor(elapsedSeconds / 86_400);
+  const hours = Math.floor((elapsedSeconds % 86_400) / 3_600);
+  const minutes = Math.floor((elapsedSeconds % 3_600) / 60);
+  const seconds = elapsedSeconds % 60;
+
+  operatorAge.textContent = [
+    `${years}Y`,
+    `${days}D`,
+    `${String(hours).padStart(2, "0")}H`,
+    `${String(minutes).padStart(2, "0")}M`,
+    `${String(seconds).padStart(2, "0")}S`,
+  ].join(" ");
+}
+
 function updateOperatorClock() {
   const now = new Date();
   operatorLocalTime.textContent = operatorTimeFormatter.format(now);
+  updateOperatorAge(now);
 }
 
 function randomizeOperatorState() {
