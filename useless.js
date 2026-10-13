@@ -24,7 +24,11 @@ const uselessOperationAttempts = {};
 const uselessFooterAttempts = {};
 
 function getEscalatingResponse(responses, attempt) {
-  return responses[Math.min(attempt - 1, responses.length - 1)];
+  if (attempt <= responses.length) {
+    return responses[attempt - 1];
+  }
+
+  return `${responses.at(-1)} THIS WAS ATTEMPT ${attempt}. PERSISTENCE HAS BEEN NOTED, NOT REWARDED.`;
 }
 
 const uselessFooterOperations = {
