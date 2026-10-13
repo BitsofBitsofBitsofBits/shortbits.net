@@ -9,6 +9,12 @@ const uselessFooterButtons = [
 ];
 const uselessFooterResult = document.querySelector("#useless-footer-result");
 const uselessToolRetirementAttempt = 8;
+const uselessAchievementStorageKey = "bits-achievements";
+const uselessToolkitAchievement = {
+  id: "support-retirement",
+  label: "SUPPORT GROUP RETIRED",
+  message: "NO TOOLS LEFT TO HELP",
+};
 const uselessBlameTargets = [
   "the most recent update",
   "the next update",
@@ -31,6 +37,33 @@ function getEscalatingResponse(responses, attempt) {
   }
 
   return `${responses.at(-1)} THIS WAS ATTEMPT ${attempt}. PERSISTENCE HAS BEEN NOTED, NOT REWARDED.`;
+}
+
+function unlockUselessToolkitAchievement() {
+  try {
+    const stored = localStorage.getItem(uselessAchievementStorageKey);
+    const achievements = stored ? JSON.parse(stored) : [];
+    if (!Array.isArray(achievements)) {
+      throw new Error("Achievement storage does not contain an array.");
+    }
+
+    if (achievements.some(({ id }) => id === uselessToolkitAchievement.id)) {
+      return false;
+    }
+
+    achievements.push({
+      ...uselessToolkitAchievement,
+      unlockedAt: new Date().toISOString(),
+    });
+    localStorage.setItem(
+      uselessAchievementStorageKey,
+      JSON.stringify(achievements),
+    );
+    return true;
+  } catch (error) {
+    console.error("Unable to record the support retirement achievement:", error);
+    return false;
+  }
 }
 
 const uselessFooterOperations = {
@@ -150,6 +183,13 @@ function finishUselessOperation(action, operation, attempt) {
   uselessToolConsole.removeAttribute("aria-busy");
   if (shouldRetire) {
     retiredUselessOperations.add(action);
+    if (
+      retiredUselessOperations.size === uselessToolButtons.length
+      && unlockUselessToolkitAchievement()
+    ) {
+      uselessToolResult.textContent +=
+        ` ACHIEVEMENT UNLOCKED // ${uselessToolkitAchievement.label}`;
+    }
   }
   uselessToolButtons.forEach((button) => {
     const isRetired = retiredUselessOperations.has(button.dataset.uselessAction);
