@@ -1,9 +1,15 @@
 const discordRefreshIntervalMs = 60_000;
+const lanyardReconnectDelayMs = 5_000;
 const discordStatus = document.querySelector("#discord-presence-status");
 const discordCustomStatus = document.querySelector("#discord-custom-status");
 const discordActivity = document.querySelector("#discord-activity");
 
 let discordRefreshTimer;
+let lanyardHeartbeatTimer;
+let lanyardReconnectTimer;
+let lanyardSocket;
+let lanyardSocketGeneration = 0;
+let lanyardUserId;
 
 function formatDiscordActivity(activity) {
   return [activity.name, activity.details, activity.state]
@@ -26,6 +32,126 @@ function renderDiscordPresence(presence) {
     : "No public activity";
 }
 
+function publishLanyardSpotify(presence) {
+  const spotify = presence?.listening_to_spotify ? presence.spotify : null;
+  const timestamps = spotify?.timestamps;
+  const detail = (
+      spotify
+      && typeof spotify.song === "string"
+      && typeof spotify.artist === "string"
+      && Number.isFinite(timestamps?.start)
+      && Number.isFinite(timestamps?.end)
+      && timestamps.end > timestamps.start
+    )
+    ? {
+      album: typeof spotify.album === "string" ? spotify.album : null,
+      albumArtUrl: typeof spotify.album_art_url === "string"
+        ? spotify.album_art_url
+        : null,
+      artist: spotify.artist,
+      song: spotify.song,
+      startAt: timestamps.start,
+      endAt: timestamps.end,
+      trackId: typeof spotify.track_id === "string" ? spotify.track_id : null,
+    }
+    : null;
+
+  window.LANYARD_SPOTIFY = detail;
+  window.dispatchEvent(new CustomEvent("lanyard:spotify", { detail }));
+}
+
+function disconnectLanyardSocket() {
+  lanyardSocketGeneration += 1;
+  window.clearInterval(lanyardHeartbeatTimer);
+  window.clearTimeout(lanyardReconnectTimer);
+  lanyardHeartbeatTimer = undefined;
+  lanyardReconnectTimer = undefined;
+
+  if (lanyardSocket) {
+    lanyardSocket.close();
+    lanyardSocket = undefined;
+  }
+}
+
+function connectLanyardSocket(userId) {
+  if (!/^\d{17,20}$/.test(userId) || document.visibilityState !== "visible") {
+    return;
+  }
+  if (
+    lanyardSocket
+    && (
+      lanyardSocket.readyState === WebSocket.CONNECTING
+      || lanyardSocket.readyState === WebSocket.OPEN
+    )
+  ) {
+    return;
+  }
+
+  window.clearTimeout(lanyardReconnectTimer);
+  const generation = ++lanyardSocketGeneration;
+  const socket = new WebSocket("wss://api.lanyard.rest/socket");
+  lanyardSocket = socket;
+
+  socket.addEventListener("message", (event) => {
+    if (generation !== lanyardSocketGeneration) {
+      return;
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(event.data);
+    } catch (error) {
+      console.warn("Ignoring malformed Lanyard socket data:", error);
+      return;
+    }
+
+    if (payload.op === 1) {
+      const heartbeatInterval = Number(payload.d?.heartbeat_interval);
+      if (!Number.isFinite(heartbeatInterval) || heartbeatInterval < 1_000) {
+        socket.close();
+        return;
+      }
+      socket.send(JSON.stringify({
+        op: 2,
+        d: { subscribe_to_id: userId },
+      }));
+      window.clearInterval(lanyardHeartbeatTimer);
+      lanyardHeartbeatTimer = window.setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ op: 3 }));
+        }
+      }, heartbeatInterval);
+      return;
+    }
+
+    if (
+      payload.op === 0
+      && (payload.t === "INIT_STATE" || payload.t === "PRESENCE_UPDATE")
+    ) {
+      publishLanyardSpotify(payload.d?.[userId] ?? payload.d);
+    }
+  });
+
+  socket.addEventListener("close", () => {
+    if (generation !== lanyardSocketGeneration) {
+      return;
+    }
+    window.clearInterval(lanyardHeartbeatTimer);
+    lanyardHeartbeatTimer = undefined;
+    lanyardSocket = undefined;
+    if (document.visibilityState === "visible") {
+      lanyardReconnectTimer = window.setTimeout(
+        () => connectLanyardSocket(userId),
+        lanyardReconnectDelayMs,
+      );
+    }
+  });
+
+  socket.addEventListener("error", () => {
+    socket.close();
+  });
+}
+
 async function refreshDiscordPresence() {
   window.clearTimeout(discordRefreshTimer);
   const projectUrl = window.SUPABASE_CONFIG?.url;
@@ -45,6 +171,10 @@ async function refreshDiscordPresence() {
       throw new Error(presence.error || `Discord presence returned ${response.status}.`);
     }
     renderDiscordPresence(presence);
+    if (presence.enrolled && typeof presence.userId === "string") {
+      lanyardUserId = presence.userId;
+      connectLanyardSocket(lanyardUserId);
+    }
   } catch (error) {
     console.error("Unable to load Discord presence:", error);
     discordStatus.textContent = "SIGNAL UNAVAILABLE";
@@ -61,6 +191,11 @@ async function refreshDiscordPresence() {
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     refreshDiscordPresence();
+    if (lanyardUserId) {
+      connectLanyardSocket(lanyardUserId);
+    }
+  } else {
+    disconnectLanyardSocket();
   }
 });
 

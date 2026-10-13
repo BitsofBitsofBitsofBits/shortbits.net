@@ -73,7 +73,9 @@ npx --yes supabase@latest functions deploy "discord-presence" `
 Set `DISCORD_USER_ID` as a Supabase function secret before deployment. It is a
 public Discord identifier used as configuration, not a bot token.
 
-The site displays public presence, custom status, and activities.
+The site displays public presence, custom status, and activities. A Lanyard
+WebSocket also pushes Spotify track and pause changes to the player while the
+existing cached Spotify API remains the authoritative fallback.
 
 ## Deployment
 

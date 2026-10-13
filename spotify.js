@@ -9,10 +9,13 @@ const spotifyDuration = document.querySelector("#spotify-duration");
 const spotifyLink = document.querySelector("#spotify-track-link");
 const spotifyRefreshIntervalMs = 30000;
 const spotifyMaximumRetryDelayMs = 2_147_000_000;
+const lanyardOverrideWindowMs = 35_000;
 
 let spotifyRefreshTimer;
 let spotifyRequestSequence = 0;
 let hasSpotifyPlayback = false;
+let hasLanyardSpotifyPlayback = false;
+let lastLanyardSpotifyUpdateAt = 0;
 let playbackClock = {
   durationMs: 0,
   isPlaying: false,
@@ -42,6 +45,16 @@ function updateSpotifyTimeline() {
   spotifyCurrentTime.textContent = formatPlaybackTime(currentMs);
   spotifyDuration.textContent = formatPlaybackTime(playbackClock.durationMs);
   spotifyProgress.style.setProperty("--spotify-progress", `${progress}%`);
+}
+
+function getSpotifyCurrentTimeMs() {
+  const elapsedSinceSync = playbackClock.isPlaying
+    ? performance.now() - playbackClock.synchronizedAt
+    : 0;
+  return Math.min(
+    playbackClock.durationMs,
+    playbackClock.progressMs + elapsedSinceSync,
+  );
 }
 
 function setSpotifyIdle(message, detail = "Check back when the bits are louder.") {
@@ -113,6 +126,49 @@ function renderSpotifyPlayback(playback) {
   }
 }
 
+function renderLanyardSpotify(spotify) {
+  const durationMs = spotify.endAt - spotify.startAt;
+  renderSpotifyPlayback({
+    cacheAgeMs: 0,
+    isPlaying: true,
+    item: {
+      albumArt: spotify.albumArtUrl,
+      artists: [spotify.artist],
+      collection: spotify.album,
+      durationMs,
+      spotifyUrl: spotify.trackId
+        ? `https://open.spotify.com/track/${spotify.trackId}`
+        : null,
+      title: spotify.song,
+    },
+    progressMs: Math.max(0, Math.min(durationMs, Date.now() - spotify.startAt)),
+    servedAt: Date.now(),
+  });
+}
+
+function handleLanyardSpotify(event) {
+  if (event.detail) {
+    lastLanyardSpotifyUpdateAt = Date.now();
+    hasLanyardSpotifyPlayback = true;
+    renderLanyardSpotify(event.detail);
+    return;
+  }
+  if (!hasLanyardSpotifyPlayback || !hasSpotifyPlayback) {
+    return;
+  }
+
+  lastLanyardSpotifyUpdateAt = Date.now();
+  playbackClock = {
+    ...playbackClock,
+    isPlaying: false,
+    progressMs: getSpotifyCurrentTimeMs(),
+    synchronizedAt: performance.now(),
+  };
+  spotifyWidget.dataset.state = "paused";
+  spotifyState.textContent = "PLAYBACK PAUSED";
+  updateSpotifyTimeline();
+}
+
 async function refreshSpotifyPlayback() {
   window.clearTimeout(spotifyRefreshTimer);
   const requestSequence = ++spotifyRequestSequence;
@@ -157,7 +213,9 @@ async function refreshSpotifyPlayback() {
       return;
     }
 
-    renderSpotifyPlayback(playback);
+    if (Date.now() - lastLanyardSpotifyUpdateAt >= lanyardOverrideWindowMs) {
+      renderSpotifyPlayback(playback);
+    }
     const retryAfterSeconds = Number(playback.retryAfterSeconds);
     if (
       playback.cacheStatus === "stale"
@@ -224,6 +282,11 @@ window.addEventListener("pageshow", (event) => {
     refreshSpotifyPlayback();
   }
 });
+
+window.addEventListener("lanyard:spotify", handleLanyardSpotify);
+if (window.LANYARD_SPOTIFY) {
+  handleLanyardSpotify({ detail: window.LANYARD_SPOTIFY });
+}
 
 refreshSpotifyPlayback();
 window.setInterval(updateSpotifyTimeline, 1000);

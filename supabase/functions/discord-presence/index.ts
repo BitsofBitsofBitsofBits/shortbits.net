@@ -80,6 +80,7 @@ async function fetchPresence(): Promise<Record<string, unknown>> {
   ));
   return {
     enrolled: true,
+    userId: discordUserId,
     status: typeof data.discord_status === "string"
       ? data.discord_status
       : "offline",
