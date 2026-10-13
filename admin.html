@@ -8,12 +8,12 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-27">
+    <link rel="stylesheet" href="styles.css?v=upgrade-28">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="admin-windows.js?v=admin-windows-1" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
-    <script src="admin.js?v=admin-6" defer></script>
+    <script src="admin.js?v=admin-7" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -102,41 +102,13 @@
         <section id="playlist-editor" class="profile-editor" aria-labelledby="playlist-editor-heading">
           <div class="section-label">
             <h2 id="playlist-editor-heading">FEATURED_PLAYLISTS</h2>
-            <span>FIVE MANUALLY CURATED SLOTS</span>
+            <span>MANUALLY CURATED ENTRIES</span>
           </div>
           <form id="playlist-form" class="admin-form playlist-admin-form">
-            <div class="curated-admin-grid">
-              <fieldset>
-                <legend>SLOT 1</legend>
-                <label><span>TITLE</span><input name="playlist_1_title" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="playlist_1_url" type="url"></label>
-                <label class="admin-checkbox"><input name="playlist_1_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 2</legend>
-                <label><span>TITLE</span><input name="playlist_2_title" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="playlist_2_url" type="url"></label>
-                <label class="admin-checkbox"><input name="playlist_2_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 3</legend>
-                <label><span>TITLE</span><input name="playlist_3_title" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="playlist_3_url" type="url"></label>
-                <label class="admin-checkbox"><input name="playlist_3_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 4</legend>
-                <label><span>TITLE</span><input name="playlist_4_title" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="playlist_4_url" type="url"></label>
-                <label class="admin-checkbox"><input name="playlist_4_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 5</legend>
-                <label><span>TITLE</span><input name="playlist_5_title" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="playlist_5_url" type="url"></label>
-                <label class="admin-checkbox"><input name="playlist_5_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
+            <div class="repeatable-admin-actions">
+              <button id="playlist-add" type="button">+ ADD_PLAYLIST</button>
             </div>
+            <div id="playlist-slots" class="curated-admin-grid"></div>
             <p id="playlist-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="playlist-submit" type="submit">&gt; SAVE_PLAYLISTS</button>
           </form>
@@ -145,46 +117,13 @@
         <section id="track-editor" class="profile-editor" aria-labelledby="track-editor-heading">
           <div class="section-label">
             <h2 id="track-editor-heading">FEATURED_SONGS</h2>
-            <span>FIVE MANUALLY CURATED SLOTS</span>
+            <span>MANUALLY CURATED ENTRIES</span>
           </div>
           <form id="track-form" class="admin-form">
-            <div class="curated-admin-grid">
-              <fieldset>
-                <legend>SLOT 1</legend>
-                <label><span>TITLE</span><input name="track_1_title" maxlength="100"></label>
-                <label><span>ARTIST</span><input name="track_1_artist" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="track_1_url" type="url"></label>
-                <label class="admin-checkbox"><input name="track_1_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 2</legend>
-                <label><span>TITLE</span><input name="track_2_title" maxlength="100"></label>
-                <label><span>ARTIST</span><input name="track_2_artist" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="track_2_url" type="url"></label>
-                <label class="admin-checkbox"><input name="track_2_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 3</legend>
-                <label><span>TITLE</span><input name="track_3_title" maxlength="100"></label>
-                <label><span>ARTIST</span><input name="track_3_artist" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="track_3_url" type="url"></label>
-                <label class="admin-checkbox"><input name="track_3_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 4</legend>
-                <label><span>TITLE</span><input name="track_4_title" maxlength="100"></label>
-                <label><span>ARTIST</span><input name="track_4_artist" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="track_4_url" type="url"></label>
-                <label class="admin-checkbox"><input name="track_4_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
-              <fieldset>
-                <legend>SLOT 5</legend>
-                <label><span>TITLE</span><input name="track_5_title" maxlength="100"></label>
-                <label><span>ARTIST</span><input name="track_5_artist" maxlength="100"></label>
-                <label><span>SPOTIFY URL</span><input name="track_5_url" type="url"></label>
-                <label class="admin-checkbox"><input name="track_5_enabled" type="checkbox"><span>ENABLED</span></label>
-              </fieldset>
+            <div class="repeatable-admin-actions">
+              <button id="track-add" type="button">+ ADD_SONG</button>
             </div>
+            <div id="track-slots" class="curated-admin-grid"></div>
             <p id="track-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="track-submit" type="submit">&gt; SAVE_SONGS</button>
           </form>
@@ -204,6 +143,9 @@
             </div>
             <label><span>SUMMARY</span><textarea name="summary" maxlength="1200"></textarea></label>
             <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH RÉSUMÉ</span></label>
+            <div class="repeatable-admin-actions">
+              <button id="resume-entry-add" type="button">+ ADD_EXPERIENCE</button>
+            </div>
             <div id="resume-entry-slots" class="curated-admin-grid"></div>
             <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
@@ -233,9 +175,12 @@
         <section id="changelog-editor" class="profile-editor" aria-labelledby="changelog-editor-heading">
           <div class="section-label">
             <h2 id="changelog-editor-heading">CHANGELOG.LOG</h2>
-            <span>TEN ORDERED ENTRIES</span>
+            <span>ORDERED ENTRIES</span>
           </div>
           <form id="changelog-form" class="admin-form content-admin-form">
+            <div class="repeatable-admin-actions">
+              <button id="changelog-entry-add" type="button">+ ADD_CHANGE</button>
+            </div>
             <div id="changelog-slots" class="curated-admin-grid"></div>
             <p id="changelog-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="changelog-submit" type="submit">&gt; SAVE_CHANGELOG</button>

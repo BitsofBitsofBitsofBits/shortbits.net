@@ -1313,6 +1313,22 @@ h1 .dim {
   letter-spacing: 0.1em;
 }
 
+.repeatable-admin-actions,
+.repeatable-entry-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.repeatable-entry-actions {
+  margin-top: auto;
+}
+
+.repeatable-entry-remove {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
 .admin-form .admin-checkbox {
   display: flex;
   align-items: center;

@@ -30,6 +30,8 @@ is a personal project and largely a learning exercise for me.
   unpublished states
 - A desktop-style Admin Portal with draggable, resizable, deep-linkable windows
   for the inbox and every public-content editor
+- GUI controls for adding and removing résumé experiences, featured playlists,
+  featured songs, and changelog entries without fixed slot limits
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
 - Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,

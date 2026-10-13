@@ -13,13 +13,18 @@ const pronounAdminStatus = document.querySelector("#pronoun-admin-status");
 const playlistForm = document.querySelector("#playlist-form");
 const playlistSubmit = document.querySelector("#playlist-submit");
 const playlistAdminStatus = document.querySelector("#playlist-admin-status");
+const playlistSlots = document.querySelector("#playlist-slots");
+const playlistAdd = document.querySelector("#playlist-add");
 const trackForm = document.querySelector("#track-form");
 const trackSubmit = document.querySelector("#track-submit");
 const trackAdminStatus = document.querySelector("#track-admin-status");
+const trackSlots = document.querySelector("#track-slots");
+const trackAdd = document.querySelector("#track-add");
 const resumeForm = document.querySelector("#resume-form");
 const resumeSubmit = document.querySelector("#resume-submit");
 const resumeAdminStatus = document.querySelector("#resume-admin-status");
 const resumeEntrySlots = document.querySelector("#resume-entry-slots");
+const resumeEntryAdd = document.querySelector("#resume-entry-add");
 const nowForm = document.querySelector("#now-form");
 const nowSubmit = document.querySelector("#now-submit");
 const nowAdminStatus = document.querySelector("#now-admin-status");
@@ -27,6 +32,7 @@ const changelogForm = document.querySelector("#changelog-form");
 const changelogSubmit = document.querySelector("#changelog-submit");
 const changelogAdminStatus = document.querySelector("#changelog-admin-status");
 const changelogSlots = document.querySelector("#changelog-slots");
+const changelogEntryAdd = document.querySelector("#changelog-entry-add");
 const spotifyPlaylistUrlPattern =
   /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/;
 const spotifyTrackUrlPattern =
@@ -59,6 +65,64 @@ const nowFields = [
   "playing",
   "reading",
 ];
+const repeatableEditors = {
+  playlists: {
+    table: "spotify_featured_playlists",
+    container: playlistSlots,
+    addButton: playlistAdd,
+    status: playlistAdminStatus,
+    itemName: "playlist",
+    fields: [
+      { key: "title", label: "TITLE", maxLength: 100 },
+      { key: "spotify_url", label: "SPOTIFY URL", type: "url" },
+    ],
+  },
+  tracks: {
+    table: "spotify_featured_tracks",
+    container: trackSlots,
+    addButton: trackAdd,
+    status: trackAdminStatus,
+    itemName: "song",
+    fields: [
+      { key: "title", label: "TITLE", maxLength: 100 },
+      { key: "artist", label: "ARTIST", maxLength: 100 },
+      { key: "spotify_url", label: "SPOTIFY URL", type: "url" },
+    ],
+  },
+  resume: {
+    table: "site_resume_entries",
+    container: resumeEntrySlots,
+    addButton: resumeEntryAdd,
+    status: resumeAdminStatus,
+    itemName: "experience",
+    fields: [
+      { key: "role", label: "ROLE", maxLength: 120 },
+      { key: "organization", label: "ORGANIZATION", maxLength: 120 },
+      { key: "period", label: "PERIOD", maxLength: 100 },
+      { key: "summary", label: "SUMMARY", maxLength: 1000, multiline: true },
+      { key: "technologies", label: "TECHNOLOGIES", maxLength: 300 },
+    ],
+  },
+  changelog: {
+    table: "site_changelog",
+    container: changelogSlots,
+    addButton: changelogEntryAdd,
+    status: changelogAdminStatus,
+    itemName: "change",
+    fields: [
+      { key: "entry_date", label: "DATE", type: "date" },
+      { key: "title", label: "TITLE", maxLength: 120 },
+      { key: "summary", label: "SUMMARY", maxLength: 800, multiline: true },
+    ],
+  },
+};
+
+Object.values(repeatableEditors).forEach((editor) => {
+  editor.deletedPositions = new Set();
+  editor.maxPosition = 0;
+});
+
+let temporaryEntryId = 0;
 
 function createAdminField(labelText, name, options = {}) {
   const label = document.createElement("label");
@@ -74,63 +138,163 @@ function createAdminField(labelText, name, options = {}) {
   if (options.maxLength) {
     field.maxLength = options.maxLength;
   }
+  if (options.fieldKey) {
+    field.dataset.entryField = options.fieldKey;
+  }
+  field.value = options.value ?? "";
   label.append(labelCopy, field);
   return label;
 }
 
-function createAdminCheckbox(labelText, name) {
+function createAdminCheckbox(labelText, name, options = {}) {
   const label = document.createElement("label");
   const checkbox = document.createElement("input");
   const copy = document.createElement("span");
   label.className = "admin-checkbox";
   checkbox.type = "checkbox";
   checkbox.name = name;
+  checkbox.checked = options.checked === true;
+  if (options.fieldKey) {
+    checkbox.dataset.entryField = options.fieldKey;
+  }
   copy.textContent = labelText;
   label.append(checkbox, copy);
   return label;
 }
 
-function createContentSlot(position, fields, enabledName) {
+function createRepeatableEntry(editor, entry = {}) {
   const fieldset = document.createElement("fieldset");
   const legend = document.createElement("legend");
-  legend.textContent = `SLOT ${position}`;
+  const entryKey = entry.position
+    ? `position-${entry.position}`
+    : `new-${temporaryEntryId += 1}`;
+  fieldset.dataset.entryKey = entryKey;
+  if (entry.position) {
+    fieldset.dataset.position = String(entry.position);
+  }
+  legend.textContent = entry.position ? `ENTRY ${entry.position}` : "NEW ENTRY";
   fieldset.append(legend);
-  fields.forEach((field) => {
+  editor.fields.forEach((field) => {
     fieldset.append(createAdminField(
       field.label,
-      field.name(position),
-      field,
+      `${editor.itemName}_${entryKey}_${field.key}`,
+      {
+        ...field,
+        fieldKey: field.key,
+        value: entry[field.key],
+      },
     ));
   });
-  fieldset.append(createAdminCheckbox("ENABLED", enabledName(position)));
+  fieldset.append(createAdminCheckbox(
+    "ENABLED",
+    `${editor.itemName}_${entryKey}_enabled`,
+    { checked: entry.enabled, fieldKey: "enabled" },
+  ));
+
+  const actions = document.createElement("div");
+  const removeButton = document.createElement("button");
+  actions.className = "repeatable-entry-actions";
+  removeButton.type = "button";
+  removeButton.className = "repeatable-entry-remove";
+  removeButton.textContent = "REMOVE";
+  removeButton.setAttribute(
+    "aria-label",
+    `Remove ${editor.itemName} ${entry.position ?? "entry"}`,
+  );
+  removeButton.addEventListener("click", () => {
+    if (entry.position) {
+      editor.deletedPositions.add(entry.position);
+    }
+    fieldset.remove();
+    setAdminStatus(
+      editor.status,
+      `${editor.itemName[0].toUpperCase()}${editor.itemName.slice(1)} removed. Save to persist this change.`,
+    );
+  });
+  actions.append(removeButton);
+  fieldset.append(actions);
   return fieldset;
 }
 
-for (let position = 1; position <= 6; position += 1) {
-  resumeEntrySlots.append(createContentSlot(
-    position,
-    [
-      { label: "ROLE", name: (slot) => `resume_${slot}_role`, maxLength: 120 },
-      { label: "ORGANIZATION", name: (slot) => `resume_${slot}_organization`, maxLength: 120 },
-      { label: "PERIOD", name: (slot) => `resume_${slot}_period`, maxLength: 100 },
-      { label: "SUMMARY", name: (slot) => `resume_${slot}_summary`, maxLength: 1000, multiline: true },
-      { label: "TECHNOLOGIES", name: (slot) => `resume_${slot}_technologies`, maxLength: 300 },
-    ],
-    (slot) => `resume_${slot}_enabled`,
-  ));
+function renderRepeatableEntries(editor, entries) {
+  editor.container.replaceChildren();
+  editor.deletedPositions.clear();
+  editor.maxPosition = entries.reduce(
+    (maximum, entry) => Math.max(maximum, entry.position),
+    0,
+  );
+  entries.forEach((entry) => {
+    editor.container.append(createRepeatableEntry(editor, entry));
+  });
 }
 
-for (let position = 1; position <= 10; position += 1) {
-  changelogSlots.append(createContentSlot(
-    position,
-    [
-      { label: "DATE", name: (slot) => `changelog_${slot}_date`, type: "date" },
-      { label: "TITLE", name: (slot) => `changelog_${slot}_title`, maxLength: 120 },
-      { label: "SUMMARY", name: (slot) => `changelog_${slot}_summary`, maxLength: 800, multiline: true },
-    ],
-    (slot) => `changelog_${slot}_enabled`,
-  ));
+function collectRepeatableEntries(editor) {
+  return Array.from(editor.container.querySelectorAll("fieldset")).map(
+    (fieldset) => {
+      const entry = {
+        position: fieldset.dataset.position
+          ? Number(fieldset.dataset.position)
+          : null,
+      };
+      editor.fields.forEach((field) => {
+        entry[field.key] = fieldset
+          .querySelector(`[data-entry-field="${field.key}"]`)
+          .value
+          .trim();
+      });
+      entry.enabled = fieldset
+        .querySelector('[data-entry-field="enabled"]')
+        .checked;
+      return entry;
+    },
+  );
 }
+
+async function syncRepeatableEntries(editor, entries, updatedAt) {
+  let nextPosition = editor.maxPosition;
+  const changes = entries.map((entry) => {
+    const values = Object.fromEntries(
+      editor.fields.map((field) => [field.key, entry[field.key] || null]),
+    );
+    const payload = {
+      ...values,
+      enabled: entry.enabled,
+      updated_at: updatedAt,
+    };
+    if (entry.position) {
+      return adminClient
+        .from(editor.table)
+        .update(payload)
+        .eq("position", entry.position);
+    }
+    nextPosition += 1;
+    return adminClient
+      .from(editor.table)
+      .insert({ position: nextPosition, ...payload });
+  });
+  editor.deletedPositions.forEach((position) => {
+    changes.push(
+      adminClient
+        .from(editor.table)
+        .delete()
+        .eq("position", position),
+    );
+  });
+  const results = await Promise.all(changes);
+  return results.find((result) => result.error) ?? null;
+}
+
+Object.values(repeatableEditors).forEach((editor) => {
+  editor.addButton.addEventListener("click", () => {
+    const entry = createRepeatableEntry(editor);
+    editor.container.append(entry);
+    entry.querySelector("input, textarea")?.focus();
+    setAdminStatus(
+      editor.status,
+      `New ${editor.itemName} added. Complete it, then save.`,
+    );
+  });
+});
 
 function setAdminStatus(element, message, state = "") {
   element.textContent = message;
@@ -278,19 +442,16 @@ async function loadFeaturedPlaylists() {
       `Featured playlists failed to load: ${error.message}`,
       "error",
     );
-    return;
+    return false;
   }
 
-  for (let position = 1; position <= 5; position += 1) {
-    const playlist = data.find((entry) => entry.position === position);
-    playlistForm.elements[`playlist_${position}_title`].value =
-      playlist?.title ?? "";
-    playlistForm.elements[`playlist_${position}_url`].value =
-      playlist?.spotify_url ?? "";
-    playlistForm.elements[`playlist_${position}_enabled`].checked =
-      playlist?.enabled === true;
-  }
-  setAdminStatus(playlistAdminStatus, "Curated playlist slots loaded.", "success");
+  renderRepeatableEntries(repeatableEditors.playlists, data);
+  setAdminStatus(
+    playlistAdminStatus,
+    `${data.length} curated playlist entr${data.length === 1 ? "y" : "ies"} loaded.`,
+    "success",
+  );
+  return true;
 }
 
 async function loadFeaturedTracks() {
@@ -307,19 +468,16 @@ async function loadFeaturedTracks() {
       `Featured songs failed to load: ${error.message}`,
       "error",
     );
-    return;
+    return false;
   }
 
-  for (let position = 1; position <= 5; position += 1) {
-    const track = data.find((entry) => entry.position === position);
-    trackForm.elements[`track_${position}_title`].value = track?.title ?? "";
-    trackForm.elements[`track_${position}_artist`].value = track?.artist ?? "";
-    trackForm.elements[`track_${position}_url`].value =
-      track?.spotify_url ?? "";
-    trackForm.elements[`track_${position}_enabled`].checked =
-      track?.enabled === true;
-  }
-  setAdminStatus(trackAdminStatus, "Curated song slots loaded.", "success");
+  renderRepeatableEntries(repeatableEditors.tracks, data);
+  setAdminStatus(
+    trackAdminStatus,
+    `${data.length} curated song entr${data.length === 1 ? "y" : "ies"} loaded.`,
+    "success",
+  );
+  return true;
 }
 
 async function loadResumeContent() {
@@ -344,7 +502,7 @@ async function loadResumeContent() {
       `Résumé data failed to load: ${error.message}`,
       "error",
     );
-    return;
+    return false;
   }
 
   resumeProfileFields.forEach((field) => {
@@ -352,16 +510,9 @@ async function loadResumeContent() {
   });
   resumeForm.elements.enabled.checked = profileResult.data.enabled === true;
 
-  for (let position = 1; position <= 6; position += 1) {
-    const entry = entriesResult.data.find((item) => item.position === position);
-    ["role", "organization", "period", "summary", "technologies"].forEach((field) => {
-      resumeForm.elements[`resume_${position}_${field}`].value =
-        entry?.[field] ?? "";
-    });
-    resumeForm.elements[`resume_${position}_enabled`].checked =
-      entry?.enabled === true;
-  }
+  renderRepeatableEntries(repeatableEditors.resume, entriesResult.data);
   setAdminStatus(resumeAdminStatus, "Résumé data loaded.", "success");
+  return true;
 }
 
 async function loadNowContent() {
@@ -399,21 +550,16 @@ async function loadChangelogContent() {
       `Changelog failed to load: ${error.message}`,
       "error",
     );
-    return;
+    return false;
   }
 
-  for (let position = 1; position <= 10; position += 1) {
-    const entry = data.find((item) => item.position === position);
-    changelogForm.elements[`changelog_${position}_date`].value =
-      entry?.entry_date ?? "";
-    changelogForm.elements[`changelog_${position}_title`].value =
-      entry?.title ?? "";
-    changelogForm.elements[`changelog_${position}_summary`].value =
-      entry?.summary ?? "";
-    changelogForm.elements[`changelog_${position}_enabled`].checked =
-      entry?.enabled === true;
-  }
-  setAdminStatus(changelogAdminStatus, "Changelog slots loaded.", "success");
+  renderRepeatableEntries(repeatableEditors.changelog, data);
+  setAdminStatus(
+    changelogAdminStatus,
+    `${data.length} changelog entr${data.length === 1 ? "y" : "ies"} loaded.`,
+    "success",
+  );
+  return true;
 }
 
 async function showInbox() {
@@ -517,18 +663,7 @@ if (adminClient) {
 
   playlistForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const formData = new FormData(playlistForm);
-    const playlists = Array.from({ length: 5 }, (_, index) => {
-      const position = index + 1;
-      return {
-        position,
-        title: String(formData.get(`playlist_${position}_title`) ?? "").trim(),
-        spotify_url: String(
-          formData.get(`playlist_${position}_url`) ?? "",
-        ).trim(),
-        enabled: formData.has(`playlist_${position}_enabled`),
-      };
-    });
+    const playlists = collectRepeatableEntries(repeatableEditors.playlists);
     const invalidPlaylist = playlists.find((playlist) => (
       (
         playlist.enabled
@@ -542,7 +677,7 @@ if (adminClient) {
     if (invalidPlaylist) {
       setAdminStatus(
         playlistAdminStatus,
-        `Slot ${invalidPlaylist.position} needs a title and valid Spotify playlist URL.`,
+        "Every enabled playlist needs a title and valid Spotify playlist URL.",
         "error",
       );
       return;
@@ -550,20 +685,13 @@ if (adminClient) {
 
     playlistSubmit.disabled = true;
     playlistSubmit.textContent = "> SAVING...";
-    setAdminStatus(playlistAdminStatus, "Writing curated playlist slots...");
+    setAdminStatus(playlistAdminStatus, "Writing curated playlist entries...");
 
-    const results = await Promise.all(playlists.map((playlist) => (
-      adminClient
-        .from("spotify_featured_playlists")
-        .update({
-          title: playlist.title || null,
-          spotify_url: playlist.spotify_url || null,
-          enabled: playlist.enabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("position", playlist.position)
-    )));
-    const failedUpdate = results.find((result) => result.error);
+    const failedUpdate = await syncRepeatableEntries(
+      repeatableEditors.playlists,
+      playlists,
+      new Date().toISOString(),
+    );
 
     playlistSubmit.disabled = false;
     playlistSubmit.textContent = "> SAVE_PLAYLISTS";
@@ -578,22 +706,15 @@ if (adminClient) {
       return;
     }
 
+    if (!await loadFeaturedPlaylists()) {
+      return;
+    }
     setAdminStatus(playlistAdminStatus, "Curated playlists updated.", "success");
   });
 
   trackForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const formData = new FormData(trackForm);
-    const tracks = Array.from({ length: 5 }, (_, index) => {
-      const position = index + 1;
-      return {
-        position,
-        title: String(formData.get(`track_${position}_title`) ?? "").trim(),
-        artist: String(formData.get(`track_${position}_artist`) ?? "").trim(),
-        spotify_url: String(formData.get(`track_${position}_url`) ?? "").trim(),
-        enabled: formData.has(`track_${position}_enabled`),
-      };
-    });
+    const tracks = collectRepeatableEntries(repeatableEditors.tracks);
     const invalidTrack = tracks.find((track) => (
       (
         track.enabled
@@ -607,7 +728,7 @@ if (adminClient) {
     if (invalidTrack) {
       setAdminStatus(
         trackAdminStatus,
-        `Slot ${invalidTrack.position} needs a title, artist, and valid Spotify track URL.`,
+        "Every enabled song needs a title, artist, and valid Spotify track URL.",
         "error",
       );
       return;
@@ -615,22 +736,13 @@ if (adminClient) {
 
     trackSubmit.disabled = true;
     trackSubmit.textContent = "> SAVING...";
-    setAdminStatus(trackAdminStatus, "Writing curated song slots...");
+    setAdminStatus(trackAdminStatus, "Writing curated song entries...");
 
-    const updatedAt = new Date().toISOString();
-    const results = await Promise.all(tracks.map((track) => (
-      adminClient
-        .from("spotify_featured_tracks")
-        .update({
-          title: track.title || null,
-          artist: track.artist || null,
-          spotify_url: track.spotify_url || null,
-          enabled: track.enabled,
-          updated_at: updatedAt,
-        })
-        .eq("position", track.position)
-    )));
-    const failedUpdate = results.find((result) => result.error);
+    const failedUpdate = await syncRepeatableEntries(
+      repeatableEditors.tracks,
+      tracks,
+      new Date().toISOString(),
+    );
 
     trackSubmit.disabled = false;
     trackSubmit.textContent = "> SAVE_SONGS";
@@ -645,6 +757,9 @@ if (adminClient) {
       return;
     }
 
+    if (!await loadFeaturedTracks()) {
+      return;
+    }
     setAdminStatus(trackAdminStatus, "Curated songs updated.", "success");
   });
 
@@ -658,22 +773,7 @@ if (adminClient) {
       ]),
     );
     profile.enabled = formData.has("enabled");
-    const entries = Array.from({ length: 6 }, (_, index) => {
-      const position = index + 1;
-      return {
-        position,
-        role: String(formData.get(`resume_${position}_role`) ?? "").trim(),
-        organization: String(
-          formData.get(`resume_${position}_organization`) ?? "",
-        ).trim(),
-        period: String(formData.get(`resume_${position}_period`) ?? "").trim(),
-        summary: String(formData.get(`resume_${position}_summary`) ?? "").trim(),
-        technologies: String(
-          formData.get(`resume_${position}_technologies`) ?? "",
-        ).trim(),
-        enabled: formData.has(`resume_${position}_enabled`),
-      };
-    });
+    const entries = collectRepeatableEntries(repeatableEditors.resume);
     const invalidEntry = entries.find((entry) => (
       entry.enabled
       && (!entry.role || !entry.organization || !entry.period || !entry.summary)
@@ -694,7 +794,7 @@ if (adminClient) {
     if (invalidEntry) {
       setAdminStatus(
         resumeAdminStatus,
-        `Résumé slot ${invalidEntry.position} needs a role, organization, period, and summary.`,
+        "Every enabled résumé entry needs a role, organization, period, and summary.",
         "error",
       );
       return;
@@ -717,22 +817,9 @@ if (adminClient) {
           updated_at: updatedAt,
         })
         .eq("id", "primary"),
-      ...entries.map((entry) => (
-        adminClient
-          .from("site_resume_entries")
-          .update({
-            role: entry.role || null,
-            organization: entry.organization || null,
-            period: entry.period || null,
-            summary: entry.summary || null,
-            technologies: entry.technologies || null,
-            enabled: entry.enabled,
-            updated_at: updatedAt,
-          })
-          .eq("position", entry.position)
-      )),
+      syncRepeatableEntries(repeatableEditors.resume, entries, updatedAt),
     ]);
-    const failedUpdate = results.find((result) => result.error);
+    const failedUpdate = results.find((result) => result?.error);
     resumeSubmit.disabled = false;
     resumeSubmit.textContent = "> SAVE_RESUME";
 
@@ -743,6 +830,9 @@ if (adminClient) {
         `Résumé update failed: ${failedUpdate.error.message}`,
         "error",
       );
+      return;
+    }
+    if (!await loadResumeContent()) {
       return;
     }
     clearPublicContentCache();
@@ -796,30 +886,14 @@ if (adminClient) {
 
   changelogForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const formData = new FormData(changelogForm);
-    const entries = Array.from({ length: 10 }, (_, index) => {
-      const position = index + 1;
-      return {
-        position,
-        entry_date: String(
-          formData.get(`changelog_${position}_date`) ?? "",
-        ).trim(),
-        title: String(
-          formData.get(`changelog_${position}_title`) ?? "",
-        ).trim(),
-        summary: String(
-          formData.get(`changelog_${position}_summary`) ?? "",
-        ).trim(),
-        enabled: formData.has(`changelog_${position}_enabled`),
-      };
-    });
+    const entries = collectRepeatableEntries(repeatableEditors.changelog);
     const invalidEntry = entries.find((entry) => (
       entry.enabled && (!entry.entry_date || !entry.title || !entry.summary)
     ));
     if (invalidEntry) {
       setAdminStatus(
         changelogAdminStatus,
-        `Changelog slot ${invalidEntry.position} needs a date, title, and summary.`,
+        "Every enabled changelog entry needs a date, title, and summary.",
         "error",
       );
       return;
@@ -827,21 +901,13 @@ if (adminClient) {
 
     changelogSubmit.disabled = true;
     changelogSubmit.textContent = "> SAVING...";
-    setAdminStatus(changelogAdminStatus, "Writing changelog slots...");
+    setAdminStatus(changelogAdminStatus, "Writing changelog entries...");
     const updatedAt = new Date().toISOString();
-    const results = await Promise.all(entries.map((entry) => (
-      adminClient
-        .from("site_changelog")
-        .update({
-          entry_date: entry.entry_date || null,
-          title: entry.title || null,
-          summary: entry.summary || null,
-          enabled: entry.enabled,
-          updated_at: updatedAt,
-        })
-        .eq("position", entry.position)
-    )));
-    const failedUpdate = results.find((result) => result.error);
+    const failedUpdate = await syncRepeatableEntries(
+      repeatableEditors.changelog,
+      entries,
+      updatedAt,
+    );
     changelogSubmit.disabled = false;
     changelogSubmit.textContent = "> SAVE_CHANGELOG";
 
@@ -852,6 +918,9 @@ if (adminClient) {
         `Changelog update failed: ${failedUpdate.error.message}`,
         "error",
       );
+      return;
+    }
+    if (!await loadChangelogContent()) {
       return;
     }
     clearPublicContentCache();

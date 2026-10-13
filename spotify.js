@@ -169,7 +169,6 @@ function renderSpotifyPlayback(playback) {
       return playlist
         && Number.isInteger(playlist.position)
         && playlist.position >= 1
-        && playlist.position <= 5
         && typeof playlist.title === "string"
         && playlist.title.trim().length > 0
         && playlist.title.length <= 100
@@ -184,7 +183,6 @@ function renderSpotifyPlayback(playback) {
       playlists
         .filter((playlist) => playlist.enabled && isValidFeaturedPlaylist(playlist))
         .sort((first, second) => first.position - second.position)
-        .slice(0, 5)
         .forEach((playlist) => {
           const item = document.createElement("li");
           item.value = playlist.position;
@@ -200,7 +198,7 @@ function renderSpotifyPlayback(playback) {
 
       if (!spotifyFeaturedPlaylists.children.length) {
         const empty = document.createElement("li");
-        empty.textContent = "Playlist slots are awaiting curation.";
+        empty.textContent = "Playlist entries are awaiting curation.";
         spotifyFeaturedPlaylists.append(empty);
       }
     }
@@ -271,7 +269,6 @@ function renderSpotifyPlayback(playback) {
     return track
       && Number.isInteger(track.position)
       && track.position >= 1
-      && track.position <= 5
       && typeof track.title === "string"
       && track.title.trim().length > 0
       && track.title.length <= 100
@@ -289,7 +286,6 @@ function renderSpotifyPlayback(playback) {
     tracks
       .filter((track) => track.enabled && isValidFeaturedTrack(track))
       .sort((first, second) => first.position - second.position)
-      .slice(0, 5)
       .forEach((track) => {
         const item = document.createElement("li");
         item.value = track.position;
@@ -305,7 +301,7 @@ function renderSpotifyPlayback(playback) {
 
     if (!spotifyFeaturedTracks.children.length) {
       const empty = document.createElement("li");
-      empty.textContent = "Song slots are awaiting curation.";
+      empty.textContent = "Song entries are awaiting curation.";
       spotifyFeaturedTracks.append(empty);
     }
   }
@@ -667,6 +663,11 @@ window.addEventListener("desktop-window:opened", (event) => {
     loadFeaturedTracks();
   }
 });
+if (!document.querySelector("#spotify-window")?.hidden) {
+  loadSpotifyHistory();
+  loadFeaturedPlaylists();
+  loadFeaturedTracks();
+}
 if (window.LANYARD_SPOTIFY) {
   handleLanyardSpotify({ detail: window.LANYARD_SPOTIFY });
 }
