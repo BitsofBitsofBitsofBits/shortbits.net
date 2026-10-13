@@ -2226,6 +2226,102 @@ footer span {
   letter-spacing: 0.04em;
 }
 
+.useless-tools {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.useless-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.useless-tool-grid button {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background: var(--panel);
+  text-align: left;
+  cursor: pointer;
+}
+
+.useless-tool-grid button:hover,
+.useless-tool-grid button:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.useless-tool-grid button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.useless-tool-grid button strong {
+  overflow-wrap: anywhere;
+  font-size: 0.72rem;
+}
+
+.useless-tool-grid button span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.useless-tool-console {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.useless-tool-console > div:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+}
+
+.useless-tool-state {
+  color: var(--accent);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+.useless-tool-result {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.useless-tool-progress {
+  height: 5px;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.useless-tool-progress[hidden] {
+  display: none;
+}
+
+.useless-tool-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+  transition: width 80ms steps(2);
+}
+
 .useless-resolution {
   margin-top: 32px;
   padding: 24px;
@@ -2257,6 +2353,15 @@ footer span {
   .useless-header,
   .useless-steps {
     grid-template-columns: 1fr;
+  }
+
+  .useless-tool-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .useless-tool-console > div:first-child {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
 
