@@ -29,7 +29,7 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-2"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-11">
+    <link rel="stylesheet" href="styles.css?v=upgrade-12">
     <script src="messages.js?v=messages-10" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="script.js?v=upgrade-16" defer></script>
@@ -39,7 +39,7 @@
     <script src="pronouns.js?v=pronouns-1" defer></script>
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
-    <script src="spotify.js?v=spotify-9" defer></script>
+    <script src="spotify.js?v=spotify-10" defer></script>
   </head>
   <body>
     <noscript>
@@ -395,18 +395,36 @@
           <button type="button" data-window-close aria-label="Close Spotify window">&times;</button>
         </div>
       </header>
-      <div class="desktop-window-content desktop-spotify-content">
-        <img class="desktop-spotify-art" data-window-mirror-image="#spotify-artwork" alt="" hidden>
-        <div>
-          <p class="system-kicker" data-window-mirror="#spotify-state">CONNECTING TO SPOTIFY</p>
-          <h2 data-window-mirror="#spotify-track">Locating musical bits...</h2>
-          <p data-window-mirror="#spotify-artist">Please stand by</p>
-          <p class="desktop-spotify-time">
-            <span data-window-mirror="#spotify-current-time">0:00</span>
-            <span>/</span>
-            <span data-window-mirror="#spotify-duration">0:00</span>
-          </p>
+      <div class="desktop-window-content spotify-window-content">
+        <div class="desktop-spotify-content">
+          <img class="desktop-spotify-art" data-window-mirror-image="#spotify-artwork" alt="" hidden>
+          <div>
+            <p class="system-kicker" data-window-mirror="#spotify-state">CONNECTING TO SPOTIFY</p>
+            <h2 data-window-mirror="#spotify-track">Locating musical bits...</h2>
+            <p data-window-mirror="#spotify-artist">Please stand by</p>
+            <p class="desktop-spotify-time">
+              <span data-window-mirror="#spotify-current-time">0:00</span>
+              <span>/</span>
+              <span data-window-mirror="#spotify-duration">0:00</span>
+            </p>
+          </div>
         </div>
+        <section class="spotify-history-section" aria-labelledby="spotify-recent-heading">
+          <p class="system-kicker">LISTENING_HISTORY // CACHED</p>
+          <h3 id="spotify-recent-heading">MOST RECENTLY PLAYED</h3>
+          <div id="spotify-recent-track" class="spotify-history-list">
+            <p>Open this window to load recent musical Bits.</p>
+          </div>
+        </section>
+        <section class="spotify-history-section" aria-labelledby="spotify-top-heading">
+          <h3 id="spotify-top-heading">TOP TRACKS // LAST 4 WEEKS</h3>
+          <ol id="spotify-top-tracks" class="spotify-history-list spotify-top-tracks">
+            <li>Waiting for Spotify statistics...</li>
+          </ol>
+          <p id="spotify-history-status" class="spotify-history-status" role="status" aria-live="polite">
+            History loads on demand to protect the Spotify API.
+          </p>
+        </section>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Spotify window"></button>
     </section>

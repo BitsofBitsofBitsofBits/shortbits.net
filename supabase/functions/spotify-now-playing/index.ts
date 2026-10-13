@@ -4,11 +4,15 @@ const allowedOrigins = new Set([
   "null",
 ]);
 const spotifyPlaybackCacheTtlMs = 30_000;
+const spotifyHistoryCacheTtlMs = 300_000;
 const spotifyDefaultRetryAfterSeconds = 60;
 let spotifyRateLimitedUntil = 0;
 let cachedPlayback: Record<string, unknown> | null = null;
 let cachedPlaybackAt = 0;
 let spotifyRequestInFlight: Promise<Response> | null = null;
+let cachedHistory: Record<string, unknown> | null = null;
+let cachedHistoryAt = 0;
+let spotifyHistoryRequestInFlight: Promise<Response> | null = null;
 
 function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
@@ -79,6 +83,133 @@ function cachedPlaybackPayload(
     servedAt: Date.now(),
     ...(retryAfter === null ? {} : { retryAfterSeconds: retryAfter }),
   };
+}
+
+function cachedHistoryPayload(
+  cacheStatus: "hit" | "stale",
+  retryAfter: number | null = null,
+): Record<string, unknown> {
+  return {
+    ...cachedHistory,
+    cacheStatus,
+    cacheAgeMs: Math.max(0, Date.now() - cachedHistoryAt),
+    servedAt: Date.now(),
+    ...(retryAfter === null ? {} : { retryAfterSeconds: retryAfter }),
+  };
+}
+
+function sanitizeTrack(track: Record<string, unknown>): Record<string, unknown> {
+  const album = track.album && typeof track.album === "object"
+    ? track.album as Record<string, unknown>
+    : {};
+  const images = Array.isArray(album.images) ? album.images : [];
+  const image = images[0] && typeof images[0] === "object"
+    ? images[0] as Record<string, unknown>
+    : {};
+  const externalUrls = track.external_urls && typeof track.external_urls === "object"
+    ? track.external_urls as Record<string, unknown>
+    : {};
+  const artists = Array.isArray(track.artists)
+    ? track.artists
+      .filter((artist): artist is Record<string, unknown> => (
+        Boolean(artist) && typeof artist === "object"
+      ))
+      .map((artist) => artist.name)
+      .filter((name): name is string => typeof name === "string")
+    : [];
+
+  return {
+    title: typeof track.name === "string" ? track.name : "Unknown track",
+    artists,
+    collection: typeof album.name === "string" ? album.name : null,
+    albumArt: typeof image.url === "string" ? image.url : null,
+    spotifyUrl: typeof externalUrls.spotify === "string"
+      ? externalUrls.spotify
+      : null,
+  };
+}
+
+async function fetchSpotifyHistory(request: Request): Promise<Response> {
+  const clientId = Deno.env.get("SPOTIFY_CLIENT_ID");
+  const clientSecret = Deno.env.get("SPOTIFY_CLIENT_SECRET");
+  const refreshToken = Deno.env.get("SPOTIFY_REFRESH_TOKEN");
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    console.error("One or more Spotify secrets are missing.");
+    return jsonResponse(request, { error: "Spotify integration is unavailable." }, 503);
+  }
+
+  try {
+    const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      }),
+    });
+    const tokenData = await tokenResponse.json();
+
+    if (!tokenResponse.ok || !tokenData.access_token) {
+      console.error("Spotify history token refresh failed:", tokenResponse.status);
+      return jsonResponse(request, { error: "Spotify authentication failed." }, 502);
+    }
+
+    const spotifyHeaders = {
+      "Authorization": `Bearer ${tokenData.access_token}`,
+    };
+    const [recentResponse, topResponse] = await Promise.all([
+      fetch("https://api.spotify.com/v1/me/player/recently-played?limit=1", {
+        headers: spotifyHeaders,
+      }),
+      fetch("https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5", {
+        headers: spotifyHeaders,
+      }),
+    ]);
+
+    if (!recentResponse.ok || !topResponse.ok) {
+      const failedResponse = !recentResponse.ok ? recentResponse : topResponse;
+      console.error(
+        "Spotify history request failed:",
+        recentResponse.status,
+        topResponse.status,
+      );
+      const historyRetryAfter = failedResponse.status === 429
+        ? beginSpotifyCooldown(retryAfterSeconds(failedResponse))
+        : null;
+      return jsonResponse(request, {
+        error: failedResponse.status === 403
+          ? "Spotify history authorization requires updated scopes."
+          : "Spotify listening history is unavailable.",
+        upstreamStatus: failedResponse.status,
+        retryAfterSeconds: historyRetryAfter,
+      }, failedResponse.status === 429 ? 429 : 502);
+    }
+
+    const recentData = await recentResponse.json();
+    const topData = await topResponse.json();
+    const recentEntry = Array.isArray(recentData.items) ? recentData.items[0] : null;
+    const topItems = Array.isArray(topData.items) ? topData.items : [];
+
+    return jsonResponse(request, {
+      recentTrack: recentEntry?.track
+        ? {
+          ...sanitizeTrack(recentEntry.track),
+          playedAt: typeof recentEntry.played_at === "string"
+            ? recentEntry.played_at
+            : null,
+        }
+        : null,
+      topTracks: topItems.slice(0, 5).map(sanitizeTrack),
+      timeRange: "short_term",
+    });
+  } catch (error) {
+    console.error("Spotify history function failed:", error);
+    return jsonResponse(request, { error: "Spotify listening history failed." }, 500);
+  }
 }
 
 async function fetchSpotifyPlayback(request: Request): Promise<Response> {
@@ -182,9 +313,72 @@ Deno.serve(async (request) => {
     return jsonResponse(request, { error: "Method not allowed." }, 405);
   }
 
+  const view = new URL(request.url).searchParams.get("view");
   const rateLimitSecondsRemaining = Math.ceil(
     (spotifyRateLimitedUntil - Date.now()) / 1000,
   );
+
+  if (view === "history") {
+    if (rateLimitSecondsRemaining > 0) {
+      if (cachedHistory) {
+        return jsonResponse(
+          request,
+          cachedHistoryPayload("stale", rateLimitSecondsRemaining),
+        );
+      }
+      return jsonResponse(request, {
+        error: "Spotify history is temporarily rate limited.",
+        upstreamStatus: 429,
+        retryAfterSeconds: rateLimitSecondsRemaining,
+      }, 429);
+    }
+
+    if (
+      cachedHistory
+      && Date.now() - cachedHistoryAt < spotifyHistoryCacheTtlMs
+    ) {
+      return jsonResponse(
+        request,
+        cachedHistoryPayload("hit"),
+        200,
+        "public, max-age=0, s-maxage=300, stale-while-revalidate=300",
+      );
+    }
+
+    if (!spotifyHistoryRequestInFlight) {
+      spotifyHistoryRequestInFlight = fetchSpotifyHistory(request)
+        .finally(() => {
+          spotifyHistoryRequestInFlight = null;
+        });
+    }
+
+    const historyResponse = await spotifyHistoryRequestInFlight;
+    const historyBody = await historyResponse.clone().json();
+    if (historyResponse.ok) {
+      cachedHistory = historyBody;
+      cachedHistoryAt = Date.now();
+      return jsonResponse(
+        request,
+        cachedHistoryPayload("hit"),
+        200,
+        "public, max-age=0, s-maxage=300, stale-while-revalidate=300",
+      );
+    }
+    if (historyResponse.status === 429 && cachedHistory) {
+      const retryAfter = Number(historyBody.retryAfterSeconds);
+      return jsonResponse(
+        request,
+        cachedHistoryPayload(
+          "stale",
+          Number.isFinite(retryAfter)
+            ? retryAfter
+            : spotifyDefaultRetryAfterSeconds,
+        ),
+      );
+    }
+    return jsonResponse(request, historyBody, historyResponse.status);
+  }
+
   if (rateLimitSecondsRemaining > 0) {
     if (cachedPlayback) {
       return jsonResponse(

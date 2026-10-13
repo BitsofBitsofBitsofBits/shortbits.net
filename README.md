@@ -53,6 +53,18 @@ the Edge Function reads them from Supabase secrets:
 - `SPOTIFY_CLIENT_SECRET`
 - `SPOTIFY_REFRESH_TOKEN`
 
+The refresh token needs these scopes:
+
+- `user-read-currently-playing`
+- `user-read-playback-state`
+- `user-read-recently-played`
+- `user-top-read`
+
+Generate and store a replacement token with `scripts/spotify-auth-helper.mjs`
+after setting `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the local
+shell. The helper completes OAuth locally and writes the refresh token directly
+to the linked Supabase project without printing it.
+
 Deploy the function with:
 
 ```powershell
@@ -76,6 +88,11 @@ public Discord identifier used as configuration, not a bot token.
 The site displays public presence, custom status, and activities. A Lanyard
 WebSocket also pushes Spotify track and pause changes to the player while the
 existing cached Spotify API remains the authoritative fallback.
+
+The Spotify popup loads the most recently played track and five short-term top
+tracks only when opened. That history response is cached in the browser, Edge
+Function, and CDN for five minutes, so it does not change the now-playing poll
+rate.
 
 The public pronoun reference is stored in the `pronoun_profiles` Supabase table.
 Anonymous visitors can read its single profile row, while authenticated Admin
