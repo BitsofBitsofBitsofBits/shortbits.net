@@ -25,7 +25,7 @@ const publicContentWindowIds = new Set([
   "changelog-window",
   "games-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v2";
+const publicContentCacheKey = "bits-public-content-v3";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;

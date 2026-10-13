@@ -328,6 +328,7 @@ function setAdminStatus(element, message, state = "") {
 function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v1");
   localStorage.removeItem("bits-public-content-v2");
+  localStorage.removeItem("bits-public-content-v3");
 }
 
 function createMessageElement(message) {
