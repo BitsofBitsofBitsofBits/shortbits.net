@@ -2274,6 +2274,11 @@ footer span {
   opacity: 0.55;
 }
 
+.useless-tool-grid button.is-retired:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .useless-tool-grid button strong {
   overflow-wrap: anywhere;
   font-size: 0.72rem;

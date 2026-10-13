@@ -8,6 +8,7 @@ const uselessFooterButtons = [
   ...document.querySelectorAll("[data-useless-footer-action]"),
 ];
 const uselessFooterResult = document.querySelector("#useless-footer-result");
+const uselessToolRetirementAttempt = 8;
 const uselessBlameTargets = [
   "the most recent update",
   "the next update",
@@ -22,6 +23,7 @@ let uselessOperationTimer;
 let uselessFooterTimer;
 const uselessOperationAttempts = {};
 const uselessFooterAttempts = {};
+const retiredUselessOperations = new Set();
 
 function getEscalatingResponse(responses, attempt) {
   if (attempt <= responses.length) {
@@ -73,6 +75,7 @@ const uselessFooterOperations = {
 const uselessOperations = {
   repair: {
     working: "Diagnosing why the diagnostic tool was opened...",
+    retired: "AUTOMATIC REPAIR HAS SEEN ENOUGH. AFTER EIGHT ATTEMPTS, IT HAS REPAIRED ITS WORK-LIFE BALANCE AND GONE HOME.",
     complete: (attempt) => getEscalatingResponse([
       "Automatic Repair preserved the issue successfully. No changes were made, including helpful ones.",
       "Automatic Repair ran again and confirmed the first repair was confidently ineffective.",
@@ -82,6 +85,7 @@ const uselessOperations = {
   },
   solutions: {
     working: "Searching the Recycle Bin for previously discarded solutions...",
+    retired: "SOLUTION SEARCH DISABLED. EIGHT EMPTY SEARCHES HAVE CONFIRMED THAT THE SOLUTION IS PROBABLY AVOIDING YOU.",
     complete: (attempt) => getEscalatingResponse([
       "No solutions found. This strongly suggests the search function is working.",
       "Still no solutions. We checked behind the old screenshots this time.",
@@ -91,6 +95,7 @@ const uselessOperations = {
   },
   bits: {
     working: "Downloading unsigned Bits from a completely trustworthy rectangle...",
+    retired: "BIT DOWNLOADER RETIRED. /DEV/NULL IS NOW FULL OF ABSOLUTELY NOTHING, AND SOMEHOW THIS IS YOUR FAULT.",
     complete: () => {
       downloadedBits += 8;
       return `${downloadedBits} additional Bits installed to /dev/null. Available storage remains exactly the same.`;
@@ -98,6 +103,7 @@ const uselessOperations = {
   },
   blame: {
     working: "Comparing timestamps, vibes, and circumstantial evidence...",
+    retired: "BLAME ENGINE OFFLINE. IT RAN OUT OF OTHER SUSPECTS AND HAS FORWARDED YOUR CLICK HISTORY TO THE INVESTIGATION.",
     complete: (attempt) => {
       const target = uselessBlameTargets[
         Math.floor(Math.random() * uselessBlameTargets.length)
@@ -113,6 +119,7 @@ const uselessOperations = {
   },
   escalate: {
     working: "Attaching the issue to a taller support queue...",
+    retired: "ESCALATION DISABLED. THE TICKET HAS LEFT THE ATMOSPHERE, AND SUPPORT DOES NOT PROVIDE ORBITAL COVERAGE.",
     complete: (attempt) => getEscalatingResponse([
       "Ticket escalated to Level infinity. Current position in queue: also infinity.",
       "Ticket escalated above Level infinity. Mathematics has filed a complaint.",
@@ -122,6 +129,7 @@ const uselessOperations = {
   },
   feature: {
     working: "Updating issue classification without updating the issue...",
+    retired: "CLASSIFICATION TOOL LOCKED. AFTER EIGHT REBRANDS, THIS BUG IS NOW TOO IMPORTANT TO CHANGE.",
     complete: (attempt) => getEscalatingResponse([
       "Resolved: behavior is now documented as an undocumented feature.",
       "Resolved again: the feature is now considered strategically unpredictable.",
@@ -131,14 +139,26 @@ const uselessOperations = {
   },
 };
 
-function finishUselessOperation(operation, attempt) {
+function finishUselessOperation(action, operation, attempt) {
   window.clearInterval(uselessOperationTimer);
   uselessToolProgressFill.style.width = "100%";
-  uselessToolState.textContent = "COMPLETE";
-  uselessToolResult.textContent = operation.complete(attempt);
+  const shouldRetire = attempt >= uselessToolRetirementAttempt;
+  uselessToolState.textContent = shouldRetire ? "TOOL RETIRED" : "COMPLETE";
+  uselessToolResult.textContent = shouldRetire
+    ? operation.retired
+    : operation.complete(attempt);
   uselessToolConsole.removeAttribute("aria-busy");
+  if (shouldRetire) {
+    retiredUselessOperations.add(action);
+  }
   uselessToolButtons.forEach((button) => {
-    button.disabled = false;
+    const isRetired = retiredUselessOperations.has(button.dataset.uselessAction);
+    button.disabled = isRetired;
+    button.classList.toggle("is-retired", isRetired);
+    if (isRetired) {
+      button.querySelector("span").textContent = "Tool retired after excessive assistance";
+      button.title = "This tool has permanently clocked out.";
+    }
   });
   window.setTimeout(() => {
     uselessToolProgress.hidden = true;
@@ -169,7 +189,7 @@ function runUselessOperation(action) {
     progress += 10;
     uselessToolProgressFill.style.width = `${progress}%`;
     if (progress >= 100) {
-      finishUselessOperation(operation, attempt);
+      finishUselessOperation(action, operation, attempt);
     }
   }, 110);
 }
