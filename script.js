@@ -1689,7 +1689,6 @@ function translateBinary(binaryInput) {
 const secretCommandResponses = {
   whoami: "BITS_OF_BITS_OF_BITS // THEY/THEM // PROBABLY HUMAN",
   sudo: "PERMISSION DENIED: NICE TRY",
-  cat: "MEOW. THAT IS NOT WHAT THIS COMMAND DOES.",
   meaningoflife: "42 BITS, GIVE OR TAKE",
 };
 
@@ -1707,6 +1706,11 @@ function renderHelpCommand() {
     "  changelog  view recent patches",
     "  source     open the source repository",
     "  share      copy this site's address",
+    "  files      open FILE_EXPLORER.EXE",
+    "  pwd        print virtual working directory",
+    "  ls [path]  list virtual files",
+    "  cd [path]  change virtual directory",
+    "  cat <file> read a virtual file",
     "  clear      clear this output",
     "  whoami     identify the operator",
     "",
@@ -1790,6 +1794,12 @@ async function copySiteUrl() {
 
 function handleSecretCommand(rawCommand) {
   const command = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
+  const filesystemResult = window.BITS_VIRTUAL_FILESYSTEM?.handleCommand(command);
+
+  if (filesystemResult?.handled) {
+    renderTerminalOutput(filesystemResult.title, filesystemResult.lines);
+    return true;
+  }
 
   if (command === "help") {
     renderHelpCommand();
@@ -1888,6 +1898,14 @@ const commandSuggestions = [
   "source",
   "repo",
   "share",
+  "files",
+  "pwd",
+  "ls",
+  "ls /etc",
+  "cd links",
+  "cd ..",
+  "cat readme.txt",
+  "cat /etc/motd",
   "clear",
   "whoami",
   "bios",
@@ -1933,6 +1951,9 @@ function showPreviousSplash(direction) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (document.documentElement.dataset.boot === "pending") {
+    return;
+  }
   const target = event.target;
   const isEditable = target instanceof HTMLInputElement
     || target instanceof HTMLTextAreaElement

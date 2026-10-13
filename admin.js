@@ -6,6 +6,9 @@ const loginStatus = document.querySelector("#login-status");
 const inboxStatus = document.querySelector("#inbox-status");
 const messageList = document.querySelector("#message-list");
 const refreshButton = document.querySelector("#refresh-messages");
+const guestbookAdminStatus = document.querySelector("#guestbook-admin-status");
+const guestbookAdminList = document.querySelector("#guestbook-admin-list");
+const refreshGuestbook = document.querySelector("#refresh-guestbook");
 const logoutButton = document.querySelector("#logout-button");
 const pronounProfileForm = document.querySelector("#pronoun-profile-form");
 const pronounProfileSubmit = document.querySelector("#pronoun-profile-submit");
@@ -404,6 +407,79 @@ async function loadMessages() {
   setAdminStatus(inboxStatus, `${data.length} packet${data.length === 1 ? "" : "s"} loaded.`, "success");
 }
 
+function createGuestbookAdminEntry(entry) {
+  const article = document.createElement("article");
+  const header = document.createElement("header");
+  const identity = document.createElement("div");
+  const name = document.createElement("h3");
+  const timestamp = document.createElement("time");
+  const message = document.createElement("p");
+  const actions = document.createElement("div");
+  const deleteButton = document.createElement("button");
+
+  article.className = "message-card";
+  name.textContent = entry.name;
+  timestamp.dateTime = entry.created_at;
+  timestamp.textContent = new Date(entry.created_at).toLocaleString();
+  message.textContent = entry.message;
+  deleteButton.type = "button";
+  deleteButton.textContent = "DELETE";
+  deleteButton.addEventListener("click", async () => {
+    if (!window.confirm(`Delete the public Guestbook entry from ${entry.name}?`)) {
+      return;
+    }
+    const { error } = await adminClient
+      .from("site_guestbook")
+      .delete()
+      .eq("id", entry.id);
+    if (error) {
+      console.error("Unable to delete Guestbook entry:", error);
+      setAdminStatus(
+        guestbookAdminStatus,
+        `Guestbook deletion failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    await loadAdminGuestbook();
+  });
+
+  identity.append(name, timestamp);
+  actions.className = "message-actions";
+  actions.append(deleteButton);
+  header.append(identity, actions);
+  article.append(header, message);
+  return article;
+}
+
+async function loadAdminGuestbook() {
+  setAdminStatus(guestbookAdminStatus, "Loading public signatures...");
+  const { data, error } = await adminClient
+    .from("site_guestbook")
+    .select("id, name, message, created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error("Unable to load Guestbook entries:", error);
+    setAdminStatus(
+      guestbookAdminStatus,
+      `Guestbook failed to load: ${error.message}`,
+      "error",
+    );
+    return;
+  }
+
+  guestbookAdminList.replaceChildren(...data.map(createGuestbookAdminEntry));
+  setAdminStatus(
+    guestbookAdminStatus,
+    data.length
+      ? `${data.length} public signature${data.length === 1 ? "" : "s"} loaded.`
+      : "No public Guestbook signatures.",
+    "success",
+  );
+}
+
 async function loadPronounProfile() {
   setAdminStatus(pronounAdminStatus, "Loading identity reference...");
   const { data, error } = await adminClient
@@ -567,6 +643,7 @@ async function showInbox() {
   inboxView.hidden = false;
   await Promise.all([
     loadMessages(),
+    loadAdminGuestbook(),
     loadPronounProfile(),
     loadFeaturedPlaylists(),
     loadFeaturedTracks(),
@@ -621,6 +698,7 @@ if (adminClient) {
   });
 
   refreshButton.addEventListener("click", loadMessages);
+  refreshGuestbook.addEventListener("click", loadAdminGuestbook);
   pronounProfileForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(pronounProfileForm);

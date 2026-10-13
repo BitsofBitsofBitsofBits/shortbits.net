@@ -32,6 +32,12 @@ is a personal project and largely a learning exercise for me.
   for the inbox and every public-content editor
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
+- A public `GUESTBOOK.LOG` with immediate publishing and authenticated Admin
+  deletion controls
+- A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
+  terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
+- A skippable first-visit boot sequence that remembers completion for the
+  current browser session and respects reduced-motion preferences
 - RGB Mode that preserves the interface accent while cycling a rainbow gradient
   around the main shell and desktop-window edges
 - Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,

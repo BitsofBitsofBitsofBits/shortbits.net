@@ -8,12 +8,12 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-28">
+    <link rel="stylesheet" href="styles.css?v=upgrade-29">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin-windows.js?v=admin-windows-1" defer></script>
+    <script src="admin-windows.js?v=admin-windows-2" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
-    <script src="admin.js?v=admin-7" defer></script>
+    <script src="admin.js?v=admin-8" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -71,6 +71,18 @@
           </div>
           <p id="inbox-status" class="form-status" role="status" aria-live="polite"></p>
           <div id="message-list" class="message-list"></div>
+        </section>
+
+        <section id="guestbook-editor" class="profile-editor" aria-labelledby="guestbook-editor-heading">
+          <div class="section-label">
+            <h2 id="guestbook-editor-heading">GUESTBOOK_LOG</h2>
+            <span>PUBLIC SIGNATURES</span>
+          </div>
+          <div class="repeatable-admin-actions">
+            <button id="refresh-guestbook" type="button">REFRESH</button>
+          </div>
+          <p id="guestbook-admin-status" class="form-status" role="status" aria-live="polite"></p>
+          <div id="guestbook-admin-list" class="message-list"></div>
         </section>
 
         <section id="pronoun-editor" class="profile-editor" aria-labelledby="pronoun-editor-heading">

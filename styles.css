@@ -1109,7 +1109,7 @@ h1 .dim {
 
 .content-file-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 10px;
 }
 
@@ -1428,7 +1428,8 @@ h1 .dim {
 .contact-actions button,
 .admin-form button,
 .inbox-actions button,
-.message-actions button {
+.message-actions button,
+.repeatable-admin-actions button {
   padding: 9px 12px;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -1446,7 +1447,9 @@ h1 .dim {
 .inbox-actions button:hover,
 .inbox-actions button:focus-visible,
 .message-actions button:hover,
-.message-actions button:focus-visible {
+.message-actions button:focus-visible,
+.repeatable-admin-actions button:hover,
+.repeatable-admin-actions button:focus-visible {
   outline: none;
   color: var(--bg);
   background: var(--accent);
@@ -2549,6 +2552,16 @@ footer span {
   --window-default-width: 820px;
 }
 
+#guestbook-window {
+  --window-default-height: 700px;
+  --window-default-width: 900px;
+}
+
+#filesystem-window {
+  --window-default-height: 620px;
+  --window-default-width: 920px;
+}
+
 .desktop-window[hidden] {
   display: none;
 }
@@ -2688,6 +2701,350 @@ footer span {
 .desktop-window.is-minimized .desktop-window-resize-handle,
 .desktop-window.is-minimized .desktop-window-resize-edge {
   display: none;
+}
+
+.guestbook-window-content {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.guestbook-form {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.45fr) minmax(260px, 1fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.guestbook-form label {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--panel-2);
+  font: inherit;
+  resize: vertical;
+}
+
+.guestbook-form input:focus,
+.guestbook-form textarea:focus {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
+.guestbook-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.guestbook-form-actions .form-status {
+  margin: 0;
+}
+
+.guestbook-form button,
+.guestbook-log-header button,
+.filesystem-toolbar button {
+  padding: 9px 12px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.guestbook-form button:hover,
+.guestbook-form button:focus-visible,
+.guestbook-log-header button:hover,
+.guestbook-log-header button:focus-visible,
+.filesystem-toolbar button:hover,
+.filesystem-toolbar button:focus-visible {
+  outline: none;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.guestbook-form button:disabled {
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: wait;
+  background: transparent;
+}
+
+.guestbook-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.guestbook-log-header h2 {
+  margin: 0;
+}
+
+.guestbook-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guestbook-list li {
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.guestbook-list header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--accent);
+}
+
+.guestbook-list time {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.guestbook-list p {
+  margin: 10px 0 0;
+  color: var(--ink);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.filesystem-window-content {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.filesystem-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filesystem-toolbar code {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filesystem-toolbar button:disabled {
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.filesystem-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(280px, 1.3fr);
+  min-height: 0;
+  border: 1px solid var(--border);
+}
+
+.filesystem-list {
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  border-right: 1px solid var(--border);
+  list-style: none;
+  scrollbar-color: var(--accent) var(--panel);
+  scrollbar-width: thin;
+}
+
+.filesystem-list button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.filesystem-list button:hover,
+.filesystem-list button:focus-visible {
+  outline: 1px solid var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.filesystem-list button span {
+  color: var(--accent);
+  font-size: 0.66rem;
+}
+
+.filesystem-list button strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filesystem-preview {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+}
+
+.filesystem-preview pre {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+html[data-boot="pending"] .shell,
+html[data-boot="pending"] .desktop-window {
+  visibility: hidden;
+}
+
+.boot-screen {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.boot-screen[hidden] {
+  display: none;
+}
+
+html[data-boot="pending"] .boot-screen[hidden] {
+  display: grid;
+}
+
+.boot-console {
+  width: min(760px, 100%);
+  padding: clamp(22px, 5vw, 46px);
+  box-sizing: border-box;
+  border: 1px solid var(--accent);
+  background: var(--panel);
+  box-shadow: 14px 16px 0 rgba(0, 0, 0, 0.32);
+}
+
+.boot-console h2 {
+  margin: 8px 0 24px;
+  color: var(--accent);
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+}
+
+.boot-log {
+  display: grid;
+  gap: 10px;
+  min-height: 190px;
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
+  list-style: none;
+  line-height: 1.5;
+}
+
+.boot-log li::before {
+  content: "> ";
+  color: var(--accent);
+}
+
+.boot-progress {
+  height: 8px;
+  margin: 22px 0 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.boot-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+  transition: width 180ms steps(3);
+}
+
+#boot-skip {
+  padding: 9px 12px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+#boot-skip:hover,
+#boot-skip:focus-visible {
+  outline: none;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .guestbook-form {
+    grid-template-columns: 1fr;
+  }
+
+  .guestbook-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filesystem-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(180px, 0.8fr) minmax(220px, 1.2fr);
+    overflow: auto;
+  }
+
+  .filesystem-list {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .boot-log {
+    min-height: 250px;
+    font-size: 0.72rem;
+  }
 }
 
 .desktop-window-resize-edge {

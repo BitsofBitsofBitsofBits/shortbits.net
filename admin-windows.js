@@ -19,6 +19,15 @@ const adminWindowModules = [
     y: 110,
   },
   {
+    sourceId: "guestbook-editor",
+    windowId: "admin-guestbook-window",
+    title: "GUESTBOOK_MODERATION.EXE",
+    label: "GUESTBOOK",
+    description: "Review and delete public signatures",
+    x: 95,
+    y: 105,
+  },
+  {
     sourceId: "playlist-editor",
     windowId: "admin-playlists-window",
     title: "PLAYLIST_EDITOR.EXE",
