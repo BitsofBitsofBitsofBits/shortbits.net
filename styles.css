@@ -639,6 +639,36 @@ h1 .dim {
   text-transform: uppercase;
 }
 
+.pronoun-window-launch {
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pronoun-window-launch:hover,
+.pronoun-window-launch:focus-visible {
+  outline: none;
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.pronoun-detail-launch {
+  padding: 0;
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pronoun-detail-launch:hover,
+.pronoun-detail-launch:focus-visible {
+  outline: none;
+  color: var(--ink);
+}
+
 .bio {
   max-width: 52ch;
   margin: 18px 0 17px;
@@ -912,6 +942,22 @@ h1 .dim {
   background: var(--panel);
 }
 
+.profile-editor {
+  margin-top: 42px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.pronoun-admin-form {
+  max-width: none;
+}
+
+.pronoun-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
 .contact-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -945,6 +991,19 @@ h1 .dim {
   font-size: 0.76rem;
 }
 
+.admin-form textarea {
+  width: 100%;
+  min-height: 78px;
+  padding: 10px 11px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--ink);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
 .contact-form input,
 .admin-form input {
   height: 38px;
@@ -960,6 +1019,12 @@ h1 .dim {
 .contact-form input:focus,
 .contact-form textarea:focus,
 .admin-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+.admin-form textarea:focus {
+  outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
@@ -2036,6 +2101,44 @@ footer span {
 .desktop-window-stats dt,
 .desktop-window-stats dd {
   margin: 0;
+}
+
+.pronoun-profile-set {
+  margin: 0 0 18px;
+  color: var(--accent) !important;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+}
+
+.pronoun-examples {
+  display: grid;
+  gap: 8px;
+}
+
+.pronoun-examples p {
+  display: grid;
+  grid-template-columns: minmax(90px, max-content) minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.pronoun-examples strong {
+  color: var(--accent);
+  font-size: 0.63rem;
+  letter-spacing: 0.08em;
+}
+
+.pronoun-examples span {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.pronoun-preferences {
+  margin-top: 22px;
 }
 
 .desktop-window-stats dt {

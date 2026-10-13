@@ -18,7 +18,7 @@ is a personal project and largely a learning exercise for me.
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
-- Optional draggable and resizable mini-windows for profile, Spotify, source, and diagnostics
+- Optional draggable and resizable mini-windows for profile, pronouns, Spotify, source, and diagnostics
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
@@ -76,6 +76,14 @@ public Discord identifier used as configuration, not a bot token.
 The site displays public presence, custom status, and activities. A Lanyard
 WebSocket also pushes Spotify track and pause changes to the player while the
 existing cached Spotify API remains the authoritative fallback.
+
+The public pronoun reference is stored in the `pronoun_profiles` Supabase table.
+Anonymous visitors can read its single profile row, while authenticated Admin
+Portal sessions can update it. Apply migrations with:
+
+```powershell
+npx --yes supabase@latest db push --linked
+```
 
 ## Deployment
 

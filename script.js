@@ -357,7 +357,7 @@ const achievementCatalog = [
   { id: "fake-system-crash", hints: ["A famously dangerous command is harmless here.", "Try deleting absolutely everything.", "Type rm -rf /."] },
   { id: "view-source", hints: ["The source is not actually classified.", "The terminal can open the repository.", "Type source or repo."] },
   { id: "page-not-found", hints: ["Not every route contains Bits.", "An actual missing page has its own reward.", "Visit a path that does not exist."] },
-  { id: "window-shopper", hints: ["Some processes prefer their own space.", "Look for OPEN and POP OUT controls.", "Open all four mini-window types."] },
+  { id: "window-shopper", hints: ["Some processes prefer their own space.", "Look for OPEN and POP OUT controls.", "Open all five mini-window types."] },
   { id: "bits-assistant", hints: ["Help arrives after prolonged hesitation.", "Remain inactive for a while.", "Wait for the Bits Assistant."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "avatar-escape", hints: ["Idle processes may wander.", "Leave the page alone for three minutes.", "Trigger avatar idle mode."] },

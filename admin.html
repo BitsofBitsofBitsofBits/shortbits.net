@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-10">
+    <link rel="stylesheet" href="styles.css?v=upgrade-11">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin.js" defer></script>
+    <script src="admin.js?v=admin-2" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -58,6 +58,32 @@
         </div>
         <p id="inbox-status" class="form-status" role="status" aria-live="polite"></p>
         <div id="message-list" class="message-list"></div>
+
+        <section class="profile-editor" aria-labelledby="pronoun-editor-heading">
+          <div class="section-label">
+            <h2 id="pronoun-editor-heading">PRONOUN_PROFILE</h2>
+            <span>PUBLIC IDENTITY REFERENCE</span>
+          </div>
+          <form id="pronoun-profile-form" class="admin-form pronoun-admin-form">
+            <label>
+              <span>DISPLAY NAME</span>
+              <input name="display_name" maxlength="80" required>
+            </label>
+            <div class="pronoun-form-grid">
+              <label><span>SUBJECT</span><input name="subject_pronoun" maxlength="30" required></label>
+              <label><span>OBJECT</span><input name="object_pronoun" maxlength="30" required></label>
+              <label><span>POSSESSIVE DETERMINER</span><input name="possessive_determiner" maxlength="30" required></label>
+              <label><span>POSSESSIVE PRONOUN</span><input name="possessive_pronoun" maxlength="30" required></label>
+              <label><span>REFLEXIVE</span><input name="reflexive_pronoun" maxlength="30" required></label>
+            </div>
+            <label><span>HONORIFICS</span><textarea name="honorifics" maxlength="200" required></textarea></label>
+            <label><span>GENDERED TERMS</span><textarea name="gendered_terms" maxlength="500" required></textarea></label>
+            <label><span>COMPLIMENTS</span><textarea name="compliments" maxlength="500" required></textarea></label>
+            <label><span>RELATIONSHIP TERMS</span><textarea name="relationship_terms" maxlength="500" required></textarea></label>
+            <p id="pronoun-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="pronoun-profile-submit" type="submit">&gt; SAVE_PROFILE</button>
+          </form>
+        </section>
       </section>
     </main>
   </body>

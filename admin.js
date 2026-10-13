@@ -7,6 +7,21 @@ const inboxStatus = document.querySelector("#inbox-status");
 const messageList = document.querySelector("#message-list");
 const refreshButton = document.querySelector("#refresh-messages");
 const logoutButton = document.querySelector("#logout-button");
+const pronounProfileForm = document.querySelector("#pronoun-profile-form");
+const pronounProfileSubmit = document.querySelector("#pronoun-profile-submit");
+const pronounAdminStatus = document.querySelector("#pronoun-admin-status");
+const pronounProfileFields = [
+  "display_name",
+  "subject_pronoun",
+  "object_pronoun",
+  "possessive_determiner",
+  "possessive_pronoun",
+  "reflexive_pronoun",
+  "honorifics",
+  "gendered_terms",
+  "compliments",
+  "relationship_terms",
+];
 
 function setAdminStatus(element, message, state = "") {
   element.textContent = message;
@@ -112,10 +127,34 @@ async function loadMessages() {
   setAdminStatus(inboxStatus, `${data.length} packet${data.length === 1 ? "" : "s"} loaded.`, "success");
 }
 
+async function loadPronounProfile() {
+  setAdminStatus(pronounAdminStatus, "Loading identity reference...");
+  const { data, error } = await adminClient
+    .from("pronoun_profiles")
+    .select(pronounProfileFields.join(", "))
+    .eq("id", "primary")
+    .single();
+
+  if (error) {
+    console.error("Unable to load pronoun profile:", error);
+    setAdminStatus(
+      pronounAdminStatus,
+      `Pronoun profile failed to load: ${error.message}`,
+      "error",
+    );
+    return;
+  }
+
+  pronounProfileFields.forEach((field) => {
+    pronounProfileForm.elements[field].value = data[field];
+  });
+  setAdminStatus(pronounAdminStatus, "Identity reference loaded.", "success");
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
-  await loadMessages();
+  await Promise.all([loadMessages(), loadPronounProfile()]);
 }
 
 function showLogin() {
@@ -162,6 +201,46 @@ if (adminClient) {
   });
 
   refreshButton.addEventListener("click", loadMessages);
+  pronounProfileForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(pronounProfileForm);
+    const profile = Object.fromEntries(
+      pronounProfileFields.map((field) => [
+        field,
+        String(formData.get(field) ?? "").trim(),
+      ]),
+    );
+
+    if (pronounProfileFields.some((field) => !profile[field])) {
+      setAdminStatus(pronounAdminStatus, "Every profile field is required.", "error");
+      return;
+    }
+
+    pronounProfileSubmit.disabled = true;
+    pronounProfileSubmit.textContent = "> SAVING...";
+    setAdminStatus(pronounAdminStatus, "Writing identity reference...");
+
+    const { error } = await adminClient
+      .from("pronoun_profiles")
+      .update({ ...profile, updated_at: new Date().toISOString() })
+      .eq("id", "primary");
+
+    pronounProfileSubmit.disabled = false;
+    pronounProfileSubmit.textContent = "> SAVE_PROFILE";
+
+    if (error) {
+      console.error("Unable to save pronoun profile:", error);
+      setAdminStatus(
+        pronounAdminStatus,
+        `Pronoun profile update failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+
+    setAdminStatus(pronounAdminStatus, "Identity reference updated.", "success");
+  });
+
   logoutButton.addEventListener("click", async () => {
     const { error } = await adminClient.auth.signOut();
 
