@@ -353,11 +353,7 @@ window.BITS_MESSAGES = [
   { text: "There is no part of my soul I would not turn over for 5 points", weight: 1 }, 
   { text: "Sam is a Sick-Sick man!", weight: 1 }, 
   { text: "Noise Makes Some", weight: 1 }, 
-  { text: "Apeture Science, we do what we must because we can.", weight: 1 
-    , format: { fontStyle: "italic" }
-  },
-  { text: "bitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbitsofbits", weight: 1, colorful: true, format: { fontWeight: "700", bold: true } }, 
-  { text: "now we're out of beta we're releasing on time...", weight: 1 }, 
+
 ];
 
 // These rotate independently in the NOW PROCESSING panel.
