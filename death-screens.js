@@ -3,6 +3,10 @@ const deathScreenStorageKey = "bits-death-screens";
 const insiderToggle = document.querySelector("#settings-insider-toggle");
 const insiderStatus = document.querySelector("#settings-insider-status");
 const insiderWatermark = document.querySelector("#insider-watermark");
+const systemStatusTrigger = document.querySelector("#system-status-trigger");
+const kernelPanic = document.querySelector("#kernel-panic");
+const kernelPanicLog = document.querySelector("#kernel-panic-log");
+const kernelPanicCountdown = document.querySelector("#kernel-panic-countdown");
 const blackScreen = document.querySelector("#black-screen");
 const blackScreenProgress = document.querySelector("#black-screen-progress");
 const blackScreenStatus = document.querySelector("#black-screen-status");
@@ -18,10 +22,24 @@ const greenStopCodes = [
   "DOCUMENTATION_PENDING",
   "PRODUCTION_TESTING_ENABLED",
 ];
+const kernelPanicLines = [
+  "Debugger called: <panic>",
+  "Memory ID: 0xB17B17 // confidence level: optimistic",
+  "OS release type: User (allegedly)",
+  "OS version: BitOS 13.37 (Probably Final)",
+  "Kernel version: Darwin Bits Kernel 23.0.0 // RELEASE_TINY",
+  "BSD process name corresponding to current thread: presence.exe",
+  "Kernel extensions in backtrace: net.shortbits.questionablecss",
+  "Attempting to sync disks... disks have requested personal space",
+];
 
 let insiderEnabled = localStorage.getItem(insiderStorageKey) === "canary";
 let insiderWindowLaunches = 0;
 let greenCrashPending = false;
+let kernelPanicClicks = 0;
+let kernelPanicTimer;
+let kernelPanicRecoveryTimer;
+let kernelPanicPreviousFocus;
 let greenScreenTimer;
 let greenScreenPreviousFocus;
 let blackScreenTimer;
@@ -92,7 +110,7 @@ function markDeathScreenSurvived(screen) {
 
 function isDeathScreenActive() {
   return document.body.matches(
-    ".is-shutdown, .is-red-screen, .is-black-screen, .is-green-screen, .is-black-screen-staging",
+    ".is-shutdown, .is-red-screen, .is-kernel-panic, .is-black-screen, .is-green-screen, .is-black-screen-staging",
   );
 }
 
@@ -145,6 +163,51 @@ function restoreDeathScreenFocus(previousFocus, fallback) {
     ? previousFocus
     : fallback;
   recoveryFocus?.focus();
+}
+
+function recoverFromKernelPanic() {
+  window.clearInterval(kernelPanicTimer);
+  window.clearTimeout(kernelPanicRecoveryTimer);
+  kernelPanic.hidden = true;
+  document.body.classList.remove("is-kernel-panic");
+  document.title = "BitsofBitsofBits // BITSOFWEBSITE";
+  window.BITS_ACHIEVEMENTS.unlock(
+    "kernel-panic",
+    "PANIC! AT THE KERNEL",
+    "UNIX-LIKE FAILURE SURVIVED",
+  );
+  restoreDeathScreenFocus(kernelPanicPreviousFocus, systemStatusTrigger);
+}
+
+function triggerKernelPanic() {
+  if (isDeathScreenActive()) {
+    return;
+  }
+
+  disarmEmptyDesktop();
+  kernelPanicClicks = 0;
+  kernelPanicPreviousFocus = document.activeElement;
+  kernelPanicCountdown.textContent = "8";
+  kernelPanicLog.replaceChildren();
+  document.body.classList.add("is-kernel-panic");
+  document.title = "KERNEL PANIC // BIT_ASSERTION_FAILED";
+  kernelPanic.hidden = false;
+  kernelPanic.focus();
+
+  let remainingSeconds = 8;
+  let lineIndex = 0;
+  kernelPanicTimer = window.setInterval(() => {
+    const line = document.createElement("li");
+    line.textContent = kernelPanicLines[lineIndex];
+    kernelPanicLog.append(line);
+    lineIndex += 1;
+    remainingSeconds -= 1;
+    kernelPanicCountdown.textContent = String(remainingSeconds);
+    if (remainingSeconds <= 0) {
+      window.clearInterval(kernelPanicTimer);
+      kernelPanicRecoveryTimer = window.setTimeout(recoverFromKernelPanic, 450);
+    }
+  }, 1000);
 }
 
 function recoverFromGreenScreen() {
@@ -267,6 +330,21 @@ function triggerBlackScreen() {
 
 insiderToggle.addEventListener("click", () => {
   setInsiderEnabled(!insiderEnabled);
+});
+
+systemStatusTrigger.addEventListener("click", () => {
+  if (isDeathScreenActive()) {
+    return;
+  }
+  kernelPanicClicks += 1;
+  systemStatusTrigger.classList.remove("is-status-probed");
+  window.requestAnimationFrame(() => {
+    systemStatusTrigger.classList.add("is-status-probed");
+  });
+  if (kernelPanicClicks >= 7) {
+    systemStatusTrigger.classList.remove("is-status-probed");
+    triggerKernelPanic();
+  }
 });
 
 window.addEventListener("desktop-window:opened", () => {

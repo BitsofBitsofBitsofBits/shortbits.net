@@ -18,7 +18,8 @@ is a personal project and largely a learning exercise for me.
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs,
   including Blue, Red, Black, and Insider Green death screens with a
-  four-color completion achievement
+  four-color completion achievement, plus an automatically recovering
+  Kernel Panic diagnostic dump
 - Adaptive performance mode for constrained or slow devices
 - Optional draggable mini-windows for profile, pronouns, Spotify, source,
   diagnostics, and settings that stay viewport-safe, resize from every edge

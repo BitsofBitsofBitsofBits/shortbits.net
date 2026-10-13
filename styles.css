@@ -342,6 +342,7 @@ body {
 
 body.is-shutdown,
 body.is-red-screen,
+body.is-kernel-panic,
 body.is-black-screen,
 body.is-green-screen,
 body.is-black-screen-staging {
@@ -906,7 +907,27 @@ html.is-page-hidden * {
   justify-content: flex-start;
   align-items: center;
   gap: 7px;
+  padding: 0;
+  border: 0;
   color: var(--accent);
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: help;
+}
+
+.system-status:hover,
+.system-status:focus-visible {
+  outline: none;
+  color: var(--ink);
+}
+
+.system-status:focus-visible {
+  box-shadow: inset 0 -2px var(--accent);
+}
+
+.system-status.is-status-probed {
+  animation: status-probed 220ms steps(2);
 }
 
 .status-dot {
@@ -2563,6 +2584,76 @@ footer span {
   letter-spacing: 0.04em;
 }
 
+.kernel-panic {
+  z-index: 165;
+  place-items: start;
+  padding: clamp(24px, 5vw, 70px);
+  color: #e8eceb;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(255, 255, 255, 0.018) 4px,
+      transparent 5px
+    ),
+    #080a0b;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  animation: kernel-panic-arrival 240ms steps(3);
+}
+
+.kernel-panic-content {
+  width: min(1100px, 100%);
+}
+
+.kernel-panic h2 {
+  margin: 24px 0 10px;
+  color: #fff;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.kernel-panic-lead {
+  max-width: none;
+  margin: 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #5e6663;
+  color: #fff;
+  font-size: clamp(0.7rem, 1.8vw, 0.88rem);
+  overflow-wrap: anywhere;
+}
+
+.kernel-panic-content > p:not(.kernel-panic-lead, .kernel-panic-recovery) {
+  color: #aeb6b3;
+  font-size: clamp(0.68rem, 1.7vw, 0.82rem);
+}
+
+.kernel-panic-log {
+  min-height: 18.5em;
+  margin: 28px 0;
+  padding: 0;
+  color: #d4dad8;
+  font-size: clamp(0.62rem, 1.6vw, 0.78rem);
+  line-height: 1.75;
+  list-style: none;
+}
+
+.kernel-panic-log li::before {
+  color: #77807d;
+  content: "[" counter(list-item, decimal-leading-zero) "] ";
+}
+
+.kernel-panic-recovery {
+  padding-top: 16px;
+  border-top: 1px solid #5e6663;
+  color: #aeb6b3;
+  font-size: clamp(0.68rem, 1.7vw, 0.82rem);
+}
+
+.kernel-panic-recovery strong {
+  color: #fff;
+}
+
 .black-screen {
   z-index: 160;
   background:
@@ -2654,6 +2745,24 @@ body.is-black-screen-staging .binary-rain {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes kernel-panic-arrival {
+  from {
+    opacity: 0;
+    filter: brightness(2);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@keyframes status-probed {
+  50% {
+    color: #ffdd65;
+    transform: translateX(2px);
   }
 }
 

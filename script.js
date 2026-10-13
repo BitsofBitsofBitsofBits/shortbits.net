@@ -378,6 +378,7 @@ const achievementCatalog = [
   { id: "black-screen", hints: ["An empty desktop can become emptier.", "Close the last desktop window.", "Then knock five times on the empty background."] },
   { id: "green-screen", hints: ["Stable software is optional.", "Advanced update options contain a preview channel.", "Join Canary Bits, then open three windows."] },
   { id: "failure-spectrum", hints: ["Technical difficulty comes in several colors.", "Blue, Red, Black, and Green are all available.", "Survive all four death screens."] },
+  { id: "kernel-panic", hints: ["The online indicator invites unnecessary confidence.", "Check the system status repeatedly.", "Click the ONLINE status seven times."] },
   { id: "fake-update", hints: ["Everything needs an update eventually.", "The terminal knows update.", "Type update."] },
   { id: "gravity", hints: ["Physics is configurable.", "Restore a familiar force.", "Type gravity."] },
   { id: "antigravity", hints: ["Physics is optional.", "Try removing a familiar force.", "Type antigravity."] },

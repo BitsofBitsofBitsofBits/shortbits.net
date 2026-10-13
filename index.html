@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-39">
+    <link rel="stylesheet" href="styles.css?v=upgrade-40">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
@@ -38,10 +38,10 @@
     <script src="analytics.js?v=analytics-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-28" defer></script>
+    <script src="script.js?v=upgrade-29" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
-    <script src="death-screens.js?v=death-screens-1" defer></script>
+    <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-1" defer></script>
     <script src="about.js?v=about-3" defer></script>
     <script src="pronouns.js?v=pronouns-1" defer></script>
@@ -77,10 +77,10 @@
 
     <main id="interface-shell" class="shell">
       <header class="system-bar" aria-label="System status">
-        <div class="system-status">
+        <button id="system-status-trigger" class="system-status" type="button" aria-label="System status online">
           <span class="status-dot"></span>
           <span id="status-text">ONLINE</span>
-        </div>
+        </button>
         <p id="process-title">~/internet/presence.exe</p>
         <div class="window-controls">
           <button id="minimize-button" class="window-button minimize-button" type="button" aria-label="Minimize interface">
@@ -1131,6 +1131,30 @@
       <span id="achievement-label">ACHIEVEMENT UNLOCKED</span>
       <strong id="achievement-message">TOO MANY BITS</strong>
     </div>
+
+    <section
+      id="kernel-panic"
+      class="death-screen kernel-panic"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="kernel-panic-heading"
+      tabindex="-1"
+      hidden
+    >
+      <div class="kernel-panic-content">
+        <p class="kernel-panic-lead">
+          panic(cpu 0 caller 0xffffff800b17b175):
+          BIT_ASSERTION_FAILED: expected 1 or 0, received "probably"
+        </p>
+        <h2 id="kernel-panic-heading">KERNEL PANIC</h2>
+        <p>The kernel encountered a Bit it could not emotionally process.</p>
+        <ol id="kernel-panic-log" class="kernel-panic-log" aria-live="polite"></ol>
+        <p class="kernel-panic-recovery">
+          Automatic restart in <strong id="kernel-panic-countdown">8</strong> seconds.<br>
+          Please do not turn off the internet while it is already off.
+        </p>
+      </div>
+    </section>
 
     <section
       id="black-screen"
