@@ -340,7 +340,8 @@ body {
   line-height: 1.5;
 }
 
-body.is-shutdown {
+body.is-shutdown,
+body.is-red-screen {
   overflow: hidden;
 }
 
@@ -2324,6 +2325,133 @@ footer span {
   border-bottom: 0;
 }
 
+.red-screen {
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: clamp(26px, 7vw, 90px);
+  overflow: auto;
+  color: #fff;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(255, 255, 255, 0.035) 4px,
+      transparent 6px
+    ),
+    radial-gradient(circle at 24% 18%, #e93535 0, #a20f18 48%, #5a0009 100%);
+  box-shadow: inset 0 0 20vw rgba(35, 0, 0, 0.5);
+  animation: red-screen-boot 420ms steps(6), red-screen-flicker 4s steps(1) 600ms infinite;
+}
+
+.red-screen[hidden] {
+  display: none;
+}
+
+.red-screen-content {
+  width: min(820px, 100%);
+}
+
+.red-screen-code {
+  margin: 0 0 26px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+  letter-spacing: 0.14em;
+}
+
+.red-screen-face {
+  font-size: clamp(3rem, 14vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 5px 0 rgba(255, 215, 215, 0.22), -4px 0 rgba(40, 0, 0, 0.4);
+}
+
+.red-screen h2 {
+  margin: 24px 0 10px;
+  font-size: clamp(1.5rem, 6vw, 3.5rem);
+  letter-spacing: 0.04em;
+}
+
+.red-screen-content > p:not(.red-screen-code, .red-screen-recovery) {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.7;
+}
+
+.red-screen-diagnostics {
+  display: grid;
+  gap: 8px;
+  margin: 28px 0;
+}
+
+.red-screen-diagnostics div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.4fr) minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.red-screen-diagnostics dt {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.red-screen-diagnostics dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.red-screen-recovery {
+  margin: 0 0 12px;
+  line-height: 1.7;
+}
+
+.red-screen-meter {
+  width: min(520px, 100%);
+  height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(35, 0, 0, 0.28);
+}
+
+.red-screen-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #fff;
+  transition: width 180ms steps(3);
+}
+
+@keyframes red-screen-boot {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: brightness(2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+}
+
+@keyframes red-screen-flicker {
+  18% {
+    filter: saturate(1.1) brightness(1.04);
+  }
+  19%,
+  76% {
+    filter: none;
+  }
+  77% {
+    filter: contrast(1.08);
+  }
+}
+
 .shutdown-screen {
   position: fixed;
   z-index: 70;
@@ -4071,6 +4199,11 @@ html[data-boot="pending"] .boot-screen[hidden] {
     top: 10px;
     right: 10px;
     width: calc(100vw - 20px);
+  }
+
+  .red-screen-diagnostics div {
+    grid-template-columns: 1fr;
+    gap: 3px;
   }
 
   .boot-log {

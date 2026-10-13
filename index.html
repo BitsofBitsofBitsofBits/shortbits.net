@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-33">
+    <link rel="stylesheet" href="styles.css?v=upgrade-34">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
@@ -38,7 +38,7 @@
     <script src="analytics.js?v=analytics-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-25" defer></script>
+    <script src="script.js?v=upgrade-26" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
     <script src="content.js?v=content-1" defer></script>
@@ -1112,6 +1112,35 @@
       <span id="achievement-label">ACHIEVEMENT UNLOCKED</span>
       <strong id="achievement-message">TOO MANY BITS</strong>
     </div>
+
+    <section
+      id="red-screen"
+      class="red-screen"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="red-screen-heading"
+      tabindex="-1"
+      hidden
+    >
+      <div class="red-screen-content">
+        <p class="red-screen-code">FATAL_EXCEPTION // BIT_OVERFLOW</p>
+        <div class="red-screen-face" aria-hidden="true">:(</div>
+        <h2 id="red-screen-heading">TOO MANY BITS</h2>
+        <p>The username exceeded the maximum safe quantity of Bits and the internet presence has stopped to prevent further recursion.</p>
+        <dl class="red-screen-diagnostics">
+          <div><dt>STOP CODE</dt><dd>BIT_OF_BIT_OF_BIT_OVERFLOW</dd></div>
+          <div><dt>FAULTING PROCESS</dt><dd>username-expander.exe</dd></div>
+          <div><dt>ADDED BITS</dt><dd>10 / 10</dd></div>
+        </dl>
+        <p class="red-screen-recovery" aria-live="assertive">
+          Collecting loose Bits: <strong id="red-screen-progress">0%</strong><br>
+          Automatic reboot in <strong id="red-screen-countdown">5</strong> seconds.
+        </p>
+        <div class="red-screen-meter" aria-hidden="true">
+          <span id="red-screen-meter-fill"></span>
+        </div>
+      </div>
+    </section>
 
     <section id="shutdown-screen" class="shutdown-screen" aria-live="polite" hidden>
       <p id="shutdown-code" class="shutdown-code">STOP CODE: PROCESS_EXITED_WITH_CODE_0</p>

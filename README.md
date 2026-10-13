@@ -16,7 +16,9 @@ is a personal project and largely a learning exercise for me.
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard
 - Private contact form backed by Supabase
-- Persistent local achievements and a large collection of Easter eggs
+- Persistent local achievements and a large collection of Easter eggs,
+  including an automatically recovering Red Screen of Death after username
+  overflow
 - Adaptive performance mode for constrained or slow devices
 - Optional draggable mini-windows for profile, pronouns, Spotify, source,
   diagnostics, and settings that stay viewport-safe, resize from every edge

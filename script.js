@@ -200,6 +200,10 @@ const avatarButton = document.querySelector("#avatar-button");
 const avatarReaction = document.querySelector("#avatar-reaction");
 const avatarDeparture = document.querySelector("#avatar-departure");
 const identityName = document.querySelector("#identity-name");
+const redScreen = document.querySelector("#red-screen");
+const redScreenProgress = document.querySelector("#red-screen-progress");
+const redScreenCountdown = document.querySelector("#red-screen-countdown");
+const redScreenMeterFill = document.querySelector("#red-screen-meter-fill");
 const interactiveSpotifyArtwork = document.querySelector("#spotify-artwork");
 const achievement = document.querySelector("#achievement");
 const achievementLabel = document.querySelector("#achievement-label");
@@ -370,6 +374,7 @@ const achievementCatalog = [
   { id: "access-denied", hints: ["The avatar guards its context.", "Try asking it for a menu.", "Right-click the avatar."] },
   { id: "infinite-username", hints: ["The username can contain more username.", "Hold the repeated name.", "Press and hold BitsofBitsofBits."] },
   { id: "more-bits", hints: ["Rapid repetition reveals more.", "The username responds to impatient clicking.", "Triple-click BitsofBitsofBits."] },
+  { id: "red-screen", hints: ["A username can only contain so many Bits.", "Triple-clicking adds another segment.", "Add ten extra Bits without refreshing."] },
   { id: "fake-update", hints: ["Everything needs an update eventually.", "The terminal knows update.", "Type update."] },
   { id: "gravity", hints: ["Physics is configurable.", "Restore a familiar force.", "Type gravity."] },
   { id: "antigravity", hints: ["Physics is optional.", "Try removing a familiar force.", "Type antigravity."] },
@@ -1493,6 +1498,76 @@ let identityHoldTimer;
 let identityExpansionTimer;
 let heldBitCount = 0;
 let didHoldIdentity = false;
+let tripleBitCount = 0;
+let redScreenTimer;
+let redScreenPreviousFocus;
+
+function resetIdentityName() {
+  const fragments = ["Bits", "of", "Bits", "of", "Bits"];
+  identityName.replaceChildren(
+    ...fragments.map((fragment, index) => {
+      const span = document.createElement("span");
+      span.textContent = fragment;
+      if (index % 2 === 1) {
+        span.className = "dim";
+      }
+      return span;
+    }),
+  );
+  identityName.classList.remove("is-expanding", "is-collapsed-bits");
+  identityName.setAttribute(
+    "aria-label",
+    "BitsofBitsofBits. Hold for more bits.",
+  );
+}
+
+function recoverFromRedScreen() {
+  window.clearInterval(redScreenTimer);
+  redScreen.hidden = true;
+  document.body.classList.remove("is-red-screen");
+  document.title = "BitsofBitsofBits // BITSOFWEBSITE";
+  tripleBitCount = 0;
+  heldBitCount = 0;
+  didHoldIdentity = false;
+  resetIdentityName();
+  showAchievement(
+    "BIT OVERFLOW RECOVERED",
+    "RED SCREEN SURVIVED",
+    3600,
+    "red-screen",
+  );
+  const recoveryFocus = redScreenPreviousFocus instanceof HTMLElement
+    && document.contains(redScreenPreviousFocus)
+    && redScreenPreviousFocus !== document.body
+    ? redScreenPreviousFocus
+    : identityName;
+  recoveryFocus.focus();
+}
+
+function triggerRedScreen() {
+  window.clearTimeout(identityHoldTimer);
+  window.clearInterval(identityExpansionTimer);
+  redScreenPreviousFocus = document.activeElement;
+  let remainingSeconds = 5;
+  let progress = 0;
+  redScreenProgress.textContent = "0%";
+  redScreenCountdown.textContent = String(remainingSeconds);
+  redScreenMeterFill.style.width = "0%";
+  document.body.classList.add("is-red-screen");
+  document.title = "FATAL ERROR // TOO MANY BITS";
+  redScreen.hidden = false;
+  redScreen.focus();
+  redScreenTimer = window.setInterval(() => {
+    remainingSeconds -= 1;
+    progress = Math.min(100, progress + 20);
+    redScreenProgress.textContent = `${progress}%`;
+    redScreenCountdown.textContent = String(Math.max(0, remainingSeconds));
+    redScreenMeterFill.style.width = `${progress}%`;
+    if (remainingSeconds <= 0) {
+      recoverFromRedScreen();
+    }
+  }, 1000);
+}
 
 function appendIdentityBits() {
   const separator = document.createElement("span");
@@ -1564,12 +1639,16 @@ identityName.addEventListener("click", (event) => {
   }
 
   appendIdentityBits();
+  tripleBitCount += 1;
   showAchievement(
     "MORE BITS HAVE BEEN ADDED",
     "ACHIEVEMENT UNLOCKED",
     3200,
     "more-bits",
   );
+  if (tripleBitCount === 10) {
+    window.setTimeout(triggerRedScreen, 260);
+  }
 });
 
 let vinylSpeed = 2.4;
