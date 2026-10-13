@@ -93,5 +93,6 @@ jobs:
             sitemap.xml \
             source.html \
             styles.css \
+            useless.html \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"
