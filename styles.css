@@ -1922,6 +1922,7 @@ footer span {
   z-index: 30;
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
   width: min(420px, calc(100vw - 32px));
   min-width: 280px;
   min-height: 120px;
@@ -2230,8 +2231,9 @@ footer span {
   letter-spacing: 0.08em;
 }
 
-.spotify-history-subheading {
-  margin-top: 20px !important;
+.spotify-ranking-columns {
+  display: grid;
+  gap: 20px;
 }
 
 .spotify-history-list {
@@ -2308,6 +2310,61 @@ footer span {
   margin: 12px 0 0;
   color: var(--muted);
   font-size: 0.62rem;
+}
+
+@container (min-width: 700px) {
+  .desktop-window-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 22px;
+  }
+
+  .pronoun-examples {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 22px;
+  }
+
+  .desktop-window-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .desktop-window-actions a,
+  .desktop-window-actions button {
+    min-width: 0;
+  }
+
+  .spotify-ranking-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@container (min-width: 900px) {
+  .spotify-window-content {
+    display: grid;
+    grid-template:
+      "now rankings" auto
+      "recent rankings" 1fr
+      / minmax(260px, 0.75fr) minmax(0, 1.5fr);
+    gap: 22px 28px;
+    align-items: start;
+  }
+
+  .spotify-window-content > .desktop-spotify-content {
+    grid-area: now;
+  }
+
+  .spotify-recent-section {
+    grid-area: recent;
+  }
+
+  .spotify-rankings-section {
+    grid-area: rankings;
+  }
+
+  .spotify-window-content > .spotify-history-section {
+    margin-top: 0;
+  }
 }
 
 .desktop-spotify-content > div {
