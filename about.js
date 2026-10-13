@@ -12,11 +12,6 @@ const operatorTimeFormatter = new Intl.DateTimeFormat("en-US", {
   second: "2-digit",
   timeZoneName: "short",
 });
-const operatorHourFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: operatorTimeZone,
-  hour: "numeric",
-  hourCycle: "h23",
-});
 
 const operatorFacts = [
   "Has opinions about semicolons, but they are still compiling.",
@@ -30,30 +25,37 @@ const operatorFacts = [
   "Responds to both Caleb and unexpected production incidents.",
   "Primary debugging technique: stare at it until it confesses.",
 ];
+const operatorStates = [
+  "FUNCTIONING WITHIN PARAMETERS",
+  "RECOMPILING PERSONALITY",
+  "PROCESSING SIDE QUESTS",
+  "AWAITING CAFFEINE INTERRUPT",
+  "RUNNING ON OPTIMISTIC ASSUMPTIONS",
+  "BACKGROUND TASKS MULTIPLYING",
+  "CACHE FULL OF FUN FACTS",
+  "MAINTENANCE WINDOW IGNORED",
+  "TOUCHING GRASS DRIVER NOT FOUND",
+  "SYNCHRONIZING LOOSE BITS",
+  "UPTIME TECHNICALLY IMPRESSIVE",
+  "ONE TAB AWAY FROM STABILITY",
+];
 
 let lastOperatorFact = -1;
-
-function getOperatorState(hour) {
-  if (hour < 6) {
-    return "SHOULD BE ASLEEP";
-  }
-  if (hour < 9) {
-    return "BOOTING WITH CAFFEINE";
-  }
-  if (hour < 17) {
-    return "FUNCTIONING WITHIN PARAMETERS";
-  }
-  if (hour < 22) {
-    return "AFTER-HOURS PROCESSING";
-  }
-  return "CONSIDERING SLEEP MODE";
-}
+let lastOperatorState = -1;
 
 function updateOperatorClock() {
   const now = new Date();
-  const operatorHour = Number(operatorHourFormatter.format(now));
   operatorLocalTime.textContent = operatorTimeFormatter.format(now);
-  operatorState.textContent = getOperatorState(operatorHour);
+}
+
+function randomizeOperatorState() {
+  let nextState = Math.floor(Math.random() * operatorStates.length);
+  if (operatorStates.length > 1 && nextState === lastOperatorState) {
+    nextState = (nextState + 1) % operatorStates.length;
+  }
+
+  lastOperatorState = nextState;
+  operatorState.textContent = operatorStates[nextState];
 }
 
 function createPersonalityChecksum(value) {
@@ -78,5 +80,12 @@ operatorQueryButton.addEventListener("click", () => {
 });
 
 personalityChecksum.textContent = createPersonalityChecksum("BitsofBitsofBits");
+randomizeOperatorState();
 updateOperatorClock();
 window.setInterval(updateOperatorClock, 1_000);
+
+window.addEventListener("desktop-window:opened", (event) => {
+  if (event.detail?.windowId === "about-window") {
+    randomizeOperatorState();
+  }
+});

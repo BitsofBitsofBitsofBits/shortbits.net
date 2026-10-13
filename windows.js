@@ -91,6 +91,9 @@ function openDesktopWindow(windowElement, launcher = null) {
 
   focusDesktopWindow(windowElement);
   updateDesktopWindowCount();
+  window.dispatchEvent(new CustomEvent("desktop-window:opened", {
+    detail: { windowId: windowElement.id },
+  }));
   openedDesktopWindowIds.add(windowElement.id);
   if (openedDesktopWindowIds.size === desktopWindows.length) {
     window.BITS_EASTER_EGGS?.showAchievement(
