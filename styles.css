@@ -1853,7 +1853,7 @@ footer span {
 }
 
 .shell.is-maximized {
-  width: min(1120px, calc(100% - 32px));
+  width: min(1280px, calc(100% - 32px));
 }
 
 .shell.is-minimized {
