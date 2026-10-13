@@ -95,6 +95,11 @@ range covers several years and is its closest available equivalent to all-time
 history. The response is cached in the browser, Edge Function, and CDN for five
 minutes, so it does not change the now-playing poll rate.
 
+Five manually curated playlist slots are stored in
+`spotify_featured_playlists` and edited through the authenticated Admin Portal.
+They load with the popup from Supabase's public read-only API and do not create
+additional Spotify API requests.
+
 The public pronoun reference is stored in the `pronoun_profiles` Supabase table.
 Anonymous visitors can read its single profile row, while authenticated Admin
 Portal sessions can update it. Apply migrations with:

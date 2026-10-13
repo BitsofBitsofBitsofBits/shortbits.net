@@ -10,6 +10,7 @@ const spotifyLink = document.querySelector("#spotify-track-link");
 const spotifyRecentTrack = document.querySelector("#spotify-recent-track");
 const spotifyTopTracks = document.querySelector("#spotify-top-tracks");
 const spotifyAllTimeTracks = document.querySelector("#spotify-all-time-tracks");
+const spotifyFeaturedPlaylists = document.querySelector("#spotify-featured-playlists");
 const spotifyHistoryStatus = document.querySelector("#spotify-history-status");
 const spotifyRefreshIntervalMs = 30000;
 const spotifyHistoryRefreshIntervalMs = 300_000;
@@ -23,6 +24,8 @@ let hasLanyardSpotifyPlayback = false;
 let lastLanyardSpotifyUpdateAt = 0;
 let spotifyHistoryLoadedAt = 0;
 let spotifyHistoryRequestInFlight = null;
+let featuredPlaylistsLoadedAt = 0;
+let featuredPlaylistsRequestInFlight = null;
 let playbackClock = {
   durationMs: 0,
   isPlaying: false,
@@ -142,10 +145,6 @@ function renderSpotifyPlayback(playback) {
 
   function renderSpotifyHistory(history) {
     const recentTrack = history.recentTrack;
-    const topTracks = Array.isArray(history.topTracks) ? history.topTracks : [];
-    const allTimeTracks = Array.isArray(history.allTimeTracks)
-      ? history.allTimeTracks
-      : [];
 
     spotifyRecentTrack.replaceChildren();
     if (recentTrack && isValidHistoryTrack(recentTrack)) {
@@ -159,6 +158,117 @@ function renderSpotifyPlayback(playback) {
       empty.textContent = "No recently played track was returned.";
       spotifyRecentTrack.append(empty);
     }
+
+    renderSpotifyRankings(history);
+  }
+
+  function isValidFeaturedPlaylist(playlist) {
+      return playlist
+        && Number.isInteger(playlist.position)
+        && playlist.position >= 1
+        && playlist.position <= 5
+        && typeof playlist.title === "string"
+        && playlist.title.trim().length > 0
+        && playlist.title.length <= 100
+        && typeof playlist.spotify_url === "string"
+        && /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/.test(
+          playlist.spotify_url,
+        );
+    }
+
+  function renderFeaturedPlaylists(playlists) {
+      spotifyFeaturedPlaylists.replaceChildren();
+      playlists
+        .filter((playlist) => playlist.enabled && isValidFeaturedPlaylist(playlist))
+        .sort((first, second) => first.position - second.position)
+        .slice(0, 5)
+        .forEach((playlist) => {
+          const item = document.createElement("li");
+          item.value = playlist.position;
+          item.append(createSpotifyHistoryTrack({
+            title: playlist.title.trim(),
+            artists: ["CURATED PLAYLIST"],
+            collection: null,
+            albumArt: null,
+            spotifyUrl: playlist.spotify_url,
+          }));
+          spotifyFeaturedPlaylists.append(item);
+        });
+
+      if (!spotifyFeaturedPlaylists.children.length) {
+        const empty = document.createElement("li");
+        empty.textContent = "Playlist slots are awaiting curation.";
+        spotifyFeaturedPlaylists.append(empty);
+      }
+    }
+
+  async function loadFeaturedPlaylists() {
+      if (
+        featuredPlaylistsRequestInFlight
+        || Date.now() - featuredPlaylistsLoadedAt < spotifyHistoryRefreshIntervalMs
+      ) {
+        return featuredPlaylistsRequestInFlight;
+      }
+
+      const { url, anonKey } = window.SUPABASE_CONFIG || {};
+      if (!url || !anonKey) {
+        spotifyFeaturedPlaylists.replaceChildren();
+        const error = document.createElement("li");
+        error.textContent = "Featured playlists are not configured.";
+        spotifyFeaturedPlaylists.append(error);
+        return;
+      }
+
+      featuredPlaylistsRequestInFlight = (async () => {
+        try {
+          const response = await fetch(
+            `${url.replace(/\/$/, "")}/rest/v1/spotify_featured_playlists?select=position,title,spotify_url,enabled&order=position.asc`,
+            {
+              headers: {
+                apikey: anonKey,
+                Authorization: `Bearer ${anonKey}`,
+              },
+            },
+          );
+          const playlists = await response.json();
+          if (!response.ok) {
+            throw new Error(
+              playlists.message || `Featured playlists returned ${response.status}.`,
+            );
+          }
+          if (
+            !Array.isArray(playlists)
+            || playlists.some((playlist) => (
+              typeof playlist.enabled !== "boolean"
+              || (
+                playlist.enabled
+                && !isValidFeaturedPlaylist(playlist)
+              )
+            ))
+          ) {
+            throw new Error("Featured playlist response is malformed.");
+          }
+          renderFeaturedPlaylists(playlists);
+          featuredPlaylistsLoadedAt = Date.now();
+        } catch (error) {
+          console.error("Unable to load featured playlists:", error);
+          spotifyFeaturedPlaylists.replaceChildren();
+          const unavailable = document.createElement("li");
+          unavailable.textContent = "Featured playlist signal temporarily unavailable.";
+          spotifyFeaturedPlaylists.append(unavailable);
+        } finally {
+          featuredPlaylistsRequestInFlight = null;
+        }
+      })();
+
+      return featuredPlaylistsRequestInFlight;
+    }
+
+  function renderSpotifyRankings(history) {
+    const topTracks = Array.isArray(history.topTracks) ? history.topTracks : [];
+    const allTimeTracks = Array.isArray(history.allTimeTracks)
+      ? history.allTimeTracks
+      : [];
 
     spotifyTopTracks.replaceChildren();
     topTracks.filter(isValidHistoryTrack).slice(0, 5).forEach((track, index) => {
@@ -448,6 +558,7 @@ window.addEventListener("lanyard:spotify", handleLanyardSpotify);
 window.addEventListener("desktop-window:opened", (event) => {
   if (event.detail?.windowId === "spotify-window") {
     loadSpotifyHistory();
+    loadFeaturedPlaylists();
   }
 });
 if (window.LANYARD_SPOTIFY) {

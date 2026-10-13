@@ -10,6 +10,11 @@ const logoutButton = document.querySelector("#logout-button");
 const pronounProfileForm = document.querySelector("#pronoun-profile-form");
 const pronounProfileSubmit = document.querySelector("#pronoun-profile-submit");
 const pronounAdminStatus = document.querySelector("#pronoun-admin-status");
+const playlistForm = document.querySelector("#playlist-form");
+const playlistSubmit = document.querySelector("#playlist-submit");
+const playlistAdminStatus = document.querySelector("#playlist-admin-status");
+const spotifyPlaylistUrlPattern =
+  /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/;
 const pronounProfileFields = [
   "display_name",
   "subject_pronoun",
@@ -151,10 +156,43 @@ async function loadPronounProfile() {
   setAdminStatus(pronounAdminStatus, "Identity reference loaded.", "success");
 }
 
+async function loadFeaturedPlaylists() {
+  setAdminStatus(playlistAdminStatus, "Loading curated playlist slots...");
+  const { data, error } = await adminClient
+    .from("spotify_featured_playlists")
+    .select("position, title, spotify_url, enabled")
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Unable to load featured playlists:", error);
+    setAdminStatus(
+      playlistAdminStatus,
+      `Featured playlists failed to load: ${error.message}`,
+      "error",
+    );
+    return;
+  }
+
+  for (let position = 1; position <= 5; position += 1) {
+    const playlist = data.find((entry) => entry.position === position);
+    playlistForm.elements[`playlist_${position}_title`].value =
+      playlist?.title ?? "";
+    playlistForm.elements[`playlist_${position}_url`].value =
+      playlist?.spotify_url ?? "";
+    playlistForm.elements[`playlist_${position}_enabled`].checked =
+      playlist?.enabled === true;
+  }
+  setAdminStatus(playlistAdminStatus, "Curated playlist slots loaded.", "success");
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
-  await Promise.all([loadMessages(), loadPronounProfile()]);
+  await Promise.all([
+    loadMessages(),
+    loadPronounProfile(),
+    loadFeaturedPlaylists(),
+  ]);
 }
 
 function showLogin() {
@@ -239,6 +277,72 @@ if (adminClient) {
     }
 
     setAdminStatus(pronounAdminStatus, "Identity reference updated.", "success");
+  });
+
+  playlistForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(playlistForm);
+    const playlists = Array.from({ length: 5 }, (_, index) => {
+      const position = index + 1;
+      return {
+        position,
+        title: String(formData.get(`playlist_${position}_title`) ?? "").trim(),
+        spotify_url: String(
+          formData.get(`playlist_${position}_url`) ?? "",
+        ).trim(),
+        enabled: formData.has(`playlist_${position}_enabled`),
+      };
+    });
+    const invalidPlaylist = playlists.find((playlist) => (
+      (
+        playlist.enabled
+        && (!playlist.title || !playlist.spotify_url)
+      )
+      || (
+        playlist.spotify_url
+        && !spotifyPlaylistUrlPattern.test(playlist.spotify_url)
+      )
+    ));
+    if (invalidPlaylist) {
+      setAdminStatus(
+        playlistAdminStatus,
+        `Slot ${invalidPlaylist.position} needs a title and valid Spotify playlist URL.`,
+        "error",
+      );
+      return;
+    }
+
+    playlistSubmit.disabled = true;
+    playlistSubmit.textContent = "> SAVING...";
+    setAdminStatus(playlistAdminStatus, "Writing curated playlist slots...");
+
+    const results = await Promise.all(playlists.map((playlist) => (
+      adminClient
+        .from("spotify_featured_playlists")
+        .update({
+          title: playlist.title || null,
+          spotify_url: playlist.spotify_url || null,
+          enabled: playlist.enabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("position", playlist.position)
+    )));
+    const failedUpdate = results.find((result) => result.error);
+
+    playlistSubmit.disabled = false;
+    playlistSubmit.textContent = "> SAVE_PLAYLISTS";
+
+    if (failedUpdate) {
+      console.error("Unable to save featured playlists:", failedUpdate.error);
+      setAdminStatus(
+        playlistAdminStatus,
+        `Featured playlist update failed: ${failedUpdate.error.message}`,
+        "error",
+      );
+      return;
+    }
+
+    setAdminStatus(playlistAdminStatus, "Curated playlists updated.", "success");
   });
 
   logoutButton.addEventListener("click", async () => {

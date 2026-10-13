@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-13">
+    <link rel="stylesheet" href="styles.css?v=upgrade-14">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin.js?v=admin-2" defer></script>
+    <script src="admin.js?v=admin-3" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -82,6 +82,49 @@
             <label><span>RELATIONSHIP TERMS</span><textarea name="relationship_terms" maxlength="500" required></textarea></label>
             <p id="pronoun-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="pronoun-profile-submit" type="submit">&gt; SAVE_PROFILE</button>
+          </form>
+        </section>
+
+        <section class="profile-editor" aria-labelledby="playlist-editor-heading">
+          <div class="section-label">
+            <h2 id="playlist-editor-heading">FEATURED_PLAYLISTS</h2>
+            <span>FIVE MANUALLY CURATED SLOTS</span>
+          </div>
+          <form id="playlist-form" class="admin-form playlist-admin-form">
+            <div class="playlist-admin-grid">
+              <fieldset>
+                <legend>SLOT 1</legend>
+                <label><span>TITLE</span><input name="playlist_1_title" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="playlist_1_url" type="url"></label>
+                <label class="admin-checkbox"><input name="playlist_1_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 2</legend>
+                <label><span>TITLE</span><input name="playlist_2_title" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="playlist_2_url" type="url"></label>
+                <label class="admin-checkbox"><input name="playlist_2_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 3</legend>
+                <label><span>TITLE</span><input name="playlist_3_title" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="playlist_3_url" type="url"></label>
+                <label class="admin-checkbox"><input name="playlist_3_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 4</legend>
+                <label><span>TITLE</span><input name="playlist_4_title" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="playlist_4_url" type="url"></label>
+                <label class="admin-checkbox"><input name="playlist_4_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>SLOT 5</legend>
+                <label><span>TITLE</span><input name="playlist_5_title" maxlength="100"></label>
+                <label><span>SPOTIFY URL</span><input name="playlist_5_url" type="url"></label>
+                <label class="admin-checkbox"><input name="playlist_5_enabled" type="checkbox"><span>ENABLED</span></label>
+              </fieldset>
+            </div>
+            <p id="playlist-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="playlist-submit" type="submit">&gt; SAVE_PLAYLISTS</button>
           </form>
         </section>
       </section>
