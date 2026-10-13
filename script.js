@@ -1734,6 +1734,7 @@ function renderHelpCommand() {
     "  changelog  view recent patches",
     "  source     open the source repository",
     "  share      copy this site's address",
+    "  stats      open aggregate site statistics",
     "  files      open FILE_EXPLORER.EXE",
     "  pwd        print virtual working directory",
     "  ls [path]  list virtual files",
@@ -1854,6 +1855,15 @@ function handleSecretCommand(rawCommand) {
     return true;
   }
 
+  if (command === "stats") {
+    window.BITS_DESKTOP_WINDOWS?.open("stats");
+    renderTerminalOutput("stats", [
+      "STATS.EXE opened.",
+      "Telemetry mode: aggregate counters only.",
+    ]);
+    return true;
+  }
+
   if (command === "clear") {
     terminalOutput.textContent = "";
     terminalOutput.hidden = true;
@@ -1926,6 +1936,7 @@ const commandSuggestions = [
   "source",
   "repo",
   "share",
+  "stats",
   "files",
   "pwd",
   "ls",

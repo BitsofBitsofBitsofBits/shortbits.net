@@ -92,6 +92,12 @@ function setArcadeStatus(message, state = "") {
   arcadeStatus.dataset.state = state;
 }
 
+function recordArcadePlay(game) {
+  window.dispatchEvent(new CustomEvent("bits:arcade-played", {
+    detail: { game },
+  }));
+}
+
 function saveLocalBest(game, score) {
   if (score <= localBests[game]) {
     return false;
@@ -217,7 +223,7 @@ function selectGame(game) {
     return;
   }
   if (activeGame === "minesweeper" && mineStarted && !mineFinished) {
-    startMinesweeper();
+    startMinesweeper(false);
   }
   stopSnake();
   stopBitsweeper();
@@ -440,6 +446,7 @@ function startSnake() {
   drawSnake();
   setArcadeStatus("Snake process running. Consume responsibly.");
   snakeTimer = window.setInterval(tickSnake, 120);
+  recordArcadePlay("snake");
 }
 
 function setSnakeDirection(direction) {
@@ -654,7 +661,7 @@ function interactWithMine(index, flagOnly = false) {
   checkMineWin();
 }
 
-function startMinesweeper() {
+function startMinesweeper(recordPlay = true) {
   stopMineTimer();
   const difficulty = mineDifficulties[mineDifficulty];
   mineRows = difficulty.rows;
@@ -698,9 +705,12 @@ function startMinesweeper() {
   setArcadeStatus(
     `${mineDifficulty.toUpperCase()} minefield generated. First dig is always safe.`,
   );
+  if (recordPlay) {
+    recordArcadePlay(getRankingGame("minesweeper"));
+  }
 }
 
-minesweeperStart.addEventListener("click", startMinesweeper);
+minesweeperStart.addEventListener("click", () => startMinesweeper());
 mineDifficultyButtons.forEach((button) => {
   button.addEventListener("click", () => {
     mineDifficulty = button.dataset.mineDifficulty;
@@ -856,6 +866,7 @@ function startBitsweeper() {
   setArcadeStatus("Typing defense online. Protect the red firewall.");
   bitsweeperInput.focus();
   bitsweeperFrame = window.requestAnimationFrame(runBitsweeper);
+  recordArcadePlay("bitsweeper");
 }
 
 bitsweeperStart.addEventListener("click", startBitsweeper);
@@ -1175,6 +1186,7 @@ function startTetris() {
   drawTetris();
   setArcadeStatus("Stack processor online. Avoid overflow.");
   scheduleTetrisTick();
+  recordArcadePlay("tetris");
 }
 
 tetrisStart.addEventListener("click", startTetris);
@@ -1245,7 +1257,7 @@ function suspendArcadeGame() {
   stopBitsweeper();
   stopTetris();
   if (mineStarted && !mineFinished) {
-    startMinesweeper();
+    startMinesweeper(false);
   }
   setArcadeStatus("Game suspended. Press the game start control to restart.");
 }
@@ -1266,7 +1278,7 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-startMinesweeper();
+startMinesweeper(false);
 drawSnake();
 drawBitsweeper();
 tetrisBoard = createTetrisBoard();

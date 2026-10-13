@@ -30,23 +30,24 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-32">
+    <link rel="stylesheet" href="styles.css?v=upgrade-33">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="analytics.js?v=analytics-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-24" defer></script>
+    <script src="script.js?v=upgrade-25" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
-    <script src="supabase-config.js" defer></script>
     <script src="content.js?v=content-1" defer></script>
     <script src="about.js?v=about-3" defer></script>
     <script src="pronouns.js?v=pronouns-1" defer></script>
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="guestbook.js?v=guestbook-1" defer></script>
-    <script src="arcade.js?v=arcade-2" defer></script>
+    <script src="arcade.js?v=arcade-3" defer></script>
     <script src="spotify.js?v=spotify-14" defer></script>
   </head>
   <body>
@@ -209,6 +210,10 @@
           <button type="button" data-window-target="arcade-window">
             <strong>ARCADE.EXE</strong>
             <span>Play suspiciously productive games</span>
+          </button>
+          <button type="button" data-window-target="stats-window">
+            <strong>STATS.EXE</strong>
+            <span>View privacy-friendly site telemetry</span>
           </button>
         </div>
       </section>
@@ -969,6 +974,81 @@
         </div>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Arcade window"></button>
+    </section>
+
+    <section
+      id="stats-window"
+      class="desktop-window"
+      role="dialog"
+      aria-labelledby="stats-window-title"
+      data-window
+      data-window-x="230"
+      data-window-y="90"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="stats-window-title">STATS.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Statistics window">_</button>
+          <button type="button" data-window-close aria-label="Close Statistics window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content stats-window-content">
+        <div class="stats-header">
+          <div>
+            <p class="system-kicker">AGGREGATE_TELEMETRY // PUBLIC</p>
+            <h2>LIVE SITE STATISTICS</h2>
+          </div>
+          <button id="stats-refresh" type="button">REFRESH</button>
+        </div>
+        <p id="stats-status" class="form-status" role="status" aria-live="polite">
+          Reading aggregate counters...
+        </p>
+        <section class="stats-section" aria-labelledby="stats-today-heading">
+          <h3 id="stats-today-heading">TODAY // UTC</h3>
+          <div class="stats-metric-grid">
+            <article>
+              <span>PAGE VIEWS</span>
+              <strong id="stats-today-views">0</strong>
+            </article>
+            <article>
+              <span>DAILY SESSIONS</span>
+              <strong id="stats-today-sessions">0</strong>
+            </article>
+            <article>
+              <span>ARCADE PLAYS</span>
+              <strong id="stats-today-arcade">0</strong>
+            </article>
+          </div>
+        </section>
+        <section class="stats-section" aria-labelledby="stats-total-heading">
+          <h3 id="stats-total-heading">ALL TIME</h3>
+          <div class="stats-metric-grid">
+            <article>
+              <span>PAGE VIEWS</span>
+              <strong id="stats-total-views">0</strong>
+            </article>
+            <article>
+              <span>SESSIONS</span>
+              <strong id="stats-total-sessions">0</strong>
+            </article>
+            <article>
+              <span>ARCADE PLAYS</span>
+              <strong id="stats-total-arcade">0</strong>
+            </article>
+          </div>
+        </section>
+        <section class="stats-section" aria-labelledby="stats-windows-heading">
+          <h3 id="stats-windows-heading">POPULAR WINDOWS</h3>
+          <ol id="stats-popular-windows" class="stats-popular-windows"></ol>
+        </section>
+        <aside class="stats-privacy">
+          <strong>PRIVACY_MODE: AGGREGATES ONLY</strong>
+          <p>No cookies, IP addresses, fingerprints, user agents, or individual event records are collected. Daily sessions are counted once per browser tab session. Global Privacy Control and Do Not Track are honored.</p>
+          <p id="stats-privacy-status"></p>
+        </aside>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Statistics window"></button>
     </section>
 
     <section

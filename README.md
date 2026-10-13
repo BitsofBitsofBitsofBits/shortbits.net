@@ -44,6 +44,9 @@ is a personal project and largely a learning exercise for me.
   current browser session and respects reduced-motion preferences
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
+- Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser
+  sessions, Arcade starts, and popular windows without cookies, IP addresses,
+  fingerprints, user agents, or individual event records
 - Distinct decorative atmospheres for every interface theme, including circuit
   pulses, aurora ribbons, petals, acrylic lighting, reveal sweeps, OLED stars,
   color orbs, and phosphor effects. These respect decorative-effects, contrast,
@@ -155,6 +158,11 @@ npx --yes supabase@latest db push --linked
 Arcade rankings are stored in `arcade_scores`. Anonymous visitors can read and
 submit constrained score rows with an optional validated display name;
 authenticated Admin Portal sessions can review and delete leaderboard entries.
+
+Site statistics use daily aggregate counters updated through restricted
+Supabase functions. The browser counts a daily session once with
+`sessionStorage`, honors Global Privacy Control and Do Not Track, and never
+transmits or stores a visitor identifier.
 
 ## Deployment
 
