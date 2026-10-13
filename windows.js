@@ -3,7 +3,6 @@ const desktopWindowCount = document.querySelector("#desktop-window-count");
 const desktopWindowLaunchers = document.querySelectorAll("[data-window-target]");
 const desktopWindowMirrors = document.querySelectorAll("[data-window-mirror]");
 const desktopWindowImageMirrors = document.querySelectorAll("[data-window-mirror-image]");
-const desktopWindowMinimumVisiblePx = 56;
 const desktopWindowMinimumWidthPx = 280;
 const desktopWindowMinimumHeightPx = 120;
 const openedDesktopWindowIds = new Set();
@@ -31,18 +30,14 @@ function focusDesktopWindow(windowElement) {
 
 function constrainDesktopWindow(windowElement, x, y) {
   const rect = windowElement.getBoundingClientRect();
-  const maxX = Math.max(
-    desktopWindowMinimumVisiblePx - rect.width,
-    window.innerWidth - desktopWindowMinimumVisiblePx,
-  );
-  const maxY = Math.max(
-    0,
-    window.innerHeight - desktopWindowMinimumVisiblePx,
-  );
+  const width = windowElement.offsetWidth || rect.width;
+  const height = windowElement.offsetHeight || rect.height;
+  const maxX = Math.max(8, window.innerWidth - width - 8);
+  const maxY = Math.max(8, window.innerHeight - height - 8);
 
   return {
-    x: Math.min(maxX, Math.max(desktopWindowMinimumVisiblePx - rect.width, x)),
-    y: Math.min(maxY, Math.max(0, y)),
+    x: Math.min(maxX, Math.max(8, x)),
+    y: Math.min(maxY, Math.max(8, y)),
   };
 }
 
@@ -70,6 +65,54 @@ function resizeDesktopWindow(windowElement, width, height) {
     Math.min(rect.left, window.innerWidth - clampedWidth - 8),
     Math.min(rect.top, window.innerHeight - clampedHeight - 8),
   );
+}
+
+function resizeDesktopWindowFromEdge(state, clientX, clientY) {
+  const horizontalDelta = clientX - state.startX;
+  const verticalDelta = clientY - state.startY;
+  const minimumWidth = Math.min(
+    desktopWindowMinimumWidthPx,
+    window.innerWidth - 16,
+  );
+  const minimumHeight = Math.min(
+    desktopWindowMinimumHeightPx,
+    window.innerHeight - 16,
+  );
+  let left = state.startLeft;
+  let top = state.startTop;
+  let width = state.startWidth;
+  let height = state.startHeight;
+
+  if (state.direction.includes("e")) {
+    width = Math.min(
+      window.innerWidth - state.startLeft - 8,
+      Math.max(minimumWidth, state.startWidth + horizontalDelta),
+    );
+  } else if (state.direction.includes("w")) {
+    width = Math.min(
+      state.startRight - 8,
+      Math.max(minimumWidth, state.startWidth - horizontalDelta),
+    );
+    left = state.startRight - width;
+  }
+
+  if (state.direction.includes("s")) {
+    height = Math.min(
+      window.innerHeight - state.startTop - 8,
+      Math.max(minimumHeight, state.startHeight + verticalDelta),
+    );
+  } else if (state.direction.includes("n")) {
+    height = Math.min(
+      state.startBottom - 8,
+      Math.max(minimumHeight, state.startHeight - verticalDelta),
+    );
+    top = state.startBottom - height;
+  }
+
+  state.windowElement.style.left = `${left}px`;
+  state.windowElement.style.top = `${top}px`;
+  state.windowElement.style.width = `${width}px`;
+  state.windowElement.style.height = `${height}px`;
 }
 
 function openDesktopWindow(windowElement, launcher = null) {
@@ -219,50 +262,67 @@ desktopWindows.forEach((windowElement) => {
   dragHandle?.addEventListener("pointercancel", finishDrag);
 
   const resizeHandle = windowElement.querySelector("[data-window-resize]");
-  resizeHandle?.addEventListener("pointerdown", (event) => {
-    if (
-      event.button !== 0
-      || windowElement.classList.contains("is-minimized")
-      || window.matchMedia("(max-width: 640px)").matches
-    ) {
-      return;
-    }
+  if (resizeHandle) {
+    resizeHandle.dataset.resizeDirection = "se";
+  }
+  ["n", "ne", "e", "s", "sw", "w", "nw"].forEach((direction) => {
+    const edge = document.createElement("span");
+    edge.className = "desktop-window-resize-edge";
+    edge.dataset.resizeDirection = direction;
+    edge.setAttribute("aria-hidden", "true");
+    windowElement.append(edge);
+  });
+  const resizeHandles = windowElement.querySelectorAll("[data-resize-direction]");
 
-    const rect = windowElement.getBoundingClientRect();
-    resizeState = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      startWidth: rect.width,
-      startHeight: rect.height,
-      windowElement,
+  resizeHandles.forEach((handle) => {
+    handle.addEventListener("pointerdown", (event) => {
+      if (
+        event.button !== 0
+        || windowElement.classList.contains("is-minimized")
+        || window.matchMedia("(max-width: 640px)").matches
+      ) {
+        return;
+      }
+
+      const rect = windowElement.getBoundingClientRect();
+      resizeState = {
+        direction: handle.dataset.resizeDirection,
+        pointerId: event.pointerId,
+        startBottom: rect.bottom,
+        startHeight: rect.height,
+        startLeft: rect.left,
+        startRight: rect.right,
+        startTop: rect.top,
+        startWidth: rect.width,
+        startX: event.clientX,
+        startY: event.clientY,
+        windowElement,
+      };
+      handle.setPointerCapture(event.pointerId);
+      windowElement.classList.add("is-resizing");
+      focusDesktopWindow(windowElement);
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    handle.addEventListener("pointermove", (event) => {
+      if (!resizeState || resizeState.pointerId !== event.pointerId) {
+        return;
+      }
+      resizeDesktopWindowFromEdge(resizeState, event.clientX, event.clientY);
+    });
+
+    const finishResize = (event) => {
+      if (!resizeState || resizeState.pointerId !== event.pointerId) {
+        return;
+      }
+      resizeState.windowElement.classList.remove("is-resizing");
+      resizeState = null;
     };
-    resizeHandle.setPointerCapture(event.pointerId);
-    windowElement.classList.add("is-resizing");
-    focusDesktopWindow(windowElement);
-    event.preventDefault();
+    handle.addEventListener("pointerup", finishResize);
+    handle.addEventListener("pointercancel", finishResize);
   });
 
-  resizeHandle?.addEventListener("pointermove", (event) => {
-    if (!resizeState || resizeState.pointerId !== event.pointerId) {
-      return;
-    }
-    resizeDesktopWindow(
-      resizeState.windowElement,
-      resizeState.startWidth + event.clientX - resizeState.startX,
-      resizeState.startHeight + event.clientY - resizeState.startY,
-    );
-  });
-
-  const finishResize = (event) => {
-    if (!resizeState || resizeState.pointerId !== event.pointerId) {
-      return;
-    }
-    resizeState.windowElement.classList.remove("is-resizing");
-    resizeState = null;
-  };
-  resizeHandle?.addEventListener("pointerup", finishResize);
-  resizeHandle?.addEventListener("pointercancel", finishResize);
   resizeHandle?.addEventListener("keydown", (event) => {
     if (
       !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
@@ -323,6 +383,11 @@ window.addEventListener("resize", () => {
     .filter((windowElement) => !windowElement.hidden)
     .forEach((windowElement) => {
       const rect = windowElement.getBoundingClientRect();
+      resizeDesktopWindow(
+        windowElement,
+        Math.min(rect.width, window.innerWidth - 16),
+        Math.min(rect.height, window.innerHeight - 16),
+      );
       positionDesktopWindow(windowElement, rect.left, rect.top);
     });
 });

@@ -18,7 +18,11 @@ is a personal project and largely a learning exercise for me.
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs
 - Adaptive performance mode for constrained or slow devices
-- Optional draggable and resizable mini-windows for profile, pronouns, Spotify, source, and diagnostics
+- Optional draggable mini-windows for profile, pronouns, Spotify, source, and diagnostics
+  that stay viewport-safe, resize from every edge and corner, and use themed
+  internal scrollbars
+- RGB Mode that preserves the interface accent while cycling a rainbow gradient
+  around the main shell and desktop-window edges
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions

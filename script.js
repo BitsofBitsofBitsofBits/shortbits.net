@@ -1034,19 +1034,10 @@ let themeIndex = Math.max(
 );
 const rgbThemeSequence = ["CYAN", "VIOLET", "AMBER", "GREEN"];
 let recentThemeSequence = [];
-let rgbAnimationFrame;
-let rgbAnimationStartedAt;
-let rgbLastRenderedAt = 0;
-let rgbColorIndex = 0;
-const rgbSegmentDuration = 1200;
 
 function hexToRgbString(hexColor) {
   const color = Number.parseInt(hexColor.slice(1), 16);
   return `${color >> 16}, ${(color >> 8) & 255}, ${color & 255}`;
-}
-
-function hexToRgb(hexColor) {
-  return hexToRgbString(hexColor).split(", ").map(Number);
 }
 
 function getRgbPalette() {
@@ -1054,49 +1045,9 @@ function getRgbPalette() {
     || rainbowColors.dark;
 }
 
-function applyRgbAccentColor(red, green, blue) {
-  const rgb = `${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)}`;
-  document.documentElement.style.setProperty("--accent", `rgb(${rgb})`);
-  document.documentElement.style.setProperty("--accent-rgb", rgb);
-  themeName.textContent = "RGB";
-}
-
 function applyRgbAccent() {
-  applyRgbAccentColor(...hexToRgb(getRgbPalette()[rgbColorIndex % getRgbPalette().length]));
-}
-
-function animateRgbAccent(timestamp) {
-  if (!document.documentElement.classList.contains("is-rgb-mode")) {
-    return;
-  }
-
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    applyRgbAccent();
-    return;
-  }
-
-  const minimumFrameTime = performanceLite ? 50 : 1000 / 30;
-  if (timestamp - rgbLastRenderedAt < minimumFrameTime) {
-    rgbAnimationFrame = window.requestAnimationFrame(animateRgbAccent);
-    return;
-  }
-
-  rgbLastRenderedAt = timestamp;
-  rgbAnimationStartedAt ??= timestamp;
-  const palette = getRgbPalette();
-  const elapsed = timestamp - rgbAnimationStartedAt;
-  const segment = Math.floor(elapsed / rgbSegmentDuration);
-  const progress = (elapsed % rgbSegmentDuration) / rgbSegmentDuration;
-  const current = hexToRgb(palette[segment % palette.length]);
-  const next = hexToRgb(palette[(segment + 1) % palette.length]);
-
-  rgbColorIndex = segment % palette.length;
-  applyRgbAccentColor(
-    current[0] + ((next[0] - current[0]) * progress),
-    current[1] + ((next[1] - current[1]) * progress),
-    current[2] + ((next[2] - current[2]) * progress),
-  );
-  rgbAnimationFrame = window.requestAnimationFrame(animateRgbAccent);
+  applyAccentTheme(themes[themeIndex]);
+  themeName.textContent = "RGB";
 }
 
 function applyRgbBitColor(bit) {
@@ -1108,7 +1059,6 @@ function applyRgbBitColor(bit) {
 }
 
 function setRgbMode(enabled) {
-  window.cancelAnimationFrame(rgbAnimationFrame);
   document.documentElement.classList.toggle("is-rgb-mode", enabled);
 
   if (!enabled) {
@@ -1121,12 +1071,9 @@ function setRgbMode(enabled) {
     return;
   }
 
-  rgbColorIndex = 0;
-  rgbAnimationStartedAt = undefined;
-  rgbLastRenderedAt = 0;
+  applyRgbAccent();
   binaryRain.querySelectorAll(".falling-bit:not(.is-forbidden)")
     .forEach(applyRgbBitColor);
-  rgbAnimationFrame = window.requestAnimationFrame(animateRgbAccent);
 }
 
 function applyAccentTheme(theme) {
