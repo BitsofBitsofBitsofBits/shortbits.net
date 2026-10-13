@@ -2430,7 +2430,8 @@ footer span {
   --window-default-width: 850px;
 }
 
-#admin-changelog-window {
+#admin-changelog-window,
+#admin-games-window {
   --window-default-height: 760px;
   --window-default-width: 1100px;
 }
@@ -3447,6 +3448,11 @@ body.is-black-screen-staging .binary-rain {
 #changelog-window {
   --window-default-height: 660px;
   --window-default-width: 820px;
+}
+
+#games-window {
+  --window-default-height: 650px;
+  --window-default-width: 880px;
 }
 
 #guestbook-window {
@@ -5231,6 +5237,73 @@ html[data-boot="pending"] .boot-screen[hidden] {
   color: var(--muted);
   font-size: 0.62rem;
   letter-spacing: 0.06em;
+}
+
+.favorite-games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.favorite-games-list[hidden] {
+  display: none;
+}
+
+.favorite-games-list > li {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 58%),
+    var(--panel);
+}
+
+.favorite-games-list h3,
+.favorite-games-list p {
+  margin: 0;
+}
+
+.favorite-games-list h3 {
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+
+.favorite-games-list h3 + p {
+  margin-top: 5px;
+  color: var(--accent);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.favorite-game-note {
+  margin-top: 12px !important;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.favorite-games-list a {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.62rem;
+  text-decoration: none;
+}
+
+.favorite-games-list a:hover,
+.favorite-games-list a:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--ink);
+  background: var(--accent-soft);
 }
 
 @container (min-width: 620px) {

@@ -17,12 +17,15 @@ const nowFields = document.querySelector("#now-fields");
 const nowUpdated = document.querySelector("#now-updated");
 const changelogEmpty = document.querySelector("#changelog-empty");
 const changelogEntries = document.querySelector("#changelog-entries");
+const gamesEmpty = document.querySelector("#games-empty");
+const gamesList = document.querySelector("#games-list");
 const publicContentWindowIds = new Set([
   "resume-window",
   "now-window",
   "changelog-window",
+  "games-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v1";
+const publicContentCacheKey = "bits-public-content-v2";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -86,7 +89,7 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, nowProfiles, changelogItems] =
+  const [resumeProfiles, resumeItems, nowProfiles, changelogItems, gameItems] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
@@ -100,12 +103,16 @@ async function requestPublicContent() {
       fetchPublicContentTable(
         "site_changelog?select=position,entry_date,title,summary&enabled=eq.true&order=position.asc",
       ),
+      fetchPublicContentTable(
+        "site_favorite_games?select=position,title,platform,store_url,note&enabled=eq.true&order=position.asc",
+      ),
     ]);
   const payload = {
     resumeProfile: resumeProfiles[0] ?? null,
     resumeEntries: resumeItems,
     nowProfile: nowProfiles[0] ?? null,
     changelogEntries: changelogItems,
+    favoriteGames: gameItems,
   };
   localStorage.setItem(publicContentCacheKey, JSON.stringify({
     cachedAt: Date.now(),
@@ -223,22 +230,58 @@ function renderChangelog(entries) {
   changelogEmpty.textContent = "Changelog entries are awaiting operator input.";
 }
 
+function createFavoriteGame(game) {
+  const item = document.createElement("li");
+  const copy = document.createElement("div");
+  const title = document.createElement("h3");
+  const platform = document.createElement("p");
+  const link = document.createElement("a");
+
+  title.textContent = game.title;
+  platform.textContent = game.platform;
+  link.href = game.store_url;
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = "OPEN PAGE ↗";
+  copy.append(title, platform);
+
+  if (game.note) {
+    const note = document.createElement("p");
+    note.className = "favorite-game-note";
+    note.textContent = game.note;
+    copy.append(note);
+  }
+
+  item.append(copy, link);
+  return item;
+}
+
+function renderFavoriteGames(games) {
+  gamesList.replaceChildren(...games.map(createFavoriteGame));
+  gamesList.hidden = games.length === 0;
+  gamesEmpty.hidden = games.length > 0;
+  gamesEmpty.textContent = "Favorite games are awaiting operator input.";
+}
+
 async function loadPublicContent() {
   if (!publicContentRequest) {
     resumeEmpty.textContent = "Synchronizing résumé data...";
     nowEmpty.textContent = "Synchronizing NOW.TXT...";
     changelogEmpty.textContent = "Synchronizing changelog entries...";
+    gamesEmpty.textContent = "Synchronizing favorite games...";
     publicContentRequest = requestPublicContent()
       .then((content) => {
         renderResume(content.resumeProfile, content.resumeEntries);
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);
+        renderFavoriteGames(content.favoriteGames);
       })
       .catch((error) => {
         console.error("Unable to load public content:", error);
         resumeEmpty.textContent = "Résumé data is temporarily unavailable.";
         nowEmpty.textContent = "NOW.TXT is temporarily unavailable.";
         changelogEmpty.textContent = "Changelog data is temporarily unavailable.";
+        gamesEmpty.textContent = "Favorite games are temporarily unavailable.";
         publicContentRequest = null;
         throw error;
       });

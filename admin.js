@@ -39,6 +39,11 @@ const changelogSubmit = document.querySelector("#changelog-submit");
 const changelogAdminStatus = document.querySelector("#changelog-admin-status");
 const changelogSlots = document.querySelector("#changelog-slots");
 const changelogEntryAdd = document.querySelector("#changelog-entry-add");
+const gamesForm = document.querySelector("#games-form");
+const gamesSubmit = document.querySelector("#games-submit");
+const gamesAdminStatus = document.querySelector("#games-admin-status");
+const gamesSlots = document.querySelector("#games-slots");
+const gamesEntryAdd = document.querySelector("#games-entry-add");
 const spotifyPlaylistUrlPattern =
   /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/;
 const spotifyTrackUrlPattern =
@@ -119,6 +124,19 @@ const repeatableEditors = {
       { key: "entry_date", label: "DATE", type: "date" },
       { key: "title", label: "TITLE", maxLength: 120 },
       { key: "summary", label: "SUMMARY", maxLength: 800, multiline: true },
+    ],
+  },
+  games: {
+    table: "site_favorite_games",
+    container: gamesSlots,
+    addButton: gamesEntryAdd,
+    status: gamesAdminStatus,
+    itemName: "game",
+    fields: [
+      { key: "title", label: "TITLE", maxLength: 120 },
+      { key: "platform", label: "PAGE LABEL", maxLength: 80 },
+      { key: "store_url", label: "STORE / OFFICIAL URL", type: "url", maxLength: 500 },
+      { key: "note", label: "NOTE", maxLength: 500, multiline: true },
     ],
   },
 };
@@ -309,6 +327,7 @@ function setAdminStatus(element, message, state = "") {
 
 function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v1");
+  localStorage.removeItem("bits-public-content-v2");
 }
 
 function createMessageElement(message) {
@@ -714,6 +733,32 @@ async function loadChangelogContent() {
   return true;
 }
 
+async function loadFavoriteGames() {
+  setAdminStatus(gamesAdminStatus, "Loading favorite games...");
+  const { data, error } = await adminClient
+    .from("site_favorite_games")
+    .select("position, title, platform, store_url, note, enabled")
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Unable to load favorite games:", error);
+    setAdminStatus(
+      gamesAdminStatus,
+      `Favorite games failed to load: ${error.message}`,
+      "error",
+    );
+    return false;
+  }
+
+  renderRepeatableEntries(repeatableEditors.games, data);
+  setAdminStatus(
+    gamesAdminStatus,
+    `${data.length} favorite game entr${data.length === 1 ? "y" : "ies"} loaded.`,
+    "success",
+  );
+  return true;
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
@@ -727,6 +772,7 @@ async function showInbox() {
     loadResumeContent(),
     loadNowContent(),
     loadChangelogContent(),
+    loadFavoriteGames(),
   ]);
   window.dispatchEvent(new CustomEvent("admin:authenticated"));
 }
@@ -1081,6 +1127,55 @@ if (adminClient) {
     }
     clearPublicContentCache();
     setAdminStatus(changelogAdminStatus, "Changelog updated.", "success");
+  });
+
+  gamesForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const entries = collectRepeatableEntries(repeatableEditors.games);
+    const invalidEntry = entries.find((entry) => (
+      (
+        entry.enabled
+        && (!entry.title || !entry.platform || !entry.store_url)
+      )
+      || (
+        entry.store_url
+        && !httpsUrlPattern.test(entry.store_url)
+      )
+    ));
+    if (invalidEntry) {
+      setAdminStatus(
+        gamesAdminStatus,
+        "Every enabled game needs a title, page label, and HTTPS store or official URL.",
+        "error",
+      );
+      return;
+    }
+
+    gamesSubmit.disabled = true;
+    gamesSubmit.textContent = "> SAVING...";
+    setAdminStatus(gamesAdminStatus, "Writing favorite games...");
+    const failedUpdate = await syncRepeatableEntries(
+      repeatableEditors.games,
+      entries,
+      new Date().toISOString(),
+    );
+    gamesSubmit.disabled = false;
+    gamesSubmit.textContent = "> SAVE_GAMES";
+
+    if (failedUpdate) {
+      console.error("Unable to save favorite games:", failedUpdate.error);
+      setAdminStatus(
+        gamesAdminStatus,
+        `Favorite games update failed: ${failedUpdate.error.message}`,
+        "error",
+      );
+      return;
+    }
+    if (!await loadFavoriteGames()) {
+      return;
+    }
+    clearPublicContentCache();
+    setAdminStatus(gamesAdminStatus, "Favorite games updated.", "success");
   });
 
   logoutButton.addEventListener("click", async () => {

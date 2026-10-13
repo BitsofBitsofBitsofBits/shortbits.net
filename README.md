@@ -44,6 +44,8 @@ is a personal project and largely a learning exercise for me.
   Bitsweeper typing defense, and Tetris with keyboard/touch controls, persistent
   local records, related achievements, and public global leaderboards with
   Admin moderation
+- An Admin-managed `GAMES.EXE` library of favorite games with ordered,
+  publishable entries and links to their official or storefront pages
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,

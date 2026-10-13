@@ -24,6 +24,7 @@ const analyticsWindowLabels = {
   guestbook: "GUESTBOOK.LOG",
   filesystem: "FILE_EXPLORER.EXE",
   arcade: "ARCADE.EXE",
+  games: "GAMES.EXE",
   notifications: "NOTIFICATIONS.LOG",
   stats: "STATS.EXE",
 };

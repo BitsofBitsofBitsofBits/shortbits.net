@@ -81,6 +81,15 @@ const adminWindowModules = [
     x: 200,
     y: 120,
   },
+  {
+    sourceId: "games-editor",
+    windowId: "admin-games-window",
+    title: "GAMES_EDITOR.EXE",
+    label: "GAMES",
+    description: "Manage the public favorite-games library",
+    x: 245,
+    y: 135,
+  },
 ];
 
 function createAdminWindow(module) {
