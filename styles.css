@@ -2406,6 +2406,18 @@ footer span {
   overflow-wrap: anywhere;
 }
 
+.shutdown-qr.red-screen-qr {
+  position: static;
+  box-sizing: border-box;
+  width: min(360px, 100%);
+  max-width: 100%;
+  margin: 0 auto 24px 0;
+}
+
+.shutdown-qr.red-screen-qr span {
+  min-width: 0;
+}
+
 .red-screen-recovery {
   margin: 0 0 12px;
   line-height: 1.7;

@@ -1548,7 +1548,7 @@ function triggerRedScreen() {
   window.clearTimeout(identityHoldTimer);
   window.clearInterval(identityExpansionTimer);
   redScreenPreviousFocus = document.activeElement;
-  let remainingSeconds = 5;
+  let remainingSeconds = 10;
   let progress = 0;
   redScreenProgress.textContent = "0%";
   redScreenCountdown.textContent = String(remainingSeconds);
@@ -1559,7 +1559,7 @@ function triggerRedScreen() {
   redScreen.focus();
   redScreenTimer = window.setInterval(() => {
     remainingSeconds -= 1;
-    progress = Math.min(100, progress + 20);
+    progress = Math.min(100, progress + 10);
     redScreenProgress.textContent = `${progress}%`;
     redScreenCountdown.textContent = String(Math.max(0, remainingSeconds));
     redScreenMeterFill.style.width = `${progress}%`;
