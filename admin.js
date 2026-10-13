@@ -9,6 +9,9 @@ const refreshButton = document.querySelector("#refresh-messages");
 const guestbookAdminStatus = document.querySelector("#guestbook-admin-status");
 const guestbookAdminList = document.querySelector("#guestbook-admin-list");
 const refreshGuestbook = document.querySelector("#refresh-guestbook");
+const arcadeAdminStatus = document.querySelector("#arcade-admin-status");
+const arcadeAdminList = document.querySelector("#arcade-admin-list");
+const refreshArcadeScores = document.querySelector("#refresh-arcade-scores");
 const logoutButton = document.querySelector("#logout-button");
 const pronounProfileForm = document.querySelector("#pronoun-profile-form");
 const pronounProfileSubmit = document.querySelector("#pronoun-profile-submit");
@@ -480,6 +483,79 @@ async function loadAdminGuestbook() {
   );
 }
 
+function createArcadeAdminEntry(entry) {
+  const article = document.createElement("article");
+  const header = document.createElement("header");
+  const identity = document.createElement("div");
+  const name = document.createElement("h3");
+  const timestamp = document.createElement("time");
+  const score = document.createElement("p");
+  const actions = document.createElement("div");
+  const deleteButton = document.createElement("button");
+
+  article.className = "message-card";
+  name.textContent = `${entry.player_name} // ${entry.game.toUpperCase()}`;
+  timestamp.dateTime = entry.created_at;
+  timestamp.textContent = new Date(entry.created_at).toLocaleString();
+  score.textContent = `${entry.score.toLocaleString()} POINTS // ${entry.detail}`;
+  deleteButton.type = "button";
+  deleteButton.textContent = "DELETE";
+  deleteButton.addEventListener("click", async () => {
+    if (!window.confirm(`Delete ${entry.player_name}'s ${entry.game} score?`)) {
+      return;
+    }
+    const { error } = await adminClient
+      .from("arcade_scores")
+      .delete()
+      .eq("id", entry.id);
+    if (error) {
+      console.error("Unable to delete Arcade score:", error);
+      setAdminStatus(
+        arcadeAdminStatus,
+        `Arcade score deletion failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    await loadAdminArcadeScores();
+  });
+
+  identity.append(name, timestamp);
+  actions.className = "message-actions";
+  actions.append(deleteButton);
+  header.append(identity, actions);
+  article.append(header, score);
+  return article;
+}
+
+async function loadAdminArcadeScores() {
+  setAdminStatus(arcadeAdminStatus, "Loading public leaderboard scores...");
+  const { data, error } = await adminClient
+    .from("arcade_scores")
+    .select("id, game, player_name, score, detail, created_at")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error) {
+    console.error("Unable to load Arcade scores:", error);
+    setAdminStatus(
+      arcadeAdminStatus,
+      `Arcade scores failed to load: ${error.message}`,
+      "error",
+    );
+    return;
+  }
+
+  arcadeAdminList.replaceChildren(...data.map(createArcadeAdminEntry));
+  setAdminStatus(
+    arcadeAdminStatus,
+    data.length
+      ? `${data.length} public score${data.length === 1 ? "" : "s"} loaded.`
+      : "No public Arcade scores.",
+    "success",
+  );
+}
+
 async function loadPronounProfile() {
   setAdminStatus(pronounAdminStatus, "Loading identity reference...");
   const { data, error } = await adminClient
@@ -644,6 +720,7 @@ async function showInbox() {
   await Promise.all([
     loadMessages(),
     loadAdminGuestbook(),
+    loadAdminArcadeScores(),
     loadPronounProfile(),
     loadFeaturedPlaylists(),
     loadFeaturedTracks(),
@@ -699,6 +776,7 @@ if (adminClient) {
 
   refreshButton.addEventListener("click", loadMessages);
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
+  refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
   pronounProfileForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(pronounProfileForm);

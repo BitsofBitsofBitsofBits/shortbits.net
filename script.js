@@ -384,6 +384,9 @@ const achievementCatalog = [
   { id: "avatar-escape", hints: ["Idle processes may wander.", "Leave the page alone for three minutes.", "Trigger avatar idle mode."] },
   { id: "inspect-bits", hints: ["The Bits dislike close inspection.", "A certain browser panel changes the viewport.", "Open developer tools or resize dramatically."] },
   { id: "friday-thirteen", hints: ["The calendar can alter the protocol.", "An ominous date is required.", "Visit on Friday the 13th."] },
+  { id: "snake-byte", hints: ["An old process is hungry.", "Open ARCADE.EXE.", "Feed the Snake at least one byte."] },
+  { id: "mine-clear", hints: ["Some Bits are dangerously buried.", "Open ARCADE.EXE.", "Clear the Minesweeper field."] },
+  { id: "bitsweeper-defender", hints: ["The firewall is under linguistic attack.", "Open ARCADE.EXE.", "Type at least one falling target."] },
   { id: `birthday-${new Date().getFullYear()}`, hints: ["One date belongs to Caleb.", "Look near the end of June.", "Visit on June 26."] },
 ];
 const sessionMetrics = {
@@ -2263,6 +2266,15 @@ window.BITS_EASTER_EGGS = {
     forceTypoMessage = true;
   },
   triggerChaosMode,
+};
+
+window.BITS_ACHIEVEMENTS = {
+  unlock: (id, message, label = "ACHIEVEMENT UNLOCKED") => {
+    if (!achievementCatalog.some((achievement) => achievement.id === id)) {
+      throw new Error(`Unknown achievement: ${id}`);
+    }
+    showAchievement(message, label, 3200, id);
+  },
 };
 
 updateAchievementCount();

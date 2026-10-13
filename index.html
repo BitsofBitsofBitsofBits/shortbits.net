@@ -30,13 +30,13 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-30">
+    <link rel="stylesheet" href="styles.css?v=upgrade-31">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-22" defer></script>
+    <script src="script.js?v=upgrade-23" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
     <script src="supabase-config.js" defer></script>
@@ -46,6 +46,7 @@
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="guestbook.js?v=guestbook-1" defer></script>
+    <script src="arcade.js?v=arcade-1" defer></script>
     <script src="spotify.js?v=spotify-14" defer></script>
   </head>
   <body>
@@ -204,6 +205,10 @@
           <button type="button" data-window-target="filesystem-window">
             <strong>FILE_EXPLORER.EXE</strong>
             <span>Browse the virtual filesystem</span>
+          </button>
+          <button type="button" data-window-target="arcade-window">
+            <strong>ARCADE.EXE</strong>
+            <span>Play suspiciously productive games</span>
           </button>
         </div>
       </section>
@@ -837,6 +842,109 @@
         </div>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize File Explorer window"></button>
+    </section>
+
+    <section
+      id="arcade-window"
+      class="desktop-window arcade-window"
+      role="dialog"
+      aria-labelledby="arcade-window-title"
+      data-window
+      data-window-x="180"
+      data-window-y="70"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="arcade-window-title">ARCADE.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Arcade window">_</button>
+          <button type="button" data-window-close aria-label="Close Arcade window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content arcade-window-content">
+        <div class="arcade-header">
+          <div>
+            <p class="system-kicker">ENTERTAINMENT_SUBSYSTEM // PUBLIC SCORES</p>
+            <h2>BITSOFBITS ARCADE</h2>
+          </div>
+          <p>LOCAL BEST <strong id="arcade-local-best">0</strong></p>
+        </div>
+        <div class="arcade-tabs" role="tablist" aria-label="Arcade games">
+          <button id="arcade-tab-snake" type="button" role="tab" aria-selected="true" aria-controls="arcade-game-snake" data-arcade-game="snake">SNAKE</button>
+          <button id="arcade-tab-minesweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-minesweeper" data-arcade-game="minesweeper">MINESWEEPER</button>
+          <button id="arcade-tab-bitsweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-bitsweeper" data-arcade-game="bitsweeper">BITSWEEPER</button>
+        </div>
+        <div class="arcade-layout">
+          <section class="arcade-game-column">
+            <article id="arcade-game-snake" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-snake" data-arcade-panel="snake">
+              <div class="arcade-game-toolbar">
+                <p>SCORE <strong id="snake-score">0</strong></p>
+                <button id="snake-start" type="button">START_GAME</button>
+              </div>
+              <canvas id="snake-canvas" class="arcade-canvas arcade-square-canvas" width="400" height="400" aria-label="Snake game board"></canvas>
+              <div class="arcade-dpad" aria-label="Snake direction controls">
+                <button type="button" data-snake-direction="up" aria-label="Move up">▲</button>
+                <button type="button" data-snake-direction="left" aria-label="Move left">◀</button>
+                <button type="button" data-snake-direction="down" aria-label="Move down">▼</button>
+                <button type="button" data-snake-direction="right" aria-label="Move right">▶</button>
+              </div>
+              <p class="arcade-help">ARROW KEYS / WASD / TOUCH CONTROLS</p>
+            </article>
+
+            <article id="arcade-game-minesweeper" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-minesweeper" data-arcade-panel="minesweeper" hidden>
+              <div class="arcade-game-toolbar">
+                <p>MINES <strong id="minesweeper-mines">10</strong> // TIME <strong id="minesweeper-time">0</strong></p>
+                <button id="minesweeper-start" type="button">NEW_FIELD</button>
+              </div>
+              <div class="minesweeper-mode" role="group" aria-label="Minesweeper input mode">
+                <button type="button" data-mine-mode="dig" aria-pressed="true">DIG</button>
+                <button type="button" data-mine-mode="flag" aria-pressed="false">FLAG</button>
+              </div>
+              <div id="minesweeper-board" class="minesweeper-board" role="grid" aria-label="Minesweeper board"></div>
+              <p class="arcade-help">LEFT CLICK TO DIG // RIGHT CLICK TO FLAG // TOUCH MODE ABOVE</p>
+            </article>
+
+            <article id="arcade-game-bitsweeper" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-bitsweeper" data-arcade-panel="bitsweeper" hidden>
+              <div class="arcade-game-toolbar">
+                <p>SCORE <strong id="bitsweeper-score">0</strong> // LIVES <strong id="bitsweeper-lives">3</strong> // TIME <strong id="bitsweeper-time">45</strong></p>
+                <button id="bitsweeper-start" type="button">START_DEFENSE</button>
+              </div>
+              <canvas id="bitsweeper-canvas" class="arcade-canvas" width="640" height="360" aria-label="Bitsweeper typing defense field"></canvas>
+              <label class="bitsweeper-input-label">
+                <span>TYPE TARGET</span>
+                <input id="bitsweeper-input" type="text" maxlength="24" autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
+              </label>
+              <p class="arcade-help">TYPE FALLING WORDS BEFORE THEY REACH THE FIREWALL</p>
+            </article>
+            <p id="arcade-status" class="form-status" role="status" aria-live="polite">Select a game and initialize entertainment.</p>
+          </section>
+
+          <aside class="arcade-leaderboard">
+            <div class="arcade-leaderboard-header">
+              <div>
+                <p class="system-kicker">GLOBAL_RANKING</p>
+                <h3 id="arcade-leaderboard-title">SNAKE LEADERBOARD</h3>
+              </div>
+              <button id="arcade-leaderboard-refresh" type="button">REFRESH</button>
+            </div>
+            <p id="arcade-leaderboard-status" class="form-status" role="status" aria-live="polite"></p>
+            <ol id="arcade-leaderboard-list" class="arcade-leaderboard-list"></ol>
+            <form id="arcade-score-form" class="arcade-score-form" hidden>
+              <p>NEW SCORE: <strong id="arcade-result-score">0</strong></p>
+              <label>
+                <span>DISPLAY NAME (OPTIONAL)</span>
+                <input name="player_name" type="text" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9 _.\-]{0,23}" autocomplete="nickname">
+              </label>
+              <label class="contact-honeypot" aria-hidden="true">
+                <span>WEBSITE</span>
+                <input name="website" type="text" tabindex="-1" autocomplete="off">
+              </label>
+              <button id="arcade-score-submit" type="submit">SUBMIT_SCORE</button>
+            </form>
+          </aside>
+        </div>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Arcade window"></button>
     </section>
 
     <section

@@ -28,6 +28,15 @@ const adminWindowModules = [
     y: 105,
   },
   {
+    sourceId: "arcade-editor",
+    windowId: "admin-arcade-window",
+    title: "ARCADE_MODERATION.EXE",
+    label: "ARCADE",
+    description: "Review and delete public leaderboard scores",
+    x: 145,
+    y: 115,
+  },
+  {
     sourceId: "playlist-editor",
     windowId: "admin-playlists-window",
     title: "PLAYLIST_EDITOR.EXE",

@@ -36,6 +36,9 @@ is a personal project and largely a learning exercise for me.
   deletion controls
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
+- An `ARCADE.EXE` library containing Snake, Minesweeper, and Bitsweeper typing
+  defense with keyboard/touch controls, persistent local records, related
+  achievements, and public global leaderboards with Admin moderation
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
@@ -147,6 +150,10 @@ Portal sessions can update it. Apply migrations with:
 ```powershell
 npx --yes supabase@latest db push --linked
 ```
+
+Arcade rankings are stored in `arcade_scores`. Anonymous visitors can read and
+submit constrained score rows with an optional validated display name;
+authenticated Admin Portal sessions can review and delete leaderboard entries.
 
 ## Deployment
 
