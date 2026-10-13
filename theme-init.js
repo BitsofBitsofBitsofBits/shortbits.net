@@ -49,6 +49,10 @@ const initialInterfaceTheme = window.BITS_INTERFACE_THEMES.find(
 
 document.documentElement.dataset.colorScheme = colorScheme;
 document.documentElement.dataset.interfaceTheme = initialInterfaceTheme.id;
+document.documentElement.classList.toggle(
+  "is-rgb-mode",
+  localStorage.getItem("bits-rgb-mode") === "true",
+);
 document.documentElement.style.setProperty("--accent", initialAccent.accent);
 document.documentElement.style.setProperty("--accent-rgb", initialAccent.rgb);
 document.querySelector('meta[name="theme-color"]').content =

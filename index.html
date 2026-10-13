@@ -28,11 +28,11 @@
     <link rel="canonical" href="https://www.shortbits.net/">
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
-    <script src="theme-init.js?v=theme-3"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-19">
+    <script src="theme-init.js?v=theme-4"></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-20">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
-    <script src="script.js?v=upgrade-18" defer></script>
+    <script src="script.js?v=upgrade-19" defer></script>
     <script src="windows.js?v=windows-6" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="about.js?v=about-3" defer></script>
@@ -259,12 +259,29 @@
       <footer>
         <p>MADE WITH <span aria-label="love">♥</span> + QUESTIONABLE CSS</p>
         <div class="footer-controls">
-          <button id="interface-theme-button" type="button" aria-label="Change interface theme">
-            THEME: <span id="interface-theme-name">DEFAULT</span>
-          </button>
-          <button id="theme-button" type="button" aria-label="Change interface color">
-            ACCENT: <span id="theme-name">GREEN</span>
-          </button>
+          <label class="footer-select-control">
+            <span>THEME:</span>
+            <select id="interface-theme-select" aria-label="Interface theme">
+              <option value="default">DEFAULT</option>
+              <option value="aurora">AURORA</option>
+              <option value="cozy-blossom">COZY BLOSSOM</option>
+              <option value="mica">MICA</option>
+              <option value="fluent">FLUENT</option>
+              <option value="midnight-oled">MIDNIGHT OLED</option>
+              <option value="macos">MACOS</option>
+              <option value="terminal">TERMINAL</option>
+            </select>
+          </label>
+          <label class="footer-select-control">
+            <span>ACCENT:</span>
+            <select id="accent-select" aria-label="Interface accent">
+              <option value="GREEN">GREEN</option>
+              <option value="CYAN">CYAN</option>
+              <option value="VIOLET">VIOLET</option>
+              <option value="AMBER">AMBER</option>
+              <option value="RGB">RGB</option>
+            </select>
+          </label>
           <button id="mode-button" type="button" aria-label="Switch between dark and light mode">
             DISPLAY: <span id="mode-name">DARK</span>
           </button>
