@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-38">
+    <link rel="stylesheet" href="styles.css?v=upgrade-39">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
@@ -38,9 +38,10 @@
     <script src="analytics.js?v=analytics-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-27" defer></script>
-    <script src="windows.js?v=windows-7" defer></script>
-    <script src="settings.js?v=settings-1" defer></script>
+    <script src="script.js?v=upgrade-28" defer></script>
+    <script src="windows.js?v=windows-8" defer></script>
+    <script src="settings.js?v=settings-2" defer></script>
+    <script src="death-screens.js?v=death-screens-1" defer></script>
     <script src="content.js?v=content-1" defer></script>
     <script src="about.js?v=about-3" defer></script>
     <script src="pronouns.js?v=pronouns-1" defer></script>
@@ -662,6 +663,19 @@
               Preferences are saved in this browser.
             </p>
           </fieldset>
+          <details class="settings-group settings-group-wide settings-insider">
+            <summary>ADVANCED UPDATE OPTIONS</summary>
+            <div class="settings-insider-content">
+              <div>
+                <strong>BITS INSIDER PROGRAM</strong>
+                <p>Receive experimental Bits before they are ready, useful, or technically Bits.</p>
+              </div>
+              <button id="settings-insider-toggle" type="button">JOIN CANARY BITS</button>
+            </div>
+            <p id="settings-insider-status" class="settings-status" role="status" aria-live="polite">
+              Channel: STABLE // Sensible decisions enabled.
+            </p>
+          </details>
         </div>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Settings window"></button>
@@ -1091,6 +1105,11 @@
       aria-atomic="false"
     ></div>
 
+    <aside id="insider-watermark" class="insider-watermark" aria-label="Bits Insider Preview build" hidden>
+      <strong>Bits Insider Preview</strong>
+      <span>Evaluation copy. Build 10.0.26052.bits_canary.241013-0032</span>
+    </aside>
+
     <section
       id="boot-screen"
       class="boot-screen"
@@ -1112,6 +1131,59 @@
       <span id="achievement-label">ACHIEVEMENT UNLOCKED</span>
       <strong id="achievement-message">TOO MANY BITS</strong>
     </div>
+
+    <section
+      id="black-screen"
+      class="death-screen black-screen"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="black-screen-heading"
+      tabindex="-1"
+      hidden
+    >
+      <div class="death-screen-content">
+        <div class="death-screen-face" aria-hidden="true">:(</div>
+        <h2 id="black-screen-heading">Your Bits ran into nothing and need to be rediscovered.</h2>
+        <p id="black-screen-status">Searching the Bit Bucket for recoverable interface fragments.</p>
+        <p class="death-screen-progress" aria-live="assertive">
+          <strong id="black-screen-progress">0%</strong> complete
+        </p>
+        <a class="death-screen-qr black-screen-qr" href="/useless.html" aria-label="Open the allegedly helpful Black Screen error information page">
+          <img src="/images/useless-qr.svg" alt="">
+          <span>QR code visibility is currently experiencing visibility issues.</span>
+        </a>
+        <p class="death-screen-stop-code">Stop code: <strong>BIT_BUCKET_EMPTY</strong><br>What failed: reality.dll</p>
+      </div>
+    </section>
+
+    <section
+      id="green-screen"
+      class="death-screen green-screen"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="green-screen-heading"
+      tabindex="-1"
+      hidden
+    >
+      <div class="death-screen-content">
+        <p class="green-screen-build">BITS INSIDER PREVIEW // CANARY CHANNEL</p>
+        <div class="death-screen-face" aria-hidden="true">:(</div>
+        <h2 id="green-screen-heading">Your experimental Bits ran into a problem and need to restart.</h2>
+        <p>We're collecting some extremely speculative error info, and then we'll install an even less stable build.</p>
+        <p class="death-screen-progress" aria-live="assertive">
+          <strong id="green-screen-progress">0%</strong> complete
+        </p>
+        <a class="death-screen-qr" href="/useless.html" aria-label="Open the allegedly helpful Green Screen error information page">
+          <img src="/images/useless-qr.svg" alt="">
+          <span>For more information about this issue, scan this QR code.</span>
+        </a>
+        <p class="death-screen-stop-code">
+          Stop code: <strong id="green-screen-code">UNSTABLE_BIT_CHANNEL</strong><br>
+          What failed: definitely-ready-for-production.sys
+        </p>
+        <p class="green-screen-build">Evaluation copy. Build 10.0.26052.bits_canary.241013-0032</p>
+      </div>
+    </section>
 
     <section
       id="red-screen"

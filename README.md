@@ -17,8 +17,8 @@ is a personal project and largely a learning exercise for me.
 - Cached Discord presence, custom status, and activity through Lanyard
 - Private contact form backed by Supabase
 - Persistent local achievements and a large collection of Easter eggs,
-  including an automatically recovering Red Screen of Death after username
-  overflow
+  including Blue, Red, Black, and Insider Green death screens with a
+  four-color completion achievement
 - Adaptive performance mode for constrained or slow devices
 - Optional draggable mini-windows for profile, pronouns, Spotify, source,
   diagnostics, and settings that stay viewport-safe, resize from every edge
@@ -26,7 +26,8 @@ is a personal project and largely a learning exercise for me.
 - Shareable window URLs such as `?window=spotify` and
   `?windows=about,spotify` that restore linked windows on load
 - A persistent control panel for appearance, reduced motion, larger text,
-  increased contrast, decorative effects, window-layout resets, and link copying
+  increased contrast, decorative effects, window-layout resets, link copying,
+  and an experimental Canary Bits Insider channel
 - Admin-managed `CAREER.SYS`, `NOW.TXT`, and `CHANGELOG.LOG` windows with
   shareable URLs, responsive layouts, five-minute public caching, and clean
   unpublished states

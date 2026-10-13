@@ -201,6 +201,7 @@ function closeDesktopWindow(windowElement, syncUrl = true) {
   windowElement.hidden = true;
   windowElement.classList.remove("is-minimized");
   updateDesktopWindowCount();
+  const remainingOpen = desktopWindows.filter((candidate) => !candidate.hidden).length;
 
   const launcherId = windowElement.dataset.launcherId;
   if (launcherId) {
@@ -213,6 +214,12 @@ function closeDesktopWindow(windowElement, syncUrl = true) {
   if (syncUrl) {
     syncDesktopWindowUrl();
   }
+  window.dispatchEvent(new CustomEvent("desktop-window:closed", {
+    detail: {
+      remainingOpen,
+      windowId: windowElement.id,
+    },
+  }));
 }
 
 function applyDesktopWindowUrl() {
@@ -482,7 +489,7 @@ window.addEventListener("popstate", applyDesktopWindowUrl);
 
 document.addEventListener("keydown", (event) => {
   const blockingInterface = document.querySelector(
-    ".system-overlay:not([hidden]), #achievements-panel:not([hidden]), #shutdown-screen:not([hidden])",
+    ".system-overlay:not([hidden]), .death-screen:not([hidden]), #achievements-panel:not([hidden]), #shutdown-screen:not([hidden])",
   );
   if (
     event.key === "Escape"

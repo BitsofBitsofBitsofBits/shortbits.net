@@ -22,6 +22,7 @@ const preferenceKeys = [
   "bits-text-size",
   "bits-contrast",
   "bits-effects",
+  "bits-insider-channel",
 ];
 
 function addSelectOptions(select, options) {

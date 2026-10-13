@@ -375,6 +375,9 @@ const achievementCatalog = [
   { id: "infinite-username", hints: ["The username can contain more username.", "Hold the repeated name.", "Press and hold BitsofBitsofBits."] },
   { id: "more-bits", hints: ["Rapid repetition reveals more.", "The username responds to impatient clicking.", "Triple-click BitsofBitsofBits."] },
   { id: "red-screen", hints: ["A username can only contain so many Bits.", "Triple-clicking adds another segment.", "Add ten extra Bits without refreshing."] },
+  { id: "black-screen", hints: ["An empty desktop can become emptier.", "Close the last desktop window.", "Then knock five times on the empty background."] },
+  { id: "green-screen", hints: ["Stable software is optional.", "Advanced update options contain a preview channel.", "Join Canary Bits, then open three windows."] },
+  { id: "failure-spectrum", hints: ["Technical difficulty comes in several colors.", "Blue, Red, Black, and Green are all available.", "Survive all four death screens."] },
   { id: "fake-update", hints: ["Everything needs an update eventually.", "The terminal knows update.", "Type update."] },
   { id: "gravity", hints: ["Physics is configurable.", "Restore a familiar force.", "Type gravity."] },
   { id: "antigravity", hints: ["Physics is optional.", "Try removing a familiar force.", "Type antigravity."] },
@@ -685,6 +688,7 @@ achievementsReset.addEventListener("click", () => {
   }
   unlockedAchievements = [];
   saveUnlockedAchievements();
+  window.dispatchEvent(new CustomEvent("bits:achievements-reset"));
   updateAchievementCount();
   renderAchievementsPanel();
   showAchievement("LOCAL CACHE CLEARED", "ACHIEVEMENT DATA", 2200);
@@ -1357,6 +1361,9 @@ rebootButton.addEventListener("click", () => {
     2800,
     "reboot",
   );
+  window.dispatchEvent(new CustomEvent("bits:death-screen-survived", {
+    detail: { screen: "blue" },
+  }));
   markRootStep("reboot");
   if (bootToBios) {
     bootToBios = false;
@@ -1536,6 +1543,9 @@ function recoverFromRedScreen() {
     3600,
     "red-screen",
   );
+  window.dispatchEvent(new CustomEvent("bits:death-screen-survived", {
+    detail: { screen: "red" },
+  }));
   const recoveryFocus = redScreenPreviousFocus instanceof HTMLElement
     && document.contains(redScreenPreviousFocus)
     && redScreenPreviousFocus !== document.body

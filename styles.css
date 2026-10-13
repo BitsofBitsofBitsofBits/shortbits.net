@@ -341,7 +341,10 @@ body {
 }
 
 body.is-shutdown,
-body.is-red-screen {
+body.is-red-screen,
+body.is-black-screen,
+body.is-green-screen,
+body.is-black-screen-staging {
   overflow: hidden;
 }
 
@@ -2475,6 +2478,225 @@ footer span {
 
 .shell.is-minimized .system-bar {
   border-bottom: 0;
+}
+
+.death-screen {
+  position: fixed;
+  z-index: 155;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: clamp(28px, 8vw, 110px);
+  overflow: auto;
+  color: #fff;
+}
+
+.death-screen[hidden] {
+  display: none;
+}
+
+.death-screen-content {
+  width: min(760px, 100%);
+}
+
+.death-screen-face {
+  margin-bottom: 24px;
+  font-size: clamp(3.6rem, 14vw, 7.5rem);
+  font-weight: 400;
+  line-height: 0.8;
+}
+
+.death-screen h2 {
+  max-width: 700px;
+  margin: 0 0 18px;
+  font-size: clamp(1.35rem, 4.5vw, 2.35rem);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.death-screen-content > p {
+  max-width: 680px;
+  line-height: 1.65;
+}
+
+.death-screen-progress {
+  margin: 30px 0 24px;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+}
+
+.death-screen-progress strong {
+  font-size: 1.2em;
+}
+
+.death-screen-qr {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  width: min(390px, 100%);
+  margin: 0 0 26px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.death-screen-qr img {
+  width: clamp(74px, 10vw, 96px);
+  height: auto;
+  padding: 4px;
+  background: #fff;
+  image-rendering: pixelated;
+}
+
+.death-screen-qr:hover,
+.death-screen-qr:focus-visible {
+  color: #fff;
+  outline: 2px solid #fff;
+  outline-offset: 5px;
+}
+
+.death-screen-stop-code {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(0.65rem, 1.8vw, 0.78rem);
+  letter-spacing: 0.04em;
+}
+
+.black-screen {
+  z-index: 160;
+  background:
+    radial-gradient(circle at 46% 36%, #101010 0, #030303 46%, #000 78%),
+    #000;
+  box-shadow: inset 0 0 22vw #000;
+  animation: black-screen-arrival 300ms steps(3);
+}
+
+.black-screen-qr {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.black-screen-qr img {
+  opacity: 0.035;
+}
+
+.black-screen-qr:hover img,
+.black-screen-qr:focus-visible img {
+  opacity: 0.25;
+}
+
+body.is-empty-desktop-armed {
+  cursor: crosshair;
+}
+
+body.is-black-screen-warning .shell {
+  animation: black-screen-warning 380ms steps(2);
+}
+
+body.is-black-screen-staging .shell,
+body.is-black-screen-staging footer,
+body.is-black-screen-staging .desktop-window,
+body.is-black-screen-staging .insider-watermark,
+body.is-black-screen-staging .name-field,
+body.is-black-screen-staging .theme-atmosphere,
+body.is-black-screen-staging .binary-rain {
+  animation: empty-desktop-collapse 650ms steps(5) forwards;
+  pointer-events: none;
+}
+
+.green-screen {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 4px,
+      rgba(255, 255, 255, 0.035) 5px,
+      transparent 7px
+    ),
+    radial-gradient(circle at 30% 24%, #169f45 0, #087c35 52%, #045825 100%);
+  box-shadow: inset 0 0 18vw rgba(0, 40, 8, 0.42);
+  animation: green-screen-arrival 440ms steps(6);
+}
+
+.green-screen-build {
+  margin-bottom: 26px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: clamp(0.6rem, 1.6vw, 0.74rem);
+  letter-spacing: 0.1em;
+}
+
+.insider-watermark {
+  position: fixed;
+  z-index: 25;
+  right: clamp(14px, 3vw, 36px);
+  bottom: clamp(14px, 3vw, 32px);
+  display: grid;
+  max-width: min(360px, calc(100% - 28px));
+  color: color-mix(in srgb, var(--ink) 58%, transparent);
+  font-size: clamp(0.6rem, 1.5vw, 0.72rem);
+  line-height: 1.45;
+  text-align: right;
+  text-shadow: 0 1px 4px var(--bg);
+  pointer-events: none;
+}
+
+.insider-watermark[hidden] {
+  display: none;
+}
+
+.insider-watermark strong {
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  font-weight: 600;
+}
+
+@keyframes black-screen-arrival {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes black-screen-warning {
+  0%,
+  100% {
+    filter: none;
+  }
+  50% {
+    filter: brightness(0.42);
+  }
+}
+
+@keyframes empty-desktop-collapse {
+  0% {
+    opacity: 1;
+    filter: none;
+  }
+  35% {
+    opacity: 0.78;
+    filter: grayscale(1) brightness(0.7);
+  }
+  58% {
+    opacity: 0.2;
+    filter: grayscale(1) brightness(0.25);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(0);
+  }
+}
+
+@keyframes green-screen-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: brightness(1.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 .red-screen {
@@ -4679,6 +4901,83 @@ html[data-boot="pending"] .boot-screen[hidden] {
 
 .settings-status.is-error {
   color: #ff6d7a;
+}
+
+.settings-insider {
+  padding: 0;
+}
+
+.settings-insider summary {
+  padding: 14px 16px;
+  color: var(--accent);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.settings-insider summary:hover,
+.settings-insider summary:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.settings-insider-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin: 0 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.settings-insider-content strong {
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+.settings-insider-content p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.settings-insider-content button {
+  padding: 9px 11px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.settings-insider-content button:hover,
+.settings-insider-content button:focus-visible,
+.settings-insider-content button[aria-pressed="true"] {
+  outline: none;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.settings-insider .settings-status {
+  margin: 0;
+  padding: 0 16px 14px;
+}
+
+@media (max-width: 560px) {
+  .settings-insider-content {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-insider-content button {
+    width: 100%;
+  }
+
+  .death-screen {
+    align-items: start;
+  }
 }
 
 .content-window-empty {
