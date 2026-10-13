@@ -3598,6 +3598,11 @@ body.is-black-screen-staging .binary-rain {
   --window-default-width: 920px;
 }
 
+#trace-window {
+  --window-default-height: 720px;
+  --window-default-width: 900px;
+}
+
 #arcade-window {
   --window-default-height: 780px;
   --window-default-width: 1180px;
@@ -3887,6 +3892,186 @@ body.is-black-screen-staging .binary-rain {
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 14px;
+}
+
+.arg-fragment-button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 10px 12px;
+  border: 1px dashed color-mix(in srgb, var(--danger) 65%, var(--border));
+  color: var(--danger);
+  background: transparent;
+  font: inherit;
+  font-size: 0.68rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.arg-fragment-button:hover,
+.arg-fragment-button:focus-visible {
+  border-color: var(--danger);
+  outline: none;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.trace-window-content {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.arg-progress,
+.arg-page-status {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.arg-fragment-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arg-fragment-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-strong);
+}
+
+.arg-fragment-list li > span {
+  grid-row: 1 / 3;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.arg-fragment-list strong,
+.arg-fragment-list code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.arg-fragment-list strong {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.arg-fragment-list code {
+  color: var(--danger);
+  font-size: 0.66rem;
+}
+
+.arg-fragment-list .is-recovered {
+  border-color: var(--accent);
+}
+
+.arg-fragment-list .is-recovered strong,
+.arg-fragment-list .is-recovered code {
+  color: var(--accent);
+}
+
+.arg-next-hint {
+  margin: 0;
+  padding: 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  font-size: 0.7rem;
+}
+
+.arg-assembly,
+.arg-archive {
+  padding: 16px;
+  border: 1px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, var(--panel));
+}
+
+.arg-assembly {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.arg-assembly span {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.arg-assembly strong {
+  color: var(--danger);
+  font-size: 1.7rem;
+  letter-spacing: 0.25em;
+}
+
+.arg-assembly code {
+  color: var(--ink);
+}
+
+.arg-archive h3 {
+  margin: 4px 0 14px;
+}
+
+.arg-archive pre {
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  color: var(--danger);
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.arg-outcome-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.arg-outcome-actions button,
+.arg-reset {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.arg-outcome-actions button:hover,
+.arg-outcome-actions button:focus-visible,
+.arg-reset:hover,
+.arg-reset:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  background: var(--accent-soft);
+}
+
+.arg-outcome {
+  margin: 14px 0 0;
+  color: var(--accent);
+  font-size: 0.68rem;
+}
+
+.arg-reset {
+  justify-self: start;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .arg-fragment-list,
+  .arg-outcome-actions {
+    grid-template-columns: 1fr;
+  }
   overflow: hidden;
 }
 

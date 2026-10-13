@@ -30,15 +30,16 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-44">
-    <script src="messages.js?v=messages-12" defer></script>
+    <link rel="stylesheet" href="styles.css?v=upgrade-45">
+    <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
-    <script src="filesystem.js?v=filesystem-1" defer></script>
+    <script src="arg.js?v=arg-2" defer></script>
+    <script src="filesystem.js?v=filesystem-2" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="analytics.js?v=analytics-2" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-30" defer></script>
+    <script src="script.js?v=upgrade-31" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -752,6 +753,9 @@
           <dl id="now-fields" class="content-window-meta content-window-meta-stacked"></dl>
           <p class="content-window-updated">LAST UPDATED <span id="now-updated"></span></p>
         </div>
+        <button class="arg-fragment-button" type="button" data-arg-fragment="now">
+          [CORRUPTED_TRAILING_BYTE]
+        </button>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize NOW window"></button>
     </section>
@@ -779,6 +783,9 @@
           Changelog entries are awaiting operator input.
         </div>
         <ol id="changelog-entries" class="changelog-entry-list" hidden></ol>
+        <button class="arg-fragment-button" type="button" data-arg-fragment="changelog">
+          [RECOVER_UNRELEASED_VERSION]
+        </button>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Changelog window"></button>
     </section>
@@ -894,6 +901,58 @@
         </div>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize File Explorer window"></button>
+    </section>
+
+    <section
+      id="trace-window"
+      class="desktop-window trace-window"
+      role="dialog"
+      aria-labelledby="trace-window-title"
+      data-window
+      data-window-x="240"
+      data-window-y="70"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="trace-window-title">TRACE.EXE</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Trace window">_</button>
+          <button type="button" data-window-close aria-label="Close Trace window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content trace-window-content">
+        <p class="system-kicker">ANOMALOUS_PROCESS // PROCESS_000</p>
+        <h2>THE MISSING BIT</h2>
+        <p id="arg-progress" class="arg-progress">0 / 6 FRAGMENTS RECOVERED</p>
+        <ol id="arg-fragment-list" class="arg-fragment-list"></ol>
+        <p id="arg-next-hint" class="arg-next-hint"></p>
+        <div id="arg-assembly" class="arg-assembly" hidden>
+          <span>ASSEMBLED INSTRUCTION</span>
+          <strong></strong>
+          <code>&gt; trace return</code>
+        </div>
+        <section id="arg-archive" class="arg-archive" aria-labelledby="arg-archive-title" hidden>
+          <p class="system-kicker">ARCHIVE_13.SYS // RECOVERED</p>
+          <h3 id="arg-archive-title">DELETION RECORD</h3>
+          <pre>PROCESS: PROCESS_000
+ALIAS: THE MISSING BIT
+REMOVAL REASON: EXCESSIVE SELF-REPLICATION
+LAST MESSAGE: "I WAS NOT LOST. I WAS ROUNDED DOWN."
+STATUS: DELETED, BUT STILL RUNNING</pre>
+          <p>Containment requires a decision. The process would like to note that deleting it already failed once.</p>
+          <div class="arg-outcome-actions" aria-label="Missing Bit containment decision">
+            <button type="button" data-arg-outcome="restore">RESTORE THE BIT</button>
+            <button type="button" data-arg-outcome="quarantine">QUARANTINE THE BIT</button>
+            <button type="button" data-arg-outcome="delete">DELETE IT AGAIN</button>
+            <button type="button" data-arg-outcome="negotiate">ASK IT POLITELY</button>
+          </div>
+          <p id="arg-outcome" class="arg-outcome" aria-live="polite">
+            NO CONTAINMENT DECISION RECORDED
+          </p>
+        </section>
+        <button id="arg-reset" class="arg-reset" type="button">RESET TRACE DATA</button>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Trace window"></button>
     </section>
 
     <section

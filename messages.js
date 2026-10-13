@@ -102,6 +102,7 @@ window.BITS_MESSAGES = [
   { text: "Put a little fence around the bits!", weight: 2 },
   { text: "Bits are watching you...", weight: 2 },
   { text: "The bits have secrets...", weight: 2 },
+  { text: "WARNING: EXPECTED 8 BITS. FOUND 7. TRY: trace missing bit", weight: 0.5 },
   { text: "Bits are the new black...", weight: 1 },
   { text: "Bits rule the world...", weight: 2 },
   { text: "Bits are forever...", weight: 2 },

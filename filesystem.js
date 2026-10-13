@@ -14,6 +14,22 @@ const virtualFilesystem = {
         bits: {
           type: "directory",
           children: {
+            ".lost+found": {
+              type: "directory",
+              children: {
+                "fragment_04.bin": {
+                  type: "file",
+                  argFragment: "filesystem",
+                  content: [
+                    "ORPHANED INODE RECOVERED",
+                    "OWNER: PROCESS_000",
+                    "BYTE: 01010101",
+                    "ASCII: U",
+                    "COMMENT: I WAS PUT HERE, NOT LOST HERE.",
+                  ].join("\n"),
+                },
+              },
+            },
             "readme.txt": {
               type: "file",
               content: [
@@ -210,6 +226,9 @@ function renderFilesystemDirectory(path) {
         setFilesystemPreview(name, "Directory opened.");
       } else {
         setFilesystemPreview(name, entry.content);
+        if (entry.argFragment) {
+          window.BITS_ARG?.discover(entry.argFragment);
+        }
       }
     });
     item.append(button);
@@ -279,6 +298,9 @@ function handleFilesystemCommand(command) {
         title: command,
         lines: [`cat: ${argument}: Is a directory`],
       };
+    }
+    if (node.argFragment) {
+      window.BITS_ARG?.discover(node.argFragment);
     }
     return {
       handled: true,

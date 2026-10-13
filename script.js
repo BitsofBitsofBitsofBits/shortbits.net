@@ -391,6 +391,9 @@ const achievementCatalog = [
   { id: "bits-assistant", hints: ["Help arrives after prolonged hesitation.", "Remain inactive for a while.", "Wait for the Bits Assistant."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "support-retirement", hints: ["Support tools have limits.", "Excessive assistance wears them down.", "Retire every Automated Support Toolkit button."] },
+  { id: "found-a-bit", hints: ["The system expected more Bits.", "A rare message names a missing process.", "Ask the terminal to trace missing bit."] },
+  { id: "defragmented", hints: ["Six misplaced bytes form one instruction.", "TRACE.EXE tracks every recovered fragment.", "Recover all six Missing Bit fragments."] },
+  { id: "bits-all-the-way-down", hints: ["The recovered process requires a decision.", "RETURN is both a word and an instruction.", "Reconstruct PROCESS_000 and choose its fate."] },
   { id: "avatar-escape", hints: ["Idle processes may wander.", "Leave the page alone for three minutes.", "Trigger avatar idle mode."] },
   { id: "inspect-bits", hints: ["The Bits dislike close inspection.", "A certain browser panel changes the viewport.", "Open developer tools or resize dramatically."] },
   { id: "friday-thirteen", hints: ["The calendar can alter the protocol.", "An ominous date is required.", "Visit on Friday the 13th."] },
@@ -1914,6 +1917,12 @@ async function copySiteUrl() {
 
 function handleSecretCommand(rawCommand) {
   const command = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
+  const argResult = window.BITS_ARG?.handleCommand(command);
+  if (argResult?.handled) {
+    renderTerminalOutput(argResult.title, argResult.lines);
+    return true;
+  }
+
   const filesystemResult = window.BITS_VIRTUAL_FILESYSTEM?.handleCommand(command);
 
   if (filesystemResult?.handled) {
@@ -2022,6 +2031,8 @@ const commandHistory = [];
 let commandHistoryIndex = 0;
 const commandSuggestions = [
   "help",
+  "trace missing bit",
+  "trace status",
   "status",
   "changelog",
   "source",

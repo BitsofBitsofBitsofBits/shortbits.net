@@ -259,10 +259,17 @@ uselessFooterButtons.forEach((button) => {
     uselessFooterResult.textContent = operation.working;
 
     uselessFooterTimer = window.setTimeout(() => {
-      uselessFooterResult.textContent = getEscalatingResponse(
-        operation.complete,
-        attempt,
-      );
+      if (action === "help" && attempt === 13) {
+        const { fragment, wasNew } = window.BITS_ARG.discover("support");
+        uselessFooterResult.textContent = wasNew
+          ? `TICKET 13 ESCAPED THE QUEUE. RECOVERED BYTE: ${fragment.token} // ${fragment.letter}`
+          : `TICKET 13 REMAINS OPEN. VERIFIED BYTE: ${fragment.token} // ${fragment.letter}`;
+      } else {
+        uselessFooterResult.textContent = getEscalatingResponse(
+          operation.complete,
+          attempt,
+        );
+      }
       uselessFooterButtons.forEach((footerButton) => {
         footerButton.disabled = false;
       });
