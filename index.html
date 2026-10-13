@@ -30,13 +30,13 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-31">
+    <link rel="stylesheet" href="styles.css?v=upgrade-32">
     <script src="messages.js?v=messages-11" defer></script>
     <script src="stop-codes.js?v=stop-codes-1" defer></script>
     <script src="filesystem.js?v=filesystem-1" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-23" defer></script>
+    <script src="script.js?v=upgrade-24" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
     <script src="settings.js?v=settings-1" defer></script>
     <script src="supabase-config.js" defer></script>
@@ -46,7 +46,7 @@
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="guestbook.js?v=guestbook-1" defer></script>
-    <script src="arcade.js?v=arcade-1" defer></script>
+    <script src="arcade.js?v=arcade-2" defer></script>
     <script src="spotify.js?v=spotify-14" defer></script>
   </head>
   <body>
@@ -873,6 +873,7 @@
           <button id="arcade-tab-snake" type="button" role="tab" aria-selected="true" aria-controls="arcade-game-snake" data-arcade-game="snake">SNAKE</button>
           <button id="arcade-tab-minesweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-minesweeper" data-arcade-game="minesweeper">MINESWEEPER</button>
           <button id="arcade-tab-bitsweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-bitsweeper" data-arcade-game="bitsweeper">BITSWEEPER</button>
+          <button id="arcade-tab-tetris" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-tetris" data-arcade-game="tetris">TETRIS</button>
         </div>
         <div class="arcade-layout">
           <section class="arcade-game-column">
@@ -896,11 +897,18 @@
                 <p>MINES <strong id="minesweeper-mines">10</strong> // TIME <strong id="minesweeper-time">0</strong></p>
                 <button id="minesweeper-start" type="button">NEW_FIELD</button>
               </div>
+              <div class="minesweeper-difficulty" role="group" aria-label="Minesweeper difficulty">
+                <button type="button" data-mine-difficulty="beginner" aria-pressed="true">BEGINNER</button>
+                <button type="button" data-mine-difficulty="intermediate" aria-pressed="false">INTERMEDIATE</button>
+                <button type="button" data-mine-difficulty="expert" aria-pressed="false">EXPERT</button>
+              </div>
               <div class="minesweeper-mode" role="group" aria-label="Minesweeper input mode">
                 <button type="button" data-mine-mode="dig" aria-pressed="true">DIG</button>
                 <button type="button" data-mine-mode="flag" aria-pressed="false">FLAG</button>
               </div>
-              <div id="minesweeper-board" class="minesweeper-board" role="grid" aria-label="Minesweeper board"></div>
+              <div class="minesweeper-board-scroll">
+                <div id="minesweeper-board" class="minesweeper-board" role="grid" aria-label="Minesweeper board"></div>
+              </div>
               <p class="arcade-help">LEFT CLICK TO DIG // RIGHT CLICK TO FLAG // TOUCH MODE ABOVE</p>
             </article>
 
@@ -915,6 +923,22 @@
                 <input id="bitsweeper-input" type="text" maxlength="24" autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
               </label>
               <p class="arcade-help">TYPE FALLING WORDS BEFORE THEY REACH THE FIREWALL</p>
+            </article>
+
+            <article id="arcade-game-tetris" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-tetris" data-arcade-panel="tetris" hidden>
+              <div class="arcade-game-toolbar">
+                <p>SCORE <strong id="tetris-score">0</strong> // LINES <strong id="tetris-lines">0</strong> // LEVEL <strong id="tetris-level">1</strong></p>
+                <button id="tetris-start" type="button">START_STACK</button>
+              </div>
+              <canvas id="tetris-canvas" class="arcade-canvas tetris-canvas" width="300" height="600" aria-label="Tetris game board"></canvas>
+              <div class="tetris-controls" aria-label="Tetris controls">
+                <button type="button" data-tetris-action="left" aria-label="Move left">◀</button>
+                <button type="button" data-tetris-action="rotate" aria-label="Rotate clockwise">ROTATE</button>
+                <button type="button" data-tetris-action="right" aria-label="Move right">▶</button>
+                <button type="button" data-tetris-action="down" aria-label="Soft drop">▼</button>
+                <button type="button" data-tetris-action="drop" aria-label="Hard drop">DROP</button>
+              </div>
+              <p class="arcade-help">ARROWS TO MOVE // UP TO ROTATE // SPACE TO HARD DROP</p>
             </article>
             <p id="arcade-status" class="form-status" role="status" aria-live="polite">Select a game and initialize entertainment.</p>
           </section>

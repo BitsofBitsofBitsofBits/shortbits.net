@@ -387,6 +387,7 @@ const achievementCatalog = [
   { id: "snake-byte", hints: ["An old process is hungry.", "Open ARCADE.EXE.", "Feed the Snake at least one byte."] },
   { id: "mine-clear", hints: ["Some Bits are dangerously buried.", "Open ARCADE.EXE.", "Clear the Minesweeper field."] },
   { id: "bitsweeper-defender", hints: ["The firewall is under linguistic attack.", "Open ARCADE.EXE.", "Type at least one falling target."] },
+  { id: "tetris-line", hints: ["Order can emerge from falling blocks.", "Open ARCADE.EXE.", "Complete a line in Tetris."] },
   { id: `birthday-${new Date().getFullYear()}`, hints: ["One date belongs to Caleb.", "Look near the end of June.", "Visit on June 26."] },
 ];
 const sessionMetrics = {

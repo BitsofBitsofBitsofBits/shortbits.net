@@ -36,9 +36,10 @@ is a personal project and largely a learning exercise for me.
   deletion controls
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
-- An `ARCADE.EXE` library containing Snake, Minesweeper, and Bitsweeper typing
-  defense with keyboard/touch controls, persistent local records, related
-  achievements, and public global leaderboards with Admin moderation
+- An `ARCADE.EXE` library containing Snake, three Minesweeper difficulties,
+  Bitsweeper typing defense, and Tetris with keyboard/touch controls, persistent
+  local records, related achievements, and public global leaderboards with
+  Admin moderation
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,

@@ -11,28 +11,77 @@ const scoreForm = document.querySelector("#arcade-score-form");
 const scoreSubmit = document.querySelector("#arcade-score-submit");
 const resultScore = document.querySelector("#arcade-result-score");
 const arcadeStorageKey = "bits-arcade-bests-v1";
-const arcadeGames = new Set(["snake", "minesweeper", "bitsweeper"]);
+const arcadeGames = new Set(["snake", "minesweeper", "bitsweeper", "tetris"]);
+const rankingGames = new Set([
+  "snake",
+  "minesweeper-beginner",
+  "minesweeper-intermediate",
+  "minesweeper-expert",
+  "bitsweeper",
+  "tetris",
+]);
 const playerNamePattern = /^[A-Za-z0-9][A-Za-z0-9 _.-]{0,23}$/;
 const gameLabels = {
   snake: "SNAKE",
   minesweeper: "MINESWEEPER",
   bitsweeper: "BITSWEEPER",
+  tetris: "TETRIS",
+};
+const mineDifficulties = {
+  beginner: {
+    rows: 9,
+    columns: 9,
+    mines: 10,
+    baseScore: 10000,
+  },
+  intermediate: {
+    rows: 16,
+    columns: 16,
+    mines: 40,
+    baseScore: 25000,
+  },
+  expert: {
+    rows: 16,
+    columns: 30,
+    mines: 99,
+    baseScore: 50000,
+  },
 };
 let activeGame = "snake";
+let mineDifficulty = "beginner";
 let pendingResult = null;
+
+function getRankingGame(game = activeGame) {
+  return game === "minesweeper"
+    ? `minesweeper-${mineDifficulty}`
+    : game;
+}
+
+function getLeaderboardLabel() {
+  if (activeGame === "minesweeper") {
+    return `MINESWEEPER ${mineDifficulty.toUpperCase()}`;
+  }
+  return gameLabels[activeGame];
+}
 
 function readLocalBests() {
   try {
     const stored = JSON.parse(localStorage.getItem(arcadeStorageKey) || "{}");
+    if (
+      Number.isInteger(stored.minesweeper)
+      && !Number.isInteger(stored["minesweeper-beginner"])
+    ) {
+      stored["minesweeper-beginner"] = stored.minesweeper;
+    }
     return Object.fromEntries(
-      [...arcadeGames].map((game) => [
+      [...rankingGames].map((game) => [
         game,
         Number.isInteger(stored[game]) && stored[game] >= 0 ? stored[game] : 0,
       ]),
     );
   } catch (error) {
     console.error("Unable to read Arcade high scores:", error);
-    return { snake: 0, minesweeper: 0, bitsweeper: 0 };
+    return Object.fromEntries([...rankingGames].map((game) => [game, 0]));
   }
 }
 
@@ -58,7 +107,7 @@ function saveLocalBest(game, score) {
 }
 
 function updateLocalBest() {
-  arcadeLocalBest.textContent = localBests[activeGame].toLocaleString();
+  arcadeLocalBest.textContent = localBests[getRankingGame()].toLocaleString();
 }
 
 function getArcadeConnection() {
@@ -78,7 +127,7 @@ function getArcadeConnection() {
 function isValidScoreRow(row) {
   return row
     && typeof row.id === "string"
-    && arcadeGames.has(row.game)
+    && rankingGames.has(row.game)
     && typeof row.player_name === "string"
     && row.player_name.length > 0
     && row.player_name.length <= 24
@@ -112,7 +161,7 @@ async function loadLeaderboard() {
   leaderboardList.replaceChildren();
   try {
     const { endpoint, headers } = getArcadeConnection();
-    const game = encodeURIComponent(activeGame);
+    const game = encodeURIComponent(getRankingGame());
     const response = await fetch(
       `${endpoint}?select=id,game,player_name,score,detail,created_at&game=eq.${game}&order=score.desc,created_at.asc&limit=10`,
       { headers },
@@ -172,6 +221,7 @@ function selectGame(game) {
   }
   stopSnake();
   stopBitsweeper();
+  stopTetris();
   activeGame = game;
   pendingResult = null;
   scoreForm.hidden = true;
@@ -183,7 +233,7 @@ function selectGame(game) {
   arcadePanels.forEach((panel) => {
     panel.hidden = panel.dataset.arcadePanel !== game;
   });
-  leaderboardTitle.textContent = `${gameLabels[game]} LEADERBOARD`;
+  leaderboardTitle.textContent = `${getLeaderboardLabel()} LEADERBOARD`;
   updateLocalBest();
   setArcadeStatus(`${gameLabels[game]} subsystem ready.`);
   loadLeaderboard();
@@ -244,7 +294,7 @@ scoreForm.addEventListener("submit", async (event) => {
     setArcadeStatus("Score transmitted to the global leaderboard.", "success");
     window.BITS_NOTIFICATIONS?.notify({
       title: "SCORE UPLOADED",
-      message: `${gameLabels[activeGame]} leaderboard updated.`,
+      message: `${getLeaderboardLabel()} leaderboard updated.`,
       type: "success",
     });
     await loadLeaderboard();
@@ -420,8 +470,12 @@ const minesweeperMines = document.querySelector("#minesweeper-mines");
 const minesweeperTime = document.querySelector("#minesweeper-time");
 const minesweeperStart = document.querySelector("#minesweeper-start");
 const mineModeButtons = [...document.querySelectorAll("[data-mine-mode]")];
-const mineSize = 9;
-const mineCount = 10;
+const mineDifficultyButtons = [
+  ...document.querySelectorAll("[data-mine-difficulty]"),
+];
+let mineRows = mineDifficulties[mineDifficulty].rows;
+let mineColumns = mineDifficulties[mineDifficulty].columns;
+let mineCount = mineDifficulties[mineDifficulty].mines;
 let mineCells = [];
 let mineMode = "dig";
 let mineStarted = false;
@@ -430,7 +484,7 @@ let mineSeconds = 0;
 let mineTimer = null;
 
 function mineIndex(row, column) {
-  return (row * mineSize) + column;
+  return (row * mineColumns) + column;
 }
 
 function mineNeighbors(row, column) {
@@ -442,9 +496,9 @@ function mineNeighbors(row, column) {
       if (
         (rowOffset !== 0 || columnOffset !== 0)
         && nextRow >= 0
-        && nextRow < mineSize
+        && nextRow < mineRows
         && nextColumn >= 0
-        && nextColumn < mineSize
+        && nextColumn < mineColumns
       ) {
         neighbors.push(mineIndex(nextRow, nextColumn));
       }
@@ -492,8 +546,8 @@ function renderMinefield() {
 
 function plantMines(safeIndex) {
   const excluded = new Set([safeIndex, ...mineNeighbors(
-    Math.floor(safeIndex / mineSize),
-    safeIndex % mineSize,
+    Math.floor(safeIndex / mineColumns),
+    safeIndex % mineColumns,
   )]);
   const candidates = mineCells
     .map((_, index) => index)
@@ -504,8 +558,8 @@ function plantMines(safeIndex) {
     mineCells[selected].mine = true;
   }
   mineCells.forEach((cell, index) => {
-    const row = Math.floor(index / mineSize);
-    const column = index % mineSize;
+    const row = Math.floor(index / mineColumns);
+    const column = index % mineColumns;
     cell.adjacent = mineNeighbors(row, column)
       .filter((neighbor) => mineCells[neighbor].mine)
       .length;
@@ -529,8 +583,8 @@ function revealMineCell(startIndex) {
     visited.add(index);
     cell.revealed = true;
     if (!cell.mine && cell.adjacent === 0) {
-      const row = Math.floor(index / mineSize);
-      const column = index % mineSize;
+      const row = Math.floor(index / mineColumns);
+      const column = index % mineColumns;
       queue.push(...mineNeighbors(row, column));
     }
   }
@@ -549,12 +603,13 @@ function finishMinesweeper(won) {
     setArcadeStatus("Minefield integrity compromised. New field recommended.", "error");
     return;
   }
-  const score = Math.max(1000, 10000 - (mineSeconds * 100));
+  const difficulty = mineDifficulties[mineDifficulty];
+  const score = Math.max(1000, difficulty.baseScore - (mineSeconds * 100));
   finishGame(
-    "minesweeper",
+    getRankingGame("minesweeper"),
     score,
-    `${mineSeconds} SEC // 9x9`,
-    `Minefield cleared in ${mineSeconds} seconds.`,
+    `${mineSeconds} SEC // ${mineColumns}x${mineRows}`,
+    `${mineDifficulty.toUpperCase()} minefield cleared in ${mineSeconds} seconds.`,
     { id: "mine-clear", label: "ARCADE ACHIEVEMENT", message: "NO BITS WERE EXPLODED" },
   );
 }
@@ -601,7 +656,11 @@ function interactWithMine(index, flagOnly = false) {
 
 function startMinesweeper() {
   stopMineTimer();
-  mineCells = Array.from({ length: mineSize * mineSize }, () => ({
+  const difficulty = mineDifficulties[mineDifficulty];
+  mineRows = difficulty.rows;
+  mineColumns = difficulty.columns;
+  mineCount = difficulty.mines;
+  mineCells = Array.from({ length: mineRows * mineColumns }, () => ({
     mine: false,
     revealed: false,
     flagged: false,
@@ -612,6 +671,12 @@ function startMinesweeper() {
   mineSeconds = 0;
   minesweeperTime.textContent = "0";
   minesweeperMines.textContent = String(mineCount);
+  minesweeperBoard.style.setProperty("--mine-columns", String(mineColumns));
+  minesweeperBoard.style.setProperty("--mine-rows", String(mineRows));
+  minesweeperBoard.setAttribute(
+    "aria-label",
+    `${mineDifficulty} Minesweeper board, ${mineColumns} by ${mineRows}`,
+  );
   scoreForm.hidden = true;
   pendingResult = null;
   minesweeperBoard.replaceChildren();
@@ -630,10 +695,27 @@ function startMinesweeper() {
     minesweeperBoard.append(button);
   });
   renderMinefield();
-  setArcadeStatus("Fresh minefield generated. First dig is always safe.");
+  setArcadeStatus(
+    `${mineDifficulty.toUpperCase()} minefield generated. First dig is always safe.`,
+  );
 }
 
 minesweeperStart.addEventListener("click", startMinesweeper);
+mineDifficultyButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    mineDifficulty = button.dataset.mineDifficulty;
+    mineDifficultyButtons.forEach((difficultyButton) => {
+      difficultyButton.setAttribute(
+        "aria-pressed",
+        String(difficultyButton.dataset.mineDifficulty === mineDifficulty),
+      );
+    });
+    startMinesweeper();
+    leaderboardTitle.textContent = `${getLeaderboardLabel()} LEADERBOARD`;
+    updateLocalBest();
+    loadLeaderboard();
+  });
+});
 mineModeButtons.forEach((button) => {
   button.addEventListener("click", () => {
     mineMode = button.dataset.mineMode;
@@ -790,14 +872,342 @@ bitsweeperInput.addEventListener("input", () => {
   drawBitsweeper();
 });
 
+const tetrisCanvas = document.querySelector("#tetris-canvas");
+const tetrisContext = tetrisCanvas.getContext("2d");
+const tetrisScore = document.querySelector("#tetris-score");
+const tetrisLines = document.querySelector("#tetris-lines");
+const tetrisLevel = document.querySelector("#tetris-level");
+const tetrisStart = document.querySelector("#tetris-start");
+const tetrisColumns = 10;
+const tetrisRows = 20;
+const tetrisCellSize = tetrisCanvas.width / tetrisColumns;
+const tetrominoes = [
+  { color: "#4fd8ff", matrix: [[1, 1, 1, 1]] },
+  { color: "#ffd84f", matrix: [[1, 1], [1, 1]] },
+  { color: "#b98aff", matrix: [[0, 1, 0], [1, 1, 1]] },
+  { color: "#58df7b", matrix: [[0, 1, 1], [1, 1, 0]] },
+  { color: "#ff6573", matrix: [[1, 1, 0], [0, 1, 1]] },
+  { color: "#5d88ff", matrix: [[1, 0, 0], [1, 1, 1]] },
+  { color: "#ff9d4f", matrix: [[0, 0, 1], [1, 1, 1]] },
+];
+let tetrisBoard = [];
+let tetrisPiece = null;
+let tetrisPoints = 0;
+let tetrisClearedLines = 0;
+let tetrisCurrentLevel = 1;
+let tetrisTimer = null;
+let tetrisAchievementShown = false;
+
+function createTetrisBoard() {
+  return Array.from(
+    { length: tetrisRows },
+    () => Array(tetrisColumns).fill(null),
+  );
+}
+
+function createTetrisPiece() {
+  const template = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+  const matrix = template.matrix.map((row) => [...row]);
+  return {
+    color: template.color,
+    matrix,
+    x: Math.floor((tetrisColumns - matrix[0].length) / 2),
+    y: 0,
+  };
+}
+
+function rotateTetrisMatrix(matrix) {
+  return matrix[0].map((_, column) => (
+    matrix.map((row) => row[column]).reverse()
+  ));
+}
+
+function tetrisCollides(piece, offsetX = 0, offsetY = 0, matrix = piece.matrix) {
+  return matrix.some((row, rowIndex) => row.some((filled, columnIndex) => {
+    if (!filled) {
+      return false;
+    }
+    const x = piece.x + columnIndex + offsetX;
+    const y = piece.y + rowIndex + offsetY;
+    return (
+      x < 0
+      || x >= tetrisColumns
+      || y >= tetrisRows
+      || (y >= 0 && tetrisBoard[y][x])
+    );
+  }));
+}
+
+function drawTetrisCell(x, y, color) {
+  tetrisContext.fillStyle = color;
+  tetrisContext.fillRect(
+    (x * tetrisCellSize) + 1,
+    (y * tetrisCellSize) + 1,
+    tetrisCellSize - 2,
+    tetrisCellSize - 2,
+  );
+  tetrisContext.strokeStyle = "rgba(255, 255, 255, 0.28)";
+  tetrisContext.strokeRect(
+    (x * tetrisCellSize) + 3,
+    (y * tetrisCellSize) + 3,
+    tetrisCellSize - 6,
+    tetrisCellSize - 6,
+  );
+}
+
+function drawTetris() {
+  const colors = arcadeColors();
+  tetrisContext.fillStyle = colors.panel;
+  tetrisContext.fillRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
+  tetrisContext.strokeStyle = `${colors.muted}33`;
+  tetrisContext.lineWidth = 1;
+  for (let column = 0; column <= tetrisColumns; column += 1) {
+    tetrisContext.beginPath();
+    tetrisContext.moveTo(column * tetrisCellSize, 0);
+    tetrisContext.lineTo(column * tetrisCellSize, tetrisCanvas.height);
+    tetrisContext.stroke();
+  }
+  for (let row = 0; row <= tetrisRows; row += 1) {
+    tetrisContext.beginPath();
+    tetrisContext.moveTo(0, row * tetrisCellSize);
+    tetrisContext.lineTo(tetrisCanvas.width, row * tetrisCellSize);
+    tetrisContext.stroke();
+  }
+  tetrisBoard.forEach((row, y) => {
+    row.forEach((color, x) => {
+      if (color) {
+        drawTetrisCell(x, y, color);
+      }
+    });
+  });
+  if (tetrisPiece) {
+    tetrisPiece.matrix.forEach((row, rowIndex) => {
+      row.forEach((filled, columnIndex) => {
+        if (filled) {
+          drawTetrisCell(
+            tetrisPiece.x + columnIndex,
+            tetrisPiece.y + rowIndex,
+            tetrisPiece.color,
+          );
+        }
+      });
+    });
+  }
+}
+
+function updateTetrisStats() {
+  tetrisScore.textContent = tetrisPoints.toLocaleString();
+  tetrisLines.textContent = String(tetrisClearedLines);
+  tetrisLevel.textContent = String(tetrisCurrentLevel);
+}
+
+function stopTetris() {
+  window.clearTimeout(tetrisTimer);
+  tetrisTimer = null;
+}
+
+function scheduleTetrisTick() {
+  stopTetris();
+  const delay = Math.max(90, 780 - ((tetrisCurrentLevel - 1) * 65));
+  tetrisTimer = window.setTimeout(() => {
+    stepTetris();
+    if (tetrisPiece) {
+      scheduleTetrisTick();
+    }
+  }, delay);
+}
+
+function mergeTetrisPiece() {
+  tetrisPiece.matrix.forEach((row, rowIndex) => {
+    row.forEach((filled, columnIndex) => {
+      if (filled) {
+        const y = tetrisPiece.y + rowIndex;
+        const x = tetrisPiece.x + columnIndex;
+        if (y >= 0) {
+          tetrisBoard[y][x] = tetrisPiece.color;
+        }
+      }
+    });
+  });
+}
+
+function clearTetrisLines() {
+  let cleared = 0;
+  tetrisBoard = tetrisBoard.filter((row) => {
+    if (row.every(Boolean)) {
+      cleared += 1;
+      return false;
+    }
+    return true;
+  });
+  while (tetrisBoard.length < tetrisRows) {
+    tetrisBoard.unshift(Array(tetrisColumns).fill(null));
+  }
+  if (!cleared) {
+    return;
+  }
+  const lineScores = [0, 100, 300, 500, 800];
+  tetrisPoints += lineScores[cleared] * tetrisCurrentLevel;
+  tetrisClearedLines += cleared;
+  tetrisCurrentLevel = Math.floor(tetrisClearedLines / 10) + 1;
+  updateTetrisStats();
+  if (!tetrisAchievementShown) {
+    tetrisAchievementShown = true;
+    window.BITS_ACHIEVEMENTS?.unlock(
+      "tetris-line",
+      "THE BITS HAVE FALLEN INTO PLACE",
+      "ARCADE ACHIEVEMENT",
+    );
+  }
+}
+
+function finishTetris() {
+  stopTetris();
+  tetrisPiece = null;
+  drawTetris();
+  finishGame(
+    "tetris",
+    tetrisPoints,
+    `${tetrisClearedLines} LINES // LVL ${tetrisCurrentLevel}`,
+    `Stack overflow after ${tetrisClearedLines} cleared lines.`,
+    null,
+  );
+}
+
+function spawnTetrisPiece() {
+  tetrisPiece = createTetrisPiece();
+  if (tetrisCollides(tetrisPiece)) {
+    finishTetris();
+    return false;
+  }
+  return true;
+}
+
+function lockTetrisPiece() {
+  mergeTetrisPiece();
+  clearTetrisLines();
+  if (!spawnTetrisPiece()) {
+    return;
+  }
+  drawTetris();
+}
+
+function stepTetris(manual = false) {
+  if (!tetrisPiece) {
+    return;
+  }
+  if (!tetrisCollides(tetrisPiece, 0, 1)) {
+    tetrisPiece.y += 1;
+    if (manual) {
+      tetrisPoints += 1;
+      updateTetrisStats();
+    }
+    drawTetris();
+    return;
+  }
+  lockTetrisPiece();
+}
+
+function moveTetris(horizontal) {
+  if (tetrisPiece && !tetrisCollides(tetrisPiece, horizontal, 0)) {
+    tetrisPiece.x += horizontal;
+    drawTetris();
+  }
+}
+
+function rotateTetris() {
+  if (!tetrisPiece) {
+    return;
+  }
+  const rotated = rotateTetrisMatrix(tetrisPiece.matrix);
+  const wallKick = [0, -1, 1, -2, 2].find(
+    (offset) => !tetrisCollides(tetrisPiece, offset, 0, rotated),
+  );
+  if (wallKick !== undefined) {
+    tetrisPiece.x += wallKick;
+    tetrisPiece.matrix = rotated;
+    drawTetris();
+  }
+}
+
+function hardDropTetris() {
+  if (!tetrisPiece) {
+    return;
+  }
+  let dropped = 0;
+  while (!tetrisCollides(tetrisPiece, 0, 1)) {
+    tetrisPiece.y += 1;
+    dropped += 1;
+  }
+  tetrisPoints += dropped * 2;
+  updateTetrisStats();
+  lockTetrisPiece();
+}
+
+function runTetrisAction(action) {
+  if (!tetrisPiece) {
+    return;
+  }
+  if (action === "left") {
+    moveTetris(-1);
+  } else if (action === "right") {
+    moveTetris(1);
+  } else if (action === "rotate") {
+    rotateTetris();
+  } else if (action === "down") {
+    stepTetris(true);
+  } else if (action === "drop") {
+    hardDropTetris();
+  }
+}
+
+function startTetris() {
+  stopTetris();
+  tetrisBoard = createTetrisBoard();
+  tetrisPoints = 0;
+  tetrisClearedLines = 0;
+  tetrisCurrentLevel = 1;
+  tetrisAchievementShown = false;
+  scoreForm.hidden = true;
+  pendingResult = null;
+  updateTetrisStats();
+  spawnTetrisPiece();
+  drawTetris();
+  setArcadeStatus("Stack processor online. Avoid overflow.");
+  scheduleTetrisTick();
+}
+
+tetrisStart.addEventListener("click", startTetris);
+document.querySelectorAll("[data-tetris-action]").forEach((button) => {
+  button.addEventListener("click", () => {
+    runTetrisAction(button.dataset.tetrisAction);
+  });
+});
+
 document.addEventListener("keydown", (event) => {
   if (
     arcadeWindow.hidden
-    || activeGame !== "snake"
-    || !snakeTimer
     || event.target instanceof HTMLInputElement
     || event.target instanceof HTMLTextAreaElement
   ) {
+    return;
+  }
+  if (activeGame === "tetris" && tetrisPiece) {
+    const tetrisActions = {
+      ArrowLeft: "left",
+      ArrowRight: "right",
+      ArrowUp: "rotate",
+      ArrowDown: "down",
+      " ": "drop",
+    };
+    const action = tetrisActions[event.key];
+    if (action) {
+      event.preventDefault();
+      runTetrisAction(action);
+    }
+    return;
+  }
+  if (activeGame !== "snake" || !snakeTimer) {
     return;
   }
   const keyDirections = {
@@ -825,6 +1235,7 @@ function suspendArcadeGame() {
   const gameWasRunning = Boolean(
     snakeTimer
     || bitsweeperFrame
+    || tetrisTimer
     || (mineStarted && !mineFinished),
   );
   if (!gameWasRunning) {
@@ -832,6 +1243,7 @@ function suspendArcadeGame() {
   }
   stopSnake();
   stopBitsweeper();
+  stopTetris();
   if (mineStarted && !mineFinished) {
     startMinesweeper();
   }
@@ -857,4 +1269,6 @@ document.addEventListener("visibilitychange", () => {
 startMinesweeper();
 drawSnake();
 drawBitsweeper();
+tetrisBoard = createTetrisBoard();
+drawTetris();
 selectGame("snake");

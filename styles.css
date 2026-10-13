@@ -3258,12 +3258,13 @@ footer span {
 
 .arcade-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
 .arcade-tabs button,
 .arcade-game-toolbar button,
+.minesweeper-difficulty button,
 .minesweeper-mode button,
 .arcade-leaderboard button,
 .arcade-score-form button,
@@ -3278,11 +3279,14 @@ footer span {
 }
 
 .arcade-tabs button[aria-selected="true"],
+.minesweeper-difficulty button[aria-pressed="true"],
 .minesweeper-mode button[aria-pressed="true"],
 .arcade-tabs button:hover,
 .arcade-tabs button:focus-visible,
 .arcade-game-toolbar button:hover,
 .arcade-game-toolbar button:focus-visible,
+.minesweeper-difficulty button:hover,
+.minesweeper-difficulty button:focus-visible,
 .minesweeper-mode button:hover,
 .minesweeper-mode button:focus-visible,
 .arcade-leaderboard button:hover,
@@ -3380,13 +3384,31 @@ footer span {
   gap: 8px;
 }
 
+.minesweeper-difficulty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .minesweeper-board {
   display: grid;
-  grid-template-columns: repeat(9, minmax(28px, 1fr));
-  width: min(100%, 500px);
-  aspect-ratio: 1;
+  grid-template-columns: repeat(var(--mine-columns, 9), minmax(18px, 1fr));
+  width: min(100%, 760px);
+  aspect-ratio: var(--mine-columns, 9) / var(--mine-rows, 9);
   justify-self: center;
   gap: 3px;
+}
+
+.minesweeper-board-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 7px;
+  scrollbar-color: var(--accent) var(--panel-2);
+  scrollbar-width: thin;
+}
+
+.minesweeper-board-scroll .minesweeper-board {
+  margin-inline: auto;
 }
 
 .mine-cell {
@@ -3443,6 +3465,37 @@ footer span {
   color: var(--muted);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
+}
+
+.tetris-canvas {
+  width: min(100%, 300px);
+  justify-self: center;
+  aspect-ratio: 1 / 2;
+}
+
+.tetris-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(42px, 1fr));
+  gap: 7px;
+}
+
+.tetris-controls button {
+  min-width: 0;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.62rem;
+}
+
+.tetris-controls button:hover,
+.tetris-controls button:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--bg);
+  background: var(--accent);
 }
 
 .bitsweeper-input-label input,
@@ -3531,6 +3584,10 @@ footer span {
 }
 
 @media (max-width: 860px) {
+  .arcade-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .arcade-layout {
     grid-template-columns: 1fr;
   }
