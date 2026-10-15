@@ -74,6 +74,10 @@ function showMaskedShortBit(record, slug, destinationUrl) {
   if (record.display_mode === "embed") {
     const embed = window.BITS_SHORTBITS.getEmbed(destinationUrl.href);
     if (embed) {
+      document.body.classList.toggle(
+        "has-youtube-shortbit",
+        embed.provider === "YouTube",
+      );
       shortBitFrame.src = embed.url;
       shortBitFrame.title = `${title} on ${embed.provider}`;
       shortBitFrameShell.dataset.provider = embed.provider.toLowerCase();

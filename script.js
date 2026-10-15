@@ -188,6 +188,9 @@ const forbiddenBitDock = document.querySelector("#forbidden-bit-dock");
 const interfaceShell = document.querySelector("#interface-shell");
 const minimizeButton = document.querySelector("#minimize-button");
 const maximizeButton = document.querySelector("#maximize-button");
+const fakeDesktop = document.querySelector("#fake-desktop");
+const fakeDesktopRestore = document.querySelector("#fake-desktop-restore");
+const fakeDesktopClock = document.querySelector("#fake-desktop-clock");
 const closeButton = document.querySelector("#close-button");
 const processTitle = document.querySelector("#process-title");
 const statusText = document.querySelector("#status-text");
@@ -397,10 +400,6 @@ const achievementCatalog = [
   { id: "avatar-escape", hints: ["Idle processes may wander.", "Leave the page alone for three minutes.", "Trigger avatar idle mode."] },
   { id: "inspect-bits", hints: ["The Bits dislike close inspection.", "A certain browser panel changes the viewport.", "Open developer tools or resize dramatically."] },
   { id: "friday-thirteen", hints: ["The calendar can alter the protocol.", "An ominous date is required.", "Visit on Friday the 13th."] },
-  { id: "snake-byte", hints: ["An old process is hungry.", "Open ARCADE.EXE.", "Feed the Snake at least one byte."] },
-  { id: "mine-clear", hints: ["Some Bits are dangerously buried.", "Open ARCADE.EXE.", "Clear the Minesweeper field."] },
-  { id: "bitsweeper-defender", hints: ["The firewall is under linguistic attack.", "Open ARCADE.EXE.", "Type at least one falling target."] },
-  { id: "tetris-line", hints: ["Order can emerge from falling blocks.", "Open ARCADE.EXE.", "Complete a line in Tetris."] },
   { id: `birthday-${new Date().getFullYear()}`, hints: ["One date belongs to Caleb.", "Look near the end of June.", "Visit on June 26."] },
 ];
 const sessionMetrics = {
@@ -1276,6 +1275,33 @@ function recordControl(name) {
   return false;
 }
 
+function setFakeDesktopVisible(visible) {
+  fakeDesktop.hidden = !visible;
+  document.body.classList.toggle("has-fake-desktop", visible);
+}
+
+function restoreInterfaceFromDesktop() {
+  interfaceShell.classList.remove("is-minimized");
+  minimizeButton.setAttribute("aria-label", "Minimize interface");
+  processTitle.textContent = "~/internet/presence.exe";
+  statusText.textContent = "ONLINE";
+  setFakeDesktopVisible(false);
+  minimizeButton.focus();
+}
+
+function updateFakeDesktopClock() {
+  const now = new Date();
+  fakeDesktopClock.dateTime = now.toISOString();
+  fakeDesktopClock.textContent = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+fakeDesktopRestore.addEventListener("click", restoreInterfaceFromDesktop);
+updateFakeDesktopClock();
+window.setInterval(updateFakeDesktopClock, 1000);
+
 minimizeButton.addEventListener("click", () => {
   recordControl("minimize");
   const willMinimize = !interfaceShell.classList.contains("is-minimized");
@@ -1290,6 +1316,7 @@ minimizeButton.addEventListener("click", () => {
     ? "~/internet/playing_dead.exe"
     : "~/internet/presence.exe";
   statusText.textContent = willMinimize ? "PLAYING DEAD" : "ONLINE";
+  setFakeDesktopVisible(willMinimize);
 });
 
 maximizeButton.addEventListener("click", () => {
@@ -1303,6 +1330,7 @@ maximizeButton.addEventListener("click", () => {
     ? "~/internet/MAXIMUM_BITS.exe"
     : "~/internet/presence.exe";
   statusText.textContent = willMaximize ? "OVERCLOCKED" : "ONLINE";
+  setFakeDesktopVisible(false);
 
   if (willMaximize && !hasReducedMotionPreference()) {
     for (let index = 0; index < 24; index += 1) {
@@ -1318,6 +1346,7 @@ closeButton.addEventListener("click", () => {
     maximizeButton.setAttribute("aria-pressed", "false");
     processTitle.textContent = "~/internet/MAXIMUM_BITS.exe";
     statusText.textContent = "CHAOS ONLINE";
+    setFakeDesktopVisible(false);
     window.setTimeout(() => {
       if (!isIdle) {
         processTitle.textContent = "~/internet/presence.exe";
@@ -1336,6 +1365,7 @@ closeButton.addEventListener("click", () => {
   reportAvatar.textContent = String(sessionMetrics.avatarIncidents);
   reportSecrets.textContent = String(sessionMetrics.secretsDiscovered);
   interfaceShell.classList.add("is-closing");
+  setFakeDesktopVisible(false);
   setTimeout(() => {
     interfaceShell.hidden = true;
     document.body.classList.add("is-shutdown");
@@ -1360,6 +1390,7 @@ rebootButton.addEventListener("click", () => {
   maximizeButton.setAttribute("aria-pressed", "false");
   processTitle.textContent = "~/internet/presence.exe";
   statusText.textContent = "ONLINE";
+  setFakeDesktopVisible(false);
   showAchievement(
     "THE INTERNET IS BACK ONLINE",
     "SECOND THOUGHTS",

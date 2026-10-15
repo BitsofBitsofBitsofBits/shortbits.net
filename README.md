@@ -40,10 +40,6 @@ is a personal project and largely a learning exercise for me.
   deletion controls
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
-- An `ARCADE.EXE` library containing Snake, three Minesweeper difficulties,
-  Bitsweeper typing defense, and Tetris with keyboard/touch controls, persistent
-  local records, related achievements, and public global leaderboards with
-  Admin moderation
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 - An Admin-only ShortBits manager for HTTPS redirects at
@@ -55,7 +51,7 @@ is a personal project and largely a learning exercise for me.
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
 - Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser
-  sessions, Arcade starts, and popular windows without cookies, IP addresses,
+  sessions, and popular windows without cookies, IP addresses,
   fingerprints, user agents, or individual event records
 - Distinct decorative atmospheres for every interface theme, including circuit
   pulses, aurora ribbons, petals, acrylic lighting, reveal sweeps, OLED stars,
@@ -175,10 +171,6 @@ Portal sessions can update it. Apply migrations with:
 ```powershell
 npx --yes supabase@latest db push --linked
 ```
-
-Arcade rankings are stored in `arcade_scores`. Anonymous visitors can read and
-submit constrained score rows with an optional validated display name;
-authenticated Admin Portal sessions can review and delete leaderboard entries.
 
 Site statistics use daily aggregate counters updated through restricted
 Supabase functions. The browser counts a daily session once with

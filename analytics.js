@@ -6,10 +6,8 @@ const statsPopularWindows = document.querySelector("#stats-popular-windows");
 const statsFields = {
   todayViews: document.querySelector("#stats-today-views"),
   todaySessions: document.querySelector("#stats-today-sessions"),
-  todayArcade: document.querySelector("#stats-today-arcade"),
   totalViews: document.querySelector("#stats-total-views"),
   totalSessions: document.querySelector("#stats-total-sessions"),
-  totalArcade: document.querySelector("#stats-total-arcade"),
 };
 const analyticsWindowLabels = {
   about: "ABOUT_ME.TXT",
@@ -23,7 +21,6 @@ const analyticsWindowLabels = {
   changelog: "CHANGELOG.LOG",
   guestbook: "GUESTBOOK.LOG",
   filesystem: "FILE_EXPLORER.EXE",
-  arcade: "ARCADE.EXE",
   games: "GAMES.EXE",
   notifications: "NOTIFICATIONS.LOG",
   stats: "STATS.EXE",
@@ -121,10 +118,8 @@ function isValidAnalyticsResponse(stats) {
     && stats.totals
     && isNonNegativeInteger(stats.today.views)
     && isNonNegativeInteger(stats.today.sessions)
-    && isNonNegativeInteger(stats.today.arcade_plays)
     && isNonNegativeInteger(stats.totals.views)
     && isNonNegativeInteger(stats.totals.sessions)
-    && isNonNegativeInteger(stats.totals.arcade_plays)
     && Array.isArray(stats.popular_windows)
     && stats.popular_windows.every((entry) => (
       entry
@@ -167,10 +162,8 @@ function renderPopularWindows(windows) {
 function renderStats(stats) {
   statsFields.todayViews.textContent = stats.today.views.toLocaleString();
   statsFields.todaySessions.textContent = stats.today.sessions.toLocaleString();
-  statsFields.todayArcade.textContent = stats.today.arcade_plays.toLocaleString();
   statsFields.totalViews.textContent = stats.totals.views.toLocaleString();
   statsFields.totalSessions.textContent = stats.totals.sessions.toLocaleString();
-  statsFields.totalArcade.textContent = stats.totals.arcade_plays.toLocaleString();
   renderPopularWindows(stats.popular_windows);
 }
 
@@ -208,10 +201,6 @@ window.addEventListener("desktop-window:opened", (event) => {
     loadSiteStats();
   }
 });
-window.addEventListener("bits:arcade-played", () => {
-  recordAnalyticsEvent("arcade_play");
-});
-
 recordAnalyticsEvent("view");
 try {
   if (!analyticsDisabled && sessionStorage.getItem(sessionCountKey) !== "true") {

@@ -30,16 +30,16 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-47">
+    <link rel="stylesheet" href="styles.css?v=upgrade-49">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-2" defer></script>
     <script src="filesystem.js?v=filesystem-2" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="analytics.js?v=analytics-2" defer></script>
+    <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-31" defer></script>
+    <script src="script.js?v=upgrade-33" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -49,7 +49,6 @@
     <script src="discord.js?v=discord-3" defer></script>
     <script src="contact.js?v=contact-3" defer></script>
     <script src="guestbook.js?v=guestbook-1" defer></script>
-    <script src="arcade.js?v=arcade-3" defer></script>
     <script src="spotify.js?v=spotify-14" defer></script>
   </head>
   <body>
@@ -75,6 +74,51 @@
     ></div>
     <div class="noise" aria-hidden="true"></div>
     <div class="scanlines" aria-hidden="true"></div>
+
+    <section id="fake-desktop" class="fake-desktop" aria-label="BitsofBits desktop" hidden>
+      <div class="fake-desktop-icons" aria-label="Desktop shortcuts">
+        <button type="button" data-window-target="about-window">
+          <span class="fake-desktop-icon" aria-hidden="true">B</span>
+          <span>ABOUT_ME.TXT</span>
+        </button>
+        <button type="button" data-window-target="filesystem-window">
+          <span class="fake-desktop-icon fake-desktop-icon-folder" aria-hidden="true"></span>
+          <span>PUBLIC_FILES</span>
+        </button>
+        <button type="button" data-window-target="games-window">
+          <span class="fake-desktop-icon" aria-hidden="true">&gt;_</span>
+          <span>GAMES.EXE</span>
+        </button>
+        <button type="button" data-window-target="settings-window">
+          <span class="fake-desktop-icon" aria-hidden="true">⚙</span>
+          <span>CONTROL_PANEL</span>
+        </button>
+        <button type="button" data-window-target="notifications-window">
+          <span class="fake-desktop-icon" aria-hidden="true">!</span>
+          <span>NOTIFICATIONS</span>
+        </button>
+        <button class="fake-recycle-bin" type="button" aria-label="Recycle Bin, already empty">
+          <span class="fake-desktop-icon" aria-hidden="true">⌫</span>
+          <span>RECYCLE.BIN</span>
+        </button>
+      </div>
+      <footer class="fake-taskbar">
+        <details class="fake-start-menu">
+          <summary>BITS</summary>
+          <div>
+            <strong>BITSOFBITS_OS</strong>
+            <button type="button" data-window-target="resume-window">CAREER.SYS</button>
+            <button type="button" data-window-target="now-window">NOW.TXT</button>
+            <button type="button" data-window-target="stats-window">STATS.EXE</button>
+          </div>
+        </details>
+        <button id="fake-desktop-restore" class="fake-task-running" type="button">
+          <span aria-hidden="true">▣</span>
+          INTERNET PRESENCE
+        </button>
+        <time id="fake-desktop-clock" class="fake-desktop-clock"></time>
+      </footer>
+    </section>
 
     <main id="interface-shell" class="shell">
       <header class="system-bar" aria-label="System status">
@@ -246,10 +290,6 @@
           <button type="button" data-window-target="filesystem-window">
             <strong>FILE_EXPLORER.EXE</strong>
             <span>Browse the virtual filesystem</span>
-          </button>
-          <button type="button" data-window-target="arcade-window">
-            <strong>ARCADE.EXE</strong>
-            <span>Play suspiciously productive games</span>
           </button>
           <button type="button" data-window-target="games-window">
             <strong>GAMES.EXE</strong>
@@ -957,133 +997,6 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
     </section>
 
     <section
-      id="arcade-window"
-      class="desktop-window arcade-window"
-      role="dialog"
-      aria-labelledby="arcade-window-title"
-      data-window
-      data-window-x="180"
-      data-window-y="70"
-      hidden
-    >
-      <header class="desktop-window-bar" data-window-drag-handle>
-        <p id="arcade-window-title">ARCADE.EXE</p>
-        <div class="desktop-window-controls">
-          <button type="button" data-window-minimize aria-label="Minimize Arcade window">_</button>
-          <button type="button" data-window-close aria-label="Close Arcade window">&times;</button>
-        </div>
-      </header>
-      <div class="desktop-window-content arcade-window-content">
-        <div class="arcade-header">
-          <div>
-            <p class="system-kicker">ENTERTAINMENT_SUBSYSTEM // PUBLIC SCORES</p>
-            <h2>BITSOFBITS ARCADE</h2>
-          </div>
-          <p>LOCAL BEST <strong id="arcade-local-best">0</strong></p>
-        </div>
-        <div class="arcade-tabs" role="tablist" aria-label="Arcade games">
-          <button id="arcade-tab-snake" type="button" role="tab" aria-selected="true" aria-controls="arcade-game-snake" data-arcade-game="snake">SNAKE</button>
-          <button id="arcade-tab-minesweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-minesweeper" data-arcade-game="minesweeper">MINESWEEPER</button>
-          <button id="arcade-tab-bitsweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-bitsweeper" data-arcade-game="bitsweeper">BITSWEEPER</button>
-          <button id="arcade-tab-tetris" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-tetris" data-arcade-game="tetris">TETRIS</button>
-        </div>
-        <div class="arcade-layout">
-          <section class="arcade-game-column">
-            <article id="arcade-game-snake" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-snake" data-arcade-panel="snake">
-              <div class="arcade-game-toolbar">
-                <p>SCORE <strong id="snake-score">0</strong></p>
-                <button id="snake-start" type="button">START_GAME</button>
-              </div>
-              <canvas id="snake-canvas" class="arcade-canvas arcade-square-canvas" width="400" height="400" aria-label="Snake game board"></canvas>
-              <div class="arcade-dpad" aria-label="Snake direction controls">
-                <button type="button" data-snake-direction="up" aria-label="Move up">▲</button>
-                <button type="button" data-snake-direction="left" aria-label="Move left">◀</button>
-                <button type="button" data-snake-direction="down" aria-label="Move down">▼</button>
-                <button type="button" data-snake-direction="right" aria-label="Move right">▶</button>
-              </div>
-              <p class="arcade-help">ARROW KEYS / WASD / TOUCH CONTROLS</p>
-            </article>
-
-            <article id="arcade-game-minesweeper" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-minesweeper" data-arcade-panel="minesweeper" hidden>
-              <div class="arcade-game-toolbar">
-                <p>MINES <strong id="minesweeper-mines">10</strong> // TIME <strong id="minesweeper-time">0</strong></p>
-                <button id="minesweeper-start" type="button">NEW_FIELD</button>
-              </div>
-              <div class="minesweeper-difficulty" role="group" aria-label="Minesweeper difficulty">
-                <button type="button" data-mine-difficulty="beginner" aria-pressed="true">BEGINNER</button>
-                <button type="button" data-mine-difficulty="intermediate" aria-pressed="false">INTERMEDIATE</button>
-                <button type="button" data-mine-difficulty="expert" aria-pressed="false">EXPERT</button>
-              </div>
-              <div class="minesweeper-mode" role="group" aria-label="Minesweeper input mode">
-                <button type="button" data-mine-mode="dig" aria-pressed="true">DIG</button>
-                <button type="button" data-mine-mode="flag" aria-pressed="false">FLAG</button>
-              </div>
-              <div class="minesweeper-board-scroll">
-                <div id="minesweeper-board" class="minesweeper-board" role="grid" aria-label="Minesweeper board"></div>
-              </div>
-              <p class="arcade-help">LEFT CLICK TO DIG // RIGHT CLICK TO FLAG // TOUCH MODE ABOVE</p>
-            </article>
-
-            <article id="arcade-game-bitsweeper" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-bitsweeper" data-arcade-panel="bitsweeper" hidden>
-              <div class="arcade-game-toolbar">
-                <p>SCORE <strong id="bitsweeper-score">0</strong> // LIVES <strong id="bitsweeper-lives">3</strong> // TIME <strong id="bitsweeper-time">45</strong></p>
-                <button id="bitsweeper-start" type="button">START_DEFENSE</button>
-              </div>
-              <canvas id="bitsweeper-canvas" class="arcade-canvas" width="640" height="360" aria-label="Bitsweeper typing defense field"></canvas>
-              <label class="bitsweeper-input-label">
-                <span>TYPE TARGET</span>
-                <input id="bitsweeper-input" type="text" maxlength="24" autocomplete="off" autocapitalize="off" spellcheck="false" disabled>
-              </label>
-              <p class="arcade-help">TYPE FALLING WORDS BEFORE THEY REACH THE FIREWALL</p>
-            </article>
-
-            <article id="arcade-game-tetris" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-tetris" data-arcade-panel="tetris" hidden>
-              <div class="arcade-game-toolbar">
-                <p>SCORE <strong id="tetris-score">0</strong> // LINES <strong id="tetris-lines">0</strong> // LEVEL <strong id="tetris-level">1</strong></p>
-                <button id="tetris-start" type="button">START_STACK</button>
-              </div>
-              <canvas id="tetris-canvas" class="arcade-canvas tetris-canvas" width="300" height="600" aria-label="Tetris game board"></canvas>
-              <div class="tetris-controls" aria-label="Tetris controls">
-                <button type="button" data-tetris-action="left" aria-label="Move left">◀</button>
-                <button type="button" data-tetris-action="rotate" aria-label="Rotate clockwise">ROTATE</button>
-                <button type="button" data-tetris-action="right" aria-label="Move right">▶</button>
-                <button type="button" data-tetris-action="down" aria-label="Soft drop">▼</button>
-                <button type="button" data-tetris-action="drop" aria-label="Hard drop">DROP</button>
-              </div>
-              <p class="arcade-help">ARROWS TO MOVE // UP TO ROTATE // SPACE TO HARD DROP</p>
-            </article>
-            <p id="arcade-status" class="form-status" role="status" aria-live="polite">Select a game and initialize entertainment.</p>
-          </section>
-
-          <aside class="arcade-leaderboard">
-            <div class="arcade-leaderboard-header">
-              <div>
-                <p class="system-kicker">GLOBAL_RANKING</p>
-                <h3 id="arcade-leaderboard-title">SNAKE LEADERBOARD</h3>
-              </div>
-              <button id="arcade-leaderboard-refresh" type="button">REFRESH</button>
-            </div>
-            <p id="arcade-leaderboard-status" class="form-status" role="status" aria-live="polite"></p>
-            <ol id="arcade-leaderboard-list" class="arcade-leaderboard-list"></ol>
-            <form id="arcade-score-form" class="arcade-score-form" hidden>
-              <p>NEW SCORE: <strong id="arcade-result-score">0</strong></p>
-              <label>
-                <span>DISPLAY NAME (OPTIONAL)</span>
-                <input name="player_name" type="text" maxlength="24" pattern="[A-Za-z0-9][A-Za-z0-9 _.\-]{0,23}" autocomplete="nickname">
-              </label>
-              <label class="contact-honeypot" aria-hidden="true">
-                <span>WEBSITE</span>
-                <input name="website" type="text" tabindex="-1" autocomplete="off">
-              </label>
-              <button id="arcade-score-submit" type="submit">SUBMIT_SCORE</button>
-            </form>
-          </aside>
-        </div>
-      </div>
-      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Arcade window"></button>
-    </section>
-
-    <section
       id="stats-window"
       class="desktop-window"
       role="dialog"
@@ -1122,10 +1035,6 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
               <span>DAILY SESSIONS</span>
               <strong id="stats-today-sessions">0</strong>
             </article>
-            <article>
-              <span>ARCADE PLAYS</span>
-              <strong id="stats-today-arcade">0</strong>
-            </article>
           </div>
         </section>
         <section class="stats-section" aria-labelledby="stats-total-heading">
@@ -1138,10 +1047,6 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
             <article>
               <span>SESSIONS</span>
               <strong id="stats-total-sessions">0</strong>
-            </article>
-            <article>
-              <span>ARCADE PLAYS</span>
-              <strong id="stats-total-arcade">0</strong>
             </article>
           </div>
         </section>
