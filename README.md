@@ -43,7 +43,8 @@ is a personal project and largely a learning exercise for me.
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
-  Bitsweeper, Bitris, Bititaire, and Flappy Bit, plus local bests, public
+  Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
+  Null Tac Toe, Packet Breaker, and Flappy Bit, plus local bests, public
   rankings, and Admin moderation
 - A stateful `COBITS.EXE` parody assistant with quick actions, delayed replies,
   slash commands, conversational memory, multi-step interviews, diagnostics,

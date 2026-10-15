@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-9"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-82">
+    <link rel="stylesheet" href="styles.css?v=upgrade-83">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -42,7 +42,7 @@
     <script src="screensaver.js?v=screensaver-1" defer></script>
     <script src="script.js?v=upgrade-55" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
-    <script src="arcade.js?v=arcade-6" defer></script>
+    <script src="arcade.js?v=arcade-7" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-3" defer></script>
@@ -1127,6 +1127,11 @@
           <button id="arcade-tab-bitsweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-bitsweeper" data-arcade-game="bitsweeper">BITSWEEPER</button>
           <button id="arcade-tab-tetris" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-tetris" data-arcade-game="tetris">BITRIS</button>
           <button id="arcade-tab-solitaire" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-solitaire" data-arcade-game="solitaire">BITITAIRE</button>
+          <button id="arcade-tab-pong" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-pong" data-arcade-game="pong">BIT PONG</button>
+          <button id="arcade-tab-dodge" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-dodge" data-arcade-game="dodge">PACKET DODGE</button>
+          <button id="arcade-tab-cursor" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-cursor" data-arcade-game="cursor">CURSOR CHASE</button>
+          <button id="arcade-tab-null-tac-toe" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-null-tac-toe" data-arcade-game="null-tac-toe">NULL TAC TOE</button>
+          <button id="arcade-tab-breaker" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-breaker" data-arcade-game="breaker">PACKET BREAKER</button>
           <button id="arcade-tab-flappy" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-flappy" data-arcade-game="flappy">FLAPPY BIT</button>
         </div>
         <div class="arcade-layout">
@@ -1203,6 +1208,61 @@
               <div class="bititaire-foundations" id="solitaire-foundations" aria-label="Bititaire home stacks"></div>
               <div class="bititaire-tableau" id="solitaire-tableau" aria-label="Bititaire tableau"></div>
               <p class="arcade-help">STACK DOWN BY ALTERNATING POLARITY // SEND MATCHING SUITS HOME FROM 1 TO 6</p>
+            </article>
+
+            <article id="arcade-game-pong" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-pong" data-arcade-panel="pong" hidden>
+              <div class="arcade-game-toolbar">
+                <p>YOU <strong id="pong-player-score">0</strong> // CPU <strong id="pong-cpu-score">0</strong></p>
+                <button id="pong-start" type="button">START_MATCH</button>
+              </div>
+              <canvas id="pong-canvas" class="arcade-canvas arcade-wide-canvas" width="720" height="420" aria-label="Bit Pong game field"></canvas>
+              <p class="arcade-help">MOVE WITH W/S, ARROWS, OR POINTER // FIRST PROCESS TO 7 WINS</p>
+            </article>
+
+            <article id="arcade-game-dodge" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-dodge" data-arcade-panel="dodge" hidden>
+              <div class="arcade-game-toolbar">
+                <p>PACKETS <strong id="dodge-score">0</strong> // LIVES <strong id="dodge-lives">3</strong></p>
+                <button id="dodge-start" type="button">START_TRANSFER</button>
+              </div>
+              <canvas id="dodge-canvas" class="arcade-canvas arcade-wide-canvas" width="720" height="420" aria-label="Packet Dodge game field"></canvas>
+              <p class="arcade-help">MOVE WITH A/D, ARROWS, OR POINTER // AVOID CORRUPTED PACKETS</p>
+            </article>
+
+            <article id="arcade-game-cursor" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-cursor" data-arcade-panel="cursor" hidden>
+              <div class="arcade-game-toolbar">
+                <p>CATCHES <strong id="cursor-score">0</strong> // TIME <strong id="cursor-time">20.0</strong></p>
+                <button id="cursor-start" type="button">RELEASE_BIT</button>
+              </div>
+              <canvas id="cursor-canvas" class="arcade-canvas arcade-wide-canvas" width="720" height="420" aria-label="Cursor Chase game field"></canvas>
+              <p class="arcade-help">CLICK THE ROGUE BIT BEFORE IT ESCAPES THE CURSOR</p>
+            </article>
+
+            <article id="arcade-game-null-tac-toe" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-null-tac-toe" data-arcade-panel="null-tac-toe" hidden>
+              <div class="arcade-game-toolbar">
+                <p>YOU <strong>0</strong> // CPU <strong>1</strong> // <strong id="null-status">YOUR TURN</strong></p>
+                <button id="null-start" type="button">RESET_GRID</button>
+              </div>
+              <div id="null-board" class="null-tac-toe-board" role="grid" aria-label="Null Tac Toe board">
+                <button type="button" data-null-cell="0" role="gridcell" aria-label="Empty cell 1"></button>
+                <button type="button" data-null-cell="1" role="gridcell" aria-label="Empty cell 2"></button>
+                <button type="button" data-null-cell="2" role="gridcell" aria-label="Empty cell 3"></button>
+                <button type="button" data-null-cell="3" role="gridcell" aria-label="Empty cell 4"></button>
+                <button type="button" data-null-cell="4" role="gridcell" aria-label="Empty cell 5"></button>
+                <button type="button" data-null-cell="5" role="gridcell" aria-label="Empty cell 6"></button>
+                <button type="button" data-null-cell="6" role="gridcell" aria-label="Empty cell 7"></button>
+                <button type="button" data-null-cell="7" role="gridcell" aria-label="Empty cell 8"></button>
+                <button type="button" data-null-cell="8" role="gridcell" aria-label="Empty cell 9"></button>
+              </div>
+              <p class="arcade-help">PLACE 0 // DENY THE 1 PROCESS // THREE MATCHING VALUES WINS</p>
+            </article>
+
+            <article id="arcade-game-breaker" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-breaker" data-arcade-panel="breaker" hidden>
+              <div class="arcade-game-toolbar">
+                <p>SCORE <strong id="breaker-score">0</strong> // LIVES <strong id="breaker-lives">3</strong></p>
+                <button id="breaker-start" type="button">BREACH_FIREWALL</button>
+              </div>
+              <canvas id="breaker-canvas" class="arcade-canvas arcade-wide-canvas" width="720" height="420" aria-label="Packet Breaker game field"></canvas>
+              <p class="arcade-help">MOVE WITH A/D, ARROWS, OR POINTER // BREAK EVERY FIREWALL PACKET</p>
             </article>
 
             <article id="arcade-game-flappy" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-flappy" data-arcade-panel="flappy" hidden>

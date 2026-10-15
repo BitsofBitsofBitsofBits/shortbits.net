@@ -2272,6 +2272,46 @@ html.is-page-hidden * {
   aspect-ratio: 16 / 9;
 }
 
+.arcade-wide-canvas {
+  width: min(100%, 720px);
+  aspect-ratio: 12 / 7;
+  touch-action: none;
+}
+
+.null-tac-toe-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(76px, 128px));
+  justify-content: center;
+  gap: 8px;
+}
+
+.null-tac-toe-board button {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.08), transparent),
+    var(--panel-2);
+  cursor: pointer;
+  font: 700 clamp(1.6rem, 5vw, 3rem) var(--font-family);
+}
+
+.null-tac-toe-board button:hover,
+.null-tac-toe-board button:focus-visible {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.2);
+}
+
+.null-tac-toe-board button:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.null-tac-toe-board button[data-value="1"] {
+  color: #ff6d7a;
+}
+
 @media (max-width: 900px) {
   .arcade-desktop-launcher {
     display: none !important;

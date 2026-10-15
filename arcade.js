@@ -17,6 +17,11 @@ const arcadeGames = new Set([
   "bitsweeper",
   "tetris",
   "solitaire",
+  "pong",
+  "dodge",
+  "cursor",
+  "null-tac-toe",
+  "breaker",
   "flappy",
 ]);
 const rankingGames = new Set([
@@ -27,6 +32,11 @@ const rankingGames = new Set([
   "bitsweeper",
   "tetris",
   "solitaire",
+  "pong",
+  "dodge",
+  "cursor",
+  "null-tac-toe",
+  "breaker",
   "flappy",
 ]);
 const playerNamePattern = /^[A-Za-z0-9][A-Za-z0-9 _.-]{0,23}$/;
@@ -36,6 +46,11 @@ const gameLabels = {
   bitsweeper: "BITSWEEPER",
   tetris: "BITRIS",
   solitaire: "BITITAIRE",
+  pong: "BIT PONG",
+  dodge: "PACKET DODGE",
+  cursor: "CURSOR CHASE",
+  "null-tac-toe": "NULL TAC TOE",
+  breaker: "PACKET BREAKER",
   flappy: "FLAPPY BIT",
 };
 const mineDifficulties = {
@@ -268,7 +283,13 @@ function selectGame(game) {
   stopSnake();
   stopBitsweeper();
   stopTetris();
+  stopPong();
+  stopDodge();
+  stopCursorChase();
+  stopNullTacToe();
+  stopBreaker();
   stopFlappy();
+  arcadeKeys.clear();
   activeGame = game;
   pendingResult = null;
   scoreForm.hidden = true;
@@ -1512,12 +1533,639 @@ function flapBit() {
 flappyCanvas.addEventListener("pointerdown", flapBit);
 flappyStart.addEventListener("click", startFlappy);
 
+const arcadeKeys = new Set();
+const pongCanvas = document.querySelector("#pong-canvas");
+const pongContext = pongCanvas.getContext("2d");
+const pongPlayerScore = document.querySelector("#pong-player-score");
+const pongCpuScore = document.querySelector("#pong-cpu-score");
+const pongStart = document.querySelector("#pong-start");
+let pongFrame = 0;
+let pongPreviousTime = 0;
+let pongPlayerY = 170;
+let pongCpuY = 170;
+let pongBall = { x: 360, y: 210, vx: 0.31, vy: 0.18 };
+let pongPoints = { player: 0, cpu: 0 };
+
+function drawPong() {
+  const colors = arcadeColors();
+  pongContext.fillStyle = "#07111a";
+  pongContext.fillRect(0, 0, pongCanvas.width, pongCanvas.height);
+  pongContext.strokeStyle = colors.muted;
+  pongContext.setLineDash([8, 12]);
+  pongContext.beginPath();
+  pongContext.moveTo(pongCanvas.width / 2, 0);
+  pongContext.lineTo(pongCanvas.width / 2, pongCanvas.height);
+  pongContext.stroke();
+  pongContext.setLineDash([]);
+  pongContext.fillStyle = colors.accent;
+  pongContext.fillRect(24, pongPlayerY, 14, 80);
+  pongContext.fillStyle = colors.muted;
+  pongContext.fillRect(pongCanvas.width - 38, pongCpuY, 14, 80);
+  pongContext.fillStyle = colors.ink;
+  pongContext.fillRect(pongBall.x - 8, pongBall.y - 8, 16, 16);
+}
+
+function resetPongBall(direction = 1) {
+  pongBall = {
+    x: pongCanvas.width / 2,
+    y: 80 + (Math.random() * (pongCanvas.height - 160)),
+    vx: direction * (0.3 + (Math.random() * 0.06)),
+    vy: (Math.random() - 0.5) * 0.36,
+  };
+}
+
+function stopPong() {
+  cancelAnimationFrame(pongFrame);
+  pongFrame = 0;
+}
+
+function finishPong(playerWon) {
+  stopPong();
+  const score = (pongPoints.player * 300) + (playerWon ? 1000 : 0);
+  finishGame(
+    "pong",
+    score,
+    `${pongPoints.player}-${pongPoints.cpu}`,
+    playerWon ? "CPU process bounced out of memory." : "CPU process owns the socket.",
+  );
+}
+
+function runPong(timestamp) {
+  const delta = Math.min(32, timestamp - (pongPreviousTime || timestamp));
+  pongPreviousTime = timestamp;
+  if (arcadeKeys.has("ArrowUp") || arcadeKeys.has("w") || arcadeKeys.has("W")) {
+    pongPlayerY -= 0.42 * delta;
+  }
+  if (arcadeKeys.has("ArrowDown") || arcadeKeys.has("s") || arcadeKeys.has("S")) {
+    pongPlayerY += 0.42 * delta;
+  }
+  pongPlayerY = Math.max(0, Math.min(pongCanvas.height - 80, pongPlayerY));
+  const cpuTarget = pongBall.y - 40;
+  pongCpuY += Math.sign(cpuTarget - pongCpuY) * Math.min(Math.abs(cpuTarget - pongCpuY), 0.26 * delta);
+  pongCpuY = Math.max(0, Math.min(pongCanvas.height - 80, pongCpuY));
+  pongBall.x += pongBall.vx * delta;
+  pongBall.y += pongBall.vy * delta;
+  if (pongBall.y < 8 || pongBall.y > pongCanvas.height - 8) {
+    pongBall.y = Math.max(8, Math.min(pongCanvas.height - 8, pongBall.y));
+    pongBall.vy *= -1;
+  }
+  const hitPlayer = pongBall.vx < 0
+    && pongBall.x - 8 <= 38
+    && pongBall.x > 20
+    && pongBall.y >= pongPlayerY
+    && pongBall.y <= pongPlayerY + 80;
+  const hitCpu = pongBall.vx > 0
+    && pongBall.x + 8 >= pongCanvas.width - 38
+    && pongBall.x < pongCanvas.width - 20
+    && pongBall.y >= pongCpuY
+    && pongBall.y <= pongCpuY + 80;
+  if (hitPlayer || hitCpu) {
+    const paddleY = hitPlayer ? pongPlayerY : pongCpuY;
+    pongBall.vx = Math.sign(-pongBall.vx) * Math.min(0.62, Math.abs(pongBall.vx) * 1.055);
+    pongBall.vy = ((pongBall.y - (paddleY + 40)) / 40) * 0.42;
+    pongBall.x = hitPlayer ? 47 : pongCanvas.width - 47;
+  }
+  if (pongBall.x < -20 || pongBall.x > pongCanvas.width + 20) {
+    const playerScored = pongBall.x > pongCanvas.width;
+    pongPoints[playerScored ? "player" : "cpu"] += 1;
+    pongPlayerScore.textContent = String(pongPoints.player);
+    pongCpuScore.textContent = String(pongPoints.cpu);
+    if (pongPoints.player >= 7 || pongPoints.cpu >= 7) {
+      finishPong(pongPoints.player >= 7);
+      return;
+    }
+    resetPongBall(playerScored ? -1 : 1);
+  }
+  drawPong();
+  pongFrame = requestAnimationFrame(runPong);
+}
+
+function startPong() {
+  stopPong();
+  pongPoints = { player: 0, cpu: 0 };
+  pongPlayerY = 170;
+  pongCpuY = 170;
+  pongPlayerScore.textContent = "0";
+  pongCpuScore.textContent = "0";
+  pongPreviousTime = 0;
+  resetPongBall(Math.random() < 0.5 ? -1 : 1);
+  scoreForm.hidden = true;
+  pendingResult = null;
+  setArcadeStatus("BIT PONG socket open. First process to seven wins.");
+  pongFrame = requestAnimationFrame(runPong);
+}
+
+pongCanvas.addEventListener("pointermove", (event) => {
+  const rect = pongCanvas.getBoundingClientRect();
+  pongPlayerY = ((event.clientY - rect.top) / rect.height) * pongCanvas.height - 40;
+});
+pongStart.addEventListener("click", startPong);
+
+const dodgeCanvas = document.querySelector("#dodge-canvas");
+const dodgeContext = dodgeCanvas.getContext("2d");
+const dodgeScore = document.querySelector("#dodge-score");
+const dodgeLivesOutput = document.querySelector("#dodge-lives");
+const dodgeStart = document.querySelector("#dodge-start");
+let dodgeFrame = 0;
+let dodgePreviousTime = 0;
+let dodgePlayerX = 336;
+let dodgePackets = [];
+let dodgePoints = 0;
+let dodgeLives = 3;
+let dodgeSpawnTimer = 0;
+
+function drawDodge() {
+  const colors = arcadeColors();
+  dodgeContext.fillStyle = "#07111a";
+  dodgeContext.fillRect(0, 0, dodgeCanvas.width, dodgeCanvas.height);
+  dodgeContext.fillStyle = colors.accent;
+  dodgeContext.fillRect(dodgePlayerX, 374, 48, 22);
+  dodgeContext.fillStyle = colors.ink;
+  dodgeContext.font = "bold 14px monospace";
+  dodgeContext.fillText("SAFE", dodgePlayerX + 6, 390);
+  dodgePackets.forEach((packet) => {
+    dodgeContext.fillStyle = packet.danger ? "#ff5267" : colors.muted;
+    dodgeContext.fillRect(packet.x, packet.y, packet.size, packet.size);
+    dodgeContext.fillStyle = "#07111a";
+    dodgeContext.fillText(packet.danger ? "!" : "0", packet.x + 8, packet.y + 20);
+  });
+}
+
+function stopDodge() {
+  cancelAnimationFrame(dodgeFrame);
+  dodgeFrame = 0;
+}
+
+function finishDodge() {
+  stopDodge();
+  finishGame("dodge", dodgePoints * 100, `${dodgePoints} PACKETS`, `${dodgePoints} packets safely routed.`);
+}
+
+function runDodge(timestamp) {
+  const delta = Math.min(32, timestamp - (dodgePreviousTime || timestamp));
+  dodgePreviousTime = timestamp;
+  if (arcadeKeys.has("ArrowLeft") || arcadeKeys.has("a") || arcadeKeys.has("A")) {
+    dodgePlayerX -= 0.48 * delta;
+  }
+  if (arcadeKeys.has("ArrowRight") || arcadeKeys.has("d") || arcadeKeys.has("D")) {
+    dodgePlayerX += 0.48 * delta;
+  }
+  dodgePlayerX = Math.max(0, Math.min(dodgeCanvas.width - 48, dodgePlayerX));
+  dodgeSpawnTimer -= delta;
+  if (dodgeSpawnTimer <= 0) {
+    const size = 26 + Math.floor(Math.random() * 12);
+    dodgePackets.push({
+      danger: Math.random() < 0.78,
+      size,
+      speed: 0.14 + (dodgePoints * 0.004) + (Math.random() * 0.12),
+      x: Math.random() * (dodgeCanvas.width - size),
+      y: -size,
+    });
+    dodgeSpawnTimer = Math.max(230, 650 - (dodgePoints * 9));
+  }
+  dodgePackets.forEach((packet) => {
+    packet.y += packet.speed * delta;
+  });
+  dodgePackets = dodgePackets.filter((packet) => {
+    if (dodgeLives <= 0) {
+      return false;
+    }
+    const hit = packet.danger
+      && packet.y + packet.size >= 374
+      && packet.y < 396
+      && packet.x + packet.size > dodgePlayerX
+      && packet.x < dodgePlayerX + 48;
+    if (hit) {
+      dodgeLives -= 1;
+      dodgeLivesOutput.textContent = String(dodgeLives);
+      if (dodgeLives <= 0) {
+        finishDodge();
+      }
+      return false;
+    }
+    if (packet.y > dodgeCanvas.height) {
+      if (packet.danger) {
+        dodgePoints += 1;
+        dodgeScore.textContent = String(dodgePoints);
+      }
+      return false;
+    }
+    return true;
+  });
+  if (!dodgeFrame) {
+    return;
+  }
+  drawDodge();
+  dodgeFrame = requestAnimationFrame(runDodge);
+}
+
+function startDodge() {
+  stopDodge();
+  dodgePlayerX = 336;
+  dodgePackets = [];
+  dodgePoints = 0;
+  dodgeLives = 3;
+  dodgeSpawnTimer = 0;
+  dodgePreviousTime = 0;
+  dodgeScore.textContent = "0";
+  dodgeLivesOutput.textContent = "3";
+  scoreForm.hidden = true;
+  pendingResult = null;
+  setArcadeStatus("PACKET DODGE transfer started. Corrupt packets are red.");
+  dodgeFrame = requestAnimationFrame(runDodge);
+}
+
+dodgeCanvas.addEventListener("pointermove", (event) => {
+  const rect = dodgeCanvas.getBoundingClientRect();
+  dodgePlayerX = ((event.clientX - rect.left) / rect.width) * dodgeCanvas.width - 24;
+});
+dodgeStart.addEventListener("click", startDodge);
+
+const cursorCanvas = document.querySelector("#cursor-canvas");
+const cursorContext = cursorCanvas.getContext("2d");
+const cursorScore = document.querySelector("#cursor-score");
+const cursorTime = document.querySelector("#cursor-time");
+const cursorStart = document.querySelector("#cursor-start");
+let cursorFrame = 0;
+let cursorStartedAt = 0;
+let cursorTarget = { x: 330, y: 180, size: 48 };
+let cursorCatches = 0;
+
+function moveCursorTarget() {
+  cursorTarget.size = Math.max(24, 48 - cursorCatches);
+  cursorTarget.x = 8 + (Math.random() * (cursorCanvas.width - cursorTarget.size - 16));
+  cursorTarget.y = 8 + (Math.random() * (cursorCanvas.height - cursorTarget.size - 16));
+}
+
+function drawCursorChase() {
+  const colors = arcadeColors();
+  cursorContext.fillStyle = "#07111a";
+  cursorContext.fillRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+  cursorContext.strokeStyle = colors.muted;
+  for (let x = 0; x < cursorCanvas.width; x += 40) {
+    cursorContext.beginPath();
+    cursorContext.moveTo(x, 0);
+    cursorContext.lineTo(x, cursorCanvas.height);
+    cursorContext.stroke();
+  }
+  cursorContext.fillStyle = colors.accent;
+  cursorContext.fillRect(cursorTarget.x, cursorTarget.y, cursorTarget.size, cursorTarget.size);
+  cursorContext.fillStyle = "#07111a";
+  cursorContext.font = `bold ${Math.max(14, cursorTarget.size * 0.46)}px monospace`;
+  cursorContext.fillText("1", cursorTarget.x + (cursorTarget.size * 0.34), cursorTarget.y + (cursorTarget.size * 0.68));
+}
+
+function stopCursorChase() {
+  cancelAnimationFrame(cursorFrame);
+  cursorFrame = 0;
+}
+
+function finishCursorChase() {
+  stopCursorChase();
+  finishGame(
+    "cursor",
+    cursorCatches * 100,
+    `${cursorCatches} CATCHES`,
+    `Rogue Bit caught ${cursorCatches} time${cursorCatches === 1 ? "" : "s"}.`,
+  );
+}
+
+function runCursorChase(timestamp) {
+  const remaining = Math.max(0, 20000 - (timestamp - cursorStartedAt));
+  cursorTime.textContent = (remaining / 1000).toFixed(1);
+  drawCursorChase();
+  if (remaining <= 0) {
+    finishCursorChase();
+    return;
+  }
+  cursorFrame = requestAnimationFrame(runCursorChase);
+}
+
+function startCursorChase() {
+  stopCursorChase();
+  cursorCatches = 0;
+  cursorScore.textContent = "0";
+  cursorTime.textContent = "20.0";
+  moveCursorTarget();
+  scoreForm.hidden = true;
+  pendingResult = null;
+  setArcadeStatus("CURSOR CHASE active. Catch the rogue Bit.");
+  cursorStartedAt = performance.now();
+  cursorFrame = requestAnimationFrame(runCursorChase);
+}
+
+cursorCanvas.addEventListener("pointerdown", (event) => {
+  if (!cursorFrame) {
+    return;
+  }
+  const rect = cursorCanvas.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * cursorCanvas.width;
+  const y = ((event.clientY - rect.top) / rect.height) * cursorCanvas.height;
+  if (
+    x >= cursorTarget.x
+    && x <= cursorTarget.x + cursorTarget.size
+    && y >= cursorTarget.y
+    && y <= cursorTarget.y + cursorTarget.size
+  ) {
+    cursorCatches += 1;
+    cursorScore.textContent = String(cursorCatches);
+    moveCursorTarget();
+    drawCursorChase();
+  }
+});
+cursorStart.addEventListener("click", startCursorChase);
+
+const nullBoard = document.querySelector("#null-board");
+const nullCells = [...nullBoard.querySelectorAll("[data-null-cell]")];
+const nullStatus = document.querySelector("#null-status");
+const nullStart = document.querySelector("#null-start");
+const nullWins = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
+];
+let nullGrid = Array(9).fill("");
+let nullFinished = false;
+let nullMoves = 0;
+let nullCpuTimer = 0;
+
+function nullWinner(grid = nullGrid) {
+  return nullWins.find((line) => line.every((index) => grid[index] && grid[index] === grid[line[0]]));
+}
+
+function renderNullTacToe() {
+  nullCells.forEach((cell, index) => {
+    cell.textContent = nullGrid[index];
+    cell.dataset.value = nullGrid[index];
+    cell.disabled = nullFinished || Boolean(nullGrid[index]);
+    cell.setAttribute("aria-label", nullGrid[index] ? `Cell ${index + 1}: ${nullGrid[index]}` : `Empty cell ${index + 1}`);
+  });
+}
+
+function stopNullTacToe() {
+  const cpuWasThinking = Boolean(nullCpuTimer);
+  clearTimeout(nullCpuTimer);
+  nullCpuTimer = 0;
+  if (cpuWasThinking) {
+    nullFinished = true;
+    nullStatus.textContent = "RESET REQUIRED";
+    renderNullTacToe();
+  }
+}
+
+function finishNullTacToe(result) {
+  stopNullTacToe();
+  nullFinished = true;
+  renderNullTacToe();
+  if (result === "0") {
+    nullStatus.textContent = "0 PROCESS WINS";
+    finishGame("null-tac-toe", 1200 - (nullMoves * 80), `${nullMoves} MOVES`, "0 process completed a valid row.");
+  } else if (result === "1") {
+    nullStatus.textContent = "1 PROCESS WINS";
+    setArcadeStatus("The 1 process owns this grid.", "error");
+  } else {
+    nullStatus.textContent = "BOOLEAN DEADLOCK";
+    finishGame("null-tac-toe", 300, "DRAW", "BOOLEAN DEADLOCK: no writable cells remain.");
+  }
+}
+
+function findNullMove(value) {
+  return nullGrid.findIndex((cell, index) => {
+    if (cell) {
+      return false;
+    }
+    const test = [...nullGrid];
+    test[index] = value;
+    return Boolean(nullWinner(test));
+  });
+}
+
+function runNullCpu() {
+  nullCpuTimer = 0;
+  if (nullFinished) {
+    return;
+  }
+  const open = nullGrid.map((cell, index) => (cell ? -1 : index)).filter((index) => index >= 0);
+  const move = findNullMove("1") >= 0
+    ? findNullMove("1")
+    : findNullMove("0") >= 0
+      ? findNullMove("0")
+      : !nullGrid[4]
+        ? 4
+        : open[Math.floor(Math.random() * open.length)];
+  nullGrid[move] = "1";
+  nullMoves += 1;
+  if (nullWinner()) {
+    finishNullTacToe("1");
+  } else if (nullGrid.every(Boolean)) {
+    finishNullTacToe("draw");
+  } else {
+    nullStatus.textContent = "YOUR TURN";
+    renderNullTacToe();
+  }
+}
+
+function startNullTacToe() {
+  stopNullTacToe();
+  nullGrid = Array(9).fill("");
+  nullFinished = false;
+  nullMoves = 0;
+  nullStatus.textContent = "YOUR TURN";
+  scoreForm.hidden = true;
+  pendingResult = null;
+  renderNullTacToe();
+  setArcadeStatus("NULL TAC TOE initialized. You are the 0 process.");
+}
+
+nullBoard.addEventListener("click", (event) => {
+  const cell = event.target.closest("[data-null-cell]");
+  if (!cell || nullFinished || nullGrid[Number(cell.dataset.nullCell)]) {
+    return;
+  }
+  nullGrid[Number(cell.dataset.nullCell)] = "0";
+  nullMoves += 1;
+  renderNullTacToe();
+  if (nullWinner()) {
+    finishNullTacToe("0");
+  } else if (nullGrid.every(Boolean)) {
+    finishNullTacToe("draw");
+  } else {
+    nullStatus.textContent = "CPU THINKING";
+    nullCells.forEach((button) => {
+      button.disabled = true;
+    });
+    nullCpuTimer = window.setTimeout(runNullCpu, 280);
+  }
+});
+nullStart.addEventListener("click", startNullTacToe);
+
+const breakerCanvas = document.querySelector("#breaker-canvas");
+const breakerContext = breakerCanvas.getContext("2d");
+const breakerScore = document.querySelector("#breaker-score");
+const breakerLivesOutput = document.querySelector("#breaker-lives");
+const breakerStart = document.querySelector("#breaker-start");
+let breakerFrame = 0;
+let breakerPreviousTime = 0;
+let breakerPaddleX = 310;
+let breakerBall = { x: 360, y: 340, vx: 0.23, vy: -0.28 };
+let breakerBricks = [];
+let breakerPoints = 0;
+let breakerLives = 3;
+
+function createBreakerBricks() {
+  return Array.from({ length: 45 }, (_, index) => ({
+    active: true,
+    column: index % 9,
+    row: Math.floor(index / 9),
+  }));
+}
+
+function drawBreaker() {
+  const colors = arcadeColors();
+  breakerContext.fillStyle = "#07111a";
+  breakerContext.fillRect(0, 0, breakerCanvas.width, breakerCanvas.height);
+  breakerBricks.forEach((brick) => {
+    if (!brick.active) {
+      return;
+    }
+    const x = 20 + (brick.column * 76);
+    const y = 24 + (brick.row * 30);
+    breakerContext.fillStyle = brick.row % 2 ? colors.muted : colors.accent;
+    breakerContext.fillRect(x, y, 68, 20);
+  });
+  breakerContext.fillStyle = colors.accent;
+  breakerContext.fillRect(breakerPaddleX, 390, 100, 14);
+  breakerContext.fillStyle = colors.ink;
+  breakerContext.fillRect(breakerBall.x - 7, breakerBall.y - 7, 14, 14);
+}
+
+function resetBreakerBall() {
+  breakerBall = {
+    x: breakerPaddleX + 50,
+    y: 370,
+    vx: (Math.random() < 0.5 ? -1 : 1) * 0.23,
+    vy: -0.28,
+  };
+}
+
+function stopBreaker() {
+  cancelAnimationFrame(breakerFrame);
+  breakerFrame = 0;
+}
+
+function finishBreaker(cleared) {
+  stopBreaker();
+  finishGame(
+    "breaker",
+    breakerPoints + (cleared ? 1000 : 0),
+    `${45 - breakerBricks.filter((brick) => brick.active).length}/45 PACKETS`,
+    cleared ? "Firewall packets completely deallocated." : "Packet dropped below the buffer.",
+  );
+}
+
+function runBreaker(timestamp) {
+  const delta = Math.min(32, timestamp - (breakerPreviousTime || timestamp));
+  breakerPreviousTime = timestamp;
+  if (arcadeKeys.has("ArrowLeft") || arcadeKeys.has("a") || arcadeKeys.has("A")) {
+    breakerPaddleX -= 0.5 * delta;
+  }
+  if (arcadeKeys.has("ArrowRight") || arcadeKeys.has("d") || arcadeKeys.has("D")) {
+    breakerPaddleX += 0.5 * delta;
+  }
+  breakerPaddleX = Math.max(0, Math.min(breakerCanvas.width - 100, breakerPaddleX));
+  breakerBall.x += breakerBall.vx * delta;
+  breakerBall.y += breakerBall.vy * delta;
+  if (breakerBall.x < 7 || breakerBall.x > breakerCanvas.width - 7) {
+    breakerBall.x = Math.max(7, Math.min(breakerCanvas.width - 7, breakerBall.x));
+    breakerBall.vx *= -1;
+  }
+  if (breakerBall.y < 7) {
+    breakerBall.y = 7;
+    breakerBall.vy = Math.abs(breakerBall.vy);
+  }
+  if (
+    breakerBall.vy > 0
+    && breakerBall.y + 7 >= 390
+    && breakerBall.y < 406
+    && breakerBall.x >= breakerPaddleX
+    && breakerBall.x <= breakerPaddleX + 100
+  ) {
+    breakerBall.y = 382;
+    breakerBall.vy = -Math.abs(breakerBall.vy);
+    breakerBall.vx = ((breakerBall.x - (breakerPaddleX + 50)) / 50) * 0.36;
+  }
+  const hitBrick = breakerBricks.find((brick) => {
+    if (!brick.active) {
+      return false;
+    }
+    const x = 20 + (brick.column * 76);
+    const y = 24 + (brick.row * 30);
+    return (
+      breakerBall.x + 7 >= x
+      && breakerBall.x - 7 <= x + 68
+      && breakerBall.y + 7 >= y
+      && breakerBall.y - 7 <= y + 20
+    );
+  });
+  if (hitBrick) {
+    hitBrick.active = false;
+    breakerBall.vy *= -1;
+    breakerPoints += 100;
+    breakerScore.textContent = String(breakerPoints);
+  }
+  if (breakerBricks.every((brick) => !brick.active)) {
+    finishBreaker(true);
+    return;
+  }
+  if (breakerBall.y > breakerCanvas.height + 10) {
+    breakerLives -= 1;
+    breakerLivesOutput.textContent = String(breakerLives);
+    if (breakerLives <= 0) {
+      finishBreaker(false);
+      return;
+    }
+    resetBreakerBall();
+  }
+  drawBreaker();
+  breakerFrame = requestAnimationFrame(runBreaker);
+}
+
+function startBreaker() {
+  stopBreaker();
+  breakerPaddleX = 310;
+  breakerBricks = createBreakerBricks();
+  breakerPoints = 0;
+  breakerLives = 3;
+  breakerPreviousTime = 0;
+  breakerScore.textContent = "0";
+  breakerLivesOutput.textContent = "3";
+  resetBreakerBall();
+  scoreForm.hidden = true;
+  pendingResult = null;
+  setArcadeStatus("PACKET BREAKER breach started.");
+  breakerFrame = requestAnimationFrame(runBreaker);
+}
+
+breakerCanvas.addEventListener("pointermove", (event) => {
+  const rect = breakerCanvas.getBoundingClientRect();
+  breakerPaddleX = ((event.clientX - rect.left) / rect.width) * breakerCanvas.width - 50;
+});
+breakerStart.addEventListener("click", startBreaker);
+
 document.addEventListener("keydown", (event) => {
   if (
     arcadeWindow.hidden
     || event.target instanceof HTMLInputElement
     || event.target instanceof HTMLTextAreaElement
   ) {
+    return;
+  }
+  arcadeKeys.add(event.key);
+  if (
+    ["pong", "dodge", "breaker"].includes(activeGame)
+    && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "W", "a", "A", "s", "S", "d", "D"].includes(event.key)
+  ) {
+    event.preventDefault();
     return;
   }
   if (activeGame === "flappy" && flappyFrame && event.key === " ") {
@@ -1564,11 +2212,20 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+document.addEventListener("keyup", (event) => {
+  arcadeKeys.delete(event.key);
+});
+
 function suspendArcadeGame() {
   const gameWasRunning = Boolean(
     snakeTimer
     || bitsweeperFrame
     || tetrisTimer
+    || pongFrame
+    || dodgeFrame
+    || cursorFrame
+    || nullCpuTimer
+    || breakerFrame
     || flappyFrame
     || (mineStarted && !mineFinished),
   );
@@ -1578,7 +2235,13 @@ function suspendArcadeGame() {
   stopSnake();
   stopBitsweeper();
   stopTetris();
+  stopPong();
+  stopDodge();
+  stopCursorChase();
+  stopNullTacToe();
+  stopBreaker();
   stopFlappy();
+  arcadeKeys.clear();
   if (mineStarted && !mineFinished) {
     startMinesweeper();
   }
@@ -1607,5 +2270,11 @@ drawBitsweeper();
 tetrisBoard = createTetrisBoard();
 drawTetris();
 startSolitaire();
+drawPong();
+drawDodge();
+drawCursorChase();
+startNullTacToe();
+breakerBricks = createBreakerBricks();
+drawBreaker();
 drawFlappy();
 selectGame("snake");
