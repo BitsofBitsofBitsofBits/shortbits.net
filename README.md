@@ -65,11 +65,12 @@ is a personal project and largely a learning exercise for me.
   reduced-motion, forced-colors, and performance preferences
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
-- Twenty persistent full-interface themes, each with its own fixed accent,
+- Twenty-one persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
   Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Solarized,
-  Nord, Dracula, Candy Pop, RGB, and Aero Glass.
+  Nord, Dracula, Candy Pop, RGB, Aero Glass, and the original voxel-inspired
+  MineBits.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions

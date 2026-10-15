@@ -19,6 +19,7 @@ window.BITS_INTERFACE_THEMES = [
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
   { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
   { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#0d3358" },
+  { id: "minebits", name: "MINEBITS", darkColor: "#332719", lightColor: "#dbe8c5" },
 ];
 
 const storedInterfaceTheme = localStorage.getItem("bits-interface-theme");

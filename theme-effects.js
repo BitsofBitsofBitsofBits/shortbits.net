@@ -10,6 +10,7 @@ const themeParticleCounts = {
   "midnight-oled": 28,
   macos: 0,
   terminal: 10,
+  minebits: 18,
 };
 
 function hasReducedAtmosphereMotion() {
