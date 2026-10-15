@@ -30,6 +30,16 @@ window.BITS_INTERFACE_THEMES = [
   { id: "midnight-oled", name: "MIDNIGHT OLED", darkColor: "#000000", lightColor: "#f7f7f7" },
   { id: "macos", name: "MACOS", darkColor: "#18181a", lightColor: "#f5f5f7" },
   { id: "terminal", name: "TERMINAL", darkColor: "#000500", lightColor: "#e8f4e8" },
+  { id: "vaporwave", name: "VAPORWAVE", darkColor: "#160d2b", lightColor: "#fff0fb" },
+  { id: "amber-crt", name: "AMBER CRT", darkColor: "#100900", lightColor: "#fff4d6" },
+  { id: "y2k-silver", name: "Y2K SILVER", darkColor: "#252a33", lightColor: "#e8edf4" },
+  { id: "cyberpunk", name: "CYBERPUNK", darkColor: "#080712", lightColor: "#f3f000" },
+  { id: "dos-blue", name: "DOS BLUE", darkColor: "#0000aa", lightColor: "#d7d7d7" },
+  { id: "windows-95", name: "WINDOWS 95", darkColor: "#004c4c", lightColor: "#008080" },
+  { id: "solarized", name: "SOLARIZED", darkColor: "#002b36", lightColor: "#fdf6e3" },
+  { id: "nord", name: "NORD", darkColor: "#2e3440", lightColor: "#eceff4" },
+  { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
+  { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
 ];
 
 const storedScheme = localStorage.getItem("bits-color-scheme");
