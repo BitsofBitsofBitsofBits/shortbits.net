@@ -2267,9 +2267,204 @@ html.is-page-hidden * {
   font: inherit;
 }
 
-.minebits-canvas,
 .flappy-canvas {
   aspect-ratio: 16 / 9;
+}
+
+.minebits-how-to {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent);
+  background: rgba(var(--accent-rgb), 0.07);
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.4;
+}
+
+.minebits-how-to strong {
+  color: var(--accent);
+}
+
+.minebits-point-layout {
+  display: grid;
+  grid-template-columns: minmax(460px, 1fr) minmax(220px, 280px);
+  gap: 12px;
+  min-height: 0;
+}
+
+.minebits-scene-column {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.minebits-scene {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(28px, 1fr));
+  width: 100%;
+  aspect-ratio: 14 / 8;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: linear-gradient(180deg, #6aa9c2 0 37.5%, #101924 37.5%);
+  box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.28);
+}
+
+.minebits-cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(3, 8, 12, 0.32);
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.72);
+  background: transparent;
+  cursor: crosshair;
+  font: 700 clamp(0.36rem, 0.72vw, 0.58rem) var(--font-family);
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.52);
+}
+
+.minebits-cell::after {
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  content: "";
+}
+
+.minebits-cell.is-air {
+  border-color: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.38);
+  background: transparent;
+}
+
+.minebits-cell.is-data {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 5px, transparent 5px 10px),
+    #65452e;
+}
+
+.minebits-cell.is-data.is-surface {
+  background:
+    linear-gradient(180deg, #70ba4d 0 24%, transparent 24%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 5px, transparent 5px 10px),
+    #65452e;
+}
+
+.minebits-cell.is-bitstone {
+  background:
+    repeating-linear-gradient(45deg, #606c72 0 7px, #536067 7px 14px);
+}
+
+.minebits-cell.is-core {
+  color: #061018;
+  background:
+    repeating-linear-gradient(45deg, var(--accent) 0 7px, #f2dc64 7px 14px);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.62);
+  animation: minebits-core-pulse 1.2s steps(2) infinite;
+}
+
+.minebits-cell:hover,
+.minebits-cell:focus-visible {
+  z-index: 1;
+  border-color: #fff;
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+  filter: brightness(1.22);
+}
+
+.minebits-status {
+  min-height: 2.8em;
+  margin: 0;
+  padding: 9px 11px;
+  border-left: 3px solid var(--accent);
+  color: var(--ink);
+  background: var(--panel-2);
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.minebits-mission {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.minebits-objectives {
+  display: grid;
+  gap: 9px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.minebits-objectives li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.35;
+}
+
+.minebits-objectives li strong {
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.minebits-objectives li.is-complete,
+.minebits-objectives li.is-complete strong {
+  color: var(--accent);
+}
+
+.minebits-tools {
+  display: grid;
+}
+
+.minebits-tools button {
+  width: 100%;
+  text-align: left;
+}
+
+.minebits-tools button strong {
+  float: right;
+}
+
+.minebits-tools button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.minebits-core-readout {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.55rem;
+  line-height: 1.45;
+}
+
+.minebits-core-readout strong {
+  color: var(--accent);
+}
+
+@keyframes minebits-core-pulse {
+  50% { filter: brightness(1.3) saturate(1.4); }
+}
+
+@media (max-width: 1180px) {
+  .minebits-point-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .minebits-mission {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
