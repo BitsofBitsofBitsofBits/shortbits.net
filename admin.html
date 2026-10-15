@@ -8,12 +8,12 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-45">
+    <link rel="stylesheet" href="styles.css?v=upgrade-46">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin-windows.js?v=admin-windows-4" defer></script>
+    <script src="admin-windows.js?v=admin-windows-5" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
-    <script src="admin.js?v=admin-11" defer></script>
+    <script src="admin.js?v=admin-12" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -224,6 +224,40 @@
             <p id="games-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="games-submit" type="submit">&gt; SAVE_GAMES</button>
           </form>
+        </section>
+
+        <section id="short-links-editor" class="profile-editor" aria-labelledby="short-links-editor-heading">
+          <div class="section-label">
+            <h2 id="short-links-editor-heading">SHORT_LINKS</h2>
+            <span>ADMIN-GENERATED REDIRECTS</span>
+          </div>
+          <form id="short-link-create-form" class="admin-form short-link-create-form">
+            <label>
+              <span>DESTINATION URL</span>
+              <input name="destination_url" type="url" maxlength="2000" placeholder="https://example.com/path" required>
+            </label>
+            <label>
+              <span>LABEL</span>
+              <input name="title" maxlength="120" placeholder="Optional internal label">
+            </label>
+            <div class="short-link-alias-row">
+              <label>
+                <span>ALIAS</span>
+                <input name="slug" minlength="3" maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9_-]{2,63}" placeholder="generated-if-empty">
+              </label>
+              <button id="short-link-generate" type="button">GENERATE ALIAS</button>
+            </div>
+            <label>
+              <span>EXPIRES AT</span>
+              <input name="expires_at" type="datetime-local">
+            </label>
+            <p id="short-links-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="short-link-create" type="submit">&gt; CREATE_SHORT_LINK</button>
+          </form>
+          <div class="repeatable-admin-actions">
+            <button id="short-links-refresh" type="button">REFRESH LINKS</button>
+          </div>
+          <div id="short-links-list" class="short-links-admin-list"></div>
         </section>
       </section>
     </main>

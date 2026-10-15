@@ -8,22 +8,23 @@
     <title>404 // BIT_NOT_FOUND</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-45">
-    <script src="/not-found.js?v=404-1" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=upgrade-46">
+    <script src="/supabase-config.js" defer></script>
+    <script src="/not-found.js?v=404-2" defer></script>
   </head>
   <body class="error-page">
     <div class="noise" aria-hidden="true"></div>
     <div class="scanlines" aria-hidden="true"></div>
     <main class="error-window">
-      <p class="system-kicker">ROUTING EXCEPTION</p>
-      <p class="error-code" aria-label="Error 404">404</p>
-      <h1>BIT_NOT_FOUND</h1>
-      <p>
+      <p id="error-kicker" class="system-kicker">ROUTING EXCEPTION</p>
+      <p id="error-code" class="error-code" aria-label="Error 404">404</p>
+      <h1 id="error-heading">BIT_NOT_FOUND</h1>
+      <p id="error-copy">
         The requested page either escaped containment or was never compiled in
         the first place.
       </p>
       <p id="error-path"></p>
-      <nav class="error-actions" aria-label="Recovery options">
+      <nav id="error-actions" class="error-actions" aria-label="Recovery options">
         <a href="/">&gt; RETURN_HOME</a>
         <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer">&gt; VIEW_SOURCE</a>
       </nav>

@@ -44,11 +44,18 @@ const gamesSubmit = document.querySelector("#games-submit");
 const gamesAdminStatus = document.querySelector("#games-admin-status");
 const gamesSlots = document.querySelector("#games-slots");
 const gamesEntryAdd = document.querySelector("#games-entry-add");
+const shortLinkCreateForm = document.querySelector("#short-link-create-form");
+const shortLinkCreate = document.querySelector("#short-link-create");
+const shortLinkGenerate = document.querySelector("#short-link-generate");
+const shortLinksRefresh = document.querySelector("#short-links-refresh");
+const shortLinksAdminStatus = document.querySelector("#short-links-admin-status");
+const shortLinksList = document.querySelector("#short-links-list");
 const spotifyPlaylistUrlPattern =
   /^https:\/\/open\.spotify\.com\/playlist\/[A-Za-z0-9]+(?:\?.*)?$/;
 const spotifyTrackUrlPattern =
   /^https:\/\/open\.spotify\.com\/track\/[A-Za-z0-9]+(?:\?.*)?$/;
 const httpsUrlPattern = /^https:\/\/\S+$/;
+const shortLinkSlugPattern = /^[a-z0-9][a-z0-9_-]{2,63}$/;
 const pronounProfileFields = [
   "display_name",
   "subject_pronoun",
@@ -760,6 +767,165 @@ async function loadFavoriteGames() {
   return true;
 }
 
+function generateShortLinkSlug(length = 7) {
+  const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+  const values = new Uint32Array(length);
+  crypto.getRandomValues(values);
+  return [...values]
+    .map((value) => alphabet[value % alphabet.length])
+    .join("");
+}
+
+function formatShortLinkDate(value) {
+  if (!value) {
+    return "NEVER";
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "INVALID DATE"
+    : date.toLocaleString();
+}
+
+function toDateTimeLocalValue(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+
+function getShortLinkUrl(slug) {
+  return `${window.location.origin}/go/${encodeURIComponent(slug)}`;
+}
+
+function createShortLinkEditor(link) {
+  const form = document.createElement("form");
+  const heading = document.createElement("div");
+  const title = document.createElement("strong");
+  const shortUrl = document.createElement("a");
+  const destinationLabel = document.createElement("label");
+  const destinationCopy = document.createElement("span");
+  const destination = document.createElement("input");
+  const titleLabel = document.createElement("label");
+  const titleCopy = document.createElement("span");
+  const titleInput = document.createElement("input");
+  const expiresLabel = document.createElement("label");
+  const expiresCopy = document.createElement("span");
+  const expires = document.createElement("input");
+  const enabledLabel = document.createElement("label");
+  const enabled = document.createElement("input");
+  const enabledCopy = document.createElement("span");
+  const metrics = document.createElement("p");
+  const actions = document.createElement("div");
+  const copy = document.createElement("button");
+  const save = document.createElement("button");
+  const remove = document.createElement("button");
+
+  form.className = "short-link-admin-entry";
+  form.dataset.shortLinkSlug = link.slug;
+  heading.className = "short-link-admin-heading";
+  title.textContent = link.title || link.slug;
+  shortUrl.href = getShortLinkUrl(link.slug);
+  shortUrl.target = "_blank";
+  shortUrl.rel = "noreferrer";
+  shortUrl.textContent = `/go/${link.slug} ↗`;
+  heading.append(title, shortUrl);
+
+  destinationCopy.textContent = "DESTINATION URL";
+  destination.name = "destination_url";
+  destination.type = "url";
+  destination.maxLength = 2000;
+  destination.required = true;
+  destination.value = link.destination_url;
+  destinationLabel.append(destinationCopy, destination);
+
+  titleCopy.textContent = "LABEL";
+  titleInput.name = "title";
+  titleInput.maxLength = 120;
+  titleInput.value = link.title ?? "";
+  titleLabel.append(titleCopy, titleInput);
+
+  expiresCopy.textContent = "EXPIRES AT";
+  expires.name = "expires_at";
+  expires.type = "datetime-local";
+  expires.value = toDateTimeLocalValue(link.expires_at);
+  expiresLabel.append(expiresCopy, expires);
+
+  enabledLabel.className = "admin-checkbox";
+  enabled.name = "enabled";
+  enabled.type = "checkbox";
+  enabled.checked = link.enabled;
+  enabledCopy.textContent = "ENABLED";
+  enabledLabel.append(enabled, enabledCopy);
+
+  metrics.className = "short-link-admin-metrics";
+  metrics.textContent = [
+    `CLICKS: ${link.click_count}`,
+    `LAST USED: ${formatShortLinkDate(link.last_clicked_at)}`,
+    `CREATED: ${formatShortLinkDate(link.created_at)}`,
+  ].join(" // ");
+
+  actions.className = "repeatable-entry-actions";
+  copy.type = "button";
+  copy.dataset.shortLinkAction = "copy";
+  copy.textContent = "COPY";
+  save.type = "submit";
+  save.textContent = "SAVE";
+  remove.type = "button";
+  remove.dataset.shortLinkAction = "delete";
+  remove.textContent = "DELETE";
+  actions.append(copy, save, remove);
+
+  form.append(
+    heading,
+    destinationLabel,
+    titleLabel,
+    expiresLabel,
+    enabledLabel,
+    metrics,
+    actions,
+  );
+  return form;
+}
+
+async function loadShortLinks() {
+  setAdminStatus(shortLinksAdminStatus, "Loading short links...");
+  const { data, error } = await adminClient
+    .from("site_short_links")
+    .select(
+      "slug, title, destination_url, enabled, expires_at, click_count, last_clicked_at, created_at",
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Unable to load short links:", error);
+    setAdminStatus(
+      shortLinksAdminStatus,
+      `Short links failed to load: ${error.message}`,
+      "error",
+    );
+    return false;
+  }
+
+  shortLinksList.replaceChildren(...data.map(createShortLinkEditor));
+  if (data.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "content-window-empty";
+    empty.textContent = "No short links have been generated.";
+    shortLinksList.append(empty);
+  }
+  setAdminStatus(
+    shortLinksAdminStatus,
+    `${data.length} short link${data.length === 1 ? "" : "s"} loaded.`,
+    "success",
+  );
+  return true;
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
@@ -774,6 +940,7 @@ async function showInbox() {
     loadNowContent(),
     loadChangelogContent(),
     loadFavoriteGames(),
+    loadShortLinks(),
   ]);
   window.dispatchEvent(new CustomEvent("admin:authenticated"));
 }
@@ -824,6 +991,152 @@ if (adminClient) {
   refreshButton.addEventListener("click", loadMessages);
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
   refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
+  shortLinksRefresh.addEventListener("click", loadShortLinks);
+  shortLinkGenerate.addEventListener("click", () => {
+    shortLinkCreateForm.elements.slug.value = generateShortLinkSlug();
+    shortLinkCreateForm.elements.slug.focus();
+  });
+  shortLinkCreateForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(shortLinkCreateForm);
+    const destinationUrl = String(formData.get("destination_url") ?? "").trim();
+    const title = String(formData.get("title") ?? "").trim();
+    const slugInput = String(formData.get("slug") ?? "").trim().toLowerCase();
+    const slug = slugInput || generateShortLinkSlug();
+    const expiresInput = String(formData.get("expires_at") ?? "").trim();
+
+    if (!shortLinkSlugPattern.test(slug)) {
+      setAdminStatus(
+        shortLinksAdminStatus,
+        "Alias must be 3-64 lowercase letters, numbers, hyphens, or underscores.",
+        "error",
+      );
+      return;
+    }
+    if (!httpsUrlPattern.test(destinationUrl)) {
+      setAdminStatus(
+        shortLinksAdminStatus,
+        "Destination must be a valid HTTPS URL.",
+        "error",
+      );
+      return;
+    }
+
+    shortLinkCreate.disabled = true;
+    shortLinkCreate.textContent = "> CREATING...";
+    const { error } = await adminClient.from("site_short_links").insert({
+      slug,
+      title: title || null,
+      destination_url: destinationUrl,
+      expires_at: expiresInput ? new Date(expiresInput).toISOString() : null,
+      enabled: true,
+    });
+    shortLinkCreate.disabled = false;
+    shortLinkCreate.textContent = "> CREATE_SHORT_LINK";
+
+    if (error) {
+      console.error("Unable to create short link:", error);
+      setAdminStatus(
+        shortLinksAdminStatus,
+        error.code === "23505"
+          ? `The alias "${slug}" is already in use.`
+          : `Short link creation failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+
+    shortLinkCreateForm.reset();
+    await loadShortLinks();
+    setAdminStatus(
+      shortLinksAdminStatus,
+      `Created ${getShortLinkUrl(slug)}`,
+      "success",
+    );
+  });
+  shortLinksList.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.target.closest("[data-short-link-slug]");
+    if (!form) {
+      return;
+    }
+    const formData = new FormData(form);
+    const destinationUrl =
+      String(formData.get("destination_url") ?? "").trim();
+    const expiresInput = String(formData.get("expires_at") ?? "").trim();
+    if (!httpsUrlPattern.test(destinationUrl)) {
+      setAdminStatus(
+        shortLinksAdminStatus,
+        "Destination must be a valid HTTPS URL.",
+        "error",
+      );
+      return;
+    }
+
+    const { error } = await adminClient
+      .from("site_short_links")
+      .update({
+        title: String(formData.get("title") ?? "").trim() || null,
+        destination_url: destinationUrl,
+        expires_at: expiresInput ? new Date(expiresInput).toISOString() : null,
+        enabled: formData.get("enabled") === "on",
+      })
+      .eq("slug", form.dataset.shortLinkSlug);
+
+    if (error) {
+      console.error("Unable to update short link:", error);
+      setAdminStatus(
+        shortLinksAdminStatus,
+        `Short link update failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    await loadShortLinks();
+    setAdminStatus(shortLinksAdminStatus, "Short link updated.", "success");
+  });
+  shortLinksList.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-short-link-action]");
+    const form = button?.closest("[data-short-link-slug]");
+    if (!button || !form) {
+      return;
+    }
+    const slug = form.dataset.shortLinkSlug;
+    if (button.dataset.shortLinkAction === "copy") {
+      try {
+        await navigator.clipboard.writeText(getShortLinkUrl(slug));
+        setAdminStatus(shortLinksAdminStatus, `Copied /go/${slug}.`, "success");
+      } catch (error) {
+        console.error("Unable to copy short link:", error);
+        setAdminStatus(
+          shortLinksAdminStatus,
+          `Copy failed: ${error.message}`,
+          "error",
+        );
+      }
+      return;
+    }
+    if (
+      button.dataset.shortLinkAction === "delete"
+      && window.confirm(`Permanently delete /go/${slug}?`)
+    ) {
+      const { error } = await adminClient
+        .from("site_short_links")
+        .delete()
+        .eq("slug", slug);
+      if (error) {
+        console.error("Unable to delete short link:", error);
+        setAdminStatus(
+          shortLinksAdminStatus,
+          `Short link deletion failed: ${error.message}`,
+          "error",
+        );
+        return;
+      }
+      await loadShortLinks();
+      setAdminStatus(shortLinksAdminStatus, `Deleted /go/${slug}.`, "success");
+    }
+  });
   pronounProfileForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(pronounProfileForm);

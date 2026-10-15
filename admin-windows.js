@@ -90,6 +90,15 @@ const adminWindowModules = [
     x: 245,
     y: 135,
   },
+  {
+    sourceId: "short-links-editor",
+    windowId: "admin-short-links-window",
+    title: "SHORT_LINKS.EXE",
+    label: "SHORT LINKS",
+    description: "Create and manage shortbits.net redirects",
+    x: 280,
+    y: 95,
+  },
 ];
 
 function createAdminWindow(module) {
