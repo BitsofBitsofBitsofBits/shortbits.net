@@ -760,6 +760,45 @@
   --scrollbar-thumb-shadow: 0 0 9px rgba(122, 167, 255, 0.48);
 }
 
+:root[data-interface-theme="aero-glass"] {
+  --accent: #38b6ff;
+  --accent-rgb: 56, 182, 255;
+  --bg: #0d3358;
+  --panel: rgba(18, 62, 98, 0.68);
+  --panel-2: rgba(64, 116, 150, 0.48);
+  --ink: #f7fcff;
+  --muted: #bed9e8;
+  --border: rgba(220, 245, 255, 0.42);
+  --shell-bg: rgba(15, 58, 91, 0.58);
+  --admin-bg: rgba(12, 48, 78, 0.82);
+  --overlay-bg: rgba(18, 62, 96, 0.88);
+  --body-background:
+    radial-gradient(ellipse at 18% 8%, rgba(153, 224, 255, 0.42), transparent 36%),
+    radial-gradient(ellipse at 76% 15%, rgba(74, 164, 255, 0.34), transparent 38%),
+    radial-gradient(ellipse at 50% 105%, rgba(84, 210, 129, 0.34), transparent 46%),
+    linear-gradient(155deg, #092746, #17649a 56%, #1a6f75);
+  --body-background-size: auto;
+  --control-radius: 7px;
+  --font-family: "Segoe UI", "Segoe UI Variable", system-ui, sans-serif;
+  --material-blur: 26px;
+  --shell-radius: 12px;
+  --window-radius: 9px;
+  --noise-opacity: 0.018;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0.035;
+  --scrollbar-size: 14px;
+  --scrollbar-track: rgba(8, 39, 66, 0.54);
+  --scrollbar-track-border: rgba(220, 245, 255, 0.32);
+  --scrollbar-thumb-color: #79cbfa;
+  --scrollbar-thumb-background: linear-gradient(90deg, rgba(255, 255, 255, 0.68), #38b6ff 48%, #1478ba);
+  --scrollbar-thumb-hover: linear-gradient(90deg, #fff, #79cbfa 48%, #1b91d4);
+  --scrollbar-thumb-active: #fff;
+  --scrollbar-thumb-border: 2px solid rgba(9, 50, 82, 0.72);
+  --scrollbar-thumb-radius: 999px;
+  --scrollbar-track-radius: 999px;
+  --scrollbar-thumb-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38), 0 0 8px rgba(56, 182, 255, 0.34);
+}
+
 :root {
   --scrollbar-size: 12px;
   --scrollbar-firefox-width: thin;
@@ -8253,6 +8292,85 @@ html[data-interface-theme="dracula"] .desktop-window-bar {
 html[data-interface-theme="candy-pop"] .system-bar,
 html[data-interface-theme="candy-pop"] .desktop-window-bar {
   background: linear-gradient(90deg, rgba(255, 117, 183, 0.22), rgba(109, 225, 255, 0.18));
+}
+
+html[data-interface-theme="aero-glass"] .shell,
+html[data-interface-theme="aero-glass"] .desktop-window,
+html[data-interface-theme="aero-glass"] .system-window,
+html[data-interface-theme="aero-glass"] .fake-desktop-app {
+  border: 1px solid rgba(235, 250, 255, 0.66);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.42),
+    inset 0 0 0 1px rgba(42, 126, 180, 0.3),
+    0 22px 64px rgba(0, 22, 46, 0.46);
+  backdrop-filter: blur(26px) saturate(1.2);
+}
+
+html[data-interface-theme="aero-glass"] .system-bar,
+html[data-interface-theme="aero-glass"] .desktop-window-bar,
+html[data-interface-theme="aero-glass"] .fake-desktop-app > header {
+  border-bottom-color: rgba(225, 247, 255, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06) 48%, rgba(5, 62, 105, 0.24) 52%),
+    rgba(31, 105, 154, 0.48);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px rgba(0, 37, 70, 0.42);
+  text-shadow: 0 1px 2px rgba(0, 20, 42, 0.88);
+}
+
+html[data-interface-theme="aero-glass"] footer,
+html[data-interface-theme="aero-glass"] .link-card,
+html[data-interface-theme="aero-glass"] .spotify-widget,
+html[data-interface-theme="aero-glass"] .now-playing {
+  border-color: rgba(220, 245, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 42%),
+    rgba(19, 69, 104, 0.52);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.16);
+}
+
+html[data-interface-theme="aero-glass"] .window-controls {
+  gap: 3px;
+  padding: 4px;
+}
+
+html[data-interface-theme="aero-glass"] .window-button {
+  width: 42px;
+  min-height: 30px;
+  border: 1px solid rgba(235, 250, 255, 0.54);
+  border-radius: 0 0 5px 5px;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(16, 79, 124, 0.38)),
+    rgba(26, 91, 137, 0.66);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.32),
+    0 1px 3px rgba(0, 22, 44, 0.46);
+}
+
+html[data-interface-theme="aero-glass"] .window-button:hover,
+html[data-interface-theme="aero-glass"] .window-button:focus-visible {
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(41, 161, 224, 0.36)),
+    rgba(33, 122, 180, 0.72);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.5),
+    0 0 9px rgba(80, 203, 255, 0.58);
+}
+
+html[data-interface-theme="aero-glass"] .close-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(158, 21, 29, 0.42)),
+    rgba(190, 42, 51, 0.74);
+}
+
+html[data-interface-theme="aero-glass"] .close-button:hover,
+html[data-interface-theme="aero-glass"] .close-button:focus-visible {
+  background:
+    linear-gradient(180deg, #ff8b82, #b70f19 58%, #77070d);
+  box-shadow: 0 0 12px rgba(255, 87, 76, 0.8);
 }
 
 html.is-rgb-mode .shell {

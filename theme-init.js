@@ -18,6 +18,7 @@ window.BITS_INTERFACE_THEMES = [
   { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
   { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
+  { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#0d3358" },
 ];
 
 const storedInterfaceTheme = localStorage.getItem("bits-interface-theme");
