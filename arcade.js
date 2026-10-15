@@ -271,7 +271,7 @@ function selectGame(game) {
   stopSnake();
   stopBitsweeper();
   stopTetris();
-  stopMineBits();
+  mineBitsGame.pause();
   stopFlappy();
   activeGame = game;
   pendingResult = null;
@@ -284,6 +284,9 @@ function selectGame(game) {
   arcadePanels.forEach((panel) => {
     panel.hidden = panel.dataset.arcadePanel !== game;
   });
+  if (game === "minebits") {
+    mineBitsGame.resume();
+  }
   leaderboardTitle.textContent = `${getLeaderboardLabel()} LEADERBOARD`;
   updateLocalBest();
   setArcadeStatus(`${gameLabels[game]} subsystem ready.`);
@@ -1411,231 +1414,18 @@ solitaireFoundations.addEventListener("click", (event) => {
 
 solitaireStart.addEventListener("click", startSolitaire);
 
-const mineBitsScene = document.querySelector("#minebits-scene");
-const mineBitsScore = document.querySelector("#minebits-score");
-const mineBitsToolLabel = document.querySelector("#minebits-tool-label");
-const mineBitsStart = document.querySelector("#minebits-start");
-const mineBitsTools = [...document.querySelectorAll("[data-minebits-tool]")];
-const mineBitsStatus = document.querySelector("#minebits-status");
-const mineBitsMinedOutput = document.querySelector("#minebits-mined");
-const mineBitsCoresOutput = document.querySelector("#minebits-cores");
-const mineBitsPlacedOutput = document.querySelector("#minebits-placed");
-const mineBitsDataCount = document.querySelector("#minebits-data-count");
-const mineBitsBitstoneCount = document.querySelector("#minebits-bitstone-count");
-const mineBitsCoreCount = document.querySelector("#minebits-core-count");
-const mineBitsGoalMined = document.querySelector("#minebits-goal-mined");
-const mineBitsGoalCores = document.querySelector("#minebits-goal-cores");
-const mineBitsGoalPlaced = document.querySelector("#minebits-goal-placed");
-const mineBitsColumns = 14;
-const mineBitsRows = 8;
-const mineBitsGoals = {
-  mined: 20,
-  cores: 3,
-  placed: 4,
-};
-let mineBitsWorld = [];
-let mineBitsPoints = 0;
-let mineBitsMined = 0;
-let mineBitsCores = 0;
-let mineBitsPlaced = 0;
-let mineBitsInventory = { data: 0, bitstone: 0 };
-let mineBitsTool = "mine";
-let mineBitsFinished = false;
-
-function createMineBitsWorld() {
-  const coreLocations = new Set(["5:5", "10:6", "2:7", "12:5"]);
-  return Array.from({ length: mineBitsRows }, (_, row) => (
-    Array.from({ length: mineBitsColumns }, (_, column) => {
-      if (row < 3) {
-        return 0;
-      }
-      if (row === 3) {
-        return 1;
-      }
-      if (coreLocations.has(`${column}:${row}`)) {
-        return 3;
-      }
-      return Math.random() < 0.34 ? 2 : 1;
-    })
-  ));
-}
-
-function updateMineBitsGoal(element, complete) {
-  element.classList.toggle("is-complete", complete);
-  element.querySelector("span").textContent = complete ? "[X]" : "[ ]";
-}
-
-function updateMineBitsHud() {
-  const minedComplete = mineBitsMined >= mineBitsGoals.mined;
-  const coresComplete = mineBitsCores >= mineBitsGoals.cores;
-  const placedComplete = mineBitsPlaced >= mineBitsGoals.placed;
-  mineBitsScore.textContent = String(mineBitsPoints);
-  mineBitsMinedOutput.textContent = `${Math.min(mineBitsMined, mineBitsGoals.mined)} / ${mineBitsGoals.mined}`;
-  mineBitsCoresOutput.textContent = `${Math.min(mineBitsCores, mineBitsGoals.cores)} / ${mineBitsGoals.cores}`;
-  mineBitsPlacedOutput.textContent = `${Math.min(mineBitsPlaced, mineBitsGoals.placed)} / ${mineBitsGoals.placed}`;
-  mineBitsDataCount.textContent = String(mineBitsInventory.data);
-  mineBitsBitstoneCount.textContent = String(mineBitsInventory.bitstone);
-  mineBitsCoreCount.textContent = String(mineBitsCores);
-  updateMineBitsGoal(mineBitsGoalMined, minedComplete);
-  updateMineBitsGoal(mineBitsGoalCores, coresComplete);
-  updateMineBitsGoal(mineBitsGoalPlaced, placedComplete);
-  mineBitsTools.forEach((button) => {
-    const tool = button.dataset.minebitsTool;
-    button.setAttribute("aria-pressed", String(tool === mineBitsTool));
-    button.disabled = mineBitsFinished
-      || (tool !== "mine" && mineBitsInventory[tool] === 0);
-  });
-}
-
-function drawMineBits() {
-  const fragment = document.createDocumentFragment();
-  const blockClasses = ["air", "data", "bitstone", "core"];
-  const blockNames = ["empty sky", "Data block", "Bitstone block", "glowing Core Bit"];
-  mineBitsWorld.forEach((row, rowIndex) => row.forEach((block, columnIndex) => {
-    const cell = document.createElement("button");
-    cell.type = "button";
-    cell.className = `minebits-cell is-${blockClasses[block]}`;
-    cell.dataset.minebitsRow = String(rowIndex);
-    cell.dataset.minebitsColumn = String(columnIndex);
-    cell.dataset.minebitsBlock = String(block);
-    cell.setAttribute("role", "gridcell");
-    cell.setAttribute(
-      "aria-label",
-      `Row ${rowIndex + 1}, column ${columnIndex + 1}: ${blockNames[block]}`,
-    );
-    if (block === 1) {
-      cell.textContent = rowIndex === 3 ? "D" : "DATA";
-      cell.classList.toggle("is-surface", rowIndex === 3);
-      cell.title = "Click to mine Data (+15 score, +1 Data inventory)";
-    } else if (block === 2) {
-      cell.textContent = "BITS";
-      cell.title = "Click to mine Bitstone (+30 score, +1 Bitstone inventory)";
-    } else if (block === 3) {
-      cell.textContent = (rowIndex + columnIndex) % 2 ? "01" : "10";
-      cell.title = "Click to recover a Core Bit (+100 score)";
-    } else {
-      cell.textContent = mineBitsTool === "mine" ? "" : "+";
-      cell.title = mineBitsTool === "mine"
-        ? "Empty space. Select an inventory block to build here."
-        : `Click to place ${mineBitsTool}.`;
-    }
-    fragment.append(cell);
-  }));
-  mineBitsScene.replaceChildren(fragment);
-  updateMineBitsHud();
-}
-
-function completeMineBitsIfReady() {
-  if (
-    mineBitsFinished
-    || mineBitsMined < mineBitsGoals.mined
-    || mineBitsCores < mineBitsGoals.cores
-    || mineBitsPlaced < mineBitsGoals.placed
-  ) {
-    return;
-  }
-
-  mineBitsFinished = true;
-  mineBitsTool = "mine";
-  drawMineBits();
-  mineBitsToolLabel.textContent = "ARCHIVED";
-  mineBitsStatus.textContent = "MISSION COMPLETE: excavation archived before the terrain filed a complaint.";
-  finishGame(
-    "minebits",
-    mineBitsPoints,
-    `${mineBitsMined} MINED // ${mineBitsPlaced} BUILT // ${mineBitsCores} CORES`,
-    "Point-and-click world archived before the Bits became sentient.",
-    { id: "minebits-architect", label: "BLOCKY GOOD FAITH", message: "MINEBITS WORLD ARCHIVED" },
-  );
-}
-
-function startMineBits() {
-  mineBitsWorld = createMineBitsWorld();
-  mineBitsPoints = 0;
-  mineBitsMined = 0;
-  mineBitsCores = 0;
-  mineBitsPlaced = 0;
-  mineBitsInventory = { data: 0, bitstone: 0 };
-  mineBitsTool = "mine";
-  mineBitsFinished = false;
-  scoreForm.hidden = true;
-  pendingResult = null;
-  drawMineBits();
-  mineBitsToolLabel.textContent = "MINE";
-  mineBitsStatus.textContent = "World ready. Click any visible block to mine it automatically.";
-  setArcadeStatus("MINEBITS point-and-click world generated in good faith. No borrowed textures detected.");
-}
-
-function stopMineBits() {
-  // MineBits has no continuous process to suspend.
-}
-
-mineBitsTools.forEach((button) => {
-  button.addEventListener("click", () => {
-    const selectedTool = button.dataset.minebitsTool;
-    if (selectedTool !== "mine" && mineBitsInventory[selectedTool] === 0) {
-      mineBitsStatus.textContent = `Mine a ${selectedTool === "data" ? "Data" : "Bitstone"} block before trying to place one.`;
-      return;
-    }
-    mineBitsTool = selectedTool;
-    mineBitsToolLabel.textContent = mineBitsTool.toUpperCase();
-    mineBitsStatus.textContent = mineBitsTool === "mine"
-      ? "Mine mode selected. Click a solid block."
-      : `${mineBitsTool.toUpperCase()} selected. Click any empty square to place it.`;
-    drawMineBits();
-  });
+const mineBitsRoot = document.querySelector("#arcade-game-minebits");
+const mineBitsGame = window.createMineBitsGame({
+  root: mineBitsRoot,
+  onScore: ({ score, detail }) => {
+    prepareScore("minebits", score, detail);
+    setArcadeStatus("MINEBITS run ready for the public leaderboard.", "success");
+  },
+  onAchievement: ({ id, message, label }) => {
+    window.BITS_ACHIEVEMENTS?.unlock(id, message, label);
+  },
+  onArcadeStatus: (message) => setArcadeStatus(message),
 });
-
-mineBitsScene.addEventListener("click", (event) => {
-  const cell = event.target.closest("[data-minebits-row][data-minebits-column]");
-  if (!cell) {
-    return;
-  }
-  if (mineBitsFinished) {
-    mineBitsStatus.textContent = "This world is archived. Select NEW_WORLD to excavate again.";
-    return;
-  }
-  const row = Number.parseInt(cell.dataset.minebitsRow, 10);
-  const column = Number.parseInt(cell.dataset.minebitsColumn, 10);
-  const block = mineBitsWorld[row][column];
-  if (mineBitsTool === "mine" && block) {
-    mineBitsWorld[row][column] = 0;
-    mineBitsPoints += block === 3 ? 100 : block === 2 ? 30 : 15;
-    mineBitsMined += 1;
-    if (block === 1) {
-      mineBitsInventory.data += 1;
-      mineBitsStatus.textContent = "Data block mined. DATA inventory +1.";
-    } else if (block === 2) {
-      mineBitsInventory.bitstone += 1;
-      mineBitsStatus.textContent = "Bitstone mined. BITSTONE inventory +1.";
-    } else {
-      mineBitsCores += 1;
-      mineBitsStatus.textContent = `Core Bit recovered. ${Math.min(mineBitsCores, mineBitsGoals.cores)} of ${mineBitsGoals.cores} required cores found.`;
-    }
-  } else if (mineBitsTool === "mine") {
-    mineBitsStatus.textContent = "That square is already empty. Select an inventory block to build there.";
-  } else if (!block && mineBitsInventory[mineBitsTool] > 0) {
-    mineBitsWorld[row][column] = mineBitsTool === "data" ? 1 : 2;
-    mineBitsInventory[mineBitsTool] -= 1;
-    mineBitsPlaced += 1;
-    mineBitsPoints += 5;
-    mineBitsStatus.textContent = `${mineBitsTool.toUpperCase()} placed. ${Math.min(mineBitsPlaced, mineBitsGoals.placed)} of ${mineBitsGoals.placed} build blocks complete.`;
-    if (mineBitsInventory[mineBitsTool] === 0) {
-      mineBitsTool = "mine";
-      mineBitsToolLabel.textContent = "MINE";
-    }
-  } else if (block) {
-    mineBitsStatus.textContent = "That square is occupied. Choose an empty sky or mined square for building.";
-  } else {
-    mineBitsTool = "mine";
-    mineBitsToolLabel.textContent = "MINE";
-    mineBitsStatus.textContent = "Inventory empty. Mine another block before placing.";
-  }
-  drawMineBits();
-  completeMineBitsIfReady();
-});
-
-mineBitsStart.addEventListener("click", startMineBits);
 
 const flappyCanvas = document.querySelector("#flappy-canvas");
 const flappyContext = flappyCanvas.getContext("2d");
@@ -1800,7 +1590,8 @@ function suspendArcadeGame() {
     || bitsweeperFrame
     || tetrisTimer
     || flappyFrame
-    || (mineStarted && !mineFinished),
+    || (mineStarted && !mineFinished)
+    || activeGame === "minebits",
   );
   if (!gameWasRunning) {
     return;
@@ -1809,6 +1600,7 @@ function suspendArcadeGame() {
   stopBitsweeper();
   stopTetris();
   stopFlappy();
+  mineBitsGame.pause();
   if (mineStarted && !mineFinished) {
     startMinesweeper();
   }
@@ -1818,6 +1610,8 @@ function suspendArcadeGame() {
 const arcadeVisibilityObserver = new MutationObserver(() => {
   if (arcadeWindow.hidden || arcadeWindow.classList.contains("is-minimized")) {
     suspendArcadeGame();
+  } else if (activeGame === "minebits") {
+    mineBitsGame.resume();
   }
 });
 arcadeVisibilityObserver.observe(arcadeWindow, {
@@ -1828,6 +1622,12 @@ arcadeVisibilityObserver.observe(arcadeWindow, {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     suspendArcadeGame();
+  } else if (
+    activeGame === "minebits"
+    && !arcadeWindow.hidden
+    && !arcadeWindow.classList.contains("is-minimized")
+  ) {
+    mineBitsGame.resume();
   }
 });
 
@@ -1837,6 +1637,6 @@ drawBitsweeper();
 tetrisBoard = createTetrisBoard();
 drawTetris();
 startSolitaire();
-startMineBits();
+mineBitsGame.pause();
 drawFlappy();
 selectGame("snake");

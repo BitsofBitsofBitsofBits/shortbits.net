@@ -1935,8 +1935,7 @@ html.is-page-hidden * {
 .arcade-leaderboard button,
 .arcade-score-form button,
 .arcade-dpad button,
-.tetris-controls button,
-.minebits-tools button {
+.tetris-controls button {
   flex: 0 0 auto;
   padding: 9px 12px;
   border: 1px solid var(--border);
@@ -1950,7 +1949,6 @@ html.is-page-hidden * {
 .arcade-tabs button[aria-selected="true"],
 .minesweeper-difficulty button[aria-pressed="true"],
 .minesweeper-mode button[aria-pressed="true"],
-.minebits-tools button[aria-pressed="true"],
 .arcade-tabs button:hover,
 .arcade-tabs button:focus-visible,
 .arcade-game-toolbar button:hover,
@@ -1966,9 +1964,7 @@ html.is-page-hidden * {
 .arcade-dpad button:hover,
 .arcade-dpad button:focus-visible,
 .tetris-controls button:hover,
-.tetris-controls button:focus-visible,
-.minebits-tools button:hover,
-.minebits-tools button:focus-visible {
+.tetris-controls button:focus-visible {
   border-color: var(--accent);
   outline: none;
   color: var(--bg);
@@ -2042,8 +2038,7 @@ html.is-page-hidden * {
   text-align: center;
 }
 
-.minesweeper-mode,
-.minebits-tools {
+.minesweeper-mode {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -2292,95 +2287,6 @@ html.is-page-hidden * {
   color: var(--accent);
 }
 
-.minebits-point-layout {
-  display: grid;
-  grid-template-columns: minmax(460px, 1fr) minmax(220px, 280px);
-  gap: 12px;
-  min-height: 0;
-}
-
-.minebits-scene-column {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-width: 0;
-}
-
-.minebits-scene {
-  display: grid;
-  grid-template-columns: repeat(14, minmax(28px, 1fr));
-  width: 100%;
-  aspect-ratio: 14 / 8;
-  overflow: hidden;
-  border: 2px solid var(--border);
-  background: linear-gradient(180deg, #6aa9c2 0 37.5%, #101924 37.5%);
-  box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.28);
-}
-
-.minebits-cell {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid rgba(3, 8, 12, 0.32);
-  border-radius: 0;
-  color: rgba(255, 255, 255, 0.72);
-  background: transparent;
-  cursor: crosshair;
-  font: 700 clamp(0.36rem, 0.72vw, 0.58rem) var(--font-family);
-  text-shadow: 1px 1px rgba(0, 0, 0, 0.52);
-}
-
-.minebits-cell::after {
-  position: absolute;
-  inset: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  content: "";
-}
-
-.minebits-cell.is-air {
-  border-color: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.38);
-  background: transparent;
-}
-
-.minebits-cell.is-data {
-  background:
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 5px, transparent 5px 10px),
-    #65452e;
-}
-
-.minebits-cell.is-data.is-surface {
-  background:
-    linear-gradient(180deg, #70ba4d 0 24%, transparent 24%),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 5px, transparent 5px 10px),
-    #65452e;
-}
-
-.minebits-cell.is-bitstone {
-  background:
-    repeating-linear-gradient(45deg, #606c72 0 7px, #536067 7px 14px);
-}
-
-.minebits-cell.is-core {
-  color: #061018;
-  background:
-    repeating-linear-gradient(45deg, var(--accent) 0 7px, #f2dc64 7px 14px);
-  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.62);
-  animation: minebits-core-pulse 1.2s steps(2) infinite;
-}
-
-.minebits-cell:hover,
-.minebits-cell:focus-visible {
-  z-index: 1;
-  border-color: #fff;
-  outline: 2px solid var(--accent);
-  outline-offset: -3px;
-  filter: brightness(1.22);
-}
-
 .minebits-status {
   min-height: 2.8em;
   margin: 0;
@@ -2392,7 +2298,187 @@ html.is-page-hidden * {
   line-height: 1.4;
 }
 
-.minebits-mission {
+.minebits-world-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.minebits-world-actions button,
+.minebits-world-panel button,
+.minebits-hotbar button {
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: rgba(5, 12, 16, 0.74);
+  cursor: pointer;
+  font: inherit;
+}
+
+.minebits-world-actions button,
+.minebits-world-panel button {
+  padding: 9px 11px;
+  font-size: 0.62rem;
+}
+
+.minebits-world-actions button:hover,
+.minebits-world-actions button:focus-visible,
+.minebits-world-panel button:hover,
+.minebits-world-panel button:focus-visible,
+.minebits-hotbar button:hover,
+.minebits-hotbar button:focus-visible,
+.minebits-hotbar button.is-selected {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.24), 0 0 14px rgba(var(--accent-rgb), 0.16);
+}
+
+.minebits-voxel-layout {
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) minmax(190px, 230px);
+  gap: 12px;
+  min-height: 0;
+}
+
+.minebits-view-column {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.minebits-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 330px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  background: #64a0c2;
+  box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.3);
+}
+
+#minebits-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+#minebits-canvas:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+
+.minebits-crosshair {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+}
+
+.minebits-crosshair::before,
+.minebits-crosshair::after {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.94);
+  content: "";
+}
+
+.minebits-crosshair::before {
+  top: 8px;
+  left: 2px;
+  width: 14px;
+  height: 2px;
+}
+
+.minebits-crosshair::after {
+  top: 2px;
+  left: 8px;
+  width: 2px;
+  height: 14px;
+}
+
+.minebits-prompt {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 50%;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  color: #fff;
+  background: rgba(4, 10, 13, 0.72);
+  font-size: 0.55rem;
+  pointer-events: none;
+  transform: translateX(-50%);
+  text-shadow: 1px 1px #000;
+}
+
+.minebits-hotbar {
+  position: absolute;
+  z-index: 3;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.minebits-hotbar button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px 8px;
+  font-size: clamp(0.4rem, 0.55vw, 0.56rem);
+  text-align: left;
+  text-shadow: 1px 1px #000;
+}
+
+.minebits-hotbar button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minebits-hotbar button i {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.minebits-hotbar button strong {
+  color: #fff;
+}
+
+.minebits-hotbar button[data-minebits-block="2"] {
+  background: linear-gradient(135deg, rgba(98, 67, 43, 0.94), rgba(55, 35, 23, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="3"] {
+  background: linear-gradient(135deg, rgba(90, 101, 108, 0.94), rgba(45, 51, 55, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="4"] {
+  background: linear-gradient(135deg, rgba(25, 139, 146, 0.94), rgba(30, 67, 74, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="5"] {
+  background: linear-gradient(135deg, rgba(101, 65, 28, 0.94), rgba(50, 33, 17, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="6"] {
+  background: linear-gradient(135deg, rgba(43, 111, 36, 0.94), rgba(24, 62, 20, 0.94));
+}
+
+.minebits-world-panel {
   display: grid;
   align-content: start;
   gap: 18px;
@@ -2401,72 +2487,69 @@ html.is-page-hidden * {
   background: var(--panel-2);
 }
 
-.minebits-objectives {
+.minebits-world-panel > div {
   display: grid;
   gap: 9px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
 }
 
-.minebits-objectives li {
+.minebits-seed-label {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 7px;
+  gap: 6px;
   color: var(--muted);
-  font-size: 0.58rem;
-  line-height: 1.35;
+  font-size: 0.56rem;
 }
 
-.minebits-objectives li strong {
+.minebits-seed-label input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px;
+  border: 1px solid var(--border);
   color: var(--ink);
-  white-space: nowrap;
+  background: var(--panel);
+  font: inherit;
 }
 
-.minebits-objectives li.is-complete,
-.minebits-objectives li.is-complete strong {
+.minebits-stats {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.minebits-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.58rem;
+}
+
+.minebits-stats dt {
+  color: var(--muted);
+}
+
+.minebits-stats dd {
+  margin: 0;
   color: var(--accent);
 }
 
-.minebits-tools {
-  display: grid;
-}
-
-.minebits-tools button {
-  width: 100%;
-  text-align: left;
-}
-
-.minebits-tools button strong {
-  float: right;
-}
-
-.minebits-tools button:disabled {
-  cursor: not-allowed;
-  opacity: 0.42;
-}
-
-.minebits-core-readout {
+.minebits-save-readout {
   margin: 0;
   color: var(--muted);
-  font-size: 0.55rem;
-  line-height: 1.45;
+  font-size: 0.52rem;
+  line-height: 1.5;
 }
 
-.minebits-core-readout strong {
+.minebits-save-readout strong {
   color: var(--accent);
 }
 
-@keyframes minebits-core-pulse {
-  50% { filter: brightness(1.3) saturate(1.4); }
-}
-
-@media (max-width: 1180px) {
-  .minebits-point-layout {
+@media (max-width: 1280px) {
+  .minebits-voxel-layout {
     grid-template-columns: 1fr;
   }
 
-  .minebits-mission {
+  .minebits-world-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

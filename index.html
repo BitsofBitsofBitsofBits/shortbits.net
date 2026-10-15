@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-9"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-77">
+    <link rel="stylesheet" href="styles.css?v=upgrade-78">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -40,9 +40,10 @@
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-2" defer></script>
     <script src="screensaver.js?v=screensaver-1" defer></script>
-    <script src="script.js?v=upgrade-51" defer></script>
+    <script src="script.js?v=upgrade-52" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
-    <script src="arcade.js?v=arcade-4" defer></script>
+    <script src="minebits.js?v=minebits-1" defer></script>
+    <script src="arcade.js?v=arcade-5" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-3" defer></script>
@@ -1208,41 +1209,59 @@
 
             <article id="arcade-game-minebits" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-minebits" data-arcade-panel="minebits" hidden>
               <div class="arcade-game-toolbar">
-                <p>SCORE <strong id="minebits-score">0</strong> // ACTION <strong id="minebits-tool-label">MINE</strong></p>
-                <button id="minebits-start" type="button">NEW_WORLD</button>
+                <p>SCORE <strong id="minebits-score">0</strong> // BLOCK <strong id="minebits-tool-label">DATA</strong> // XYZ <strong id="minebits-position">0 0 0</strong></p>
+                <div class="minebits-world-actions">
+                  <button id="minebits-save" type="button">SAVE_WORLD</button>
+                  <button id="minebits-publish" type="button">PUBLISH_RUN</button>
+                </div>
               </div>
               <div class="minebits-how-to">
-                <strong>POINT-AND-CLICK PROTOCOL</strong>
-                <span>1. CLICK BLOCKS TO MINE</span>
-                <span>2. FIND 3 GLOWING CORE BITS</span>
-                <span>3. SELECT INVENTORY, THEN CLICK EMPTY SPACE TO BUILD</span>
+                <strong>FIRST-PERSON VOXEL PROTOCOL</strong>
+                <span>WASD MOVE</span>
+                <span>MOUSE LOOK</span>
+                <span>SPACE / E JUMP</span>
+                <span>LEFT CLICK MINE</span>
+                <span>RIGHT CLICK BUILD</span>
+                <span>1-5 SELECT BLOCK</span>
               </div>
-              <div class="minebits-point-layout">
-                <div class="minebits-scene-column">
-                  <div id="minebits-scene" class="minebits-scene" role="grid" aria-label="MineBits side-view block world"></div>
-                  <p id="minebits-status" class="minebits-status" role="status">Click NEW_WORLD to generate a point-and-click excavation site.</p>
-                </div>
-                <aside class="minebits-mission" aria-label="MineBits mission and inventory">
-                  <div>
-                    <p class="system-kicker">MISSION_OBJECTIVES</p>
-                    <ul class="minebits-objectives">
-                      <li id="minebits-goal-mined"><span aria-hidden="true">[ ]</span> MINE 20 BLOCKS <strong id="minebits-mined">0 / 20</strong></li>
-                      <li id="minebits-goal-cores"><span aria-hidden="true">[ ]</span> FIND 3 CORE BITS <strong id="minebits-cores">0 / 3</strong></li>
-                      <li id="minebits-goal-placed"><span aria-hidden="true">[ ]</span> BUILD 4 BLOCKS <strong id="minebits-placed">0 / 4</strong></li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p class="system-kicker">ACTION_AND_INVENTORY</p>
-                    <div class="minebits-tools" role="group" aria-label="MineBits action and inventory">
-                      <button type="button" data-minebits-tool="mine" aria-pressed="true">MINE MODE</button>
-                      <button type="button" data-minebits-tool="data" aria-pressed="false">PLACE DATA <strong id="minebits-data-count">0</strong></button>
-                      <button type="button" data-minebits-tool="bitstone" aria-pressed="false">PLACE BITSTONE <strong id="minebits-bitstone-count">0</strong></button>
+              <div class="minebits-voxel-layout">
+                <div class="minebits-view-column">
+                  <div class="minebits-viewport">
+                    <canvas id="minebits-canvas" width="960" height="540" tabindex="0" aria-label="MineBits first-person voxel world"></canvas>
+                    <span class="minebits-crosshair" aria-hidden="true"></span>
+                    <span id="minebits-prompt" class="minebits-prompt">CLICK TO ENTER WORLD</span>
+                    <div id="minebits-hotbar" class="minebits-hotbar" role="group" aria-label="MineBits block hotbar">
+                      <button type="button" data-minebits-block="2" aria-pressed="true"><span><i>1</i> DATA</span><strong>12</strong></button>
+                      <button type="button" data-minebits-block="3" aria-pressed="false"><span><i>2</i> BITSTONE</span><strong>0</strong></button>
+                      <button type="button" data-minebits-block="4" aria-pressed="false"><span><i>3</i> COPPER BIT</span><strong>0</strong></button>
+                      <button type="button" data-minebits-block="5" aria-pressed="false"><span><i>4</i> LOG FILE</span><strong>4</strong></button>
+                      <button type="button" data-minebits-block="6" aria-pressed="false"><span><i>5</i> LEAF CACHE</span><strong>0</strong></button>
                     </div>
                   </div>
-                  <p class="minebits-core-readout">CORE BITS <strong id="minebits-core-count">0</strong> // NOT PLACEABLE DUE TO OPINIONS</p>
+                  <p id="minebits-status" class="minebits-status" role="status">Click the world to begin exploring.</p>
+                </div>
+                <aside class="minebits-world-panel" aria-label="MineBits world information">
+                  <div>
+                    <p class="system-kicker">WORLD_GENERATOR</p>
+                    <label class="minebits-seed-label">
+                      <span>SEED</span>
+                      <input id="minebits-seed" type="number" inputmode="numeric" min="0" max="4294967295">
+                    </label>
+                    <button id="minebits-start" type="button">GENERATE_NEW_WORLD</button>
+                  </div>
+                  <div>
+                    <p class="system-kicker">SESSION_STATS</p>
+                    <dl class="minebits-stats">
+                      <div><dt>MINED</dt><dd id="minebits-mined">0</dd></div>
+                      <div><dt>BUILT</dt><dd id="minebits-placed">0</dd></div>
+                      <div><dt>CORE BITS</dt><dd id="minebits-cores">0</dd></div>
+                      <div><dt>WORLD</dt><dd>64×28×64</dd></div>
+                    </dl>
+                  </div>
+                  <p class="minebits-save-readout">LOCAL WORLD STATE // <strong id="minebits-save-state">LOADING</strong></p>
                 </aside>
               </div>
-              <p class="arcade-help">AN ORIGINAL 2D POINT-AND-CLICK BLOCK-WORLD PARODY // NO BORROWED ASSETS</p>
+              <p class="arcade-help">AN ORIGINAL FIRST-PERSON VOXEL SANDBOX PARODY // SEEDED TERRAIN, CAVES, TREES, ORES, GRAVITY, COLLISION, AND LOCAL SAVES // NO BORROWED ASSETS</p>
             </article>
 
             <article id="arcade-game-flappy" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-flappy" data-arcade-panel="flappy" hidden>

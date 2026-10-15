@@ -1,0 +1,891 @@
+(() => {
+  const WORLD_WIDTH = 64;
+  const WORLD_HEIGHT = 28;
+  const WORLD_DEPTH = 64;
+  const REACH = 7;
+  const STORAGE_KEY = "minebits-voxel-world-v1";
+  const BLOCKS = {
+    air: 0,
+    grass: 1,
+    data: 2,
+    bitstone: 3,
+    ore: 4,
+    log: 5,
+    leaves: 6,
+    core: 7,
+    bedrock: 8,
+  };
+  const BLOCK_INFO = {
+    1: { name: "Grass Data", color: [0.36, 0.68, 0.22], drop: 2 },
+    2: { name: "Data", color: [0.45, 0.29, 0.16], drop: 2 },
+    3: { name: "Bitstone", color: [0.39, 0.43, 0.46], drop: 3 },
+    4: { name: "Copper Bit", color: [0.18, 0.68, 0.72], drop: 4 },
+    5: { name: "Log File", color: [0.42, 0.27, 0.12], drop: 5 },
+    6: { name: "Leaf Cache", color: [0.22, 0.52, 0.18], drop: 6 },
+    7: { name: "Core Bit", color: [0.96, 0.78, 0.18], drop: 7 },
+    8: { name: "Bedrock Firewall", color: [0.12, 0.13, 0.15], unbreakable: true },
+  };
+  const HOTBAR_BLOCKS = [2, 3, 4, 5, 6];
+  const FACE_DATA = [
+    { direction: [1, 0, 0], shade: 0.82, vertices: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 0], [1, 1, 1], [1, 0, 1]] },
+    { direction: [-1, 0, 0], shade: 0.68, vertices: [[0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 1], [0, 1, 0], [0, 0, 0]] },
+    { direction: [0, 1, 0], shade: 1, vertices: [[0, 1, 0], [0, 1, 1], [1, 1, 1], [0, 1, 0], [1, 1, 1], [1, 1, 0]] },
+    { direction: [0, -1, 0], shade: 0.5, vertices: [[0, 0, 1], [0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 0], [1, 0, 1]] },
+    { direction: [0, 0, 1], shade: 0.76, vertices: [[1, 0, 1], [1, 1, 1], [0, 1, 1], [1, 0, 1], [0, 1, 1], [0, 0, 1]] },
+    { direction: [0, 0, -1], shade: 0.62, vertices: [[0, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 0], [1, 1, 0], [1, 0, 0]] },
+  ];
+
+  function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
+  }
+
+  function randomSeed() {
+    if (window.crypto?.getRandomValues) {
+      return window.crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
+    }
+    return Math.floor(Math.random() * 0xffffffff) >>> 0;
+  }
+
+  function hash(seed, x, y = 0, z = 0) {
+    let value = (seed ^ Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(z, 2147483647)) >>> 0;
+    value = Math.imul(value ^ (value >>> 13), 1274126177) >>> 0;
+    return ((value ^ (value >>> 16)) >>> 0) / 4294967295;
+  }
+
+  function smoothstep(value) {
+    return value * value * (3 - 2 * value);
+  }
+
+  function valueNoise(seed, x, z, scale) {
+    const scaledX = x / scale;
+    const scaledZ = z / scale;
+    const x0 = Math.floor(scaledX);
+    const z0 = Math.floor(scaledZ);
+    const tx = smoothstep(scaledX - x0);
+    const tz = smoothstep(scaledZ - z0);
+    const a = hash(seed, x0, 0, z0);
+    const b = hash(seed, x0 + 1, 0, z0);
+    const c = hash(seed, x0, 0, z0 + 1);
+    const d = hash(seed, x0 + 1, 0, z0 + 1);
+    const top = a + ((b - a) * tx);
+    const bottom = c + ((d - c) * tx);
+    return top + ((bottom - top) * tz);
+  }
+
+  function multiplyMatrices(a, b) {
+    const output = new Float32Array(16);
+    for (let column = 0; column < 4; column += 1) {
+      for (let row = 0; row < 4; row += 1) {
+        output[(column * 4) + row] =
+          (a[row] * b[column * 4])
+          + (a[4 + row] * b[(column * 4) + 1])
+          + (a[8 + row] * b[(column * 4) + 2])
+          + (a[12 + row] * b[(column * 4) + 3]);
+      }
+    }
+    return output;
+  }
+
+  function perspectiveMatrix(fieldOfView, aspect, near, far) {
+    const f = 1 / Math.tan(fieldOfView / 2);
+    const range = 1 / (near - far);
+    return new Float32Array([
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (near + far) * range, -1,
+      0, 0, near * far * range * 2, 0,
+    ]);
+  }
+
+  function lookAtMatrix(eye, target) {
+    const zx = eye[0] - target[0];
+    const zy = eye[1] - target[1];
+    const zz = eye[2] - target[2];
+    const zLength = Math.hypot(zx, zy, zz) || 1;
+    const z = [zx / zLength, zy / zLength, zz / zLength];
+    const xx = z[2];
+    const xy = 0;
+    const xz = -z[0];
+    const xLength = Math.hypot(xx, xy, xz) || 1;
+    const x = [xx / xLength, xy, xz / xLength];
+    const y = [
+      (z[1] * x[2]) - (z[2] * x[1]),
+      (z[2] * x[0]) - (z[0] * x[2]),
+      (z[0] * x[1]) - (z[1] * x[0]),
+    ];
+    return new Float32Array([
+      x[0], y[0], z[0], 0,
+      x[1], y[1], z[1], 0,
+      x[2], y[2], z[2], 0,
+      -((x[0] * eye[0]) + (x[1] * eye[1]) + (x[2] * eye[2])),
+      -((y[0] * eye[0]) + (y[1] * eye[1]) + (y[2] * eye[2])),
+      -((z[0] * eye[0]) + (z[1] * eye[1]) + (z[2] * eye[2])),
+      1,
+    ]);
+  }
+
+  function compileShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const message = gl.getShaderInfoLog(shader);
+      gl.deleteShader(shader);
+      throw new Error(`MineBits shader failed: ${message}`);
+    }
+    return shader;
+  }
+
+  function createProgram(gl) {
+    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, `
+      attribute vec3 a_position;
+      attribute vec3 a_color;
+      uniform mat4 u_viewProjection;
+      uniform vec3 u_camera;
+      varying vec3 v_color;
+      varying float v_distance;
+      void main() {
+        gl_Position = u_viewProjection * vec4(a_position, 1.0);
+        v_color = a_color;
+        v_distance = distance(a_position, u_camera);
+      }
+    `);
+    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, `
+      precision mediump float;
+      varying vec3 v_color;
+      varying float v_distance;
+      void main() {
+        vec3 sky = vec3(0.39, 0.62, 0.76);
+        float fog = smoothstep(28.0, 52.0, v_distance);
+        gl_FragColor = vec4(mix(v_color, sky, fog), 1.0);
+      }
+    `);
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(`MineBits renderer failed: ${gl.getProgramInfoLog(program)}`);
+    }
+    return program;
+  }
+
+  window.createMineBitsGame = ({
+    root,
+    onScore = () => {},
+    onAchievement = () => {},
+    onArcadeStatus = () => {},
+  }) => {
+    const canvas = root.querySelector("#minebits-canvas");
+    const status = root.querySelector("#minebits-status");
+    const scoreOutput = root.querySelector("#minebits-score");
+    const toolOutput = root.querySelector("#minebits-tool-label");
+    const positionOutput = root.querySelector("#minebits-position");
+    const seedInput = root.querySelector("#minebits-seed");
+    const saveButton = root.querySelector("#minebits-save");
+    const newButton = root.querySelector("#minebits-start");
+    const publishButton = root.querySelector("#minebits-publish");
+    const hotbar = root.querySelector("#minebits-hotbar");
+    const minedOutput = root.querySelector("#minebits-mined");
+    const placedOutput = root.querySelector("#minebits-placed");
+    const coresOutput = root.querySelector("#minebits-cores");
+    const saveOutput = root.querySelector("#minebits-save-state");
+    const prompt = root.querySelector("#minebits-prompt");
+    const gl = canvas.getContext("webgl", {
+      alpha: false,
+      antialias: false,
+      powerPreference: "high-performance",
+    });
+    let program;
+    let buffer;
+    let positionLocation;
+    let colorLocation;
+    let matrixLocation;
+    let cameraLocation;
+    let vertexCount = 0;
+    let world = new Uint8Array(WORLD_WIDTH * WORLD_HEIGHT * WORLD_DEPTH);
+    let seed = randomSeed();
+    let edits = {};
+    let inventory = { 2: 12, 3: 0, 4: 0, 5: 4, 6: 0 };
+    let stats = { mined: 0, placed: 0, cores: 0 };
+    let selectedBlock = 2;
+    let player = { x: 32.5, y: 16, z: 32.5, yaw: 0, pitch: 0, velocityY: 0, grounded: false };
+    let keys = new Set();
+    let frameRequest = 0;
+    let previousTime = 0;
+    let running = false;
+    let initialized = false;
+    let saveTimer = 0;
+    let achievementAwarded = false;
+
+    function indexFor(x, y, z) {
+      return x + (z * WORLD_WIDTH) + (y * WORLD_WIDTH * WORLD_DEPTH);
+    }
+
+    function inBounds(x, y, z) {
+      return x >= 0 && x < WORLD_WIDTH
+        && y >= 0 && y < WORLD_HEIGHT
+        && z >= 0 && z < WORLD_DEPTH;
+    }
+
+    function getBlock(x, y, z) {
+      if (!inBounds(x, y, z)) {
+        return BLOCKS.air;
+      }
+      return world[indexFor(x, y, z)];
+    }
+
+    function setBlock(x, y, z, block, trackEdit = true) {
+      if (!inBounds(x, y, z)) {
+        return;
+      }
+      world[indexFor(x, y, z)] = block;
+      if (trackEdit) {
+        edits[`${x},${y},${z}`] = block;
+      }
+    }
+
+    function terrainHeight(x, z) {
+      const broad = valueNoise(seed, x, z, 22);
+      const detail = valueNoise(seed ^ 0x9e3779b9, x, z, 7);
+      return clamp(Math.round(7 + (broad * 7) + (detail * 3)), 6, 18);
+    }
+
+    function generateWorld() {
+      world = new Uint8Array(WORLD_WIDTH * WORLD_HEIGHT * WORLD_DEPTH);
+      for (let z = 0; z < WORLD_DEPTH; z += 1) {
+        for (let x = 0; x < WORLD_WIDTH; x += 1) {
+          const height = terrainHeight(x, z);
+          for (let y = 0; y <= height; y += 1) {
+            let block = BLOCKS.bitstone;
+            if (y === 0) {
+              block = BLOCKS.bedrock;
+            } else if (y === height) {
+              block = BLOCKS.grass;
+            } else if (y >= height - 3) {
+              block = BLOCKS.data;
+            } else {
+              const cave = y > 2
+                && y < height - 2
+                && hash(seed ^ 0x51f15e, x, y, z) > 0.91;
+              if (cave) {
+                block = BLOCKS.air;
+              } else if (hash(seed ^ 0xa11ce, x, y, z) > 0.966) {
+                block = BLOCKS.ore;
+              } else if (y < 8 && hash(seed ^ 0xc0feb17, x, y, z) > 0.993) {
+                block = BLOCKS.core;
+              }
+            }
+            setBlock(x, y, z, block, false);
+          }
+        }
+      }
+      for (let z = 3; z < WORLD_DEPTH - 3; z += 1) {
+        for (let x = 3; x < WORLD_WIDTH - 3; x += 1) {
+          if (hash(seed ^ 0x7ee, x, 0, z) < 0.018) {
+            const ground = terrainHeight(x, z);
+            for (let y = 1; y <= 3; y += 1) {
+              setBlock(x, ground + y, z, BLOCKS.log, false);
+            }
+            for (let dz = -2; dz <= 2; dz += 1) {
+              for (let dx = -2; dx <= 2; dx += 1) {
+                for (let dy = 2; dy <= 4; dy += 1) {
+                  if (Math.abs(dx) + Math.abs(dz) + Math.abs(dy - 3) <= 4) {
+                    if (dx !== 0 || dz !== 0 || dy > 3) {
+                      setBlock(x + dx, ground + dy, z + dz, BLOCKS.leaves, false);
+                    }
+                  }
+                }
+              }
+            }
+            setBlock(x, ground + 4, z, BLOCKS.leaves, false);
+          }
+        }
+      }
+      const spawnX = Math.floor(WORLD_WIDTH / 2);
+      const spawnZ = Math.floor(WORLD_DEPTH / 2);
+      const spawnY = terrainHeight(spawnX, spawnZ);
+      for (let z = spawnZ - 1; z <= spawnZ + 1; z += 1) {
+        for (let x = spawnX - 1; x <= spawnX + 1; x += 1) {
+          for (let y = spawnY + 1; y <= spawnY + 3; y += 1) {
+            setBlock(x, y, z, BLOCKS.air, false);
+          }
+        }
+      }
+      Object.entries(edits).forEach(([key, block]) => {
+        const [x, y, z] = key.split(",").map(Number);
+        setBlock(x, y, z, block, false);
+      });
+    }
+
+    function getSurfaceY(x, z) {
+      for (let y = WORLD_HEIGHT - 1; y >= 0; y -= 1) {
+        const block = getBlock(x, y, z);
+        if (block && block !== BLOCKS.leaves && block !== BLOCKS.log) {
+          return y;
+        }
+      }
+      return 0;
+    }
+
+    function resetPlayer() {
+      const x = Math.floor(WORLD_WIDTH / 2);
+      const z = Math.floor(WORLD_DEPTH / 2);
+      player = {
+        x: x + 0.5,
+        y: getSurfaceY(x, z) + 1.01,
+        z: z + 0.5,
+        yaw: Math.PI,
+        pitch: -0.08,
+        velocityY: 0,
+        grounded: false,
+      };
+    }
+
+    function buildMesh() {
+      const vertices = [];
+      for (let y = 0; y < WORLD_HEIGHT; y += 1) {
+        for (let z = 0; z < WORLD_DEPTH; z += 1) {
+          for (let x = 0; x < WORLD_WIDTH; x += 1) {
+            const block = getBlock(x, y, z);
+            if (!block) {
+              continue;
+            }
+            const info = BLOCK_INFO[block];
+            FACE_DATA.forEach((face) => {
+              const neighbor = getBlock(
+                x + face.direction[0],
+                y + face.direction[1],
+                z + face.direction[2],
+              );
+              if (neighbor) {
+                return;
+              }
+              const topTint = block === BLOCKS.grass && face.direction[1] === 1
+                ? [0.42, 0.78, 0.24]
+                : info.color;
+              const glow = block === BLOCKS.core ? 1.12 : 1;
+              face.vertices.forEach((vertex) => {
+                vertices.push(
+                  x + vertex[0],
+                  y + vertex[1],
+                  z + vertex[2],
+                  clamp(topTint[0] * face.shade * glow, 0, 1),
+                  clamp(topTint[1] * face.shade * glow, 0, 1),
+                  clamp(topTint[2] * face.shade * glow, 0, 1),
+                );
+              });
+            });
+          }
+        }
+      }
+      const data = new Float32Array(vertices);
+      vertexCount = data.length / 6;
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    }
+
+    function calculateScore() {
+      return (stats.mined * 10) + (stats.placed * 5) + (stats.cores * 150);
+    }
+
+    function updateHud() {
+      scoreOutput.textContent = calculateScore().toLocaleString();
+      minedOutput.textContent = stats.mined.toLocaleString();
+      placedOutput.textContent = stats.placed.toLocaleString();
+      coresOutput.textContent = stats.cores.toLocaleString();
+      seedInput.value = String(seed);
+      toolOutput.textContent = BLOCK_INFO[selectedBlock].name.toUpperCase();
+      positionOutput.textContent = `${Math.floor(player.x)} ${Math.floor(player.y)} ${Math.floor(player.z)}`;
+      hotbar.querySelectorAll("[data-minebits-block]").forEach((button) => {
+        const block = Number(button.dataset.minebitsBlock);
+        button.classList.toggle("is-selected", block === selectedBlock);
+        button.setAttribute("aria-pressed", String(block === selectedBlock));
+        button.querySelector("strong").textContent = String(inventory[block] || 0);
+      });
+      if (!achievementAwarded && stats.mined >= 20 && stats.placed >= 10 && stats.cores >= 1) {
+        achievementAwarded = true;
+        onAchievement({
+          id: "minebits-architect",
+          label: "BLOCKY GOOD FAITH",
+          message: "MINEBITS SANDBOX MASTERED",
+        });
+      }
+    }
+
+    function setStatus(message, state = "") {
+      status.textContent = message;
+      status.dataset.state = state;
+    }
+
+    function saveWorld(showMessage = true) {
+      window.clearTimeout(saveTimer);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          version: 1,
+          seed,
+          edits,
+          inventory,
+          stats,
+          selectedBlock,
+          player: {
+            x: player.x,
+            y: player.y,
+            z: player.z,
+            yaw: player.yaw,
+            pitch: player.pitch,
+          },
+          achievementAwarded,
+        }));
+        saveOutput.textContent = "SAVED";
+        if (showMessage) {
+          setStatus("World saved locally. The chunks will remember your architectural decisions.", "success");
+        }
+      } catch (error) {
+        console.error("Unable to save MineBits world:", error);
+        saveOutput.textContent = "SAVE FAILED";
+        setStatus("World save failed. Local storage rejected the chunks.", "error");
+      }
+    }
+
+    function scheduleSave() {
+      saveOutput.textContent = "UNSAVED";
+      window.clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => saveWorld(false), 700);
+    }
+
+    function loadWorld() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!saved || saved.version !== 1 || !Number.isInteger(saved.seed)) {
+          return false;
+        }
+        const savedEdits = saved.edits && typeof saved.edits === "object"
+          ? Object.entries(saved.edits)
+          : [];
+        const validEdits = savedEdits.filter(([key, block]) => {
+          const coordinates = key.split(",").map(Number);
+          return coordinates.length === 3
+            && coordinates.every(Number.isInteger)
+            && inBounds(...coordinates)
+            && Number.isInteger(block)
+            && block >= BLOCKS.air
+            && block < BLOCKS.bedrock;
+        });
+        const savedCount = (value) => (
+          Number.isInteger(value) && value >= 0 ? value : 0
+        );
+        seed = saved.seed >>> 0;
+        edits = Object.fromEntries(validEdits);
+        inventory = Object.fromEntries(HOTBAR_BLOCKS.map((block) => [
+          block,
+          savedCount(saved.inventory?.[block]),
+        ]));
+        stats = {
+          mined: savedCount(saved.stats?.mined),
+          placed: savedCount(saved.stats?.placed),
+          cores: savedCount(saved.stats?.cores),
+        };
+        selectedBlock = HOTBAR_BLOCKS.includes(saved.selectedBlock) ? saved.selectedBlock : 2;
+        achievementAwarded = saved.achievementAwarded === true;
+        generateWorld();
+        resetPlayer();
+        if (saved.player) {
+          player.x = clamp(Number(saved.player.x) || player.x, 1, WORLD_WIDTH - 1);
+          player.y = clamp(Number(saved.player.y) || player.y, 1, WORLD_HEIGHT - 2);
+          player.z = clamp(Number(saved.player.z) || player.z, 1, WORLD_DEPTH - 1);
+          player.yaw = Number(saved.player.yaw) || 0;
+          player.pitch = clamp(Number(saved.player.pitch) || 0, -1.5, 1.5);
+        }
+        return true;
+      } catch (error) {
+        console.error("Unable to load MineBits world:", error);
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+    }
+
+    function newWorld() {
+      const requestedSeed = seedInput.value.trim();
+      const parsedSeed = Number.parseInt(requestedSeed, 10);
+      seed = Number.isFinite(parsedSeed) ? parsedSeed >>> 0 : randomSeed();
+      edits = {};
+      inventory = { 2: 12, 3: 0, 4: 0, 5: 4, 6: 0 };
+      stats = { mined: 0, placed: 0, cores: 0 };
+      selectedBlock = 2;
+      achievementAwarded = false;
+      generateWorld();
+      resetPlayer();
+      buildMesh();
+      updateHud();
+      saveWorld(false);
+      setStatus(`World ${seed} generated. Click the view to capture the mouse and explore.`, "success");
+      onArcadeStatus("MINEBITS first-person voxel world generated from original code and colors.");
+      resume();
+    }
+
+    function isSolidAt(x, y, z) {
+      const radius = 0.28;
+      const samplesX = [x - radius, x + radius];
+      const samplesY = [y + 0.05, y + 0.9, y + 1.72];
+      const samplesZ = [z - radius, z + radius];
+      return samplesX.some((sampleX) => samplesY.some((sampleY) => samplesZ.some((sampleZ) => (
+        sampleX < 0
+        || sampleX >= WORLD_WIDTH
+        || sampleY < 0
+        || sampleZ < 0
+        || sampleZ >= WORLD_DEPTH
+        || getBlock(Math.floor(sampleX), Math.floor(sampleY), Math.floor(sampleZ)) !== BLOCKS.air
+      ))));
+    }
+
+    function movePlayer(deltaTime) {
+      const forward = (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0)
+        - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0);
+      const strafe = (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0)
+        - (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0);
+      const length = Math.hypot(forward, strafe) || 1;
+      const speed = keys.has("ShiftLeft") || keys.has("ShiftRight") ? 7.2 : 4.6;
+      const sin = Math.sin(player.yaw);
+      const cos = Math.cos(player.yaw);
+      const moveX = (((sin * forward) + (cos * strafe)) / length) * speed * deltaTime;
+      const moveZ = (((-cos * forward) + (sin * strafe)) / length) * speed * deltaTime;
+      const nextX = player.x + moveX;
+      if (!isSolidAt(nextX, player.y, player.z)) {
+        player.x = nextX;
+      }
+      const nextZ = player.z + moveZ;
+      if (!isSolidAt(player.x, player.y, nextZ)) {
+        player.z = nextZ;
+      }
+      player.velocityY -= 22 * deltaTime;
+      if ((keys.has("Space") || keys.has("KeyE")) && player.grounded) {
+        player.velocityY = 8.2;
+        player.grounded = false;
+      }
+      const nextY = player.y + (player.velocityY * deltaTime);
+      if (!isSolidAt(player.x, nextY, player.z)) {
+        player.y = nextY;
+        player.grounded = false;
+      } else {
+        if (player.velocityY < 0) {
+          player.grounded = true;
+        }
+        player.velocityY = 0;
+      }
+      if (player.y < 1) {
+        resetPlayer();
+        setStatus("Respawned after an unscheduled meeting with the void.", "error");
+      }
+    }
+
+    function viewDirection() {
+      const pitchCosine = Math.cos(player.pitch);
+      return [
+        Math.sin(player.yaw) * pitchCosine,
+        Math.sin(player.pitch),
+        -Math.cos(player.yaw) * pitchCosine,
+      ];
+    }
+
+    function raycast() {
+      const origin = [player.x, player.y + 1.62, player.z];
+      const direction = viewDirection();
+      let x = Math.floor(origin[0]);
+      let y = Math.floor(origin[1]);
+      let z = Math.floor(origin[2]);
+      const stepX = direction[0] >= 0 ? 1 : -1;
+      const stepY = direction[1] >= 0 ? 1 : -1;
+      const stepZ = direction[2] >= 0 ? 1 : -1;
+      const deltaX = direction[0] === 0 ? Infinity : Math.abs(1 / direction[0]);
+      const deltaY = direction[1] === 0 ? Infinity : Math.abs(1 / direction[1]);
+      const deltaZ = direction[2] === 0 ? Infinity : Math.abs(1 / direction[2]);
+      let maxX = direction[0] === 0
+        ? Infinity
+        : Math.abs(((stepX > 0 ? x + 1 : x) - origin[0]) / direction[0]);
+      let maxY = direction[1] === 0
+        ? Infinity
+        : Math.abs(((stepY > 0 ? y + 1 : y) - origin[1]) / direction[1]);
+      let maxZ = direction[2] === 0
+        ? Infinity
+        : Math.abs(((stepZ > 0 ? z + 1 : z) - origin[2]) / direction[2]);
+      let distance = 0;
+      let previous = { x, y, z };
+      while (distance <= REACH) {
+        const block = getBlock(x, y, z);
+        if (block) {
+          return { x, y, z, block, previous };
+        }
+        previous = { x, y, z };
+        if (maxX < maxY && maxX < maxZ) {
+          x += stepX;
+          distance = maxX;
+          maxX += deltaX;
+        } else if (maxY < maxZ) {
+          y += stepY;
+          distance = maxY;
+          maxY += deltaY;
+        } else {
+          z += stepZ;
+          distance = maxZ;
+          maxZ += deltaZ;
+        }
+      }
+      return null;
+    }
+
+    function playerIntersectsBlock(x, y, z) {
+      return player.x + 0.28 > x
+        && player.x - 0.28 < x + 1
+        && player.y + 1.78 > y
+        && player.y < y + 1
+        && player.z + 0.28 > z
+        && player.z - 0.28 < z + 1;
+    }
+
+    function editTarget(place) {
+      const target = raycast();
+      if (!target) {
+        setStatus("No block in range. The Bits cannot reach that far.", "error");
+        return;
+      }
+      if (!place) {
+        const info = BLOCK_INFO[target.block];
+        if (info.unbreakable) {
+          setStatus("The Bedrock Firewall declined your deletion request.", "error");
+          return;
+        }
+        setBlock(target.x, target.y, target.z, BLOCKS.air);
+        if (info.drop && info.drop !== BLOCKS.core) {
+          inventory[info.drop] = (inventory[info.drop] || 0) + 1;
+        }
+        stats.mined += 1;
+        if (target.block === BLOCKS.core) {
+          stats.cores += 1;
+        }
+        setStatus(`${info.name} mined. The world is now marginally less complete.`, "success");
+      } else {
+        const destination = target.previous;
+        if (!inBounds(destination.x, destination.y, destination.z)) {
+          setStatus("Blocks must remain inside the allocated world process.", "error");
+          return;
+        }
+        if (!inventory[selectedBlock]) {
+          setStatus(`No ${BLOCK_INFO[selectedBlock].name} blocks available. Mine some first.`, "error");
+          return;
+        }
+        if (playerIntersectsBlock(destination.x, destination.y, destination.z)) {
+          setStatus("Cannot place a block inside the operator.", "error");
+          return;
+        }
+        setBlock(destination.x, destination.y, destination.z, selectedBlock);
+        inventory[selectedBlock] -= 1;
+        stats.placed += 1;
+        setStatus(`${BLOCK_INFO[selectedBlock].name} placed.`, "success");
+      }
+      buildMesh();
+      updateHud();
+      scheduleSave();
+    }
+
+    function resizeCanvas() {
+      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = Math.max(1, Math.floor(canvas.clientWidth * ratio));
+      const height = Math.max(1, Math.floor(canvas.clientHeight * ratio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+
+    function render() {
+      resizeCanvas();
+      const eye = [player.x, player.y + 1.62, player.z];
+      const direction = viewDirection();
+      const target = [eye[0] + direction[0], eye[1] + direction[1], eye[2] + direction[2]];
+      const projection = perspectiveMatrix(Math.PI / 3, canvas.width / canvas.height, 0.08, 80);
+      const view = lookAtMatrix(eye, target);
+      const viewProjection = multiplyMatrices(projection, view);
+      gl.clearColor(0.39, 0.62, 0.76, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.useProgram(program);
+      gl.uniformMatrix4fv(matrixLocation, false, viewProjection);
+      gl.uniform3fv(cameraLocation, eye);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 24, 0);
+      gl.enableVertexAttribArray(colorLocation);
+      gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 24, 12);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+    }
+
+    function frame(time) {
+      if (!running) {
+        return;
+      }
+      const deltaTime = Math.min((time - previousTime) / 1000 || 0, 0.05);
+      previousTime = time;
+      movePlayer(deltaTime);
+      updateHud();
+      render();
+      frameRequest = window.requestAnimationFrame(frame);
+    }
+
+    function selectBlock(block) {
+      if (!HOTBAR_BLOCKS.includes(block)) {
+        return;
+      }
+      selectedBlock = block;
+      updateHud();
+      setStatus(`${BLOCK_INFO[block].name} selected. Right-click a nearby face to place it.`);
+    }
+
+    function initialize() {
+      if (initialized) {
+        return;
+      }
+      initialized = true;
+      if (!gl) {
+        canvas.hidden = true;
+        prompt.textContent = "WEBGL UNAVAILABLE";
+        setStatus("MineBits needs WebGL to render its voxel world.", "error");
+        return;
+      }
+      try {
+        program = createProgram(gl);
+        buffer = gl.createBuffer();
+        positionLocation = gl.getAttribLocation(program, "a_position");
+        colorLocation = gl.getAttribLocation(program, "a_color");
+        matrixLocation = gl.getUniformLocation(program, "u_viewProjection");
+        cameraLocation = gl.getUniformLocation(program, "u_camera");
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+      } catch (error) {
+        console.error(error);
+        canvas.hidden = true;
+        prompt.textContent = "RENDERER FAILED";
+        setStatus(error.message, "error");
+        return;
+      }
+      const restored = loadWorld();
+      if (!restored) {
+        generateWorld();
+        resetPlayer();
+      }
+      buildMesh();
+      updateHud();
+      render();
+      saveOutput.textContent = restored ? "RESTORED" : "NEW WORLD";
+      setStatus(
+        restored
+          ? `World ${seed} restored. Click the view to continue exploring.`
+          : `World ${seed} generated. Click the view to capture the mouse.`,
+      );
+    }
+
+    function resume() {
+      initialize();
+      if (!gl || running) {
+        return;
+      }
+      running = true;
+      previousTime = performance.now();
+      frameRequest = window.requestAnimationFrame(frame);
+    }
+
+    function pause() {
+      running = false;
+      keys.clear();
+      window.cancelAnimationFrame(frameRequest);
+      if (document.pointerLockElement === canvas) {
+        document.exitPointerLock();
+      }
+      if (initialized && gl) {
+        saveWorld(false);
+      }
+    }
+
+    canvas.addEventListener("click", () => {
+      if (document.pointerLockElement !== canvas) {
+        canvas.requestPointerLock();
+      }
+    });
+    canvas.addEventListener("mousedown", (event) => {
+      if (document.pointerLockElement !== canvas) {
+        return;
+      }
+      event.preventDefault();
+      if (event.button === 0) {
+        editTarget(false);
+      } else if (event.button === 2) {
+        editTarget(true);
+      }
+    });
+    canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+    document.addEventListener("pointerlockchange", () => {
+      const locked = document.pointerLockElement === canvas;
+      root.classList.toggle("is-pointer-locked", locked);
+      prompt.textContent = locked ? "ESC TO RELEASE MOUSE" : "CLICK TO ENTER WORLD";
+      if (locked) {
+        setStatus("Mouse captured. Left-click mines; right-click builds.");
+      }
+    });
+    document.addEventListener("mousemove", (event) => {
+      if (document.pointerLockElement !== canvas) {
+        return;
+      }
+      player.yaw += event.movementX * 0.0024;
+      player.pitch = clamp(player.pitch - (event.movementY * 0.0024), -1.5, 1.5);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!running || root.hidden || root.closest("[hidden]")) {
+        return;
+      }
+      if (event.code.startsWith("Digit")) {
+        const index = Number.parseInt(event.code.slice(5), 10) - 1;
+        if (HOTBAR_BLOCKS[index]) {
+          selectBlock(HOTBAR_BLOCKS[index]);
+          event.preventDefault();
+        }
+      }
+      if (["KeyW", "KeyA", "KeyS", "KeyD", "Space", "KeyE", "ShiftLeft", "ShiftRight", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code)) {
+        keys.add(event.code);
+        event.preventDefault();
+      }
+    });
+    document.addEventListener("keyup", (event) => keys.delete(event.code));
+    hotbar.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-minebits-block]");
+      if (button) {
+        selectBlock(Number(button.dataset.minebitsBlock));
+      }
+    });
+    saveButton.addEventListener("click", () => saveWorld(true));
+    newButton.addEventListener("click", newWorld);
+    publishButton.addEventListener("click", () => {
+      const score = calculateScore();
+      if (score <= 0) {
+        setStatus("Mine or place at least one block before publishing a run.", "error");
+        return;
+      }
+      saveWorld(false);
+      onScore({
+        score,
+        detail: `${stats.mined} MINED // ${stats.placed} BUILT // ${stats.cores} CORES`,
+      });
+      setStatus("Run score prepared for the Arcade leaderboard.", "success");
+    });
+    window.addEventListener("beforeunload", () => {
+      if (initialized && gl) {
+        saveWorld(false);
+      }
+    });
+
+    initialize();
+    return { newWorld, pause, resume, save: saveWorld };
+  };
+})();
