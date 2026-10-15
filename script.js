@@ -197,6 +197,17 @@ const fakeRecycleLabel = document.querySelector("#fake-recycle-label");
 const fakePlayingDead = document.querySelector("#fake-playing-dead");
 const fakePlayingDeadClose = document.querySelector("#fake-playing-dead-close");
 const fakePlayingDeadMessage = document.querySelector("#fake-playing-dead-message");
+const fakeTaskManagerLaunch = document.querySelector("#fake-task-manager-launch");
+const fakeTaskManager = document.querySelector("#fake-task-manager");
+const fakeTaskManagerStatus = document.querySelector("#fake-task-manager-status");
+const fakeCoBitsLaunch = document.querySelector("#fake-cobits-launch");
+const fakeCoBits = document.querySelector("#fake-cobits");
+const fakeCoBitsForm = document.querySelector("#fake-cobits-form");
+const fakeCoBitsInput = document.querySelector("#fake-cobits-input");
+const fakeCoBitsLog = document.querySelector("#fake-cobits-log");
+const fakeActionCenterTrigger = document.querySelector("#fake-action-center-trigger");
+const fakeActionCenter = document.querySelector("#fake-action-center");
+const fakeActionCenterStatus = document.querySelector("#fake-action-center-status");
 const closeButton = document.querySelector("#close-button");
 const processTitle = document.querySelector("#process-title");
 const statusText = document.querySelector("#status-text");
@@ -1286,6 +1297,7 @@ function setFakeDesktopVisible(visible) {
   document.body.classList.toggle("has-fake-desktop", visible);
   if (!visible) {
     closePlayingDeadProcess();
+    closeFakeDesktopApps();
   }
 }
 
@@ -1320,6 +1332,52 @@ function inspectPlayingDeadProcess() {
   fakePlayingDeadClose.focus();
 }
 
+function closeFakeDesktopApps() {
+  [fakeTaskManager, fakeCoBits].forEach((app) => {
+    app.hidden = true;
+  });
+  fakeActionCenter.hidden = true;
+  fakeActionCenterTrigger.setAttribute("aria-expanded", "false");
+}
+
+function openFakeDesktopApp(app, focusTarget) {
+  closePlayingDeadProcess();
+  closeFakeDesktopApps();
+  app.hidden = false;
+  focusTarget.focus();
+}
+
+function appendCoBitsMessage(text, className) {
+  const message = document.createElement("p");
+  message.className = className;
+  message.textContent = text;
+  fakeCoBitsLog.append(message);
+  fakeCoBitsLog.scrollTop = fakeCoBitsLog.scrollHeight;
+}
+
+function getCoBitsResponse(prompt) {
+  const normalized = prompt.toLowerCase();
+  if (normalized.includes("hello") || normalized.includes("hi")) {
+    return "COBITS: Hello! I have already indexed at least three of your Bits.";
+  }
+  if (normalized.includes("help")) {
+    return "COBITS: Certainly. Have you considered turning the question off and on again?";
+  }
+  if (normalized.includes("who are you") || normalized.includes("what are you")) {
+    return "COBITS: I am CoBits, a locally imagined assistant with no training data and tremendous confidence.";
+  }
+  if (normalized.includes("bit")) {
+    return "COBITS: Excellent use of the word Bit. No revisions necessary.";
+  }
+  const responses = [
+    "COBITS: I have reviewed your request and classified it as probably actionable.",
+    "COBITS: Generating answer... answer misplaced. Please imagine something helpful.",
+    "COBITS: That is outside my context window, which is currently one window.",
+    "COBITS: Done. I changed nothing, but I did so very efficiently.",
+  ];
+  return responses[fakeCoBitsLog.children.length % responses.length];
+}
+
 function restoreInterfaceFromDesktop() {
   interfaceShell.classList.remove("is-minimized");
   minimizeButton.setAttribute("aria-label", "Minimize interface");
@@ -1343,6 +1401,62 @@ fakeRecycleBin.addEventListener("click", inspectPlayingDeadProcess);
 fakePlayingDeadClose.addEventListener("click", () => {
   closePlayingDeadProcess();
   fakeRecycleBin.focus();
+});
+fakeTaskManagerLaunch.addEventListener("click", () => {
+  openFakeDesktopApp(
+    fakeTaskManager,
+    fakeTaskManager.querySelector("[data-fake-app-close]"),
+  );
+});
+fakeCoBitsLaunch.addEventListener("click", () => {
+  openFakeDesktopApp(fakeCoBits, fakeCoBitsInput);
+});
+document.querySelectorAll("[data-fake-app-close]").forEach((button) => {
+  button.addEventListener("click", () => {
+    button.closest(".fake-desktop-app").hidden = true;
+  });
+});
+document.querySelectorAll("[data-end-fake-process]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const row = button.closest(".fake-process-row");
+    const processName = row.dataset.fakeProcess;
+    if (button.dataset.protected === "true") {
+      fakeTaskManagerStatus.textContent =
+        "ACCESS DENIED: Ending presence.exe would make this interface inconveniently absent.";
+      return;
+    }
+    row.classList.add("is-ended");
+    row.children[1].textContent = "0%";
+    row.children[2].textContent = "0 MB";
+    button.textContent = "ENDED";
+    button.disabled = true;
+    fakeTaskManagerStatus.textContent =
+      `${processName} ended. It will pretend not to restart later.`;
+  });
+});
+fakeCoBitsForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const prompt = fakeCoBitsInput.value.trim();
+  if (!prompt) {
+    return;
+  }
+  appendCoBitsMessage(`YOU: ${prompt}`, "is-user");
+  appendCoBitsMessage(getCoBitsResponse(prompt), "is-cobits");
+  fakeCoBitsInput.value = "";
+  fakeCoBitsInput.focus();
+});
+fakeActionCenterTrigger.addEventListener("click", () => {
+  const willOpen = fakeActionCenter.hidden;
+  fakeActionCenter.hidden = !willOpen;
+  fakeActionCenterTrigger.setAttribute("aria-expanded", String(willOpen));
+});
+fakeActionCenter.querySelectorAll(".fake-quick-actions button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const pressed = button.getAttribute("aria-pressed") !== "true";
+    button.setAttribute("aria-pressed", String(pressed));
+    fakeActionCenterStatus.textContent =
+      `${button.textContent.trim()}: ${pressed ? "ENABLED" : "DISABLED"} // Probably.`;
+  });
 });
 updateFakeDesktopClock();
 window.setInterval(updateFakeDesktopClock, 1000);

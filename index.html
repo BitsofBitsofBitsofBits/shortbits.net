@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-50">
+    <link rel="stylesheet" href="styles.css?v=upgrade-51">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-2" defer></script>
@@ -39,7 +39,7 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-34" defer></script>
+    <script src="script.js?v=upgrade-35" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -75,7 +75,7 @@
     <div class="noise" aria-hidden="true"></div>
     <div class="scanlines" aria-hidden="true"></div>
 
-    <section id="fake-desktop" class="fake-desktop" aria-label="BitsofBits desktop" hidden>
+    <section id="fake-desktop" class="fake-desktop" aria-label="BITS OS desktop" hidden>
       <div class="fake-desktop-icons" aria-label="Desktop shortcuts">
         <button type="button" data-window-target="about-window">
           <span class="fake-desktop-icon" aria-hidden="true">B</span>
@@ -96,6 +96,14 @@
         <button type="button" data-window-target="notifications-window">
           <span class="fake-desktop-icon" aria-hidden="true">!</span>
           <span>NOTIFICATIONS</span>
+        </button>
+        <button id="fake-task-manager-launch" type="button" aria-controls="fake-task-manager" aria-haspopup="dialog">
+          <span class="fake-desktop-icon" aria-hidden="true">TM</span>
+          <span>TASK_MANAGER</span>
+        </button>
+        <button id="fake-cobits-launch" type="button" aria-controls="fake-cobits" aria-haspopup="dialog">
+          <span class="fake-desktop-icon" aria-hidden="true">CB</span>
+          <span>COBITS.EXE</span>
         </button>
         <button id="fake-recycle-bin" class="fake-recycle-bin" type="button" aria-controls="fake-playing-dead" aria-haspopup="dialog">
           <span id="fake-recycle-icon" class="fake-desktop-icon" aria-hidden="true">⌫</span>
@@ -124,11 +132,90 @@
           <p id="fake-playing-dead-message" class="fake-playing-dead-message" aria-live="polite"></p>
         </div>
       </aside>
+      <aside
+        id="fake-task-manager"
+        class="fake-desktop-app fake-task-manager"
+        role="dialog"
+        aria-labelledby="fake-task-manager-title"
+        hidden
+      >
+        <header>
+          <strong id="fake-task-manager-title">BITS OS TASK MANAGER</strong>
+          <button type="button" data-fake-app-close aria-label="Close Task Manager">&times;</button>
+        </header>
+        <div>
+          <p class="system-kicker">PROCESS MANAGEMENT // CONFIDENCE OPTIONAL</p>
+          <h2>RUNNING PROCESSES</h2>
+          <div class="fake-process-table" role="table" aria-label="Running processes">
+            <div class="fake-process-row fake-process-heading" role="row">
+              <span role="columnheader">NAME</span>
+              <span role="columnheader">CPU</span>
+              <span role="columnheader">MEMORY</span>
+              <span role="columnheader">ACTION</span>
+            </div>
+            <div class="fake-process-row" role="row" data-fake-process="presence.exe">
+              <span role="cell">presence.exe</span><span role="cell">12%</span><span role="cell">∞ MB</span>
+              <button type="button" data-end-fake-process data-protected="true">END TASK</button>
+            </div>
+            <div class="fake-process-row" role="row" data-fake-process="too_many_bits.dll">
+              <span role="cell">too_many_bits.dll</span><span role="cell">73%</span><span role="cell">404 MB</span>
+              <button type="button" data-end-fake-process>END TASK</button>
+            </div>
+            <div class="fake-process-row" role="row" data-fake-process="spotify_signal.exe">
+              <span role="cell">spotify_signal.exe</span><span role="cell">3%</span><span role="cell">64 MB</span>
+              <button type="button" data-end-fake-process>END TASK</button>
+            </div>
+            <div class="fake-process-row" role="row" data-fake-process="suspicious_bit">
+              <span role="cell">suspicious_bit</span><span role="cell">???</span><span role="cell">1 bit</span>
+              <button type="button" data-end-fake-process>END TASK</button>
+            </div>
+          </div>
+          <p id="fake-task-manager-status" class="fake-app-status" aria-live="polite">4 processes require varying amounts of supervision.</p>
+        </div>
+      </aside>
+      <aside
+        id="fake-cobits"
+        class="fake-desktop-app fake-cobits"
+        role="dialog"
+        aria-labelledby="fake-cobits-title"
+        hidden
+      >
+        <header>
+          <strong id="fake-cobits-title">COBITS // ARTIFICIAL BITELLIGENCE</strong>
+          <button type="button" data-fake-app-close aria-label="Close CoBits">&times;</button>
+        </header>
+        <div>
+          <p class="system-kicker">LOCALLY IMAGINED ASSISTANT // ZERO CLOUD REQUIRED</p>
+          <div id="fake-cobits-log" class="fake-cobits-log" aria-live="polite">
+            <p class="is-cobits">COBITS: Hello. I am ready to confidently misunderstand your request.</p>
+          </div>
+          <form id="fake-cobits-form" class="fake-cobits-form">
+            <label for="fake-cobits-input">ASK COBITS</label>
+            <div>
+              <input id="fake-cobits-input" name="prompt" type="text" maxlength="160" autocomplete="off" required>
+              <button type="submit">SEND</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+      <aside id="fake-action-center" class="fake-action-center" aria-labelledby="fake-action-center-title" hidden>
+        <header>
+          <strong id="fake-action-center-title">ACTION CENTER</strong>
+          <span>BITS OS</span>
+        </header>
+        <div class="fake-quick-actions" aria-label="Quick actions">
+          <button type="button" aria-pressed="true">WI-FI-ish</button>
+          <button type="button" aria-pressed="false">NIGHT BITS</button>
+          <button type="button" aria-pressed="false">DO NOT DISTURB</button>
+          <button type="button" aria-pressed="true">CHAOS GUARD</button>
+        </div>
+        <p id="fake-action-center-status" aria-live="polite">All systems are making their best effort.</p>
+      </aside>
       <footer class="fake-taskbar">
         <details class="fake-start-menu">
           <summary>BITS</summary>
           <div>
-            <strong>BITSOFBITS_OS</strong>
+            <strong>BITS OS</strong>
             <button type="button" data-window-target="resume-window">CAREER.SYS</button>
             <button type="button" data-window-target="now-window">NOW.TXT</button>
             <button type="button" data-window-target="stats-window">STATS.EXE</button>
@@ -138,7 +225,16 @@
           <span aria-hidden="true">▣</span>
           INTERNET PRESENCE
         </button>
-        <time id="fake-desktop-clock" class="fake-desktop-clock"></time>
+        <button
+          id="fake-action-center-trigger"
+          class="fake-action-center-trigger"
+          type="button"
+          aria-controls="fake-action-center"
+          aria-expanded="false"
+        >
+          <span aria-hidden="true">AC</span>
+          <time id="fake-desktop-clock" class="fake-desktop-clock"></time>
+        </button>
       </footer>
     </section>
 
