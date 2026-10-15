@@ -1233,12 +1233,14 @@ body {
 }
 
 html[data-interface-theme="aurora"]:not([data-effects="off"]):not([data-contrast="high"]) body {
+  background-color: var(--bg);
+  background-repeat: no-repeat;
   animation: aurora-background-drift 22s ease-in-out infinite alternate;
 }
 
 @keyframes aurora-background-drift {
   from {
-    background-position: -8% -5%, 108% -4%, 50% 108%, center;
+    background-position: 0% 0%, 100% 0%, 50% 100%, center;
   }
 
   to {
