@@ -14,18 +14,57 @@
     leaves: 6,
     core: 7,
     bedrock: 8,
+    sand: 9,
+    clay: 10,
+    coal: 11,
+    planks: 12,
+    craftingTable: 13,
+    glass: 14,
+    bricks: 15,
+    gravel: 16,
   };
   const BLOCK_INFO = {
-    1: { name: "Grass Data", color: [0.36, 0.68, 0.22], drop: 2 },
-    2: { name: "Data", color: [0.45, 0.29, 0.16], drop: 2 },
-    3: { name: "Bitstone", color: [0.39, 0.43, 0.46], drop: 3 },
-    4: { name: "Copper Bit", color: [0.18, 0.68, 0.72], drop: 4 },
-    5: { name: "Log File", color: [0.42, 0.27, 0.12], drop: 5 },
-    6: { name: "Leaf Cache", color: [0.22, 0.52, 0.18], drop: 6 },
-    7: { name: "Core Bit", color: [0.96, 0.78, 0.18], drop: 7 },
+    1: { name: "Grass Data", color: [0.36, 0.68, 0.22], drop: 2, hardness: 1, tool: "shovel", tier: 0 },
+    2: { name: "Data", color: [0.45, 0.29, 0.16], drop: 2, hardness: 1, tool: "shovel", tier: 0 },
+    3: { name: "Bitstone", color: [0.39, 0.43, 0.46], drop: 3, hardness: 3, tool: "pickaxe", tier: 1 },
+    4: { name: "Copper Bit Ore", color: [0.18, 0.68, 0.72], drop: 4, hardness: 4, tool: "pickaxe", tier: 2 },
+    5: { name: "Log File", color: [0.42, 0.27, 0.12], drop: 5, hardness: 3, tool: "axe", tier: 0 },
+    6: { name: "Leaf Cache", color: [0.22, 0.52, 0.18], drop: 6, hardness: 1, tool: "axe", tier: 0 },
+    7: { name: "Core Bit", color: [0.96, 0.78, 0.18], drop: 7, hardness: 6, tool: "pickaxe", tier: 3 },
     8: { name: "Bedrock Firewall", color: [0.12, 0.13, 0.15], unbreakable: true },
+    9: { name: "Packet Sand", color: [0.78, 0.68, 0.4], drop: 9, hardness: 1, tool: "shovel", tier: 0 },
+    10: { name: "Raw Clay", color: [0.46, 0.53, 0.58], drop: 10, hardness: 2, tool: "shovel", tier: 0 },
+    11: { name: "Coal Bit Ore", color: [0.19, 0.2, 0.22], drop: 11, hardness: 3, tool: "pickaxe", tier: 1 },
+    12: { name: "Data Planks", color: [0.66, 0.44, 0.2], drop: 12, hardness: 2, tool: "axe", tier: 0 },
+    13: { name: "Crafting Terminal", color: [0.52, 0.31, 0.12], drop: 13, hardness: 3, tool: "axe", tier: 0 },
+    14: { name: "Glass Pane Block", color: [0.48, 0.78, 0.84], drop: 14, hardness: 1, tool: "hand", tier: 0 },
+    15: { name: "Compiled Brick", color: [0.57, 0.25, 0.18], drop: 15, hardness: 3, tool: "pickaxe", tier: 1 },
+    16: { name: "Loose Gravel", color: [0.43, 0.41, 0.39], drop: 16, hardness: 1, tool: "shovel", tier: 0 },
   };
-  const HOTBAR_BLOCKS = [2, 3, 4, 5, 6];
+  const HOTBAR_BLOCKS = [2, 3, 5, 6, 9, 12, 13, 14, 15];
+  const INVENTORY_BLOCKS = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16];
+  const TOOL_KINDS = ["hand", "pickaxe", "axe", "shovel"];
+  const TOOL_MATERIALS = {
+    wood: { label: "WOOD", tier: 1, durability: 48 },
+    bitstone: { label: "BITSTONE", tier: 2, durability: 112 },
+    copper: { label: "COPPER", tier: 3, durability: 220 },
+  };
+  const RECIPES = {
+    planks: { label: "DATA PLANKS ×4", inputs: { 5: 1 }, outputs: { 12: 4 } },
+    sticks: { label: "BIT STICKS ×4", inputs: { 12: 2 }, itemInputs: {}, itemOutputs: { sticks: 4 } },
+    table: { label: "CRAFTING TERMINAL", inputs: { 12: 4 }, outputs: { 13: 1 } },
+    glass: { label: "GLASS BLOCKS ×4", inputs: { 9: 4, 11: 1 }, outputs: { 14: 4 }, table: true },
+    bricks: { label: "COMPILED BRICKS ×4", inputs: { 10: 4, 11: 1 }, outputs: { 15: 4 }, table: true },
+    "wood-pickaxe": { label: "WOOD PICKAXE", inputs: { 12: 3 }, itemInputs: { sticks: 2 }, tool: ["pickaxe", "wood"], table: true },
+    "wood-axe": { label: "WOOD AXE", inputs: { 12: 3 }, itemInputs: { sticks: 2 }, tool: ["axe", "wood"], table: true },
+    "wood-shovel": { label: "WOOD SHOVEL", inputs: { 12: 1 }, itemInputs: { sticks: 2 }, tool: ["shovel", "wood"], table: true },
+    "bitstone-pickaxe": { label: "BITSTONE PICKAXE", inputs: { 3: 3 }, itemInputs: { sticks: 2 }, tool: ["pickaxe", "bitstone"], table: true },
+    "bitstone-axe": { label: "BITSTONE AXE", inputs: { 3: 3 }, itemInputs: { sticks: 2 }, tool: ["axe", "bitstone"], table: true },
+    "bitstone-shovel": { label: "BITSTONE SHOVEL", inputs: { 3: 1 }, itemInputs: { sticks: 2 }, tool: ["shovel", "bitstone"], table: true },
+    "copper-pickaxe": { label: "COPPER PICKAXE", inputs: { 4: 3, 11: 1 }, itemInputs: { sticks: 2 }, tool: ["pickaxe", "copper"], table: true },
+    "copper-axe": { label: "COPPER AXE", inputs: { 4: 3, 11: 1 }, itemInputs: { sticks: 2 }, tool: ["axe", "copper"], table: true },
+    "copper-shovel": { label: "COPPER SHOVEL", inputs: { 4: 1, 11: 1 }, itemInputs: { sticks: 2 }, tool: ["shovel", "copper"], table: true },
+  };
   const FACE_DATA = [
     { direction: [1, 0, 0], shade: 0.82, vertices: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 0], [1, 1, 1], [1, 0, 1]] },
     { direction: [-1, 0, 0], shade: 0.68, vertices: [[0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 1], [0, 1, 0], [0, 0, 0]] },
@@ -182,12 +221,18 @@
     const status = root.querySelector("#minebits-status");
     const scoreOutput = root.querySelector("#minebits-score");
     const toolOutput = root.querySelector("#minebits-tool-label");
+    const blockOutput = root.querySelector("#minebits-block-label");
     const positionOutput = root.querySelector("#minebits-position");
     const seedInput = root.querySelector("#minebits-seed");
     const saveButton = root.querySelector("#minebits-save");
     const newButton = root.querySelector("#minebits-start");
     const publishButton = root.querySelector("#minebits-publish");
     const hotbar = root.querySelector("#minebits-hotbar");
+    const toolbelt = root.querySelector("#minebits-toolbelt");
+    const recipeList = root.querySelector("#minebits-recipes");
+    const tableOutput = root.querySelector("#minebits-table-state");
+    const sticksOutput = root.querySelector("#minebits-sticks-count");
+    const craftedOutput = root.querySelector("#minebits-crafted");
     const minedOutput = root.querySelector("#minebits-mined");
     const placedOutput = root.querySelector("#minebits-placed");
     const coresOutput = root.querySelector("#minebits-cores");
@@ -208,9 +253,13 @@
     let world = new Uint8Array(WORLD_WIDTH * WORLD_HEIGHT * WORLD_DEPTH);
     let seed = randomSeed();
     let edits = {};
-    let inventory = { 2: 12, 3: 0, 4: 0, 5: 4, 6: 0 };
-    let stats = { mined: 0, placed: 0, cores: 0 };
+    let inventory = Object.fromEntries(INVENTORY_BLOCKS.map((block) => [block, 0]));
+    let items = { sticks: 0 };
+    let tools = { pickaxe: null, axe: null, shovel: null };
+    let stats = { mined: 0, placed: 0, cores: 0, crafted: 0 };
     let selectedBlock = 2;
+    let selectedTool = "hand";
+    let miningTarget = { key: "", progress: 0 };
     let player = { x: 32.5, y: 16, z: 32.5, yaw: 0, pitch: 0, velocityY: 0, grounded: false };
     let keys = new Set();
     let frameRequest = 0;
@@ -258,22 +307,36 @@
       for (let z = 0; z < WORLD_DEPTH; z += 1) {
         for (let x = 0; x < WORLD_WIDTH; x += 1) {
           const height = terrainHeight(x, z);
+          const dryBiome = valueNoise(seed ^ 0x5a17, x, z, 17) > 0.7;
+          const clayPatch = valueNoise(seed ^ 0xc1a7, x, z, 8) > 0.76;
           for (let y = 0; y <= height; y += 1) {
             let block = BLOCKS.bitstone;
             if (y === 0) {
               block = BLOCKS.bedrock;
             } else if (y === height) {
-              block = BLOCKS.grass;
+              block = dryBiome ? BLOCKS.sand : BLOCKS.grass;
             } else if (y >= height - 3) {
-              block = BLOCKS.data;
+              if (dryBiome) {
+                block = BLOCKS.sand;
+              } else {
+                block = clayPatch && y < height - 1 ? BLOCKS.clay : BLOCKS.data;
+              }
             } else {
               const cave = y > 2
                 && y < height - 2
                 && hash(seed ^ 0x51f15e, x, y, z) > 0.91;
+              const resourceRoll = hash(seed ^ 0xa11ce, x, y, z);
               if (cave) {
                 block = BLOCKS.air;
-              } else if (hash(seed ^ 0xa11ce, x, y, z) > 0.966) {
+              } else if (resourceRoll > 0.972) {
                 block = BLOCKS.ore;
+              } else if (resourceRoll > 0.925) {
+                block = BLOCKS.coal;
+              } else if (
+                y < height - 3
+                && valueNoise(seed ^ 0x6a4e1, x + y, z - y, 6) > 0.82
+              ) {
+                block = BLOCKS.gravel;
               } else if (y < 8 && hash(seed ^ 0xc0feb17, x, y, z) > 0.993) {
                 block = BLOCKS.core;
               }
@@ -284,7 +347,10 @@
       }
       for (let z = 3; z < WORLD_DEPTH - 3; z += 1) {
         for (let x = 3; x < WORLD_WIDTH - 3; x += 1) {
-          if (hash(seed ^ 0x7ee, x, 0, z) < 0.018) {
+          if (
+            hash(seed ^ 0x7ee, x, 0, z) < 0.018
+            && getBlock(x, terrainHeight(x, z), z) === BLOCKS.grass
+          ) {
             const ground = terrainHeight(x, z);
             for (let y = 1; y <= 3; y += 1) {
               setBlock(x, ground + y, z, BLOCKS.log, false);
@@ -388,7 +454,91 @@
     }
 
     function calculateScore() {
-      return (stats.mined * 10) + (stats.placed * 5) + (stats.cores * 150);
+      return (stats.mined * 10)
+        + (stats.placed * 5)
+        + (stats.cores * 150)
+        + (stats.crafted * 25);
+    }
+
+    function hasNearbyTable() {
+      const centerX = Math.floor(player.x);
+      const centerY = Math.floor(player.y);
+      const centerZ = Math.floor(player.z);
+      for (let y = centerY - 3; y <= centerY + 3; y += 1) {
+        for (let z = centerZ - 4; z <= centerZ + 4; z += 1) {
+          for (let x = centerX - 4; x <= centerX + 4; x += 1) {
+            if (getBlock(x, y, z) === BLOCKS.craftingTable) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function hasRecipeMaterials(recipe, tableNearby = hasNearbyTable()) {
+      const hasBlocks = Object.entries(recipe.inputs || {}).every(
+        ([block, count]) => (inventory[block] || 0) >= count,
+      );
+      const hasItems = Object.entries(recipe.itemInputs || {}).every(
+        ([item, count]) => (items[item] || 0) >= count,
+      );
+      if (!hasBlocks || !hasItems || (recipe.table && !tableNearby)) {
+        return false;
+      }
+      if (recipe.tool) {
+        const [kind, material] = recipe.tool;
+        const existingTier = tools[kind]?.tier || 0;
+        return existingTier <= TOOL_MATERIALS[material].tier;
+      }
+      return true;
+    }
+
+    function toolLabel(kind) {
+      const tool = tools[kind];
+      return tool
+        ? `${TOOL_MATERIALS[tool.material].label} ${kind.toUpperCase()} ${tool.durability}/${tool.maxDurability}`
+        : `${kind.toUpperCase()} NONE`;
+    }
+
+    function craftRecipe(recipeId) {
+      const recipe = RECIPES[recipeId];
+      if (!recipe || !hasRecipeMaterials(recipe)) {
+        setStatus(
+          recipe?.table && !hasNearbyTable()
+            ? "Place a Crafting Terminal nearby before compiling that recipe."
+            : "The inventory does not contain the Bits required for that recipe.",
+          "error",
+        );
+        return;
+      }
+      Object.entries(recipe.inputs || {}).forEach(([block, count]) => {
+        inventory[block] -= count;
+      });
+      Object.entries(recipe.itemInputs || {}).forEach(([item, count]) => {
+        items[item] -= count;
+      });
+      Object.entries(recipe.outputs || {}).forEach(([block, count]) => {
+        inventory[block] = (inventory[block] || 0) + count;
+      });
+      Object.entries(recipe.itemOutputs || {}).forEach(([item, count]) => {
+        items[item] = (items[item] || 0) + count;
+      });
+      if (recipe.tool) {
+        const [kind, material] = recipe.tool;
+        const materialInfo = TOOL_MATERIALS[material];
+        tools[kind] = {
+          material,
+          tier: materialInfo.tier,
+          durability: materialInfo.durability,
+          maxDurability: materialInfo.durability,
+        };
+        selectedTool = kind;
+      }
+      stats.crafted += 1;
+      setStatus(`${recipe.label} compiled successfully.`, "success");
+      updateHud();
+      scheduleSave();
     }
 
     function updateHud() {
@@ -396,14 +546,41 @@
       minedOutput.textContent = stats.mined.toLocaleString();
       placedOutput.textContent = stats.placed.toLocaleString();
       coresOutput.textContent = stats.cores.toLocaleString();
+      craftedOutput.textContent = stats.crafted.toLocaleString();
+      sticksOutput.textContent = String(items.sticks || 0);
       seedInput.value = String(seed);
-      toolOutput.textContent = BLOCK_INFO[selectedBlock].name.toUpperCase();
+      toolOutput.textContent = selectedTool === "hand"
+        ? "HAND"
+        : toolLabel(selectedTool);
+      blockOutput.textContent = BLOCK_INFO[selectedBlock].name.toUpperCase();
       positionOutput.textContent = `${Math.floor(player.x)} ${Math.floor(player.y)} ${Math.floor(player.z)}`;
+      const tableNearby = hasNearbyTable();
+      tableOutput.textContent = tableNearby ? "ONLINE" : "NOT NEARBY";
+      tableOutput.dataset.state = tableNearby ? "success" : "";
       hotbar.querySelectorAll("[data-minebits-block]").forEach((button) => {
         const block = Number(button.dataset.minebitsBlock);
         button.classList.toggle("is-selected", block === selectedBlock);
         button.setAttribute("aria-pressed", String(block === selectedBlock));
         button.querySelector("strong").textContent = String(inventory[block] || 0);
+      });
+      toolbelt.querySelectorAll("[data-minebits-tool]").forEach((button) => {
+        const kind = button.dataset.minebitsTool;
+        const available = kind === "hand" || Boolean(tools[kind]);
+        button.classList.toggle("is-selected", kind === selectedTool);
+        button.setAttribute("aria-pressed", String(kind === selectedTool));
+        button.disabled = !available;
+        button.querySelector("strong").textContent = kind === "hand"
+          ? "∞"
+          : toolLabel(kind).replace(`${kind.toUpperCase()} `, "");
+      });
+      root.querySelectorAll("[data-minebits-inventory]").forEach((output) => {
+        output.textContent = String(inventory[output.dataset.minebitsInventory] || 0);
+      });
+      recipeList.querySelectorAll("[data-minebits-recipe]").forEach((button) => {
+        button.disabled = !hasRecipeMaterials(
+          RECIPES[button.dataset.minebitsRecipe],
+          tableNearby,
+        );
       });
       if (!achievementAwarded && stats.mined >= 20 && stats.placed >= 10 && stats.cores >= 1) {
         achievementAwarded = true;
@@ -424,12 +601,15 @@
       window.clearTimeout(saveTimer);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          version: 1,
+          version: 2,
           seed,
           edits,
           inventory,
+          items,
+          tools,
           stats,
           selectedBlock,
+          selectedTool,
           player: {
             x: player.x,
             y: player.y,
@@ -459,7 +639,11 @@
     function loadWorld() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        if (!saved || saved.version !== 1 || !Number.isInteger(saved.seed)) {
+        if (
+          !saved
+          || ![1, 2].includes(saved.version)
+          || !Number.isInteger(saved.seed)
+        ) {
           return false;
         }
         const savedEdits = saved.edits && typeof saved.edits === "object"
@@ -472,23 +656,50 @@
             && inBounds(...coordinates)
             && Number.isInteger(block)
             && block >= BLOCKS.air
-            && block < BLOCKS.bedrock;
+            && block !== BLOCKS.bedrock
+            && (block === BLOCKS.air || Boolean(BLOCK_INFO[block]));
         });
         const savedCount = (value) => (
           Number.isInteger(value) && value >= 0 ? value : 0
         );
         seed = saved.seed >>> 0;
         edits = Object.fromEntries(validEdits);
-        inventory = Object.fromEntries(HOTBAR_BLOCKS.map((block) => [
+        inventory = Object.fromEntries(INVENTORY_BLOCKS.map((block) => [
           block,
           savedCount(saved.inventory?.[block]),
         ]));
+        items = {
+          sticks: savedCount(saved.items?.sticks),
+        };
+        tools = Object.fromEntries(["pickaxe", "axe", "shovel"].map((kind) => {
+          const savedTool = saved.tools?.[kind];
+          const materialInfo = TOOL_MATERIALS[savedTool?.material];
+          const durability = savedCount(savedTool?.durability);
+          if (!materialInfo || durability === 0) {
+            return [kind, null];
+          }
+          return [kind, {
+            material: savedTool.material,
+            tier: materialInfo.tier,
+            durability: clamp(
+              durability,
+              0,
+              materialInfo.durability,
+            ),
+            maxDurability: materialInfo.durability,
+          }];
+        }));
         stats = {
           mined: savedCount(saved.stats?.mined),
           placed: savedCount(saved.stats?.placed),
           cores: savedCount(saved.stats?.cores),
+          crafted: savedCount(saved.stats?.crafted),
         };
         selectedBlock = HOTBAR_BLOCKS.includes(saved.selectedBlock) ? saved.selectedBlock : 2;
+        selectedTool = TOOL_KINDS.includes(saved.selectedTool)
+          && (saved.selectedTool === "hand" || tools[saved.selectedTool])
+          ? saved.selectedTool
+          : "hand";
         achievementAwarded = saved.achievementAwarded === true;
         generateWorld();
         resetPlayer();
@@ -512,9 +723,13 @@
       const parsedSeed = Number.parseInt(requestedSeed, 10);
       seed = Number.isFinite(parsedSeed) ? parsedSeed >>> 0 : randomSeed();
       edits = {};
-      inventory = { 2: 12, 3: 0, 4: 0, 5: 4, 6: 0 };
-      stats = { mined: 0, placed: 0, cores: 0 };
+      inventory = Object.fromEntries(INVENTORY_BLOCKS.map((block) => [block, 0]));
+      items = { sticks: 0 };
+      tools = { pickaxe: null, axe: null, shovel: null };
+      stats = { mined: 0, placed: 0, cores: 0, crafted: 0 };
       selectedBlock = 2;
+      selectedTool = "hand";
+      miningTarget = { key: "", progress: 0 };
       achievementAwarded = false;
       generateWorld();
       resetPlayer();
@@ -645,6 +860,31 @@
         && player.z - 0.28 < z + 1;
     }
 
+    function requiredToolLabel(info) {
+      const material = Object.values(TOOL_MATERIALS).find(
+        (candidate) => candidate.tier === info.tier,
+      );
+      return `${material?.label || "SPECIAL"} ${info.tool.toUpperCase()}`;
+    }
+
+    function damageSelectedTool() {
+      if (selectedTool === "hand") {
+        return "";
+      }
+      const tool = tools[selectedTool];
+      if (!tool) {
+        return "";
+      }
+      tool.durability -= 1;
+      if (tool.durability > 0) {
+        return ` ${tool.durability}/${tool.maxDurability} durability remains.`;
+      }
+      const brokenLabel = `${TOOL_MATERIALS[tool.material].label} ${selectedTool.toUpperCase()}`;
+      tools[selectedTool] = null;
+      selectedTool = "hand";
+      return ` ${brokenLabel} exhausted its warranty and broke.`;
+    }
+
     function editTarget(place) {
       const target = raycast();
       if (!target) {
@@ -657,6 +897,38 @@
           setStatus("The Bedrock Firewall declined your deletion request.", "error");
           return;
         }
+        const equippedTool = selectedTool === "hand" ? null : tools[selectedTool];
+        if (
+          info.tier > 0
+          && (
+            selectedTool !== info.tool
+            || !equippedTool
+            || equippedTool.tier < info.tier
+          )
+        ) {
+          miningTarget = { key: "", progress: 0 };
+          setStatus(
+            `${info.name} requires a ${requiredToolLabel(info)} or better.`,
+            "error",
+          );
+          return;
+        }
+        const targetKey = `${target.x},${target.y},${target.z}`;
+        if (miningTarget.key !== targetKey) {
+          miningTarget = { key: targetKey, progress: 0 };
+        }
+        const properTool = selectedTool === info.tool && equippedTool;
+        miningTarget.progress += properTool ? 1 + (equippedTool.tier * 1.5) : 1;
+        if (miningTarget.progress < info.hardness) {
+          const remainingHits = Math.ceil(
+            (info.hardness - miningTarget.progress)
+            / (properTool ? 1 + (equippedTool.tier * 1.5) : 1),
+          );
+          setStatus(
+            `${info.name} cracking... ${remainingHits} more hit${remainingHits === 1 ? "" : "s"}.`,
+          );
+          return;
+        }
         setBlock(target.x, target.y, target.z, BLOCKS.air);
         if (info.drop && info.drop !== BLOCKS.core) {
           inventory[info.drop] = (inventory[info.drop] || 0) + 1;
@@ -665,8 +937,11 @@
         if (target.block === BLOCKS.core) {
           stats.cores += 1;
         }
-        setStatus(`${info.name} mined. The world is now marginally less complete.`, "success");
+        const durabilityMessage = damageSelectedTool();
+        miningTarget = { key: "", progress: 0 };
+        setStatus(`${info.name} mined.${durabilityMessage}`, "success");
       } else {
+        miningTarget = { key: "", progress: 0 };
         const destination = target.previous;
         if (!inBounds(destination.x, destination.y, destination.z)) {
           setStatus("Blocks must remain inside the allocated world process.", "error");
@@ -741,6 +1016,28 @@
       selectedBlock = block;
       updateHud();
       setStatus(`${BLOCK_INFO[block].name} selected. Right-click a nearby face to place it.`);
+    }
+
+    function selectTool(kind) {
+      if (!TOOL_KINDS.includes(kind) || (kind !== "hand" && !tools[kind])) {
+        return;
+      }
+      selectedTool = kind;
+      miningTarget = { key: "", progress: 0 };
+      updateHud();
+      setStatus(
+        kind === "hand"
+          ? "Hand selected. Natural materials may require several hits."
+          : `${toolLabel(kind)} equipped.`,
+      );
+    }
+
+    function cycleTool() {
+      const availableTools = TOOL_KINDS.filter(
+        (kind) => kind === "hand" || Boolean(tools[kind]),
+      );
+      const currentIndex = availableTools.indexOf(selectedTool);
+      selectTool(availableTools[(currentIndex + 1) % availableTools.length]);
     }
 
     function initialize() {
@@ -851,6 +1148,10 @@
           selectBlock(HOTBAR_BLOCKS[index]);
           event.preventDefault();
         }
+        if (event.code === "KeyQ") {
+          cycleTool();
+          event.preventDefault();
+        }
       }
       if (["KeyW", "KeyA", "KeyS", "KeyD", "Space", "KeyE", "ShiftLeft", "ShiftRight", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code)) {
         keys.add(event.code);
@@ -864,6 +1165,18 @@
         selectBlock(Number(button.dataset.minebitsBlock));
       }
     });
+    toolbelt.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-minebits-tool]");
+      if (button) {
+        selectTool(button.dataset.minebitsTool);
+      }
+    });
+    recipeList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-minebits-recipe]");
+      if (button) {
+        craftRecipe(button.dataset.minebitsRecipe);
+      }
+    });
     saveButton.addEventListener("click", () => saveWorld(true));
     newButton.addEventListener("click", newWorld);
     publishButton.addEventListener("click", () => {
@@ -875,7 +1188,7 @@
       saveWorld(false);
       onScore({
         score,
-        detail: `${stats.mined} MINED // ${stats.placed} BUILT // ${stats.cores} CORES`,
+        detail: `${stats.mined} MINED // ${stats.placed} BUILT // ${stats.crafted} CRAFTED`,
       });
       setStatus("Run score prepared for the Arcade leaderboard.", "success");
     });

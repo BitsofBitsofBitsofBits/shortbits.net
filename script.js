@@ -485,7 +485,7 @@ const achievementCatalog = [
   { id: "cobits-diagnostics", hints: ["CoBits claims to understand the desktop.", "A slash command requests technical confidence.", "Run /diagnose in CoBits."] },
   { id: "cobits-remembers", hints: ["The assistant has a very small memory.", "Introduce yourself, then test its recall.", "Tell CoBits your name and later ask what it is."] },
   { id: "cobits-interview", hints: ["Artificial Bitelligence has questions too.", "One quick action reverses the conversation.", "Complete the CoBits interview."] },
-  { id: "minebits-architect", hints: ["One Arcade world allows free excavation and reconstruction.", "Mine deeply enough to find a glowing Core Bit.", "Mine 20 blocks, place 10, and recover a Core Bit in MineBits."] },
+  { id: "minebits-architect", hints: ["One Arcade world allows survival-lite excavation and reconstruction.", "Craft tools, then mine deeply enough to find a glowing Core Bit.", "Mine 20 blocks, place 10, and recover a Core Bit in MineBits."] },
   { id: "action-airgap", hints: ["Action Center controls are mostly aspirational.", "Disconnect absolutely everything.", "Turn off all four quick actions at once."] },
   { id: "chaos-unguarded", hints: ["One Action Center switch protects everyone.", "Safety can be tested more than once.", "Disable CHAOS GUARD three times."] },
   { id: "wifi-virus", hints: ["Not every free connection is complimentary.", "BITS OS lists several questionable networks.", "Connect to a suspicious WI-FI-ish network and survive the result."] },

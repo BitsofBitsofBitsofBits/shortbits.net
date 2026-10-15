@@ -2309,7 +2309,8 @@ html.is-page-hidden * {
 
 .minebits-world-actions button,
 .minebits-world-panel button,
-.minebits-hotbar button {
+.minebits-hotbar button,
+.minebits-toolbelt button {
   border: 1px solid var(--border);
   color: var(--muted);
   background: rgba(5, 12, 16, 0.74);
@@ -2329,7 +2330,10 @@ html.is-page-hidden * {
 .minebits-world-panel button:focus-visible,
 .minebits-hotbar button:hover,
 .minebits-hotbar button:focus-visible,
-.minebits-hotbar button.is-selected {
+.minebits-hotbar button.is-selected,
+.minebits-toolbelt button:hover,
+.minebits-toolbelt button:focus-visible,
+.minebits-toolbelt button.is-selected {
   border-color: var(--accent);
   outline: none;
   color: var(--ink);
@@ -2338,7 +2342,7 @@ html.is-page-hidden * {
 
 .minebits-voxel-layout {
   display: grid;
-  grid-template-columns: minmax(520px, 1fr) minmax(190px, 230px);
+  grid-template-columns: minmax(520px, 1fr) minmax(260px, 300px);
   gap: 12px;
   min-height: 0;
 }
@@ -2429,7 +2433,7 @@ html.is-page-hidden * {
   bottom: 10px;
   left: 10px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 5px;
 }
 
@@ -2480,11 +2484,30 @@ html.is-page-hidden * {
   background: linear-gradient(135deg, rgba(43, 111, 36, 0.94), rgba(24, 62, 20, 0.94));
 }
 
+.minebits-hotbar button[data-minebits-block="9"] {
+  background: linear-gradient(135deg, rgba(194, 165, 91, 0.94), rgba(105, 87, 46, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="12"],
+.minebits-hotbar button[data-minebits-block="13"] {
+  background: linear-gradient(135deg, rgba(143, 87, 34, 0.94), rgba(69, 39, 18, 0.94));
+}
+
+.minebits-hotbar button[data-minebits-block="14"] {
+  background: linear-gradient(135deg, rgba(91, 169, 184, 0.9), rgba(39, 85, 96, 0.9));
+}
+
+.minebits-hotbar button[data-minebits-block="15"] {
+  background: linear-gradient(135deg, rgba(137, 54, 39, 0.94), rgba(73, 28, 23, 0.94));
+}
+
 .minebits-world-panel {
   display: grid;
   align-content: start;
   gap: 18px;
+  max-height: calc(100vh - 300px);
   padding: 12px;
+  overflow: auto;
   border: 1px solid var(--border);
   background: var(--panel-2);
 }
@@ -2492,6 +2515,35 @@ html.is-page-hidden * {
 .minebits-world-panel > div {
   display: grid;
   gap: 9px;
+}
+
+.minebits-toolbelt {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.minebits-toolbelt button {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px;
+  font-size: 0.52rem;
+  text-align: left;
+}
+
+.minebits-toolbelt button strong {
+  overflow: hidden;
+  color: var(--accent);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minebits-toolbelt button:disabled,
+.minebits-recipes button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .minebits-seed-label {
@@ -2511,13 +2563,15 @@ html.is-page-hidden * {
   font: inherit;
 }
 
-.minebits-stats {
+.minebits-stats,
+.minebits-inventory {
   display: grid;
   gap: 7px;
   margin: 0;
 }
 
-.minebits-stats div {
+.minebits-stats div,
+.minebits-inventory div {
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -2526,13 +2580,58 @@ html.is-page-hidden * {
   font-size: 0.58rem;
 }
 
-.minebits-stats dt {
+.minebits-stats dt,
+.minebits-inventory dt {
   color: var(--muted);
 }
 
-.minebits-stats dd {
+.minebits-stats dd,
+.minebits-inventory dd {
   margin: 0;
   color: var(--accent);
+}
+
+.minebits-crafting {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 9px 0;
+}
+
+.minebits-crafting summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.56rem;
+}
+
+.minebits-crafting summary strong {
+  float: right;
+  color: var(--accent);
+}
+
+.minebits-recipes {
+  display: grid;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.minebits-recipes button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.minebits-recipes button span {
+  color: var(--ink);
+  font-size: 0.54rem;
+}
+
+.minebits-recipes button small {
+  color: var(--muted);
+  font-size: 0.43rem;
+  line-height: 1.35;
 }
 
 .minebits-save-readout {
