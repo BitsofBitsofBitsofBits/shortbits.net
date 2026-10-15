@@ -8102,7 +8102,15 @@ html.is-birthday .falling-bit:nth-child(4n) { color: #b99aff; }
 
 .avatar-wrap.is-idle {
   z-index: auto;
-  animation: avatar-wander 14s ease-in-out infinite alternate;
+}
+
+.avatar-wrap.is-idle .avatar {
+  transform-origin: center;
+  animation: avatar-wander 6.4s ease-in-out infinite;
+}
+
+.avatar-wrap.is-idle .avatar-shadow {
+  animation: avatar-idle-shadow 6.4s ease-in-out infinite;
 }
 
 html.is-chaos-mode .shell {
@@ -8792,8 +8800,38 @@ html.is-root-mode .name-field {
 }
 
 @keyframes avatar-wander {
-  from { transform: translate(-7px, -3px) rotate(-3deg); }
-  to { transform: translate(7px, 3px) rotate(3deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(3deg);
+  }
+  18% {
+    transform: translate(-12px, -8px) rotate(-4deg);
+  }
+  36% {
+    transform: translate(-5px, 10px) rotate(-1deg);
+  }
+  54% {
+    transform: translate(15px, -11px) rotate(6deg);
+  }
+  72% {
+    transform: translate(8px, 8px) rotate(4deg);
+  }
+  88% {
+    transform: translate(-10px, 4px) rotate(-3deg);
+  }
+}
+
+@keyframes avatar-idle-shadow {
+  0%,
+  100% {
+    opacity: 1;
+    transform: rotate(-5deg) scale(1);
+  }
+  36%,
+  72% {
+    opacity: 0.5;
+    transform: rotate(-3deg) scale(0.96);
+  }
 }
 
 @keyframes avatar-fury {
