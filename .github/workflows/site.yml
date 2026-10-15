@@ -96,3 +96,32 @@ jobs:
             useless.html \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"
+
+      - name: Allow approved ShortBit embeds
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+          CADDYFILE_PATH: /etc/caddy/Caddyfile
+        run: |
+          set -euo pipefail
+          scp -P "${DEPLOY_PORT}" \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:${CADDYFILE_PATH}" \
+            /tmp/Caddyfile.original
+          cp /tmp/Caddyfile.original /tmp/Caddyfile.candidate
+          node scripts/update-caddy-csp.mjs /tmp/Caddyfile.candidate
+          scp -P "${DEPLOY_PORT}" \
+            /tmp/Caddyfile.original \
+            /tmp/Caddyfile.candidate \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
+          ssh -p "${DEPLOY_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -eu; \
+            sudo caddy validate --config /tmp/Caddyfile.candidate --adapter caddyfile; \
+            sudo install -m 644 /tmp/Caddyfile.candidate '${CADDYFILE_PATH}'; \
+            if ! sudo systemctl reload caddy; then \
+              sudo install -m 644 /tmp/Caddyfile.original '${CADDYFILE_PATH}'; \
+              sudo systemctl reload caddy; \
+              exit 1; \
+            fi; \
+            rm -f /tmp/Caddyfile.original /tmp/Caddyfile.candidate"

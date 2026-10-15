@@ -207,21 +207,15 @@ The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static
 site files. It does not delete other files from the production directory.
 
-The production web server must route missing paths to the themed error page
-while retaining the HTTP 404 status. For Nginx, add this inside the site's
-`server` block and reload Nginx:
+The production Caddy server must route missing paths to the themed error page
+while retaining the HTTP 404 status. The active Caddy configuration supplies
+that internal error handling for `/404.html`.
 
-```nginx
-error_page 404 /404.html;
-
-location = /404.html {
-    internal;
-}
-```
-
-The production Content Security Policy must also allow the approved ShortBit
-embed providers:
-
-```nginx
-add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.scdn.co; connect-src 'self' https://arjwrycitgobvlodmkeo.supabase.co wss://arjwrycitgobvlodmkeo.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com; font-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
-```
+After deploying the static files, the workflow downloads
+`/etc/caddy/Caddyfile`, updates its quoted Content Security Policy with the
+approved YouTube, Vimeo, and Spotify `frame-src` values, validates the candidate
+configuration, installs it, and reloads Caddy. A failed reload restores the
+original Caddyfile automatically. The deployment user therefore needs narrowly
+scoped passwordless `sudo` access to `caddy validate`,
+`install /tmp/Caddyfile.* /etc/caddy/Caddyfile`, and
+`systemctl reload caddy`.
