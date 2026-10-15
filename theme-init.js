@@ -1,26 +1,3 @@
-window.BITS_THEMES = [
-  {
-    name: "GREEN",
-    dark: { accent: "#66ff9a", rgb: "102, 255, 154" },
-    light: { accent: "#08783e", rgb: "8, 120, 62" },
-  },
-  {
-    name: "CYAN",
-    dark: { accent: "#63d8ff", rgb: "99, 216, 255" },
-    light: { accent: "#006f8f", rgb: "0, 111, 143" },
-  },
-  {
-    name: "VIOLET",
-    dark: { accent: "#b99aff", rgb: "185, 154, 255" },
-    light: { accent: "#6946ad", rgb: "105, 70, 173" },
-  },
-  {
-    name: "AMBER",
-    dark: { accent: "#ffcc66", rgb: "255, 204, 102" },
-    light: { accent: "#8a5b00", rgb: "138, 91, 0" },
-  },
-];
-
 window.BITS_INTERFACE_THEMES = [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
   { id: "aurora", name: "AURORA", darkColor: "#071018", lightColor: "#edf7f5" },
@@ -40,28 +17,20 @@ window.BITS_INTERFACE_THEMES = [
   { id: "nord", name: "NORD", darkColor: "#2e3440", lightColor: "#eceff4" },
   { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
+  { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
 ];
 
-const storedScheme = localStorage.getItem("bits-color-scheme");
-const colorScheme = storedScheme === "light" || storedScheme === "dark"
-  ? storedScheme
-  : window.matchMedia("(prefers-color-scheme: light)").matches
-    ? "light"
-    : "dark";
-const storedAccent = localStorage.getItem("bits-accent");
-const initialTheme = window.BITS_THEMES.find((theme) => theme.name === storedAccent)
-  ?? window.BITS_THEMES[0];
-const initialAccent = initialTheme[colorScheme];
 const storedInterfaceTheme = localStorage.getItem("bits-interface-theme");
+const legacyRgbMode = localStorage.getItem("bits-rgb-mode") === "true";
 const initialInterfaceTheme = window.BITS_INTERFACE_THEMES.find(
-  (theme) => theme.id === storedInterfaceTheme,
+  (theme) => theme.id === (legacyRgbMode ? "rgb" : storedInterfaceTheme),
 ) ?? window.BITS_INTERFACE_THEMES[0];
 
-document.documentElement.dataset.colorScheme = colorScheme;
+document.documentElement.dataset.colorScheme = "dark";
 document.documentElement.dataset.interfaceTheme = initialInterfaceTheme.id;
 document.documentElement.classList.toggle(
   "is-rgb-mode",
-  localStorage.getItem("bits-rgb-mode") === "true",
+  initialInterfaceTheme.id === "rgb",
 );
 document.documentElement.dataset.motion =
   localStorage.getItem("bits-motion") === "reduced" ? "reduced" : "system";
@@ -71,9 +40,8 @@ document.documentElement.dataset.contrast =
   localStorage.getItem("bits-contrast") === "high" ? "high" : "default";
 document.documentElement.dataset.effects =
   localStorage.getItem("bits-effects") === "off" ? "off" : "on";
-document.documentElement.style.setProperty("--accent", initialAccent.accent);
-document.documentElement.style.setProperty("--accent-rgb", initialAccent.rgb);
-document.querySelector('meta[name="theme-color"]').content =
-  colorScheme === "light"
-    ? initialInterfaceTheme.lightColor
-    : initialInterfaceTheme.darkColor;
+localStorage.setItem("bits-interface-theme", initialInterfaceTheme.id);
+localStorage.removeItem("bits-accent");
+localStorage.removeItem("bits-color-scheme");
+localStorage.removeItem("bits-rgb-mode");
+document.querySelector('meta[name="theme-color"]').content = initialInterfaceTheme.darkColor;

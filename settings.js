@@ -1,6 +1,4 @@
 const settingsTheme = document.querySelector("#settings-theme");
-const settingsAccent = document.querySelector("#settings-accent");
-const settingsDisplay = document.querySelector("#settings-display");
 const settingsMotion = document.querySelector("#settings-motion");
 const settingsLargeText = document.querySelector("#settings-large-text");
 const settingsHighContrast = document.querySelector("#settings-high-contrast");
@@ -10,8 +8,6 @@ const settingsResetWindows = document.querySelector("#settings-reset-windows");
 const settingsResetAll = document.querySelector("#settings-reset-all");
 const settingsStatus = document.querySelector("#settings-status");
 const footerTheme = document.querySelector("#interface-theme-select");
-const footerAccent = document.querySelector("#accent-select");
-const footerDisplay = document.querySelector("#mode-button");
 
 const preferenceKeys = [
   "bits-interface-theme",
@@ -41,10 +37,6 @@ function setSettingsStatus(message, isError = false) {
 
 function syncAppearanceControls() {
   settingsTheme.value = document.documentElement.dataset.interfaceTheme;
-  settingsAccent.value = document.documentElement.classList.contains("is-rgb-mode")
-    ? "RGB"
-    : localStorage.getItem("bits-accent") || "GREEN";
-  settingsDisplay.value = document.documentElement.dataset.colorScheme;
 }
 
 function applyAccessibilityPreference(key, value) {
@@ -84,17 +76,6 @@ addSelectOptions(
     value: theme.id,
   })),
 );
-addSelectOptions(
-  settingsAccent,
-  [
-    ...window.BITS_THEMES.map((theme) => ({
-      label: theme.name,
-      value: theme.name,
-    })),
-    { label: "RGB", value: "RGB" },
-  ],
-);
-
 settingsMotion.value = document.documentElement.dataset.motion;
 settingsLargeText.checked = document.documentElement.dataset.textsize === "large";
 settingsHighContrast.checked = document.documentElement.dataset.contrast === "high";
@@ -105,19 +86,6 @@ settingsTheme.addEventListener("change", () => {
   footerTheme.value = settingsTheme.value;
   footerTheme.dispatchEvent(new Event("change", { bubbles: true }));
   setSettingsStatus("Interface theme saved.");
-});
-
-settingsAccent.addEventListener("change", () => {
-  footerAccent.value = settingsAccent.value;
-  footerAccent.dispatchEvent(new Event("change", { bubbles: true }));
-  setSettingsStatus("Accent preference saved.");
-});
-
-settingsDisplay.addEventListener("change", () => {
-  if (document.documentElement.dataset.colorScheme !== settingsDisplay.value) {
-    footerDisplay.click();
-  }
-  setSettingsStatus("Display preference saved.");
 });
 
 settingsMotion.addEventListener("change", () => {
@@ -146,8 +114,6 @@ settingsEffects.addEventListener("change", () => {
 });
 
 footerTheme.addEventListener("change", syncAppearanceControls);
-footerAccent.addEventListener("change", syncAppearanceControls);
-footerDisplay.addEventListener("click", syncAppearanceControls);
 
 settingsCopyLink.addEventListener("click", async () => {
   try {

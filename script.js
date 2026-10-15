@@ -83,28 +83,6 @@ const links = [
   },
 ];
 
-const themes = window.BITS_THEMES ?? [
-  {
-    name: "GREEN",
-    dark: { accent: "#66ff9a", rgb: "102, 255, 154" },
-    light: { accent: "#08783e", rgb: "8, 120, 62" },
-  },
-  {
-    name: "CYAN",
-    dark: { accent: "#63d8ff", rgb: "99, 216, 255" },
-    light: { accent: "#006f8f", rgb: "0, 111, 143" },
-  },
-  {
-    name: "VIOLET",
-    dark: { accent: "#b99aff", rgb: "185, 154, 255" },
-    light: { accent: "#6946ad", rgb: "105, 70, 173" },
-  },
-  {
-    name: "AMBER",
-    dark: { accent: "#ffcc66", rgb: "255, 204, 102" },
-    light: { accent: "#8a5b00", rgb: "138, 91, 0" },
-  },
-];
 const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
   { id: "aurora", name: "AURORA", darkColor: "#071018", lightColor: "#edf7f5" },
@@ -124,19 +102,12 @@ const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
   { id: "nord", name: "NORD", darkColor: "#2e3440", lightColor: "#eceff4" },
   { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
+  { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
 ];
 
-if (!window.BITS_THEMES) {
-  console.warn("theme-init.js did not load; using the built-in theme configuration.");
-  const storedScheme = localStorage.getItem("bits-color-scheme");
-  document.documentElement.dataset.colorScheme = storedScheme === "light"
-    || storedScheme === "dark"
-    ? storedScheme
-    : window.matchMedia("(prefers-color-scheme: light)").matches
-      ? "light"
-      : "dark";
-}
 if (!window.BITS_INTERFACE_THEMES) {
+  console.warn("theme-init.js did not load; using the built-in theme configuration.");
+  document.documentElement.dataset.colorScheme = "dark";
   document.documentElement.dataset.interfaceTheme = "default";
 }
 
@@ -190,9 +161,6 @@ const activityText = document.querySelector("#activity-text");
 const uptime = document.querySelector("#uptime");
 const commandLine = document.querySelector(".command-line");
 const interfaceThemeSelect = document.querySelector("#interface-theme-select");
-const accentSelect = document.querySelector("#accent-select");
-const modeButton = document.querySelector("#mode-button");
-const modeName = document.querySelector("#mode-name");
 const binaryRain = document.querySelector("#binary-rain");
 const forbiddenBitDock = document.querySelector("#forbidden-bit-dock");
 const interfaceShell = document.querySelector("#interface-shell");
@@ -423,7 +391,7 @@ const achievementCatalog = [
   { id: "uptime-300", hints: ["Patience is measurable.", "Stay for at least five minutes.", "Reach 00:05:00 uptime."] },
   { id: "uptime-600", hints: ["The tab is becoming concerned.", "Ten minutes is a long time here.", "Reach 00:10:00 uptime."] },
   { id: "uptime-1800", hints: ["Perhaps this is your home now.", "Thirty minutes should do it.", "Reach 00:30:00 uptime."] },
-  { id: "pride-mode", hints: ["The accent control contains more than solid colors.", "Inspect the accent dropdown.", "Select RGB Mode."] },
+  { id: "pride-mode", hints: ["One interface theme refuses to choose a color.", "Inspect the theme dropdown.", "Select the RGB theme."] },
   { id: "maximum-bits", hints: ["Window controls can be sequenced.", "Minimize and maximize with intent.", "Use minimize, maximize, minimize, close."] },
   { id: "personal-space", hints: ["The avatar has boundaries.", "Poke it considerably more than once.", "Keep poking until the avatar leaves."] },
   { id: "bits-released", hints: ["Not every click is a left click.", "The avatar understands a middle click.", "Middle-click the avatar."] },
@@ -1139,10 +1107,6 @@ function scheduleNextBit() {
   }, delay);
 }
 
-let themeIndex = Math.max(
-  0,
-  themes.findIndex((theme) => theme.name === localStorage.getItem("bits-accent")),
-);
 let interfaceThemeIndex = Math.max(
   0,
   interfaceThemes.findIndex(
@@ -1155,13 +1119,7 @@ function hexToRgbString(hexColor) {
 }
 
 function getRgbPalette() {
-  return rainbowColors[document.documentElement.dataset.colorScheme]
-    || rainbowColors.dark;
-}
-
-function applyRgbAccent() {
-  applyAccentTheme(themes[themeIndex]);
-  accentSelect.value = "RGB";
+  return rainbowColors.dark;
 }
 
 function applyRgbBitColor(bit) {
@@ -1174,7 +1132,6 @@ function applyRgbBitColor(bit) {
 
 function setRgbMode(enabled) {
   document.documentElement.classList.toggle("is-rgb-mode", enabled);
-  localStorage.setItem("bits-rgb-mode", String(enabled));
 
   if (!enabled) {
     binaryRain.querySelectorAll(".is-rgb-bit").forEach((bit) => {
@@ -1182,50 +1139,30 @@ function setRgbMode(enabled) {
       bit.style.removeProperty("--bit-color");
       bit.style.removeProperty("--bit-color-rgb");
     });
-    applyAccentTheme(themes[themeIndex]);
     return;
   }
 
-  applyRgbAccent();
   binaryRain.querySelectorAll(".falling-bit:not(.is-forbidden)")
     .forEach(applyRgbBitColor);
 }
 
-function applyAccentTheme(theme) {
-  const colorScheme = document.documentElement.dataset.colorScheme;
-  const accent = theme[colorScheme];
-  document.documentElement.style.setProperty("--accent", accent.accent);
-  document.documentElement.style.setProperty("--accent-rgb", accent.rgb);
-  if (!document.documentElement.classList.contains("is-rgb-mode")) {
-    accentSelect.value = theme.name;
-  }
-  localStorage.setItem("bits-accent", theme.name);
-}
-
 function updateBrowserThemeColor() {
   const theme = interfaceThemes[interfaceThemeIndex];
-  const colorScheme = document.documentElement.dataset.colorScheme;
-  document.querySelector('meta[name="theme-color"]').content =
-    colorScheme === "light" ? theme.lightColor : theme.darkColor;
+  document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
 }
 
 function applyInterfaceTheme(theme) {
+  document.documentElement.style.removeProperty("--accent");
+  document.documentElement.style.removeProperty("--accent-rgb");
+  document.documentElement.dataset.colorScheme = "dark";
   document.documentElement.dataset.interfaceTheme = theme.id;
+  setRgbMode(theme.id === "rgb");
   interfaceThemeSelect.value = theme.id;
   localStorage.setItem("bits-interface-theme", theme.id);
+  localStorage.removeItem("bits-accent");
+  localStorage.removeItem("bits-color-scheme");
+  localStorage.removeItem("bits-rgb-mode");
   updateBrowserThemeColor();
-}
-
-function applyColorScheme(colorScheme) {
-  document.documentElement.dataset.colorScheme = colorScheme;
-  modeName.textContent = colorScheme.toUpperCase();
-  updateBrowserThemeColor();
-  localStorage.setItem("bits-color-scheme", colorScheme);
-  if (document.documentElement.classList.contains("is-rgb-mode")) {
-    applyRgbAccent();
-  } else {
-    applyAccentTheme(themes[themeIndex]);
-  }
 }
 
 interfaceThemeSelect.value = interfaceThemes[interfaceThemeIndex].id;
@@ -1238,23 +1175,7 @@ interfaceThemeSelect.addEventListener("change", () => {
   }
   interfaceThemeIndex = selectedIndex;
   applyInterfaceTheme(interfaceThemes[interfaceThemeIndex]);
-  window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
-    detail: {
-      label: "INTERFACE THEME",
-      value: interfaceThemes[interfaceThemeIndex].name,
-    },
-  }));
-});
-
-accentSelect.value = document.documentElement.classList.contains("is-rgb-mode")
-  ? "RGB"
-  : themes[themeIndex].name;
-accentSelect.addEventListener("change", () => {
-  if (accentSelect.value === "RGB") {
-    setRgbMode(true);
-    window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
-      detail: { label: "ACCENT", value: "RGB MODE" },
-    }));
+  if (interfaceThemes[interfaceThemeIndex].id === "rgb") {
     showAchievement(
       "RGB MODE ENABLED",
       "RGB MODE",
@@ -1262,36 +1183,13 @@ accentSelect.addEventListener("change", () => {
       "pride-mode",
     );
     showAvatarContextReaction("[>_<] MY OPTICAL SENSORS OBJECT TO THIS.");
-    return;
   }
-
-  const selectedIndex = themes.findIndex(
-    (theme) => theme.name === accentSelect.value,
-  );
-  if (selectedIndex < 0) {
-    throw new Error(`Unknown accent: ${accentSelect.value}`);
-  }
-  themeIndex = selectedIndex;
-  setRgbMode(false);
   window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
-    detail: { label: "ACCENT", value: themes[themeIndex].name },
+    detail: {
+      label: "INTERFACE THEME",
+      value: interfaceThemes[interfaceThemeIndex].name,
+    },
   }));
-});
-
-modeButton.addEventListener("click", () => {
-  const nextScheme = document.documentElement.dataset.colorScheme === "dark"
-    ? "light"
-    : "dark";
-  applyColorScheme(nextScheme);
-  window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
-    detail: { label: "DISPLAY", value: nextScheme.toUpperCase() },
-  }));
-  renderMessageText(
-    typedText,
-    currentMessageCharacters,
-    characterIndex,
-    currentMessage.colorful,
-  );
 });
 
 function triggerChaosMode() {
@@ -3007,11 +2905,8 @@ function applyTemporalEggs(now = new Date()) {
     document.documentElement.style.setProperty("--accent", "#ff3e4d");
     document.documentElement.style.setProperty("--accent-rgb", "255, 62, 77");
   } else if (wasFridayThirteen) {
-    if (document.documentElement.classList.contains("is-rgb-mode")) {
-      applyRgbAccent();
-    } else {
-      applyAccentTheme(themes[themeIndex]);
-    }
+    document.documentElement.style.removeProperty("--accent");
+    document.documentElement.style.removeProperty("--accent-rgb");
   }
 
   if (isMidnight) {
@@ -3167,7 +3062,7 @@ async function loadBuildMetadata() {
   }
 }
 
-applyColorScheme(document.documentElement.dataset.colorScheme);
+applyInterfaceTheme(interfaceThemes[interfaceThemeIndex]);
 renderMessageText(
   typedText,
   currentMessageCharacters,

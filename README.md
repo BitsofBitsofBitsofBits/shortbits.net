@@ -12,7 +12,7 @@ is a personal project and largely a learning exercise for me.
 ## Features
 
 - Responsive LinkTree-style social and project links
-- Dark, light, accent, high-contrast, and reduced-motion display profiles
+- Theme-driven, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard
 - Private contact form backed by Supabase
@@ -57,12 +57,13 @@ is a personal project and largely a learning exercise for me.
   pulses, aurora ribbons, petals, acrylic lighting, reveal sweeps, OLED stars,
   color orbs, and phosphor effects. These respect decorative-effects, contrast,
   reduced-motion, forced-colors, and performance preferences
-- RGB Mode that preserves the interface accent while cycling a rainbow gradient
-  around the main shell and desktop-window edges
-- Persistent full-interface themes: Default, Aurora, Cozy Blossom, Mica,
-  Fluent, Midnight OLED, macOS, and Terminal. These remain independent from
-  accent colors, light/dark display mode, and RGB edges. Theme and accent
-  dropdowns provide direct selection, including a persistent RGB option.
+- A persistent RGB interface theme that cycles rainbow gradients around the
+  main shell, desktop-window edges, falling Bits, and themed scrollbars
+- Nineteen persistent full-interface themes, each with its own fixed accent,
+  background, window treatment, typography, and scrollbar. These include
+  Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
+  Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Solarized,
+  Nord, Dracula, Candy Pop, and RGB.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
