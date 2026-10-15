@@ -2975,6 +2975,10 @@ function showPreviousSplash(direction) {
 }
 
 document.addEventListener("keydown", (event) => {
+  const activeMineBitsPanel = document.querySelector("[data-arcade-panel=\"minebits\"]:not([hidden])");
+  if (activeMineBitsPanel && !document.querySelector("#arcade-window")?.hidden) {
+    return;
+  }
   if (document.documentElement.dataset.boot === "pending") {
     return;
   }

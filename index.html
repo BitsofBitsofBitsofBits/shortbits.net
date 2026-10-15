@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-9"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-80">
+    <link rel="stylesheet" href="styles.css?v=upgrade-81">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -40,9 +40,9 @@
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-2" defer></script>
     <script src="screensaver.js?v=screensaver-1" defer></script>
-    <script src="script.js?v=upgrade-53" defer></script>
+    <script src="script.js?v=upgrade-54" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
-    <script src="minebits.js?v=minebits-2" defer></script>
+    <script src="minebits.js?v=minebits-3" defer></script>
     <script src="arcade.js?v=arcade-5" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -1211,6 +1211,7 @@
               <div class="arcade-game-toolbar">
                 <p>SCORE <strong id="minebits-score">0</strong> // TOOL <strong id="minebits-tool-label">HAND</strong> // BLOCK <strong id="minebits-block-label">DATA</strong> // XYZ <strong id="minebits-position">0 0 0</strong></p>
                 <div class="minebits-world-actions">
+                  <button id="minebits-fullscreen" type="button">FULLSCREEN</button>
                   <button id="minebits-save" type="button">SAVE_WORLD</button>
                   <button id="minebits-publish" type="button">PUBLISH_RUN</button>
                 </div>
@@ -1224,13 +1225,25 @@
                 <span>RIGHT CLICK BUILD</span>
                 <span>1-9 SELECT BLOCK</span>
                 <span>Q CYCLE TOOL</span>
+                <span>I INVENTORY</span>
+                <span>F FULLSCREEN</span>
               </div>
               <div class="minebits-voxel-layout">
                 <div class="minebits-view-column">
                   <div class="minebits-viewport">
                     <canvas id="minebits-canvas" width="960" height="540" tabindex="0" aria-label="MineBits first-person voxel world"></canvas>
+                    <div class="minebits-survival-hud" aria-label="MineBits survival status">
+                      <span>HEALTH <strong id="minebits-health">10 / 10</strong></span>
+                      <span id="minebits-time">DAY 1 // 08:00</span>
+                      <span>HOSTILES <strong id="minebits-hostiles">0</strong></span>
+                    </div>
                     <span class="minebits-crosshair" aria-hidden="true"></span>
                     <span id="minebits-prompt" class="minebits-prompt">CLICK TO ENTER WORLD</span>
+                    <span id="minebits-danger-alert" class="minebits-danger-alert" role="status"></span>
+                    <span id="minebits-damage-flash" class="minebits-damage-flash" aria-hidden="true"></span>
+                    <div id="minebits-hand" class="minebits-hand" data-tool="hand" aria-hidden="true">
+                      <span id="minebits-hand-tool">HAND</span>
+                    </div>
                     <div id="minebits-hotbar" class="minebits-hotbar" role="group" aria-label="MineBits block hotbar">
                       <button type="button" data-minebits-block="2" aria-pressed="true"><span><i>1</i> DATA</span><strong>12</strong></button>
                       <button type="button" data-minebits-block="3" aria-pressed="false"><span><i>2</i> BITSTONE</span><strong>0</strong></button>
@@ -1242,6 +1255,16 @@
                       <button type="button" data-minebits-block="14" aria-pressed="false"><span><i>8</i> GLASS</span><strong>0</strong></button>
                       <button type="button" data-minebits-block="15" aria-pressed="false"><span><i>9</i> BRICKS</span><strong>0</strong></button>
                     </div>
+                    <section id="minebits-game-inventory" class="minebits-game-inventory" aria-labelledby="minebits-game-inventory-title" hidden>
+                      <header>
+                        <div>
+                          <p class="system-kicker">POINTER_LOCK_SAFE_MENU</p>
+                          <h3 id="minebits-game-inventory-title">INVENTORY</h3>
+                        </div>
+                        <span>ARROWS NAVIGATE // ENTER SELECTS // I CLOSES</span>
+                      </header>
+                      <div id="minebits-game-inventory-options" class="minebits-game-inventory-options"></div>
+                    </section>
                   </div>
                   <p id="minebits-status" class="minebits-status" role="status">Click the world to begin exploring.</p>
                 </div>
@@ -1308,7 +1331,7 @@
                   <p class="minebits-save-readout">LOCAL WORLD STATE // <strong id="minebits-save-state">LOADING</strong></p>
                 </aside>
               </div>
-              <p class="arcade-help">SURVIVAL-LITE VOXEL PARODY // HARVEST WOOD, COMPILE RECIPES, PLACE A CRAFTING TERMINAL, AND PROGRESS FROM WOOD TO BITSTONE TO COPPER TOOLS // NO BORROWED ASSETS</p>
+              <p class="arcade-help">SURVIVAL-LITE VOXEL PARODY // FULLSCREEN, LOCK-SAFE INVENTORY, VISIBLE TOOLS, DAY/NIGHT, FALL DAMAGE, MEMORY LAVA, AND HOSTILE GLITCH MOBS // NO BORROWED ASSETS</p>
             </article>
 
             <article id="arcade-game-flappy" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-flappy" data-arcade-panel="flappy" hidden>

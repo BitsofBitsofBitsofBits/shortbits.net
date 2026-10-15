@@ -2365,6 +2365,20 @@ html.is-page-hidden * {
   box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.3);
 }
 
+.minebits-viewport:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  aspect-ratio: auto;
+  border: 0;
+  background: #05080d;
+}
+
+.minebits-viewport:fullscreen #minebits-canvas {
+  width: 100vw;
+  height: 100vh;
+}
+
 #minebits-canvas {
   display: block;
   width: 100%;
@@ -2424,6 +2438,236 @@ html.is-page-hidden * {
   pointer-events: none;
   transform: translateX(-50%);
   text-shadow: 1px 1px #000;
+}
+
+.minebits-survival-hud {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.minebits-survival-hud span,
+.minebits-danger-alert {
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  background: rgba(4, 10, 13, 0.72);
+  font-size: 0.5rem;
+  text-shadow: 1px 1px #000;
+}
+
+.minebits-survival-hud strong {
+  color: #73ff91;
+}
+
+.minebits-survival-hud.is-critical strong {
+  color: #ff6d7a;
+  animation: minebits-danger-pulse 700ms steps(2) infinite;
+}
+
+.minebits-danger-alert {
+  position: absolute;
+  z-index: 5;
+  top: 52px;
+  left: 50%;
+  border-color: rgba(255, 91, 108, 0.72);
+  color: #ffccd1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 180ms ease;
+}
+
+.minebits-danger-alert:not(:empty) {
+  opacity: 1;
+}
+
+.minebits-damage-flash {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  border: 0 solid rgba(255, 45, 69, 0);
+  background: transparent;
+  pointer-events: none;
+}
+
+.minebits-viewport.is-damaged .minebits-damage-flash {
+  animation: minebits-damage-flash 280ms ease-out;
+}
+
+.minebits-hand {
+  --hand-color: #d2a06f;
+  position: absolute;
+  z-index: 3;
+  right: 8%;
+  bottom: 58px;
+  width: clamp(74px, 10vw, 130px);
+  height: clamp(105px, 15vw, 190px);
+  border: 4px solid rgba(22, 13, 8, 0.72);
+  background:
+    linear-gradient(90deg, transparent 62%, rgba(255, 255, 255, 0.14) 63% 72%, transparent 73%),
+    var(--hand-color);
+  box-shadow:
+    inset 7px 7px rgba(255, 255, 255, 0.12),
+    inset -9px -9px rgba(0, 0, 0, 0.22),
+    8px 10px 18px rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+  transform: rotate(-18deg) translate3d(0, 26%, 0);
+  transform-origin: 70% 100%;
+}
+
+.minebits-hand::before {
+  position: absolute;
+  top: -45%;
+  left: 17%;
+  width: 38%;
+  height: 72%;
+  border: 4px solid rgba(22, 13, 8, 0.72);
+  background: var(--hand-color);
+  box-shadow: inset 5px 5px rgba(255, 255, 255, 0.12);
+  content: "";
+}
+
+.minebits-hand[data-tool]:not([data-tool="hand"])::after {
+  position: absolute;
+  top: -76%;
+  left: -54%;
+  width: 128%;
+  height: 22%;
+  border: 4px solid rgba(14, 16, 17, 0.82);
+  background: #777;
+  box-shadow: 35px 32px 0 -8px #6c4827;
+  content: "";
+  transform: rotate(-18deg);
+}
+
+.minebits-hand[data-tool="axe"]::after {
+  height: 34%;
+  clip-path: polygon(0 0, 100% 18%, 76% 100%, 12% 76%);
+}
+
+.minebits-hand[data-tool="shovel"]::after {
+  width: 72%;
+  border-radius: 45% 45% 12% 12%;
+}
+
+.minebits-hand span {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.42rem;
+  writing-mode: vertical-rl;
+}
+
+.minebits-viewport.is-walking .minebits-hand {
+  animation: minebits-hand-bob 420ms ease-in-out infinite alternate;
+}
+
+.minebits-viewport.is-swinging .minebits-hand {
+  animation: minebits-hand-swing 220ms ease-out;
+}
+
+.minebits-game-inventory {
+  position: absolute;
+  z-index: 10;
+  inset: 7%;
+  overflow: auto;
+  border: 2px solid var(--accent);
+  color: var(--ink);
+  background: rgba(5, 13, 18, 0.96);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+}
+
+.minebits-game-inventory header {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5, 13, 18, 0.98);
+}
+
+.minebits-game-inventory h3,
+.minebits-game-inventory p {
+  margin: 0;
+}
+
+.minebits-game-inventory header > span {
+  color: var(--muted);
+  font-size: 0.48rem;
+}
+
+.minebits-game-inventory-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  padding: 12px;
+}
+
+.minebits-game-inventory-options button {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel-2);
+  font: inherit;
+  font-size: 0.52rem;
+  text-align: left;
+}
+
+.minebits-game-inventory-options button small {
+  color: var(--accent);
+  font-size: 0.46rem;
+}
+
+.minebits-game-inventory-options button:focus {
+  border-color: #fff;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.2);
+}
+
+.minebits-game-inventory-options button:disabled {
+  opacity: 0.36;
+}
+
+.minebits-viewport.is-inventory-open .minebits-crosshair,
+.minebits-viewport.is-inventory-open .minebits-hand,
+.minebits-viewport.is-inventory-open .minebits-hotbar {
+  opacity: 0.18;
+}
+
+@keyframes minebits-hand-bob {
+  from { transform: rotate(-19deg) translate3d(-3px, 26%, 0); }
+  to { transform: rotate(-15deg) translate3d(5px, 20%, 0); }
+}
+
+@keyframes minebits-hand-swing {
+  45% { transform: rotate(-72deg) translate3d(-45%, -12%, 0); }
+}
+
+@keyframes minebits-damage-flash {
+  20% {
+    border-width: 18px;
+    border-color: rgba(255, 45, 69, 0.72);
+    background: rgba(255, 20, 44, 0.18);
+  }
+}
+
+@keyframes minebits-danger-pulse {
+  50% { opacity: 0.45; }
 }
 
 .minebits-hotbar {

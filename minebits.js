@@ -22,6 +22,7 @@
     glass: 14,
     bricks: 15,
     gravel: 16,
+    lava: 17,
   };
   const BLOCK_INFO = {
     1: { name: "Grass Data", color: [0.36, 0.68, 0.22], drop: 2, hardness: 1, tool: "shovel", tier: 0 },
@@ -40,6 +41,7 @@
     14: { name: "Glass Pane Block", color: [0.48, 0.78, 0.84], drop: 14, hardness: 1, tool: "hand", tier: 0 },
     15: { name: "Compiled Brick", color: [0.57, 0.25, 0.18], drop: 15, hardness: 3, tool: "pickaxe", tier: 1 },
     16: { name: "Loose Gravel", color: [0.43, 0.41, 0.39], drop: 16, hardness: 1, tool: "shovel", tier: 0 },
+    17: { name: "Memory Lava", color: [1, 0.18, 0.04], unbreakable: true, hazard: true },
   };
   const HOTBAR_BLOCKS = [2, 3, 5, 6, 9, 12, 13, 14, 15];
   const INVENTORY_BLOCKS = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16];
@@ -191,12 +193,12 @@
     `);
     const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, `
       precision mediump float;
+      uniform vec3 u_sky;
       varying vec3 v_color;
       varying float v_distance;
       void main() {
-        vec3 sky = vec3(0.39, 0.62, 0.76);
         float fog = smoothstep(28.0, 52.0, v_distance);
-        gl_FragColor = vec4(mix(v_color, sky, fog), 1.0);
+        gl_FragColor = vec4(mix(v_color, u_sky, fog), 1.0);
       }
     `);
     const program = gl.createProgram();
@@ -227,6 +229,8 @@
     const saveButton = root.querySelector("#minebits-save");
     const newButton = root.querySelector("#minebits-start");
     const publishButton = root.querySelector("#minebits-publish");
+    const fullscreenButton = root.querySelector("#minebits-fullscreen");
+    const viewport = root.querySelector(".minebits-viewport");
     const hotbar = root.querySelector("#minebits-hotbar");
     const toolbelt = root.querySelector("#minebits-toolbelt");
     const recipeList = root.querySelector("#minebits-recipes");
@@ -238,6 +242,14 @@
     const coresOutput = root.querySelector("#minebits-cores");
     const saveOutput = root.querySelector("#minebits-save-state");
     const prompt = root.querySelector("#minebits-prompt");
+    const healthOutput = root.querySelector("#minebits-health");
+    const timeOutput = root.querySelector("#minebits-time");
+    const hostilesOutput = root.querySelector("#minebits-hostiles");
+    const dangerAlert = root.querySelector("#minebits-danger-alert");
+    const hand = root.querySelector("#minebits-hand");
+    const handTool = root.querySelector("#minebits-hand-tool");
+    const gameInventory = root.querySelector("#minebits-game-inventory");
+    const gameInventoryOptions = root.querySelector("#minebits-game-inventory-options");
     const gl = canvas.getContext("webgl", {
       alpha: false,
       antialias: false,
@@ -249,7 +261,10 @@
     let colorLocation;
     let matrixLocation;
     let cameraLocation;
+    let skyLocation;
     let vertexCount = 0;
+    let mobBuffer;
+    let mobVertexCount = 0;
     let world = new Uint8Array(WORLD_WIDTH * WORLD_HEIGHT * WORLD_DEPTH);
     let seed = randomSeed();
     let edits = {};
@@ -268,6 +283,13 @@
     let initialized = false;
     let saveTimer = 0;
     let achievementAwarded = false;
+    let survival = { health: 10, day: 1, time: 0.32, deaths: 0, kills: 0 };
+    let mobs = [];
+    let mobSpawnTimer = 0;
+    let hazardCooldown = 0;
+    let highestFallSpeed = 0;
+    let swingTimer = 0;
+    let inventoryOpen = false;
 
     function indexFor(x, y, z) {
       return x + (z * WORLD_WIDTH) + (y * WORLD_WIDTH * WORLD_DEPTH);
@@ -327,7 +349,9 @@
                 && hash(seed ^ 0x51f15e, x, y, z) > 0.91;
               const resourceRoll = hash(seed ^ 0xa11ce, x, y, z);
               if (cave) {
-                block = BLOCKS.air;
+                block = y <= 3 && hash(seed ^ 0x1a7a, x, y, z) > 0.62
+                  ? BLOCKS.lava
+                  : BLOCKS.air;
               } else if (resourceRoll > 0.972) {
                 block = BLOCKS.ore;
               } else if (resourceRoll > 0.925) {
@@ -453,6 +477,34 @@
       gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     }
 
+    function appendCube(vertices, x, y, z, color, size = 1) {
+      const offset = (1 - size) / 2;
+      FACE_DATA.forEach((face) => {
+        face.vertices.forEach((vertex) => {
+          vertices.push(
+            x + offset + (vertex[0] * size),
+            y + (vertex[1] * size),
+            z + offset + (vertex[2] * size),
+            clamp(color[0] * face.shade, 0, 1),
+            clamp(color[1] * face.shade, 0, 1),
+            clamp(color[2] * face.shade, 0, 1),
+          );
+        });
+      });
+    }
+
+    function buildMobMesh() {
+      const vertices = [];
+      mobs.forEach((mob) => {
+        appendCube(vertices, mob.x - 0.5, mob.y, mob.z - 0.5, [0.94, 0.08, 0.5], 0.9);
+        appendCube(vertices, mob.x - 0.5, mob.y + 0.82, mob.z - 0.5, [0.42, 0.05, 0.65], 0.78);
+      });
+      const data = new Float32Array(vertices);
+      mobVertexCount = data.length / 6;
+      gl.bindBuffer(gl.ARRAY_BUFFER, mobBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    }
+
     function calculateScore() {
       return (stats.mined * 10)
         + (stats.placed * 5)
@@ -554,6 +606,20 @@
         : toolLabel(selectedTool);
       blockOutput.textContent = BLOCK_INFO[selectedBlock].name.toUpperCase();
       positionOutput.textContent = `${Math.floor(player.x)} ${Math.floor(player.y)} ${Math.floor(player.z)}`;
+      healthOutput.textContent = `${survival.health} / 10`;
+      healthOutput.closest(".minebits-survival-hud").classList.toggle(
+        "is-critical",
+        survival.health <= 3,
+      );
+      const totalMinutes = Math.floor(survival.time * 24 * 60);
+      const hour = Math.floor(totalMinutes / 60) % 24;
+      const minute = totalMinutes % 60;
+      timeOutput.textContent = `DAY ${survival.day} // ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+      hostilesOutput.textContent = String(mobs.length);
+      hand.dataset.tool = selectedTool;
+      handTool.textContent = selectedTool === "hand"
+        ? "HAND"
+        : TOOL_MATERIALS[tools[selectedTool]?.material]?.label || selectedTool.toUpperCase();
       const tableNearby = hasNearbyTable();
       tableOutput.textContent = tableNearby ? "ONLINE" : "NOT NEARBY";
       tableOutput.dataset.state = tableNearby ? "success" : "";
@@ -590,6 +656,63 @@
           message: "MINEBITS SANDBOX MASTERED",
         });
       }
+      if (inventoryOpen) {
+        renderGameInventory();
+      }
+    }
+
+    function renderGameInventory() {
+      const options = [];
+      TOOL_KINDS.forEach((kind) => {
+        const available = kind === "hand" || Boolean(tools[kind]);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.inventoryAction = "tool";
+        button.dataset.value = kind;
+        button.disabled = !available;
+        button.innerHTML = `<span>EQUIP ${kind.toUpperCase()}</span><small>${kind === "hand" ? "ALWAYS AVAILABLE" : toolLabel(kind)}</small>`;
+        options.push(button);
+      });
+      HOTBAR_BLOCKS.forEach((block) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.inventoryAction = "block";
+        button.dataset.value = String(block);
+        button.disabled = !inventory[block];
+        button.innerHTML = `<span>SELECT ${BLOCK_INFO[block].name.toUpperCase()}</span><small>${inventory[block] || 0} BLOCKS</small>`;
+        options.push(button);
+      });
+      Object.entries(RECIPES).forEach(([recipeId, recipe]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.inventoryAction = "recipe";
+        button.dataset.value = recipeId;
+        button.disabled = !hasRecipeMaterials(recipe);
+        button.innerHTML = `<span>CRAFT ${recipe.label}</span><small>${recipe.table ? "CRAFTING TERMINAL REQUIRED" : "HAND RECIPE"}</small>`;
+        options.push(button);
+      });
+      const focusedAction = document.activeElement?.dataset.inventoryAction;
+      const focusedValue = document.activeElement?.dataset.value;
+      gameInventoryOptions.replaceChildren(...options);
+      const preferred = options.find((button) => (
+        button.dataset.inventoryAction === focusedAction
+        && button.dataset.value === focusedValue
+      ));
+      (preferred || options.find((button) => !button.disabled))?.focus();
+    }
+
+    function toggleGameInventory(forceOpen) {
+      inventoryOpen = typeof forceOpen === "boolean" ? forceOpen : !inventoryOpen;
+      gameInventory.hidden = !inventoryOpen;
+      viewport.classList.toggle("is-inventory-open", inventoryOpen);
+      keys.clear();
+      if (inventoryOpen) {
+        renderGameInventory();
+        setStatus("Inventory opened without releasing pointer lock. Use arrows and Enter.");
+      } else {
+        canvas.focus();
+        setStatus("Inventory closed. Survival process resumed.");
+      }
     }
 
     function setStatus(message, state = "") {
@@ -601,7 +724,7 @@
       window.clearTimeout(saveTimer);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          version: 2,
+          version: 3,
           seed,
           edits,
           inventory,
@@ -610,6 +733,7 @@
           stats,
           selectedBlock,
           selectedTool,
+          survival,
           player: {
             x: player.x,
             y: player.y,
@@ -641,7 +765,7 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
         if (
           !saved
-          || ![1, 2].includes(saved.version)
+          || ![1, 2, 3].includes(saved.version)
           || !Number.isInteger(saved.seed)
         ) {
           return false;
@@ -700,6 +824,13 @@
           && (saved.selectedTool === "hand" || tools[saved.selectedTool])
           ? saved.selectedTool
           : "hand";
+        survival = {
+          health: clamp(savedCount(saved.survival?.health) || 10, 1, 10),
+          day: Math.max(1, savedCount(saved.survival?.day) || 1),
+          time: clamp(Number(saved.survival?.time) || 0.32, 0, 0.9999),
+          deaths: savedCount(saved.survival?.deaths),
+          kills: savedCount(saved.survival?.kills),
+        };
         achievementAwarded = saved.achievementAwarded === true;
         generateWorld();
         resetPlayer();
@@ -730,6 +861,8 @@
       selectedBlock = 2;
       selectedTool = "hand";
       miningTarget = { key: "", progress: 0 };
+      survival = { health: 10, day: 1, time: 0.32, deaths: 0, kills: 0 };
+      mobs = [];
       achievementAwarded = false;
       generateWorld();
       resetPlayer();
@@ -752,11 +885,166 @@
         || sampleY < 0
         || sampleZ < 0
         || sampleZ >= WORLD_DEPTH
-        || getBlock(Math.floor(sampleX), Math.floor(sampleY), Math.floor(sampleZ)) !== BLOCKS.air
+        || ![BLOCKS.air, BLOCKS.lava].includes(
+          getBlock(Math.floor(sampleX), Math.floor(sampleY), Math.floor(sampleZ)),
+        )
       ))));
     }
 
+    function isNight() {
+      return survival.time >= 0.72 || survival.time < 0.2;
+    }
+
+    function takeDamage(amount, reason) {
+      if (hazardCooldown > 0 || amount <= 0) {
+        return;
+      }
+      survival.health = Math.max(0, survival.health - amount);
+      hazardCooldown = 0.7;
+      viewport.classList.remove("is-damaged");
+      window.requestAnimationFrame(() => viewport.classList.add("is-damaged"));
+      dangerAlert.textContent = `${reason} // -${amount} HEALTH`;
+      window.setTimeout(() => {
+        dangerAlert.textContent = "";
+        viewport.classList.remove("is-damaged");
+      }, 900);
+      if (survival.health === 0) {
+        survival.deaths += 1;
+        survival.health = 10;
+        mobs = [];
+        resetPlayer();
+        setStatus(`RESPAWNED: ${reason}. Inventory survived due to narrative convenience.`, "error");
+      }
+      updateHud();
+      scheduleSave();
+    }
+
+    function spawnGlitchMob() {
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 9 + (Math.random() * 8);
+        const x = Math.floor(player.x + (Math.cos(angle) * distance));
+        const z = Math.floor(player.z + (Math.sin(angle) * distance));
+        if (x < 2 || x >= WORLD_WIDTH - 2 || z < 2 || z >= WORLD_DEPTH - 2) {
+          continue;
+        }
+        const y = getSurfaceY(x, z) + 1;
+        if (getBlock(x, y, z) === BLOCKS.air && getBlock(x, y + 1, z) === BLOCKS.air) {
+          mobs.push({
+            id: `${Date.now()}-${attempt}`,
+            x: x + 0.5,
+            y,
+            z: z + 0.5,
+            health: 6,
+            attackCooldown: 0,
+          });
+          return;
+        }
+      }
+    }
+
+    function updateSurvival(deltaTime) {
+      if (inventoryOpen) {
+        return;
+      }
+
+      function swingHand() {
+        window.clearTimeout(swingTimer);
+        viewport.classList.remove("is-swinging");
+        void viewport.offsetWidth;
+        viewport.classList.add("is-swinging");
+        swingTimer = window.setTimeout(() => {
+          viewport.classList.remove("is-swinging");
+        }, 240);
+      }
+      hazardCooldown = Math.max(0, hazardCooldown - deltaTime);
+      survival.time += deltaTime / 180;
+      if (survival.time >= 1) {
+        survival.time -= 1;
+        survival.day += 1;
+      }
+      const footBlock = getBlock(
+        Math.floor(player.x),
+        Math.floor(player.y + 0.1),
+        Math.floor(player.z),
+      );
+      if (footBlock === BLOCKS.lava) {
+        takeDamage(2, "MEMORY LAVA");
+      }
+      if (isNight()) {
+        mobSpawnTimer -= deltaTime;
+        if (mobSpawnTimer <= 0 && mobs.length < 6) {
+          spawnGlitchMob();
+          mobSpawnTimer = 3 + (Math.random() * 4);
+        }
+      } else if (mobs.length) {
+        mobs = mobs.filter((mob) => Math.hypot(mob.x - player.x, mob.z - player.z) < 7);
+      }
+      mobs.forEach((mob) => {
+        mob.attackCooldown = Math.max(0, mob.attackCooldown - deltaTime);
+        const dx = player.x - mob.x;
+        const dz = player.z - mob.z;
+        const distance = Math.hypot(dx, dz) || 1;
+        if (distance > 1.15) {
+          const speed = 0.9 * deltaTime;
+          const nextX = mob.x + ((dx / distance) * speed);
+          const nextZ = mob.z + ((dz / distance) * speed);
+          if (!isSolidAt(nextX, mob.y, mob.z)) {
+            mob.x = nextX;
+          }
+          if (!isSolidAt(mob.x, mob.y, nextZ)) {
+            mob.z = nextZ;
+          }
+          mob.y = getSurfaceY(Math.floor(mob.x), Math.floor(mob.z)) + 1;
+        } else if (mob.attackCooldown === 0) {
+          mob.attackCooldown = 1.35;
+          takeDamage(1, "GLITCH MOB COLLISION");
+        }
+      });
+    }
+
+    function attackMob() {
+      const direction = viewDirection();
+      const eye = [player.x, player.y + 1.3, player.z];
+      let target = null;
+      let targetDistance = Infinity;
+      mobs.forEach((mob) => {
+        const vector = [mob.x - eye[0], (mob.y + 0.8) - eye[1], mob.z - eye[2]];
+        const distance = Math.hypot(...vector);
+        const dot = (
+          (vector[0] * direction[0])
+          + (vector[1] * direction[1])
+          + (vector[2] * direction[2])
+        ) / (distance || 1);
+        if (distance <= 4.5 && dot > 0.92 && distance < targetDistance) {
+          target = mob;
+          targetDistance = distance;
+        }
+      });
+      if (!target) {
+        return false;
+      }
+      const damage = selectedTool === "hand" ? 2 : 3 + (tools[selectedTool]?.tier || 0);
+      target.health -= damage;
+      if (selectedTool !== "hand") {
+        damageSelectedTool();
+      }
+      if (target.health <= 0) {
+        mobs = mobs.filter((mob) => mob !== target);
+        survival.kills += 1;
+        setStatus("Glitch mob dereferenced. Hostile process terminated.", "success");
+      } else {
+        setStatus(`Glitch mob damaged. ${target.health} integrity remains.`);
+      }
+      updateHud();
+      scheduleSave();
+      return true;
+    }
+
     function movePlayer(deltaTime) {
+      if (inventoryOpen) {
+        return;
+      }
       const forward = (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0)
         - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0);
       const strafe = (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0)
@@ -776,6 +1064,7 @@
         player.z = nextZ;
       }
       player.velocityY -= 22 * deltaTime;
+      highestFallSpeed = Math.min(highestFallSpeed, player.velocityY);
       if ((keys.has("Space") || keys.has("KeyE")) && player.grounded) {
         player.velocityY = 8.2;
         player.grounded = false;
@@ -787,8 +1076,12 @@
       } else {
         if (player.velocityY < 0) {
           player.grounded = true;
+          if (highestFallSpeed < -12) {
+            takeDamage(Math.min(6, Math.floor((Math.abs(highestFallSpeed) - 9) / 3)), "FALL DAMAGE");
+          }
         }
         player.velocityY = 0;
+        highestFallSpeed = 0;
       }
       if (player.y < 1) {
         resetPlayer();
@@ -978,23 +1271,39 @@
 
     function render() {
       resizeCanvas();
+      const daylight = clamp(
+        Math.sin(((survival.time - 0.25) * Math.PI * 2)) * 0.55 + 0.55,
+        0.08,
+        1,
+      );
+      const sky = [
+        0.04 + (0.35 * daylight),
+        0.04 + (0.58 * daylight),
+        0.1 + (0.66 * daylight),
+      ];
       const eye = [player.x, player.y + 1.62, player.z];
       const direction = viewDirection();
       const target = [eye[0] + direction[0], eye[1] + direction[1], eye[2] + direction[2]];
       const projection = perspectiveMatrix(Math.PI / 3, canvas.width / canvas.height, 0.08, 80);
       const view = lookAtMatrix(eye, target);
       const viewProjection = multiplyMatrices(projection, view);
-      gl.clearColor(0.39, 0.62, 0.76, 1);
+      gl.clearColor(sky[0], sky[1], sky[2], 1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.useProgram(program);
       gl.uniformMatrix4fv(matrixLocation, false, viewProjection);
       gl.uniform3fv(cameraLocation, eye);
+      gl.uniform3fv(skyLocation, sky);
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.enableVertexAttribArray(positionLocation);
       gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 24, 0);
       gl.enableVertexAttribArray(colorLocation);
       gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 24, 12);
       gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+      buildMobMesh();
+      gl.bindBuffer(gl.ARRAY_BUFFER, mobBuffer);
+      gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 24, 0);
+      gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 24, 12);
+      gl.drawArrays(gl.TRIANGLES, 0, mobVertexCount);
     }
 
     function frame(time) {
@@ -1004,6 +1313,18 @@
       const deltaTime = Math.min((time - previousTime) / 1000 || 0, 0.05);
       previousTime = time;
       movePlayer(deltaTime);
+      updateSurvival(deltaTime);
+      const walking = !inventoryOpen && (
+        keys.has("KeyW")
+        || keys.has("KeyA")
+        || keys.has("KeyS")
+        || keys.has("KeyD")
+        || keys.has("ArrowUp")
+        || keys.has("ArrowDown")
+        || keys.has("ArrowLeft")
+        || keys.has("ArrowRight")
+      );
+      viewport.classList.toggle("is-walking", walking);
       updateHud();
       render();
       frameRequest = window.requestAnimationFrame(frame);
@@ -1054,10 +1375,12 @@
       try {
         program = createProgram(gl);
         buffer = gl.createBuffer();
+        mobBuffer = gl.createBuffer();
         positionLocation = gl.getAttribLocation(program, "a_position");
         colorLocation = gl.getAttribLocation(program, "a_color");
         matrixLocation = gl.getUniformLocation(program, "u_viewProjection");
         cameraLocation = gl.getUniformLocation(program, "u_camera");
+        skyLocation = gl.getUniformLocation(program, "u_sky");
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
@@ -1097,6 +1420,11 @@
     function pause() {
       running = false;
       keys.clear();
+      if (inventoryOpen) {
+        toggleGameInventory(false);
+      }
+      window.clearTimeout(swingTimer);
+      viewport.classList.remove("is-swinging", "is-walking");
       window.cancelAnimationFrame(frameRequest);
       if (document.pointerLockElement === canvas) {
         document.exitPointerLock();
@@ -1112,12 +1440,15 @@
       }
     });
     canvas.addEventListener("mousedown", (event) => {
-      if (document.pointerLockElement !== canvas) {
+      if (document.pointerLockElement !== canvas || inventoryOpen) {
         return;
       }
       event.preventDefault();
+      swingHand();
       if (event.button === 0) {
-        editTarget(false);
+        if (!attackMob()) {
+          editTarget(false);
+        }
       } else if (event.button === 2) {
         editTarget(true);
       }
@@ -1132,7 +1463,7 @@
       }
     });
     document.addEventListener("mousemove", (event) => {
-      if (document.pointerLockElement !== canvas) {
+      if (document.pointerLockElement !== canvas || inventoryOpen) {
         return;
       }
       player.yaw += event.movementX * 0.0024;
@@ -1140,6 +1471,36 @@
     });
     document.addEventListener("keydown", (event) => {
       if (!running || root.hidden || root.closest("[hidden]")) {
+        return;
+      }
+      if (event.code === "KeyI") {
+        toggleGameInventory();
+        event.preventDefault();
+        return;
+      }
+      if (event.code === "KeyF") {
+        if (document.fullscreenElement === viewport) {
+          document.exitFullscreen();
+        } else {
+          viewport.requestFullscreen().catch((error) => {
+            console.error("Unable to enter MineBits fullscreen:", error);
+            setStatus("Fullscreen request was declined by the browser.", "error");
+          });
+        }
+        event.preventDefault();
+        return;
+      }
+      if (inventoryOpen) {
+        const options = [...gameInventoryOptions.querySelectorAll("button:not(:disabled)")];
+        const currentIndex = options.indexOf(document.activeElement);
+        if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.code)) {
+          const direction = ["ArrowDown", "ArrowRight"].includes(event.code) ? 1 : -1;
+          options[(currentIndex + direction + options.length) % options.length]?.focus();
+          event.preventDefault();
+        } else if (event.code === "Enter" || event.code === "Space") {
+          document.activeElement?.click();
+          event.preventDefault();
+        }
         return;
       }
       if (event.code.startsWith("Digit")) {
@@ -1176,6 +1537,36 @@
       if (button) {
         craftRecipe(button.dataset.minebitsRecipe);
       }
+    });
+    gameInventoryOptions.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-inventory-action]");
+      if (!button || button.disabled) {
+        return;
+      }
+      if (button.dataset.inventoryAction === "tool") {
+        selectTool(button.dataset.value);
+      } else if (button.dataset.inventoryAction === "block") {
+        selectBlock(Number(button.dataset.value));
+      } else if (button.dataset.inventoryAction === "recipe") {
+        craftRecipe(button.dataset.value);
+      }
+      renderGameInventory();
+    });
+    fullscreenButton.addEventListener("click", () => {
+      if (document.fullscreenElement === viewport) {
+        document.exitFullscreen();
+      } else {
+        viewport.requestFullscreen().catch((error) => {
+          console.error("Unable to enter MineBits fullscreen:", error);
+          setStatus("Fullscreen request was declined by the browser.", "error");
+        });
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      const fullscreen = document.fullscreenElement === viewport;
+      fullscreenButton.textContent = fullscreen ? "EXIT_FULLSCREEN" : "FULLSCREEN";
+      viewport.classList.toggle("is-fullscreen", fullscreen);
+      render();
     });
     saveButton.addEventListener("click", () => saveWorld(true));
     newButton.addEventListener("click", newWorld);
