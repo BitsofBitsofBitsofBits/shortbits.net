@@ -6426,8 +6426,8 @@ body.is-black-screen-staging .binary-rain {
 }
 
 #monitor-window {
-  --window-default-height: 500px;
-  --window-default-width: 620px;
+  --window-default-height: 680px;
+  --window-default-width: 760px;
 }
 
 #settings-window {
@@ -7611,6 +7611,138 @@ html[data-boot="pending"] .boot-screen[hidden] {
   display: grid;
   gap: 8px;
   margin: 18px 0 0;
+}
+
+.system-monitor-content {
+  align-content: start;
+}
+
+.system-monitor-heading,
+.system-monitor-metric header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.system-monitor-heading h2,
+.system-monitor-heading p,
+.system-monitor-metric p {
+  margin: 0;
+}
+
+.system-monitor-heading h2 {
+  margin-top: 5px;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+}
+
+.system-monitor-simulated {
+  padding: 5px 7px;
+  border: 1px solid var(--warning);
+  color: var(--warning);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+}
+
+.system-monitor-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.system-monitor-metric {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--border);
+  background: rgba(var(--accent-rgb), 0.045);
+}
+
+.system-monitor-metric header span,
+.system-monitor-process-header {
+  color: var(--accent);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+}
+
+.system-monitor-metric header strong {
+  color: var(--ink);
+  font-size: 0.65rem;
+  text-align: right;
+}
+
+.system-monitor-meter {
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.system-monitor-meter i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--warning));
+  transition: width 700ms ease;
+}
+
+.system-monitor-metric p {
+  min-height: 2.7em;
+  color: var(--muted);
+  font-size: 0.55rem;
+  line-height: 1.35;
+}
+
+.system-monitor-processes {
+  display: grid;
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+}
+
+.system-monitor-processes > p {
+  padding: 9px 10px;
+}
+
+.system-monitor-processes > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(54px, 0.45fr) minmax(100px, 0.9fr);
+  gap: 9px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--border);
+  font-size: 0.56rem;
+}
+
+.system-monitor-processes strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.system-monitor-processes span {
+  color: var(--accent);
+}
+
+.system-monitor-processes em {
+  overflow: hidden;
+  color: var(--muted);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.system-monitor-summary {
+  margin-top: 12px;
+}
+
+@container (max-width: 520px) {
+  .system-monitor-metrics {
+    grid-template-columns: 1fr;
+  }
 }
 
 .desktop-window-stats > div {

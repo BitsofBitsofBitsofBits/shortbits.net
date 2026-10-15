@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-9"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-83">
+    <link rel="stylesheet" href="styles.css?v=upgrade-84">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -41,7 +41,7 @@
     <script src="theme-effects.js?v=theme-effects-2" defer></script>
     <script src="screensaver.js?v=screensaver-1" defer></script>
     <script src="script.js?v=upgrade-55" defer></script>
-    <script src="windows.js?v=windows-9" defer></script>
+    <script src="windows.js?v=windows-10" defer></script>
     <script src="arcade.js?v=arcade-9" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -898,14 +898,61 @@
           <button type="button" data-window-close aria-label="Close System Monitor window">&times;</button>
         </div>
       </header>
-      <div class="desktop-window-content">
-        <p class="system-kicker">LIVE_DIAGNOSTICS</p>
-        <dl class="desktop-window-stats">
+      <div class="desktop-window-content system-monitor-content">
+        <div class="system-monitor-heading">
+          <div>
+            <p class="system-kicker">LIVE_DIAGNOSTICS // DEFINITELY_SCIENTIFIC</p>
+            <h2>PSEUDO RESOURCE MONITOR</h2>
+          </div>
+          <span class="system-monitor-simulated">SIMULATED</span>
+        </div>
+        <div class="system-monitor-metrics">
+          <article class="system-monitor-metric">
+            <header><span>CPU USAGE</span><strong id="monitor-cpu-value">24%</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-cpu-meter"></i></div>
+            <p id="monitor-cpu-joke">Calculating how many Bits fit in another Bit.</p>
+          </article>
+          <article class="system-monitor-metric">
+            <header><span>RAM USAGE</span><strong id="monitor-ram-value">13.4 / 32 GB</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-ram-meter"></i></div>
+            <p id="monitor-ram-joke">Remembering several tabs you forgot existed.</p>
+          </article>
+          <article class="system-monitor-metric">
+            <header><span>GPU USAGE</span><strong id="monitor-gpu-value">18%</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-gpu-meter"></i></div>
+            <p id="monitor-gpu-joke">Rendering one extremely important gradient.</p>
+          </article>
+          <article class="system-monitor-metric">
+            <header><span>BIT STORAGE</span><strong id="monitor-storage-value">404.0 GB FREE</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-storage-meter"></i></div>
+            <p id="monitor-storage-joke">Most space is reserved for screenshots named final_final.</p>
+          </article>
+          <article class="system-monitor-metric">
+            <header><span>NETWORK</span><strong id="monitor-network-value">↓ 8.0 / ↑ 1.0 Mbps</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-network-meter"></i></div>
+            <p id="monitor-network-joke">Packets are taking the scenic route.</p>
+          </article>
+          <article class="system-monitor-metric">
+            <header><span>THERMALS</span><strong id="monitor-thermal-value">42°C</strong></header>
+            <div class="system-monitor-meter"><i id="monitor-thermal-meter"></i></div>
+            <p id="monitor-thermal-joke">Warm, but not emotionally available.</p>
+          </article>
+        </div>
+        <div class="system-monitor-processes">
+          <p class="system-kicker">TOP_PROCESSES</p>
+          <div class="system-monitor-process-header"><span>PROCESS</span><span>CPU</span><span>STATUS</span></div>
+          <div><strong>presence.exe</strong><span id="monitor-process-presence">12.4%</span><em>OVERTHINKING</em></div>
+          <div><strong>side_project_daemon</strong><span id="monitor-process-projects">8.8%</span><em>SPAWNING MORE</em></div>
+          <div><strong>cookie_eater.sys</strong><span>4.0%</span><em>NO CRUMBS FOUND</em></div>
+          <div><strong>actual_work.exe</strong><span>0.1%</span><em>SUSPENDED</em></div>
+        </div>
+        <dl class="desktop-window-stats system-monitor-summary">
           <div><dt>UPTIME</dt><dd data-window-mirror="#uptime">00:00:00</dd></div>
           <div><dt>STATUS</dt><dd data-window-mirror="#status-text">ONLINE</dd></div>
           <div><dt>SPOTIFY</dt><dd data-window-mirror="#spotify-state">CONNECTING</dd></div>
           <div><dt>ACTIVITY</dt><dd data-window-mirror="#activity-text">Loading...</dd></div>
           <div><dt>OPEN WINDOWS</dt><dd id="desktop-window-count">0</dd></div>
+          <div><dt>BITS PROCESSED</dt><dd id="monitor-bits-processed">0</dd></div>
         </dl>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize System Monitor window"></button>

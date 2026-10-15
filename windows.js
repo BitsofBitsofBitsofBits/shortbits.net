@@ -3,6 +3,32 @@ const desktopWindowCount = document.querySelector("#desktop-window-count");
 const desktopWindowLaunchers = document.querySelectorAll("[data-window-target]");
 const desktopWindowMirrors = document.querySelectorAll("[data-window-mirror]");
 const desktopWindowImageMirrors = document.querySelectorAll("[data-window-mirror-image]");
+const systemMonitorWindow = document.querySelector("#monitor-window");
+const systemMonitorMetrics = systemMonitorWindow
+  ? {
+      bits: systemMonitorWindow.querySelector("#monitor-bits-processed"),
+      cpu: systemMonitorWindow.querySelector("#monitor-cpu-value"),
+      cpuJoke: systemMonitorWindow.querySelector("#monitor-cpu-joke"),
+      cpuMeter: systemMonitorWindow.querySelector("#monitor-cpu-meter"),
+      gpu: systemMonitorWindow.querySelector("#monitor-gpu-value"),
+      gpuJoke: systemMonitorWindow.querySelector("#monitor-gpu-joke"),
+      gpuMeter: systemMonitorWindow.querySelector("#monitor-gpu-meter"),
+      network: systemMonitorWindow.querySelector("#monitor-network-value"),
+      networkJoke: systemMonitorWindow.querySelector("#monitor-network-joke"),
+      networkMeter: systemMonitorWindow.querySelector("#monitor-network-meter"),
+      processPresence: systemMonitorWindow.querySelector("#monitor-process-presence"),
+      processProjects: systemMonitorWindow.querySelector("#monitor-process-projects"),
+      ram: systemMonitorWindow.querySelector("#monitor-ram-value"),
+      ramJoke: systemMonitorWindow.querySelector("#monitor-ram-joke"),
+      ramMeter: systemMonitorWindow.querySelector("#monitor-ram-meter"),
+      storage: systemMonitorWindow.querySelector("#monitor-storage-value"),
+      storageJoke: systemMonitorWindow.querySelector("#monitor-storage-joke"),
+      storageMeter: systemMonitorWindow.querySelector("#monitor-storage-meter"),
+      thermal: systemMonitorWindow.querySelector("#monitor-thermal-value"),
+      thermalJoke: systemMonitorWindow.querySelector("#monitor-thermal-joke"),
+      thermalMeter: systemMonitorWindow.querySelector("#monitor-thermal-meter"),
+    }
+  : null;
 const desktopWindowMinimumWidthPx = 280;
 const desktopWindowMinimumHeightPx = 120;
 const desktopExperienceQuery = window.matchMedia("(min-width: 901px)");
@@ -18,6 +44,53 @@ let activeDesktopWindow = null;
 let dragState = null;
 let resizeState = null;
 let isApplyingWindowUrl = false;
+let systemMonitorTick = 0;
+let systemMonitorBits = 8192;
+let systemMonitorState = {
+  cpu: 24,
+  gpu: 18,
+  ram: 13.4,
+  thermal: 42,
+};
+
+const systemMonitorJokes = {
+  cpu: [
+    "Calculating how many Bits fit in another Bit.",
+    "Briefly considering doing actual work.",
+    "Compiling opinions into machine code.",
+    "One core is dedicated entirely to overthinking.",
+  ],
+  gpu: [
+    "Rendering one extremely important gradient.",
+    "Adding bloom to something nobody can see.",
+    "Drawing triangles as fast as legally permitted.",
+    "Preparing another frame for the void.",
+  ],
+  network: [
+    "Packets are taking the scenic route.",
+    "Downloading additional download indicators.",
+    "Negotiating with a router named Linksys.",
+    "Uploading confidence at dial-up speed.",
+  ],
+  ram: [
+    "Remembering several tabs you forgot existed.",
+    "Holding a thought until the process responds.",
+    "Caching one suspiciously large personality.",
+    "Memory leak insists it is a water feature.",
+  ],
+  storage: [
+    "Most space is reserved for screenshots named final_final.",
+    "Defragmenting a folder full of untitled documents.",
+    "The recycle bin is emotionally attached.",
+    "Archiving side projects that are definitely almost done.",
+  ],
+  thermal: [
+    "Warm, but not emotionally available.",
+    "Fans are whispering encouraging words.",
+    "Temperature classified as laptop-adjacent.",
+    "Applying thermal paste conceptually.",
+  ],
+};
 
 function getDesktopWindowSlug(windowElement) {
   return windowElement.id.replace(/-window$/, "");
@@ -61,6 +134,66 @@ function updateDesktopWindowCount() {
   desktopWindowCount.textContent = String(
     desktopWindows.filter((windowElement) => !windowElement.hidden).length,
   );
+}
+
+function driftMonitorValue(value, minimum, maximum, movement) {
+  return Math.min(maximum, Math.max(minimum, value + ((Math.random() - 0.5) * movement)));
+}
+
+function setSystemMonitorMeter(element, value) {
+  if (element) {
+    element.style.width = `${Math.min(100, Math.max(0, value))}%`;
+  }
+}
+
+function updateSystemMonitor() {
+  if (!systemMonitorMetrics) {
+    return;
+  }
+
+  systemMonitorTick += 1;
+  systemMonitorState.cpu = driftMonitorValue(systemMonitorState.cpu, 7, 88, 24);
+  systemMonitorState.gpu = driftMonitorValue(
+    systemMonitorState.gpu + ((systemMonitorState.cpu - systemMonitorState.gpu) * 0.08),
+    4,
+    82,
+    18,
+  );
+  systemMonitorState.ram = driftMonitorValue(systemMonitorState.ram, 9.5, 27.5, 2.6);
+  systemMonitorState.thermal = driftMonitorValue(
+    systemMonitorState.thermal + ((systemMonitorState.cpu - 35) * 0.015),
+    37,
+    67,
+    2.8,
+  );
+  const download = 2 + (Math.random() * 92);
+  const upload = 0.4 + (Math.random() * 18);
+  const storageUsed = 37.5;
+  systemMonitorBits += Math.round(256 + (systemMonitorState.cpu * 17) + (download * 5));
+
+  systemMonitorMetrics.cpu.textContent = `${Math.round(systemMonitorState.cpu)}%`;
+  systemMonitorMetrics.gpu.textContent = `${Math.round(systemMonitorState.gpu)}%`;
+  systemMonitorMetrics.ram.textContent = `${systemMonitorState.ram.toFixed(1)} / 32 GB`;
+  systemMonitorMetrics.network.textContent = `↓ ${download.toFixed(1)} / ↑ ${upload.toFixed(1)} Mbps`;
+  systemMonitorMetrics.storage.textContent = "404.0 GB FREE";
+  systemMonitorMetrics.thermal.textContent = `${Math.round(systemMonitorState.thermal)}°C`;
+  systemMonitorMetrics.bits.textContent = systemMonitorBits.toLocaleString();
+  systemMonitorMetrics.processPresence.textContent = `${Math.max(1, systemMonitorState.cpu * 0.46).toFixed(1)}%`;
+  systemMonitorMetrics.processProjects.textContent = `${Math.max(0.5, systemMonitorState.cpu * 0.31).toFixed(1)}%`;
+
+  setSystemMonitorMeter(systemMonitorMetrics.cpuMeter, systemMonitorState.cpu);
+  setSystemMonitorMeter(systemMonitorMetrics.gpuMeter, systemMonitorState.gpu);
+  setSystemMonitorMeter(systemMonitorMetrics.ramMeter, (systemMonitorState.ram / 32) * 100);
+  setSystemMonitorMeter(systemMonitorMetrics.networkMeter, download);
+  setSystemMonitorMeter(systemMonitorMetrics.storageMeter, storageUsed);
+  setSystemMonitorMeter(systemMonitorMetrics.thermalMeter, ((systemMonitorState.thermal - 30) / 45) * 100);
+
+  Object.entries(systemMonitorJokes).forEach(([metric, jokes], index) => {
+    const output = systemMonitorMetrics[`${metric}Joke`];
+    if (output) {
+      output.textContent = jokes[(systemMonitorTick + index) % jokes.length];
+    }
+  });
 }
 
 function focusDesktopWindow(windowElement) {
@@ -546,4 +679,6 @@ window.BITS_DESKTOP_WINDOWS = {
   resetLayout: resetDesktopWindowLayout,
 };
 
+updateSystemMonitor();
+window.setInterval(updateSystemMonitor, 2200);
 applyDesktopWindowUrl();

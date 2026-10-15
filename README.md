@@ -22,8 +22,9 @@ is a personal project and largely a learning exercise for me.
   Kernel Panic diagnostic dump
 - Adaptive performance mode for constrained or slow devices
 - Optional draggable mini-windows for profile, pronouns, Spotify, source,
-  diagnostics, and settings that stay viewport-safe, resize from every edge
-  and corner, and use themed internal scrollbars
+  settings, and simulated system diagnostics with animated resource meters,
+  fake process telemetry, and rotating jokes. Windows stay viewport-safe,
+  resize from every edge and corner, and use themed internal scrollbars
 - Shareable window URLs such as `?window=spotify` and
   `?windows=about,spotify` that restore linked windows on load
 - A persistent control panel for appearance, reduced motion, larger text,
