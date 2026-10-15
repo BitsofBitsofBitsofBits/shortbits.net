@@ -42,22 +42,22 @@ function recordNotFoundAchievement() {
 }
 
 function showShortLinkFailure(message, path) {
-  document.title = "SHORT LINK // NOT FOUND";
+  document.title = "SHORTBIT // NOT FOUND";
   errorKicker.textContent = "REDIRECT LOOKUP FAILED";
   errorCode.textContent = "404";
-  errorCode.setAttribute("aria-label", "Short link not found");
-  errorHeading.textContent = "SHORT_LINK_NOT_FOUND";
+  errorCode.setAttribute("aria-label", "ShortBit not found");
+  errorHeading.textContent = "SHORTBIT_NOT_FOUND";
   errorCopy.textContent = message;
   errorPath.textContent = `ALIAS: ${path}`;
   errorAchievement.textContent = "NO REDIRECT WAS PERFORMED";
 }
 
 async function resolveShortLink(slug) {
-  document.title = "RESOLVING // SHORTBITS.NET";
-  errorKicker.textContent = "SHORT LINK ROUTER";
+  document.title = "RESOLVING SHORTBIT // SHORTBITS.NET";
+  errorKicker.textContent = "SHORTBIT ROUTER";
   errorCode.textContent = "→";
-  errorCode.setAttribute("aria-label", "Resolving short link");
-  errorHeading.textContent = "RESOLVING_SHORT_LINK";
+  errorCode.setAttribute("aria-label", "Resolving ShortBit");
+  errorHeading.textContent = "RESOLVING_SHORTBIT";
   errorCopy.textContent = "Looking up the requested destination...";
   errorPath.textContent = `ALIAS: ${slug}`;
   errorAchievement.textContent = "PLEASE STAND BY";
@@ -79,7 +79,7 @@ async function resolveShortLink(slug) {
   const payload = await response.json();
   if (!response.ok) {
     throw new Error(
-      payload?.message || `Short-link lookup returned ${response.status}.`,
+      payload?.message || `ShortBit lookup returned ${response.status}.`,
     );
   }
 
@@ -96,7 +96,7 @@ async function resolveShortLink(slug) {
 
   const destinationUrl = new URL(destination);
   if (destinationUrl.protocol !== "https:") {
-    throw new Error("Resolved short-link destination is not HTTPS.");
+    throw new Error("Resolved ShortBit destination is not HTTPS.");
   }
 
   errorHeading.textContent = "REDIRECT_CONFIRMED";
@@ -115,7 +115,7 @@ if (!shortLinkMatch) {
   try {
     slug = decodeURIComponent(shortLinkMatch[1]).toLowerCase();
   } catch (error) {
-    console.error("Unable to decode short-link alias:", error);
+    console.error("Unable to decode ShortBit alias:", error);
     showShortLinkFailure("This alias contains invalid URL encoding.", "INVALID");
   }
 
@@ -126,12 +126,12 @@ if (!shortLinkMatch) {
     );
   } else if (slug) {
     resolveShortLink(slug).catch((error) => {
-      console.error("Unable to resolve short link:", error);
-      document.title = "SHORT LINK // UNAVAILABLE";
+      console.error("Unable to resolve ShortBit:", error);
+      document.title = "SHORTBIT // UNAVAILABLE";
       errorKicker.textContent = "REDIRECT SERVICE ERROR";
       errorCode.textContent = "503";
       errorCode.setAttribute("aria-label", "Redirect service unavailable");
-      errorHeading.textContent = "SHORT_LINK_UNAVAILABLE";
+      errorHeading.textContent = "SHORTBIT_UNAVAILABLE";
       errorCopy.textContent =
         "The redirect service is temporarily unavailable. Please try again.";
       errorPath.textContent = `ALIAS: ${slug}`;

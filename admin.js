@@ -893,7 +893,7 @@ function createShortLinkEditor(link) {
 }
 
 async function loadShortLinks() {
-  setAdminStatus(shortLinksAdminStatus, "Loading short links...");
+  setAdminStatus(shortLinksAdminStatus, "Loading ShortBits...");
   const { data, error } = await adminClient
     .from("site_short_links")
     .select(
@@ -902,10 +902,10 @@ async function loadShortLinks() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Unable to load short links:", error);
+    console.error("Unable to load ShortBits:", error);
     setAdminStatus(
       shortLinksAdminStatus,
-      `Short links failed to load: ${error.message}`,
+      `ShortBits failed to load: ${error.message}`,
       "error",
     );
     return false;
@@ -915,12 +915,12 @@ async function loadShortLinks() {
   if (data.length === 0) {
     const empty = document.createElement("p");
     empty.className = "content-window-empty";
-    empty.textContent = "No short links have been generated.";
+    empty.textContent = "No ShortBits have been generated.";
     shortLinksList.append(empty);
   }
   setAdminStatus(
     shortLinksAdminStatus,
-    `${data.length} short link${data.length === 1 ? "" : "s"} loaded.`,
+    `${data.length} ShortBit${data.length === 1 ? "" : "s"} loaded.`,
     "success",
   );
   return true;
@@ -1032,15 +1032,15 @@ if (adminClient) {
       enabled: true,
     });
     shortLinkCreate.disabled = false;
-    shortLinkCreate.textContent = "> CREATE_SHORT_LINK";
+    shortLinkCreate.textContent = "> CREATE_SHORTBIT";
 
     if (error) {
-      console.error("Unable to create short link:", error);
+      console.error("Unable to create ShortBit:", error);
       setAdminStatus(
         shortLinksAdminStatus,
         error.code === "23505"
           ? `The alias "${slug}" is already in use.`
-          : `Short link creation failed: ${error.message}`,
+          : `ShortBit creation failed: ${error.message}`,
         "error",
       );
       return;
@@ -1084,16 +1084,16 @@ if (adminClient) {
       .eq("slug", form.dataset.shortLinkSlug);
 
     if (error) {
-      console.error("Unable to update short link:", error);
+      console.error("Unable to update ShortBit:", error);
       setAdminStatus(
         shortLinksAdminStatus,
-        `Short link update failed: ${error.message}`,
+        `ShortBit update failed: ${error.message}`,
         "error",
       );
       return;
     }
     await loadShortLinks();
-    setAdminStatus(shortLinksAdminStatus, "Short link updated.", "success");
+    setAdminStatus(shortLinksAdminStatus, "ShortBit updated.", "success");
   });
   shortLinksList.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-short-link-action]");
@@ -1107,7 +1107,7 @@ if (adminClient) {
         await navigator.clipboard.writeText(getShortLinkUrl(slug));
         setAdminStatus(shortLinksAdminStatus, `Copied /go/${slug}.`, "success");
       } catch (error) {
-        console.error("Unable to copy short link:", error);
+        console.error("Unable to copy ShortBit:", error);
         setAdminStatus(
           shortLinksAdminStatus,
           `Copy failed: ${error.message}`,
@@ -1125,10 +1125,10 @@ if (adminClient) {
         .delete()
         .eq("slug", slug);
       if (error) {
-        console.error("Unable to delete short link:", error);
+        console.error("Unable to delete ShortBit:", error);
         setAdminStatus(
           shortLinksAdminStatus,
-          `Short link deletion failed: ${error.message}`,
+          `ShortBit deletion failed: ${error.message}`,
           "error",
         );
         return;

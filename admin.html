@@ -11,9 +11,9 @@
     <link rel="stylesheet" href="styles.css?v=upgrade-46">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="admin-windows.js?v=admin-windows-5" defer></script>
+    <script src="admin-windows.js?v=admin-windows-6" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
-    <script src="admin.js?v=admin-12" defer></script>
+    <script src="admin.js?v=admin-13" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -228,7 +228,7 @@
 
         <section id="short-links-editor" class="profile-editor" aria-labelledby="short-links-editor-heading">
           <div class="section-label">
-            <h2 id="short-links-editor-heading">SHORT_LINKS</h2>
+            <h2 id="short-links-editor-heading">SHORTBITS</h2>
             <span>ADMIN-GENERATED REDIRECTS</span>
           </div>
           <form id="short-link-create-form" class="admin-form short-link-create-form">
@@ -252,10 +252,10 @@
               <input name="expires_at" type="datetime-local">
             </label>
             <p id="short-links-admin-status" class="form-status" role="status" aria-live="polite"></p>
-            <button id="short-link-create" type="submit">&gt; CREATE_SHORT_LINK</button>
+            <button id="short-link-create" type="submit">&gt; CREATE_SHORTBIT</button>
           </form>
           <div class="repeatable-admin-actions">
-            <button id="short-links-refresh" type="button">REFRESH LINKS</button>
+            <button id="short-links-refresh" type="button">REFRESH SHORTBITS</button>
           </div>
           <div id="short-links-list" class="short-links-admin-list"></div>
         </section>

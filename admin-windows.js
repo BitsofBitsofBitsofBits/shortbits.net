@@ -93,9 +93,9 @@ const adminWindowModules = [
   {
     sourceId: "short-links-editor",
     windowId: "admin-short-links-window",
-    title: "SHORT_LINKS.EXE",
-    label: "SHORT LINKS",
-    description: "Create and manage shortbits.net redirects",
+    title: "SHORTBITS.EXE",
+    label: "SHORTBITS",
+    description: "Create and manage tiny Bits of the internet",
     x: 280,
     y: 95,
   },

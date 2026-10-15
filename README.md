@@ -46,7 +46,7 @@ is a personal project and largely a learning exercise for me.
   Admin moderation
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
-- An Admin-only short-link manager for HTTPS redirects at
+- An Admin-only ShortBits manager for HTTPS redirects at
   `shortbits.net/go/<alias>`, with generated or custom aliases, expiration,
   enable/disable controls, and aggregate click totals
 - A skippable first-visit boot sequence that remembers completion for the
@@ -117,7 +117,7 @@ the singleton NOW profile, and ten ordered changelog entries. Draft rows remain
 hidden from anonymous Supabase clients through row-level security until their
 publish controls are enabled.
 
-Short-link records remain private to authenticated Admin sessions. Anonymous
+ShortBit records remain private to authenticated Admin sessions. Anonymous
 visitors can resolve only an exact enabled, unexpired alias through the
 restricted `resolve_short_link` function; the public API cannot list the link
 inventory. Redirects use the server's internal custom-404 handling so the
