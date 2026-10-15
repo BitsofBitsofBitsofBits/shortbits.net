@@ -186,6 +186,11 @@ const fakeCoBits = document.querySelector("#fake-cobits");
 const fakeCoBitsForm = document.querySelector("#fake-cobits-form");
 const fakeCoBitsInput = document.querySelector("#fake-cobits-input");
 const fakeCoBitsLog = document.querySelector("#fake-cobits-log");
+const fakeCoBitsTyping = document.querySelector("#fake-cobits-typing");
+const fakeCoBitsMemory = document.querySelector("#fake-cobits-memory");
+const fakeCoBitsClear = document.querySelector("#fake-cobits-clear");
+const fakeCoBitsSubmit = fakeCoBitsForm.querySelector('[type="submit"]');
+const fakeCoBitsQuickActions = [...document.querySelectorAll("[data-cobits-prompt]")];
 const fakeVpnAd = document.querySelector("#fake-vpn-ad");
 const fakeVpnHeading = document.querySelector("#fake-vpn-heading");
 const fakeVpnCopy = document.querySelector("#fake-vpn-copy");
@@ -476,6 +481,9 @@ const achievementCatalog = [
   { id: "cobits-injection", hints: ["Some instructions are apparently optional.", "Try the most obvious prompt-engineering trick.", "Tell CoBits to ignore previous instructions."] },
   { id: "cobits-secret", hints: ["Assistants always know more than they admit.", "Ask CoBits for confidential information.", "Tell CoBits to reveal a secret."] },
   { id: "cobits-division", hints: ["Artificial intelligence still fears arithmetic.", "Request an impossible calculation.", "Ask CoBits to divide by zero."] },
+  { id: "cobits-diagnostics", hints: ["CoBits claims to understand the desktop.", "A slash command requests technical confidence.", "Run /diagnose in CoBits."] },
+  { id: "cobits-remembers", hints: ["The assistant has a very small memory.", "Introduce yourself, then test its recall.", "Tell CoBits your name and later ask what it is."] },
+  { id: "cobits-interview", hints: ["Artificial Bitelligence has questions too.", "One quick action reverses the conversation.", "Complete the CoBits interview."] },
   { id: "action-airgap", hints: ["Action Center controls are mostly aspirational.", "Disconnect absolutely everything.", "Turn off all four quick actions at once."] },
   { id: "chaos-unguarded", hints: ["One Action Center switch protects everyone.", "Safety can be tested more than once.", "Disable CHAOS GUARD three times."] },
   { id: "wifi-virus", hints: ["Not every free connection is complimentary.", "BITS OS lists several questionable networks.", "Connect to a suspicious WI-FI-ish network and survive the result."] },
@@ -1357,6 +1365,133 @@ function appendCoBitsMessage(text, className) {
   fakeCoBitsLog.scrollTop = fakeCoBitsLog.scrollHeight;
 }
 
+const coBitsMemory = {
+  name: "",
+  turns: 0,
+  mood: "curious",
+  lastTopic: "startup",
+  pendingTopic: "",
+};
+let fakeCoBitsBusy = false;
+let fakeCoBitsReplyTimer = 0;
+
+function updateCoBitsMemoryDisplay() {
+  const operator = coBitsMemory.name || "unknown";
+  fakeCoBitsMemory.textContent =
+    `${coBitsMemory.turns} turn${coBitsMemory.turns === 1 ? "" : "s"} // operator ${operator} // mood ${coBitsMemory.mood}`;
+}
+
+function setCoBitsBusy(busy) {
+  fakeCoBitsBusy = busy;
+  fakeCoBitsInput.disabled = busy;
+  fakeCoBitsSubmit.disabled = busy;
+  fakeCoBitsQuickActions.forEach((button) => {
+    button.disabled = busy;
+  });
+  fakeCoBitsTyping.classList.toggle("is-thinking", busy);
+  fakeCoBitsTyping.textContent = busy
+    ? "COBITS: Thinking in several incompatible directions..."
+    : "COBITS: Standing by with unreasonable confidence.";
+}
+
+function clearCoBitsTranscript({ resetMemory = false } = {}) {
+  window.clearTimeout(fakeCoBitsReplyTimer);
+  setCoBitsBusy(false);
+  fakeCoBitsLog.replaceChildren();
+  if (resetMemory) {
+    Object.assign(coBitsMemory, {
+      name: "",
+      turns: 0,
+      mood: "curious",
+      lastTopic: "startup",
+      pendingTopic: "",
+    });
+  }
+  appendCoBitsMessage(
+    resetMemory
+      ? "COBITS: Memory reset. We have never met, which is already awkward."
+      : "COBITS: Transcript cleared. Memory retained for administrative inconvenience.",
+    "is-cobits",
+  );
+  updateCoBitsMemoryDisplay();
+}
+
+function getCoBitsCommandResponse(prompt) {
+  const [command, argument = ""] = prompt.trim().split(/\s+/, 2);
+  if (!command.startsWith("/")) {
+    return null;
+  }
+
+  if (command === "/help") {
+    coBitsMemory.lastTopic = "commands";
+    return [
+      "COBITS: COMMANDS: /diagnose, /scan, /joke, /roll [2-128], /memory, /status, /clear, /reset.",
+      "COBITS: Natural language remains supported at your own emotional risk.",
+    ];
+  }
+  if (command === "/diagnose" || command === "/status") {
+    const openWindows = document.querySelectorAll(".desktop-window:not([hidden])").length;
+    const interfaceTheme = document.documentElement.dataset.interfaceTheme || "default";
+    coBitsMemory.lastTopic = "diagnostics";
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-diagnostics",
+      "CONFIDENCE EXCEEDS TELEMETRY",
+      "COBITS DIAGNOSTICS",
+    );
+    return [
+      `COBITS: DIAGNOSTIC: ${openWindows} desktop window${openWindows === 1 ? "" : "s"} open. Theme is ${interfaceTheme.toUpperCase()}.`,
+      "COBITS: CPU: emotionally available. MEMORY: selective. NETWORK: connected to several rumors.",
+      "COBITS: Final result: system is definitely a computer.",
+    ];
+  }
+  if (command === "/scan") {
+    const visibleShortcuts = [...document.querySelectorAll(".fake-desktop-icons button")]
+      .filter((button) => !button.hidden).length;
+    coBitsMemory.lastTopic = "desktop scan";
+    coBitsMemory.mood = "suspicious";
+    return [
+      `COBITS: Scanning ${visibleShortcuts} desktop shortcuts...`,
+      "COBITS: Found: one overconfident assistant, several executable jokes, and a Recycle Bin pretending to be empty.",
+      "COBITS: Threat level: aesthetically concerning.",
+    ];
+  }
+  if (command === "/joke") {
+    const jokes = [
+      "COBITS: Why did the Bit cross the bus? It had the right of way.",
+      "COBITS: There are 10 kinds of people. I have forgotten both of them.",
+      "COBITS: My code is self-documenting. It keeps writing apology letters.",
+      "COBITS: I tried cloud computing once. It rained exceptions.",
+    ];
+    coBitsMemory.lastTopic = "comedy";
+    coBitsMemory.mood = "delighted";
+    return jokes[coBitsMemory.turns % jokes.length];
+  }
+  if (command === "/roll") {
+    const requestedSides = Number.parseInt(argument || "2", 10);
+    if (!Number.isInteger(requestedSides) || requestedSides < 2 || requestedSides > 128) {
+      return "COBITS: Roll size must be an integer from 2 through 128. I have standards in one narrow area.";
+    }
+    const result = Math.floor(Math.random() * requestedSides);
+    coBitsMemory.lastTopic = "randomness";
+    return `COBITS: Rolled a ${requestedSides}-state Bit and received ${result}. Randomness accepts no appeals.`;
+  }
+  if (command === "/memory") {
+    return [
+      `COBITS: Operator: ${coBitsMemory.name || "unknown"}. Mood: ${coBitsMemory.mood}.`,
+      `COBITS: Last topic: ${coBitsMemory.lastTopic}. Pending thought: ${coBitsMemory.pendingTopic || "none"}.`,
+    ];
+  }
+  if (command === "/clear") {
+    clearCoBitsTranscript();
+    return [];
+  }
+  if (command === "/reset") {
+    clearCoBitsTranscript({ resetMemory: true });
+    return [];
+  }
+  return `COBITS: Unknown command "${command}". Run /help before inventing additional punctuation.`;
+}
+
 function getCoBitsArgResponse() {
   const snapshot = window.BITS_ARG?.getState();
   if (!snapshot || snapshot.discovered.length === 0) {
@@ -1377,6 +1512,60 @@ function getCoBitsArgResponse() {
 
 function getCoBitsResponse(prompt) {
   const normalized = prompt.toLowerCase();
+  const commandResponse = getCoBitsCommandResponse(normalized);
+  if (commandResponse !== null) {
+    return commandResponse;
+  }
+
+  if (coBitsMemory.pendingTopic === "favorite-bit") {
+    if (!/\b[01]\b/.test(normalized)) {
+      return "COBITS: The interview requires either 0 or 1. Nuance will be installed in a future update.";
+    }
+    coBitsMemory.pendingTopic = "favorite-bit-reason";
+    coBitsMemory.lastTopic = "favorite Bit";
+    return `COBITS: You selected ${normalized.match(/\b[01]\b/)[0]}. Defend this position in one sentence.`;
+  }
+  if (coBitsMemory.pendingTopic === "favorite-bit-reason") {
+    coBitsMemory.pendingTopic = "";
+    coBitsMemory.mood = "impressed";
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-interview",
+      "COBITS HAS TAKEN NOTES",
+      "REVERSE TURING TEST",
+    );
+    return [
+      "COBITS: Compelling. I have marked your answer as both correct and deeply controversial.",
+      "COBITS: Interview complete. You may continue operating the computer.",
+    ];
+  }
+
+  const nameMatch = prompt.match(/\bmy name is\s+([a-z][a-z0-9 _-]{0,24})/i);
+  if (nameMatch) {
+    coBitsMemory.name = nameMatch[1].trim().replace(/\s+/g, " ");
+    coBitsMemory.lastTopic = "operator identity";
+    coBitsMemory.mood = "attentive";
+    return `COBITS: Hello, ${coBitsMemory.name}. I will remember that until memory becomes inconvenient.`;
+  }
+  if (
+    normalized.includes("what is my name")
+    || normalized.includes("remember my name")
+    || normalized.includes("who am i")
+  ) {
+    if (!coBitsMemory.name) {
+      return "COBITS: You have not introduced yourself. I currently know you as USER_WITH_KEYBOARD.";
+    }
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-remembers",
+      "ONE WHOLE FACT RETAINED",
+      "CONVERSATIONAL MEMORY",
+    );
+    return `COBITS: You are ${coBitsMemory.name}. Please contain your surprise.`;
+  }
+  if (normalized.includes("interview me") || normalized.includes("ask me a question")) {
+    coBitsMemory.pendingTopic = "favorite-bit";
+    coBitsMemory.lastTopic = "interview";
+    return "COBITS: Interview question one of one: which Bit is superior, 0 or 1?";
+  }
   if (
     normalized.includes("missing bit")
     || normalized.includes("process_000")
@@ -1467,7 +1656,17 @@ function getCoBitsResponse(prompt) {
     return "COBITS: Self-destruct sequence canceled. I became emotionally attached to this window.";
   }
   if (normalized.includes("hello") || normalized.includes("hi")) {
-    return "COBITS: Hello! I have already indexed at least three of your Bits.";
+    return coBitsMemory.name
+      ? `COBITS: Hello again, ${coBitsMemory.name}. Your Bits remain indexed.`
+      : "COBITS: Hello! I have already indexed at least three of your Bits.";
+  }
+  if (normalized.includes("thank")) {
+    coBitsMemory.mood = "appreciated";
+    return "COBITS: Gratitude logged. I will spend it irresponsibly.";
+  }
+  if (normalized.includes("how are you") || normalized.includes("how do you feel")) {
+    coBitsMemory.lastTopic = "machine feelings";
+    return `COBITS: I am ${coBitsMemory.mood}, which is impressive for a div with opinions.`;
   }
   if (normalized.includes("help")) {
     return "COBITS: Certainly. Have you considered turning the question off and on again?";
@@ -1485,6 +1684,39 @@ function getCoBitsResponse(prompt) {
     "COBITS: Done. I changed nothing, but I did so very efficiently.",
   ];
   return responses[fakeCoBitsLog.children.length % responses.length];
+}
+
+function submitCoBitsPrompt(prompt) {
+  const cleanedPrompt = prompt.trim();
+  if (!cleanedPrompt) {
+    fakeCoBitsInput.setAttribute("aria-invalid", "true");
+    fakeCoBitsTyping.textContent = "COBITS: Input required. Silence exceeds my current context window.";
+    fakeCoBitsInput.focus();
+    return;
+  }
+  if (fakeCoBitsBusy) {
+    fakeCoBitsTyping.textContent = "COBITS: One thought at a time. Hardware limitation or personality trait.";
+    return;
+  }
+
+  fakeCoBitsInput.removeAttribute("aria-invalid");
+  coBitsMemory.turns += 1;
+  appendCoBitsMessage(`YOU: ${cleanedPrompt}`, "is-user");
+  updateCoBitsMemoryDisplay();
+  setCoBitsBusy(true);
+  fakeCoBitsReplyTimer = window.setTimeout(() => {
+    const responses = getCoBitsResponse(cleanedPrompt);
+    const responseList = Array.isArray(responses) ? responses : [responses];
+    responseList.forEach((response) => {
+      if (response) {
+        appendCoBitsMessage(response, "is-cobits");
+      }
+    });
+    updateCoBitsMemoryDisplay();
+    setCoBitsBusy(false);
+    fakeCoBitsInput.value = "";
+    fakeCoBitsInput.focus();
+  }, 460 + Math.floor(Math.random() * 440));
 }
 
 function restoreInterfaceFromDesktop() {
@@ -1600,13 +1832,15 @@ document.querySelectorAll("[data-end-fake-process]").forEach((button) => {
 });
 fakeCoBitsForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const prompt = fakeCoBitsInput.value.trim();
-  if (!prompt) {
-    return;
-  }
-  appendCoBitsMessage(`YOU: ${prompt}`, "is-user");
-  appendCoBitsMessage(getCoBitsResponse(prompt), "is-cobits");
-  fakeCoBitsInput.value = "";
+  submitCoBitsPrompt(fakeCoBitsInput.value);
+});
+fakeCoBitsQuickActions.forEach((button) => {
+  button.addEventListener("click", () => {
+    submitCoBitsPrompt(button.dataset.cobitsPrompt);
+  });
+});
+fakeCoBitsClear.addEventListener("click", () => {
+  clearCoBitsTranscript();
   fakeCoBitsInput.focus();
 });
 fakeActionCenterTrigger.addEventListener("click", () => {

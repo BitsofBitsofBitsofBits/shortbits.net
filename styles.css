@@ -4479,6 +4479,52 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   width: min(680px, calc(100% - 32px));
 }
 
+.fake-cobits-toolbar {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.fake-cobits-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fake-cobits-actions button,
+.fake-cobits-clear {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  background: var(--panel);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+}
+
+.fake-cobits-clear {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.fake-cobits-actions button:hover,
+.fake-cobits-actions button:focus-visible,
+.fake-cobits-clear:hover,
+.fake-cobits-clear:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+.fake-cobits-actions button:disabled,
+.fake-cobits-clear:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
 .fake-cobits.is-calculating-impossible {
   animation: cobits-impossible-calculation 900ms steps(2);
 }
@@ -4529,6 +4575,29 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   color: var(--ink);
 }
 
+.fake-cobits-state {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+}
+
+.fake-cobits-state p {
+  margin: 0;
+}
+
+#fake-cobits-typing.is-thinking {
+  color: var(--warning);
+  animation: cobits-thinking 720ms steps(2) infinite;
+}
+
+@keyframes cobits-thinking {
+  50% { opacity: 0.48; }
+}
+
 .fake-cobits-form {
   display: grid;
   gap: 7px;
@@ -4567,6 +4636,20 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 .fake-cobits-form button:focus-visible {
   border-color: var(--accent);
   outline: none;
+}
+
+.fake-cobits-form input:disabled,
+.fake-cobits-form button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 640px) {
+  .fake-cobits-toolbar,
+  .fake-cobits-state {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .fake-vpn-ad {

@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-8"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-73">
+    <link rel="stylesheet" href="styles.css?v=upgrade-74">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -40,7 +40,7 @@
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
     <script src="screensaver.js?v=screensaver-1" defer></script>
-    <script src="script.js?v=upgrade-48" defer></script>
+    <script src="script.js?v=upgrade-49" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
     <script src="arcade.js?v=arcade-3" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
@@ -200,8 +200,22 @@
         </header>
         <div>
           <p class="system-kicker">LOCALLY IMAGINED ASSISTANT // ZERO CLOUD REQUIRED</p>
+          <div class="fake-cobits-toolbar">
+            <div class="fake-cobits-actions" aria-label="CoBits quick actions">
+              <button type="button" data-cobits-prompt="/diagnose">DIAGNOSE</button>
+              <button type="button" data-cobits-prompt="/scan">SCAN DESKTOP</button>
+              <button type="button" data-cobits-prompt="/joke">BAD JOKE</button>
+              <button type="button" data-cobits-prompt="interview me">INTERVIEW</button>
+              <button type="button" data-cobits-prompt="/help">COMMANDS</button>
+            </div>
+            <button id="fake-cobits-clear" class="fake-cobits-clear" type="button">CLEAR LOG</button>
+          </div>
           <div id="fake-cobits-log" class="fake-cobits-log" aria-live="polite">
             <p class="is-cobits">COBITS: Hello. I am ready to confidently misunderstand your request.</p>
+          </div>
+          <div class="fake-cobits-state">
+            <p id="fake-cobits-typing" role="status">COBITS: Standing by with unreasonable confidence.</p>
+            <p>MEMORY: <span id="fake-cobits-memory">0 turns // operator unknown // mood curious</span></p>
           </div>
           <form id="fake-cobits-form" class="fake-cobits-form">
             <label for="fake-cobits-input">ASK COBITS</label>
