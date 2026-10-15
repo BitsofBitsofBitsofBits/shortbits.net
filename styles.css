@@ -4,6 +4,12 @@
   initial-value: 0deg;
 }
 
+@property --rgb-scrollbar-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff6d7a;
+}
+
 :root {
   color-scheme: dark;
   --bg: #070b0f;
@@ -7468,6 +7474,45 @@ html.is-rgb-mode .desktop-window {
     rgb-edge-cycle 7s linear infinite;
 }
 
+html.is-rgb-mode {
+  animation: rgb-scrollbar-color-cycle 7s linear infinite;
+}
+
+html.is-rgb-mode,
+html.is-rgb-mode * {
+  scrollbar-color: var(--rgb-scrollbar-color) var(--scrollbar-track);
+}
+
+html.is-rgb-mode::-webkit-scrollbar-thumb,
+html.is-rgb-mode *::-webkit-scrollbar-thumb {
+  background: var(--rgb-scrollbar-color);
+  box-shadow:
+    var(--scrollbar-thumb-shadow),
+    0 0 8px rgba(122, 167, 255, 0.34);
+  transition: filter 120ms ease;
+}
+
+html.is-rgb-mode::-webkit-scrollbar-thumb:hover,
+html.is-rgb-mode *::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.18) saturate(1.2);
+}
+
+html.is-rgb-mode::-webkit-scrollbar-thumb:active,
+html.is-rgb-mode *::-webkit-scrollbar-thumb:active {
+  filter: brightness(1.3) saturate(1.2);
+}
+
+html.is-rgb-mode[data-interface-theme="terminal"]::-webkit-scrollbar-thumb,
+html.is-rgb-mode[data-interface-theme="terminal"] *::-webkit-scrollbar-thumb {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 4px,
+      rgba(0, 0, 0, 0.24) 4px 7px
+    ),
+    linear-gradient(var(--rgb-scrollbar-color), var(--rgb-scrollbar-color));
+}
+
 html.is-root-mode .name-field {
   opacity: 0.13;
   animation-duration: 12s;
@@ -7604,6 +7649,16 @@ html.is-root-mode .name-field {
 
 @keyframes rgb-edge-cycle {
   to { --rgb-edge-angle: 360deg; }
+}
+
+@keyframes rgb-scrollbar-color-cycle {
+  0%, 100% { --rgb-scrollbar-color: #ff6d7a; }
+  14% { --rgb-scrollbar-color: #ff9b62; }
+  28% { --rgb-scrollbar-color: #ffcc66; }
+  42% { --rgb-scrollbar-color: #66ff9a; }
+  57% { --rgb-scrollbar-color: #63d8ff; }
+  71% { --rgb-scrollbar-color: #7aa7ff; }
+  85% { --rgb-scrollbar-color: #b99aff; }
 }
 
 @keyframes blink {
