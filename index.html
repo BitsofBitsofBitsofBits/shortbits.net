@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-7"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-63">
+    <link rel="stylesheet" href="styles.css?v=upgrade-64">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -1551,11 +1551,27 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
     </section>
 
     <aside id="bits-assistant" class="bits-assistant" aria-labelledby="assistant-heading" hidden>
-      <p id="assistant-heading">It looks like you're trying to use the internet.</p>
-      <p>Would you like some Bits?</p>
-      <div>
-        <button class="assistant-answer" type="button">YES</button>
-        <button class="assistant-answer" type="button">NO</button>
+      <div class="bits-assistant-avatar" aria-hidden="true">
+        <svg viewBox="0 0 100 118" focusable="false">
+          <path class="assistant-wire" d="M59 10c19 0 30 13 30 32v34c0 20-14 34-33 34S22 96 22 76V38c0-16 10-27 25-27 14 0 24 11 24 26v36c0 10-6 17-15 17s-16-7-16-17V43" />
+          <g class="assistant-face">
+            <ellipse class="assistant-eye" cx="45" cy="43" rx="5" ry="7" />
+            <ellipse class="assistant-eye" cx="65" cy="43" rx="5" ry="7" />
+            <circle class="assistant-pupil" cx="46" cy="45" r="2" />
+            <circle class="assistant-pupil" cx="66" cy="45" r="2" />
+            <path class="assistant-mouth" d="M47 58c5 5 11 5 16 0" />
+          </g>
+          <text class="assistant-bit assistant-bit-zero" x="9" y="89">0</text>
+          <text class="assistant-bit assistant-bit-one" x="83" y="24">1</text>
+        </svg>
+      </div>
+      <div class="bits-assistant-copy">
+        <p id="assistant-heading">It looks like you're trying to use the internet.</p>
+        <p>Would you like some Bits?</p>
+        <div class="bits-assistant-actions">
+          <button class="assistant-answer" type="button">YES</button>
+          <button class="assistant-answer" type="button">NO</button>
+        </div>
       </div>
     </aside>
 
