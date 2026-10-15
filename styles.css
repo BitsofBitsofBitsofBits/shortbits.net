@@ -1768,6 +1768,420 @@ html.is-page-hidden * {
   color: var(--accent);
 }
 
+.arcade-window {
+  max-width: none;
+  max-height: none;
+}
+
+.arcade-window .desktop-window-resize-handle,
+.arcade-window .desktop-window-resize-edge {
+  display: none;
+}
+
+.arcade-window-content {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: 12px;
+  height: calc(100% - 42px);
+  overflow: hidden;
+}
+
+.arcade-header,
+.arcade-game-toolbar,
+.arcade-leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.arcade-header h2,
+.arcade-header p,
+.arcade-game-toolbar p,
+.arcade-leaderboard-header h3,
+.arcade-leaderboard-header p {
+  margin: 0;
+}
+
+.arcade-header h2,
+.arcade-leaderboard-header h3 {
+  margin-top: 5px;
+}
+
+.arcade-header > p,
+.arcade-game-toolbar p {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.arcade-header strong,
+.arcade-game-toolbar strong {
+  color: var(--accent);
+}
+
+.arcade-tabs {
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.arcade-tabs button,
+.arcade-game-toolbar button,
+.minesweeper-difficulty button,
+.minesweeper-mode button,
+.arcade-leaderboard button,
+.arcade-score-form button,
+.arcade-dpad button,
+.tetris-controls button,
+.minebits-tools button {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+.arcade-tabs button[aria-selected="true"],
+.minesweeper-difficulty button[aria-pressed="true"],
+.minesweeper-mode button[aria-pressed="true"],
+.minebits-tools button[aria-pressed="true"],
+.arcade-tabs button:hover,
+.arcade-tabs button:focus-visible,
+.arcade-game-toolbar button:hover,
+.arcade-game-toolbar button:focus-visible,
+.minesweeper-difficulty button:hover,
+.minesweeper-difficulty button:focus-visible,
+.minesweeper-mode button:hover,
+.minesweeper-mode button:focus-visible,
+.arcade-leaderboard button:hover,
+.arcade-leaderboard button:focus-visible,
+.arcade-score-form button:hover,
+.arcade-score-form button:focus-visible,
+.arcade-dpad button:hover,
+.arcade-dpad button:focus-visible,
+.tetris-controls button:hover,
+.tetris-controls button:focus-visible,
+.minebits-tools button:hover,
+.minebits-tools button:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.arcade-layout {
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) minmax(280px, 340px);
+  gap: 14px;
+  min-height: 0;
+}
+
+.arcade-game-column,
+.arcade-game-panel,
+.arcade-leaderboard {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.arcade-game-panel,
+.arcade-leaderboard {
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.arcade-game-panel[hidden] {
+  display: none;
+}
+
+.arcade-canvas {
+  display: block;
+  width: min(100%, 900px);
+  height: auto;
+  max-height: calc(100vh - 265px);
+  box-sizing: border-box;
+  justify-self: center;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  image-rendering: pixelated;
+}
+
+.arcade-square-canvas {
+  width: min(100%, 500px);
+  aspect-ratio: 1;
+}
+
+.arcade-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-areas: ". up ." "left down right";
+  justify-content: center;
+  gap: 6px;
+}
+
+.arcade-dpad [data-snake-direction="up"] { grid-area: up; }
+.arcade-dpad [data-snake-direction="left"] { grid-area: left; }
+.arcade-dpad [data-snake-direction="down"] { grid-area: down; }
+.arcade-dpad [data-snake-direction="right"] { grid-area: right; }
+
+.arcade-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.58rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.minesweeper-mode,
+.minebits-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.minesweeper-difficulty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.minesweeper-board {
+  display: grid;
+  grid-template-columns: repeat(var(--mine-columns, 9), minmax(18px, 1fr));
+  width: min(100%, 760px);
+  aspect-ratio: var(--mine-columns, 9) / var(--mine-rows, 9);
+  justify-self: center;
+  gap: 3px;
+}
+
+.minesweeper-board-scroll {
+  max-width: 100%;
+  overflow: auto;
+  padding-bottom: 7px;
+}
+
+.minesweeper-board-scroll .minesweeper-board {
+  margin-inline: auto;
+}
+
+.mine-cell {
+  min-width: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel-2);
+  cursor: pointer;
+  font: 700 clamp(0.65rem, 2vw, 1rem) monospace;
+}
+
+.mine-cell:hover,
+.mine-cell:focus-visible {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
+.mine-cell.is-revealed {
+  border-color: transparent;
+  background: rgba(var(--accent-rgb), 0.08);
+  cursor: default;
+}
+
+.mine-cell.is-flagged { color: var(--warning); }
+.mine-cell.is-mine { color: #ff6d7a; }
+.mine-cell[data-adjacent="1"] { color: #66aaff; }
+.mine-cell[data-adjacent="2"] { color: #55d88b; }
+.mine-cell[data-adjacent="3"],
+.mine-cell[data-adjacent="4"],
+.mine-cell[data-adjacent="5"],
+.mine-cell[data-adjacent="6"],
+.mine-cell[data-adjacent="7"],
+.mine-cell[data-adjacent="8"] { color: #ff6d7a; }
+
+.bitsweeper-input-label,
+.arcade-score-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.tetris-canvas {
+  width: min(100%, 300px);
+  aspect-ratio: 1 / 2;
+}
+
+.tetris-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(42px, 1fr));
+  gap: 7px;
+}
+
+.bitsweeper-input-label input,
+.arcade-score-form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel-2);
+  font: inherit;
+}
+
+.bitsweeper-input-label input:focus,
+.arcade-score-form input:focus {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
+.arcade-leaderboard {
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.arcade-leaderboard-list {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.arcade-leaderboard-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.arcade-leaderboard-list li > strong,
+.arcade-leaderboard-list li > b {
+  color: var(--accent);
+}
+
+.arcade-leaderboard-list li > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.arcade-leaderboard-list span,
+.arcade-leaderboard-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arcade-leaderboard-list small {
+  color: var(--muted);
+  font-size: 0.58rem;
+}
+
+.arcade-score-form {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.arcade-score-form[hidden] {
+  display: none;
+}
+
+.arcade-score-form p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.arcade-score-form strong {
+  color: var(--accent);
+}
+
+.bititaire-foundations {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(72px, 110px));
+  justify-content: center;
+  gap: 10px;
+}
+
+.bititaire-tableau {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(76px, 1fr));
+  gap: 10px;
+  min-height: 260px;
+}
+
+.bititaire-pile {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  padding: 6px;
+  border: 1px dashed var(--border);
+  background: rgba(var(--accent-rgb), 0.035);
+}
+
+.bititaire-card {
+  min-height: 76px;
+  margin-top: -52px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel-2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font: 700 0.78rem var(--font-family);
+  text-align: left;
+}
+
+.bititaire-card:first-child {
+  margin-top: 0;
+}
+
+.bititaire-card[data-polarity="1"] {
+  color: var(--accent);
+}
+
+.bititaire-card.is-selected {
+  outline: 2px solid var(--accent);
+  transform: translateY(-4px);
+}
+
+.bititaire-foundation {
+  min-height: 86px;
+  border: 1px dashed var(--accent);
+  color: var(--muted);
+  background: rgba(var(--accent-rgb), 0.06);
+  cursor: pointer;
+  font: inherit;
+}
+
+.minebits-canvas,
+.flappy-canvas {
+  aspect-ratio: 16 / 9;
+}
+
+@media (max-width: 900px) {
+  .arcade-desktop-launcher {
+    display: none !important;
+  }
+}
+
 .app-menu-select {
   display: grid;
   gap: 6px;

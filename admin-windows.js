@@ -28,6 +28,15 @@ const adminWindowModules = [
     y: 105,
   },
   {
+    sourceId: "arcade-editor",
+    windowId: "admin-arcade-window",
+    title: "ARCADE_CONTROL.EXE",
+    label: "ARCADE",
+    description: "Configure leaderboards and moderate public scores",
+    x: 145,
+    y: 120,
+  },
+  {
     sourceId: "playlist-editor",
     windowId: "admin-playlists-window",
     title: "PLAYLIST_EDITOR.EXE",

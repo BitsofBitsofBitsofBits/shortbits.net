@@ -5,6 +5,7 @@ const desktopWindowMirrors = document.querySelectorAll("[data-window-mirror]");
 const desktopWindowImageMirrors = document.querySelectorAll("[data-window-mirror-image]");
 const desktopWindowMinimumWidthPx = 280;
 const desktopWindowMinimumHeightPx = 120;
+const desktopExperienceQuery = window.matchMedia("(min-width: 901px)");
 const openedDesktopWindowIds = new Set();
 const desktopWindowsBySlug = new Map(
   desktopWindows.map((windowElement) => [
@@ -161,11 +162,24 @@ function resizeDesktopWindowFromEdge(state, clientX, clientY) {
 }
 
 function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
+  if (windowElement.hasAttribute("data-desktop-only") && !desktopExperienceQuery.matches) {
+    window.dispatchEvent(new CustomEvent("desktop-window:desktop-required", {
+      detail: { windowId: windowElement.id },
+    }));
+    return;
+  }
+
   windowElement.hidden = false;
   windowElement.classList.remove("is-minimized");
   windowElement.dataset.launcherId = launcher?.id || "";
 
-  if (!windowElement.dataset.positioned) {
+  if (windowElement.hasAttribute("data-window-fullscreen")) {
+    windowElement.style.left = "8px";
+    windowElement.style.top = "8px";
+    windowElement.style.width = `${window.innerWidth - 16}px`;
+    windowElement.style.height = `${window.innerHeight - 16}px`;
+    windowElement.dataset.positioned = "true";
+  } else if (!windowElement.dataset.positioned) {
     const offset = desktopWindows.filter((candidate) => (
       !candidate.hidden && candidate !== windowElement
     )).length * 24;
@@ -315,6 +329,7 @@ desktopWindows.forEach((windowElement) => {
     if (
       event.button !== 0
       || event.target.closest("button")
+      || windowElement.hasAttribute("data-window-fullscreen")
       || window.matchMedia("(max-width: 640px)").matches
     ) {
       return;
@@ -372,6 +387,7 @@ desktopWindows.forEach((windowElement) => {
       if (
         event.button !== 0
         || windowElement.classList.contains("is-minimized")
+        || windowElement.hasAttribute("data-window-fullscreen")
         || window.matchMedia("(max-width: 640px)").matches
       ) {
         return;
@@ -475,6 +491,20 @@ window.addEventListener("resize", () => {
   desktopWindows
     .filter((windowElement) => !windowElement.hidden)
     .forEach((windowElement) => {
+      if (
+        windowElement.hasAttribute("data-desktop-only")
+        && !desktopExperienceQuery.matches
+      ) {
+        closeDesktopWindow(windowElement);
+        return;
+      }
+      if (windowElement.hasAttribute("data-window-fullscreen")) {
+        windowElement.style.left = "8px";
+        windowElement.style.top = "8px";
+        windowElement.style.width = `${window.innerWidth - 16}px`;
+        windowElement.style.height = `${window.innerHeight - 16}px`;
+        return;
+      }
       const rect = windowElement.getBoundingClientRect();
       resizeDesktopWindow(
         windowElement,

@@ -9,6 +9,13 @@ const refreshButton = document.querySelector("#refresh-messages");
 const guestbookAdminStatus = document.querySelector("#guestbook-admin-status");
 const guestbookAdminList = document.querySelector("#guestbook-admin-list");
 const refreshGuestbook = document.querySelector("#refresh-guestbook");
+const arcadeAdminStatus = document.querySelector("#arcade-admin-status");
+const arcadeAdminList = document.querySelector("#arcade-admin-list");
+const refreshArcadeScores = document.querySelector("#refresh-arcade-scores");
+const arcadeSettingsForm = document.querySelector("#arcade-settings-form");
+const arcadeSettingsSubmit = document.querySelector("#arcade-settings-submit");
+const arcadeLeaderboardEnabled = document.querySelector("#arcade-leaderboard-enabled");
+const arcadeSubmissionsEnabled = document.querySelector("#arcade-submissions-enabled");
 const logoutButton = document.querySelector("#logout-button");
 const pronounProfileForm = document.querySelector("#pronoun-profile-form");
 const pronounProfileSubmit = document.querySelector("#pronoun-profile-submit");
@@ -507,6 +514,96 @@ async function loadAdminGuestbook() {
   );
 }
 
+function createArcadeAdminEntry(entry) {
+  const article = document.createElement("article");
+  const header = document.createElement("header");
+  const identity = document.createElement("div");
+  const name = document.createElement("h3");
+  const timestamp = document.createElement("time");
+  const score = document.createElement("p");
+  const actions = document.createElement("div");
+  const deleteButton = document.createElement("button");
+
+  article.className = "message-card";
+  name.textContent = `${entry.player_name} // ${entry.game.toUpperCase()}`;
+  timestamp.dateTime = entry.created_at;
+  timestamp.textContent = new Date(entry.created_at).toLocaleString();
+  score.textContent = `${entry.score.toLocaleString()} POINTS // ${entry.detail}`;
+  deleteButton.type = "button";
+  deleteButton.textContent = "DELETE";
+  deleteButton.addEventListener("click", async () => {
+    if (!window.confirm(`Delete ${entry.player_name}'s ${entry.game} score?`)) {
+      return;
+    }
+    const { error } = await adminClient
+      .from("arcade_scores")
+      .delete()
+      .eq("id", entry.id);
+    if (error) {
+      console.error("Unable to delete Arcade score:", error);
+      setAdminStatus(
+        arcadeAdminStatus,
+        `Arcade score deletion failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    await loadAdminArcadeScores();
+  });
+
+  identity.append(name, timestamp);
+  actions.className = "message-actions";
+  actions.append(deleteButton);
+  header.append(identity, actions);
+  article.append(header, score);
+  return article;
+}
+
+async function loadAdminArcade() {
+  setAdminStatus(arcadeAdminStatus, "Loading Arcade controls...");
+  const [settingsResult, scoresResult] = await Promise.all([
+    adminClient
+      .from("arcade_settings")
+      .select("leaderboard_enabled, score_submissions_enabled")
+      .eq("id", "global")
+      .single(),
+    adminClient
+      .from("arcade_scores")
+      .select("id, game, player_name, score, detail, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200),
+  ]);
+
+  if (settingsResult.error || scoresResult.error) {
+    const error = settingsResult.error || scoresResult.error;
+    console.error("Unable to load Arcade controls:", error);
+    setAdminStatus(
+      arcadeAdminStatus,
+      `Arcade controls failed to load: ${error.message}`,
+      "error",
+    );
+    return false;
+  }
+
+  arcadeLeaderboardEnabled.checked = settingsResult.data.leaderboard_enabled;
+  arcadeSubmissionsEnabled.checked = settingsResult.data.score_submissions_enabled;
+  arcadeAdminList.replaceChildren(
+    ...scoresResult.data.map(createArcadeAdminEntry),
+  );
+  setAdminStatus(
+    arcadeAdminStatus,
+    scoresResult.data.length
+      ? `${scoresResult.data.length} public score${scoresResult.data.length === 1 ? "" : "s"} loaded.`
+      : "No public Arcade scores.",
+    "success",
+  );
+  return true;
+}
+
+async function loadAdminArcadeScores() {
+  return loadAdminArcade();
+}
+
 async function loadPronounProfile() {
   setAdminStatus(pronounAdminStatus, "Loading identity reference...");
   const { data, error } = await adminClient
@@ -901,6 +998,7 @@ async function showInbox() {
   await Promise.all([
     loadMessages(),
     loadAdminGuestbook(),
+    loadAdminArcade(),
     loadPronounProfile(),
     loadFeaturedPlaylists(),
     loadFeaturedTracks(),
@@ -958,6 +1056,33 @@ if (adminClient) {
 
   refreshButton.addEventListener("click", loadMessages);
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
+  refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
+  arcadeSettingsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    arcadeSettingsSubmit.disabled = true;
+    arcadeSettingsSubmit.textContent = "> SAVING...";
+    setAdminStatus(arcadeAdminStatus, "Writing Arcade settings...");
+    const { error } = await adminClient
+      .from("arcade_settings")
+      .update({
+        leaderboard_enabled: arcadeLeaderboardEnabled.checked,
+        score_submissions_enabled: arcadeSubmissionsEnabled.checked,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", "global");
+    arcadeSettingsSubmit.disabled = false;
+    arcadeSettingsSubmit.textContent = "> SAVE_ARCADE_SETTINGS";
+    if (error) {
+      console.error("Unable to save Arcade settings:", error);
+      setAdminStatus(
+        arcadeAdminStatus,
+        `Arcade settings update failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    setAdminStatus(arcadeAdminStatus, "Arcade settings updated.", "success");
+  });
   shortLinksRefresh.addEventListener("click", loadShortLinks);
   shortLinkGenerate.addEventListener("click", () => {
     shortLinkCreateForm.elements.slug.value = generateShortLinkSlug();
