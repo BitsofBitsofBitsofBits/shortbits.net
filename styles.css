@@ -10,6 +10,24 @@
   initial-value: #ff6d7a;
 }
 
+@property --rgb-accent-red {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 255;
+}
+
+@property --rgb-accent-green {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 109;
+}
+
+@property --rgb-accent-blue {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 122;
+}
+
 :root {
   color-scheme: dark;
   --bg: #070b0f;
@@ -725,8 +743,10 @@
 }
 
 :root[data-interface-theme="rgb"] {
-  --accent: #ff6d7a;
-  --accent-rgb: 255, 109, 122;
+  --accent: rgb(var(--rgb-accent-red), var(--rgb-accent-green), var(--rgb-accent-blue));
+  --accent-rgb: var(--rgb-accent-red), var(--rgb-accent-green), var(--rgb-accent-blue);
+  --rgb-scrollbar-color: var(--accent);
+  --spotify-accent: var(--accent);
   --bg: #090713;
   --panel: rgba(22, 17, 38, 0.9);
   --panel-2: rgba(34, 25, 55, 0.94);
@@ -737,9 +757,9 @@
   --admin-bg: rgba(12, 9, 23, 0.97);
   --overlay-bg: rgba(18, 13, 32, 0.98);
   --body-background:
-    radial-gradient(circle at 12% 12%, rgba(255, 109, 122, 0.25), transparent 30%),
-    radial-gradient(circle at 88% 15%, rgba(99, 216, 255, 0.24), transparent 32%),
-    radial-gradient(circle at 50% 92%, rgba(185, 154, 255, 0.24), transparent 34%),
+    radial-gradient(circle at 12% 12%, rgba(var(--accent-rgb), 0.25), transparent 30%),
+    radial-gradient(circle at 88% 15%, rgba(var(--accent-rgb), 0.18), transparent 32%),
+    radial-gradient(circle at 50% 92%, rgba(var(--accent-rgb), 0.22), transparent 34%),
     #090713;
   --body-background-size: auto;
   --control-radius: 8px;
@@ -750,14 +770,14 @@
   --scrollbar-size: 14px;
   --scrollbar-track: #090713;
   --scrollbar-track-border: rgba(255, 255, 255, 0.24);
-  --scrollbar-thumb-color: #ff6d7a;
-  --scrollbar-thumb-background: #ff6d7a;
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
   --scrollbar-thumb-hover: #fff;
-  --scrollbar-thumb-active: #ffcc66;
+  --scrollbar-thumb-active: var(--accent);
   --scrollbar-thumb-border: 2px solid #090713;
   --scrollbar-thumb-radius: 999px;
   --scrollbar-track-radius: 999px;
-  --scrollbar-thumb-shadow: 0 0 9px rgba(122, 167, 255, 0.48);
+  --scrollbar-thumb-shadow: 0 0 9px rgba(var(--accent-rgb), 0.48);
 }
 
 :root[data-interface-theme="aero-glass"] {
@@ -8640,7 +8660,7 @@ html.is-rgb-mode .desktop-window {
 }
 
 html.is-rgb-mode {
-  animation: rgb-scrollbar-color-cycle 7s linear infinite;
+  animation: rgb-accent-color-cycle 7s linear infinite;
 }
 
 html.is-rgb-mode,
@@ -8648,12 +8668,16 @@ html.is-rgb-mode * {
   scrollbar-color: var(--rgb-scrollbar-color) var(--scrollbar-track);
 }
 
+html.is-rgb-mode .link-card {
+  --card-accent: var(--accent) !important;
+}
+
 html.is-rgb-mode::-webkit-scrollbar-thumb,
 html.is-rgb-mode *::-webkit-scrollbar-thumb {
   background: var(--rgb-scrollbar-color);
   box-shadow:
     var(--scrollbar-thumb-shadow),
-    0 0 8px rgba(122, 167, 255, 0.34);
+    0 0 8px rgba(var(--accent-rgb), 0.34);
   transition: filter 120ms ease;
 }
 
@@ -8816,14 +8840,42 @@ html.is-root-mode .name-field {
   to { --rgb-edge-angle: 360deg; }
 }
 
-@keyframes rgb-scrollbar-color-cycle {
-  0%, 100% { --rgb-scrollbar-color: #ff6d7a; }
-  14% { --rgb-scrollbar-color: #ff9b62; }
-  28% { --rgb-scrollbar-color: #ffcc66; }
-  42% { --rgb-scrollbar-color: #66ff9a; }
-  57% { --rgb-scrollbar-color: #63d8ff; }
-  71% { --rgb-scrollbar-color: #7aa7ff; }
-  85% { --rgb-scrollbar-color: #b99aff; }
+@keyframes rgb-accent-color-cycle {
+  0%, 100% {
+    --rgb-accent-red: 255;
+    --rgb-accent-green: 109;
+    --rgb-accent-blue: 122;
+  }
+  14% {
+    --rgb-accent-red: 255;
+    --rgb-accent-green: 155;
+    --rgb-accent-blue: 98;
+  }
+  28% {
+    --rgb-accent-red: 255;
+    --rgb-accent-green: 204;
+    --rgb-accent-blue: 102;
+  }
+  42% {
+    --rgb-accent-red: 102;
+    --rgb-accent-green: 255;
+    --rgb-accent-blue: 154;
+  }
+  57% {
+    --rgb-accent-red: 99;
+    --rgb-accent-green: 216;
+    --rgb-accent-blue: 255;
+  }
+  71% {
+    --rgb-accent-red: 122;
+    --rgb-accent-green: 167;
+    --rgb-accent-blue: 255;
+  }
+  85% {
+    --rgb-accent-red: 185;
+    --rgb-accent-green: 154;
+    --rgb-accent-blue: 255;
+  }
 }
 
 @keyframes blink {
@@ -9296,6 +9348,10 @@ html[data-motion="reduced"] .binary-rain {
 }
 
 html[data-motion="reduced"][data-interface-theme="aurora"] body {
+  animation: none !important;
+}
+
+html[data-motion="reduced"].is-rgb-mode {
   animation: none !important;
 }
 
