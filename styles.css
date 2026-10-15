@@ -1658,7 +1658,8 @@ h1 .dim {
 
 .contact-form input,
 .contact-form textarea,
-.admin-form input {
+.admin-form input,
+.admin-form select {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 0;
@@ -1683,7 +1684,8 @@ h1 .dim {
 }
 
 .contact-form input,
-.admin-form input {
+.admin-form input,
+.admin-form select {
   height: 38px;
   padding: 0 11px;
 }
@@ -1696,7 +1698,8 @@ h1 .dim {
 
 .contact-form input:focus,
 .contact-form textarea:focus,
-.admin-form input:focus {
+.admin-form input:focus,
+.admin-form select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
@@ -2091,6 +2094,45 @@ footer span {
 .error-achievement {
   margin-top: 24px;
   color: var(--muted);
+}
+
+.error-page.has-shortbit-display .error-window {
+  width: min(1100px, 100%);
+}
+
+.shortbit-content h1 {
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.shortbit-content > p:not(.system-kicker) {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.shortbit-frame-shell {
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.shortbit-frame-shell iframe {
+  display: block;
+  width: 100%;
+  height: clamp(360px, 65vh, 680px);
+  border: 0;
+}
+
+.shortbit-frame-shell[data-provider="spotify"] iframe {
+  height: 352px;
+}
+
+.shortbit-notice {
+  margin: 14px 0 0;
+  color: var(--accent) !important;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
 }
 
 .source-window {

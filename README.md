@@ -48,7 +48,8 @@ is a personal project and largely a learning exercise for me.
   publishable entries and links to their official or storefront pages
 - An Admin-only ShortBits manager for HTTPS redirects at
   `shortbits.net/go/<alias>`, with generated or custom aliases, expiration,
-  enable/disable controls, and aggregate click totals
+  enable/disable controls, aggregate click totals, masked landing pages, and
+  YouTube, Vimeo, or Spotify embeds
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
@@ -124,6 +125,9 @@ inventory. Redirects use the server's internal custom-404 handling so the
 visitor-facing URL can remain `/go/<alias>` on this static deployment. They
 therefore require JavaScript and initially return HTTP 404 before the browser
 redirects; click totals are approximate and can include link-preview bots.
+Masked ShortBits retain the `/go/<alias>` address. Embed mode accepts only
+YouTube, Vimeo, and Spotify URLs; Landing mode presents any HTTPS destination
+behind an explicit open button.
 
 Deploy the function with:
 
@@ -213,4 +217,11 @@ error_page 404 /404.html;
 location = /404.html {
     internal;
 }
+```
+
+The production Content Security Policy must also allow the approved ShortBit
+embed providers:
+
+```nginx
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.scdn.co; connect-src 'self' https://arjwrycitgobvlodmkeo.supabase.co wss://arjwrycitgobvlodmkeo.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com; font-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
 ```

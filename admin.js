@@ -802,6 +802,34 @@ function getShortLinkUrl(slug) {
   return `${window.location.origin}/go/${encodeURIComponent(slug)}`;
 }
 
+function createShortBitModeSelect(selectedMode) {
+  const select = document.createElement("select");
+  const modes = [
+    ["redirect", "REDIRECT // CHANGE ADDRESS"],
+    ["embed", "EMBED // KEEP SHORTBIT ADDRESS"],
+    ["landing", "LANDING PAGE // KEEP SHORTBIT ADDRESS"],
+  ];
+  select.name = "display_mode";
+  modes.forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    option.selected = value === selectedMode;
+    select.append(option);
+  });
+  return select;
+}
+
+function getShortBitModeError(displayMode, destinationUrl) {
+  if (!["redirect", "embed", "landing"].includes(displayMode)) {
+    return "Select a valid ShortBit display mode.";
+  }
+  if (displayMode === "embed" && !window.BITS_SHORTBITS.getEmbed(destinationUrl)) {
+    return "Embed mode supports YouTube, Vimeo, and Spotify URLs only.";
+  }
+  return null;
+}
+
 function createShortLinkEditor(link) {
   const form = document.createElement("form");
   const heading = document.createElement("div");
@@ -813,6 +841,12 @@ function createShortLinkEditor(link) {
   const titleLabel = document.createElement("label");
   const titleCopy = document.createElement("span");
   const titleInput = document.createElement("input");
+  const modeLabel = document.createElement("label");
+  const modeCopy = document.createElement("span");
+  const mode = createShortBitModeSelect(link.display_mode);
+  const descriptionLabel = document.createElement("label");
+  const descriptionCopy = document.createElement("span");
+  const description = document.createElement("textarea");
   const expiresLabel = document.createElement("label");
   const expiresCopy = document.createElement("span");
   const expires = document.createElement("input");
@@ -843,11 +877,20 @@ function createShortLinkEditor(link) {
   destination.value = link.destination_url;
   destinationLabel.append(destinationCopy, destination);
 
-  titleCopy.textContent = "LABEL";
+  titleCopy.textContent = "PUBLIC TITLE";
   titleInput.name = "title";
   titleInput.maxLength = 120;
   titleInput.value = link.title ?? "";
   titleLabel.append(titleCopy, titleInput);
+
+  modeCopy.textContent = "MODE";
+  modeLabel.append(modeCopy, mode);
+
+  descriptionCopy.textContent = "PUBLIC DESCRIPTION";
+  description.name = "description";
+  description.maxLength = 500;
+  description.value = link.description ?? "";
+  descriptionLabel.append(descriptionCopy, description);
 
   expiresCopy.textContent = "EXPIRES AT";
   expires.name = "expires_at";
@@ -884,6 +927,8 @@ function createShortLinkEditor(link) {
     heading,
     destinationLabel,
     titleLabel,
+    modeLabel,
+    descriptionLabel,
     expiresLabel,
     enabledLabel,
     metrics,
@@ -897,7 +942,7 @@ async function loadShortLinks() {
   const { data, error } = await adminClient
     .from("site_short_links")
     .select(
-      "slug, title, destination_url, enabled, expires_at, click_count, last_clicked_at, created_at",
+      "slug, title, description, destination_url, display_mode, enabled, expires_at, click_count, last_clicked_at, created_at",
     )
     .order("created_at", { ascending: false });
 
@@ -1001,6 +1046,8 @@ if (adminClient) {
     const formData = new FormData(shortLinkCreateForm);
     const destinationUrl = String(formData.get("destination_url") ?? "").trim();
     const title = String(formData.get("title") ?? "").trim();
+    const description = String(formData.get("description") ?? "").trim();
+    const displayMode = String(formData.get("display_mode") ?? "");
     const slugInput = String(formData.get("slug") ?? "").trim().toLowerCase();
     const slug = slugInput || generateShortLinkSlug();
     const expiresInput = String(formData.get("expires_at") ?? "").trim();
@@ -1021,13 +1068,20 @@ if (adminClient) {
       );
       return;
     }
+    const modeError = getShortBitModeError(displayMode, destinationUrl);
+    if (modeError) {
+      setAdminStatus(shortLinksAdminStatus, modeError, "error");
+      return;
+    }
 
     shortLinkCreate.disabled = true;
     shortLinkCreate.textContent = "> CREATING...";
     const { error } = await adminClient.from("site_short_links").insert({
       slug,
       title: title || null,
+      description: description || null,
       destination_url: destinationUrl,
+      display_mode: displayMode,
       expires_at: expiresInput ? new Date(expiresInput).toISOString() : null,
       enabled: true,
     });
@@ -1064,6 +1118,7 @@ if (adminClient) {
     const destinationUrl =
       String(formData.get("destination_url") ?? "").trim();
     const expiresInput = String(formData.get("expires_at") ?? "").trim();
+    const displayMode = String(formData.get("display_mode") ?? "");
     if (!httpsUrlPattern.test(destinationUrl)) {
       setAdminStatus(
         shortLinksAdminStatus,
@@ -1072,12 +1127,20 @@ if (adminClient) {
       );
       return;
     }
+    const modeError = getShortBitModeError(displayMode, destinationUrl);
+    if (modeError) {
+      setAdminStatus(shortLinksAdminStatus, modeError, "error");
+      return;
+    }
 
     const { error } = await adminClient
       .from("site_short_links")
       .update({
         title: String(formData.get("title") ?? "").trim() || null,
+        description:
+          String(formData.get("description") ?? "").trim() || null,
         destination_url: destinationUrl,
+        display_mode: displayMode,
         expires_at: expiresInput ? new Date(expiresInput).toISOString() : null,
         enabled: formData.get("enabled") === "on",
       })

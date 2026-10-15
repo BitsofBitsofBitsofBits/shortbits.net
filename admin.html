@@ -8,12 +8,13 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-46">
+    <link rel="stylesheet" href="styles.css?v=upgrade-47">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
+    <script src="shortbits.js?v=shortbits-1" defer></script>
     <script src="admin-windows.js?v=admin-windows-6" defer></script>
     <script src="windows.js?v=windows-7" defer></script>
-    <script src="admin.js?v=admin-13" defer></script>
+    <script src="admin.js?v=admin-14" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -237,8 +238,20 @@
               <input name="destination_url" type="url" maxlength="2000" placeholder="https://example.com/path" required>
             </label>
             <label>
-              <span>LABEL</span>
-              <input name="title" maxlength="120" placeholder="Optional internal label">
+              <span>PUBLIC TITLE</span>
+              <input name="title" maxlength="120" placeholder="Optional title shown on masked ShortBits">
+            </label>
+            <label>
+              <span>MODE</span>
+              <select name="display_mode">
+                <option value="redirect">REDIRECT // CHANGE ADDRESS</option>
+                <option value="embed">EMBED // KEEP SHORTBIT ADDRESS</option>
+                <option value="landing">LANDING PAGE // KEEP SHORTBIT ADDRESS</option>
+              </select>
+            </label>
+            <label>
+              <span>PUBLIC DESCRIPTION</span>
+              <textarea name="description" maxlength="500" placeholder="Optional context shown for Embed and Landing modes"></textarea>
             </label>
             <div class="short-link-alias-row">
               <label>

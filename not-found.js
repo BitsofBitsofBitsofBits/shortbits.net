@@ -10,6 +10,14 @@ const errorHeading = document.querySelector("#error-heading");
 const errorCopy = document.querySelector("#error-copy");
 const errorPath = document.querySelector("#error-path");
 const errorAchievement = document.querySelector("#error-achievement");
+const errorContent = document.querySelector("#error-content");
+const shortBitContent = document.querySelector("#shortbit-content");
+const shortBitTitle = document.querySelector("#shortbit-title");
+const shortBitDescription = document.querySelector("#shortbit-description");
+const shortBitFrameShell = document.querySelector("#shortbit-frame-shell");
+const shortBitFrame = document.querySelector("#shortbit-frame");
+const shortBitNotice = document.querySelector("#shortbit-notice");
+const shortBitOpen = document.querySelector("#shortbit-open");
 
 errorPath.textContent = `PATH: ${window.location.pathname}`;
 
@@ -52,6 +60,37 @@ function showShortLinkFailure(message, path) {
   errorAchievement.textContent = "NO REDIRECT WAS PERFORMED";
 }
 
+function showMaskedShortBit(record, slug, destinationUrl) {
+  const title = record.title || `SHORTBIT // ${slug}`;
+  document.title = `${title} // SHORTBIT`;
+  document.body.classList.add("has-shortbit-display");
+  errorContent.hidden = true;
+  shortBitContent.hidden = false;
+  shortBitTitle.textContent = title;
+  shortBitDescription.textContent = record.description
+    || "This destination is being presented through a suspiciously small Bit.";
+  shortBitOpen.href = destinationUrl.href;
+
+  if (record.display_mode === "embed") {
+    const embed = window.BITS_SHORTBITS.getEmbed(destinationUrl.href);
+    if (embed) {
+      shortBitFrame.src = embed.url;
+      shortBitFrame.title = `${title} on ${embed.provider}`;
+      shortBitFrameShell.dataset.provider = embed.provider.toLowerCase();
+      shortBitFrameShell.hidden = false;
+      shortBitNotice.textContent =
+        `${embed.provider.toUpperCase()} EMBED // SHORTBIT ADDRESS PRESERVED`;
+      return;
+    }
+    shortBitNotice.textContent =
+      "EMBED PROVIDER UNSUPPORTED // USE OPEN_DESTINATION";
+    return;
+  }
+
+  shortBitNotice.textContent =
+    "LANDING PAGE MODE // DESTINATION OPENS ONLY WHEN REQUESTED";
+}
+
 async function resolveShortLink(slug) {
   document.title = "RESOLVING SHORTBIT // SHORTBITS.NET";
   errorKicker.textContent = "SHORTBIT ROUTER";
@@ -83,10 +122,8 @@ async function resolveShortLink(slug) {
     );
   }
 
-  const destination = Array.isArray(payload)
-    ? payload[0]?.destination_url
-    : payload?.destination_url;
-  if (!destination) {
+  const record = Array.isArray(payload) ? payload[0] : payload;
+  if (!record?.destination_url) {
     showShortLinkFailure(
       "This alias does not exist, is disabled, or has expired.",
       slug,
@@ -94,17 +131,23 @@ async function resolveShortLink(slug) {
     return;
   }
 
-  const destinationUrl = new URL(destination);
+  const destinationUrl = new URL(record.destination_url);
   if (destinationUrl.protocol !== "https:") {
     throw new Error("Resolved ShortBit destination is not HTTPS.");
   }
 
-  errorHeading.textContent = "REDIRECT_CONFIRMED";
-  errorCopy.textContent = `Transferring to ${destinationUrl.hostname}...`;
-  errorAchievement.textContent = "DESTINATION VERIFIED";
-  window.setTimeout(() => {
-    window.location.replace(destinationUrl.href);
-  }, 350);
+  if (record.display_mode === "embed" || record.display_mode === "landing") {
+    showMaskedShortBit(record, slug, destinationUrl);
+  } else if (record.display_mode === "redirect") {
+    errorHeading.textContent = "REDIRECT_CONFIRMED";
+    errorCopy.textContent = `Transferring to ${destinationUrl.hostname}...`;
+    errorAchievement.textContent = "DESTINATION VERIFIED";
+    window.setTimeout(() => {
+      window.location.replace(destinationUrl.href);
+    }, 350);
+  } else {
+    throw new Error(`Unknown ShortBit mode: ${record.display_mode}`);
+  }
 }
 
 const shortLinkMatch = window.location.pathname.match(shortLinkPathPattern);
