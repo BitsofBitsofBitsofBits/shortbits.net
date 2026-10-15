@@ -2886,6 +2886,127 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   background: rgba(var(--accent-rgb), 0.18);
 }
 
+.fake-recycle-bin.is-playing-dead .fake-desktop-icon {
+  border-color: var(--danger);
+  color: var(--danger);
+  animation: fake-playing-dead-twitch 2.4s steps(1) infinite;
+}
+
+.fake-playing-dead {
+  position: fixed;
+  z-index: 40;
+  top: 50%;
+  left: 50%;
+  width: min(520px, calc(100% - 32px));
+  overflow: hidden;
+  border: 1px solid var(--accent);
+  color: var(--ink);
+  background: var(--overlay-bg);
+  box-shadow: 14px 16px 0 rgba(0, 0, 0, 0.34), var(--shadow);
+  transform: translate(-50%, -50%);
+  animation: desktop-window-open 180ms steps(3);
+}
+
+.fake-playing-dead[hidden] {
+  display: none;
+}
+
+.fake-playing-dead > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  min-height: 42px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.fake-playing-dead > header strong {
+  align-self: center;
+  padding: 0 14px;
+  color: var(--accent);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.fake-playing-dead > header button {
+  width: 44px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.fake-playing-dead > header button:hover,
+.fake-playing-dead > header button:focus-visible {
+  color: #fff;
+  outline: none;
+  background: #c42b1c;
+}
+
+.fake-playing-dead > div {
+  padding: 24px;
+}
+
+.fake-playing-dead h2 {
+  margin: 10px 0 20px;
+  font-size: clamp(1rem, 4vw, 1.35rem);
+}
+
+.fake-playing-dead dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.fake-playing-dead dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.5fr) 1fr;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.fake-playing-dead dt,
+.fake-playing-dead dd {
+  margin: 0;
+  font-size: 0.68rem;
+}
+
+.fake-playing-dead dt {
+  color: var(--muted);
+}
+
+.fake-playing-dead dd {
+  color: var(--accent);
+}
+
+.fake-playing-dead-message {
+  min-height: 2.9em;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+@keyframes fake-playing-dead-twitch {
+  0%,
+  88%,
+  100% {
+    transform: none;
+  }
+
+  90% {
+    transform: translateX(2px) rotate(1deg);
+  }
+
+  92% {
+    transform: translateX(-1px);
+  }
+}
+
 .fake-taskbar {
   position: fixed;
   z-index: 45;

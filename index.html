@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-49">
+    <link rel="stylesheet" href="styles.css?v=upgrade-50">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-2" defer></script>
@@ -39,7 +39,7 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-33" defer></script>
+    <script src="script.js?v=upgrade-34" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -97,11 +97,33 @@
           <span class="fake-desktop-icon" aria-hidden="true">!</span>
           <span>NOTIFICATIONS</span>
         </button>
-        <button class="fake-recycle-bin" type="button" aria-label="Recycle Bin, already empty">
-          <span class="fake-desktop-icon" aria-hidden="true">⌫</span>
-          <span>RECYCLE.BIN</span>
+        <button id="fake-recycle-bin" class="fake-recycle-bin" type="button" aria-controls="fake-playing-dead" aria-haspopup="dialog">
+          <span id="fake-recycle-icon" class="fake-desktop-icon" aria-hidden="true">⌫</span>
+          <span id="fake-recycle-label">RECYCLE.BIN</span>
         </button>
       </div>
+      <aside
+        id="fake-playing-dead"
+        class="fake-playing-dead"
+        role="dialog"
+        aria-labelledby="fake-playing-dead-title"
+        hidden
+      >
+        <header>
+          <strong id="fake-playing-dead-title">PLAYING_DEAD.EXE</strong>
+          <button id="fake-playing-dead-close" type="button" aria-label="Close playing dead process">&times;</button>
+        </header>
+        <div>
+          <p class="system-kicker">RECOVERED PROCESS // CONDITION QUESTIONABLE</p>
+          <h2>PROCESS STATUS: PLAYING DEAD</h2>
+          <dl>
+            <div><dt>CPU</dt><dd>0%</dd></div>
+            <div><dt>VITAL SIGNS</dt><dd>INCONCLUSIVE</dd></div>
+            <div><dt>LAST MOVEMENT</dt><dd>WHEN UNOBSERVED</dd></div>
+          </dl>
+          <p id="fake-playing-dead-message" class="fake-playing-dead-message" aria-live="polite"></p>
+        </div>
+      </aside>
       <footer class="fake-taskbar">
         <details class="fake-start-menu">
           <summary>BITS</summary>

@@ -191,6 +191,12 @@ const maximizeButton = document.querySelector("#maximize-button");
 const fakeDesktop = document.querySelector("#fake-desktop");
 const fakeDesktopRestore = document.querySelector("#fake-desktop-restore");
 const fakeDesktopClock = document.querySelector("#fake-desktop-clock");
+const fakeRecycleBin = document.querySelector("#fake-recycle-bin");
+const fakeRecycleIcon = document.querySelector("#fake-recycle-icon");
+const fakeRecycleLabel = document.querySelector("#fake-recycle-label");
+const fakePlayingDead = document.querySelector("#fake-playing-dead");
+const fakePlayingDeadClose = document.querySelector("#fake-playing-dead-close");
+const fakePlayingDeadMessage = document.querySelector("#fake-playing-dead-message");
 const closeButton = document.querySelector("#close-button");
 const processTitle = document.querySelector("#process-title");
 const statusText = document.querySelector("#status-text");
@@ -1278,6 +1284,40 @@ function recordControl(name) {
 function setFakeDesktopVisible(visible) {
   fakeDesktop.hidden = !visible;
   document.body.classList.toggle("has-fake-desktop", visible);
+  if (!visible) {
+    closePlayingDeadProcess();
+  }
+}
+
+const playingDeadMessages = [
+  "The process is extremely committed to the bit.",
+  "Please stop checking. It is doing its best.",
+  "playing_dead.exe has declined to comment.",
+  "The process moved slightly when nobody was looking.",
+  "Diagnostic result: suspiciously alive for something this dead.",
+];
+let playingDeadChecks = 0;
+
+function closePlayingDeadProcess() {
+  fakePlayingDead.hidden = true;
+  fakeRecycleBin.classList.remove("is-playing-dead");
+  fakeRecycleIcon.textContent = "⌫";
+  fakeRecycleLabel.textContent = "RECYCLE.BIN";
+}
+
+function inspectPlayingDeadProcess() {
+  const message = playingDeadMessages[
+    Math.min(playingDeadChecks, playingDeadMessages.length - 1)
+  ];
+  playingDeadChecks += 1;
+  fakeRecycleBin.classList.add("is-playing-dead");
+  fakeRecycleIcon.textContent = "[x_x]";
+  fakeRecycleLabel.textContent = "playing_dead.exe";
+  fakePlayingDeadMessage.textContent = playingDeadChecks > playingDeadMessages.length
+    ? `${message} Check #${playingDeadChecks} has changed nothing.`
+    : message;
+  fakePlayingDead.hidden = false;
+  fakePlayingDeadClose.focus();
 }
 
 function restoreInterfaceFromDesktop() {
@@ -1299,6 +1339,11 @@ function updateFakeDesktopClock() {
 }
 
 fakeDesktopRestore.addEventListener("click", restoreInterfaceFromDesktop);
+fakeRecycleBin.addEventListener("click", inspectPlayingDeadProcess);
+fakePlayingDeadClose.addEventListener("click", () => {
+  closePlayingDeadProcess();
+  fakeRecycleBin.focus();
+});
 updateFakeDesktopClock();
 window.setInterval(updateFakeDesktopClock, 1000);
 
@@ -1312,10 +1357,8 @@ minimizeButton.addEventListener("click", () => {
     "aria-label",
     willMinimize ? "Restore interface" : "Minimize interface",
   );
-  processTitle.textContent = willMinimize
-    ? "~/internet/playing_dead.exe"
-    : "~/internet/presence.exe";
-  statusText.textContent = willMinimize ? "PLAYING DEAD" : "ONLINE";
+  processTitle.textContent = "~/internet/presence.exe";
+  statusText.textContent = "ONLINE";
   setFakeDesktopVisible(willMinimize);
 });
 
