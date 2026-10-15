@@ -2881,7 +2881,7 @@ cookieDismiss.addEventListener("click", () => {
 });
 
 function getAvatarCornerInterval() {
-  return 3 + Math.floor(Math.random() * 4);
+  return 5 + Math.floor(Math.random() * 5);
 }
 
 function releaseCornerConfetti(x, y) {
@@ -2917,9 +2917,17 @@ function setRandomAvatarDirection(state, cornerX, cornerY) {
   state.velocityY = Math.sin(angle) * avatarRoamSpeed * (cornerY === 0 ? 1 : -1);
 }
 
-function aimAvatarAtCorner(state, hitX, hitY, maxX, maxY) {
-  const targetX = hitX ? (state.x === 0 ? maxX : 0) : (Math.random() < 0.5 ? 0 : maxX);
-  const targetY = hitY ? (state.y === 0 ? maxY : 0) : (Math.random() < 0.5 ? 0 : maxY);
+function aimAvatarNearCorner(state, hitX, hitY, maxX, maxY) {
+  const exactCorner = Math.random() < 0.12;
+  const missOffset = exactCorner ? 0 : 8 + Math.random() * 34;
+  const horizontalOffset = Math.min(missOffset, maxX / 2);
+  const verticalOffset = Math.min(missOffset, maxY / 2);
+  const targetX = hitX
+    ? (state.x === 0 ? maxX : 0)
+    : (Math.random() < 0.5 ? horizontalOffset : maxX - horizontalOffset);
+  const targetY = hitY
+    ? (state.y === 0 ? maxY : 0)
+    : (Math.random() < 0.5 ? verticalOffset : maxY - verticalOffset);
   const distanceX = targetX - state.x;
   const distanceY = targetY - state.y;
   const distance = Math.hypot(distanceX, distanceY);
@@ -2967,15 +2975,15 @@ function animateAvatarRoam(timestamp) {
       const cornerY = state.y === 0 ? 0 : window.innerHeight;
       releaseCornerConfetti(cornerX, cornerY);
       setRandomAvatarDirection(state, state.x, state.y);
-      state.collisionsUntilCorner = getAvatarCornerInterval();
+      state.collisionsUntilCornerAttempt = getAvatarCornerInterval();
       state.isCornerBound = false;
     } else if (state.isCornerBound) {
-      state.collisionsUntilCorner = getAvatarCornerInterval();
+      state.collisionsUntilCornerAttempt = getAvatarCornerInterval();
       state.isCornerBound = false;
     } else if (!state.isCornerBound) {
-      state.collisionsUntilCorner -= 1;
-      if (state.collisionsUntilCorner <= 0) {
-        aimAvatarAtCorner(state, hitX, hitY, maxX, maxY);
+      state.collisionsUntilCornerAttempt -= 1;
+      if (state.collisionsUntilCornerAttempt <= 0) {
+        aimAvatarNearCorner(state, hitX, hitY, maxX, maxY);
       }
     }
   }
@@ -2997,7 +3005,7 @@ function startAvatarRoam() {
     velocityX: Math.cos(angle) * avatarRoamSpeed,
     velocityY: -Math.sin(angle) * avatarRoamSpeed,
     lastTimestamp: 0,
-    collisionsUntilCorner: getAvatarCornerInterval(),
+    collisionsUntilCornerAttempt: getAvatarCornerInterval(),
     isCornerBound: false,
   };
   avatarButton.classList.add("is-screen-roaming");
