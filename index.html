@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-8"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-72">
+    <link rel="stylesheet" href="styles.css?v=upgrade-73">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -39,7 +39,8 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-47" defer></script>
+    <script src="screensaver.js?v=screensaver-1" defer></script>
+    <script src="script.js?v=upgrade-48" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
     <script src="arcade.js?v=arcade-3" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
@@ -308,6 +309,9 @@
         </button>
         <p id="fake-action-center-status" aria-live="polite">All systems are making their best effort.</p>
       </aside>
+      <div id="desktop-screensaver" class="desktop-screensaver" aria-hidden="true" hidden>
+        <canvas id="desktop-screensaver-canvas"></canvas>
+      </div>
       <footer class="fake-taskbar">
         <details class="fake-start-menu">
           <summary>BITS</summary>

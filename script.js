@@ -3029,7 +3029,11 @@ function enterIdleMode() {
   isIdle = true;
   avatarWrap.classList.add("is-idle");
   if (!hasReducedMotionPreference()) {
-    startAvatarRoam();
+    if (fakeDesktop.hidden) {
+      startAvatarRoam();
+    } else {
+      window.BitsDesktopScreensaver.start();
+    }
   }
   statusText.textContent = "AFK?";
   processTitle.textContent = "~/internet/avatar_escape.exe";
@@ -3047,6 +3051,7 @@ function resetIdleTimer() {
   if (isIdle) {
     isIdle = false;
     stopAvatarRoam();
+    window.BitsDesktopScreensaver.stop();
     avatarWrap.insertBefore(avatarButton, avatarWrap.querySelector(".avatar-shadow"));
     avatarWrap.classList.remove("is-idle");
     statusText.textContent = "ONLINE";
@@ -3059,6 +3064,12 @@ function resetIdleTimer() {
 ["pointerdown", "keydown", "scroll"].forEach((eventName) => {
   window.addEventListener(eventName, resetIdleTimer, { passive: true });
 });
+
+window.addEventListener("pointermove", () => {
+  if (isIdle) {
+    resetIdleTimer();
+  }
+}, { passive: true });
 
 document.addEventListener("visibilitychange", () => {
   document.documentElement.classList.toggle("is-page-hidden", document.hidden);
