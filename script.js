@@ -1665,6 +1665,7 @@ let virusScreenTimer;
 let virusScreenPreviousFocus;
 let virusNetworkName = "";
 let virusTriggerTimer;
+let virusTextTimer;
 
 function isActionCenterEnabled(name) {
   return fakeActionCenter.querySelector(
@@ -1707,7 +1708,9 @@ function updateWifiPickerAvailability() {
 
 function recoverFromVirusScreen() {
   window.clearInterval(virusScreenTimer);
+  window.clearTimeout(virusTextTimer);
   virusScreen.hidden = true;
+  virusScreen.classList.remove("is-glitch-spike");
   document.body.classList.remove("is-virus-screen");
   document.title = "BitsofBitsofBits // BITSOFWEBSITE";
   virusScreenProgress.textContent = "0%";
@@ -1755,6 +1758,22 @@ function triggerVirusScreen(networkName) {
     progress = Math.min(100, progress + 10);
     virusScreenProgress.textContent = `${progress}%`;
     virusScreenMeterFill.style.width = `${progress}%`;
+    if (progress > 0 && progress < 100 && progress % 30 === 0) {
+      const glitchMessages = [
+        "THR3AT NAM3: fr33_b1ts_final_FINAL.exe // PLEASE PANIC NORMALLY",
+        "M3M0RY LEAK DETECTED: several memories now belong to the toolbar",
+        "QUARANTINE STATUS: YES // NO // FILE NOT EMOTIONALLY AVAILABLE",
+      ];
+      virusScreenCopy.textContent =
+        glitchMessages[(progress / 30 - 1) % glitchMessages.length];
+      virusScreen.classList.add("is-glitch-spike");
+      window.clearTimeout(virusTextTimer);
+      virusTextTimer = window.setTimeout(() => {
+        virusScreenCopy.textContent =
+          `${networkName} installed a complimentary virus and several browser toolbars.`;
+        virusScreen.classList.remove("is-glitch-spike");
+      }, 240);
+    }
     if (progress >= 100) {
       recoverFromVirusScreen();
     }
