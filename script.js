@@ -205,6 +205,12 @@ const fakeCoBits = document.querySelector("#fake-cobits");
 const fakeCoBitsForm = document.querySelector("#fake-cobits-form");
 const fakeCoBitsInput = document.querySelector("#fake-cobits-input");
 const fakeCoBitsLog = document.querySelector("#fake-cobits-log");
+const fakeVpnAd = document.querySelector("#fake-vpn-ad");
+const fakeVpnHeading = document.querySelector("#fake-vpn-heading");
+const fakeVpnCopy = document.querySelector("#fake-vpn-copy");
+const fakeVpnInstall = document.querySelector("#fake-vpn-install");
+const fakeVpnDecline = document.querySelector("#fake-vpn-decline");
+let fakeVpnInstallTimer;
 const fakeActionCenterTrigger = document.querySelector("#fake-action-center-trigger");
 const fakeActionCenter = document.querySelector("#fake-action-center");
 const fakeActionCenterStatus = document.querySelector("#fake-action-center-status");
@@ -1360,7 +1366,7 @@ function inspectPlayingDeadProcess() {
 }
 
 function closeFakeDesktopApps() {
-  [fakeTaskManager, fakeCoBits].forEach((app) => {
+  [fakeTaskManager, fakeCoBits, fakeVpnAd].forEach((app) => {
     app.hidden = true;
   });
   fakeActionCenter.hidden = true;
@@ -1600,7 +1606,11 @@ fakeArgAction.addEventListener("click", () => {
 });
 document.querySelectorAll("[data-fake-app-close]").forEach((button) => {
   button.addEventListener("click", () => {
-    button.closest(".fake-desktop-app").hidden = true;
+    const app = button.closest(".fake-desktop-app");
+    if (app === fakeVpnAd) {
+      window.clearTimeout(fakeVpnInstallTimer);
+    }
+    app.hidden = true;
   });
 });
 document.querySelectorAll("[data-end-fake-process]").forEach((button) => {
@@ -1750,7 +1760,7 @@ function triggerVirusScreen(networkName) {
   virusScreenProgress.textContent = "0%";
   virusScreenMeterFill.style.width = "0%";
   document.body.classList.add("is-virus-screen");
-  document.title = "BITS DEFENDER // VERY CONCERNED";
+  document.title = "BITPROTECTOR // VERY CONCERNED";
   virusScreen.hidden = false;
   virusScreen.focus();
   window.clearInterval(virusScreenTimer);
@@ -1778,6 +1788,18 @@ function triggerVirusScreen(networkName) {
       recoverFromVirusScreen();
     }
   }, 700);
+}
+
+function openFakeVpnAd() {
+  window.clearTimeout(fakeVpnInstallTimer);
+  fakeVpnHeading.textContent =
+    "Protect your Bits before someone sees all of them.";
+  fakeVpnCopy.textContent =
+    "FREE_PUBLIC_WIFI recommends BitShield VPN, the only VPN brave enough to advertise on FREE_PUBLIC_WIFI.";
+  fakeVpnInstall.textContent = "INSTALL DEFINITELY SECURE VPN";
+  fakeVpnInstall.disabled = false;
+  fakeVpnDecline.textContent = "NO THANKS, I PREFER DANGER";
+  openFakeDesktopApp(fakeVpnAd, fakeVpnInstall);
 }
 
 function reactToActionCenterControl(name, pressed) {
@@ -1860,6 +1882,7 @@ fakeWifiPickerBack.addEventListener("click", () => {
 fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((button) => {
   button.addEventListener("click", () => {
     const networkName = button.dataset.wifiNetwork;
+    const outcome = button.dataset.networkOutcome;
     connectedWifiNetwork = networkName;
     connectedWifiSignal = button.dataset.signal;
     fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((network) => {
@@ -1871,15 +1894,40 @@ fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((button) => {
       `Connected to ${networkName}. Signal strength: ${button.dataset.signal.toLowerCase()}.`;
     setActionCenterNotification(
       `Connected to ${networkName}`,
-      button.dataset.virus === "true"
-        ? "BITS Defender is checking this connection. It seems nervous."
+      outcome === "vpn-ad"
+        ? "This free connection is supported by several unavoidable sponsors."
+        : button.dataset.virus === "true"
+          ? "BitProtector is checking this connection. It seems nervous."
         : "No immediate disasters detected.",
     );
-    if (button.dataset.virus === "true") {
+    if (outcome === "vpn-ad") {
+      window.setTimeout(openFakeVpnAd, 700);
+    } else if (button.dataset.virus === "true") {
       window.clearTimeout(virusTriggerTimer);
       virusTriggerTimer = window.setTimeout(() => triggerVirusScreen(networkName), 900);
     }
   });
+});
+fakeVpnInstall.addEventListener("click", () => {
+  fakeVpnInstall.disabled = true;
+  fakeVpnInstall.textContent = "INSTALLING TRUST...";
+  fakeVpnInstallTimer = window.setTimeout(() => {
+    fakeVpnHeading.textContent = "Your Bits are now protected-ish.";
+    fakeVpnCopy.textContent =
+      "BitShield VPN moved your internet traffic behind a very convincing shield icon.";
+    fakeVpnInstall.textContent = "PROTECTED-ISH";
+    fakeVpnDecline.textContent = "CLOSE THIS EXTREMELY SECURE WINDOW";
+    setActionCenterNotification(
+      "BitShield VPN installed",
+      "Your IP address is now wearing a small disguise.",
+    );
+  }, 900);
+});
+fakeVpnDecline.addEventListener("click", () => {
+  window.clearTimeout(fakeVpnInstallTimer);
+  fakeVpnAd.hidden = true;
+  fakeActionCenterStatus.textContent =
+    "BitShield VPN declined. FREE_PUBLIC_WIFI is judging your risk tolerance.";
 });
 virusScreenRecover.addEventListener("click", recoverFromVirusScreen);
 fakeActionNotificationDismiss.addEventListener("click", () => {

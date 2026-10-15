@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-56">
+    <link rel="stylesheet" href="styles.css?v=upgrade-57">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -39,7 +39,7 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-39" defer></script>
+    <script src="script.js?v=upgrade-40" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -214,6 +214,35 @@
           </form>
         </div>
       </aside>
+      <aside
+        id="fake-vpn-ad"
+        class="fake-desktop-app fake-vpn-ad"
+        role="dialog"
+        aria-labelledby="fake-vpn-ad-title"
+        hidden
+      >
+        <header>
+          <strong id="fake-vpn-ad-title">SECURITY_NOTICE.BANNER // SPONSORED</strong>
+          <button type="button" data-fake-app-close aria-label="Close VPN advertisement">&times;</button>
+        </header>
+        <div>
+          <p class="fake-vpn-alert">YOUR INTERNET MAY BE VISIBLE TO THE INTERNET</p>
+          <div class="fake-vpn-brand" aria-hidden="true"><span>BS</span><strong>BitShield VPN</strong></div>
+          <h2 id="fake-vpn-heading">Protect your Bits before someone sees all of them.</h2>
+          <p id="fake-vpn-copy">FREE_PUBLIC_WIFI recommends BitShield VPN, the only VPN brave enough to advertise on FREE_PUBLIC_WIFI.</p>
+          <ul>
+            <li>Moves your IP address at least three pixels away</li>
+            <li>Military-grade font weight</li>
+            <li>Blocks 104% of independently imagined threats</li>
+            <li>No logs, except this one</li>
+          </ul>
+          <div class="fake-vpn-actions">
+            <button id="fake-vpn-install" type="button">INSTALL DEFINITELY SECURE VPN</button>
+            <button id="fake-vpn-decline" type="button">NO THANKS, I PREFER DANGER</button>
+          </div>
+          <small>By continuing, you agree that the shield icon looks reassuring.</small>
+        </div>
+      </aside>
       <aside id="fake-action-center" class="fake-action-center" aria-labelledby="fake-action-center-title" hidden>
         <header>
           <strong id="fake-action-center-title">ACTION CENTER</strong>
@@ -252,7 +281,7 @@
             <button type="button" data-wifi-network="The Promised LAN" data-signal="Fair">
               <span>▂▄</span><strong>The Promised LAN</strong><small>Open</small>
             </button>
-            <button type="button" data-wifi-network="FREE_PUBLIC_WIFI" data-signal="Excellent" data-virus="true">
+            <button type="button" data-wifi-network="FREE_PUBLIC_WIFI" data-signal="Excellent" data-network-outcome="vpn-ad">
               <span>▂▄▆█</span><strong>FREE_PUBLIC_WIFI</strong><small>Open</small>
             </button>
             <button type="button" data-wifi-network="Download_More_BITS" data-signal="Excellent" data-virus="true">
@@ -1431,7 +1460,7 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
       hidden
     >
       <div class="death-screen-content">
-        <p class="virus-screen-label">BITS DEFENDER // THREAT RESPONSE FAILED SUCCESSFULLY</p>
+        <p class="virus-screen-label">BITPROTECTOR // THREAT RESPONSE FAILED SUCCESSFULLY</p>
         <div class="death-screen-face" aria-hidden="true">[!_!]</div>
         <h2 id="virus-screen-heading" data-text="Your Bits connected to something they should not have.">Your Bits connected to something they should not have.</h2>
         <p id="virus-screen-copy">A complimentary virus has been installed from an extremely trustworthy network.</p>
