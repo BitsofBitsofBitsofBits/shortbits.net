@@ -1344,6 +1344,10 @@ textarea {
   transform-origin: center;
 }
 
+.theme-atmosphere[data-theme="aurora"] {
+  inset: -96px;
+}
+
 .theme-atmosphere[data-theme="aurora"]::before {
   background:
     conic-gradient(
