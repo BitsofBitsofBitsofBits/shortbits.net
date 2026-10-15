@@ -2884,6 +2884,21 @@ function enterIdleMode() {
 
   isIdle = true;
   avatarWrap.classList.add("is-idle");
+  if (!hasReducedMotionPreference()) {
+    const avatarRect = avatarButton.getBoundingClientRect();
+    const startX = Math.max(
+      12,
+      Math.min(avatarRect.left, window.innerWidth - avatarRect.width - 12),
+    );
+    const startY = Math.max(
+      12,
+      Math.min(avatarRect.top, window.innerHeight - avatarRect.height - 12),
+    );
+    avatarButton.style.setProperty("--avatar-roam-start-x", `${startX}px`);
+    avatarButton.style.setProperty("--avatar-roam-start-y", `${startY}px`);
+    avatarButton.classList.add("is-screen-roaming");
+    document.body.append(avatarButton);
+  }
   statusText.textContent = "AFK?";
   processTitle.textContent = "~/internet/avatar_escape.exe";
   showAchievement(
@@ -2899,6 +2914,10 @@ function resetIdleTimer() {
   window.clearTimeout(assistantTimer);
   if (isIdle) {
     isIdle = false;
+    avatarButton.classList.remove("is-screen-roaming");
+    avatarButton.style.removeProperty("--avatar-roam-start-x");
+    avatarButton.style.removeProperty("--avatar-roam-start-y");
+    avatarWrap.insertBefore(avatarButton, avatarWrap.querySelector(".avatar-shadow"));
     avatarWrap.classList.remove("is-idle");
     statusText.textContent = "ONLINE";
     processTitle.textContent = "~/internet/presence.exe";

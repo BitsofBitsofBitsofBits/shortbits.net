@@ -8104,13 +8104,18 @@ html.is-birthday .falling-bit:nth-child(4n) { color: #b99aff; }
   z-index: auto;
 }
 
-.avatar-wrap.is-idle .avatar {
+.avatar.is-screen-roaming {
+  position: fixed;
+  z-index: 45;
+  top: 0;
+  left: 0;
+  margin: 0;
   transform-origin: center;
-  animation: avatar-wander 6.4s ease-in-out infinite;
+  animation: avatar-screen-roam 24s ease-in-out infinite;
 }
 
 .avatar-wrap.is-idle .avatar-shadow {
-  animation: avatar-idle-shadow 6.4s ease-in-out infinite;
+  animation: avatar-idle-shadow 4.8s ease-in-out infinite;
 }
 
 html.is-chaos-mode .shell {
@@ -8799,25 +8804,33 @@ html.is-root-mode .name-field {
   80% { filter: none; }
 }
 
-@keyframes avatar-wander {
+@keyframes avatar-screen-roam {
   0%,
   100% {
-    transform: translate(0, 0) rotate(3deg);
+    transform:
+      translate3d(
+        var(--avatar-roam-start-x, 15vw),
+        var(--avatar-roam-start-y, 20vh),
+        0
+      )
+      rotate(3deg);
   }
   18% {
-    transform: translate(-12px, -8px) rotate(-4deg);
+    transform: translate3d(calc(100vw - 148px), 12vh, 0) rotate(8deg);
   }
   36% {
-    transform: translate(-5px, 10px) rotate(-1deg);
+    transform: translate3d(52vw, calc(100vh - 150px), 0) rotate(-5deg);
   }
   54% {
-    transform: translate(15px, -11px) rotate(6deg);
+    transform: translate3d(18px, 58vh, 0) rotate(-9deg);
   }
   72% {
-    transform: translate(8px, 8px) rotate(4deg);
+    transform: translate3d(42vw, 18px, 0) rotate(5deg);
   }
   88% {
-    transform: translate(-10px, 4px) rotate(-3deg);
+    transform:
+      translate3d(calc(100vw - 148px), calc(100vh - 150px), 0)
+      rotate(9deg);
   }
 }
 
