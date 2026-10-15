@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-54">
+    <link rel="stylesheet" href="styles.css?v=upgrade-55">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -39,7 +39,7 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-38" defer></script>
+    <script src="script.js?v=upgrade-39" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -220,11 +220,49 @@
           <span>BITS OS</span>
         </header>
         <div class="fake-quick-actions" aria-label="Quick actions">
-          <button type="button" data-action-center-control="wifi" aria-pressed="true">WI-FI-ish</button>
+          <div class="fake-quick-action-split">
+            <button type="button" data-action-center-control="wifi" aria-pressed="true">WI-FI-ish</button>
+            <button
+              id="fake-wifi-picker-trigger"
+              class="fake-quick-action-more"
+              type="button"
+              aria-label="Show available WI-FI-ish networks"
+              aria-controls="fake-wifi-picker"
+              aria-expanded="false"
+            >›</button>
+          </div>
           <button type="button" data-action-center-control="night" aria-pressed="false">NIGHT BITS</button>
           <button type="button" data-action-center-control="dnd" aria-pressed="false">DO NOT DISTURB</button>
           <button type="button" data-action-center-control="chaos" aria-pressed="true">CHAOS GUARD</button>
         </div>
+        <section id="fake-wifi-picker" class="fake-wifi-picker" aria-labelledby="fake-wifi-picker-title" hidden>
+          <header>
+            <button id="fake-wifi-picker-back" type="button" aria-label="Return to quick actions">‹</button>
+            <strong id="fake-wifi-picker-title">WI-FI-ish</strong>
+            <span>AVAILABLE NETWORKS</span>
+          </header>
+          <p id="fake-wifi-current">Connected: BITS_LAN // Secured-ish</p>
+          <div class="fake-wifi-networks">
+            <button class="is-connected" type="button" data-wifi-network="BITS_LAN" data-signal="Excellent">
+              <span>▂▄▆█</span><strong>BITS_LAN</strong><small>Secured-ish</small>
+            </button>
+            <button type="button" data-wifi-network="Pretty_Fly_For_A_WiFi" data-signal="Good">
+              <span>▂▄▆</span><strong>Pretty_Fly_For_A_WiFi</strong><small>Secured</small>
+            </button>
+            <button type="button" data-wifi-network="The Promised LAN" data-signal="Fair">
+              <span>▂▄</span><strong>The Promised LAN</strong><small>Open</small>
+            </button>
+            <button type="button" data-wifi-network="FREE_PUBLIC_WIFI" data-signal="Excellent" data-virus="true">
+              <span>▂▄▆█</span><strong>FREE_PUBLIC_WIFI</strong><small>Open</small>
+            </button>
+            <button type="button" data-wifi-network="Download_More_BITS" data-signal="Excellent" data-virus="true">
+              <span>▂▄▆█</span><strong>Download_More_BITS</strong><small>Secured?</small>
+            </button>
+            <button type="button" data-wifi-network="Definitely_Not_A_Virus" data-signal="Good" data-virus="true">
+              <span>▂▄▆</span><strong>Definitely_Not_A_Virus</strong><small>Trust me</small>
+            </button>
+          </div>
+        </section>
         <div class="fake-action-notification">
           <span aria-hidden="true">!</span>
           <p><strong id="fake-action-notification-title">BITS OS requires your attention</strong><br><span id="fake-action-notification-copy">Reason: attention was available.</span></p>
@@ -1380,6 +1418,32 @@ STATUS: DELETED, BUT STILL RUNNING</pre>
         <div class="red-screen-meter" aria-hidden="true">
           <span id="red-screen-meter-fill"></span>
         </div>
+      </div>
+    </section>
+
+    <section
+      id="virus-screen"
+      class="death-screen virus-screen"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="virus-screen-heading"
+      tabindex="-1"
+      hidden
+    >
+      <div class="death-screen-content">
+        <p class="virus-screen-label">BITS DEFENDER // THREAT RESPONSE FAILED SUCCESSFULLY</p>
+        <div class="death-screen-face" aria-hidden="true">[!_!]</div>
+        <h2 id="virus-screen-heading">Your Bits connected to something they should not have.</h2>
+        <p id="virus-screen-copy">A complimentary virus has been installed from an extremely trustworthy network.</p>
+        <p class="death-screen-progress" aria-live="assertive">
+          Quarantining suspicious Bits: <strong id="virus-screen-progress">0%</strong>
+        </p>
+        <div class="virus-screen-meter" aria-hidden="true"><span id="virus-screen-meter-fill"></span></div>
+        <p class="death-screen-stop-code">
+          Stop code: <strong>UNPROTECTED_BIT_EXPOSURE</strong><br>
+          What failed: common_sense.sys
+        </p>
+        <button id="virus-screen-recover" type="button">QUARANTINE AND RESTART</button>
       </div>
     </section>
 

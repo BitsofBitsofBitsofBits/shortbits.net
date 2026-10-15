@@ -212,6 +212,10 @@ const fakeActionNotification = document.querySelector(".fake-action-notification
 const fakeActionNotificationTitle = document.querySelector("#fake-action-notification-title");
 const fakeActionNotificationCopy = document.querySelector("#fake-action-notification-copy");
 const fakeActionNotificationDismiss = document.querySelector("#fake-action-notification-dismiss");
+const fakeWifiPickerTrigger = document.querySelector("#fake-wifi-picker-trigger");
+const fakeWifiPicker = document.querySelector("#fake-wifi-picker");
+const fakeWifiPickerBack = document.querySelector("#fake-wifi-picker-back");
+const fakeWifiCurrent = document.querySelector("#fake-wifi-current");
 const fakeArgSignal = document.querySelector("#fake-arg-signal");
 const fakeArgSignalLabel = document.querySelector("#fake-arg-signal-label");
 const fakeArgProcess = document.querySelector("#fake-arg-process");
@@ -235,6 +239,11 @@ const redScreen = document.querySelector("#red-screen");
 const redScreenProgress = document.querySelector("#red-screen-progress");
 const redScreenCountdown = document.querySelector("#red-screen-countdown");
 const redScreenMeterFill = document.querySelector("#red-screen-meter-fill");
+const virusScreen = document.querySelector("#virus-screen");
+const virusScreenCopy = document.querySelector("#virus-screen-copy");
+const virusScreenProgress = document.querySelector("#virus-screen-progress");
+const virusScreenMeterFill = document.querySelector("#virus-screen-meter-fill");
+const virusScreenRecover = document.querySelector("#virus-screen-recover");
 const interactiveSpotifyArtwork = document.querySelector("#spotify-artwork");
 const achievement = document.querySelector("#achievement");
 const achievementLabel = document.querySelector("#achievement-label");
@@ -426,6 +435,7 @@ const achievementCatalog = [
   { id: "cobits-division", hints: ["Artificial intelligence still fears arithmetic.", "Request an impossible calculation.", "Ask CoBits to divide by zero."] },
   { id: "action-airgap", hints: ["Action Center controls are mostly aspirational.", "Disconnect absolutely everything.", "Turn off all four quick actions at once."] },
   { id: "chaos-unguarded", hints: ["One Action Center switch protects everyone.", "Safety can be tested more than once.", "Disable CHAOS GUARD three times."] },
+  { id: "wifi-virus", hints: ["Not every free connection is complimentary.", "BITS OS lists several questionable networks.", "Connect to a suspicious WI-FI-ish network and survive the result."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "support-retirement", hints: ["Support tools have limits.", "Excessive assistance wears them down.", "Retire every Automated Support Toolkit button."] },
   { id: "found-a-bit", hints: ["The system expected more Bits.", "A rare message names a missing process.", "Ask the terminal to trace missing bit."] },
@@ -1354,6 +1364,8 @@ function closeFakeDesktopApps() {
     app.hidden = true;
   });
   fakeActionCenter.hidden = true;
+  fakeWifiPicker.hidden = true;
+  fakeWifiPickerTrigger.setAttribute("aria-expanded", "false");
   fakeActionCenterTrigger.setAttribute("aria-expanded", "false");
 }
 
@@ -1627,11 +1639,7 @@ fakeActionCenterTrigger.addEventListener("click", () => {
 });
 const actionCenterMessages = {
   wifi: {
-    on: [
-      "Connected to BITS_LAN. Signal strength: emotionally available.",
-      "Connected to Pretty_Fly_For_A_WiFi. Security: nostalgic.",
-      "Connected to The Promised LAN. No promises were verified.",
-    ],
+    on: "WI-FI-ish enabled. Use the arrow to choose a questionable network.",
     off: "WI-FI-ish disabled. You are now connected to the concept of offline.",
   },
   night: {
@@ -1647,11 +1655,16 @@ const actionCenterMessages = {
     off: "CHAOS GUARD disabled. This was almost certainly a deliberate choice.",
   },
 };
-let wifiMessageIndex = 0;
 let chaosGuardDisables = 0;
 let dismissedActionNotifications = 0;
 let suppressedActionNotifications = 0;
 let actionNotificationTimer;
+let connectedWifiNetwork = "BITS_LAN";
+let connectedWifiSignal = "Excellent";
+let virusScreenTimer;
+let virusScreenPreviousFocus;
+let virusNetworkName = "";
+let virusTriggerTimer;
 
 function isActionCenterEnabled(name) {
   return fakeActionCenter.querySelector(
@@ -1670,16 +1683,95 @@ function setActionCenterNotification(title, copy) {
   fakeActionNotification.hidden = false;
 }
 
-function reactToActionCenterControl(name, pressed) {
-  if (name === "wifi" && pressed) {
-    fakeActionCenterStatus.textContent =
-      actionCenterMessages.wifi.on[wifiMessageIndex % actionCenterMessages.wifi.on.length];
-    wifiMessageIndex += 1;
+function setWifiPickerOpen(open) {
+  fakeWifiPicker.hidden = !open;
+  fakeWifiPickerTrigger.setAttribute("aria-expanded", String(open));
+  if (open) {
+    fakeWifiPickerBack.focus();
   } else {
-    fakeActionCenterStatus.textContent =
-      actionCenterMessages[name][pressed ? "on" : "off"];
+    fakeWifiPickerTrigger.focus();
   }
+}
 
+function updateWifiPickerAvailability() {
+  const enabled = isActionCenterEnabled("wifi");
+  fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((button) => {
+    button.disabled = !enabled;
+  });
+  fakeWifiCurrent.textContent = enabled
+    ? connectedWifiNetwork
+      ? `Connected: ${connectedWifiNetwork} // Signal: ${connectedWifiSignal}`
+      : "WI-FI-ish is on // Select a network"
+    : "WI-FI-ish is off";
+}
+
+function recoverFromVirusScreen() {
+  window.clearInterval(virusScreenTimer);
+  virusScreen.hidden = true;
+  document.body.classList.remove("is-virus-screen");
+  document.title = "BitsofBitsofBits // BITSOFWEBSITE";
+  virusScreenProgress.textContent = "0%";
+  virusScreenMeterFill.style.width = "0%";
+  connectedWifiNetwork = "";
+  connectedWifiSignal = "";
+  fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((network) => {
+    network.classList.remove("is-connected");
+  });
+  updateWifiPickerAvailability();
+  fakeActionCenterStatus.textContent =
+    `${virusNetworkName} quarantined. WI-FI-ish remains on but wisely disconnected.`;
+  window.BITS_ACHIEVEMENTS.unlock(
+    "wifi-virus",
+    "ANTIVIRUS ANTIBODY",
+    "QUESTIONABLE NETWORK SURVIVED",
+  );
+  window.dispatchEvent(new CustomEvent("bits:death-screen-survived", {
+    detail: { screen: "virus" },
+  }));
+  setActionCenterNotification(
+    "Threat quarantined",
+    `${virusNetworkName} has been blocked until someone forgets why.`,
+  );
+  virusScreenPreviousFocus?.focus();
+}
+
+function triggerVirusScreen(networkName) {
+  if (!virusScreen.hidden) {
+    return;
+  }
+  virusNetworkName = networkName;
+  virusScreenPreviousFocus = document.activeElement;
+  let progress = 0;
+  virusScreenCopy.textContent =
+    `${networkName} installed a complimentary virus and several browser toolbars.`;
+  virusScreenProgress.textContent = "0%";
+  virusScreenMeterFill.style.width = "0%";
+  document.body.classList.add("is-virus-screen");
+  document.title = "BITS DEFENDER // VERY CONCERNED";
+  virusScreen.hidden = false;
+  virusScreen.focus();
+  window.clearInterval(virusScreenTimer);
+  virusScreenTimer = window.setInterval(() => {
+    progress = Math.min(100, progress + 10);
+    virusScreenProgress.textContent = `${progress}%`;
+    virusScreenMeterFill.style.width = `${progress}%`;
+    if (progress >= 100) {
+      recoverFromVirusScreen();
+    }
+  }, 700);
+}
+
+function reactToActionCenterControl(name, pressed) {
+  fakeActionCenterStatus.textContent =
+    actionCenterMessages[name][pressed ? "on" : "off"];
+
+  if (name === "wifi") {
+    if (!pressed) {
+      connectedWifiNetwork = "";
+      setWifiPickerOpen(false);
+    }
+    updateWifiPickerAvailability();
+  }
   if (name === "night") {
     fakeDesktop.classList.toggle("has-night-bits", pressed);
   }
@@ -1732,13 +1824,45 @@ function reactToActionCenterControl(name, pressed) {
   }
 }
 
-fakeActionCenter.querySelectorAll(".fake-quick-actions button").forEach((button) => {
+fakeActionCenter.querySelectorAll("[data-action-center-control]").forEach((button) => {
   button.addEventListener("click", () => {
     const pressed = button.getAttribute("aria-pressed") !== "true";
     button.setAttribute("aria-pressed", String(pressed));
     reactToActionCenterControl(button.dataset.actionCenterControl, pressed);
   });
 });
+fakeWifiPickerTrigger.addEventListener("click", () => {
+  updateWifiPickerAvailability();
+  setWifiPickerOpen(fakeWifiPicker.hidden);
+});
+fakeWifiPickerBack.addEventListener("click", () => {
+  setWifiPickerOpen(false);
+});
+fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const networkName = button.dataset.wifiNetwork;
+    connectedWifiNetwork = networkName;
+    connectedWifiSignal = button.dataset.signal;
+    fakeWifiPicker.querySelectorAll("[data-wifi-network]").forEach((network) => {
+      network.classList.toggle("is-connected", network === button);
+    });
+    fakeWifiCurrent.textContent =
+      `Connected: ${networkName} // Signal: ${button.dataset.signal}`;
+    fakeActionCenterStatus.textContent =
+      `Connected to ${networkName}. Signal strength: ${button.dataset.signal.toLowerCase()}.`;
+    setActionCenterNotification(
+      `Connected to ${networkName}`,
+      button.dataset.virus === "true"
+        ? "BITS Defender is checking this connection. It seems nervous."
+        : "No immediate disasters detected.",
+    );
+    if (button.dataset.virus === "true") {
+      window.clearTimeout(virusTriggerTimer);
+      virusTriggerTimer = window.setTimeout(() => triggerVirusScreen(networkName), 900);
+    }
+  });
+});
+virusScreenRecover.addEventListener("click", recoverFromVirusScreen);
 fakeActionNotificationDismiss.addEventListener("click", () => {
   dismissedActionNotifications += 1;
   fakeActionNotification.hidden = true;

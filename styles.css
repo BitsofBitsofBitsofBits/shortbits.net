@@ -360,6 +360,7 @@ body.is-red-screen,
 body.is-kernel-panic,
 body.is-black-screen,
 body.is-green-screen,
+body.is-virus-screen,
 body.is-black-screen-staging {
   overflow: hidden;
 }
@@ -3245,10 +3246,137 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   font-size: 0.62rem;
 }
 
+.fake-quick-action-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+}
+
+.fake-quick-action-split > button {
+  min-width: 0;
+}
+
+.fake-quick-action-split > button:first-child {
+  border-right: 0;
+}
+
+.fake-quick-actions .fake-quick-action-more {
+  padding: 0;
+  border-left: 1px solid rgba(var(--accent-rgb), 0.42);
+  font-size: 1.2rem;
+}
+
+.fake-quick-action-split:has([aria-pressed="true"]) .fake-quick-action-more {
+  border-color: var(--accent);
+  color: var(--bg);
+  background: var(--accent);
+}
+
 .fake-quick-actions button[aria-pressed="true"] {
   border-color: var(--accent);
   color: var(--bg);
   background: var(--accent);
+}
+
+.fake-wifi-picker {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.fake-wifi-picker[hidden] {
+  display: none;
+}
+
+.fake-wifi-picker > header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fake-wifi-picker > header button {
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1rem;
+}
+
+.fake-wifi-picker > header strong {
+  font-size: 0.67rem;
+}
+
+.fake-wifi-picker > header span {
+  color: var(--muted);
+  font-size: 0.48rem;
+}
+
+.fake-wifi-picker > p {
+  margin: 0;
+  padding: 9px;
+  border-bottom: 1px dashed var(--border);
+  color: var(--accent);
+  font-size: 0.56rem;
+  line-height: 1.4;
+}
+
+.fake-wifi-networks {
+  max-height: 220px;
+  padding: 5px;
+  overflow-y: auto;
+}
+
+.fake-wifi-networks button {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  width: 100%;
+  gap: 2px 8px;
+  padding: 9px;
+  border: 1px solid transparent;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.fake-wifi-networks button:hover,
+.fake-wifi-networks button:focus-visible {
+  border-color: var(--border);
+  background: rgba(var(--accent-rgb), 0.08);
+  outline: none;
+}
+
+.fake-wifi-networks button.is-connected {
+  border-color: var(--accent);
+}
+
+.fake-wifi-networks button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.fake-wifi-networks button > span {
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--accent);
+  font-size: 0.5rem;
+  letter-spacing: -0.12em;
+}
+
+.fake-wifi-networks strong {
+  overflow: hidden;
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fake-wifi-networks small {
+  color: var(--muted);
+  font-size: 0.5rem;
 }
 
 .fake-action-notification {
@@ -3589,6 +3717,57 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   color: rgba(255, 255, 255, 0.72);
   font-size: clamp(0.65rem, 1.8vw, 0.78rem);
   letter-spacing: 0.04em;
+}
+
+.virus-screen {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.035) 0,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    #4b075f;
+}
+
+.virus-screen-label {
+  color: #61fff2;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.virus-screen-meter {
+  width: min(560px, 100%);
+  height: 12px;
+  margin: -10px 0 28px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.virus-screen-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #61fff2;
+  transition: width 300ms linear;
+}
+
+.virus-screen button {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 2px solid #fff;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.virus-screen button:hover,
+.virus-screen button:focus-visible {
+  color: #4b075f;
+  background: #fff;
+  outline: none;
 }
 
 .kernel-panic {
