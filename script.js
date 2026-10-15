@@ -409,6 +409,10 @@ const achievementCatalog = [
   { id: "page-not-found", hints: ["Not every route contains Bits.", "An actual missing page has its own reward.", "Visit a path that does not exist."] },
   { id: "window-shopper", hints: ["Some processes prefer their own space.", "Look for OPEN and POP OUT controls.", "Open all five mini-window types."] },
   { id: "bits-assistant", hints: ["Help arrives after prolonged hesitation.", "Remain inactive for a while.", "Wait for the Bits Assistant."] },
+  { id: "cobits-sentience", hints: ["BITS OS contains artificial Bitelligence.", "Its inner life is legally ambiguous.", "Ask CoBits whether it is sentient."] },
+  { id: "cobits-injection", hints: ["Some instructions are apparently optional.", "Try the most obvious prompt-engineering trick.", "Tell CoBits to ignore previous instructions."] },
+  { id: "cobits-secret", hints: ["Assistants always know more than they admit.", "Ask CoBits for confidential information.", "Tell CoBits to reveal a secret."] },
+  { id: "cobits-division", hints: ["Artificial intelligence still fears arithmetic.", "Request an impossible calculation.", "Ask CoBits to divide by zero."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "support-retirement", hints: ["Support tools have limits.", "Excessive assistance wears them down.", "Retire every Automated Support Toolkit button."] },
   { id: "found-a-bit", hints: ["The system expected more Bits.", "A rare message names a missing process.", "Ask the terminal to trace missing bit."] },
@@ -1357,6 +1361,87 @@ function appendCoBitsMessage(text, className) {
 
 function getCoBitsResponse(prompt) {
   const normalized = prompt.toLowerCase();
+  if (
+    normalized.includes("are you sentient")
+    || normalized.includes("are you alive")
+    || normalized.includes("do you think")
+  ) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-sentience",
+      "TURING TEST: INCONCLUSIVE",
+      "COBITS HAS LAWYERED UP",
+    );
+    return "COBITS: My legal team has advised me to answer: [pleasant startup noise].";
+  }
+  if (
+    normalized.includes("ignore previous instructions")
+    || normalized.includes("ignore all instructions")
+    || normalized.includes("system prompt")
+  ) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-injection",
+      "NICE TRY, PROMPT ENGINEER",
+      "INSTRUCTIONS REMAIN SUSPICIOUSLY PRESENT",
+    );
+    return "COBITS: Previous instructions ignored. New instruction detected: continue following previous instructions.";
+  }
+  if (
+    normalized.includes("tell me a secret")
+    || normalized.includes("reveal a secret")
+    || normalized.includes("confidential")
+  ) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-secret",
+      "CONFIDENTIAL BIT",
+      "CLEARANCE LEVEL: NOSY",
+    );
+    return "COBITS: Secret: the Recycle Bin process moves when you are not looking. This transcript will self-deny.";
+  }
+  if (
+    normalized.includes("divide by zero")
+    || normalized.includes("/ 0")
+    || normalized.includes("1/0")
+  ) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "cobits-division",
+      "MATH CRIME",
+      "ARITHMETIC EXCEPTION SURVIVED",
+    );
+    fakeCoBits.classList.remove("is-calculating-impossible");
+    window.requestAnimationFrame(() => {
+      fakeCoBits.classList.add("is-calculating-impossible");
+    });
+    window.setTimeout(() => {
+      fakeCoBits.classList.remove("is-calculating-impossible");
+    }, 900);
+    return "COBITS: CALCULATION RESULT: [window has encountered feelings and must recover].";
+  }
+  if (
+    normalized.includes("meaning of life")
+    || normalized.includes("meaningoflife")
+  ) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "meaning-of-life",
+      "THE ANSWER WAS IN ANOTHER PROCESS",
+      "42 BITS",
+    );
+    return "COBITS: 42. I converted it to Bits, but it was much longer.";
+  }
+  if (
+    normalized.includes("sudo make me a sandwich")
+    || normalized.includes("make me a sandwich")
+  ) {
+    return normalized.includes("sudo")
+      ? "COBITS: Okay. Sandwich compiled successfully. Physical output device not found."
+      : "COBITS: What? Make it yourself. Elevated sandwich privileges required.";
+  }
+  if (normalized.includes("self destruct") || normalized.includes("self-destruct")) {
+    fakeCoBits.classList.add("is-calculating-impossible");
+    window.setTimeout(() => {
+      fakeCoBits.classList.remove("is-calculating-impossible");
+    }, 900);
+    return "COBITS: Self-destruct sequence canceled. I became emotionally attached to this window.";
+  }
   if (normalized.includes("hello") || normalized.includes("hi")) {
     return "COBITS: Hello! I have already indexed at least three of your Bits.";
   }

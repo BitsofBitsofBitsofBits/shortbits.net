@@ -3080,6 +3080,33 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   width: min(680px, calc(100% - 32px));
 }
 
+.fake-cobits.is-calculating-impossible {
+  animation: cobits-impossible-calculation 900ms steps(2);
+}
+
+@keyframes cobits-impossible-calculation {
+  0%,
+  100% {
+    filter: none;
+    transform: translate(-50%, -50%);
+  }
+
+  20% {
+    filter: hue-rotate(90deg) contrast(1.4);
+    transform: translate(calc(-50% + 5px), calc(-50% - 2px));
+  }
+
+  45% {
+    filter: invert(0.8);
+    transform: translate(calc(-50% - 4px), calc(-50% + 3px));
+  }
+
+  70% {
+    filter: saturate(2) brightness(1.3);
+    transform: translate(calc(-50% + 2px), -50%);
+  }
+}
+
 .fake-cobits-log {
   height: min(330px, 42vh);
   margin-top: 14px;
