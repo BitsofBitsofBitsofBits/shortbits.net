@@ -1664,6 +1664,8 @@ pongStart.addEventListener("click", startPong);
 const dodgeCanvas = document.querySelector("#dodge-canvas");
 const dodgeContext = dodgeCanvas.getContext("2d");
 const dodgeScore = document.querySelector("#dodge-score");
+const dodgeCollectedOutput = document.querySelector("#dodge-collected");
+const dodgeComboOutput = document.querySelector("#dodge-combo");
 const dodgeLivesOutput = document.querySelector("#dodge-lives");
 const dodgeStart = document.querySelector("#dodge-start");
 let dodgeFrame = 0;
@@ -1671,6 +1673,9 @@ let dodgePreviousTime = 0;
 let dodgePlayerX = 336;
 let dodgePackets = [];
 let dodgePoints = 0;
+let dodgeCollected = 0;
+let dodgeCombo = 0;
+let dodgeAvoided = 0;
 let dodgeLives = 3;
 let dodgeSpawnTimer = 0;
 
@@ -1684,10 +1689,10 @@ function drawDodge() {
   dodgeContext.font = "bold 14px monospace";
   dodgeContext.fillText("SAFE", dodgePlayerX + 6, 390);
   dodgePackets.forEach((packet) => {
-    dodgeContext.fillStyle = packet.danger ? "#ff5267" : colors.muted;
+    dodgeContext.fillStyle = packet.danger ? "#ff5267" : "#f4fbff";
     dodgeContext.fillRect(packet.x, packet.y, packet.size, packet.size);
     dodgeContext.fillStyle = "#07111a";
-    dodgeContext.fillText(packet.danger ? "!" : "0", packet.x + 8, packet.y + 20);
+    dodgeContext.fillText(packet.danger ? "!" : "+", packet.x + 8, packet.y + 20);
   });
 }
 
@@ -1698,7 +1703,12 @@ function stopDodge() {
 
 function finishDodge() {
   stopDodge();
-  finishGame("dodge", dodgePoints * 100, `${dodgePoints} PACKETS`, `${dodgePoints} packets safely routed.`);
+  finishGame(
+    "dodge",
+    dodgePoints,
+    `${dodgeCollected} WHITE // ${dodgeAvoided} RED`,
+    `${dodgeCollected} white packets cached and ${dodgeAvoided} corrupt packets avoided.`,
+  );
 }
 
 function runDodge(timestamp) {
@@ -1715,7 +1725,7 @@ function runDodge(timestamp) {
   if (dodgeSpawnTimer <= 0) {
     const size = 26 + Math.floor(Math.random() * 12);
     dodgePackets.push({
-      danger: Math.random() < 0.78,
+      danger: Math.random() < 0.68,
       size,
       speed: 0.14 + (dodgePoints * 0.004) + (Math.random() * 0.12),
       x: Math.random() * (dodgeCanvas.width - size),
@@ -1730,23 +1740,40 @@ function runDodge(timestamp) {
     if (dodgeLives <= 0) {
       return false;
     }
-    const hit = packet.danger
-      && packet.y + packet.size >= 374
+    const hit = (
+      packet.y + packet.size >= 374
       && packet.y < 396
       && packet.x + packet.size > dodgePlayerX
-      && packet.x < dodgePlayerX + 48;
+      && packet.x < dodgePlayerX + 48
+    );
     if (hit) {
-      dodgeLives -= 1;
-      dodgeLivesOutput.textContent = String(dodgeLives);
-      if (dodgeLives <= 0) {
-        finishDodge();
+      if (packet.danger) {
+        dodgeLives -= 1;
+        dodgeCombo = 0;
+        dodgeLivesOutput.textContent = String(dodgeLives);
+        dodgeComboOutput.textContent = "×1";
+        if (dodgeLives <= 0) {
+          finishDodge();
+        }
+      } else {
+        dodgeCombo += 1;
+        dodgeCollected += 1;
+        const comboMultiplier = Math.min(5, dodgeCombo);
+        dodgePoints += 150 * comboMultiplier;
+        dodgeScore.textContent = String(dodgePoints);
+        dodgeCollectedOutput.textContent = String(dodgeCollected);
+        dodgeComboOutput.textContent = `×${comboMultiplier}`;
       }
       return false;
     }
     if (packet.y > dodgeCanvas.height) {
       if (packet.danger) {
-        dodgePoints += 1;
+        dodgeAvoided += 1;
+        dodgePoints += 25;
         dodgeScore.textContent = String(dodgePoints);
+      } else {
+        dodgeCombo = 0;
+        dodgeComboOutput.textContent = "×1";
       }
       return false;
     }
@@ -1764,14 +1791,19 @@ function startDodge() {
   dodgePlayerX = 336;
   dodgePackets = [];
   dodgePoints = 0;
+  dodgeCollected = 0;
+  dodgeCombo = 0;
+  dodgeAvoided = 0;
   dodgeLives = 3;
   dodgeSpawnTimer = 0;
   dodgePreviousTime = 0;
   dodgeScore.textContent = "0";
+  dodgeCollectedOutput.textContent = "0";
+  dodgeComboOutput.textContent = "×1";
   dodgeLivesOutput.textContent = "3";
   scoreForm.hidden = true;
   pendingResult = null;
-  setArcadeStatus("PACKET DODGE transfer started. Corrupt packets are red.");
+  setArcadeStatus("PACKET DODGE started. Collect white packets; avoid red corruption.");
   dodgeFrame = requestAnimationFrame(runDodge);
 }
 

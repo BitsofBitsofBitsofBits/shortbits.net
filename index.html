@@ -42,7 +42,7 @@
     <script src="screensaver.js?v=screensaver-1" defer></script>
     <script src="script.js?v=upgrade-55" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
-    <script src="arcade.js?v=arcade-8" defer></script>
+    <script src="arcade.js?v=arcade-9" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-3" defer></script>
@@ -1221,11 +1221,11 @@
 
             <article id="arcade-game-dodge" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-dodge" data-arcade-panel="dodge" hidden>
               <div class="arcade-game-toolbar">
-                <p>PACKETS <strong id="dodge-score">0</strong> // LIVES <strong id="dodge-lives">3</strong></p>
+                <p>SCORE <strong id="dodge-score">0</strong> // WHITE <strong id="dodge-collected">0</strong> // COMBO <strong id="dodge-combo">×1</strong> // LIVES <strong id="dodge-lives">3</strong></p>
                 <button id="dodge-start" type="button">START_TRANSFER</button>
               </div>
               <canvas id="dodge-canvas" class="arcade-canvas arcade-wide-canvas" width="720" height="420" aria-label="Packet Dodge game field"></canvas>
-              <p class="arcade-help">MOVE WITH A/D, ARROWS, OR POINTER // AVOID CORRUPTED PACKETS</p>
+              <p class="arcade-help">COLLECT WHITE PACKETS FOR LARGE COMBO BONUSES // AVOID RED CORRUPTION // ROUTING RED PACKETS IS WORTH A SMALL SCORE</p>
             </article>
 
             <article id="arcade-game-cursor" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-cursor" data-arcade-panel="cursor" hidden>
