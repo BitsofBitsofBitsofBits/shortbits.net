@@ -2844,8 +2844,11 @@ document.addEventListener("keydown", (event) => {
 let idleTimer;
 let assistantTimer;
 let isIdle = false;
+let avatarRoamFrame = 0;
+let avatarRoamState = null;
 const idleDelayMs = 180000;
 const assistantDelayMs = 90000;
+const avatarRoamSpeed = 118;
 
 function showBitsAssistant() {
   if (!bitsAssistant.hidden) {
@@ -2877,27 +2880,148 @@ cookieDismiss.addEventListener("click", () => {
   showAchievement("THE AVATAR REGRETS NOTHING", "COOKIE STATUS", 2600, "cookie-notice");
 });
 
+function getAvatarCornerInterval() {
+  return 3 + Math.floor(Math.random() * 4);
+}
+
+function releaseCornerConfetti(x, y) {
+  const colors = ["#ff4f81", "#ffcc33", "#25d9ff", "#7cff6b", "#ad7cff", "#ff7a2f"];
+  const horizontalDirection = x < window.innerWidth / 2 ? 1 : -1;
+  const verticalDirection = y < window.innerHeight / 2 ? 1 : -1;
+
+  for (let index = 0; index < 64; index += 1) {
+    const bit = document.createElement("span");
+    const distance = 120 + Math.random() * Math.min(window.innerWidth * 0.72, 760);
+    const drop = 90 + Math.random() * Math.min(window.innerHeight * 0.68, 620);
+    bit.className = "avatar-corner-confetti";
+    bit.textContent = Math.random() < 0.5 ? "0" : "1";
+    bit.setAttribute("aria-hidden", "true");
+    bit.style.left = `${x}px`;
+    bit.style.top = `${y}px`;
+    bit.style.color = colors[index % colors.length];
+    bit.style.setProperty("--confetti-dx", `${horizontalDirection * distance}px`);
+    bit.style.setProperty("--confetti-dy", `${verticalDirection * drop}px`);
+    bit.style.setProperty("--confetti-spin", `${(Math.random() - 0.5) * 1080}deg`);
+    bit.style.setProperty("--confetti-delay", `${Math.random() * 120}ms`);
+    bit.style.setProperty("--confetti-size", `${10 + Math.random() * 13}px`);
+    document.body.append(bit);
+    window.setTimeout(() => bit.remove(), 1900);
+  }
+}
+
+function setRandomAvatarDirection(state, cornerX, cornerY) {
+  const minAngle = Math.PI / 7;
+  const maxAngle = Math.PI / 2 - minAngle;
+  const angle = minAngle + Math.random() * (maxAngle - minAngle);
+  state.velocityX = Math.cos(angle) * avatarRoamSpeed * (cornerX === 0 ? 1 : -1);
+  state.velocityY = Math.sin(angle) * avatarRoamSpeed * (cornerY === 0 ? 1 : -1);
+}
+
+function aimAvatarAtCorner(state, hitX, hitY, maxX, maxY) {
+  const targetX = hitX ? (state.x === 0 ? maxX : 0) : (Math.random() < 0.5 ? 0 : maxX);
+  const targetY = hitY ? (state.y === 0 ? maxY : 0) : (Math.random() < 0.5 ? 0 : maxY);
+  const distanceX = targetX - state.x;
+  const distanceY = targetY - state.y;
+  const distance = Math.hypot(distanceX, distanceY);
+
+  if (distance === 0) {
+    return;
+  }
+
+  state.velocityX = (distanceX / distance) * avatarRoamSpeed;
+  state.velocityY = (distanceY / distance) * avatarRoamSpeed;
+  state.isCornerBound = true;
+}
+
+function animateAvatarRoam(timestamp) {
+  const state = avatarRoamState;
+  if (!state || !isIdle) {
+    return;
+  }
+
+  const avatarRect = avatarButton.getBoundingClientRect();
+  const maxX = Math.max(0, window.innerWidth - avatarRect.width);
+  const maxY = Math.max(0, window.innerHeight - avatarRect.height);
+  const deltaSeconds = state.lastTimestamp
+    ? Math.min((timestamp - state.lastTimestamp) / 1000, 0.05)
+    : 0;
+  state.lastTimestamp = timestamp;
+  state.x += state.velocityX * deltaSeconds;
+  state.y += state.velocityY * deltaSeconds;
+
+  const hitX = state.x <= 0 || state.x >= maxX;
+  const hitY = state.y <= 0 || state.y >= maxY;
+
+  if (hitX) {
+    state.x = Math.max(0, Math.min(maxX, state.x));
+    state.velocityX *= -1;
+  }
+  if (hitY) {
+    state.y = Math.max(0, Math.min(maxY, state.y));
+    state.velocityY *= -1;
+  }
+
+  if (hitX || hitY) {
+    if (hitX && hitY) {
+      const cornerX = state.x === 0 ? 0 : window.innerWidth;
+      const cornerY = state.y === 0 ? 0 : window.innerHeight;
+      releaseCornerConfetti(cornerX, cornerY);
+      setRandomAvatarDirection(state, state.x, state.y);
+      state.collisionsUntilCorner = getAvatarCornerInterval();
+      state.isCornerBound = false;
+    } else if (state.isCornerBound) {
+      state.collisionsUntilCorner = getAvatarCornerInterval();
+      state.isCornerBound = false;
+    } else if (!state.isCornerBound) {
+      state.collisionsUntilCorner -= 1;
+      if (state.collisionsUntilCorner <= 0) {
+        aimAvatarAtCorner(state, hitX, hitY, maxX, maxY);
+      }
+    }
+  }
+
+  avatarButton.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) rotate(${state.velocityX > 0 ? 3 : -3}deg)`;
+  avatarRoamFrame = window.requestAnimationFrame(animateAvatarRoam);
+}
+
+function startAvatarRoam() {
+  const avatarRect = avatarButton.getBoundingClientRect();
+  const maxX = Math.max(0, window.innerWidth - avatarRect.width);
+  const maxY = Math.max(0, window.innerHeight - avatarRect.height);
+  const startX = Math.max(0, Math.min(avatarRect.left, maxX));
+  const startY = Math.max(0, Math.min(avatarRect.top, maxY));
+  const angle = Math.PI / 5;
+  avatarRoamState = {
+    x: startX,
+    y: startY,
+    velocityX: Math.cos(angle) * avatarRoamSpeed,
+    velocityY: -Math.sin(angle) * avatarRoamSpeed,
+    lastTimestamp: 0,
+    collisionsUntilCorner: getAvatarCornerInterval(),
+    isCornerBound: false,
+  };
+  avatarButton.classList.add("is-screen-roaming");
+  document.body.append(avatarButton);
+  avatarRoamFrame = window.requestAnimationFrame(animateAvatarRoam);
+}
+
+function stopAvatarRoam() {
+  window.cancelAnimationFrame(avatarRoamFrame);
+  avatarRoamFrame = 0;
+  avatarRoamState = null;
+  avatarButton.classList.remove("is-screen-roaming");
+  avatarButton.style.removeProperty("transform");
+}
+
 function enterIdleMode() {
-  if (avatarWrap.classList.contains("has-departed")) {
+  if (isIdle || avatarWrap.classList.contains("has-departed")) {
     return;
   }
 
   isIdle = true;
   avatarWrap.classList.add("is-idle");
   if (!hasReducedMotionPreference()) {
-    const avatarRect = avatarButton.getBoundingClientRect();
-    const startX = Math.max(
-      12,
-      Math.min(avatarRect.left, window.innerWidth - avatarRect.width - 12),
-    );
-    const startY = Math.max(
-      12,
-      Math.min(avatarRect.top, window.innerHeight - avatarRect.height - 12),
-    );
-    avatarButton.style.setProperty("--avatar-roam-start-x", `${startX}px`);
-    avatarButton.style.setProperty("--avatar-roam-start-y", `${startY}px`);
-    avatarButton.classList.add("is-screen-roaming");
-    document.body.append(avatarButton);
+    startAvatarRoam();
   }
   statusText.textContent = "AFK?";
   processTitle.textContent = "~/internet/avatar_escape.exe";
@@ -2914,9 +3038,7 @@ function resetIdleTimer() {
   window.clearTimeout(assistantTimer);
   if (isIdle) {
     isIdle = false;
-    avatarButton.classList.remove("is-screen-roaming");
-    avatarButton.style.removeProperty("--avatar-roam-start-x");
-    avatarButton.style.removeProperty("--avatar-roam-start-y");
+    stopAvatarRoam();
     avatarWrap.insertBefore(avatarButton, avatarWrap.querySelector(".avatar-shadow"));
     avatarWrap.classList.remove("is-idle");
     statusText.textContent = "ONLINE";
