@@ -2853,6 +2853,12 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   background: rgba(var(--accent-rgb), 0.12);
 }
 
+.fake-desktop-icons button[hidden],
+.fake-process-row[hidden],
+.fake-arg-action[hidden] {
+  display: none;
+}
+
 .fake-desktop-icon {
   display: grid;
   width: 52px;
@@ -2890,6 +2896,25 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   border-color: var(--danger);
   color: var(--danger);
   animation: fake-playing-dead-twitch 2.4s steps(1) infinite;
+}
+
+.fake-arg-signal .fake-desktop-icon {
+  border-style: dashed;
+  animation: fake-arg-signal-pulse 2.8s steps(2) infinite;
+}
+
+.fake-arg-signal.is-reconstructed .fake-desktop-icon {
+  border-style: solid;
+  box-shadow:
+    0 0 18px rgba(var(--accent-rgb), 0.36),
+    5px 5px 0 rgba(0, 0, 0, 0.25);
+}
+
+@keyframes fake-arg-signal-pulse {
+  50% {
+    color: var(--warning);
+    opacity: 0.58;
+  }
 }
 
 .fake-playing-dead,
@@ -3069,6 +3094,11 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   opacity: 0.48;
 }
 
+.fake-arg-process {
+  border-style: dashed;
+  box-shadow: inset 3px 0 0 var(--warning);
+}
+
 .fake-app-status {
   min-height: 1.5em;
   margin: 16px 0 0;
@@ -3226,6 +3256,38 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   color: var(--muted);
   font-size: 0.64rem;
   line-height: 1.5;
+}
+
+.fake-arg-action {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--warning);
+  color: var(--ink);
+  background: rgba(var(--accent-rgb), 0.08);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.fake-arg-action:hover,
+.fake-arg-action:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  background: var(--accent-soft);
+}
+
+.fake-arg-action strong {
+  color: var(--warning);
+  font-size: 0.65rem;
+}
+
+.fake-arg-action span {
+  color: var(--muted);
+  font-size: 0.62rem;
+  line-height: 1.45;
 }
 
 @keyframes fake-playing-dead-twitch {

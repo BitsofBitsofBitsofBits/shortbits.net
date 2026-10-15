@@ -208,6 +208,13 @@ const fakeCoBitsLog = document.querySelector("#fake-cobits-log");
 const fakeActionCenterTrigger = document.querySelector("#fake-action-center-trigger");
 const fakeActionCenter = document.querySelector("#fake-action-center");
 const fakeActionCenterStatus = document.querySelector("#fake-action-center-status");
+const fakeArgSignal = document.querySelector("#fake-arg-signal");
+const fakeArgSignalLabel = document.querySelector("#fake-arg-signal-label");
+const fakeArgProcess = document.querySelector("#fake-arg-process");
+const fakeArgProcessCpu = document.querySelector("#fake-arg-process-cpu");
+const fakeArgProcessInspect = document.querySelector("#fake-arg-process-inspect");
+const fakeArgAction = document.querySelector("#fake-arg-action");
+const fakeArgActionCopy = document.querySelector("#fake-arg-action-copy");
 const closeButton = document.querySelector("#close-button");
 const processTitle = document.querySelector("#process-title");
 const statusText = document.querySelector("#status-text");
@@ -1359,8 +1366,34 @@ function appendCoBitsMessage(text, className) {
   fakeCoBitsLog.scrollTop = fakeCoBitsLog.scrollHeight;
 }
 
+function getCoBitsArgResponse() {
+  const snapshot = window.BITS_ARG?.getState();
+  if (!snapshot || snapshot.discovered.length === 0) {
+    return "COBITS: I found a process-shaped gap. Ask the terminal to trace the missing bit.";
+  }
+  if (!snapshot.assembled) {
+    const remaining = snapshot.total - snapshot.discovered.length;
+    return `COBITS: PROCESS_000 is fragmented. ${remaining} byte${remaining === 1 ? "" : "s"} remain. TRACE.EXE has the least unhelpful hint.`;
+  }
+  if (!snapshot.reconstructed) {
+    return "COBITS: The recovered bytes spell RETURN. This is either an instruction or an unusually direct suggestion.";
+  }
+  if (!snapshot.outcome) {
+    return "COBITS: PROCESS_000 is reconstructed and requesting a containment decision. I have recused myself.";
+  }
+  return `COBITS: PROCESS_000 reports outcome "${snapshot.outcome.toUpperCase()}". It would like the record to show that it has opinions.`;
+}
+
 function getCoBitsResponse(prompt) {
   const normalized = prompt.toLowerCase();
+  if (
+    normalized.includes("missing bit")
+    || normalized.includes("process_000")
+    || normalized.includes("process 000")
+    || normalized.includes("unallocated bit")
+  ) {
+    return getCoBitsArgResponse();
+  }
   if (
     normalized.includes("are you sentient")
     || normalized.includes("are you alive")
@@ -1472,6 +1505,48 @@ function restoreInterfaceFromDesktop() {
   minimizeButton.focus();
 }
 
+function syncFakeDesktopArg(snapshot = window.BITS_ARG?.getState()) {
+  if (!snapshot) {
+    return;
+  }
+  const started = snapshot.discovered.length > 0;
+  fakeArgSignal.hidden = !started;
+  fakeArgProcess.hidden = !started;
+  fakeArgAction.hidden = !started;
+
+  if (!started) {
+    fakeTaskManagerStatus.textContent =
+      "4 processes require varying amounts of supervision.";
+    return;
+  }
+
+  if (fakeTaskManagerStatus.textContent.startsWith("4 processes require")) {
+    fakeTaskManagerStatus.textContent =
+      "5 processes detected. One process does not have a valid allocation record.";
+  }
+  fakeArgSignal.classList.toggle("is-reconstructed", snapshot.reconstructed);
+  fakeArgSignalLabel.textContent = snapshot.reconstructed
+    ? "PROCESS_000"
+    : "UNALLOCATED.BIT";
+  fakeArgProcessCpu.textContent = snapshot.reconstructed ? "1%" : "0%";
+  fakeArgActionCopy.textContent = snapshot.outcome
+    ? `Containment outcome: ${snapshot.outcome.toUpperCase()}. Revision remains possible.`
+    : snapshot.reconstructed
+      ? "PROCESS_000 is requesting a containment decision."
+      : `${snapshot.discovered.length}/${snapshot.total} fragments recovered. Trace remains incomplete.`;
+}
+
+function inspectFakeDesktopArg(source) {
+  window.BITS_ARG?.open();
+  if (source === "task-manager") {
+    fakeTaskManagerStatus.textContent =
+      "PROCESS_000 handed to TRACE.EXE. Task termination unavailable.";
+  } else if (source === "action-center") {
+    fakeActionCenterStatus.textContent =
+      "Recovery signal transferred to TRACE.EXE.";
+  }
+}
+
 function updateFakeDesktopClock() {
   const now = new Date();
   fakeDesktopClock.dateTime = now.toISOString();
@@ -1495,6 +1570,15 @@ fakeTaskManagerLaunch.addEventListener("click", () => {
 });
 fakeCoBitsLaunch.addEventListener("click", () => {
   openFakeDesktopApp(fakeCoBits, fakeCoBitsInput);
+});
+fakeArgSignal.addEventListener("click", () => {
+  inspectFakeDesktopArg("desktop");
+});
+fakeArgProcessInspect.addEventListener("click", () => {
+  inspectFakeDesktopArg("task-manager");
+});
+fakeArgAction.addEventListener("click", () => {
+  inspectFakeDesktopArg("action-center");
 });
 document.querySelectorAll("[data-fake-app-close]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1543,6 +1627,10 @@ fakeActionCenter.querySelectorAll(".fake-quick-actions button").forEach((button)
       `${button.textContent.trim()}: ${pressed ? "ENABLED" : "DISABLED"} // Probably.`;
   });
 });
+window.addEventListener("bits:arg-updated", (event) => {
+  syncFakeDesktopArg(event.detail);
+});
+syncFakeDesktopArg();
 updateFakeDesktopClock();
 window.setInterval(updateFakeDesktopClock, 1000);
 

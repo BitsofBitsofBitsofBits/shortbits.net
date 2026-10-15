@@ -367,6 +367,9 @@ function resetMissingBitProgress() {
     console.error("Unable to reset Missing Bit progress:", error);
     return false;
   }
+  window.dispatchEvent(new CustomEvent("bits:arg-updated", {
+    detail: getMissingBitSnapshot(),
+  }));
   renderMissingBitTrace();
   return true;
 }

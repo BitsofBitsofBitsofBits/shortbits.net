@@ -30,16 +30,16 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-52">
+    <link rel="stylesheet" href="styles.css?v=upgrade-53">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
-    <script src="arg.js?v=arg-2" defer></script>
+    <script src="arg.js?v=arg-3" defer></script>
     <script src="filesystem.js?v=filesystem-2" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-36" defer></script>
+    <script src="script.js?v=upgrade-37" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -105,6 +105,10 @@
           <span class="fake-desktop-icon" aria-hidden="true">CB</span>
           <span>COBITS.EXE</span>
         </button>
+        <button id="fake-arg-signal" class="fake-arg-signal" type="button" hidden>
+          <span class="fake-desktop-icon" aria-hidden="true">??</span>
+          <span id="fake-arg-signal-label">UNALLOCATED.BIT</span>
+        </button>
         <button id="fake-recycle-bin" class="fake-recycle-bin" type="button" aria-controls="fake-playing-dead" aria-haspopup="dialog">
           <span id="fake-recycle-icon" class="fake-desktop-icon" aria-hidden="true">⌫</span>
           <span id="fake-recycle-label">RECYCLE.BIN</span>
@@ -169,6 +173,10 @@
               <span role="cell">suspicious_bit</span><span role="cell">???</span><span role="cell">1 bit</span>
               <button type="button" data-end-fake-process>END TASK</button>
             </div>
+            <div id="fake-arg-process" class="fake-process-row fake-arg-process" role="row" hidden>
+              <span role="cell">PROCESS_000</span><span id="fake-arg-process-cpu" role="cell">0%</span><span role="cell">1 bit</span>
+              <button id="fake-arg-process-inspect" type="button">TRACE</button>
+            </div>
           </div>
           <p id="fake-task-manager-status" class="fake-app-status" aria-live="polite">4 processes require varying amounts of supervision.</p>
         </div>
@@ -217,6 +225,10 @@
           <button type="button" aria-pressed="false">DO NOT DISTURB</button>
           <button type="button" aria-pressed="true">CHAOS GUARD</button>
         </div>
+        <button id="fake-arg-action" class="fake-arg-action" type="button" hidden>
+          <strong>RECOVERY SIGNAL</strong>
+          <span id="fake-arg-action-copy">PROCESS_000 is requesting inspection.</span>
+        </button>
         <p id="fake-action-center-status" aria-live="polite">All systems are making their best effort.</p>
       </aside>
       <footer class="fake-taskbar">
