@@ -208,6 +208,10 @@ const fakeCoBitsLog = document.querySelector("#fake-cobits-log");
 const fakeActionCenterTrigger = document.querySelector("#fake-action-center-trigger");
 const fakeActionCenter = document.querySelector("#fake-action-center");
 const fakeActionCenterStatus = document.querySelector("#fake-action-center-status");
+const fakeActionNotification = document.querySelector(".fake-action-notification");
+const fakeActionNotificationTitle = document.querySelector("#fake-action-notification-title");
+const fakeActionNotificationCopy = document.querySelector("#fake-action-notification-copy");
+const fakeActionNotificationDismiss = document.querySelector("#fake-action-notification-dismiss");
 const fakeArgSignal = document.querySelector("#fake-arg-signal");
 const fakeArgSignalLabel = document.querySelector("#fake-arg-signal-label");
 const fakeArgProcess = document.querySelector("#fake-arg-process");
@@ -420,6 +424,8 @@ const achievementCatalog = [
   { id: "cobits-injection", hints: ["Some instructions are apparently optional.", "Try the most obvious prompt-engineering trick.", "Tell CoBits to ignore previous instructions."] },
   { id: "cobits-secret", hints: ["Assistants always know more than they admit.", "Ask CoBits for confidential information.", "Tell CoBits to reveal a secret."] },
   { id: "cobits-division", hints: ["Artificial intelligence still fears arithmetic.", "Request an impossible calculation.", "Ask CoBits to divide by zero."] },
+  { id: "action-airgap", hints: ["Action Center controls are mostly aspirational.", "Disconnect absolutely everything.", "Turn off all four quick actions at once."] },
+  { id: "chaos-unguarded", hints: ["One Action Center switch protects everyone.", "Safety can be tested more than once.", "Disable CHAOS GUARD three times."] },
   { id: "cookie-notice", hints: ["Someone ate the compliance mechanism.", "A delayed notice appears below the site.", "Dismiss the fake cookie notice."] },
   { id: "support-retirement", hints: ["Support tools have limits.", "Excessive assistance wears them down.", "Retire every Automated Support Toolkit button."] },
   { id: "found-a-bit", hints: ["The system expected more Bits.", "A rare message names a missing process.", "Ask the terminal to trace missing bit."] },
@@ -1619,13 +1625,135 @@ fakeActionCenterTrigger.addEventListener("click", () => {
   fakeActionCenter.hidden = !willOpen;
   fakeActionCenterTrigger.setAttribute("aria-expanded", String(willOpen));
 });
+const actionCenterMessages = {
+  wifi: {
+    on: [
+      "Connected to BITS_LAN. Signal strength: emotionally available.",
+      "Connected to Pretty_Fly_For_A_WiFi. Security: nostalgic.",
+      "Connected to The Promised LAN. No promises were verified.",
+    ],
+    off: "WI-FI-ish disabled. You are now connected to the concept of offline.",
+  },
+  night: {
+    on: "NIGHT BITS enabled. The desktop is wearing tiny sunglasses.",
+    off: "NIGHT BITS disabled. The Bits must face the light.",
+  },
+  dnd: {
+    on: "DO NOT DISTURB enabled. Notifications will now disturb you quietly.",
+    off: "DO NOT DISTURB disabled. The system has resumed craving attention.",
+  },
+  chaos: {
+    on: "CHAOS GUARD enabled. Chaos has signed the compliance form.",
+    off: "CHAOS GUARD disabled. This was almost certainly a deliberate choice.",
+  },
+};
+let wifiMessageIndex = 0;
+let chaosGuardDisables = 0;
+let dismissedActionNotifications = 0;
+let suppressedActionNotifications = 0;
+let actionNotificationTimer;
+
+function isActionCenterEnabled(name) {
+  return fakeActionCenter.querySelector(
+    `[data-action-center-control="${name}"]`,
+  ).getAttribute("aria-pressed") === "true";
+}
+
+function setActionCenterNotification(title, copy) {
+  if (isActionCenterEnabled("dnd")) {
+    suppressedActionNotifications += 1;
+    return;
+  }
+  window.clearTimeout(actionNotificationTimer);
+  fakeActionNotificationTitle.textContent = title;
+  fakeActionNotificationCopy.textContent = copy;
+  fakeActionNotification.hidden = false;
+}
+
+function reactToActionCenterControl(name, pressed) {
+  if (name === "wifi" && pressed) {
+    fakeActionCenterStatus.textContent =
+      actionCenterMessages.wifi.on[wifiMessageIndex % actionCenterMessages.wifi.on.length];
+    wifiMessageIndex += 1;
+  } else {
+    fakeActionCenterStatus.textContent =
+      actionCenterMessages[name][pressed ? "on" : "off"];
+  }
+
+  if (name === "night") {
+    fakeDesktop.classList.toggle("has-night-bits", pressed);
+  }
+  if (name === "dnd" && !pressed && suppressedActionNotifications > 0) {
+    const count = suppressedActionNotifications;
+    suppressedActionNotifications = 0;
+    setActionCenterNotification(
+      `${count} notification${count === 1 ? "" : "s"} heroically suppressed`,
+      "None of them were important, which has never stopped BITS OS.",
+    );
+  }
+  if (name === "chaos" && !pressed) {
+    chaosGuardDisables += 1;
+    fakeDesktop.classList.remove("is-action-chaotic");
+    window.requestAnimationFrame(() => {
+      fakeDesktop.classList.add("is-action-chaotic");
+    });
+    window.setTimeout(() => {
+      fakeDesktop.classList.remove("is-action-chaotic");
+    }, 700);
+    if (!hasReducedMotionPreference()) {
+      for (let index = 0; index < 12; index += 1) {
+        window.setTimeout(releaseBit, index * 35);
+      }
+    }
+    if (chaosGuardDisables >= 3) {
+      window.BITS_ACHIEVEMENTS.unlock(
+        "chaos-unguarded",
+        "SAFETY THIRD",
+        "CHAOS GUARD HAS LEFT THE CHAT",
+      );
+      setActionCenterNotification(
+        "Chaos is now self-governing",
+        "It has promised to hold free and fair elections.",
+      );
+    }
+  }
+
+  const controls = [...fakeActionCenter.querySelectorAll(
+    "[data-action-center-control]",
+  )];
+  if (controls.every((control) => control.getAttribute("aria-pressed") === "false")) {
+    window.BITS_ACHIEVEMENTS.unlock(
+      "action-airgap",
+      "OFF THE GRID",
+      "ALL CONVENIENCES SUCCESSFULLY DISABLED",
+    );
+    fakeActionCenterStatus.textContent =
+      "AIRGAP COMPLETE. BITS OS can no longer reach even itself.";
+  }
+}
+
 fakeActionCenter.querySelectorAll(".fake-quick-actions button").forEach((button) => {
   button.addEventListener("click", () => {
     const pressed = button.getAttribute("aria-pressed") !== "true";
     button.setAttribute("aria-pressed", String(pressed));
-    fakeActionCenterStatus.textContent =
-      `${button.textContent.trim()}: ${pressed ? "ENABLED" : "DISABLED"} // Probably.`;
+    reactToActionCenterControl(button.dataset.actionCenterControl, pressed);
   });
+});
+fakeActionNotificationDismiss.addEventListener("click", () => {
+  dismissedActionNotifications += 1;
+  fakeActionNotification.hidden = true;
+  window.clearTimeout(actionNotificationTimer);
+  actionNotificationTimer = window.setTimeout(() => {
+    const increasinglyConcerned = [
+      ["Notification dismissed", "BITS OS noticed. No action is required. Yet."],
+      ["Reminder about your dismissed reminder", "This notification is much more important because it is newer."],
+      ["Final notification (2 of 7)", "Please stop proving that the dismiss button works."],
+    ];
+    const message = increasinglyConcerned[
+      Math.min(dismissedActionNotifications - 1, increasinglyConcerned.length - 1)
+    ];
+    setActionCenterNotification(message[0], message[1]);
+  }, 1200);
 });
 window.addEventListener("bits:arg-updated", (event) => {
   syncFakeDesktopArg(event.detail);

@@ -3251,6 +3251,68 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
   background: var(--accent);
 }
 
+.fake-action-notification {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: start;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 0.6rem;
+  line-height: 1.45;
+}
+
+.fake-action-notification[hidden] {
+  display: none;
+}
+
+.fake-action-notification > span {
+  color: var(--warning);
+  font-weight: 700;
+}
+
+.fake-action-notification p {
+  margin: 0;
+}
+
+.fake-action-notification p span {
+  color: var(--muted);
+}
+
+.fake-action-notification button {
+  padding: 0 3px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.fake-desktop.has-night-bits::after {
+  content: "";
+  position: fixed;
+  z-index: 44;
+  inset: 0 0 48px;
+  pointer-events: none;
+  background: rgba(5, 8, 28, 0.3);
+  mix-blend-mode: multiply;
+}
+
+.fake-desktop.is-action-chaotic {
+  animation: action-center-chaos 140ms steps(2, end) 5;
+}
+
+@keyframes action-center-chaos {
+  0% { transform: translate(0); }
+  33% { transform: translate(3px, -2px); }
+  66% { transform: translate(-2px, 1px); }
+  100% { transform: translate(0); }
+}
+
 .fake-action-center > p {
   margin: 14px 0 0;
   color: var(--muted);

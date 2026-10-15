@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-5"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-53">
+    <link rel="stylesheet" href="styles.css?v=upgrade-54">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -39,7 +39,7 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-37" defer></script>
+    <script src="script.js?v=upgrade-38" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
     <script src="settings.js?v=settings-2" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
@@ -220,10 +220,15 @@
           <span>BITS OS</span>
         </header>
         <div class="fake-quick-actions" aria-label="Quick actions">
-          <button type="button" aria-pressed="true">WI-FI-ish</button>
-          <button type="button" aria-pressed="false">NIGHT BITS</button>
-          <button type="button" aria-pressed="false">DO NOT DISTURB</button>
-          <button type="button" aria-pressed="true">CHAOS GUARD</button>
+          <button type="button" data-action-center-control="wifi" aria-pressed="true">WI-FI-ish</button>
+          <button type="button" data-action-center-control="night" aria-pressed="false">NIGHT BITS</button>
+          <button type="button" data-action-center-control="dnd" aria-pressed="false">DO NOT DISTURB</button>
+          <button type="button" data-action-center-control="chaos" aria-pressed="true">CHAOS GUARD</button>
+        </div>
+        <div class="fake-action-notification">
+          <span aria-hidden="true">!</span>
+          <p><strong id="fake-action-notification-title">BITS OS requires your attention</strong><br><span id="fake-action-notification-copy">Reason: attention was available.</span></p>
+          <button id="fake-action-notification-dismiss" type="button" aria-label="Dismiss notification">×</button>
         </div>
         <button id="fake-arg-action" class="fake-arg-action" type="button" hidden>
           <strong>RECOVERY SIGNAL</strong>
