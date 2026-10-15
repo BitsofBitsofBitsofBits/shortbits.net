@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-9"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-81">
+    <link rel="stylesheet" href="styles.css?v=upgrade-82">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -40,10 +40,9 @@
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-2" defer></script>
     <script src="screensaver.js?v=screensaver-1" defer></script>
-    <script src="script.js?v=upgrade-54" defer></script>
+    <script src="script.js?v=upgrade-55" defer></script>
     <script src="windows.js?v=windows-9" defer></script>
-    <script src="minebits.js?v=minebits-3" defer></script>
-    <script src="arcade.js?v=arcade-5" defer></script>
+    <script src="arcade.js?v=arcade-6" defer></script>
     <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-3" defer></script>
@@ -1128,7 +1127,6 @@
           <button id="arcade-tab-bitsweeper" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-bitsweeper" data-arcade-game="bitsweeper">BITSWEEPER</button>
           <button id="arcade-tab-tetris" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-tetris" data-arcade-game="tetris">BITRIS</button>
           <button id="arcade-tab-solitaire" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-solitaire" data-arcade-game="solitaire">BITITAIRE</button>
-          <button id="arcade-tab-minebits" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-minebits" data-arcade-game="minebits">MINEBITS</button>
           <button id="arcade-tab-flappy" type="button" role="tab" aria-selected="false" aria-controls="arcade-game-flappy" data-arcade-game="flappy">FLAPPY BIT</button>
         </div>
         <div class="arcade-layout">
@@ -1205,133 +1203,6 @@
               <div class="bititaire-foundations" id="solitaire-foundations" aria-label="Bititaire home stacks"></div>
               <div class="bititaire-tableau" id="solitaire-tableau" aria-label="Bititaire tableau"></div>
               <p class="arcade-help">STACK DOWN BY ALTERNATING POLARITY // SEND MATCHING SUITS HOME FROM 1 TO 6</p>
-            </article>
-
-            <article id="arcade-game-minebits" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-minebits" data-arcade-panel="minebits" hidden>
-              <div class="arcade-game-toolbar">
-                <p>SCORE <strong id="minebits-score">0</strong> // TOOL <strong id="minebits-tool-label">HAND</strong> // BLOCK <strong id="minebits-block-label">DATA</strong> // XYZ <strong id="minebits-position">0 0 0</strong></p>
-                <div class="minebits-world-actions">
-                  <button id="minebits-fullscreen" type="button">FULLSCREEN</button>
-                  <button id="minebits-save" type="button">SAVE_WORLD</button>
-                  <button id="minebits-publish" type="button">PUBLISH_RUN</button>
-                </div>
-              </div>
-              <div class="minebits-how-to">
-                <strong>FIRST-PERSON VOXEL PROTOCOL</strong>
-                <span>WASD MOVE</span>
-                <span>MOUSE LOOK</span>
-                <span>SPACE / E JUMP</span>
-                <span>LEFT CLICK MINE</span>
-                <span>RIGHT CLICK BUILD</span>
-                <span>1-9 SELECT BLOCK</span>
-                <span>Q CYCLE TOOL</span>
-                <span>I INVENTORY</span>
-                <span>F FULLSCREEN</span>
-              </div>
-              <div class="minebits-voxel-layout">
-                <div class="minebits-view-column">
-                  <div class="minebits-viewport">
-                    <canvas id="minebits-canvas" width="960" height="540" tabindex="0" aria-label="MineBits first-person voxel world"></canvas>
-                    <div class="minebits-survival-hud" aria-label="MineBits survival status">
-                      <span>HEALTH <strong id="minebits-health">10 / 10</strong></span>
-                      <span id="minebits-time">DAY 1 // 08:00</span>
-                      <span>HOSTILES <strong id="minebits-hostiles">0</strong></span>
-                    </div>
-                    <span class="minebits-crosshair" aria-hidden="true"></span>
-                    <span id="minebits-prompt" class="minebits-prompt">CLICK TO ENTER WORLD</span>
-                    <span id="minebits-danger-alert" class="minebits-danger-alert" role="status"></span>
-                    <span id="minebits-damage-flash" class="minebits-damage-flash" aria-hidden="true"></span>
-                    <div id="minebits-hand" class="minebits-hand" data-tool="hand" aria-hidden="true">
-                      <span id="minebits-hand-tool">HAND</span>
-                    </div>
-                    <div id="minebits-hotbar" class="minebits-hotbar" role="group" aria-label="MineBits block hotbar">
-                      <button type="button" data-minebits-block="2" aria-pressed="true"><span><i>1</i> DATA</span><strong>12</strong></button>
-                      <button type="button" data-minebits-block="3" aria-pressed="false"><span><i>2</i> BITSTONE</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="5" aria-pressed="false"><span><i>3</i> LOG FILE</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="6" aria-pressed="false"><span><i>4</i> LEAF CACHE</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="9" aria-pressed="false"><span><i>5</i> SAND</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="12" aria-pressed="false"><span><i>6</i> PLANKS</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="13" aria-pressed="false"><span><i>7</i> TERMINAL</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="14" aria-pressed="false"><span><i>8</i> GLASS</span><strong>0</strong></button>
-                      <button type="button" data-minebits-block="15" aria-pressed="false"><span><i>9</i> BRICKS</span><strong>0</strong></button>
-                    </div>
-                    <section id="minebits-game-inventory" class="minebits-game-inventory" aria-labelledby="minebits-game-inventory-title" hidden>
-                      <header>
-                        <div>
-                          <p class="system-kicker">POINTER_LOCK_SAFE_MENU</p>
-                          <h3 id="minebits-game-inventory-title">INVENTORY</h3>
-                        </div>
-                        <span>ARROWS NAVIGATE // ENTER SELECTS // I CLOSES</span>
-                      </header>
-                      <div id="minebits-game-inventory-options" class="minebits-game-inventory-options"></div>
-                    </section>
-                  </div>
-                  <p id="minebits-status" class="minebits-status" role="status">Click the world to begin exploring.</p>
-                </div>
-                <aside class="minebits-world-panel" aria-label="MineBits world information">
-                  <div>
-                    <p class="system-kicker">WORLD_GENERATOR</p>
-                    <label class="minebits-seed-label">
-                      <span>SEED</span>
-                      <input id="minebits-seed" type="number" inputmode="numeric" min="0" max="4294967295">
-                    </label>
-                    <button id="minebits-start" type="button">GENERATE_NEW_WORLD</button>
-                  </div>
-                  <div>
-                    <p class="system-kicker">TOOLBELT</p>
-                    <div id="minebits-toolbelt" class="minebits-toolbelt" role="group" aria-label="MineBits toolbelt">
-                      <button type="button" data-minebits-tool="hand" aria-pressed="true">HAND <strong>∞</strong></button>
-                      <button type="button" data-minebits-tool="pickaxe" aria-pressed="false" disabled>PICKAXE <strong>NONE</strong></button>
-                      <button type="button" data-minebits-tool="axe" aria-pressed="false" disabled>AXE <strong>NONE</strong></button>
-                      <button type="button" data-minebits-tool="shovel" aria-pressed="false" disabled>SHOVEL <strong>NONE</strong></button>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="system-kicker">RESOURCE_INVENTORY</p>
-                    <dl class="minebits-inventory">
-                      <div><dt>LOG FILES</dt><dd data-minebits-inventory="5">0</dd></div>
-                      <div><dt>DATA PLANKS</dt><dd data-minebits-inventory="12">0</dd></div>
-                      <div><dt>BIT STICKS</dt><dd id="minebits-sticks-count">0</dd></div>
-                      <div><dt>BITSTONE</dt><dd data-minebits-inventory="3">0</dd></div>
-                      <div><dt>COPPER BITS</dt><dd data-minebits-inventory="4">0</dd></div>
-                      <div><dt>COAL BITS</dt><dd data-minebits-inventory="11">0</dd></div>
-                      <div><dt>PACKET SAND</dt><dd data-minebits-inventory="9">0</dd></div>
-                      <div><dt>RAW CLAY</dt><dd data-minebits-inventory="10">0</dd></div>
-                    </dl>
-                  </div>
-                  <details class="minebits-crafting" open>
-                    <summary>CRAFTING // TABLE <strong id="minebits-table-state">NOT NEARBY</strong></summary>
-                    <div id="minebits-recipes" class="minebits-recipes">
-                      <button type="button" data-minebits-recipe="planks"><span>DATA PLANKS ×4</span><small>1 LOG</small></button>
-                      <button type="button" data-minebits-recipe="sticks"><span>BIT STICKS ×4</span><small>2 PLANKS</small></button>
-                      <button type="button" data-minebits-recipe="table"><span>CRAFTING TERMINAL</span><small>4 PLANKS</small></button>
-                      <button type="button" data-minebits-recipe="glass"><span>GLASS BLOCKS ×4</span><small>4 SAND + 1 COAL // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="bricks"><span>COMPILED BRICKS ×4</span><small>4 CLAY + 1 COAL // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="wood-pickaxe"><span>WOOD PICKAXE</span><small>3 PLANKS + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="wood-axe"><span>WOOD AXE</span><small>3 PLANKS + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="wood-shovel"><span>WOOD SHOVEL</span><small>1 PLANK + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="bitstone-pickaxe"><span>BITSTONE PICKAXE</span><small>3 STONE + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="bitstone-axe"><span>BITSTONE AXE</span><small>3 STONE + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="bitstone-shovel"><span>BITSTONE SHOVEL</span><small>1 STONE + 2 STICKS // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="copper-pickaxe"><span>COPPER PICKAXE</span><small>3 COPPER + 2 STICKS + 1 COAL // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="copper-axe"><span>COPPER AXE</span><small>3 COPPER + 2 STICKS + 1 COAL // TABLE</small></button>
-                      <button type="button" data-minebits-recipe="copper-shovel"><span>COPPER SHOVEL</span><small>1 COPPER + 2 STICKS + 1 COAL // TABLE</small></button>
-                    </div>
-                  </details>
-                  <div>
-                    <p class="system-kicker">SESSION_STATS</p>
-                    <dl class="minebits-stats">
-                      <div><dt>MINED</dt><dd id="minebits-mined">0</dd></div>
-                      <div><dt>BUILT</dt><dd id="minebits-placed">0</dd></div>
-                      <div><dt>CRAFTED</dt><dd id="minebits-crafted">0</dd></div>
-                      <div><dt>CORE BITS</dt><dd id="minebits-cores">0</dd></div>
-                      <div><dt>WORLD</dt><dd>64×28×64</dd></div>
-                    </dl>
-                  </div>
-                  <p class="minebits-save-readout">LOCAL WORLD STATE // <strong id="minebits-save-state">LOADING</strong></p>
-                </aside>
-              </div>
-              <p class="arcade-help">SURVIVAL-LITE VOXEL PARODY // FULLSCREEN, LOCK-SAFE INVENTORY, VISIBLE TOOLS, DAY/NIGHT, FALL DAMAGE, MEMORY LAVA, AND HOSTILE GLITCH MOBS // NO BORROWED ASSETS</p>
             </article>
 
             <article id="arcade-game-flappy" class="arcade-game-panel" role="tabpanel" aria-labelledby="arcade-tab-flappy" data-arcade-panel="flappy" hidden>

@@ -43,11 +43,8 @@ is a personal project and largely a learning exercise for me.
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
-  Bitsweeper, Bitris, Bititaire, the original first-person MineBits voxel
-  sandbox with survival-lite crafting, tool progression, fullscreen play,
-  pointer-lock inventory, day/night hazards, and hostile glitch mobs, and
-  Flappy Bit, plus local bests, public rankings, and
-  Admin moderation
+  Bitsweeper, Bitris, Bititaire, and Flappy Bit, plus local bests, public
+  rankings, and Admin moderation
 - A stateful `COBITS.EXE` parody assistant with quick actions, delayed replies,
   slash commands, conversational memory, multi-step interviews, diagnostics,
   and discoverable achievements

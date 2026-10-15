@@ -17,7 +17,6 @@ const arcadeGames = new Set([
   "bitsweeper",
   "tetris",
   "solitaire",
-  "minebits",
   "flappy",
 ]);
 const rankingGames = new Set([
@@ -28,7 +27,6 @@ const rankingGames = new Set([
   "bitsweeper",
   "tetris",
   "solitaire",
-  "minebits",
   "flappy",
 ]);
 const playerNamePattern = /^[A-Za-z0-9][A-Za-z0-9 _.-]{0,23}$/;
@@ -38,7 +36,6 @@ const gameLabels = {
   bitsweeper: "BITSWEEPER",
   tetris: "BITRIS",
   solitaire: "BITITAIRE",
-  minebits: "MINEBITS",
   flappy: "FLAPPY BIT",
 };
 const mineDifficulties = {
@@ -271,7 +268,6 @@ function selectGame(game) {
   stopSnake();
   stopBitsweeper();
   stopTetris();
-  mineBitsGame.pause();
   stopFlappy();
   activeGame = game;
   pendingResult = null;
@@ -284,9 +280,6 @@ function selectGame(game) {
   arcadePanels.forEach((panel) => {
     panel.hidden = panel.dataset.arcadePanel !== game;
   });
-  if (game === "minebits") {
-    mineBitsGame.resume();
-  }
   leaderboardTitle.textContent = `${getLeaderboardLabel()} LEADERBOARD`;
   updateLocalBest();
   setArcadeStatus(`${gameLabels[game]} subsystem ready.`);
@@ -1414,19 +1407,6 @@ solitaireFoundations.addEventListener("click", (event) => {
 
 solitaireStart.addEventListener("click", startSolitaire);
 
-const mineBitsRoot = document.querySelector("#arcade-game-minebits");
-const mineBitsGame = window.createMineBitsGame({
-  root: mineBitsRoot,
-  onScore: ({ score, detail }) => {
-    prepareScore("minebits", score, detail);
-    setArcadeStatus("MINEBITS run ready for the public leaderboard.", "success");
-  },
-  onAchievement: ({ id, message, label }) => {
-    window.BITS_ACHIEVEMENTS?.unlock(id, message, label);
-  },
-  onArcadeStatus: (message) => setArcadeStatus(message),
-});
-
 const flappyCanvas = document.querySelector("#flappy-canvas");
 const flappyContext = flappyCanvas.getContext("2d");
 const flappyScore = document.querySelector("#flappy-score");
@@ -1590,8 +1570,7 @@ function suspendArcadeGame() {
     || bitsweeperFrame
     || tetrisTimer
     || flappyFrame
-    || (mineStarted && !mineFinished)
-    || activeGame === "minebits",
+    || (mineStarted && !mineFinished),
   );
   if (!gameWasRunning) {
     return;
@@ -1600,7 +1579,6 @@ function suspendArcadeGame() {
   stopBitsweeper();
   stopTetris();
   stopFlappy();
-  mineBitsGame.pause();
   if (mineStarted && !mineFinished) {
     startMinesweeper();
   }
@@ -1610,8 +1588,6 @@ function suspendArcadeGame() {
 const arcadeVisibilityObserver = new MutationObserver(() => {
   if (arcadeWindow.hidden || arcadeWindow.classList.contains("is-minimized")) {
     suspendArcadeGame();
-  } else if (activeGame === "minebits") {
-    mineBitsGame.resume();
   }
 });
 arcadeVisibilityObserver.observe(arcadeWindow, {
@@ -1622,12 +1598,6 @@ arcadeVisibilityObserver.observe(arcadeWindow, {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     suspendArcadeGame();
-  } else if (
-    activeGame === "minebits"
-    && !arcadeWindow.hidden
-    && !arcadeWindow.classList.contains("is-minimized")
-  ) {
-    mineBitsGame.resume();
   }
 });
 
@@ -1637,6 +1607,5 @@ drawBitsweeper();
 tetrisBoard = createTetrisBoard();
 drawTetris();
 startSolitaire();
-mineBitsGame.pause();
 drawFlappy();
 selectGame("snake");
