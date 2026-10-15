@@ -541,13 +541,13 @@
   --accent: #000080;
   --accent-rgb: 0, 0, 128;
   --bg: #004c4c;
-  --panel: #c0c0c0;
+  --panel: #d4d0c8;
   --panel-2: #d4d0c8;
-  --ink: #000;
-  --muted: #444;
-  --border: #808080;
-  --shell-bg: #c0c0c0;
-  --admin-bg: #c0c0c0;
+  --ink: #101010;
+  --muted: #3d3d3d;
+  --border: #5f5f5f;
+  --shell-bg: #d4d0c8;
+  --admin-bg: #d4d0c8;
   --overlay-bg: #d4d0c8;
   --body-background: #004c4c;
   --body-background-size: auto;
@@ -559,6 +559,7 @@
   --noise-opacity: 0;
   --scanline-opacity: 0;
   --icon-filter: none;
+  --spotify-accent: #005a25;
 }
 
 :root[data-interface-theme="windows-95"][data-color-scheme="light"] {
@@ -8062,14 +8063,105 @@ html[data-interface-theme="windows-95"] button,
 html[data-interface-theme="windows-95"] input,
 html[data-interface-theme="windows-95"] select {
   border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
   box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
+html[data-interface-theme="windows-95"] input,
+html[data-interface-theme="windows-95"] textarea,
+html[data-interface-theme="windows-95"] select {
+  color: #000;
+  background: #fff;
+}
+
+html[data-interface-theme="windows-95"] button:hover,
+html[data-interface-theme="windows-95"] button:focus-visible {
+  color: #fff;
+  background: #000080;
 }
 
 html[data-interface-theme="windows-95"] .system-bar,
 html[data-interface-theme="windows-95"] .desktop-window-bar,
 html[data-interface-theme="windows-95"] .fake-desktop-app > header {
   color: #fff;
-  background: #000080;
+  background: linear-gradient(90deg, #000080, #1084d0);
+}
+
+html[data-interface-theme="windows-95"] .system-bar {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 40px;
+  padding-left: 5px;
+  border-bottom: 2px solid #808080;
+}
+
+html[data-interface-theme="windows-95"] .system-bar > p {
+  justify-self: start;
+  margin-left: 7px;
+  overflow: hidden;
+  color: #fff;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-interface-theme="windows-95"] .system-status {
+  justify-self: start;
+  padding: 3px 6px;
+  border: 0;
+  color: #fff;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .system-status:hover,
+html[data-interface-theme="windows-95"] .system-status:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .status-dot {
+  border-radius: 0;
+  background: #00d000;
+  box-shadow: 0 0 0 1px #003800;
+}
+
+html[data-interface-theme="windows-95"] .window-controls {
+  gap: 2px;
+  padding: 3px;
+}
+
+html[data-interface-theme="windows-95"] .window-button {
+  width: 36px;
+  min-height: 30px;
+  border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .window-button:hover,
+html[data-interface-theme="windows-95"] .window-button:focus-visible {
+  color: #000;
+  background: #d4d0c8;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .close-button:hover,
+html[data-interface-theme="windows-95"] .close-button:focus-visible {
+  color: #fff;
+  background: #c42b1c;
+}
+
+html[data-interface-theme="windows-95"] .link-icon,
+html[data-interface-theme="windows-95"] .link-arrow {
+  color: color-mix(in srgb, var(--card-accent) 58%, #000);
+}
+
+html[data-interface-theme="windows-95"] .link-icon {
+  border-color: color-mix(in srgb, var(--card-accent) 45%, #444);
+  background: color-mix(in srgb, var(--card-accent) 8%, #d4d0c8);
 }
 
 html[data-interface-theme="dracula"] .system-bar,
