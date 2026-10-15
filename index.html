@@ -30,7 +30,7 @@
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-8"></script>
     <script src="boot.js?v=boot-1"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-66">
+    <link rel="stylesheet" href="styles.css?v=upgrade-67">
     <script src="messages.js?v=messages-13" defer></script>
     <script src="stop-codes.js?v=stop-codes-2" defer></script>
     <script src="arg.js?v=arg-3" defer></script>
@@ -39,9 +39,9 @@
     <script src="analytics.js?v=analytics-3" defer></script>
     <script src="notifications.js?v=notifications-1" defer></script>
     <script src="theme-effects.js?v=theme-effects-1" defer></script>
-    <script src="script.js?v=upgrade-43" defer></script>
+    <script src="script.js?v=upgrade-44" defer></script>
     <script src="windows.js?v=windows-8" defer></script>
-    <script src="settings.js?v=settings-3" defer></script>
+    <script src="settings.js?v=settings-4" defer></script>
     <script src="death-screens.js?v=death-screens-2" defer></script>
     <script src="content.js?v=content-3" defer></script>
     <script src="about.js?v=about-3" defer></script>
@@ -350,6 +350,93 @@
         </div>
       </header>
 
+      <nav id="app-menu-bar" class="app-menu-bar" aria-label="Application menu">
+        <details class="app-menu" name="application-menu">
+          <summary>FILE</summary>
+          <div class="app-menu-popup">
+            <button type="button" data-window-target="about-window">OPEN ABOUT_ME.TXT</button>
+            <button type="button" data-window-target="filesystem-window">OPEN PUBLIC_FILES</button>
+            <button type="button" data-window-target="source-window">OPEN SOURCE_BROWSER</button>
+          </div>
+        </details>
+        <details class="app-menu" name="application-menu">
+          <summary>EDIT</summary>
+          <div class="app-menu-popup">
+            <button id="settings-button" type="button" data-window-target="settings-window">
+              SETTINGS
+            </button>
+            <button type="button" data-window-target="pronouns-window">IDENTITY PREFERENCES</button>
+            <button type="button" data-window-target="guestbook-window">EDIT GUESTBOOK</button>
+          </div>
+        </details>
+        <details class="app-menu" name="application-menu">
+          <summary>VIEW</summary>
+          <div class="app-menu-popup app-menu-view">
+            <label class="app-menu-select">
+              <span>INTERFACE THEME</span>
+              <select id="interface-theme-select" aria-label="Interface theme">
+                <option value="default">DEFAULT</option>
+                <option value="aurora">AURORA</option>
+                <option value="cozy-blossom">COZY BLOSSOM</option>
+                <option value="mica">MICA</option>
+                <option value="fluent">FLUENT</option>
+                <option value="midnight-oled">MIDNIGHT OLED</option>
+                <option value="macos">MACOS</option>
+                <option value="terminal">TERMINAL</option>
+                <option value="vaporwave">VAPORWAVE</option>
+                <option value="amber-crt">AMBER CRT</option>
+                <option value="y2k-silver">Y2K SILVER</option>
+                <option value="cyberpunk">CYBERPUNK</option>
+                <option value="dos-blue">DOS BLUE</option>
+                <option value="windows-95">WINDOWS 95</option>
+                <option value="solarized">SOLARIZED</option>
+                <option value="nord">NORD</option>
+                <option value="dracula">DRACULA</option>
+                <option value="candy-pop">CANDY POP</option>
+                <option value="rgb">RGB</option>
+                <option value="aero-glass">AERO GLASS</option>
+              </select>
+            </label>
+            <span class="app-menu-separator" aria-hidden="true"></span>
+            <button id="achievements-button" type="button" aria-haspopup="dialog">
+              ACHIEVEMENTS <span id="achievement-count">0</span>
+            </button>
+            <button
+              id="notifications-button"
+              type="button"
+              data-window-target="notifications-window"
+              aria-label="Open notification center"
+            >
+              NOTICES <span id="notification-unread-count">0</span>
+            </button>
+            <button type="button" data-window-target="monitor-window">SYSTEM MONITOR</button>
+          </div>
+        </details>
+        <details class="app-menu" name="application-menu">
+          <summary>TOOLS</summary>
+          <div class="app-menu-popup">
+            <button type="button" data-window-target="games-window">GAMES.EXE</button>
+            <button type="button" data-window-target="stats-window">STATS.EXE</button>
+            <button type="button" data-window-target="now-window">NOW.TXT</button>
+          </div>
+        </details>
+        <details class="app-menu" name="application-menu">
+          <summary>HELP</summary>
+          <div class="app-menu-popup">
+            <button type="button" data-window-target="resume-window">CAREER.SYS</button>
+            <button type="button" data-window-target="changelog-window">CHANGELOG.TXT</button>
+            <span class="app-menu-separator" aria-hidden="true"></span>
+            <a
+              id="build-link"
+              class="build-link"
+              href="https://github.com/BitsofBitsofBitsofBits/shortbits.net"
+              target="_blank"
+              rel="noreferrer"
+            >BUILD LOCAL</a>
+          </div>
+        </details>
+      </nav>
+
       <section
         class="profile"
         itemscope
@@ -561,56 +648,8 @@
 
       <footer>
         <p>MADE WITH <span aria-label="love">♥</span> + QUESTIONABLE CSS</p>
-        <div class="footer-controls">
-          <label class="footer-select-control">
-            <span>THEME:</span>
-            <select id="interface-theme-select" aria-label="Interface theme">
-              <option value="default">DEFAULT</option>
-              <option value="aurora">AURORA</option>
-              <option value="cozy-blossom">COZY BLOSSOM</option>
-              <option value="mica">MICA</option>
-              <option value="fluent">FLUENT</option>
-              <option value="midnight-oled">MIDNIGHT OLED</option>
-              <option value="macos">MACOS</option>
-              <option value="terminal">TERMINAL</option>
-              <option value="vaporwave">VAPORWAVE</option>
-              <option value="amber-crt">AMBER CRT</option>
-              <option value="y2k-silver">Y2K SILVER</option>
-              <option value="cyberpunk">CYBERPUNK</option>
-              <option value="dos-blue">DOS BLUE</option>
-              <option value="windows-95">WINDOWS 95</option>
-              <option value="solarized">SOLARIZED</option>
-              <option value="nord">NORD</option>
-              <option value="dracula">DRACULA</option>
-              <option value="candy-pop">CANDY POP</option>
-              <option value="rgb">RGB</option>
-              <option value="aero-glass">AERO GLASS</option>
-            </select>
-          </label>
-          <button id="achievements-button" type="button" aria-haspopup="dialog">
-            ACHIEVEMENTS: <span id="achievement-count">0</span>
-          </button>
-          <button
-            id="notifications-button"
-            type="button"
-            data-window-target="notifications-window"
-            aria-label="Open notification center"
-          >
-            NOTICES: <span id="notification-unread-count">0</span>
-          </button>
-          <button id="settings-button" type="button" data-window-target="settings-window">
-            SETTINGS
-          </button>
-        </div>
         <p>
-          © <span id="year"></span> BITS_OF_BITS_OF_BITS //
-          <a
-            id="build-link"
-            class="build-link"
-            href="https://github.com/BitsofBitsofBitsofBits/shortbits.net"
-            target="_blank"
-            rel="noreferrer"
-          >BUILD LOCAL</a>
+          © <span id="year"></span> BITS_OF_BITS_OF_BITS
         </p>
       </footer>
     </main>

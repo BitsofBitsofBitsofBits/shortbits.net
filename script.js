@@ -162,6 +162,8 @@ const activityText = document.querySelector("#activity-text");
 const uptime = document.querySelector("#uptime");
 const commandLine = document.querySelector(".command-line");
 const interfaceThemeSelect = document.querySelector("#interface-theme-select");
+const appMenuBar = document.querySelector("#app-menu-bar");
+const appMenus = [...appMenuBar.querySelectorAll(".app-menu")];
 const binaryRain = document.querySelector("#binary-rain");
 const forbiddenBitDock = document.querySelector("#forbidden-bit-dock");
 const interfaceShell = document.querySelector("#interface-shell");
@@ -270,6 +272,62 @@ const constrainedHardware = (
   || logicalProcessors <= 4
   || saveDataEnabled
 );
+
+function closeAppMenus(exceptMenu = null) {
+  appMenus.forEach((menu) => {
+    if (menu !== exceptMenu) {
+      menu.open = false;
+    }
+  });
+}
+
+appMenus.forEach((menu) => {
+  menu.addEventListener("toggle", () => {
+    if (menu.open) {
+      closeAppMenus(menu);
+    }
+  });
+});
+
+appMenuBar.addEventListener("click", (event) => {
+  if (event.target.closest(".app-menu-popup button, .app-menu-popup a")) {
+    closeAppMenus();
+  }
+});
+
+appMenuBar.addEventListener("change", () => {
+  closeAppMenus();
+});
+
+appMenuBar.addEventListener("keydown", (event) => {
+  const summaries = appMenus.map((menu) => menu.querySelector("summary"));
+  const activeSummaryIndex = summaries.indexOf(document.activeElement);
+
+  if (event.key === "Escape") {
+    const openMenu = appMenus.find((menu) => menu.open);
+    if (openMenu) {
+      openMenu.open = false;
+      openMenu.querySelector("summary").focus();
+      event.preventDefault();
+    }
+    return;
+  }
+
+  if (activeSummaryIndex < 0 || !["ArrowLeft", "ArrowRight"].includes(event.key)) {
+    return;
+  }
+
+  const direction = event.key === "ArrowRight" ? 1 : -1;
+  const nextIndex = (activeSummaryIndex + direction + summaries.length) % summaries.length;
+  summaries[nextIndex].focus();
+  event.preventDefault();
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (!appMenuBar.contains(event.target)) {
+    closeAppMenus();
+  }
+});
 let runtimePerformanceLite = sessionStorage.getItem("bits-runtime-performance-lite") === "true";
 let performanceLite;
 let maximumFallingBits;

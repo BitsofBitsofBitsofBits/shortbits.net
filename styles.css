@@ -1656,6 +1656,120 @@ html.is-page-hidden * {
   justify-self: end;
 }
 
+.app-menu-bar {
+  position: relative;
+  z-index: 12;
+  display: flex;
+  min-height: 34px;
+  padding: 2px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+}
+
+.app-menu {
+  position: relative;
+}
+
+.app-menu summary {
+  padding: 8px 10px;
+  color: inherit;
+  cursor: default;
+  list-style: none;
+  user-select: none;
+}
+
+.app-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-menu summary:hover,
+.app-menu summary:focus-visible,
+.app-menu[open] summary {
+  outline: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.app-menu summary:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.app-menu-popup {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  display: grid;
+  width: max-content;
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: max(2px, calc(var(--control-radius) / 2));
+  background: var(--overlay-bg);
+  box-shadow: var(--shadow), inset 0 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--material-blur)) saturate(1.18);
+}
+
+.app-menu:last-child .app-menu-popup {
+  right: 0;
+  left: auto;
+}
+
+.app-menu-popup button,
+.app-menu-popup a {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: max(1px, calc(var(--control-radius) / 2));
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-menu-popup button:hover,
+.app-menu-popup button:focus-visible,
+.app-menu-popup a:hover,
+.app-menu-popup a:focus-visible {
+  outline: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.app-menu-popup button span {
+  margin-left: 24px;
+  color: var(--accent);
+}
+
+.app-menu-select {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  color: var(--muted);
+}
+
+.app-menu-select span {
+  font-size: 0.56rem;
+}
+
+.app-menu-select select {
+  width: 100%;
+  min-width: 210px;
+}
+
+.app-menu-separator {
+  height: 1px;
+  margin: 5px 6px;
+  background: var(--border);
+}
+
 .window-button {
   position: relative;
   width: 44px;
@@ -2824,12 +2938,6 @@ footer span {
 .build-link:hover,
 .build-link:focus-visible {
   text-decoration: underline;
-}
-
-.footer-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
 }
 
 .noscript-fallback {
@@ -8117,6 +8225,7 @@ html[data-interface-theme="terminal"] .desktop-window {
 }
 
 html[data-interface-theme="terminal"] .system-bar,
+html[data-interface-theme="terminal"] .app-menu-bar,
 html[data-interface-theme="terminal"] .desktop-window-bar,
 html[data-interface-theme="terminal"] footer {
   background: #020b03;
@@ -8245,6 +8354,57 @@ html[data-interface-theme="windows-95"] .status-dot {
   border-radius: 0;
   background: #00d000;
   box-shadow: 0 0 0 1px #003800;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-bar {
+  border-bottom: 2px solid #808080;
+  color: #000;
+  background: #d4d0c8;
+  font-family: "Pixel UI", "Courier New", monospace;
+}
+
+html[data-interface-theme="windows-95"] .app-menu summary:hover,
+html[data-interface-theme="windows-95"] .app-menu summary:focus-visible,
+html[data-interface-theme="windows-95"] .app-menu[open] summary {
+  color: #fff;
+  background: #000080;
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-popup {
+  border: 2px solid #808080;
+  border-radius: 0;
+  color: #000;
+  background: #d4d0c8;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff, 4px 4px rgba(0, 0, 0, 0.28);
+  backdrop-filter: none;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-popup button,
+html[data-interface-theme="windows-95"] .app-menu-popup a {
+  border: 0;
+  border-radius: 0;
+  color: #000;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-popup button:hover,
+html[data-interface-theme="windows-95"] .app-menu-popup button:focus-visible,
+html[data-interface-theme="windows-95"] .app-menu-popup a:hover,
+html[data-interface-theme="windows-95"] .app-menu-popup a:focus-visible {
+  color: #fff;
+  background: #000080;
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-select {
+  color: #000;
+}
+
+html[data-interface-theme="windows-95"] .app-menu-separator {
+  background: #808080;
+  box-shadow: 0 1px #fff;
 }
 
 html[data-interface-theme="windows-95"] .window-controls {
@@ -8380,6 +8540,25 @@ html[data-interface-theme="aero-glass"] .now-playing {
 html[data-interface-theme="aero-glass"] .window-controls {
   gap: 3px;
   padding: 4px;
+}
+
+html[data-interface-theme="aero-glass"] .app-menu-bar {
+  border-bottom-color: rgba(225, 247, 255, 0.46);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.05)),
+    rgba(20, 82, 125, 0.34);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
+}
+
+html[data-interface-theme="aero-glass"] .app-menu-popup {
+  border-color: rgba(235, 250, 255, 0.68);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 70px),
+    rgba(12, 50, 82, 0.82);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.38),
+    0 12px 32px rgba(0, 22, 46, 0.46);
+  backdrop-filter: blur(24px) saturate(1.3);
 }
 
 html[data-interface-theme="aero-glass"] .window-button {
@@ -8821,6 +9000,21 @@ html.is-root-mode .name-field {
     display: none;
   }
 
+  .app-menu {
+    position: static;
+  }
+
+  .app-menu summary {
+    padding-inline: 8px;
+  }
+
+  .app-menu-popup,
+  .app-menu:last-child .app-menu-popup {
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+
   .profile {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -8944,11 +9138,6 @@ html.is-root-mode .name-field {
     flex-direction: column;
     align-items: center;
     gap: 7px;
-  }
-
-  .footer-controls {
-    justify-content: center;
-    width: 100%;
   }
 
   .achievement-data-controls {

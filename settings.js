@@ -7,7 +7,7 @@ const settingsCopyLink = document.querySelector("#settings-copy-link");
 const settingsResetWindows = document.querySelector("#settings-reset-windows");
 const settingsResetAll = document.querySelector("#settings-reset-all");
 const settingsStatus = document.querySelector("#settings-status");
-const footerTheme = document.querySelector("#interface-theme-select");
+const toolbarTheme = document.querySelector("#interface-theme-select");
 
 const preferenceKeys = [
   "bits-interface-theme",
@@ -83,8 +83,8 @@ settingsEffects.checked = document.documentElement.dataset.effects !== "off";
 syncAppearanceControls();
 
 settingsTheme.addEventListener("change", () => {
-  footerTheme.value = settingsTheme.value;
-  footerTheme.dispatchEvent(new Event("change", { bubbles: true }));
+  toolbarTheme.value = settingsTheme.value;
+  toolbarTheme.dispatchEvent(new Event("change", { bubbles: true }));
   setSettingsStatus("Interface theme saved.");
 });
 
@@ -113,7 +113,7 @@ settingsEffects.addEventListener("change", () => {
   );
 });
 
-footerTheme.addEventListener("change", syncAppearanceControls);
+toolbarTheme.addEventListener("change", syncAppearanceControls);
 
 settingsCopyLink.addEventListener("click", async () => {
   try {
