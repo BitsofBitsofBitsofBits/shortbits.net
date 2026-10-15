@@ -2002,22 +2002,55 @@ nullStart.addEventListener("click", startNullTacToe);
 const breakerCanvas = document.querySelector("#breaker-canvas");
 const breakerContext = breakerCanvas.getContext("2d");
 const breakerScore = document.querySelector("#breaker-score");
+const breakerWaveOutput = document.querySelector("#breaker-wave");
 const breakerLivesOutput = document.querySelector("#breaker-lives");
+const breakerValueOutput = document.querySelector("#breaker-value");
 const breakerStart = document.querySelector("#breaker-start");
 let breakerFrame = 0;
 let breakerPreviousTime = 0;
 let breakerPaddleX = 310;
+let breakerPaddleWidth = 100;
 let breakerBall = { x: 360, y: 340, vx: 0.23, vy: -0.28 };
 let breakerBricks = [];
 let breakerPoints = 0;
 let breakerLives = 3;
+let breakerWave = 1;
+let breakerPacketsBroken = 0;
+
+function breakerValueMultiplier() {
+  return [0, 0.35, 0.65, 1][breakerLives] || 0;
+}
+
+function updateBreakerReadouts() {
+  breakerScore.textContent = String(breakerPoints);
+  breakerWaveOutput.textContent = String(breakerWave);
+  breakerLivesOutput.textContent = String(breakerLives);
+  breakerValueOutput.textContent = `${Math.round(breakerValueMultiplier() * 100)}%`;
+}
 
 function createBreakerBricks() {
-  return Array.from({ length: 45 }, (_, index) => ({
-    active: true,
-    column: index % 9,
-    row: Math.floor(index / 9),
-  }));
+  const rows = Math.min(8, 4 + Math.ceil(breakerWave / 2));
+  const bricks = [];
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < 9; column += 1) {
+      const patternedGap = breakerWave > 1
+        && (row + (column * 2) + breakerWave) % (5 + (breakerWave % 2)) === 0;
+      if (patternedGap) {
+        continue;
+      }
+      const reinforced = breakerWave >= 3 && (row + column + breakerWave) % 4 === 0;
+      const hardened = breakerWave >= 7 && row < Math.min(3, Math.floor(breakerWave / 4));
+      const health = 1 + Number(reinforced) + Number(hardened);
+      bricks.push({
+        active: true,
+        column,
+        health,
+        maxHealth: health,
+        row,
+      });
+    }
+  }
+  return bricks;
 }
 
 function drawBreaker() {
@@ -2030,21 +2063,32 @@ function drawBreaker() {
     }
     const x = 20 + (brick.column * 76);
     const y = 24 + (brick.row * 30);
-    breakerContext.fillStyle = brick.row % 2 ? colors.muted : colors.accent;
+    breakerContext.fillStyle = brick.health >= 3
+      ? "#ff5267"
+      : brick.health === 2
+        ? colors.muted
+        : colors.accent;
     breakerContext.fillRect(x, y, 68, 20);
+    if (brick.health > 1) {
+      breakerContext.fillStyle = "#07111a";
+      breakerContext.font = "bold 12px monospace";
+      breakerContext.fillText(String(brick.health), x + 30, y + 15);
+    }
   });
   breakerContext.fillStyle = colors.accent;
-  breakerContext.fillRect(breakerPaddleX, 390, 100, 14);
+  breakerContext.fillRect(breakerPaddleX, 390, breakerPaddleWidth, 14);
   breakerContext.fillStyle = colors.ink;
   breakerContext.fillRect(breakerBall.x - 7, breakerBall.y - 7, 14, 14);
 }
 
 function resetBreakerBall() {
+  const horizontalSpeed = Math.min(0.42, 0.23 + ((breakerWave - 1) * 0.014));
+  const verticalSpeed = Math.min(0.5, 0.28 + ((breakerWave - 1) * 0.018));
   breakerBall = {
-    x: breakerPaddleX + 50,
+    x: breakerPaddleX + (breakerPaddleWidth / 2),
     y: 370,
-    vx: (Math.random() < 0.5 ? -1 : 1) * 0.23,
-    vy: -0.28,
+    vx: (Math.random() < 0.5 ? -1 : 1) * horizontalSpeed,
+    vy: -verticalSpeed,
   };
 }
 
@@ -2053,13 +2097,26 @@ function stopBreaker() {
   breakerFrame = 0;
 }
 
-function finishBreaker(cleared) {
+function loadNextBreakerWave() {
+  const waveBonus = Math.round((500 + (breakerWave * 100)) * breakerValueMultiplier());
+  breakerPoints = Math.min(999999, breakerPoints + waveBonus);
+  breakerWave += 1;
+  breakerPaddleWidth = Math.max(58, 100 - ((breakerWave - 1) * 4));
+  breakerPaddleX = Math.max(0, Math.min(breakerCanvas.width - breakerPaddleWidth, breakerPaddleX));
+  breakerBricks = createBreakerBricks();
+  breakerPreviousTime = 0;
+  resetBreakerBall();
+  updateBreakerReadouts();
+  setArcadeStatus(`FIREWALL WAVE ${breakerWave} loaded // ${Math.round(breakerValueMultiplier() * 100)}% packet value.`);
+}
+
+function finishBreaker() {
   stopBreaker();
   finishGame(
     "breaker",
-    breakerPoints + (cleared ? 1000 : 0),
-    `${45 - breakerBricks.filter((brick) => brick.active).length}/45 PACKETS`,
-    cleared ? "Firewall packets completely deallocated." : "Packet dropped below the buffer.",
+    breakerPoints,
+    `WAVE ${breakerWave} // ${breakerPacketsBroken} PACKETS`,
+    `Buffer exhausted during firewall wave ${breakerWave}.`,
   );
 }
 
@@ -2072,7 +2129,7 @@ function runBreaker(timestamp) {
   if (arcadeKeys.has("ArrowRight") || arcadeKeys.has("d") || arcadeKeys.has("D")) {
     breakerPaddleX += 0.5 * delta;
   }
-  breakerPaddleX = Math.max(0, Math.min(breakerCanvas.width - 100, breakerPaddleX));
+  breakerPaddleX = Math.max(0, Math.min(breakerCanvas.width - breakerPaddleWidth, breakerPaddleX));
   breakerBall.x += breakerBall.vx * delta;
   breakerBall.y += breakerBall.vy * delta;
   if (breakerBall.x < 7 || breakerBall.x > breakerCanvas.width - 7) {
@@ -2088,11 +2145,14 @@ function runBreaker(timestamp) {
     && breakerBall.y + 7 >= 390
     && breakerBall.y < 406
     && breakerBall.x >= breakerPaddleX
-    && breakerBall.x <= breakerPaddleX + 100
+    && breakerBall.x <= breakerPaddleX + breakerPaddleWidth
   ) {
     breakerBall.y = 382;
     breakerBall.vy = -Math.abs(breakerBall.vy);
-    breakerBall.vx = ((breakerBall.x - (breakerPaddleX + 50)) / 50) * 0.36;
+    breakerBall.vx = (
+      (breakerBall.x - (breakerPaddleX + (breakerPaddleWidth / 2)))
+      / (breakerPaddleWidth / 2)
+    ) * Math.min(0.5, 0.36 + ((breakerWave - 1) * 0.012));
   }
   const hitBrick = breakerBricks.find((brick) => {
     if (!brick.active) {
@@ -2108,20 +2168,29 @@ function runBreaker(timestamp) {
     );
   });
   if (hitBrick) {
-    hitBrick.active = false;
+    const brickY = 24 + (hitBrick.row * 30);
+    hitBrick.health -= 1;
     breakerBall.vy *= -1;
-    breakerPoints += 100;
-    breakerScore.textContent = String(breakerPoints);
+    breakerBall.y = breakerBall.vy > 0 ? brickY + 27 : brickY - 7;
+    if (hitBrick.health <= 0) {
+      hitBrick.active = false;
+      breakerPacketsBroken += 1;
+      const packetValue = Math.round((100 + (breakerWave * 15)) * breakerValueMultiplier());
+      breakerPoints = Math.min(999999, breakerPoints + packetValue);
+      breakerScore.textContent = String(breakerPoints);
+    }
   }
   if (breakerBricks.every((brick) => !brick.active)) {
-    finishBreaker(true);
+    loadNextBreakerWave();
+    drawBreaker();
+    breakerFrame = requestAnimationFrame(runBreaker);
     return;
   }
   if (breakerBall.y > breakerCanvas.height + 10) {
     breakerLives -= 1;
-    breakerLivesOutput.textContent = String(breakerLives);
+    updateBreakerReadouts();
     if (breakerLives <= 0) {
-      finishBreaker(false);
+      finishBreaker();
       return;
     }
     resetBreakerBall();
@@ -2133,22 +2202,26 @@ function runBreaker(timestamp) {
 function startBreaker() {
   stopBreaker();
   breakerPaddleX = 310;
+  breakerPaddleWidth = 100;
+  breakerWave = 1;
   breakerBricks = createBreakerBricks();
   breakerPoints = 0;
   breakerLives = 3;
+  breakerPacketsBroken = 0;
   breakerPreviousTime = 0;
-  breakerScore.textContent = "0";
-  breakerLivesOutput.textContent = "3";
+  updateBreakerReadouts();
   resetBreakerBall();
   scoreForm.hidden = true;
   pendingResult = null;
-  setArcadeStatus("PACKET BREAKER breach started.");
+  setArcadeStatus("PACKET BREAKER endless breach started // full packet value.");
   breakerFrame = requestAnimationFrame(runBreaker);
 }
 
 breakerCanvas.addEventListener("pointermove", (event) => {
   const rect = breakerCanvas.getBoundingClientRect();
-  breakerPaddleX = ((event.clientX - rect.left) / rect.width) * breakerCanvas.width - 50;
+  breakerPaddleX = (
+    ((event.clientX - rect.left) / rect.width) * breakerCanvas.width
+  ) - (breakerPaddleWidth / 2);
 });
 breakerStart.addEventListener("click", startBreaker);
 
