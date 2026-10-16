@@ -119,11 +119,18 @@ jobs:
             "${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/"
           ssh -p "${DEPLOY_PORT}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "set -eu; \
-            sudo caddy validate --config /tmp/Caddyfile.candidate --adapter caddyfile; \
-            sudo install -m 644 /tmp/Caddyfile.candidate '${CADDYFILE_PATH}'; \
-            if ! sudo systemctl reload caddy; then \
-              sudo install -m 644 /tmp/Caddyfile.original '${CADDYFILE_PATH}'; \
-              sudo systemctl reload caddy; \
+            caddy validate --config /tmp/Caddyfile.candidate --adapter caddyfile; \
+            persisted=false; \
+            if cp /tmp/Caddyfile.candidate '${CADDYFILE_PATH}' 2>/dev/null; then \
+              persisted=true; \
+            else \
+              echo 'Caddyfile is not writable; applying through the Caddy admin API.'; \
+            fi; \
+            if ! caddy reload --config /tmp/Caddyfile.candidate --adapter caddyfile; then \
+              if [ \"\$persisted\" = true ]; then \
+                cp /tmp/Caddyfile.original '${CADDYFILE_PATH}'; \
+              fi; \
+              caddy reload --config /tmp/Caddyfile.original --adapter caddyfile; \
               exit 1; \
             fi; \
             rm -f /tmp/Caddyfile.original /tmp/Caddyfile.candidate"
