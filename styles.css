@@ -7639,26 +7639,39 @@ html[data-boot="pending"] .boot-screen[hidden] {
   right: clamp(8px, 1.5vw, 20px);
   bottom: clamp(8px, 1.5vw, 18px);
   display: grid;
+  grid-template-columns: auto auto;
   justify-items: end;
   gap: 6px;
 }
 
+.endless-boot-settings > a,
 .endless-boot-settings > button {
   display: grid;
   place-items: center;
-  width: 28px;
   height: 28px;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: 999px;
   color: var(--muted);
   background: color-mix(in srgb, var(--panel) 88%, transparent);
   cursor: pointer;
-  font: 1rem/1 sans-serif;
+  font: 0.52rem/1 var(--font-family);
   opacity: 0.46;
+  text-decoration: none;
   transition: border-color 150ms ease, color 150ms ease, opacity 150ms ease;
 }
 
+.endless-boot-settings > a {
+  padding: 0 8px;
+}
+
+.endless-boot-settings > button {
+  width: 28px;
+  font: 1rem/1 sans-serif;
+}
+
+.endless-boot-settings > a:hover,
+.endless-boot-settings > a:focus-visible,
 .endless-boot-settings > button:hover,
 .endless-boot-settings > button:focus-visible,
 .endless-boot-settings > button[aria-expanded="true"] {
@@ -7669,6 +7682,7 @@ html[data-boot="pending"] .boot-screen[hidden] {
 }
 
 .endless-boot-settings-panel {
+  grid-column: 1 / -1;
   display: grid;
   width: min(210px, calc(100vw - 24px));
   gap: 8px;
