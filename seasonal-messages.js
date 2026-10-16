@@ -1,0 +1,582 @@
+(() => {
+  const weighted = (messages, weight) => (
+    messages.map((text) => ({ text, weight }))
+  );
+  const allMonitorMetrics = (messages) => ({
+    cpu: messages.cpu,
+    gpu: messages.gpu,
+    network: messages.network,
+    ram: messages.ram,
+    storage: messages.storage,
+    thermal: messages.thermal,
+  });
+
+  const profiles = [
+    {
+      id: "new-year",
+      mode: "exclusive",
+      matches: (date) => (
+        (date.getMonth() === 11 && date.getDate() === 31)
+        || (date.getMonth() === 0 && date.getDate() <= 2)
+      ),
+      messages: weighted([
+        "incrementing the calendar register...",
+        "new year, same highly qualified bits...",
+        "resolution.exe has already stopped responding...",
+        "writing the wrong year into every timestamp...",
+        "rebooting the calendar with elevated optimism...",
+        "deploying confetti directly to production...",
+        "clearing twelve months of cached decisions...",
+        "checking whether this is the year of desktop Linux...",
+        "archiving last year's unfinished side projects...",
+        "loading a suspiciously fresh save file...",
+        "synchronizing midnight across several argumentative time zones...",
+        "performing the annual date overflow test...",
+        "renaming final_FINAL to final_FINAL_THIS_YEAR...",
+        "backing up memories before the clock rolls over...",
+        "installing 365 patches and one optional leap patch...",
+        "starting another lap around the sun...",
+        "celebrating a successful integer increment...",
+        "keeping the old bugs for compatibility...",
+      ], 1),
+      activities: weighted([
+        "Rebooting the calendar",
+        "Compiling ambitious resolutions",
+        "Deploying midnight confetti",
+        "Archiving last year's tabs",
+        "Waiting for every time zone to catch up",
+        "Practicing the new date format",
+        "Rolling the uptime counter into another year",
+        "Pretending January is a clean install",
+      ], 1),
+      bootMessages: [
+        "BOOTING NEW YEAR .................... CALENDAR DETECTED",
+        "INCREMENTING YEAR ................... INTEGER ACCEPTED",
+        "LOADING RESOLUTIONS ................. DEPENDENCIES MISSING",
+        "ARCHIVING OLD CALENDAR .............. SENTIMENTAL LOCK",
+        "SYNCING MIDNIGHT .................... TIME ZONES DISAGREE",
+        "STARTING CONFETTI.DRIVER ............ PARTICLES EVERYWHERE",
+        "CHECKING CHAMPAGNE BUFFER ........... BUBBLY",
+        "ROTATING CALENDAR KEYS .............. DATE SECURED",
+        "PATCHING AULD_LANG_SYNE.DLL ......... LYRICS STILL UNKNOWN",
+        "RESETTING ANNUAL COUNTERS ........... MOSTLY ZERO",
+        "MIGRATING LAST YEAR'S BUGS .......... BACKWARD COMPATIBLE",
+        "VALIDATING RESOLUTION.EXE ........... ABANDONED IN ADVANCE",
+        "PURGING OLD TIMESTAMPS .............. AUDIT LOG OBJECTED",
+        "STARTING ORBIT ...................... LAP ACCEPTED",
+        "COUNTING DOWN FROM TEN .............. STARTED AT SEVEN",
+        "VERIFYING FRESH START ............... SAME DESKTOP FOUND",
+        "UPDATING COPYRIGHT YEAR ............. SOMEWHERE",
+        "LOADING OPTIMISM .................... TEMPORARY LICENSE",
+      ],
+      initialBootSteps: [
+        "CALENDAR CHECK ............. YEAR INCREMENTED",
+        "LOAD resolution.exe ....... OPTIMISTIC",
+        "SYNC midnight ............. EVENTUALLY",
+        "START confetti.driver ..... ARMED",
+        "ARCHIVE old_year .......... MEMORIES KEPT",
+        "START presence.exe ........ HAPPY NEW YEAR",
+      ],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Calculating resolutions per core.", "One core is still living in last year."],
+        gpu: ["Rendering fireworks with responsible bloom.", "Drawing a brand-new calendar pixel by pixel."],
+        network: ["Waiting for the final time zone to reach midnight.", "Broadcasting HAPPY_NEW_YEAR packets."],
+        ram: ["Remembering the previous year before garbage collection.", "Holding twelve months of questionable decisions."],
+        storage: ["Archiving last_year_final_FINAL.zip.", "Making room for another year of screenshots."],
+        thermal: ["Warm from excessive midnight optimism.", "Confetti has entered the cooling vents."],
+      }),
+      shutdownMessages: [
+        "CALENDAR_ROLLOVER_FAILED",
+        "RESOLUTION_EXPIRED_EARLY",
+        "MIDNIGHT_WAS_CANCELLED",
+        "CONFETTI_DRIVER_OVERFLOW",
+        "SAME_BITS_NEW_YEAR",
+      ],
+      playingDeadMessages: [
+        "The process made a resolution to remain motionless.",
+        "playing_dead.exe insists this is a fresh start.",
+        "The process will try being alive next year.",
+      ],
+      glitchMessages: [
+        "Y3AR OV3RFLOW: calendar.exe counted past its comfort zone",
+        "R3S0LUTION STATUS: already marked WON'T FIX",
+        "CONF3TTI LEAK: several particles escaped into production",
+      ],
+    },
+    {
+      id: "christmas",
+      mode: "exclusive",
+      matches: (date) => date.getMonth() === 11 && date.getDate() >= 24 && date.getDate() <= 26,
+      messages: weighted([
+        "checking the list with O(n log n) efficiency...",
+        "routing packets through the North Pole...",
+        "compiling holiday cheer with warnings ignored...",
+        "installing decorative RGB on every available surface...",
+        "waiting for sleigh telemetry...",
+        "decrypting presents without shaking them...",
+        "tracking an unidentified object with nine power sources...",
+        "converting cookies into administrator privileges...",
+        "running silent-night mode...",
+        "wrapping bits in reusable encryption...",
+        "checking whether the chimney supports USB-C...",
+        "deploying snow to production...",
+        "allocating coal to legacy processes...",
+        "synchronizing lights with absolutely no restraint...",
+        "warming the server room with holiday spirit...",
+        "asking Santa for more storage...",
+        "mounting /dev/mistletoe...",
+        "loading festive firmware...",
+      ], 1),
+      activities: weighted([
+        "Tracking sleigh telemetry",
+        "Compiling holiday cheer",
+        "Installing excessive string lights",
+        "Converting cookies into compute",
+        "Wrapping encrypted presents",
+        "Auditing the nice list",
+        "Routing through the North Pole",
+        "Running silent-night mode",
+      ], 1),
+      bootMessages: [
+        "BOOTING CHRISTMAS ................... FESTIVE MODE",
+        "MOUNTING /dev/mistletoe ............. AWKWARD",
+        "CHECKING NICE_LIST.SQL .............. QUERY REDACTED",
+        "LOADING SLEIGH TELEMETRY ............ NINE SIGNALS",
+        "INSTALLING STRING LIGHTS ............ CABLE MANAGEMENT LOST",
+        "CALIBRATING TREE RGB ................ TASTEFULLY EXCESSIVE",
+        "VERIFYING COOKIES ................... ACCEPTED",
+        "WARMING COCOA BUFFER ................ MARSHMALLOWS READY",
+        "DEPLOYING SNOW ...................... PRODUCTION ONLY",
+        "WRAPPING PACKETS .................... BOW APPLIED",
+        "ROUTING VIA NORTH POLE .............. LATENCY JOLLY",
+        "CHECKING CHIMNEY PORT ............... LEGACY CONNECTOR",
+        "STARTING SILENT_NIGHT.EXE ........... VOLUME NOMINAL",
+        "ALLOCATING COAL ..................... LEGACY USERS FOUND",
+        "PINGING WORKSHOP .................... ELVES BUSY",
+        "CHARGING SLEIGH ..................... MAGIC ADAPTER",
+        "UPDATING ADVENT COUNTER ............. COMPLETE",
+        "STARTING PRESENCE.EXE ............... MERRY AND BRIGHT",
+      ],
+      initialBootSteps: [
+        "NICE LIST CHECK ............ ACCESS FESTIVE",
+        "LOAD sleigh.telemetry ..... NINE SIGNALS",
+        "MOUNT /dev/mistletoe ...... OK",
+        "START lights.driver ....... VERY BRIGHT",
+        "VERIFY cookies ............ DELICIOUS",
+        "START presence.exe ........ MERRY CHRISTMAS",
+      ],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Calculating the nice list twice.", "One core is reserved for cookie geometry."],
+        gpu: ["Rendering several irresponsible string lights.", "Ray tracing one extremely shiny ornament."],
+        network: ["Receiving sleigh telemetry from a suspicious altitude.", "Packets are routing through the North Pole."],
+        ram: ["Remembering who asked for what.", "Caching several terabytes of holiday cheer."],
+        storage: ["Presents are compressed but not yet wrapped.", "Coal allocation occupies a suspicious partition."],
+        thermal: ["Kept warm by cocoa and questionable airflow.", "Chestnuts are benchmarking the exhaust vent."],
+      }),
+      shutdownMessages: [
+        "SLEIGH_TELEMETRY_LOST",
+        "NAUGHTY_LIST_ACCESS_VIOLATION",
+        "COAL_PARTITION_FULL",
+        "STRING_LIGHT_DEADLOCK",
+        "CHRISTMAS_SPIRIT_NOT_FOUND",
+      ],
+      playingDeadMessages: [
+        "The process is waiting very quietly for Santa.",
+        "playing_dead.exe is disguised as a stocking.",
+        "The process claims it heard sleigh bells and froze.",
+      ],
+      glitchMessages: [
+        "THR3AT NAM3: gr1nchware.exe // HOLIDAY CHEER QUARANTINED",
+        "C00KIE BUFFER EMPTY: administrator privileges revoked",
+        "SL3IGH SIGNAL LOST: checking every rooftop manually",
+      ],
+    },
+    {
+      id: "halloween",
+      mode: "exclusive",
+      matches: (date) => date.getMonth() === 9 && date.getDate() === 31,
+      messages: weighted([
+        "raising a process from the dead...",
+        "checking the network for ghost packets...",
+        "mounting /dev/crypt...",
+        "handing out fun-sized memory allocations...",
+        "asking the skeleton for its body of work...",
+        "running a daemon that is actually a demon...",
+        "checking whether the cursor moved by itself...",
+        "compiling screams into lossless audio...",
+        "turning every bug into a feature creature...",
+        "installing cobweb-based cable management...",
+        "waiting for the witching-hour cron job...",
+        "treating unknown executables with suspicion...",
+        "scanning for processes without reflections...",
+        "booting in safe-and-spooky mode...",
+        "decrypting the candy bowl...",
+        "allocating one byte per bite...",
+        "rendering fog at dramatically unnecessary density...",
+        "asking localhost who is behind you...",
+      ], 1),
+      activities: weighted([
+        "Tracing ghost packets",
+        "Compiling digital screams",
+        "Mounting /dev/crypt",
+        "Running an actual demon process",
+        "Decrypting the candy bowl",
+        "Rendering suspicious fog",
+        "Installing cobweb cable management",
+        "Waiting for the witching-hour cron job",
+      ], 1),
+      bootMessages: [
+        "BOOTING HALLOWEEN ................... SPOOKY MODE",
+        "MOUNTING /dev/crypt ................. SOMETHING KNOCKED",
+        "SCANNING FOR GHOST PACKETS .......... ONE BEHIND YOU",
+        "STARTING DAEMON ..................... SPELLING UNCERTAIN",
+        "LOADING SKELETON DRIVERS ............ NO BODY FOUND",
+        "DECRYPTING CANDY .................... FUN SIZE",
+        "CALIBRATING FOG ..................... OMINOUS",
+        "CHECKING MIRRORS .................... PROCESS ABSENT",
+        "OPENING CREAKY PORT ................. BAD IDEA",
+        "ALLOCATING COBWEBS .................. NETWORKED",
+        "PINGING ABANDONED SERVER ............ IT PINGED BACK",
+        "VERIFYING COSTUME ................... IDENTITY UNKNOWN",
+        "RUNNING WITCHING_HOUR.CRON .......... ON SCHEDULE",
+        "COUNTING PUMPKINS ................... ONE IS WATCHING",
+        "COMPILE SCREAM.WAV .................. PEAKED",
+        "CHECKING UNDER DESKTOP .............. DON'T",
+        "STARTING PRESENCE.EXE ............... UNDEAD",
+        "VALIDATING VIBES .................... IMMACULATELY SPOOKY",
+      ],
+      initialBootSteps: [
+        "GHOST PACKET CHECK ......... ONE FOUND",
+        "MOUNT /dev/crypt .......... OMINOUS",
+        "LOAD skeleton.driver ...... NO BODY",
+        "START daemon ............... DEMON?",
+        "VERIFY candy ............... FUN SIZE",
+        "START presence.exe ......... UNDEAD",
+      ],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Running one daemon and possibly one demon.", "Calculating the shortest path out of this haunted process."],
+        gpu: ["Rendering fog nobody requested.", "Drawing a shadow that does not match its owner."],
+        network: ["Ghost packets keep passing through the firewall.", "An unknown host keeps whispering the gateway address."],
+        ram: ["Remembering several users who never logged out.", "A memory leak is spelling something on the wall."],
+        storage: ["The crypt partition is making scratching sounds.", "Deleted files have begun returning on their own."],
+        thermal: ["Cold spot detected directly behind the operator.", "Fans stopped briefly to listen."],
+      }),
+      shutdownMessages: [
+        "GHOST_IN_THE_MACHINE",
+        "DEMON_NOT_DAEMON",
+        "CRYPT_PARTITION_AWAKENED",
+        "CANDY_BUFFER_EMPTY",
+        "PROCESS_HAS_NO_REFLECTION",
+      ],
+      playingDeadMessages: [
+        "The process is no longer playing.",
+        "playing_dead.exe sat up when you looked away.",
+        "Diagnostic result: technically undead.",
+      ],
+      glitchMessages: [
+        "GHOST PACK3T DETECTED: firewall passed straight through it",
+        "DA3MON STATUS: spelling changed without permission",
+        "M3M0RY HAUNTED: previous owner still logged in",
+      ],
+    },
+    {
+      id: "birthday",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 5 && date.getDate() === 26,
+      messages: weighted([
+        "celebrating Caleb's latest successful orbit...",
+        "incrementing birthday.version by one...",
+        "deploying June 26th cake to production...",
+        "compiling birthday wishes with maximum priority...",
+        "checking whether candles count as RGB...",
+        "unlocking another year of Bits...",
+      ], 18),
+      activities: weighted([
+        "Deploying birthday cake",
+        "Counting another successful orbit",
+        "Installing candle-based RGB",
+      ], 12),
+      bootMessages: [
+        "CHECKING DATE ....................... JUNE 26 DETECTED",
+        "INCREMENTING CALEB.VERSION .......... SUCCESS",
+        "DEPLOYING BIRTHDAY CAKE ............. EXTRA BITS",
+        "LIGHTING CANDLES .................... RGB COMPATIBLE",
+      ],
+      initialBootSteps: [
+        "BIRTHDAY CHECK ............. JUNE 26",
+        "LOAD cake.driver .......... CANDLES READY",
+      ],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Calculating candles per core."],
+        gpu: ["Rendering birthday confetti at maximum saturation."],
+        network: ["Receiving birthday packets from around the internet."],
+        ram: ["Remembering another successful orbit."],
+        storage: ["Saving room for cake photos."],
+        thermal: ["Candles have increased local thermals."],
+      }),
+      shutdownMessages: ["BIRTHDAY_CAKE_KERNEL_FAULT"],
+      playingDeadMessages: ["The process is waiting for someone to bring cake."],
+      glitchMessages: ["B1RTHDAY OV3RFLOW: too many candles for one register"],
+    },
+    {
+      id: "valentines",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 1 && date.getDate() === 14,
+      messages: weighted([
+        "sending a valentine to localhost...",
+        "pairing bits into emotionally available bytes...",
+        "encrypting feelings end-to-end...",
+        "checking whether two processes have chemistry...",
+        "routing heartbeats through port 143...",
+        "installing a crush without administrator permission...",
+      ], 18),
+      activities: weighted([
+        "Pairing emotionally available bits",
+        "Encrypting feelings end-to-end",
+        "Sending localhost a valentine",
+      ], 12),
+      bootMessages: [
+        "PAIRING HEARTBEATS .................. MUTUAL",
+        "ENCRYPTING FEELINGS ................. END TO END",
+        "SENDING VALENTINE ................... TO LOCALHOST",
+        "CHECKING CHEMISTRY .................. REACTION FOUND",
+      ],
+      initialBootSteps: ["PAIR heartbeats ............ MUTUAL"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["One core has developed a crush on another."],
+        gpu: ["Rendering hearts with excessive anti-aliasing."],
+        network: ["Sending valentines over a committed connection."],
+        ram: ["Holding onto a fond memory."],
+        storage: ["Saving every message with a heart in it."],
+        thermal: ["Temperature classified as warm and fuzzy."],
+      }),
+      shutdownMessages: ["HEARTBEAT_CONNECTION_LOST"],
+      playingDeadMessages: ["The process is playing hard to get."],
+      glitchMessages: ["H3ARTBEAT ERROR: feelings not serializable"],
+    },
+    {
+      id: "pi-day",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 2 && date.getDate() === 14,
+      messages: weighted([
+        "calculating pi until someone brings pie...",
+        "rounding 3.14159 with emotional precision...",
+        "allocating circular buffers...",
+        "checking whether cake can be pie-shaped...",
+      ], 16),
+      activities: weighted(["Calculating one more digit of pi", "Benchmarking circular buffers"], 10),
+      bootMessages: ["CALCULATING PI ....................... STILL GOING", "MOUNTING /dev/pie .................... DELICIOUS"],
+      initialBootSteps: ["CALCULATE pi ............... 3.14159ISH"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Calculating pi until the fans object."],
+        gpu: ["Rendering a perfectly adequate circle."],
+        network: ["Transmitting digits without a terminating packet."],
+        ram: ["Remembering several unnecessary decimal places."],
+        storage: ["Reserving an irrational amount of disk space."],
+        thermal: ["Pie cooling curve is within tolerance."],
+      }),
+      shutdownMessages: ["IRRATIONAL_NUMBER_OVERFLOW"],
+      playingDeadMessages: ["The process is contemplating an endless decimal."],
+      glitchMessages: ["PI OV3RFLOW: final digit not found"],
+    },
+    {
+      id: "april-fools",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 3 && date.getDate() === 1,
+      messages: weighted([
+        "reporting that every test passed... April Fools...",
+        "downloading additional common sense...",
+        "confirming this message is completely trustworthy...",
+        "installing a harmless prank with kernel access...",
+        "reversing the mouse controls... just kidding...",
+      ], 18),
+      activities: weighted(["Deploying a totally harmless prank", "Passing every test suspiciously"], 12),
+      bootMessages: ["VERIFYING DATE ....................... PROBABLY APRIL 1", "LOADING TRUSTWORTHY.DLL .............. ABSOLUTELY"],
+      initialBootSteps: ["LOAD harmless_prank.dll .... TRUST ME"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["CPU usage is zero percent. Definitely."],
+        gpu: ["Rendering a benchmark result we made up."],
+        network: ["Internet speed upgraded to several terabits. Promise."],
+        ram: ["All memory is free if you stop measuring it."],
+        storage: ["Unlimited storage enabled until tomorrow."],
+        thermal: ["Running at absolute zero, somehow."],
+      }),
+      shutdownMessages: ["THIS_IS_NOT_A_REAL_STOP_CODE"],
+      playingDeadMessages: ["The process yelled April Fools and moved."],
+      glitchMessages: ["NO THR3ATS FOUND: this scan is extremely honest"],
+    },
+    {
+      id: "404-day",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 3 && date.getDate() === 4,
+      messages: weighted([
+        "celebrating 404 Day somewhere else...",
+        "looking for today's date... not found...",
+        "returning a festive resource-not-found response...",
+        "checking /calendar/04/04... missing...",
+      ], 16),
+      activities: weighted(["Looking for April 4th", "Returning a seasonal 404"], 10),
+      bootMessages: ["LOCATING APRIL 4 ..................... NOT FOUND", "CHECKING CALENDAR ROUTE .............. 404"],
+      initialBootSteps: ["LOAD date/04/04 ............ NOT FOUND"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Usage data not found."],
+        gpu: ["Frame 404 could not be rendered."],
+        network: ["The requested packet does not exist."],
+        ram: ["Memory address not found, festively."],
+        storage: ["404 GB free. This one is actually intentional."],
+        thermal: ["Temperature endpoint returned 404."],
+      }),
+      shutdownMessages: ["STOP_CODE_NOT_FOUND"],
+      playingDeadMessages: ["The process you are looking for could not be found."],
+      glitchMessages: ["THR3AT 404: malware not found, keep looking"],
+    },
+    {
+      id: "may-fourth",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 4 && date.getDate() === 4,
+      messages: weighted([
+        "balancing the force between zero and one...",
+        "checking for a disturbance in the server room...",
+        "routing packets through a galaxy far outside the subnet...",
+        "waving a hand at the access-control prompt...",
+      ], 16),
+      activities: weighted(["Balancing the binary force", "Scanning a distant subnet"], 10),
+      bootMessages: ["BALANCING FORCE ...................... BINARY", "SCANNING DISTANT SUBNET .............. FAR AWAY"],
+      initialBootSteps: ["CHECK binary force ......... BALANCED"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["The cores are attempting to bring balance."],
+        gpu: ["Rendering stars with practical effects."],
+        network: ["Packets are arriving from a very distant subnet."],
+        ram: ["Remembering an old hope."],
+        storage: ["Plans are stored in an inconveniently large file."],
+        thermal: ["High ground temperature advantage detected."],
+      }),
+      shutdownMessages: ["DISTURBANCE_IN_THE_BITS"],
+      playingDeadMessages: ["The process is not the one you are looking for."],
+      glitchMessages: ["DISTURBANC3 DETECTED: binary force unbalanced"],
+    },
+    {
+      id: "leap-day",
+      mode: "additive",
+      matches: (date) => date.getMonth() === 1 && date.getDate() === 29,
+      messages: weighted([
+        "executing the optional February patch...",
+        "using the bonus calendar byte...",
+        "checking whether today exists in production...",
+        "adding one emergency day to the sprint...",
+      ], 18),
+      activities: weighted(["Applying the February 29 patch", "Using the bonus calendar day"], 12),
+      bootMessages: ["CHECKING DATE ....................... OPTIONAL DAY FOUND", "PATCHING FEBRUARY ................... +1"],
+      initialBootSteps: ["LOAD february_29.patch .... VALID"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Processing one bonus day."],
+        gpu: ["Rendering the rarest February frame."],
+        network: ["Calendar servers are asking for confirmation."],
+        ram: ["Remembering a date from four years ago."],
+        storage: ["One extra day has been allocated."],
+        thermal: ["Seasonal calculations remain confused."],
+      }),
+      shutdownMessages: ["CALENDAR_PATCH_UNSUPPORTED"],
+      playingDeadMessages: ["The process only does this once every four years."],
+      glitchMessages: ["DAT3 ERROR: February exceeded expected bounds"],
+    },
+    {
+      id: "friday-the-13th",
+      mode: "additive",
+      matches: (date) => date.getDate() === 13 && date.getDay() === 5,
+      messages: weighted([
+        "avoiding deployment under suspicious calendar conditions...",
+        "checking under the server rack for bad luck...",
+        "backing away from production very carefully...",
+        "counting twelve successful packets and one mystery packet...",
+      ], 16),
+      activities: weighted(["Avoiding suspicious deployments", "Auditing calendar luck"], 10),
+      bootMessages: ["CHECKING CALENDAR ................... FRIDAY 13", "DEPLOYING CAUTIOUSLY ................ NOT TODAY"],
+      initialBootSteps: ["CHECK calendar luck ........ LOW"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Core 13 has requested the day off."],
+        gpu: ["Frame 13 keeps flickering ominously."],
+        network: ["Every thirteenth packet is taking a detour."],
+        ram: ["Memory slot 13 refuses to identify itself."],
+        storage: ["Sector 13 is probably fine."],
+        thermal: ["Temperature landed on 13 and immediately moved."],
+      }),
+      shutdownMessages: ["UNLUCKY_KERNEL_CONDITION"],
+      playingDeadMessages: ["The process refuses to move until Saturday."],
+      glitchMessages: ["THR3AT 13: calendar luck below safe threshold"],
+    },
+  ];
+
+  function mergeMonitorJokes(activeProfiles) {
+    return activeProfiles.reduce((merged, profile) => {
+      Object.entries(profile.monitorJokes ?? {}).forEach(([metric, messages]) => {
+        merged[metric] = [...(merged[metric] ?? []), ...messages];
+      });
+      return merged;
+    }, {});
+  }
+
+  function resolveProfile(date = new Date()) {
+    const exclusive = profiles.find((profile) => (
+      profile.mode === "exclusive" && profile.matches(date)
+    ));
+    const activeProfiles = exclusive
+      ? [exclusive]
+      : profiles.filter((profile) => profile.mode === "additive" && profile.matches(date));
+
+    return {
+      active: activeProfiles.length > 0,
+      id: activeProfiles.map((profile) => profile.id).join("+") || "standard",
+      ids: activeProfiles.map((profile) => profile.id),
+      mode: exclusive ? "exclusive" : activeProfiles.length ? "additive" : "standard",
+      messages: activeProfiles.flatMap((profile) => profile.messages ?? []),
+      activities: activeProfiles.flatMap((profile) => profile.activities ?? []),
+      bootMessages: activeProfiles.flatMap((profile) => profile.bootMessages ?? []),
+      initialBootSteps: activeProfiles.flatMap((profile) => profile.initialBootSteps ?? []),
+      monitorJokes: mergeMonitorJokes(activeProfiles),
+      shutdownMessages: activeProfiles.flatMap((profile) => profile.shutdownMessages ?? []),
+      playingDeadMessages: activeProfiles.flatMap((profile) => profile.playingDeadMessages ?? []),
+      glitchMessages: activeProfiles.flatMap((profile) => profile.glitchMessages ?? []),
+    };
+  }
+
+  const activeProfile = resolveProfile();
+  window.BITS_GET_SEASONAL_PROFILE = resolveProfile;
+  window.BITS_SEASONAL_PROFILE = activeProfile;
+
+  if (typeof window.setTimeout === "function" && window.location?.reload) {
+    const now = new Date();
+    const nextDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0,
+      0,
+      1,
+    );
+    window.setTimeout(() => window.location.reload(), nextDay.getTime() - now.getTime());
+  }
+
+  if (!activeProfile.active) {
+    return;
+  }
+
+  if (Array.isArray(window.BITS_MESSAGES)) {
+    window.BITS_MESSAGES = activeProfile.mode === "exclusive"
+      ? activeProfile.messages
+      : [...window.BITS_MESSAGES, ...activeProfile.messages];
+  }
+  if (Array.isArray(window.BITS_ACTIVITIES)) {
+    window.BITS_ACTIVITIES = activeProfile.mode === "exclusive"
+      ? activeProfile.activities
+      : [...window.BITS_ACTIVITIES, ...activeProfile.activities];
+  }
+  if (Array.isArray(window.BITS_SHUTDOWN_MESSAGES)) {
+    const frequentShutdownMessages = activeProfile.shutdownMessages.flatMap((message) => (
+      Array.from({ length: 12 }, () => message)
+    ));
+    window.BITS_SHUTDOWN_MESSAGES = activeProfile.mode === "exclusive"
+      ? activeProfile.shutdownMessages
+      : [...window.BITS_SHUTDOWN_MESSAGES, ...frequentShutdownMessages];
+  }
+})();

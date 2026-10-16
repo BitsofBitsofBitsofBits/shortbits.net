@@ -40,7 +40,7 @@
     "REQUIRES MORE COFFEE", "NOT REPRODUCIBLE", "SENT TO TIER 2",
     "CLOSED AS DESIGNED", "WAITING FOR REBOOT", "DOCUMENTATION UNCLEAR",
   ];
-  const fixedMessages = [
+  const baseFixedMessages = [
     "MEMORY CHECK ........................ TOO MANY BITS",
     "MOUNT /dev/internet ................. OK",
     "COUNT AVAILABLE CORES ............... SOME",
@@ -152,6 +152,11 @@
     "SHORTING MY BITS ................... WARRANTY VOIDED",
     "CREATING BITSOFBITS ................ RECURSION LIMIT APPROACHING",
   ];
+  const seasonalProfile = window.BITS_SEASONAL_PROFILE;
+  const seasonalBootMessages = seasonalProfile?.bootMessages ?? [];
+  const fixedMessages = seasonalProfile?.mode === "exclusive"
+    ? seasonalBootMessages
+    : baseFixedMessages;
   const stages = [
     "ENUMERATING SUSPICIOUS HARDWARE",
     "MOUNTING THE INTERNET",
@@ -278,7 +283,13 @@
     let message;
     let attempts = 0;
     do {
-      message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
+      if (seasonalProfile?.mode === "exclusive") {
+        message = randomItem(fixedMessages);
+      } else if (seasonalBootMessages.length && Math.random() < 0.22) {
+        message = randomItem(seasonalBootMessages);
+      } else {
+        message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
+      }
       attempts += 1;
     } while (recentMessageSet.has(message) && attempts < 100);
 

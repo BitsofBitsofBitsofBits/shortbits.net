@@ -53,7 +53,7 @@ let systemMonitorState = {
   thermal: 42,
 };
 
-const systemMonitorJokes = {
+const baseSystemMonitorJokes = {
   cpu: [
     "Calculating how many Bits fit in another Bit.",
     "Briefly considering doing actual work.",
@@ -91,6 +91,13 @@ const systemMonitorJokes = {
     "Applying thermal paste conceptually.",
   ],
 };
+const seasonalMonitorJokes = window.BITS_SEASONAL_PROFILE?.monitorJokes ?? {};
+const systemMonitorJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
+  ? seasonalMonitorJokes
+  : Object.fromEntries(Object.entries(baseSystemMonitorJokes).map(([metric, jokes]) => [
+      metric,
+      [...jokes, ...(seasonalMonitorJokes[metric] ?? [])],
+    ]));
 
 function getDesktopWindowSlug(windowElement) {
   return windowElement.id.replace(/-window$/, "");

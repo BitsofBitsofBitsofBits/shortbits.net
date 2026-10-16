@@ -1310,13 +1310,29 @@ function setFakeDesktopVisible(visible) {
   }
 }
 
-const playingDeadMessages = [
+const basePlayingDeadMessages = [
   "The process is extremely committed to the bit.",
   "Please stop checking. It is doing its best.",
   "playing_dead.exe has declined to comment.",
   "The process moved slightly when nobody was looking.",
   "Diagnostic result: suspiciously alive for something this dead.",
 ];
+const seasonalDesktopProfile = window.BITS_SEASONAL_PROFILE;
+const seasonalPlayingDeadMessages = seasonalDesktopProfile?.playingDeadMessages ?? [];
+const playingDeadMessages = seasonalDesktopProfile?.mode === "exclusive"
+  ? seasonalPlayingDeadMessages
+  : [...basePlayingDeadMessages, ...seasonalPlayingDeadMessages];
+const baseGlitchMessages = [
+  "THR3AT NAM3: fr33_b1ts_final_FINAL.exe // PLEASE PANIC NORMALLY",
+  "M3M0RY LEAK DETECTED: several memories now belong to the toolbar",
+  "QUARANTINE STATUS: YES // NO // FILE NOT EMOTIONALLY AVAILABLE",
+];
+const seasonalGlitchMessages = seasonalDesktopProfile?.glitchMessages ?? [];
+const glitchMessages = seasonalDesktopProfile?.mode === "exclusive"
+  ? seasonalGlitchMessages
+  : seasonalGlitchMessages.length
+    ? [seasonalGlitchMessages[0], baseGlitchMessages[1], seasonalGlitchMessages.at(-1)]
+    : baseGlitchMessages;
 let playingDeadChecks = 0;
 
 function closePlayingDeadProcess() {
@@ -1971,11 +1987,6 @@ function triggerVirusScreen(networkName) {
     virusScreenProgress.textContent = `${progress}%`;
     virusScreenMeterFill.style.width = `${progress}%`;
     if (progress > 0 && progress < 100 && progress % 30 === 0) {
-      const glitchMessages = [
-        "THR3AT NAM3: fr33_b1ts_final_FINAL.exe // PLEASE PANIC NORMALLY",
-        "M3M0RY LEAK DETECTED: several memories now belong to the toolbar",
-        "QUARANTINE STATUS: YES // NO // FILE NOT EMOTIONALLY AVAILABLE",
-      ];
       virusScreenCopy.textContent =
         glitchMessages[(progress / 30 - 1) % glitchMessages.length];
       virusScreen.classList.add("is-glitch-spike");

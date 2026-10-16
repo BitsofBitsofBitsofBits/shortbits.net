@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ).filter((element) => (
     element !== bootScreen && !["SCRIPT", "NOSCRIPT"].includes(element.tagName)
   ));
-  const bootSteps = [
+  const baseBootSteps = [
     "MEMORY CHECK ............... TOO MANY BITS",
     "MOUNT /dev/internet ........ OK",
     "LOAD avatar.service ........ OPINIONATED",
@@ -27,6 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
     "SYNC social_nodes .......... CONNECTED",
     "START presence.exe ......... READY",
   ];
+  const seasonalProfile = window.BITS_SEASONAL_PROFILE;
+  const seasonalBootSteps = seasonalProfile?.initialBootSteps ?? [];
+  const bootSteps = seasonalProfile?.mode === "exclusive"
+    ? seasonalBootSteps
+    : [...baseBootSteps, ...seasonalBootSteps];
   const timers = [];
   let finished = false;
 
