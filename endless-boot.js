@@ -287,11 +287,43 @@
     "RECOMMENDATION: Turn it off, admire it, then turn it on again.",
     "SOURCE: A tiny log file nobody remembers creating.",
   ];
-  const speedDelays = {
-    slow: [650, 950],
-    normal: [90, 450],
-    fast: [45, 150],
-    absurd: [16, 46],
+  const longRunningMessages = [
+    "PROBING LEGACY HARDWARE ............. STILL PROBING",
+    "REBUILDING FONT CACHE ............... TAKING ITS TIME",
+    "WAITING FOR STORAGE CONTROLLER ...... IT IS THINKING",
+    "VERIFYING EVERY SINGLE BIT .......... THIS MAY TAKE A WHILE",
+    "NEGOTIATING WITH OLD FIRMWARE ....... TERMS PENDING",
+    "TRAINING BOOT SPLASH ................ ALMOST SENTIENT",
+    "CALIBRATING PROGRESS ESTIMATE ....... RECALCULATING",
+    "SEARCHING FOR BOOT DEVICE ........... CHECKING UNDER DESK",
+    "DECOMPRESSING SYSTEM VIBES .......... 73% OF EVENTUALLY",
+    "ENUMERATING USB DEVICES ............. ONE OF THEM IS SHY",
+  ];
+  const speedTimingProfiles = {
+    slow: {
+      minimum: 650,
+      maximum: 950,
+      longMinimum: 2400,
+      longMaximum: 5200,
+    },
+    normal: {
+      minimum: 90,
+      maximum: 450,
+      longMinimum: 1100,
+      longMaximum: 2800,
+    },
+    fast: {
+      minimum: 45,
+      maximum: 150,
+      longMinimum: 550,
+      longMaximum: 1400,
+    },
+    absurd: {
+      minimum: 16,
+      maximum: 46,
+      longMinimum: 240,
+      longMaximum: 700,
+    },
   };
   const preferenceKey = "bits-endless-boot-preferences";
   const statsKey = "bits-endless-boot-stats";
@@ -349,7 +381,7 @@
 
   function initializePersistentState() {
     const preferences = readStorage(preferenceKey, {});
-    speed = speedDelays[preferences.speed] ? preferences.speed : "normal";
+    speed = speedTimingProfiles[preferences.speed] ? preferences.speed : "normal";
     density = ["relaxed", "normal", "compact"].includes(preferences.density)
       ? preferences.density
       : "normal";
@@ -425,7 +457,7 @@
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
     speedSelect.addEventListener("change", () => {
-      speed = speedDelays[speedSelect.value] ? speedSelect.value : "normal";
+      speed = speedTimingProfiles[speedSelect.value] ? speedSelect.value : "normal";
       savePreferences();
       scheduleNextMessage();
     });
@@ -498,14 +530,33 @@
     }
   }
 
-  function scheduleNextMessage() {
+  function randomDelay(minimum, maximum) {
+    return minimum + Math.floor(Math.random() * (maximum - minimum + 1));
+  }
+
+  function nextMessageDelay(longRunning = false) {
+    const profile = speedTimingProfiles[speed] ?? speedTimingProfiles.normal;
+    if (longRunning) {
+      return randomDelay(profile.longMinimum, profile.longMaximum);
+    }
+
+    const baseline = randomDelay(profile.minimum, profile.maximum);
+    const variation = Math.random();
+    if (variation < 0.18) {
+      return Math.max(8, Math.round(baseline * randomDelay(45, 72) / 100));
+    }
+    if (variation > 0.9) {
+      return Math.round(baseline * randomDelay(150, 260) / 100);
+    }
+    return baseline;
+  }
+
+  function scheduleNextMessage(longRunning = false) {
     window.clearTimeout(timer);
     if (paused || document.hidden) {
       return;
     }
-    const [minimum, maximum] = speedDelays[speed] ?? speedDelays.normal;
-    const delay = minimum + Math.floor(Math.random() * (maximum - minimum + 1));
-    timer = window.setTimeout(appendMessage, delay);
+    timer = window.setTimeout(appendMessage, nextMessageDelay(longRunning));
   }
 
   function appendSystemLine(message, state = "warning") {
@@ -766,7 +817,7 @@
       return `THEME SWITCHED TO ${requestedTheme.name.toUpperCase()}.`;
     }
     if (command === "speed") {
-      if (!speedDelays[argument]) {
+      if (!speedTimingProfiles[argument]) {
         return "SPEEDS: SLOW, NORMAL, FAST, ABSURD.";
       }
       speed = argument;
@@ -799,7 +850,10 @@
   }
 
   function appendMessage() {
-    const item = createLogItem(nextMessage());
+    const longRunning = Math.random() < 0.035;
+    const item = createLogItem(
+      longRunning ? randomItem(longRunningMessages) : nextMessage(),
+    );
     if (Math.random() < 0.08) {
       item.dataset.state = "warning";
       ignoredErrors += 1;
@@ -832,7 +886,7 @@
     if (count % 25 === 0) {
       saveStats();
     }
-    scheduleNextMessage();
+    scheduleNextMessage(longRunning);
   }
 
   document.addEventListener("visibilitychange", () => {
