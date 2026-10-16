@@ -96,6 +96,19 @@
   let lastMessage = "";
   let lastTransmission = "";
   let timer = 0;
+  let viewportFrame = 0;
+
+  function reconcileViewport() {
+    window.cancelAnimationFrame(viewportFrame);
+    viewportFrame = window.requestAnimationFrame(() => {
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty(
+        "--boot-viewport-height",
+        `${Math.round(viewportHeight)}px`,
+      );
+      log.scrollTop = log.scrollHeight;
+    });
+  }
 
   function applyTheme(themeId, persist = true) {
     const themes = window.BITS_INTERFACE_THEMES ?? [];
@@ -267,6 +280,10 @@
       appendMessage();
     }
   });
+  window.addEventListener("resize", reconcileViewport);
+  window.addEventListener("orientationchange", reconcileViewport);
+  window.visualViewport?.addEventListener("resize", reconcileViewport);
+  window.visualViewport?.addEventListener("scroll", reconcileViewport);
 
   for (let index = 0; index < 12; index += 1) {
     const item = document.createElement("li");
@@ -275,6 +292,7 @@
     count += 1;
   }
   countOutput.textContent = String(count).padStart(6, "0");
+  reconcileViewport();
   initializeThemePicker();
   renderTransmission();
   updateElapsed();

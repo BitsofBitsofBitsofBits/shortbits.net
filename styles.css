@@ -7450,7 +7450,10 @@ html[data-boot="pending"] .boot-screen[hidden] {
 }
 
 .endless-boot-page {
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
+  height: var(--boot-viewport-height, 100dvh);
+  min-height: 0;
   overflow: hidden;
   color: var(--ink);
   background:
@@ -7465,6 +7468,8 @@ html[data-boot="pending"] .boot-screen[hidden] {
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   width: 100vw;
   height: 100vh;
+  height: var(--boot-viewport-height, 100dvh);
+  min-height: 0;
   padding: clamp(18px, 3.5vw, 52px);
   box-sizing: border-box;
   font-family: var(--font-family);
@@ -7672,6 +7677,9 @@ html[data-boot="pending"] .boot-screen[hidden] {
   color: var(--ink);
   background: color-mix(in srgb, var(--panel) 96%, transparent);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.52);
+  max-height: calc(100vh - 54px);
+  max-height: calc(var(--boot-viewport-height, 100dvh) - 54px);
+  overflow: auto;
 }
 
 .endless-boot-settings-panel[hidden] {
