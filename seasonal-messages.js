@@ -583,6 +583,8 @@
         "compiling birthday wishes with maximum priority...",
         "checking whether candles count as RGB...",
         "unlocking another year of Bits...",
+        "it's my birthday!", 
+        "alive for another year", 
       ], 18),
       activities: weighted([
         "Deploying birthday cake",
@@ -591,7 +593,7 @@
       ], 12),
       bootMessages: [
         "CHECKING DATE ....................... JUNE 26 DETECTED",
-        "INCREMENTING CALEB.VERSION .......... SUCCESS",
+        "INCREMENTING BITS.VERSION .......... SUCCESS",
         "DEPLOYING BIRTHDAY CAKE ............. EXTRA BITS",
         "LIGHTING CANDLES .................... RGB COMPATIBLE",
       ],
