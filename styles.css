@@ -662,9 +662,21 @@
   --shell-radius: 0;
   --window-radius: 0;
   --noise-opacity: 0;
-  --scanline-opacity: 0;
+  --scanline-opacity: 0.035;
+  --name-field-opacity: 0;
   --icon-filter: none;
   --spotify-accent: #005a25;
+  --scrollbar-size: 16px;
+  --scrollbar-track: #d4d0c8;
+  --scrollbar-track-border: #808080;
+  --scrollbar-thumb-color: #c0c0c0;
+  --scrollbar-thumb-background: #c0c0c0;
+  --scrollbar-thumb-hover: #d4d0c8;
+  --scrollbar-thumb-active: #a0a0a0;
+  --scrollbar-thumb-border: 2px solid #808080;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset -1px -1px #000, inset 1px 1px #fff;
 }
 
 :root[data-interface-theme="windows-95"][data-color-scheme="light"] {
@@ -9892,6 +9904,381 @@ html[data-interface-theme="windows-95"] .useless-tool-console {
 
 html[data-interface-theme="windows-95"] .useless-warning strong {
   color: #704d00;
+}
+
+html[data-interface-theme="windows-95"] body {
+  -webkit-font-smoothing: none;
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
+  font-smooth: never;
+  letter-spacing: 0.015em;
+  text-rendering: optimizeSpeed;
+  text-shadow:
+    0.35px 0 rgba(176, 0, 0, 0.24),
+    -0.35px 0 rgba(0, 40, 176, 0.24);
+}
+
+html[data-interface-theme="windows-95"] ::selection {
+  color: #fff;
+  background: #000080;
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] :focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: -4px;
+}
+
+html[data-interface-theme="windows-95"] button,
+html[data-interface-theme="windows-95"] input,
+html[data-interface-theme="windows-95"] select,
+html[data-interface-theme="windows-95"] textarea,
+html[data-interface-theme="windows-95"] .footer-select-control {
+  border-radius: 0;
+}
+
+html[data-interface-theme="windows-95"] button:active:not(:disabled),
+html[data-interface-theme="windows-95"] .error-actions a:active,
+html[data-interface-theme="windows-95"] .endless-boot-settings > a:active {
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  transform: translate(1px, 1px);
+}
+
+html[data-interface-theme="windows-95"] button:hover :is(span, strong, em, b),
+html[data-interface-theme="windows-95"] button:focus-visible :is(span, strong, em, b),
+html[data-interface-theme="windows-95"] .app-menu-popup button:hover span,
+html[data-interface-theme="windows-95"] .app-menu-popup button:focus-visible span {
+  color: inherit;
+}
+
+html[data-interface-theme="windows-95"] .link-card:hover,
+html[data-interface-theme="windows-95"] .link-card:focus-visible,
+html[data-interface-theme="windows-95"] .source-file-list a:hover,
+html[data-interface-theme="windows-95"] .source-file-list a:focus-visible,
+html[data-interface-theme="windows-95"] .error-actions a:hover,
+html[data-interface-theme="windows-95"] .error-actions a:focus-visible,
+html[data-interface-theme="windows-95"] .error-actions button:hover,
+html[data-interface-theme="windows-95"] .error-actions button:focus-visible {
+  border-color: #000;
+  color: #fff;
+  background: #000080;
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-interface-theme="windows-95"] .error-actions a,
+html[data-interface-theme="windows-95"] .error-actions button {
+  border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .link-card:hover :is(.link-title, .link-description, .link-arrow, .link-icon),
+html[data-interface-theme="windows-95"] .link-card:focus-visible :is(.link-title, .link-description, .link-arrow, .link-icon) {
+  border-color: #fff;
+  color: #fff;
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .content-file-grid button:hover,
+html[data-interface-theme="windows-95"] .content-file-grid button:focus-visible,
+html[data-interface-theme="windows-95"] .useless-tool-grid button:hover,
+html[data-interface-theme="windows-95"] .useless-tool-grid button:focus-visible {
+  color: #fff;
+  background: #000080;
+}
+
+html[data-interface-theme="windows-95"] .content-file-grid button:hover *,
+html[data-interface-theme="windows-95"] .content-file-grid button:focus-visible *,
+html[data-interface-theme="windows-95"] .useless-tool-grid button:hover *,
+html[data-interface-theme="windows-95"] .useless-tool-grid button:focus-visible * {
+  color: #fff;
+}
+
+html[data-interface-theme="windows-95"] .error-window,
+html[data-interface-theme="windows-95"] .admin-shell {
+  border: 2px solid #808080;
+  color: #000;
+  background: #d4d0c8;
+  box-shadow:
+    inset -2px -2px #000,
+    inset 2px 2px #fff,
+    6px 6px 0 rgba(0, 0, 0, 0.42);
+}
+
+html[data-interface-theme="windows-95"] .error-window::before {
+  display: block;
+  margin: -26px -26px 24px;
+  padding: 4px 6px;
+  color: #fff;
+  background: #000080 linear-gradient(90deg, #000080, #1084d0);
+  font-weight: 700;
+  text-shadow: none;
+  content: "BITSOFBITS.EXE";
+}
+
+html[data-interface-theme="windows-95"] body:has(.source-window) .error-window::before {
+  content: "SOURCE EXPLORER";
+}
+
+html[data-interface-theme="windows-95"] body:has(.useless-window) .error-window::before {
+  content: "BITS SUPPORT";
+}
+
+html[data-interface-theme="windows-95"] .admin-header {
+  margin: 4px;
+  padding: 6px 8px;
+  border: 0;
+  color: #fff;
+  background: #000080 linear-gradient(90deg, #000080, #1084d0);
+}
+
+html[data-interface-theme="windows-95"] .admin-header .eyebrow {
+  display: none;
+}
+
+html[data-interface-theme="windows-95"] .admin-header h1 {
+  margin: 0;
+  font-size: 0.88rem;
+  letter-spacing: 0;
+}
+
+html[data-interface-theme="windows-95"] .admin-header :is(h1, p, span) {
+  color: #fff;
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .admin-header a {
+  padding: 5px 8px;
+  border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .admin-panel {
+  color: #000;
+  background: #d4d0c8;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-page {
+  padding: clamp(4px, 1.5vw, 12px);
+  background: #008080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-console {
+  --accent: #000080;
+  --accent-rgb: 0, 0, 128;
+  --border: #808080;
+  --ink: #000;
+  --muted: #3d3d3d;
+  --panel: #d4d0c8;
+  --warning: #800000;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  border: 2px solid #808080;
+  color: #000;
+  background: #d4d0c8;
+  box-shadow:
+    inset -2px -2px #000,
+    inset 2px 2px #fff,
+    5px 5px 0 rgba(0, 0, 0, 0.38);
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-header {
+  align-items: center;
+  gap: 8px 16px;
+  padding: 4px 6px;
+  border: 0;
+  color: #fff;
+  background: #000080 linear-gradient(90deg, #000080, #1084d0);
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-header .system-kicker {
+  display: none;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-header h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(0.72rem, 2.4vw, 0.92rem);
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-indicators {
+  gap: 5px 10px;
+  color: #fff;
+  font-size: clamp(0.46rem, 1.2vw, 0.58rem);
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-indicators i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid #fff;
+  border-radius: 0;
+  background: #00c000;
+  box-shadow: 1px 1px #000;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-transmission {
+  margin: 5px 4px 0;
+  padding: 7px 8px;
+  border: 2px solid #808080;
+  color: #000;
+  background: #fff;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-transmission > span {
+  color: #000080;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-transmission p {
+  color: #000;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-status {
+  margin: 0 4px;
+  padding: 7px 4px;
+  border-bottom: 1px solid #808080;
+  color: #3d3d3d;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-status strong {
+  color: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-log {
+  margin: 4px;
+  padding: 7px 8px;
+  border: 2px solid #808080;
+  color: #000;
+  background: #fff;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  mask-image: none;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-log li::before {
+  color: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="warning"] {
+  color: #800000;
+  font-weight: 700;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-footer {
+  margin: 0 4px 4px;
+  padding: 4px 34px 3px 0;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-progress {
+  height: 14px;
+  border: 2px solid #808080;
+  background: #fff;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-progress span {
+  margin: 2px;
+  height: calc(100% - 4px);
+  background:
+    repeating-linear-gradient(90deg, #000080 0 10px, transparent 10px 12px);
+  box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-footer p {
+  color: #3d3d3d;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-footer b {
+  color: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings {
+  right: 9px;
+  bottom: 8px;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings > a,
+html[data-interface-theme="windows-95"] .endless-boot-settings > button {
+  height: 28px;
+  border: 2px solid #808080;
+  border-radius: 0;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  opacity: 1;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings > button {
+  width: 28px;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings > a:hover,
+html[data-interface-theme="windows-95"] .endless-boot-settings > a:focus-visible,
+html[data-interface-theme="windows-95"] .endless-boot-settings > button:hover,
+html[data-interface-theme="windows-95"] .endless-boot-settings > button:focus-visible,
+html[data-interface-theme="windows-95"] .endless-boot-settings > button[aria-expanded="true"] {
+  border-color: #808080;
+  color: #fff;
+  background: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings-panel {
+  border: 2px solid #808080;
+  border-radius: 0;
+  color: #000;
+  background: #d4d0c8;
+  box-shadow:
+    inset -1px -1px #000,
+    inset 1px 1px #fff,
+    4px 4px 0 rgba(0, 0, 0, 0.38);
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings-panel p,
+html[data-interface-theme="windows-95"] .endless-boot-settings-panel label {
+  color: #000;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-settings-panel select {
+  border: 2px solid #808080;
+  color: #000;
+  background: #fff;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+}
+
+@media (max-height: 560px) {
+  html[data-interface-theme="windows-95"] .endless-boot-console {
+    padding: 3px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-header {
+    padding: 3px 5px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-transmission {
+    margin-top: 3px;
+    padding: 4px 6px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-status {
+    padding-block: 3px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-log {
+    margin-block: 3px;
+    padding: 4px 6px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-footer {
+    padding-top: 2px;
+  }
 }
 
 html[data-interface-theme="dracula"] .system-bar,
