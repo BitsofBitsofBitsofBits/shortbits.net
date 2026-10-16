@@ -98,6 +98,22 @@
   let timer = 0;
   let viewportFrame = 0;
 
+  function trimLog() {
+    const firstItem = log.firstElementChild;
+    const measuredLineHeight = firstItem
+      ? Number.parseFloat(window.getComputedStyle(firstItem).lineHeight)
+      : 16;
+    const lineHeight = Number.isFinite(measuredLineHeight) && measuredLineHeight > 0
+      ? measuredLineHeight
+      : 16;
+    const visibleLines = Math.ceil(log.clientHeight / lineHeight);
+    const retainedLines = Math.min(240, Math.max(80, visibleLines + 8));
+
+    while (log.children.length > retainedLines) {
+      log.firstElementChild.remove();
+    }
+  }
+
   function reconcileViewport() {
     window.cancelAnimationFrame(viewportFrame);
     viewportFrame = window.requestAnimationFrame(() => {
@@ -106,6 +122,7 @@
         "--boot-viewport-height",
         `${Math.round(viewportHeight)}px`,
       );
+      trimLog();
       log.scrollTop = log.scrollHeight;
     });
   }
@@ -249,9 +266,7 @@
       item.dataset.state = "warning";
     }
     log.append(item);
-    while (log.children.length > 80) {
-      log.firstElementChild.remove();
-    }
+    trimLog();
     log.scrollTop = log.scrollHeight;
 
     count += 1;
