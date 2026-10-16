@@ -94,6 +94,7 @@ jobs:
             source.html \
             styles.css \
             useless.html \
+            blog \
             boot \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"
