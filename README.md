@@ -132,9 +132,14 @@ publish controls are enabled.
 
 Blog posts are authored as Markdown in the Admin Portal. The shared renderer
 supports headings, emphasis, links, lists, blockquotes, inline code, and fenced
-code blocks. It creates DOM nodes directly instead of injecting HTML, and raw
-HTML in a post is displayed as text. Draft and future-dated posts remain hidden
-from anonymous clients through row-level security.
+code blocks, along with images, tables, task lists, highlighting, constrained
+colors, rainbow text, text sizes, and curated font choices. A formatting
+toolbar inserts the underlying markup for authors who do not want to write it
+manually. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
+5 MB and require alternative text before insertion. The renderer creates DOM
+nodes directly instead of injecting HTML, and raw HTML in a post is displayed
+as text. Draft and future-dated posts remain hidden from anonymous clients
+through row-level security.
 
 ShortBit records remain private to authenticated Admin sessions. Anonymous
 visitors can resolve only an exact enabled, unexpired alias through the

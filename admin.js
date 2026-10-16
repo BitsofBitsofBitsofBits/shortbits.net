@@ -56,6 +56,14 @@ const blogAdminStatus = document.querySelector("#blog-admin-status");
 const blogAdminList = document.querySelector("#blog-admin-list");
 const blogPostMarkdown = document.querySelector("#blog-post-markdown");
 const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
+const blogFormatBlock = document.querySelector("#blog-format-block");
+const blogFormatColor = document.querySelector("#blog-format-color");
+const blogFormatFont = document.querySelector("#blog-format-font");
+const blogFormatSize = document.querySelector("#blog-format-size");
+const blogImageUrl = document.querySelector("#blog-image-url");
+const blogImageUpload = document.querySelector("#blog-image-upload");
+const blogImageDialog = document.querySelector("#blog-image-dialog");
+const blogImageForm = document.querySelector("#blog-image-form");
 const shortLinkCreateForm = document.querySelector("#short-link-create-form");
 const shortLinkCreate = document.querySelector("#short-link-create");
 const shortLinkGenerate = document.querySelector("#short-link-generate");
@@ -167,6 +175,7 @@ Object.values(repeatableEditors).forEach((editor) => {
 });
 
 let temporaryEntryId = 0;
+let pendingBlogImagePath = "";
 
 function createAdminField(labelText, name, options = {}) {
   const label = document.createElement("label");
@@ -989,6 +998,169 @@ function toDatetimeLocal(value) {
   return localDate.toISOString().slice(0, 16);
 }
 
+function updateBlogMarkdown(value, selectionStart, selectionEnd = selectionStart) {
+  blogPostMarkdown.value = value;
+  blogPostMarkdown.focus();
+  blogPostMarkdown.setSelectionRange(selectionStart, selectionEnd);
+  blogPostMarkdown.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function wrapBlogSelection(before, after = before, placeholder = "text") {
+  const start = blogPostMarkdown.selectionStart;
+  const end = blogPostMarkdown.selectionEnd;
+  const selected = blogPostMarkdown.value.slice(start, end) || placeholder;
+  const replacement = `${before}${selected}${after}`;
+  const value = `${blogPostMarkdown.value.slice(0, start)}${replacement}${blogPostMarkdown.value.slice(end)}`;
+  const selectionStart = start + before.length;
+  updateBlogMarkdown(value, selectionStart, selectionStart + selected.length);
+}
+
+function prefixBlogLines(prefix) {
+  const value = blogPostMarkdown.value;
+  const selectionStart = value.lastIndexOf("\n", blogPostMarkdown.selectionStart - 1) + 1;
+  const nextNewline = value.indexOf("\n", blogPostMarkdown.selectionEnd);
+  const selectionEnd = nextNewline === -1 ? value.length : nextNewline;
+  const selected = value.slice(selectionStart, selectionEnd) || "List item";
+  const lines = selected.split("\n");
+  const replacement = lines.map((line, index) => (
+    typeof prefix === "function" ? prefix(line, index) : `${prefix}${line}`
+  )).join("\n");
+  const nextValue = `${value.slice(0, selectionStart)}${replacement}${value.slice(selectionEnd)}`;
+  updateBlogMarkdown(nextValue, selectionStart, selectionStart + replacement.length);
+}
+
+function insertBlogBlock(content) {
+  const start = blogPostMarkdown.selectionStart;
+  const before = blogPostMarkdown.value.slice(0, start);
+  const after = blogPostMarkdown.value.slice(blogPostMarkdown.selectionEnd);
+  const leadingBreak = before && !before.endsWith("\n\n") ? (before.endsWith("\n") ? "\n" : "\n\n") : "";
+  const trailingBreak = after && !after.startsWith("\n\n") ? (after.startsWith("\n") ? "\n" : "\n\n") : "";
+  const insertion = `${leadingBreak}${content}${trailingBreak}`;
+  updateBlogMarkdown(
+    `${before}${insertion}${after}`,
+    before.length + leadingBreak.length,
+    before.length + leadingBreak.length + content.length,
+  );
+}
+
+function applyBlogFormat(format) {
+  const formats = {
+    bold: () => wrapBlogSelection("**", "**"),
+    italic: () => wrapBlogSelection("*", "*"),
+    underline: () => wrapBlogSelection("++", "++"),
+    strike: () => wrapBlogSelection("~~", "~~"),
+    highlight: () => wrapBlogSelection("==", "=="),
+    "inline-code": () => wrapBlogSelection("`", "`", "code"),
+    "bullet-list": () => prefixBlogLines("- "),
+    "number-list": () => prefixBlogLines((line, index) => `${index + 1}. ${line}`),
+    "task-list": () => prefixBlogLines("- [ ] "),
+    table: () => insertBlogBlock("| COLUMN 1 | COLUMN 2 |\n| --- | --- |\n| VALUE | VALUE |"),
+    link: () => {
+      const url = window.prompt("Enter an HTTPS URL:");
+      if (!url) {
+        return;
+      }
+      try {
+        const parsed = new URL(url);
+        if (!["https:", "http:"].includes(parsed.protocol)) {
+          throw new Error("Unsupported protocol.");
+        }
+      } catch {
+        setAdminStatus(blogAdminStatus, "Link must use HTTP or HTTPS.", "error");
+        return;
+      }
+      wrapBlogSelection("[", `](${url})`, "link text");
+    },
+  };
+  formats[format]?.();
+}
+
+function applyBlogBlockFormat(format) {
+  const formats = {
+    "heading-2": () => prefixBlogLines("## "),
+    "heading-3": () => prefixBlogLines("### "),
+    quote: () => prefixBlogLines("> "),
+    "code-block": () => wrapBlogSelection("```\n", "\n```", "code"),
+  };
+  formats[format]?.();
+}
+
+function openBlogImageDialog(url = "") {
+  blogImageForm.reset();
+  blogImageForm.elements.url.value = url;
+  blogImageDialog.showModal();
+  (url ? blogImageForm.elements.alt : blogImageForm.elements.url).focus();
+}
+
+function insertBlogImage(url, alt, caption) {
+  const safeAlt = alt.replace(/[\[\]\r\n]/g, " ").trim();
+  const safeCaption = caption.replace(/["\r\n]/g, "'").trim();
+  const markdown = `![${safeAlt}](${url}${safeCaption ? ` "${safeCaption}"` : ""})`;
+  insertBlogBlock(markdown);
+}
+
+async function uploadBlogImage(file) {
+  const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  if (!allowedTypes.has(file.type)) {
+    setAdminStatus(blogAdminStatus, "Images must be JPEG, PNG, WebP, or GIF.", "error");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    setAdminStatus(blogAdminStatus, "Images must be 5 MB or smaller.", "error");
+    return;
+  }
+  const extension = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  }[file.type];
+  const date = new Date();
+  const path = [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    `${crypto.randomUUID()}.${extension}`,
+  ].join("/");
+  blogImageUpload.disabled = true;
+  blogImageUpload.textContent = "UPLOADING...";
+  setAdminStatus(blogAdminStatus, "Uploading blog image...");
+  const { error } = await adminClient.storage
+    .from("blog-images")
+    .upload(path, file, {
+      cacheControl: "31536000",
+      contentType: file.type,
+      upsert: false,
+    });
+  blogImageUpload.disabled = false;
+  blogImageUpload.textContent = "UPLOAD IMAGE";
+  if (error) {
+    console.error("Unable to upload blog image:", error);
+    setAdminStatus(blogAdminStatus, `Image upload failed: ${error.message}`, "error");
+    return;
+  }
+  const { data } = adminClient.storage.from("blog-images").getPublicUrl(path);
+  pendingBlogImagePath = path;
+  setAdminStatus(blogAdminStatus, "Image uploaded. Add accessible alt text.", "success");
+  openBlogImageDialog(data.publicUrl);
+}
+
+async function discardPendingBlogImage() {
+  if (!pendingBlogImagePath) {
+    return;
+  }
+  const path = pendingBlogImagePath;
+  pendingBlogImagePath = "";
+  const { error } = await adminClient.storage.from("blog-images").remove([path]);
+  if (error) {
+    console.error("Unable to discard unused blog image:", error);
+    setAdminStatus(
+      blogAdminStatus,
+      `Unused image cleanup failed: ${error.message}`,
+      "error",
+    );
+  }
+}
+
 function renderBlogPreview() {
   const markdown = blogPostMarkdown.value;
   if (!markdown.trim()) {
@@ -1186,6 +1358,81 @@ if (adminClient) {
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
   refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
   blogPostMarkdown.addEventListener("input", renderBlogPreview);
+  document.querySelectorAll("[data-blog-format]").forEach((button) => {
+    button.addEventListener("click", () => applyBlogFormat(button.dataset.blogFormat));
+  });
+  blogFormatBlock.addEventListener("change", () => {
+    applyBlogBlockFormat(blogFormatBlock.value);
+    blogFormatBlock.value = "";
+  });
+  blogFormatColor.addEventListener("change", () => {
+    if (blogFormatColor.value) {
+      wrapBlogSelection(
+        `{{color:${blogFormatColor.value}|`,
+        "}}",
+      );
+      blogFormatColor.value = "";
+    }
+  });
+  blogFormatFont.addEventListener("change", () => {
+    if (blogFormatFont.value) {
+      wrapBlogSelection(
+        `{{font:${blogFormatFont.value}|`,
+        "}}",
+      );
+      blogFormatFont.value = "";
+    }
+  });
+  blogFormatSize.addEventListener("change", () => {
+    if (blogFormatSize.value) {
+      wrapBlogSelection(
+        `{{size:${blogFormatSize.value}|`,
+        "}}",
+      );
+      blogFormatSize.value = "";
+    }
+  });
+  blogImageUrl.addEventListener("click", () => openBlogImageDialog());
+  blogImageUpload.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp,image/gif";
+    input.addEventListener("change", () => {
+      const [file] = input.files;
+      if (file) {
+        uploadBlogImage(file);
+      }
+    }, { once: true });
+    input.click();
+  });
+  blogImageForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(blogImageForm);
+    const url = String(formData.get("url") ?? "").trim();
+    const alt = String(formData.get("alt") ?? "").trim();
+    const caption = String(formData.get("caption") ?? "").trim();
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:") {
+        throw new Error("Image URLs must use HTTPS.");
+      }
+    } catch {
+      setAdminStatus(blogAdminStatus, "Image URL must be a valid HTTPS address.", "error");
+      return;
+    }
+    if (!alt) {
+      setAdminStatus(blogAdminStatus, "Image alt text is required.", "error");
+      return;
+    }
+    insertBlogImage(url, alt, caption);
+    pendingBlogImagePath = "";
+    blogImageDialog.close();
+    setAdminStatus(blogAdminStatus, "Image inserted into the post.", "success");
+  });
+  document.querySelector("[data-blog-image-cancel]").addEventListener("click", () => {
+    blogImageDialog.close();
+  });
+  blogImageDialog.addEventListener("close", discardPendingBlogImage);
   blogPostForm.elements.title.addEventListener("input", () => {
     if (!blogPostForm.elements.id.value) {
       blogPostForm.elements.slug.value = slugifyBlogTitle(

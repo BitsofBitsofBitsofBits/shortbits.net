@@ -11,6 +11,7 @@ const approvedFrameSources = [
   "https://open.spotify.com",
 ];
 const frameDirective = `frame-src ${approvedFrameSources.join(" ")};`;
+const imageDirective = "img-src 'self' data: https:;";
 const caddyfile = await readFile(caddyfilePath, "utf8");
 const policyPattern = /(Content-Security-Policy\s+")([^"]*)(")/i;
 const match = caddyfile.match(policyPattern);
@@ -28,6 +29,11 @@ if (/frame-src\s+[^;"]*;?/i.test(policy)) {
   policy = policy.replace(/font-src/i, `${frameDirective} font-src`);
 } else {
   policy = `${policy.trim().replace(/;?$/, ";")} ${frameDirective}`;
+}
+if (/img-src\s+[^;"]*;?/i.test(policy)) {
+  policy = policy.replace(/img-src\s+[^;"]*;?/i, imageDirective);
+} else {
+  policy = `${policy.trim().replace(/;?$/, ";")} ${imageDirective}`;
 }
 
 const updated = caddyfile.replace(

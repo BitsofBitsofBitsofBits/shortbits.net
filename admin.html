@@ -8,15 +8,15 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-100">
+    <link rel="stylesheet" href="styles.css?v=upgrade-101">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
-    <script src="markdown.js?v=markdown-1" defer></script>
+    <script src="markdown.js?v=markdown-2" defer></script>
     <script src="shortbits.js?v=shortbits-1" defer></script>
     <script src="admin-windows.js?v=admin-windows-9" defer></script>
     <script src="seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="windows.js?v=windows-11" defer></script>
-    <script src="admin.js?v=admin-17" defer></script>
+    <script src="admin.js?v=admin-18" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -277,6 +277,74 @@
                 <input name="published" type="checkbox">
                 <span>PUBLISH POST</span>
               </label>
+              <div class="blog-format-toolbar" role="toolbar" aria-label="Post formatting">
+                <label>
+                  <span class="visually-hidden">Text style</span>
+                  <select id="blog-format-block" aria-label="Text style">
+                    <option value="">TEXT STYLE</option>
+                    <option value="heading-2">HEADING</option>
+                    <option value="heading-3">SUBHEADING</option>
+                    <option value="quote">QUOTE</option>
+                    <option value="code-block">CODE BLOCK</option>
+                  </select>
+                </label>
+                <div role="group" aria-label="Inline formatting">
+                  <button type="button" data-blog-format="bold" aria-label="Bold selected text"><strong>B</strong></button>
+                  <button type="button" data-blog-format="italic" aria-label="Italicize selected text"><em>I</em></button>
+                  <button type="button" data-blog-format="underline" aria-label="Underline selected text"><u>U</u></button>
+                  <button type="button" data-blog-format="strike" aria-label="Strike through selected text"><s>S</s></button>
+                  <button type="button" data-blog-format="highlight" aria-label="Highlight selected text">HL</button>
+                  <button type="button" data-blog-format="inline-code" aria-label="Format selected text as inline code">&lt;/&gt;</button>
+                </div>
+                <div role="group" aria-label="Lists and links">
+                  <button type="button" data-blog-format="bullet-list">LIST</button>
+                  <button type="button" data-blog-format="number-list">1. LIST</button>
+                  <button type="button" data-blog-format="task-list">TASKS</button>
+                  <button type="button" data-blog-format="table">TABLE</button>
+                  <button type="button" data-blog-format="link">LINK</button>
+                </div>
+                <label>
+                  <span class="visually-hidden">Text color</span>
+                  <select id="blog-format-color" aria-label="Text color">
+                    <option value="">COLOR</option>
+                    <option value="accent">ACCENT</option>
+                    <option value="red">RED</option>
+                    <option value="orange">ORANGE</option>
+                    <option value="yellow">YELLOW</option>
+                    <option value="green">GREEN</option>
+                    <option value="cyan">CYAN</option>
+                    <option value="blue">BLUE</option>
+                    <option value="purple">PURPLE</option>
+                    <option value="pink">PINK</option>
+                    <option value="rainbow">RAINBOW</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="visually-hidden">Font family</span>
+                  <select id="blog-format-font" aria-label="Font family">
+                    <option value="">FONT</option>
+                    <option value="default">DEFAULT</option>
+                    <option value="serif">SERIF</option>
+                    <option value="sans">SANS</option>
+                    <option value="mono">MONOSPACE</option>
+                    <option value="display">DISPLAY</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="visually-hidden">Text size</span>
+                  <select id="blog-format-size" aria-label="Text size">
+                    <option value="">SIZE</option>
+                    <option value="small">SMALL</option>
+                    <option value="normal">NORMAL</option>
+                    <option value="large">LARGE</option>
+                    <option value="huge">HUGE</option>
+                  </select>
+                </label>
+                <div role="group" aria-label="Images">
+                  <button id="blog-image-url" type="button">IMAGE URL</button>
+                  <button id="blog-image-upload" type="button">UPLOAD IMAGE</button>
+                </div>
+              </div>
               <div class="blog-admin-workspace">
                 <label>
                   <span>MARKDOWN</span>
@@ -290,8 +358,8 @@
                 </section>
               </div>
               <p class="blog-markdown-help">
-                Supports headings, emphasis, links, lists, blockquotes, inline code, and fenced code blocks.
-                Raw HTML is displayed as text.
+                Supports headings, emphasis, links, images, task lists, tables, blockquotes, code, highlighting,
+                colors, rainbow text, sizes, and curated fonts. Raw HTML is displayed as text.
               </p>
               <p id="blog-admin-status" class="form-status" role="status" aria-live="polite"></p>
               <div class="repeatable-entry-actions">
@@ -301,6 +369,29 @@
             </form>
           </div>
         </section>
+
+        <dialog id="blog-image-dialog" class="blog-image-dialog" aria-labelledby="blog-image-dialog-heading">
+          <form id="blog-image-form" class="admin-form" method="dialog">
+            <h2 id="blog-image-dialog-heading">INSERT_IMAGE</h2>
+            <label>
+              <span>IMAGE URL</span>
+              <input name="url" type="url" required>
+            </label>
+            <label>
+              <span>ALT TEXT</span>
+              <input name="alt" maxlength="300" required>
+            </label>
+            <label>
+              <span>CAPTION (OPTIONAL)</span>
+              <input name="caption" maxlength="300">
+            </label>
+            <p class="blog-markdown-help">Describe the meaningful content of the image, not its filename.</p>
+            <div class="repeatable-entry-actions">
+              <button value="cancel" type="button" data-blog-image-cancel>CANCEL</button>
+              <button value="insert" type="submit">INSERT IMAGE</button>
+            </div>
+          </form>
+        </dialog>
 
         <section id="short-links-editor" class="profile-editor" aria-labelledby="short-links-editor-heading">
           <div class="section-label">

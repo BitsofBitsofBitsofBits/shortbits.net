@@ -1,15 +1,22 @@
 (() => {
-  const blockStartPattern = /^(?:#{1,6}\s+|```|>\s?|[-*+]\s+|\d+\.\s+|(?:-{3,}|\*{3,})\s*$)/;
-  const inlinePattern = /(\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`([^`\n]+)`|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\*([^*\n]+)\*|_([^_\n]+)_|~~([^~\n]+)~~)/g;
+  const blockStartPattern = /^(?:#{1,6}\s+|```|>\s?|[-*+]\s+|\d+\.\s+|(?:-{3,}|\*{3,})\s*$|\|.+\|$)/;
+  const inlinePattern = /(!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\{\{(color|font|size):?([^|}]*)\|([^}]+)\}\}|\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`([^`\n]+)`|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\+\+([^+\n]+)\+\+|==([^=\n]+)==|\*([^*\n]+)\*|_([^_\n]+)_|~~([^~\n]+)~~)/g;
+  const allowedColors = new Set([
+    "accent", "red", "orange", "yellow", "green", "cyan", "blue", "purple",
+    "pink", "white", "muted", "rainbow",
+  ]);
+  const allowedFonts = new Set(["default", "serif", "sans", "mono", "display"]);
+  const allowedSizes = new Set(["small", "normal", "large", "huge"]);
 
-  function safeLink(value) {
+  function safeLink(value, allowMail = true) {
     const trimmed = value.trim();
     if (trimmed.startsWith("#") || /^(?:\.{0,2}\/|\/)/.test(trimmed)) {
       return trimmed;
     }
     try {
       const url = new URL(trimmed);
-      return ["https:", "http:", "mailto:"].includes(url.protocol) ? url.href : null;
+      const protocols = allowMail ? ["https:", "http:", "mailto:"] : ["https:", "http:"];
+      return protocols.includes(url.protocol) ? url.href : null;
     } catch {
       return null;
     }
@@ -22,7 +29,46 @@
       parent.append(document.createTextNode(source.slice(cursor, match.index)));
       let element;
       if (match[2] !== undefined) {
-        const href = safeLink(match[3]);
+        const sourceUrl = safeLink(match[3], false);
+        if (!sourceUrl || (/^https?:/i.test(sourceUrl) && !sourceUrl.startsWith("https:"))) {
+          parent.append(document.createTextNode(match[0]));
+          cursor = match.index + match[0].length;
+          continue;
+        }
+        const figure = document.createElement("figure");
+        const image = document.createElement("img");
+        image.src = sourceUrl;
+        image.alt = match[2];
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.referrerPolicy = "no-referrer";
+        figure.className = "blog-markdown-image";
+        figure.append(image);
+        if (match[4]) {
+          const caption = document.createElement("figcaption");
+          caption.textContent = match[4];
+          figure.append(caption);
+        }
+        element = figure;
+      } else if (match[5] !== undefined) {
+        const type = match[5];
+        const value = match[6].trim().toLowerCase();
+        const content = match[7];
+        const allowedValues = {
+          color: allowedColors,
+          font: allowedFonts,
+          size: allowedSizes,
+        };
+        if (!allowedValues[type].has(value)) {
+          parent.append(document.createTextNode(match[0]));
+          cursor = match.index + match[0].length;
+          continue;
+        }
+        element = document.createElement("span");
+        element.className = `blog-text-${type}-${value}`;
+        appendInline(element, content);
+      } else if (match[8] !== undefined) {
+        const href = safeLink(match[9]);
         if (!href) {
           parent.append(document.createTextNode(match[0]));
           cursor = match.index + match[0].length;
@@ -30,23 +76,29 @@
         }
         element = document.createElement("a");
         element.href = href;
-        element.textContent = match[2];
+        element.textContent = match[8];
         if (/^https?:/i.test(href) && new URL(href).origin !== window.location.origin) {
           element.target = "_blank";
           element.rel = "noreferrer";
         }
-      } else if (match[4] !== undefined) {
+      } else if (match[10] !== undefined) {
         element = document.createElement("code");
-        element.textContent = match[4];
-      } else if (match[5] !== undefined || match[6] !== undefined) {
+        element.textContent = match[10];
+      } else if (match[11] !== undefined || match[12] !== undefined) {
         element = document.createElement("strong");
-        appendInline(element, match[5] ?? match[6]);
-      } else if (match[7] !== undefined || match[8] !== undefined) {
+        appendInline(element, match[11] ?? match[12]);
+      } else if (match[13] !== undefined) {
+        element = document.createElement("u");
+        appendInline(element, match[13]);
+      } else if (match[14] !== undefined) {
+        element = document.createElement("mark");
+        appendInline(element, match[14]);
+      } else if (match[15] !== undefined || match[16] !== undefined) {
         element = document.createElement("em");
-        appendInline(element, match[7] ?? match[8]);
+        appendInline(element, match[15] ?? match[16]);
       } else {
         element = document.createElement("s");
-        appendInline(element, match[9]);
+        appendInline(element, match[17]);
       }
       parent.append(element);
       cursor = match.index + match[0].length;
@@ -54,18 +106,73 @@
     parent.append(document.createTextNode(source.slice(cursor)));
   }
 
+  function splitTableRow(line) {
+    return line.trim().replace(/^\||\|$/g, "").split("|").map((cell) => cell.trim());
+  }
+
+  function isTableDivider(line) {
+    const cells = splitTableRow(line);
+    return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+  }
+
+  function renderTable(lines, startIndex) {
+    const headers = splitTableRow(lines[startIndex]);
+    const table = document.createElement("table");
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    headers.forEach((header) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      appendInline(cell, header);
+      headRow.append(cell);
+    });
+    head.append(headRow);
+    table.append(head);
+    const body = document.createElement("tbody");
+    let index = startIndex + 2;
+    while (index < lines.length && /^\|.+\|$/.test(lines[index].trim())) {
+      const row = document.createElement("tr");
+      splitTableRow(lines[index]).forEach((value) => {
+        const cell = document.createElement("td");
+        appendInline(cell, value);
+        row.append(cell);
+      });
+      body.append(row);
+      index += 1;
+    }
+    if (body.children.length) {
+      table.append(body);
+    }
+    const wrapper = document.createElement("div");
+    wrapper.className = "blog-markdown-table";
+    wrapper.tabIndex = 0;
+    wrapper.setAttribute("role", "region");
+    wrapper.setAttribute("aria-label", "Scrollable table");
+    wrapper.append(table);
+    return { element: wrapper, nextIndex: index };
+  }
+
   function render(markdown, options = {}) {
     const fragment = document.createDocumentFragment();
     const lines = String(markdown ?? "").replace(/\r\n?/g, "\n").split("\n");
-    const headingOffset = Number.isInteger(options.headingOffset)
-      ? options.headingOffset
-      : 1;
+    const headingOffset = Number.isInteger(options.headingOffset) ? options.headingOffset : 1;
     let index = 0;
 
     while (index < lines.length) {
       const line = lines[index];
       if (!line.trim()) {
         index += 1;
+        continue;
+      }
+
+      if (
+        /^\|.+\|$/.test(line.trim())
+        && index + 1 < lines.length
+        && isTableDivider(lines[index + 1])
+      ) {
+        const table = renderTable(lines, index);
+        fragment.append(table.element);
+        index = table.nextIndex;
         continue;
       }
 
@@ -125,15 +232,31 @@
         const ordered = Boolean(listMatch[2]);
         const list = document.createElement(ordered ? "ol" : "ul");
         const itemPattern = ordered ? /^\d+\.\s+(.+)$/ : /^[-*+]\s+(.+)$/;
+        let taskList = false;
         while (index < lines.length) {
           const itemMatch = itemPattern.exec(lines[index]);
           if (!itemMatch) {
             break;
           }
           const item = document.createElement("li");
-          appendInline(item, itemMatch[1]);
+          const taskMatch = /^\[([ xX])\]\s+(.+)$/.exec(itemMatch[1]);
+          if (taskMatch) {
+            taskList = true;
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = taskMatch[1].toLowerCase() === "x";
+            checkbox.disabled = true;
+            checkbox.setAttribute("aria-label", checkbox.checked ? "Completed" : "Not completed");
+            item.append(checkbox);
+            appendInline(item, taskMatch[2]);
+          } else {
+            appendInline(item, itemMatch[1]);
+          }
           list.append(item);
           index += 1;
+        }
+        if (taskList) {
+          list.className = "blog-task-list";
         }
         fragment.append(list);
         continue;
@@ -151,7 +274,14 @@
       }
       const paragraph = document.createElement("p");
       appendInline(paragraph, paragraphLines.join(" "));
-      fragment.append(paragraph);
+      if (
+        paragraph.childNodes.length === 1
+        && paragraph.firstElementChild?.classList.contains("blog-markdown-image")
+      ) {
+        fragment.append(paragraph.firstElementChild);
+      } else {
+        fragment.append(paragraph);
+      }
     }
     return fragment;
   }
@@ -159,7 +289,7 @@
   function readingTime(markdown) {
     const words = String(markdown ?? "")
       .replace(/```[\s\S]*?```/g, " ")
-      .replace(/[#>*_~`\[\]()-]/g, " ")
+      .replace(/[#>*_~`+\[\](){|}-]/g, " ")
       .trim()
       .split(/\s+/)
       .filter(Boolean).length;
