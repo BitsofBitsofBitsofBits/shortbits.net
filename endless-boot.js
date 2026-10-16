@@ -10,6 +10,24 @@
   const themeSelect = document.querySelector("#endless-boot-theme");
   const settingsPanel = document.querySelector("#endless-boot-settings-panel");
   const settingsToggle = document.querySelector("#endless-boot-settings-toggle");
+  const speedSelect = document.querySelector("#endless-boot-speed");
+  const densitySelect = document.querySelector("#endless-boot-density");
+  const autoscrollInput = document.querySelector("#endless-boot-autoscroll");
+  const pauseButton = document.querySelector("#endless-boot-pause");
+  const bitsOutput = document.querySelector("#endless-boot-bits");
+  const errorsOutput = document.querySelector("#endless-boot-errors");
+  const commandPanel = document.querySelector("#endless-boot-command");
+  const commandForm = document.querySelector("#endless-boot-command-form");
+  const commandInput = document.querySelector("#endless-boot-command-input");
+  const commandOutput = document.querySelector("#endless-boot-command-output");
+  const commandOpen = document.querySelector("#endless-boot-command-open");
+  const commandClose = document.querySelector("#endless-boot-command-close");
+  const eventPanel = document.querySelector("#endless-boot-event");
+  const eventCode = document.querySelector("#endless-boot-event-code");
+  const eventTitle = document.querySelector("#endless-boot-event-title");
+  const eventDetail = document.querySelector("#endless-boot-event-detail");
+  const particles = document.querySelector("#endless-boot-bits-particles");
+  const powerRestore = document.querySelector("#endless-boot-power-restore");
 
   const subjects = [
     "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
@@ -246,16 +264,105 @@
     "STARTING PRESENCE SUBSYSTEMS",
     "RECHECKING EVERYTHING FOREVER",
   ];
+  const incidents = [
+    ["INCIDENT 0xB17", "PACKET ESCAPED CONTAINMENT", "Dispatching a smaller packet to bring it back."],
+    ["THERMAL NOTICE", "CPU EXPERIENCING WARM THOUGHTS", "Opening a window and hoping for the best."],
+    ["MEMORY EVENT", "BIT FLIPPED WITHOUT PERMISSION", "Flipping it back before anyone notices."],
+    ["USER NOTICE", "UNEXPECTED USER DETECTED", "Attempting to look productive."],
+    ["DRIVER NOTICE", "KEYBOARD REQUESTING A RAISE", "Request forwarded to Human Resources.exe."],
+    ["NETWORK EVENT", "LATENCY ARRIVED LATE", "Acknowledgement expected eventually."],
+    ["STORAGE NOTICE", "CACHE MISPLACED ITS KEYS", "Checking underneath the couch."],
+  ];
+  const transformations = {
+    panic: ["KERNEL PANIC", "KERNEL PANICKED AND RAN OFF", "Please remain calm while the kernel does not."],
+    bsod: ["STOP 0x00000B17", "BITS SCREEN OF DEATH", "A bit encountered a bit it did not particularly like."],
+    bios: ["FIRMWARE SETUP", "BIOS HAS OPINIONS", "Press every key to continue pretending this is configurable."],
+    recovery: ["RECOVERY ENVIRONMENT", "AUTOMATIC REPAIR IS THINKING", "Diagnosing your PC. Your PC has declined to comment."],
+  };
+  const diagnosticDetails = [
+    "TRACE: Operation completed with an unreasonable amount of confidence.",
+    "OWNER: side_project_daemon // PRIORITY: eventually",
+    "NOTE: This result has not been peer reviewed by the bits.",
+    "EXIT CODE: 0xB17 // INTERPRETATION: probably fine",
+    "RECOMMENDATION: Turn it off, admire it, then turn it on again.",
+    "SOURCE: A tiny log file nobody remembers creating.",
+  ];
+  const speedDelays = {
+    slow: [650, 950],
+    normal: [90, 450],
+    fast: [45, 150],
+    absurd: [16, 46],
+  };
+  const preferenceKey = "bits-endless-boot-preferences";
+  const statsKey = "bits-endless-boot-stats";
 
   const startedAt = Date.now();
   let cycle = 1;
   let count = 0;
   let progress = 0;
+  let processedBits = 0;
+  let ignoredErrors = 0;
   let lastTransmission = "";
   const recentMessages = [];
   const recentMessageSet = new Set();
   let timer = 0;
   let viewportFrame = 0;
+  let paused = false;
+  let speed = "normal";
+  let density = "normal";
+  let autoScroll = true;
+  let incidentActive = false;
+  let lastIncidentAt = 0;
+  let stats = {
+    totalBoots: 0,
+    messagesSeen: 0,
+    longestUptime: 0,
+    incidentsIgnored: 0,
+  };
+
+  function readStorage(key, fallback) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(key));
+      return stored && typeof stored === "object" ? stored : fallback;
+    } catch (error) {
+      console.warn(`Unable to read ${key} from local storage.`, error);
+      return fallback;
+    }
+  }
+
+  function writeStorage(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.warn(`Unable to save ${key} to local storage.`, error);
+    }
+  }
+
+  function savePreferences() {
+    writeStorage(preferenceKey, { speed, density, autoScroll });
+  }
+
+  function saveStats() {
+    stats.longestUptime = Math.max(stats.longestUptime, Math.floor((Date.now() - startedAt) / 1000));
+    writeStorage(statsKey, stats);
+  }
+
+  function initializePersistentState() {
+    const preferences = readStorage(preferenceKey, {});
+    speed = speedDelays[preferences.speed] ? preferences.speed : "normal";
+    density = ["relaxed", "normal", "compact"].includes(preferences.density)
+      ? preferences.density
+      : "normal";
+    autoScroll = preferences.autoScroll !== false;
+    stats = { ...stats, ...readStorage(statsKey, {}) };
+    stats.totalBoots += 1;
+    document.documentElement.dataset.bootDensity = density;
+    document.documentElement.classList.toggle("is-boot-autoscroll-disabled", !autoScroll);
+    speedSelect.value = speed;
+    densitySelect.value = density;
+    autoscrollInput.checked = autoScroll;
+    saveStats();
+  }
 
   function trimLog() {
     const firstItem = log.firstElementChild;
@@ -282,7 +389,9 @@
         `${Math.round(viewportHeight)}px`,
       );
       trimLog();
-      log.scrollTop = log.scrollHeight;
+      if (autoScroll) {
+        log.scrollTop = log.scrollHeight;
+      }
     });
   }
 
@@ -315,6 +424,29 @@
     }));
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+    speedSelect.addEventListener("change", () => {
+      speed = speedDelays[speedSelect.value] ? speedSelect.value : "normal";
+      savePreferences();
+      scheduleNextMessage();
+    });
+    densitySelect.addEventListener("change", () => {
+      density = ["relaxed", "normal", "compact"].includes(densitySelect.value)
+        ? densitySelect.value
+        : "normal";
+      document.documentElement.dataset.bootDensity = density;
+      savePreferences();
+      reconcileViewport();
+    });
+    autoscrollInput.addEventListener("change", () => {
+      autoScroll = autoscrollInput.checked;
+      document.documentElement.classList.toggle("is-boot-autoscroll-disabled", !autoScroll);
+      savePreferences();
+      if (autoScroll) {
+        log.scrollTop = log.scrollHeight;
+      }
+    });
+    pauseButton.addEventListener("click", () => setPaused(!paused));
+    commandOpen.addEventListener("click", openCommandLine);
     window.addEventListener("storage", (event) => {
       const themePreferenceKeys = [
         "bits-interface-theme",
@@ -353,6 +485,60 @@
         settingsToggle.focus();
       }
     });
+  }
+
+  function setPaused(nextPaused) {
+    paused = nextPaused;
+    pauseButton.textContent = paused ? "RESUME OUTPUT" : "PAUSE OUTPUT";
+    pauseButton.setAttribute("aria-pressed", String(paused));
+    document.documentElement.classList.toggle("is-boot-paused", paused);
+    window.clearTimeout(timer);
+    if (!paused && !document.hidden) {
+      scheduleNextMessage();
+    }
+  }
+
+  function scheduleNextMessage() {
+    window.clearTimeout(timer);
+    if (paused || document.hidden) {
+      return;
+    }
+    const [minimum, maximum] = speedDelays[speed] ?? speedDelays.normal;
+    const delay = minimum + Math.floor(Math.random() * (maximum - minimum + 1));
+    timer = window.setTimeout(appendMessage, delay);
+  }
+
+  function appendSystemLine(message, state = "warning") {
+    const item = createLogItem(message);
+    item.dataset.state = state;
+    log.append(item);
+    trimLog();
+    if (autoScroll) {
+      log.scrollTop = log.scrollHeight;
+    }
+  }
+
+  function createLogItem(message) {
+    const item = document.createElement("li");
+    const toggle = document.createElement("button");
+    const summary = document.createElement("span");
+    const detail = document.createElement("small");
+    toggle.type = "button";
+    toggle.className = "endless-boot-log-entry";
+    toggle.setAttribute("aria-expanded", "false");
+    summary.textContent = message;
+    detail.textContent = randomItem(diagnosticDetails);
+    toggle.append(summary, detail);
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") !== "true";
+      toggle.setAttribute("aria-expanded", String(expanded));
+      item.classList.toggle("is-expanded", expanded);
+      if (autoScroll && expanded) {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    });
+    item.append(toggle);
+    return item;
   }
 
   function randomItem(items) {
@@ -433,25 +619,200 @@
     }
   }
 
+  function showEvent([code, title, detail], kind = "incident", duration = 3200) {
+    if (incidentActive) {
+      return false;
+    }
+    incidentActive = true;
+    lastIncidentAt = Date.now();
+    eventCode.textContent = code;
+    eventTitle.textContent = title;
+    eventDetail.textContent = detail;
+    eventPanel.dataset.kind = kind;
+    eventPanel.hidden = false;
+    document.documentElement.classList.add("has-boot-event");
+    window.setTimeout(() => {
+      eventPanel.hidden = true;
+      delete eventPanel.dataset.kind;
+      document.documentElement.classList.remove("has-boot-event");
+      incidentActive = false;
+      stats.incidentsIgnored += 1;
+      ignoredErrors += 1;
+      errorsOutput.textContent = String(ignoredErrors).padStart(4, "0");
+      saveStats();
+    }, duration);
+    return true;
+  }
+
+  function maybeTriggerEvent() {
+    if (incidentActive || Date.now() - lastIncidentAt < 60000) {
+      return;
+    }
+    if (Math.random() < 0.0015) {
+      showEvent(randomItem(incidents));
+    } else if (Math.random() < 0.00035) {
+      const [kind, event] = randomItem(Object.entries(transformations));
+      showEvent(event, kind, 4200);
+    }
+  }
+
+  function releaseBits(amount = 18) {
+    particles.replaceChildren();
+    const countToRelease = Math.min(64, Math.max(1, Number(amount) || 18));
+    for (let index = 0; index < countToRelease; index += 1) {
+      const bit = document.createElement("i");
+      bit.textContent = Math.random() < 0.5 ? "0" : "1";
+      bit.style.setProperty("--bit-x", `${8 + Math.random() * 84}vw`);
+      bit.style.setProperty("--bit-y", `${8 + Math.random() * 78}vh`);
+      bit.style.setProperty("--bit-delay", `${Math.random() * 320}ms`);
+      bit.style.setProperty("--bit-spin", `${-180 + Math.random() * 360}deg`);
+      particles.append(bit);
+    }
+    appendSystemLine(`RELEASING ${countToRelease} LOOSE BITS .............. RECAPTURE PENDING`);
+    window.setTimeout(() => particles.replaceChildren(), 2600);
+  }
+
+  function cyclePower() {
+    document.documentElement.classList.add("is-boot-powered-off");
+    powerRestore.hidden = false;
+    window.clearTimeout(timer);
+    powerRestore.focus();
+  }
+
+  function restorePower() {
+    powerRestore.hidden = true;
+    document.documentElement.classList.remove("is-boot-powered-off");
+    appendSystemLine("RESTORING DISPLAY POWER .............. USER FOUND BUTTON");
+    if (!paused) {
+      scheduleNextMessage();
+    }
+  }
+
+  function scanSignal() {
+    const originalStage = stageOutput.textContent;
+    stageOutput.textContent = "SCANNING LOCAL NETWORK";
+    appendSystemLine("SCANNING SIGNAL ...................... NEIGHBOR'S PRINTER FOUND");
+    window.setTimeout(() => {
+      stageOutput.textContent = originalStage;
+    }, 2200);
+  }
+
+  function openCommandLine() {
+    settingsPanel.hidden = true;
+    settingsToggle.setAttribute("aria-expanded", "false");
+    settingsToggle.setAttribute("aria-label", "Open display settings");
+    commandPanel.hidden = false;
+    commandInput.focus();
+  }
+
+  function closeCommandLine() {
+    commandPanel.hidden = true;
+    commandInput.value = "";
+  }
+
+  function formatDuration(totalSeconds) {
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  function runCommand(rawCommand) {
+    const [command = "", ...argumentsList] = rawCommand.trim().toLowerCase().split(/\s+/);
+    const argument = argumentsList.join(" ");
+    const responses = {
+      help: "COMMANDS: HELP, STATUS, STATS, DIAGNOSE, CLEAR, REBOOT, THEME <NAME>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
+      status: `CYCLE ${cycle} // ${count} MESSAGES // ${processedBits} BITS // ${ignoredErrors} ERRORS IGNORED // ${paused ? "PAUSED" : "RUNNING"}`,
+      stats: `TOTAL BOOTS ${stats.totalBoots} // MESSAGES SEEN ${stats.messagesSeen} // LONGEST UPTIME ${formatDuration(stats.longestUptime)} // INCIDENTS IGNORED ${stats.incidentsIgnored}`,
+      diagnose: "DIAGNOSTIC COMPLETE: 0 ERRORS, 3 CONCERNS, VIBES NOMINAL.",
+    };
+
+    if (responses[command]) {
+      return responses[command];
+    }
+    if (command === "clear") {
+      log.replaceChildren();
+      return "BOOT LOG CLEARED. THE BITS REMEMBER.";
+    }
+    if (command === "reboot") {
+      window.location.reload();
+      return "REBOOTING...";
+    }
+    if (command === "pause" || command === "resume") {
+      setPaused(command === "pause");
+      return `OUTPUT ${paused ? "PAUSED" : "RESUMED"}.`;
+    }
+    if (command === "incident") {
+      showEvent(randomItem(incidents));
+      return "MANUAL INCIDENT INJECTED.";
+    }
+    if (Object.hasOwn(transformations, command)) {
+      showEvent(transformations[command], command, 4200);
+      return `${command.toUpperCase()} SIMULATION STARTED.`;
+    }
+    if (command === "more" && argumentsList[0] === "bits") {
+      releaseBits(argumentsList[1] ?? 32);
+      return "ADDITIONAL BITS DISPENSED.";
+    }
+    if (command === "theme") {
+      const themes = window.BITS_INTERFACE_THEMES ?? [];
+      const requestedTheme = themes.find((theme) => (
+        theme.id === argument || theme.name.toLowerCase() === argument
+      ));
+      if (!requestedTheme) {
+        return `THEME NOT FOUND. AVAILABLE: ${themes.map((theme) => theme.id).join(", ")}`;
+      }
+      applyTheme(requestedTheme.id);
+      return `THEME SWITCHED TO ${requestedTheme.name.toUpperCase()}.`;
+    }
+    if (command === "speed") {
+      if (!speedDelays[argument]) {
+        return "SPEEDS: SLOW, NORMAL, FAST, ABSURD.";
+      }
+      speed = argument;
+      speedSelect.value = speed;
+      savePreferences();
+      scheduleNextMessage();
+      return `BOOT SPEED SET TO ${speed.toUpperCase()}.`;
+    }
+    if (command === "density") {
+      if (!["relaxed", "normal", "compact"].includes(argument)) {
+        return "DENSITIES: RELAXED, NORMAL, COMPACT.";
+      }
+      density = argument;
+      densitySelect.value = density;
+      document.documentElement.dataset.bootDensity = density;
+      savePreferences();
+      reconcileViewport();
+      return `MESSAGE DENSITY SET TO ${density.toUpperCase()}.`;
+    }
+    if (!command) {
+      return "AWAITING COMMAND.";
+    }
+    return `COMMAND NOT FOUND: ${command.toUpperCase()}. TRY HELP.`;
+  }
+
   function updateElapsed() {
     const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-    const hours = String(Math.floor(elapsed / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
-    const seconds = String(elapsed % 60).padStart(2, "0");
-    elapsedOutput.textContent = `${hours}:${minutes}:${seconds}`;
+    elapsedOutput.textContent = formatDuration(elapsed);
+    stats.longestUptime = Math.max(stats.longestUptime, elapsed);
   }
 
   function appendMessage() {
-    const item = document.createElement("li");
-    item.textContent = nextMessage();
+    const item = createLogItem(nextMessage());
     if (Math.random() < 0.08) {
       item.dataset.state = "warning";
+      ignoredErrors += 1;
     }
     log.append(item);
     trimLog();
-    log.scrollTop = log.scrollHeight;
+    if (autoScroll) {
+      log.scrollTop = log.scrollHeight;
+    }
 
     count += 1;
+    processedBits += 64 + Math.floor(Math.random() * 960);
+    stats.messagesSeen += 1;
     progress += 2 + Math.floor(Math.random() * 7);
     if (progress >= 100) {
       progress %= 100;
@@ -462,38 +823,74 @@
     }
     countOutput.textContent = String(count).padStart(6, "0");
     cycleOutput.textContent = String(cycle).padStart(4, "0");
+    bitsOutput.textContent = String(processedBits).padStart(8, "0");
+    errorsOutput.textContent = String(ignoredErrors).padStart(4, "0");
     percentOutput.textContent = `${progress}%`;
     progressBar.style.width = `${progress}%`;
     updateElapsed();
-
-    const delay = 90 + Math.floor(Math.random() * 360);
-    timer = window.setTimeout(appendMessage, delay);
+    maybeTriggerEvent();
+    if (count % 25 === 0) {
+      saveStats();
+    }
+    scheduleNextMessage();
   }
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       window.clearTimeout(timer);
-    } else {
-      appendMessage();
+      saveStats();
+    } else if (!paused) {
+      scheduleNextMessage();
     }
   });
+  document.querySelectorAll("[data-indicator]").forEach((indicator) => {
+    indicator.addEventListener("click", () => {
+      const actionsByIndicator = {
+        power: cyclePower,
+        signal: scanSignal,
+        bits: () => releaseBits(),
+      };
+      actionsByIndicator[indicator.dataset.indicator]?.();
+    });
+  });
+  powerRestore.addEventListener("click", restorePower);
+  commandClose.addEventListener("click", closeCommandLine);
+  commandForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const command = commandInput.value;
+    commandOutput.textContent = `boot> ${command}\n${runCommand(command)}`;
+    commandInput.value = "";
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && (event.key === "`" || event.key === "~")) {
+      event.preventDefault();
+      if (commandPanel.hidden) {
+        openCommandLine();
+      } else {
+        closeCommandLine();
+      }
+    } else if (event.key === "Escape" && !commandPanel.hidden) {
+      closeCommandLine();
+    }
+  });
+  window.addEventListener("pagehide", saveStats);
   window.addEventListener("resize", reconcileViewport);
   window.addEventListener("orientationchange", reconcileViewport);
   window.visualViewport?.addEventListener("resize", reconcileViewport);
   window.visualViewport?.addEventListener("scroll", reconcileViewport);
 
   for (let index = 0; index < 12; index += 1) {
-    const item = document.createElement("li");
-    item.textContent = nextMessage();
+    const item = createLogItem(nextMessage());
     log.append(item);
     count += 1;
   }
   countOutput.textContent = String(count).padStart(6, "0");
+  initializePersistentState();
   reconcileViewport();
   initializeThemePicker();
   renderTransmission();
   updateElapsed();
   window.setInterval(updateElapsed, 1000);
   window.setInterval(renderTransmission, 7000);
-  appendMessage();
+  scheduleNextMessage();
 })();

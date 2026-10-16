@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // ENDLESS BOOT</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-98">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-99">
     <script src="/messages.js?v=messages-13" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
-    <script src="/endless-boot.js?v=endless-boot-8" defer></script>
+    <script src="/endless-boot.js?v=endless-boot-9" defer></script>
   </head>
   <body class="endless-boot-page">
     <div class="noise" aria-hidden="true"></div>
@@ -23,9 +23,9 @@
           <h1 id="endless-boot-heading">INITIALIZING INTERNET PRESENCE</h1>
         </div>
         <div class="endless-boot-indicators" aria-label="Boot status">
-          <span><i></i> POWER</span>
-          <span><i></i> SIGNAL</span>
-          <span><i></i> BITS</span>
+          <button type="button" data-indicator="power" aria-label="Cycle display power"><i></i> POWER</button>
+          <button type="button" data-indicator="signal" aria-label="Scan network signal"><i></i> SIGNAL</button>
+          <button type="button" data-indicator="bits" aria-label="Release loose bits"><i></i> BITS</button>
         </div>
       </header>
       <section class="endless-boot-transmission" aria-label="Current transmission">
@@ -36,6 +36,8 @@
         <span>BOOT CYCLE <strong id="endless-boot-cycle">0001</strong></span>
         <span>MESSAGES <strong id="endless-boot-count">000000</strong></span>
         <span>ELAPSED <strong id="endless-boot-elapsed">00:00:00</strong></span>
+        <span>BITS PROCESSED <strong id="endless-boot-bits">00000000</strong></span>
+        <span>ERRORS IGNORED <strong id="endless-boot-errors">0000</strong></span>
       </div>
       <ol id="endless-boot-log" class="endless-boot-log" aria-live="off"></ol>
       <footer class="endless-boot-footer">
@@ -51,6 +53,30 @@
             <span>INTERFACE THEME</span>
             <select id="endless-boot-theme" aria-label="Interface theme"></select>
           </label>
+          <label>
+            <span>BOOT SPEED</span>
+            <select id="endless-boot-speed" aria-label="Boot message speed">
+              <option value="slow">SLOW</option>
+              <option value="normal">NORMAL</option>
+              <option value="fast">FAST</option>
+              <option value="absurd">ABSURD</option>
+            </select>
+          </label>
+          <label>
+            <span>MESSAGE DENSITY</span>
+            <select id="endless-boot-density" aria-label="Boot message density">
+              <option value="relaxed">RELAXED</option>
+              <option value="normal">NORMAL</option>
+              <option value="compact">COMPACT</option>
+            </select>
+          </label>
+          <label class="endless-boot-setting-check">
+            <input id="endless-boot-autoscroll" type="checkbox">
+            <span>AUTO-SCROLL LOG</span>
+          </label>
+          <button id="endless-boot-pause" class="endless-boot-setting-action" type="button">PAUSE OUTPUT</button>
+          <button id="endless-boot-command-open" class="endless-boot-setting-action" type="button">OPEN COMMAND LINE</button>
+          <p class="endless-boot-settings-hint">TIP: CTRL + ` OPENS THE COMMAND LINE</p>
         </div>
         <a class="endless-boot-home" href="/" aria-label="Return to the home page">&larr; HOME</a>
         <button
@@ -61,6 +87,26 @@
           aria-expanded="false"
         >&#9881;</button>
       </aside>
+      <section id="endless-boot-command" class="endless-boot-command" aria-label="Boot command line" hidden>
+        <div id="endless-boot-command-output" class="endless-boot-command-output" aria-live="polite">
+          Type HELP to list available commands.
+        </div>
+        <form id="endless-boot-command-form" autocomplete="off">
+          <label for="endless-boot-command-input">boot&gt;</label>
+          <input id="endless-boot-command-input" type="text" spellcheck="false" aria-label="Boot command">
+          <button type="submit">RUN</button>
+          <button id="endless-boot-command-close" type="button" aria-label="Close command line">X</button>
+        </form>
+      </section>
+      <section id="endless-boot-event" class="endless-boot-event" role="status" hidden>
+        <p id="endless-boot-event-code">SYSTEM EVENT</p>
+        <h2 id="endless-boot-event-title">UNEXPECTED CONDITION</h2>
+        <p id="endless-boot-event-detail">Attempting to look intentional.</p>
+      </section>
+      <div id="endless-boot-bits-particles" class="endless-boot-bits-particles" aria-hidden="true"></div>
+      <button id="endless-boot-power-restore" class="endless-boot-power-restore" type="button" hidden>
+        DISPLAY OFFLINE — CLICK TO RESTORE
+      </button>
     </main>
   </body>
 </html>
