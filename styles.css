@@ -10173,9 +10173,14 @@ html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="warning
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 14px 28px;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 3px;
   margin: 0 4px 4px;
-  padding: 4px 34px 3px 0;
+  padding: 4px 0 0;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-progress {
@@ -10197,6 +10202,8 @@ html[data-interface-theme="windows-95"] .endless-boot-progress span {
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer p {
+  align-items: center;
+  padding-top: 0;
   padding-right: 96px;
   box-sizing: border-box;
   color: #3d3d3d;
