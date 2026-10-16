@@ -56,6 +56,8 @@ is a personal project and largely a learning exercise for me.
   YouTube, Vimeo, or Spotify embeds
 - A skippable first-visit boot sequence that remembers completion for the
   current browser session and respects reduced-motion preferences
+- An unlinked `/boot` display mode with an endless randomized firmware log,
+  looping progress cycles, and portrait-friendly case-screen presentation
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
 - Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser

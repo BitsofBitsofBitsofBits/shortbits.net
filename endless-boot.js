@@ -1,0 +1,173 @@
+(() => {
+  const log = document.querySelector("#endless-boot-log");
+  const cycleOutput = document.querySelector("#endless-boot-cycle");
+  const countOutput = document.querySelector("#endless-boot-count");
+  const elapsedOutput = document.querySelector("#endless-boot-elapsed");
+  const progressBar = document.querySelector("#endless-boot-progress-bar");
+  const stageOutput = document.querySelector("#endless-boot-stage");
+  const percentOutput = document.querySelector("#endless-boot-percent");
+
+  const subjects = [
+    "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
+    "changelog.cache", "cookie_eater.sys", "cobits.language.model",
+    "confidence.module", "cursor_enthusiasm", "desktop.ini", "discord.presence",
+    "dramatic_lighting.fx", "filesystem.vibes", "firmware.personality",
+    "guestbook.daemon", "internet.presence", "keyboard_clacks.wav",
+    "linktree.compat", "missing_bit.trace", "notification.anxiety",
+    "packet_router", "playlist.telemetry", "questionable_css.dll",
+    "rgb_process", "side_project_daemon", "social_nodes", "spotify.signal",
+    "terminal.sarcasm", "theme_atmosphere", "unallocated.bit",
+  ];
+  const actions = [
+    "ALLOCATE", "AUTHENTICATE", "CALIBRATE", "CHECK", "COMPILE", "CONNECT",
+    "DEFRAGMENT", "ENUMERATE", "INDEX", "INITIALIZE", "LOAD", "MOUNT",
+    "NEGOTIATE", "PING", "PRETEND TO UNDERSTAND", "RECONCILE", "RENDER",
+    "RESOLVE", "SCAN", "SYNC", "VALIDATE", "WAKE",
+  ];
+  const results = [
+    "OK", "READY", "NOMINAL", "PROBABLY FINE", "OPINIONATED", "TOO MANY BITS",
+    "SUSPICIOUSLY FAST", "NO NOTES", "STILL THINKING", "CONNECTED",
+    "MOSTLY HARMLESS", "WITH FEELING", "UNREASONABLY CONFIDENT", "CACHE HIT",
+    "CACHE MISS (IT DUCKED)", "ENABLED", "ABSOLUTELY", "ASK AGAIN LATER",
+    "TECHNICALLY WORKING", "VIBES PASS", "0 ERRORS, 3 CONCERNS",
+  ];
+  const fixedMessages = [
+    "MEMORY CHECK ........................ TOO MANY BITS",
+    "MOUNT /dev/internet ................. OK",
+    "COUNT AVAILABLE CORES ............... SOME",
+    "VERIFY USERNAME LENGTH .............. EXCESSIVE",
+    "LOCATE PRODUCTIVITY ................. NOT FOUND",
+    "CHECK WARRANTY ...................... BOLD OF YOU",
+    "MEASURE INTERNET PRESENCE ........... PALPABLE",
+    "ASK GPU TO DRAW A RECTANGLE ......... COMPLIED",
+    "CONTACT RESPONSIBLE ADULT ........... TIMEOUT",
+    "CONTAIN LOOSE BITS .................. IN PROGRESS",
+    "PARSE TODO LIST ..................... GREW BY FOUR",
+    "INSPECT DOWNLOADS FOLDER ............ DECLINED",
+    "LOAD LAST_KNOWN_GOOD_VIBES .......... PARTIAL",
+    "RUN CABLE MANAGEMENT ................ SKIPPED",
+    "CHECK CAPS LOCK ..................... EMOTIONALLY ON",
+    "DETECT SECOND MONITOR ............... JEALOUS",
+    "VERIFY CLOUD ........................ STILL UP THERE",
+    "COUNT BROWSER TABS .................. INTEGER OVERFLOW",
+    "BENCHMARK COFFEE .................... 98.6%",
+    "TRAIN TINY BIT ...................... REFUSES COMMANDS",
+    "REHEARSE ERROR MESSAGE .............. CONVINCING",
+    "CHECK IF PLUGGED IN ................. PHILOSOPHICALLY",
+    "DOWNLOAD MORE RAM ................... ETHICALLY DUBIOUS",
+    "OPTIMIZE NOTHING .................... 43% FASTER",
+    "VALIDATE VIBES ...................... PASS",
+    "WAKE SLEEPING THREADS ............... FIVE MORE MINUTES",
+    "READ THE ROOM ....................... ACCESS DENIED",
+    "TEST EMERGENCY CONFETTI ............. ARMED",
+    "SEARCH FOR SEMICOLON ................ HIDING",
+    "COMPILE PERSONALITY ................. WARNINGS IGNORED",
+    "NEGOTIATE WITH FIREWALL ............. IT WANTS A SNACK",
+    "CHECK STACK ......................... PANCAKES DETECTED",
+    "INSPECT HEAP ........................ A LITTLE MESSY",
+    "START ACTUAL_WORK.EXE ............... SUSPENDED",
+    "SYNCHRONIZE CLOCK ................... CLOSE ENOUGH",
+    "PING LOCALHOST ...................... IT KNOWS WE LIVE HERE",
+    "CALCULATE ETA ....................... EVENTUALLY",
+    "VERIFY FINAL_FINAL_V2 ............... NOT FINAL",
+    "TEST UNDO BUTTON .................... NO REGRETS",
+    "MOUNT SIDE PROJECT ................. ANOTHER ONE",
+  ];
+  const stages = [
+    "ENUMERATING SUSPICIOUS HARDWARE",
+    "MOUNTING THE INTERNET",
+    "CALIBRATING PERSONALITY CORE",
+    "COUNTING LOOSE BITS",
+    "NEGOTIATING WITH PERIPHERALS",
+    "PRETENDING THIS IS NECESSARY",
+    "VERIFYING QUESTIONABLE DECISIONS",
+    "STARTING PRESENCE SUBSYSTEMS",
+    "RECHECKING EVERYTHING FOREVER",
+  ];
+
+  const startedAt = Date.now();
+  let cycle = 1;
+  let count = 0;
+  let progress = 0;
+  let lastMessage = "";
+  let timer = 0;
+
+  function randomItem(items) {
+    return items[Math.floor(Math.random() * items.length)];
+  }
+
+  function generatedMessage() {
+    const subject = randomItem(subjects);
+    const action = randomItem(actions);
+    const result = randomItem(results);
+    const dots = ".".repeat(Math.max(3, 39 - action.length - subject.length));
+    return `${action} ${subject} ${dots} ${result}`;
+  }
+
+  function nextMessage() {
+    let message;
+    do {
+      message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
+    } while (message === lastMessage);
+    lastMessage = message;
+    return message;
+  }
+
+  function updateElapsed() {
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const hours = String(Math.floor(elapsed / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
+    const seconds = String(elapsed % 60).padStart(2, "0");
+    elapsedOutput.textContent = `${hours}:${minutes}:${seconds}`;
+  }
+
+  function appendMessage() {
+    const item = document.createElement("li");
+    item.textContent = nextMessage();
+    if (Math.random() < 0.08) {
+      item.dataset.state = "warning";
+    }
+    log.append(item);
+    while (log.children.length > 80) {
+      log.firstElementChild.remove();
+    }
+    log.scrollTop = log.scrollHeight;
+
+    count += 1;
+    progress += 2 + Math.floor(Math.random() * 7);
+    if (progress >= 100) {
+      progress %= 100;
+      cycle += 1;
+      stageOutput.textContent = "BOOT COMPLETE; VERIFYING BOOT COMPLETION";
+    } else if (count % 7 === 0) {
+      stageOutput.textContent = randomItem(stages);
+    }
+    countOutput.textContent = String(count).padStart(6, "0");
+    cycleOutput.textContent = String(cycle).padStart(4, "0");
+    percentOutput.textContent = `${progress}%`;
+    progressBar.style.width = `${progress}%`;
+    updateElapsed();
+
+    const delay = 90 + Math.floor(Math.random() * 360);
+    timer = window.setTimeout(appendMessage, delay);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      window.clearTimeout(timer);
+    } else {
+      appendMessage();
+    }
+  });
+
+  for (let index = 0; index < 12; index += 1) {
+    const item = document.createElement("li");
+    item.textContent = nextMessage();
+    log.append(item);
+    count += 1;
+  }
+  countOutput.textContent = String(count).padStart(6, "0");
+  updateElapsed();
+  window.setInterval(updateElapsed, 1000);
+  appendMessage();
+})();

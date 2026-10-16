@@ -9,6 +9,7 @@ const htmlFiles = [
   "404.html",
   "source.html",
   "useless.html",
+  "boot/index.html",
 ];
 const missingAssets = [];
 

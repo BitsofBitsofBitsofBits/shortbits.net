@@ -7449,6 +7449,196 @@ html[data-boot="pending"] .boot-screen[hidden] {
   transition: width 180ms steps(3);
 }
 
+.endless-boot-page {
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(var(--accent-rgb), 0.1), transparent 42%),
+    #020806;
+}
+
+.endless-boot-console {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: 100vw;
+  height: 100vh;
+  padding: clamp(18px, 3.5vw, 52px);
+  box-sizing: border-box;
+  font-family: var(--font-family);
+}
+
+.endless-boot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 28px;
+  padding-bottom: clamp(14px, 2vh, 28px);
+  border-bottom: 1px solid var(--border);
+}
+
+.endless-boot-header h1,
+.endless-boot-header p,
+.endless-boot-footer p {
+  margin: 0;
+}
+
+.endless-boot-header h1 {
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: clamp(1.15rem, 3.4vw, 2.5rem);
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.34);
+}
+
+.endless-boot-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  color: var(--muted);
+  font-size: clamp(0.48rem, 1.25vw, 0.67rem);
+}
+
+.endless-boot-indicators span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.endless-boot-indicators i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: endless-boot-led 2.4s steps(2) infinite;
+}
+
+.endless-boot-indicators span:nth-child(2) i {
+  animation-delay: -800ms;
+}
+
+.endless-boot-indicators span:nth-child(3) i {
+  animation-delay: -1600ms;
+}
+
+.endless-boot-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px clamp(18px, 4vw, 48px);
+  padding: clamp(10px, 1.8vh, 18px) 0;
+  color: var(--muted);
+  font-size: clamp(0.5rem, 1.4vw, 0.72rem);
+}
+
+.endless-boot-status strong {
+  color: var(--ink);
+}
+
+.endless-boot-log {
+  min-height: 0;
+  margin: 0;
+  padding: 0 8px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(0.56rem, 1.55vw, 0.88rem);
+  line-height: 1.55;
+  list-style: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 100%);
+}
+
+.endless-boot-log li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: endless-boot-line 140ms steps(3);
+}
+
+.endless-boot-log li::before {
+  color: var(--accent);
+  content: "> ";
+}
+
+.endless-boot-log li[data-state="warning"] {
+  color: var(--warning);
+}
+
+.endless-boot-footer {
+  padding-top: clamp(12px, 2vh, 22px);
+}
+
+.endless-boot-progress {
+  height: clamp(7px, 1vh, 12px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.46);
+}
+
+.endless-boot-progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9px, rgba(0, 0, 0, 0.28) 9px 11px),
+    var(--accent);
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.45);
+  transition: width 180ms steps(5);
+}
+
+.endless-boot-footer p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 9px;
+  color: var(--muted);
+  font-size: clamp(0.48rem, 1.2vw, 0.66rem);
+}
+
+.endless-boot-footer b {
+  color: var(--accent);
+}
+
+@keyframes endless-boot-led {
+  50% {
+    opacity: 0.38;
+  }
+}
+
+@keyframes endless-boot-line {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@media (orientation: portrait) {
+  .endless-boot-console {
+    padding: clamp(18px, 5vw, 44px);
+  }
+
+  .endless-boot-header {
+    display: grid;
+  }
+
+  .endless-boot-indicators {
+    justify-content: flex-start;
+  }
+
+  .endless-boot-log {
+    font-size: clamp(0.54rem, 2.1vw, 0.82rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endless-boot-indicators i,
+  .endless-boot-log li {
+    animation: none;
+  }
+}
+
 #boot-skip {
   padding: 9px 12px;
   border: 1px solid var(--accent);
