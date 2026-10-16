@@ -62,8 +62,11 @@ is a personal project and largely a learning exercise for me.
 - An unlinked `/boot` display mode with the shared persistent theme catalog,
   rotating main-site transmissions, an endless randomized firmware log with
   speed-sensitive bursts, occasional long-running operations, and rare warning,
-  error, and rainbow messages, plus looping progress cycles and compact
-  square/portrait case-screen layouts
+  error, and rainbow messages. Distinct boot phases drive correlated hardware
+  telemetry, POST codes, activity lights, theme-aware messages, unreliable ETA
+  estimates, chained incidents, uptime milestones, and gradual idle degradation.
+  Locally persistent fake hardware, keyboard shortcuts, fullscreen presentation,
+  and compact square/portrait case-screen layouts support long-running displays
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
 - Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser

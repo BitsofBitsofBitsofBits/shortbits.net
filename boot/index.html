@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // ENDLESS BOOT</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-102">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-103">
     <script src="/messages.js?v=messages-13" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
-    <script src="/endless-boot.js?v=endless-boot-11" defer></script>
+    <script src="/endless-boot.js?v=endless-boot-12" defer></script>
   </head>
   <body class="endless-boot-page">
     <div class="noise" aria-hidden="true"></div>
@@ -39,6 +39,26 @@
         <span>BITS PROCESSED <strong id="endless-boot-bits">00000000</strong></span>
         <span>ERRORS IGNORED <strong id="endless-boot-errors">0000</strong></span>
       </div>
+      <section class="endless-boot-machine" aria-label="Live machine telemetry">
+        <button
+          id="endless-boot-post"
+          class="endless-boot-post"
+          type="button"
+          aria-label="Show persistent machine information"
+          aria-controls="endless-boot-hardware"
+          aria-expanded="false"
+        >
+          <span>POST</span>
+          <strong id="endless-boot-post-code">A2</strong>
+        </button>
+        <span class="endless-boot-host"><small>HOST</small> <strong id="endless-boot-hostname">BITS-BOOT</strong></span>
+        <span data-meter="cpu"><i></i> CPU <strong id="endless-boot-cpu">00%</strong></span>
+        <span data-meter="memory"><i></i> MEM <strong id="endless-boot-memory">0000M</strong></span>
+        <span data-meter="temperature"><i></i> TEMP <strong id="endless-boot-temperature">00C</strong></span>
+        <span data-meter="disk"><i></i> DISK <strong id="endless-boot-disk">00%</strong></span>
+        <span data-meter="network"><i></i> NET <strong id="endless-boot-network">000K</strong></span>
+        <span class="endless-boot-eta">ETA <strong id="endless-boot-eta">CALCULATING</strong></span>
+      </section>
       <ol id="endless-boot-log" class="endless-boot-log" aria-live="off"></ol>
       <footer class="endless-boot-footer">
         <div class="endless-boot-progress" aria-hidden="true">
@@ -75,8 +95,9 @@
             <span>AUTO-SCROLL LOG</span>
           </label>
           <button id="endless-boot-pause" class="endless-boot-setting-action" type="button">PAUSE OUTPUT</button>
+          <button id="endless-boot-presentation" class="endless-boot-setting-action" type="button">ENTER PRESENTATION MODE</button>
           <button id="endless-boot-command-open" class="endless-boot-setting-action" type="button">OPEN COMMAND LINE</button>
-          <p class="endless-boot-settings-hint">TIP: CTRL + ` OPENS THE COMMAND LINE</p>
+          <p class="endless-boot-settings-hint">KEYS: SPACE PAUSE // +/- SPEED // A SCROLL // D DENSITY // T THEME // F FULLSCREEN // ? HELP</p>
         </div>
         <a class="endless-boot-home" href="/" aria-label="Return to the home page">&larr; HOME</a>
         <button
@@ -102,6 +123,17 @@
         <p id="endless-boot-event-code">SYSTEM EVENT</p>
         <h2 id="endless-boot-event-title">UNEXPECTED CONDITION</h2>
         <p id="endless-boot-event-detail">Attempting to look intentional.</p>
+      </section>
+      <section id="endless-boot-hardware" class="endless-boot-hardware" aria-labelledby="endless-boot-hardware-title" hidden>
+        <header>
+          <div>
+            <p>PERSISTENT_MACHINE_IDENTITY</p>
+            <h2 id="endless-boot-hardware-title">HARDWARE INVENTORY</h2>
+          </div>
+          <button id="endless-boot-hardware-close" type="button" aria-label="Close hardware inventory">X</button>
+        </header>
+        <dl id="endless-boot-hardware-list"></dl>
+        <p>Identity is generated once and retained locally for future boot sessions.</p>
       </section>
       <div id="endless-boot-bits-particles" class="endless-boot-bits-particles" aria-hidden="true"></div>
       <button id="endless-boot-power-restore" class="endless-boot-power-restore" type="button" hidden>

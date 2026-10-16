@@ -8331,7 +8331,7 @@ html[data-boot="pending"] .boot-screen[hidden] {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   width: 100vw;
   height: 100vh;
   height: var(--boot-viewport-height, 100dvh);
@@ -8446,6 +8446,89 @@ html[data-boot="pending"] .boot-screen[hidden] {
 
 .endless-boot-status strong {
   color: var(--ink);
+}
+
+.endless-boot-machine {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.8vw, 22px);
+  min-width: 0;
+  min-height: 28px;
+  padding: 5px 0;
+  overflow: hidden;
+  border-block: 1px solid color-mix(in srgb, var(--border) 68%, transparent);
+  color: var(--muted);
+  font-size: clamp(0.42rem, 1vw, 0.58rem);
+  white-space: nowrap;
+}
+
+.endless-boot-machine > span,
+.endless-boot-post {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.endless-boot-machine strong {
+  color: var(--ink);
+}
+
+.endless-boot-machine small {
+  color: var(--muted);
+  font: inherit;
+}
+
+.endless-boot-post {
+  min-height: 22px;
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.endless-boot-post strong {
+  min-width: 2.4ch;
+  color: var(--accent);
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.endless-boot-post:hover,
+.endless-boot-post:focus-visible,
+.endless-boot-post[aria-expanded="true"] {
+  border-color: var(--accent);
+  outline: 0;
+  color: var(--accent);
+}
+
+.endless-boot-machine [data-meter] i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.35;
+}
+
+.endless-boot-machine [data-meter].is-active i {
+  background: var(--accent);
+  box-shadow: 0 0 7px var(--accent);
+  opacity: 1;
+  animation: endless-boot-activity 480ms steps(2) infinite;
+}
+
+.endless-boot-machine [data-meter].is-hot i {
+  background: var(--warning);
+  box-shadow: 0 0 7px var(--warning);
+}
+
+.endless-boot-eta {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .endless-boot-log {
@@ -8928,6 +9011,7 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
 
 .endless-boot-command[hidden],
 .endless-boot-event[hidden],
+.endless-boot-hardware[hidden],
 .endless-boot-power-restore[hidden] {
   display: none;
 }
@@ -9038,6 +9122,93 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
   color: #fff;
 }
 
+.endless-boot-hardware {
+  position: absolute;
+  z-index: 10;
+  inset: clamp(14px, 5vw, 72px);
+  display: grid;
+  align-content: center;
+  width: min(620px, calc(100% - 28px));
+  max-height: calc(100% - 28px);
+  margin: auto;
+  padding: clamp(14px, 3vw, 28px);
+  overflow: auto;
+  border: 1px solid var(--accent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel) 97%, #000);
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.76), 0 0 30px rgba(var(--accent-rgb), 0.2);
+  clip-path: inset(-100vmax);
+}
+
+.endless-boot-hardware header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.endless-boot-hardware h2,
+.endless-boot-hardware p {
+  margin: 0;
+}
+
+.endless-boot-hardware header p {
+  color: var(--muted);
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+}
+
+.endless-boot-hardware h2 {
+  margin-top: 5px;
+  color: var(--accent);
+  font-size: clamp(0.9rem, 3vw, 1.4rem);
+}
+
+.endless-boot-hardware header button {
+  flex: none;
+  width: 30px;
+  min-height: 30px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font: 0.7rem/1 var(--font-family);
+}
+
+.endless-boot-hardware header button:hover,
+.endless-boot-hardware header button:focus-visible {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.endless-boot-hardware dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 7px 18px;
+  margin: 16px 0;
+  font-size: clamp(0.5rem, 1.4vw, 0.7rem);
+}
+
+.endless-boot-hardware dt {
+  color: var(--muted);
+}
+
+.endless-boot-hardware dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.endless-boot-hardware > p {
+  color: var(--muted);
+  font-size: 0.46rem;
+  line-height: 1.5;
+}
+
 .endless-boot-bits-particles {
   position: fixed;
   z-index: 10;
@@ -9073,6 +9244,18 @@ html.is-boot-paused .endless-boot-indicators i {
   opacity: 0.35;
 }
 
+html.is-boot-presentation .endless-boot-settings {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+html.is-boot-presentation .endless-boot-settings.is-revealed,
+html.is-boot-presentation .endless-boot-settings:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 @keyframes endless-boot-event-in {
   from {
     opacity: 0;
@@ -9099,6 +9282,12 @@ html.is-boot-paused .endless-boot-indicators i {
 @keyframes endless-boot-led {
   50% {
     opacity: 0.38;
+  }
+
+  @keyframes endless-boot-activity {
+    50% {
+      opacity: 0.42;
+    }
   }
 }
 
@@ -9131,6 +9320,44 @@ html.is-boot-paused .endless-boot-indicators i {
 
   .endless-boot-log {
     font-size: clamp(0.54rem, 2.1vw, 0.82rem);
+  }
+}
+
+@media (max-width: 700px) {
+  .endless-boot-machine {
+    gap: 9px;
+  }
+
+  .endless-boot-host,
+  .endless-boot-machine [data-meter="network"] {
+    display: none;
+  }
+}
+
+@media (max-width: 440px) {
+  .endless-boot-machine [data-meter="memory"],
+  .endless-boot-machine [data-meter="disk"] {
+    display: none;
+  }
+
+  .endless-boot-post > span {
+    display: none;
+  }
+
+  .endless-boot-hardware {
+    inset: 8px;
+    width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
+    padding: 12px;
+  }
+
+  .endless-boot-hardware dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .endless-boot-hardware dd {
+    margin-bottom: 6px;
   }
 }
 
@@ -9182,6 +9409,24 @@ html.is-boot-paused .endless-boot-indicators i {
     gap: 4px 12px;
     padding: 5px 0;
     font-size: 0.39rem;
+  }
+
+  .endless-boot-machine {
+    min-height: 20px;
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 0.37rem;
+  }
+
+  .endless-boot-host,
+  .endless-boot-machine [data-meter="memory"],
+  .endless-boot-machine [data-meter="network"] {
+    display: none;
+  }
+
+  .endless-boot-post {
+    min-height: 18px;
+    padding: 1px 4px;
   }
 
   .endless-boot-log {
@@ -9238,10 +9483,28 @@ html.is-boot-paused .endless-boot-indicators i {
     inset: 8px;
     padding: 14px;
   }
+
+  .endless-boot-hardware {
+    inset: 6px;
+    width: calc(100% - 12px);
+    max-height: calc(100% - 12px);
+    padding: 10px;
+  }
+
+  .endless-boot-hardware header {
+    padding-bottom: 6px;
+  }
+
+  .endless-boot-hardware dl {
+    gap: 3px 12px;
+    margin: 8px 0;
+    font-size: 0.42rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .endless-boot-indicators i,
+  .endless-boot-machine [data-meter].is-active i,
   .endless-boot-log li,
   .endless-boot-transmission p,
   .endless-boot-event {
@@ -9251,6 +9514,15 @@ html.is-boot-paused .endless-boot-indicators i {
   .endless-boot-bits-particles i {
     display: none;
   }
+}
+
+html[data-boot-degradation="2"] .endless-boot-eta strong,
+html[data-boot-degradation="3"] .endless-boot-eta strong {
+  color: var(--warning);
+}
+
+html[data-boot-degradation="3"] .endless-boot-machine {
+  border-bottom-color: color-mix(in srgb, var(--warning) 55%, var(--border));
 }
 
 #boot-skip {
@@ -11362,6 +11634,28 @@ html[data-interface-theme="windows-95"] .endless-boot-status strong {
   color: #000080;
 }
 
+html[data-interface-theme="windows-95"] .endless-boot-machine {
+  margin: 0 4px;
+  padding-inline: 4px;
+  border-color: #808080;
+  color: #3d3d3d;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-machine strong {
+  color: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-post {
+  border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-machine [data-meter] i {
+  border-radius: 0;
+}
+
 html[data-interface-theme="windows-95"] .endless-boot-log {
   margin: 4px;
   padding: 7px 8px;
@@ -11487,6 +11781,28 @@ html[data-interface-theme="windows-95"] .endless-boot-settings-panel select {
   box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
 }
 
+html[data-interface-theme="windows-95"] .endless-boot-hardware {
+  border: 2px solid #808080;
+  color: #000;
+  background: #d4d0c8;
+  box-shadow:
+    inset -1px -1px #000,
+    inset 1px 1px #fff,
+    0 0 0 100vmax rgba(0, 0, 0, 0.66);
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-hardware h2,
+html[data-interface-theme="windows-95"] .endless-boot-hardware dd {
+  color: #000080;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-hardware header button {
+  border: 2px solid #808080;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+}
+
 @media (max-height: 560px) {
   html[data-interface-theme="windows-95"] .endless-boot-console {
     padding: 3px;
@@ -11503,6 +11819,10 @@ html[data-interface-theme="windows-95"] .endless-boot-settings-panel select {
 
   html[data-interface-theme="windows-95"] .endless-boot-status {
     padding-block: 3px;
+  }
+
+  html[data-interface-theme="windows-95"] .endless-boot-machine {
+    padding-block: 1px;
   }
 
   html[data-interface-theme="windows-95"] .endless-boot-log {
