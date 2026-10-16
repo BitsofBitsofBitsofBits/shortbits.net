@@ -16,17 +16,19 @@
     "changelog.cache", "cookie_eater.sys", "cobits.language.model",
     "confidence.module", "cursor_enthusiasm", "desktop.ini", "discord.presence",
     "dramatic_lighting.fx", "filesystem.vibes", "firmware.personality",
-    "guestbook.daemon", "internet.presence", "keyboard_clacks.wav",
-    "linktree.compat", "missing_bit.trace", "notification.anxiety",
-    "packet_router", "playlist.telemetry", "questionable_css.dll",
-    "rgb_process", "side_project_daemon", "social_nodes", "spotify.signal",
-    "terminal.sarcasm", "theme_atmosphere", "unallocated.bit",
+    "guestbook.daemon", "help_request", "installed.apps", "internet.presence",
+    "keyboard_clacks.wav", "linktree.compat", "missing_bit.trace", "my.bits",
+    "Nemo", "notification.anxiety", "packet_router", "playlist.telemetry",
+    "questionable_css.dll", "rgb_process", "ShortBits", "side_project_daemon",
+    "social_nodes", "spotify.signal", "support.ticket", "terminal.sarcasm",
+    "theme_atmosphere", "unallocated.bit", "BitsofBits",
   ];
   const actions = [
     "ALLOCATE", "AUTHENTICATE", "CALIBRATE", "CHECK", "COMPILE", "CONNECT",
-    "DEFRAGMENT", "ENUMERATE", "INDEX", "INITIALIZE", "LOAD", "MOUNT",
-    "NEGOTIATE", "PING", "PRETEND TO UNDERSTAND", "RECONCILE", "RENDER",
-    "RESOLVE", "SCAN", "SYNC", "VALIDATE", "WAKE",
+    "CREATE", "DEFRAGMENT", "ENUMERATE", "FIND", "INDEX", "INITIALIZE",
+    "INSTALL", "LOAD", "MOUNT", "NEGOTIATE", "PING", "PRETEND TO UNDERSTAND",
+    "RECONCILE", "RENDER", "RESOLVE", "SCAN", "SEND", "SHORT", "SOLVE",
+    "SUBMIT", "SYNC", "VALIDATE", "WAKE",
   ];
   const results = [
     "OK", "READY", "NOMINAL", "PROBABLY FINE", "OPINIONATED", "TOO MANY BITS",
@@ -34,6 +36,9 @@
     "MOSTLY HARMLESS", "WITH FEELING", "UNREASONABLY CONFIDENT", "CACHE HIT",
     "CACHE MISS (IT DUCKED)", "ENABLED", "ABSOLUTELY", "ASK AGAIN LATER",
     "TECHNICALLY WORKING", "VIBES PASS", "0 ERRORS, 3 CONCERNS",
+    "PENDING APPROVAL", "ESCALATED TO THE BITS", "WORKS ON MY MACHINE",
+    "REQUIRES MORE COFFEE", "NOT REPRODUCIBLE", "SENT TO TIER 2",
+    "CLOSED AS DESIGNED", "WAITING FOR REBOOT", "DOCUMENTATION UNCLEAR",
   ];
   const fixedMessages = [
     "MEMORY CHECK ........................ TOO MANY BITS",
@@ -76,6 +81,76 @@
     "VERIFY FINAL_FINAL_V2 ............... NOT FINAL",
     "TEST UNDO BUTTON .................... NO REGRETS",
     "MOUNT SIDE PROJECT ................. ANOTHER ONE",
+    "BOOTING LINUX ...................... KERNEL PANICKED AND RAN OFF",
+    "TRYING TO LOAD WINDOWS ............. BSOD ENCOUNTERED",
+    "INSTALLING CPU ..................... BENT PIN",
+    "INSTALLING SIDE PANEL .............. DROPPED. GLASS EVERYWHERE",
+    "FLASHING BIOS ...................... POWER BLINKED",
+    "ENABLING XMP ....................... RAM DEVELOPED CONFIDENCE",
+    "APPLYING THERMAL PASTE ............. USED THE WHOLE TUBE",
+    "CHECKING CPU TEMPERATURE ........... WARM THOUGHTS DETECTED",
+    "SPINNING UP FANS ................... PREPARING FOR TAKEOFF",
+    "TRAINING AI ........................ IT LEARNED SARCASM",
+    "QUERYING DNS ....................... ASKED ANOTHER DNS",
+    "RENEWING DHCP LEASE ................ ADDRESS PENDING",
+    "NEGOTIATING TLS .................... CERTIFICATE SAYS MAYBE",
+    "VERIFYING CHECKSUM ................. CHECKSUM CHECKING ITSELF",
+    "REBUILDING RAID .................... STILL REDUNDANT",
+    "EJECTING USB ....................... TOO LATE",
+    "DETECTING PRINTER .................. IT DENIES EXISTING",
+    "CONNECTING BLUETOOTH ............... PAIRING EMOTIONALLY",
+    "OPENING PORT 443 ................... CLOSE THE DOOR BEHIND YOU",
+    "CLOSING PORT 80 .................... DRAFT RESOLVED",
+    "PULLING LATEST MAIN ................ CONFLICT ACQUIRED",
+    "MERGING BRANCH ..................... TREE IS NOW ABSTRACT ART",
+    "RESOLVING CONFLICTS ................ CHOSE BOTH",
+    "COMMITTING CHANGES ................. IDENTITY UNKNOWN",
+    "PUSHING TO PRODUCTION .............. ON A FRIDAY? ABSOLUTELY NOT",
+    "INSTALLING NODE_MODULES ............ DISK SPACE LEFT THE CHAT",
+    "AUDITING DEPENDENCIES .............. 0 VULNERABILITIES*",
+    "STARTING DOCKER .................... ONE WHALE LATER",
+    "SCALING KUBERNETES ................. YAML INTENSIFIES",
+    "CENTERING A DIV .................... CONSULTING THE ELDERS",
+    "PARSING JSON ....................... UNEXPECTED COMMA EXPECTED",
+    "DEREFERENCING POINTER .............. NULL ENTERED THE CHAT",
+    "CATCHING EXCEPTION ................. IT GOT AWAY",
+    "COLLECTING GARBAGE ................. FOUND THREE SIDE PROJECTS",
+    "OPENING SOURCE ..................... BUGS NOW COMMUNITY-OWNED",
+    "UPDATING DRIVER .................... VEHICLE UNCHANGED",
+    "ENABLING DARK MODE ................. BUGS HARDER TO SEE",
+    "DISABLING COOKIES .................. WEBSITE IS HUNGRY",
+    "CHECKING LATENCY ................... REPLY PENDING",
+    "PINGING 8.8.8.8 .................... VIBES RETURNED",
+    "TRACING ROUTE ...................... TAKING THE SCENIC PATH",
+    "SYNCHRONIZING CLOCK ................ TIME DISAGREES",
+    "FORMATTING DRIVE ................... ASKED NICELY FIRST",
+    "PARTITIONING DISK .................. AMICABLY SEPARATED",
+    "MOUNTING FILESYSTEM ................ SADDLE UNAVAILABLE",
+    "UNZIPPING ARCHIVE .................. PANTS REMAINED ZIPPED",
+    "HASHING PASSWORD ................... BREAKFAST SECURED",
+    "SALTING PASSWORD ................... SEASONED TO TASTE",
+    "ROTATING KEYS ...................... KEYBOARD DIZZY",
+    "BALANCING LOAD ..................... SPIRITUALLY CENTERED",
+    "INVALIDATING CACHE ................. OTHER HARD PROBLEM PENDING",
+    "FIXING OFF-BY-ONE ERROR ............ FIXED 2 OF 3",
+    "READING MAN PAGE ................... PROTAGONIST UNCLEAR",
+    "EXITING VIM ........................ STILL NEGOTIATING",
+    "UPDATING FIRMWARE .................. NOW HAS OPINIONS",
+    "TESTING BACKUP ..................... RESTORE NOT INCLUDED",
+    "RESTORING BACKUP ................... BACKUP IS FROM THE FUTURE",
+    "SCANNING QR CODE ................... SQUARES WITHIN SQUARES",
+    "CALIBRATING RGB .................... +12 FPS CONFIRMED",
+    "SEATING RAM ........................ ASKED IT TO SIT",
+    "PLUGGING IN USB .................... WRONG SIDE TWICE",
+    "FLIPPING USB ....................... SOMEHOW WRONG AGAIN",
+    "FINDING NEMO ....................... CHECKING /dev/ocean",
+    "SENDING HELP ....................... DELIVERY CONFIRMATION LOST",
+    "SUBMITTING A TICKET ................ QUEUE POSITION: EVENTUALLY",
+    "SOLVING A TICKET ................... CREATED TWO MORE",
+    "INSTALLING APPS .................... TERMS UNREAD",
+    "BOOTING SHORTBITS .................. LONG BITS NOT DETECTED",
+    "SHORTING MY BITS ................... WARRANTY VOIDED",
+    "CREATING BITSOFBITS ................ RECURSION LIMIT APPROACHING",
   ];
   const stages = [
     "ENUMERATING SUSPICIOUS HARDWARE",
@@ -93,8 +168,9 @@
   let cycle = 1;
   let count = 0;
   let progress = 0;
-  let lastMessage = "";
   let lastTransmission = "";
+  const recentMessages = [];
+  const recentMessageSet = new Set();
   let timer = 0;
   let viewportFrame = 0;
 
@@ -200,10 +276,17 @@
 
   function nextMessage() {
     let message;
+    let attempts = 0;
     do {
       message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
-    } while (message === lastMessage);
-    lastMessage = message;
+      attempts += 1;
+    } while (recentMessageSet.has(message) && attempts < 100);
+
+    recentMessages.push(message);
+    recentMessageSet.add(message);
+    if (recentMessages.length > 240) {
+      recentMessageSet.delete(recentMessages.shift());
+    }
     return message;
   }
 
