@@ -462,8 +462,8 @@ const achievementCatalog = [
   { id: "bits-released", hints: ["Not every click is a left click.", "The avatar understands a middle click.", "Middle-click the avatar."] },
   { id: "access-denied", hints: ["The avatar guards its context.", "Try asking it for a menu.", "Right-click the avatar."] },
   { id: "infinite-username", hints: ["The username can contain more username.", "Hold the repeated name.", "Press and hold BitsofBitsofBits."] },
-  { id: "more-bits", hints: ["Rapid repetition reveals more.", "The username responds to impatient clicking.", "Triple-click BitsofBitsofBits."] },
-  { id: "red-screen", hints: ["A username can only contain so many Bits.", "Triple-clicking adds another segment.", "Add ten extra Bits without refreshing."] },
+  { id: "more-bits", hints: ["Rapid repetition reveals more.", "The username responds to impatient clicking.", "Click BitsofBitsofBits."] },
+  { id: "red-screen", hints: ["A username can only contain so many Bits.", "Clicking adds another segment.", "Add ten extra Bits without refreshing."] },
   { id: "black-screen", hints: ["An empty desktop can become emptier.", "Close the last desktop window.", "Then knock five times on the empty background."] },
   { id: "green-screen", hints: ["Stable software is optional.", "Advanced update options contain a preview channel.", "Join Canary Bits, then open three windows."] },
   { id: "failure-spectrum", hints: ["Technical difficulty comes in several colors.", "Blue, Red, Black, and Green are all available.", "Survive all four death screens."] },
@@ -2431,7 +2431,7 @@ let identityHoldTimer;
 let identityExpansionTimer;
 let heldBitCount = 0;
 let didHoldIdentity = false;
-let tripleBitCount = 0;
+let identityClickCount = 0;
 let redScreenTimer;
 let redScreenPreviousFocus;
 
@@ -2450,7 +2450,7 @@ function resetIdentityName() {
   identityName.classList.remove("is-expanding", "is-collapsed-bits");
   identityName.setAttribute(
     "aria-label",
-    "BitsofBitsofBits. Hold for more bits.",
+    "BitsofBitsofBits. Click or hold for more bits.",
   );
 }
 
@@ -2459,7 +2459,7 @@ function recoverFromRedScreen() {
   redScreen.hidden = true;
   document.body.classList.remove("is-red-screen");
   document.title = "BitsofBitsofBits // BITSOFWEBSITE";
-  tripleBitCount = 0;
+  identityClickCount = 0;
   heldBitCount = 0;
   didHoldIdentity = false;
   resetIdentityName();
@@ -2554,8 +2554,28 @@ function stopIdentityHold() {
   identityName.classList.remove("is-expanding");
 }
 
-identityName.addEventListener("pointerdown", startIdentityHold);
+function addIdentityBit() {
+  appendIdentityBits();
+  identityClickCount += 1;
+  showAchievement(
+    "MORE BITS HAVE BEEN ADDED",
+    "ACHIEVEMENT UNLOCKED",
+    3200,
+    "more-bits",
+  );
+  if (identityClickCount === 10) {
+    window.setTimeout(triggerRedScreen, 260);
+  }
+}
+
+identityName.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) {
+    return;
+  }
+  startIdentityHold();
+});
 window.addEventListener("pointerup", stopIdentityHold);
+identityName.addEventListener("pointercancel", stopIdentityHold);
 identityName.addEventListener("keydown", (event) => {
   if ((event.key === " " || event.key === "Enter") && !event.repeat) {
     event.preventDefault();
@@ -2564,27 +2584,23 @@ identityName.addEventListener("keydown", (event) => {
 });
 identityName.addEventListener("keyup", (event) => {
   if (event.key === " " || event.key === "Enter") {
+    event.preventDefault();
     stopIdentityHold();
+    if (!didHoldIdentity) {
+      addIdentityBit();
+    }
+    didHoldIdentity = false;
   }
 });
 
 identityName.addEventListener("click", (event) => {
-  if (didHoldIdentity || event.detail !== 3) {
+  event.preventDefault();
+  if (didHoldIdentity) {
     didHoldIdentity = false;
     return;
   }
 
-  appendIdentityBits();
-  tripleBitCount += 1;
-  showAchievement(
-    "MORE BITS HAVE BEEN ADDED",
-    "ACHIEVEMENT UNLOCKED",
-    3200,
-    "more-bits",
-  );
-  if (tripleBitCount === 10) {
-    window.setTimeout(triggerRedScreen, 260);
-  }
+  addIdentityBit();
 });
 
 let vinylSpeed = 2.4;

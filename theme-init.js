@@ -28,6 +28,8 @@ const seasonalInterfaceThemes = {
   christmas: { id: "christmas", name: "CHRISTMAS", darkColor: "#07150f", lightColor: "#fff7e8", seasonal: true },
   "new-year": { id: "new-year", name: "NEW YEAR", darkColor: "#080a18", lightColor: "#fff8dc", seasonal: true },
 };
+const themeDebugKey = "bits-theme-debug";
+const themeDebugEnabled = localStorage.getItem(themeDebugKey) === "enabled";
 
 function getSeasonalThemeState(date = new Date()) {
   const month = date.getMonth();
@@ -70,9 +72,11 @@ function getSeasonalThemeState(date = new Date()) {
 }
 
 const seasonalThemeState = getSeasonalThemeState();
-const availableSeasonalThemes = seasonalThemeState.availableThemeIds.map(
-  (themeId) => seasonalInterfaceThemes[themeId],
-);
+const availableSeasonalThemes = themeDebugEnabled
+  ? Object.values(seasonalInterfaceThemes)
+  : seasonalThemeState.availableThemeIds.map(
+    (themeId) => seasonalInterfaceThemes[themeId],
+  );
 window.BITS_INTERFACE_THEMES = [...baseInterfaceThemes, ...availableSeasonalThemes];
 window.BITS_GET_SEASONAL_THEME_STATE = getSeasonalThemeState;
 window.BITS_SEASONAL_THEME_STATE = seasonalThemeState;
@@ -91,10 +95,17 @@ const seasonalDismissed = (
   localStorage.getItem(seasonalDismissalKey) === seasonalThemeState.id
 );
 const storedSeasonalChoice = localStorage.getItem(seasonalChoiceKey)?.split(":") ?? [];
-const seasonalChoice = storedSeasonalChoice[0] === seasonalThemeState.id
-  && seasonalThemeState.availableThemeIds.includes(storedSeasonalChoice[1])
-  ? storedSeasonalChoice[1]
-  : "";
+const seasonalChoice = (
+  (
+    themeDebugEnabled
+    && storedSeasonalChoice[0] === "debug"
+    && Boolean(seasonalInterfaceThemes[storedSeasonalChoice[1]])
+  )
+  || (
+    storedSeasonalChoice[0] === seasonalThemeState.id
+    && seasonalThemeState.availableThemeIds.includes(storedSeasonalChoice[1])
+  )
+) ? storedSeasonalChoice[1] : "";
 const automaticSeasonalTheme = window.BITS_INTERFACE_THEMES.find(
   (theme) => theme.id === seasonalThemeState.automaticThemeId,
 );
@@ -112,8 +123,9 @@ function selectInterfaceTheme(themeId) {
     return;
   }
 
-  if (theme.seasonal && seasonalThemeState.active) {
-    localStorage.setItem(seasonalChoiceKey, `${seasonalThemeState.id}:${theme.id}`);
+  if (theme.seasonal && (themeDebugEnabled || seasonalThemeState.active)) {
+    const choiceScope = themeDebugEnabled ? "debug" : seasonalThemeState.id;
+    localStorage.setItem(seasonalChoiceKey, `${choiceScope}:${theme.id}`);
     localStorage.removeItem(seasonalDismissalKey);
     return;
   }
@@ -129,6 +141,13 @@ function selectInterfaceTheme(themeId) {
 
 function resolveInterfaceTheme() {
   const choice = localStorage.getItem(seasonalChoiceKey)?.split(":") ?? [];
+  if (
+    themeDebugEnabled
+    && choice[0] === "debug"
+    && Boolean(seasonalInterfaceThemes[choice[1]])
+  ) {
+    return choice[1];
+  }
   if (
     choice[0] === seasonalThemeState.id
     && seasonalThemeState.availableThemeIds.includes(choice[1])
@@ -146,6 +165,24 @@ function resolveInterfaceTheme() {
     ? savedThemeId
     : baseInterfaceThemes[0].id;
 }
+
+function setThemeDebugMode(enabled) {
+  if (enabled) {
+    localStorage.setItem(themeDebugKey, "enabled");
+  } else {
+    localStorage.removeItem(themeDebugKey);
+    if (localStorage.getItem(seasonalChoiceKey)?.startsWith("debug:")) {
+      localStorage.removeItem(seasonalChoiceKey);
+    }
+  }
+  window.location.reload();
+}
+
+window.BITS_THEME_DEBUG = Object.freeze({
+  disable: () => setThemeDebugMode(false),
+  enable: () => setThemeDebugMode(true),
+  isEnabled: () => localStorage.getItem(themeDebugKey) === "enabled",
+});
 
 window.BITS_THEME_PREFERENCE = {
   dismissalKey: seasonalDismissalKey,

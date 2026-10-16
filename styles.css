@@ -2848,7 +2848,10 @@ h1 {
 }
 
 #identity-name {
-  cursor: help;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 h1 .dim {
