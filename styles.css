@@ -7780,12 +7780,17 @@ html[data-boot="pending"] .boot-screen[hidden] {
 }
 
 .endless-boot-footer {
-  padding-top: clamp(12px, 2vh, 22px);
-  padding-right: 34px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: clamp(7px, 1vh, 12px) 28px;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 5px;
+  padding: clamp(12px, 2vh, 22px) 0 0;
 }
 
 .endless-boot-progress {
-  height: clamp(7px, 1vh, 12px);
+  height: 100%;
   overflow: hidden;
   border: 1px solid var(--border);
   background: rgba(0, 0, 0, 0.46);
@@ -7804,15 +7809,165 @@ html[data-boot="pending"] .boot-screen[hidden] {
 
 .endless-boot-footer p {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-top: 9px;
+  padding-right: 96px;
   color: var(--muted);
   font-size: clamp(0.48rem, 1.2vw, 0.66rem);
 }
 
+.endless-boot-footer p > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .endless-boot-footer b {
+  flex: none;
   color: var(--accent);
+}
+
+html[data-interface-theme="aurora"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #38f0bd, #5bc7ff 46%, #a178ff 78%, #ff76c8);
+}
+
+html[data-interface-theme="cozy-blossom"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #ff8ea8, #ffc58f 48%, #ffb9d3);
+}
+
+html[data-interface-theme="mica"] .endless-boot-progress span,
+html[data-interface-theme="fluent"] .endless-boot-progress span {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 48%),
+    linear-gradient(90deg, #1583dc, #57b7ff);
+}
+
+html[data-interface-theme="midnight-oled"] .endless-boot-progress span {
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+html[data-interface-theme="macos"] .endless-boot-progress {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+html[data-interface-theme="macos"] .endless-boot-progress span {
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2997ff, #64d2ff);
+}
+
+html[data-interface-theme="terminal"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, #66ff9a 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(102, 255, 154, 0.55);
+}
+
+html[data-interface-theme="vaporwave"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #ff60e2, #a178ff 48%, #4ae1ff);
+}
+
+html[data-interface-theme="amber-crt"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, #ffb237 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(255, 178, 55, 0.55);
+}
+
+html[data-interface-theme="y2k-silver"] .endless-boot-progress span {
+  background:
+    linear-gradient(180deg, #fff, transparent 42%),
+    linear-gradient(90deg, #6caeff, #c0e0ff 52%, #8194ff);
+}
+
+html[data-interface-theme="cyberpunk"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(120deg, transparent 0 7px, rgba(0, 0, 0, 0.45) 7px 9px),
+    linear-gradient(90deg, #f5f336, #ff2d9d);
+}
+
+html[data-interface-theme="dos-blue"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, #55ffff 0 9px, transparent 9px 11px);
+  box-shadow: none;
+}
+
+html[data-interface-theme="solarized"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #2aa198, #78c7ff);
+}
+
+html[data-interface-theme="nord"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #88c0d0, #a7d8e5 55%, #b48ead);
+}
+
+html[data-interface-theme="dracula"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #bd93f9, #ff79c6);
+}
+
+html[data-interface-theme="candy-pop"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0 6px, transparent 6px 12px),
+    linear-gradient(90deg, #ff75b7, #ffdc6f 50%, #6de1ff);
+}
+
+html[data-interface-theme="rgb"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #ff4057, #ffcc42, #52e676, #4dc7ff, #b97aff, #ff4057);
+  background-size: 200% 100%;
+  animation: rgb-progress-shift 3s linear infinite;
+}
+
+html[data-interface-theme="aero-glass"] .endless-boot-progress {
+  border-color: rgba(235, 250, 255, 0.7);
+  border-radius: 999px;
+  background: rgba(4, 30, 55, 0.5);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.18);
+}
+
+html[data-interface-theme="aero-glass"] .endless-boot-progress span {
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 48%),
+    linear-gradient(90deg, #1b91d4, #76d0ff);
+}
+
+html[data-interface-theme="minebits"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 12px, rgba(0, 0, 0, 0.35) 12px 15px),
+    linear-gradient(180deg, #a4d878 0 48%, #6c9c43 48%);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.42);
+}
+
+html[data-interface-theme="winter"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0 5px, transparent 5px 10px),
+    linear-gradient(90deg, #8ee7ff, #d8f7ff);
+}
+
+html[data-interface-theme="spooky"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #ff8a2a, #9c4dff 58%, #56d66b);
+  box-shadow: 0 0 12px rgba(255, 107, 31, 0.48);
+}
+
+html[data-interface-theme="christmas"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(135deg, #d82929 0 8px, #fff7e8 8px 14px, #168447 14px 22px);
+}
+
+html[data-interface-theme="new-year"] .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(120deg, rgba(255, 255, 255, 0.35) 0 2px, transparent 2px 9px),
+    linear-gradient(90deg, #f5ca57, #fff2a6 48%, #9f7cff);
+  box-shadow: 0 0 13px rgba(245, 202, 87, 0.58);
+}
+
+@keyframes rgb-progress-shift {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-interface-theme="rgb"] .endless-boot-progress span {
+    animation: none;
+  }
 }
 
 .endless-boot-settings {
@@ -8006,8 +8161,9 @@ html[data-boot="pending"] .boot-screen[hidden] {
   }
 
   .endless-boot-footer {
+    grid-template-rows: 5px 28px;
+    gap: 3px;
     padding-top: 6px;
-    padding-right: 26px;
   }
 
   .endless-boot-progress {
@@ -8015,7 +8171,7 @@ html[data-boot="pending"] .boot-screen[hidden] {
   }
 
   .endless-boot-footer p {
-    padding-top: 4px;
+    padding-right: 88px;
     font-size: 0.38rem;
   }
 
