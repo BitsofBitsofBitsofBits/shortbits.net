@@ -6,6 +6,8 @@
   const progressBar = document.querySelector("#endless-boot-progress-bar");
   const stageOutput = document.querySelector("#endless-boot-stage");
   const percentOutput = document.querySelector("#endless-boot-percent");
+  const messageOutput = document.querySelector("#endless-boot-message");
+  const themeSelect = document.querySelector("#endless-boot-theme");
 
   const subjects = [
     "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
@@ -90,7 +92,40 @@
   let count = 0;
   let progress = 0;
   let lastMessage = "";
+  let lastTransmission = "";
   let timer = 0;
+
+  function applyTheme(themeId, persist = true) {
+    const themes = window.BITS_INTERFACE_THEMES ?? [];
+    const theme = themes.find((entry) => entry.id === themeId) ?? themes[0];
+    if (!theme) {
+      return;
+    }
+    document.documentElement.dataset.interfaceTheme = theme.id;
+    document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
+    document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
+    themeSelect.value = theme.id;
+    if (persist) {
+      localStorage.setItem("bits-interface-theme", theme.id);
+    }
+  }
+
+  function initializeThemePicker() {
+    const themes = window.BITS_INTERFACE_THEMES ?? [];
+    themeSelect.replaceChildren(...themes.map((theme) => {
+      const option = document.createElement("option");
+      option.value = theme.id;
+      option.textContent = theme.name;
+      return option;
+    }));
+    applyTheme(document.documentElement.dataset.interfaceTheme, false);
+    themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+    window.addEventListener("storage", (event) => {
+      if (event.key === "bits-interface-theme" && event.newValue) {
+        applyTheme(event.newValue, false);
+      }
+    });
+  }
 
   function randomItem(items) {
     return items[Math.floor(Math.random() * items.length)];
@@ -111,6 +146,50 @@
     } while (message === lastMessage);
     lastMessage = message;
     return message;
+  }
+
+  function weightedTransmission() {
+    const messages = (window.BITS_MESSAGES ?? []).filter((message) => (
+      message && typeof message.text === "string" && Number(message.weight) > 0
+    ));
+    if (!messages.length) {
+      return { text: "the main process is being mysteriously quiet...", weight: 1 };
+    }
+    const totalWeight = messages.reduce((total, message) => total + Number(message.weight), 0);
+    let choice = Math.random() * totalWeight;
+    return messages.find((message) => {
+      choice -= Number(message.weight);
+      return choice <= 0;
+    }) ?? messages.at(-1);
+  }
+
+  function renderTransmission() {
+    let message;
+    do {
+      message = weightedTransmission();
+    } while (message.text === lastTransmission && (window.BITS_MESSAGES?.length ?? 0) > 1);
+    lastTransmission = message.text;
+    messageOutput.replaceChildren();
+    messageOutput.removeAttribute("style");
+    if (message.format) {
+      Object.entries(message.format).forEach(([property, value]) => {
+        if (property in messageOutput.style) {
+          messageOutput.style[property] = value;
+        }
+      });
+    }
+    if (message.colorful) {
+      [...message.text].forEach((character, index) => {
+        const span = document.createElement("span");
+        span.textContent = character;
+        if (character.trim()) {
+          span.style.color = `hsl(${(index * 37) % 360} 88% 70%)`;
+        }
+        messageOutput.append(span);
+      });
+    } else {
+      messageOutput.textContent = message.text;
+    }
   }
 
   function updateElapsed() {
@@ -167,7 +246,10 @@
     count += 1;
   }
   countOutput.textContent = String(count).padStart(6, "0");
+  initializeThemePicker();
+  renderTransmission();
   updateElapsed();
   window.setInterval(updateElapsed, 1000);
+  window.setInterval(renderTransmission, 7000);
   appendMessage();
 })();

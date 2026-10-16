@@ -7455,14 +7455,14 @@ html[data-boot="pending"] .boot-screen[hidden] {
   color: var(--ink);
   background:
     radial-gradient(circle at 50% 20%, rgba(var(--accent-rgb), 0.1), transparent 42%),
-    #020806;
+    var(--bg);
 }
 
 .endless-boot-console {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   width: 100vw;
   height: 100vh;
   padding: clamp(18px, 3.5vw, 52px);
@@ -7502,6 +7502,35 @@ html[data-boot="pending"] .boot-screen[hidden] {
   font-size: clamp(0.48rem, 1.25vw, 0.67rem);
 }
 
+.endless-boot-controls {
+  display: grid;
+  justify-items: end;
+  gap: 12px;
+}
+
+.endless-boot-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: clamp(0.46rem, 1.1vw, 0.62rem);
+}
+
+.endless-boot-controls select {
+  min-width: 142px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+  font-size: inherit;
+}
+
+.endless-boot-controls select:focus-visible {
+  border-color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
 .endless-boot-indicators span {
   display: inline-flex;
   align-items: center;
@@ -7523,6 +7552,32 @@ html[data-boot="pending"] .boot-screen[hidden] {
 
 .endless-boot-indicators span:nth-child(3) i {
   animation-delay: -1600ms;
+}
+
+.endless-boot-transmission {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 3vw, 30px);
+  padding: clamp(10px, 1.8vh, 18px) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.endless-boot-transmission > span {
+  color: var(--accent);
+  font-size: clamp(0.48rem, 1.2vw, 0.64rem);
+  letter-spacing: 0.1em;
+}
+
+.endless-boot-transmission p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(0.62rem, 1.7vw, 0.96rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: endless-boot-transmission 500ms steps(5);
 }
 
 .endless-boot-status {
@@ -7614,6 +7669,13 @@ html[data-boot="pending"] .boot-screen[hidden] {
   }
 }
 
+@keyframes endless-boot-transmission {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
 @media (orientation: portrait) {
   .endless-boot-console {
     padding: clamp(18px, 5vw, 44px);
@@ -7627,14 +7689,103 @@ html[data-boot="pending"] .boot-screen[hidden] {
     justify-content: flex-start;
   }
 
+  .endless-boot-controls {
+    justify-items: start;
+  }
+
   .endless-boot-log {
     font-size: clamp(0.54rem, 2.1vw, 0.82rem);
   }
 }
 
+@media (max-height: 560px) {
+  .endless-boot-console {
+    padding: 10px 14px;
+  }
+
+  .endless-boot-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 7px;
+  }
+
+  .endless-boot-header .system-kicker {
+    font-size: 0.43rem;
+  }
+
+  .endless-boot-header h1 {
+    margin-top: 2px;
+    font-size: clamp(0.68rem, 3.6vw, 0.95rem);
+  }
+
+  .endless-boot-controls {
+    gap: 4px;
+  }
+
+  .endless-boot-indicators {
+    gap: 5px 9px;
+    font-size: 0.39rem;
+  }
+
+  .endless-boot-indicators i {
+    width: 5px;
+    height: 5px;
+  }
+
+  .endless-boot-controls label {
+    gap: 4px;
+    font-size: 0.4rem;
+  }
+
+  .endless-boot-controls select {
+    min-width: 96px;
+    max-width: 116px;
+    padding: 2px 4px;
+  }
+
+  .endless-boot-transmission {
+    gap: 7px;
+    padding: 6px 0;
+  }
+
+  .endless-boot-transmission > span {
+    font-size: 0.38rem;
+  }
+
+  .endless-boot-transmission p {
+    font-size: 0.5rem;
+  }
+
+  .endless-boot-status {
+    gap: 4px 12px;
+    padding: 5px 0;
+    font-size: 0.39rem;
+  }
+
+  .endless-boot-log {
+    font-size: clamp(0.42rem, 1.8vw, 0.52rem);
+    line-height: 1.35;
+  }
+
+  .endless-boot-footer {
+    padding-top: 6px;
+  }
+
+  .endless-boot-progress {
+    height: 5px;
+  }
+
+  .endless-boot-footer p {
+    padding-top: 4px;
+    font-size: 0.38rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .endless-boot-indicators i,
-  .endless-boot-log li {
+  .endless-boot-log li,
+  .endless-boot-transmission p {
     animation: none;
   }
 }
