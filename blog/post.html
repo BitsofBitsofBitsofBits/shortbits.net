@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#020806">
+    <meta name="robots" content="index, follow">
+    <title>Loading post // BitsofBitsofBits</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <script src="/theme-init.js?v=theme-12"></script>
+    <link rel="stylesheet" href="/styles.css?v=upgrade-100">
+    <script src="/markdown.js?v=markdown-1" defer></script>
+    <script src="/supabase-config.js" defer></script>
+    <script src="/blog/post.js?v=blog-1" defer></script>
+  </head>
+  <body class="blog-page blog-post-page">
+    <a class="skip-link" href="#blog-post">Skip to article</a>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <main class="blog-shell">
+      <nav class="blog-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">HOME</a><span aria-hidden="true">/</span><a href="/blog/">BLOG.LOG</a>
+      </nav>
+      <p id="blog-post-status" class="blog-status" role="status" aria-live="polite">
+        Loading post...
+      </p>
+      <article id="blog-post" class="blog-article" hidden>
+        <header>
+          <p class="system-kicker">BLOG_ENTRY</p>
+          <h1 id="blog-post-title"></h1>
+          <p id="blog-post-excerpt" class="blog-article-excerpt"></p>
+          <p class="blog-article-meta">
+            <time id="blog-post-date"></time>
+            <span aria-hidden="true">//</span>
+            <span id="blog-post-reading-time"></span>
+          </p>
+        </header>
+        <div id="blog-post-body" class="blog-markdown"></div>
+      </article>
+    </main>
+  </body>
+</html>

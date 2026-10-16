@@ -48,6 +48,14 @@ const gamesSubmit = document.querySelector("#games-submit");
 const gamesAdminStatus = document.querySelector("#games-admin-status");
 const gamesSlots = document.querySelector("#games-slots");
 const gamesEntryAdd = document.querySelector("#games-entry-add");
+const blogPostForm = document.querySelector("#blog-post-form");
+const blogPostSave = document.querySelector("#blog-post-save");
+const blogPostDelete = document.querySelector("#blog-post-delete");
+const blogPostNew = document.querySelector("#blog-post-new");
+const blogAdminStatus = document.querySelector("#blog-admin-status");
+const blogAdminList = document.querySelector("#blog-admin-list");
+const blogPostMarkdown = document.querySelector("#blog-post-markdown");
+const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
 const shortLinkCreateForm = document.querySelector("#short-link-create-form");
 const shortLinkCreate = document.querySelector("#short-link-create");
 const shortLinkGenerate = document.querySelector("#short-link-generate");
@@ -60,6 +68,7 @@ const spotifyTrackUrlPattern =
   /^https:\/\/open\.spotify\.com\/track\/[A-Za-z0-9]+(?:\?.*)?$/;
 const httpsUrlPattern = /^https:\/\/\S+$/;
 const shortLinkSlugPattern = /^[a-z0-9][a-z0-9_-]{2,63}$/;
+const blogSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const pronounProfileFields = [
   "display_name",
   "subject_pronoun",
@@ -958,6 +967,124 @@ function createShortLinkEditor(link) {
   return form;
 }
 
+function slugifyBlogTitle(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+}
+
+function toDatetimeLocal(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function renderBlogPreview() {
+  const markdown = blogPostMarkdown.value;
+  if (!markdown.trim()) {
+    const empty = document.createElement("p");
+    empty.textContent = "Your rendered post will appear here.";
+    blogMarkdownPreview.replaceChildren(empty);
+    return;
+  }
+  blogMarkdownPreview.replaceChildren(
+    window.BITS_MARKDOWN.render(markdown, { headingOffset: 3 }),
+  );
+}
+
+function resetBlogEditor() {
+  blogPostForm.reset();
+  blogPostForm.elements.id.value = "";
+  blogPostDelete.disabled = true;
+  renderBlogPreview();
+  setAdminStatus(blogAdminStatus, "Ready for a new post.");
+  blogPostForm.elements.title.focus();
+}
+
+function selectBlogPost(post) {
+  blogPostForm.elements.id.value = post.id;
+  blogPostForm.elements.title.value = post.title;
+  blogPostForm.elements.slug.value = post.slug;
+  blogPostForm.elements.excerpt.value = post.excerpt;
+  blogPostForm.elements.body_markdown.value = post.body_markdown;
+  blogPostForm.elements.published.checked = post.published;
+  blogPostForm.elements.published_at.value = toDatetimeLocal(post.published_at);
+  blogPostDelete.disabled = false;
+  renderBlogPreview();
+  setAdminStatus(
+    blogAdminStatus,
+    `${post.published ? "Published" : "Draft"} post loaded.`,
+    "success",
+  );
+}
+
+function createBlogPostButton(post) {
+  const button = document.createElement("button");
+  const title = document.createElement("strong");
+  const metadata = document.createElement("span");
+  button.type = "button";
+  button.className = "blog-admin-post-button";
+  title.textContent = post.title;
+  metadata.textContent = [
+    post.published ? "PUBLISHED" : "DRAFT",
+    post.published_at
+      ? new Date(post.published_at).toLocaleDateString()
+      : "NO DATE",
+  ].join(" // ");
+  button.append(title, metadata);
+  button.addEventListener("click", () => selectBlogPost(post));
+  return button;
+}
+
+async function loadBlogPosts(preferredId = "") {
+  setAdminStatus(blogAdminStatus, "Loading blog posts...");
+  const { data, error } = await adminClient
+    .from("site_blog_posts")
+    .select(
+      "id, slug, title, excerpt, body_markdown, published, published_at, created_at, updated_at",
+    )
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("Unable to load blog posts:", error);
+    setAdminStatus(
+      blogAdminStatus,
+      `Blog posts failed to load: ${error.message}`,
+      "error",
+    );
+    return false;
+  }
+
+  blogAdminList.replaceChildren(...data.map(createBlogPostButton));
+  if (data.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "content-window-empty";
+    empty.textContent = "No blog posts have been created.";
+    blogAdminList.append(empty);
+  }
+  const preferredPost = data.find((post) => post.id === preferredId);
+  if (preferredPost) {
+    selectBlogPost(preferredPost);
+  } else {
+    setAdminStatus(
+      blogAdminStatus,
+      `${data.length} post${data.length === 1 ? "" : "s"} loaded.`,
+      "success",
+    );
+  }
+  return true;
+}
+
 async function loadShortLinks() {
   setAdminStatus(shortLinksAdminStatus, "Loading ShortBits...");
   const { data, error } = await adminClient
@@ -1006,6 +1133,7 @@ async function showInbox() {
     loadNowContent(),
     loadChangelogContent(),
     loadFavoriteGames(),
+    loadBlogPosts(),
     loadShortLinks(),
   ]);
   window.dispatchEvent(new CustomEvent("admin:authenticated"));
@@ -1057,6 +1185,115 @@ if (adminClient) {
   refreshButton.addEventListener("click", loadMessages);
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
   refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
+  blogPostMarkdown.addEventListener("input", renderBlogPreview);
+  blogPostForm.elements.title.addEventListener("input", () => {
+    if (!blogPostForm.elements.id.value) {
+      blogPostForm.elements.slug.value = slugifyBlogTitle(
+        blogPostForm.elements.title.value,
+      );
+    }
+  });
+  blogPostNew.addEventListener("click", resetBlogEditor);
+  blogPostForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(blogPostForm);
+    const id = String(formData.get("id") ?? "");
+    const title = String(formData.get("title") ?? "").trim();
+    const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
+    const excerpt = String(formData.get("excerpt") ?? "").trim();
+    const bodyMarkdown = String(formData.get("body_markdown") ?? "").trim();
+    const published = formData.has("published");
+    const publishedAtInput = String(formData.get("published_at") ?? "").trim();
+
+    if (!blogSlugPattern.test(slug) || slug.length < 3 || slug.length > 100) {
+      setAdminStatus(
+        blogAdminStatus,
+        "Slug must be 3-100 lowercase letters or numbers separated by hyphens.",
+        "error",
+      );
+      return;
+    }
+    if (!title || !excerpt || !bodyMarkdown) {
+      setAdminStatus(
+        blogAdminStatus,
+        "Title, excerpt, and Markdown body are required.",
+        "error",
+      );
+      return;
+    }
+
+    let publishedAt = null;
+    if (publishedAtInput) {
+      const parsedDate = new Date(publishedAtInput);
+      if (Number.isNaN(parsedDate.getTime())) {
+        setAdminStatus(blogAdminStatus, "Publish date is invalid.", "error");
+        return;
+      }
+      publishedAt = parsedDate.toISOString();
+    } else if (published) {
+      publishedAt = new Date().toISOString();
+    }
+
+    const payload = {
+      title,
+      slug,
+      excerpt,
+      body_markdown: bodyMarkdown,
+      published,
+      published_at: publishedAt,
+      updated_at: new Date().toISOString(),
+    };
+    blogPostSave.disabled = true;
+    blogPostSave.textContent = "> SAVING...";
+    setAdminStatus(blogAdminStatus, "Writing blog post...");
+    const query = id
+      ? adminClient.from("site_blog_posts").update(payload).eq("id", id)
+      : adminClient.from("site_blog_posts").insert(payload);
+    const { data, error } = await query.select("id").single();
+    blogPostSave.disabled = false;
+    blogPostSave.textContent = "> SAVE_POST";
+
+    if (error) {
+      console.error("Unable to save blog post:", error);
+      const message = error.code === "23505"
+        ? "Another post already uses that slug."
+        : `Blog post save failed: ${error.message}`;
+      setAdminStatus(blogAdminStatus, message, "error");
+      return;
+    }
+    await loadBlogPosts(data.id);
+    setAdminStatus(
+      blogAdminStatus,
+      published ? "Post published." : "Draft saved.",
+      "success",
+    );
+  });
+  blogPostDelete.addEventListener("click", async () => {
+    const id = blogPostForm.elements.id.value;
+    const title = blogPostForm.elements.title.value.trim();
+    if (!id || !window.confirm(`Delete "${title}" permanently?`)) {
+      return;
+    }
+    blogPostDelete.disabled = true;
+    setAdminStatus(blogAdminStatus, "Deleting blog post...");
+    const { error } = await adminClient
+      .from("site_blog_posts")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      console.error("Unable to delete blog post:", error);
+      blogPostDelete.disabled = false;
+      setAdminStatus(
+        blogAdminStatus,
+        `Blog post deletion failed: ${error.message}`,
+        "error",
+      );
+      return;
+    }
+    resetBlogEditor();
+    await loadBlogPosts();
+    setAdminStatus(blogAdminStatus, "Post deleted.", "success");
+  });
   arcadeSettingsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     arcadeSettingsSubmit.disabled = true;

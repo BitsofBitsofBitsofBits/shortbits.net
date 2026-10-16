@@ -10,6 +10,8 @@ const htmlFiles = [
   "source.html",
   "useless.html",
   "boot/index.html",
+  "blog/index.html",
+  "blog/post.html",
 ];
 const missingAssets = [];
 

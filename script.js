@@ -19,6 +19,14 @@ const links = [
     color: "#63d8ff",
   },
   {
+    label: "BLOG.LOG",
+    description: "Longer-form Bits and project notes",
+    url: "/blog/",
+    icon: "BL",
+    color: "#ffcf66",
+    external: false,
+  },
+  {
     label: "BLUESKY",
     description: "Flying blue Bits in the Sky",
     url: "https://bsky.app/profile/shortbits.net",
@@ -854,13 +862,12 @@ function activateRare404Card() {
 function renderLinks(allowRare404 = true) {
   linkGrid.innerHTML = links
     .map(
-      ({ label, description, url, icon, iconPath, color }) => `
+      ({ label, description, url, icon, iconPath, color, external = true }) => `
         <a
           class="link-card"
           href="${url}"
           style="--card-accent: ${color}"
-          target="_blank"
-          rel="noreferrer"
+          ${external ? 'target="_blank" rel="noreferrer"' : ""}
         >
           <span class="link-icon" aria-hidden="true">
             ${
@@ -873,7 +880,7 @@ function renderLinks(allowRare404 = true) {
             <span class="link-title">${label}</span>
             <span class="link-description">${description}</span>
           </span>
-          <span class="link-arrow" aria-hidden="true">↗</span>
+          <span class="link-arrow" aria-hidden="true">${external ? "↗" : "→"}</span>
         </a>
       `,
     )

@@ -91,6 +91,15 @@ const adminWindowModules = [
     y: 135,
   },
   {
+    sourceId: "blog-editor",
+    windowId: "admin-blog-window",
+    title: "BLOG_EDITOR.EXE",
+    label: "BLOG",
+    description: "Write, preview, draft, and publish Markdown posts",
+    x: 180,
+    y: 80,
+  },
+  {
     sourceId: "short-links-editor",
     windowId: "admin-short-links-window",
     title: "SHORTBITS.EXE",

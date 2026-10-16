@@ -35,6 +35,9 @@ is a personal project and largely a learning exercise for me.
   unpublished states
 - A desktop-style Admin Portal with draggable, resizable, deep-linkable windows
   for the inbox and every public-content editor
+- An accessible public `BLOG.LOG` with draft-aware Supabase publishing,
+  semantic article pages, safe Markdown rendering, and a live Markdown preview
+  in the Admin Portal
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
 - A public `GUESTBOOK.LOG` with immediate publishing and authenticated Admin
@@ -126,6 +129,12 @@ The Admin Portal also manages the public résumé profile and six career entries
 the singleton NOW profile, and ten ordered changelog entries. Draft rows remain
 hidden from anonymous Supabase clients through row-level security until their
 publish controls are enabled.
+
+Blog posts are authored as Markdown in the Admin Portal. The shared renderer
+supports headings, emphasis, links, lists, blockquotes, inline code, and fenced
+code blocks. It creates DOM nodes directly instead of injecting HTML, and raw
+HTML in a post is displayed as text. Draft and future-dated posts remain hidden
+from anonymous clients through row-level security.
 
 ShortBit records remain private to authenticated Admin sessions. Anonymous
 visitors can resolve only an exact enabled, unexpired alias through the

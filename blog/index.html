@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Posts and longer-form Bits from BitsofBitsofBits.">
+    <meta name="theme-color" content="#020806">
+    <link rel="canonical" href="https://www.shortbits.net/blog/">
+    <title>BitsofBitsofBits // BLOG.LOG</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <script src="/theme-init.js?v=theme-12"></script>
+    <link rel="stylesheet" href="/styles.css?v=upgrade-100">
+    <script src="/supabase-config.js" defer></script>
+    <script src="/blog/blog.js?v=blog-1" defer></script>
+  </head>
+  <body class="blog-page">
+    <a class="skip-link" href="#blog-content">Skip to blog posts</a>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <main id="blog-content" class="blog-shell">
+      <header class="blog-header">
+        <div>
+          <p class="system-kicker">PUBLIC_ARCHIVE // LONGER BITS</p>
+          <h1>BLOG.LOG</h1>
+          <p>Dispatches, project notes, and whatever escaped the terminal.</p>
+        </div>
+        <a href="/">&larr; RETURN_HOME</a>
+      </header>
+      <section aria-labelledby="blog-posts-heading">
+        <div class="section-label">
+          <h2 id="blog-posts-heading">PUBLISHED_POSTS</h2>
+          <span id="blog-post-count">LOADING</span>
+        </div>
+        <p id="blog-status" class="blog-status" role="status" aria-live="polite">
+          Querying the archive...
+        </p>
+        <div id="blog-post-list" class="blog-post-list"></div>
+      </section>
+    </main>
+  </body>
+</html>
