@@ -8525,6 +8525,60 @@ html[data-boot="pending"] .boot-screen[hidden] {
   color: var(--warning);
 }
 
+.endless-boot-log li[data-state="error"] {
+  color: #ff6d7a;
+  font-weight: 700;
+}
+
+.endless-boot-log li[data-state="rainbow"] .endless-boot-log-entry > span {
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    #ff6d7a,
+    #ff9b62,
+    #ffdd65,
+    #66ff9a,
+    #63d8ff,
+    #7aa7ff,
+    #d99aff
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: endless-boot-rainbow 4s linear infinite;
+  font-weight: 700;
+}
+
+:root[data-color-scheme="light"] .endless-boot-log li[data-state="error"] {
+  color: #b4232f;
+}
+
+:root[data-color-scheme="light"] .endless-boot-log li[data-state="rainbow"] .endless-boot-log-entry > span {
+  background-image: linear-gradient(
+    90deg,
+    #b4232f,
+    #a44800,
+    #746000,
+    #087a2a,
+    #006a8e,
+    #3155a6,
+    #743aa2
+  );
+}
+
+@keyframes endless-boot-rainbow {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endless-boot-log li[data-state="rainbow"] .endless-boot-log-entry > span {
+    animation: none;
+  }
+}
+
 html.is-boot-autoscroll-disabled .endless-boot-log {
   overflow-y: auto;
   scrollbar-color: var(--accent) transparent;
@@ -11325,6 +11379,10 @@ html[data-interface-theme="windows-95"] .endless-boot-log li::before {
 html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="warning"] {
   color: #800000;
   font-weight: 700;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="error"] {
+  color: #c00000;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer {

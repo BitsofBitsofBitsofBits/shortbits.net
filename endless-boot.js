@@ -854,7 +854,13 @@
     const item = createLogItem(
       longRunning ? randomItem(longRunningMessages) : nextMessage(),
     );
-    if (Math.random() < 0.08) {
+    const messageState = Math.random();
+    if (messageState < 0.01) {
+      item.dataset.state = "rainbow";
+    } else if (messageState < 0.03) {
+      item.dataset.state = "error";
+      ignoredErrors += 1;
+    } else if (messageState < 0.1) {
       item.dataset.state = "warning";
       ignoredErrors += 1;
     }
