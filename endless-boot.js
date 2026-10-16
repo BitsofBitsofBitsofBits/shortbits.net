@@ -8,6 +8,8 @@
   const percentOutput = document.querySelector("#endless-boot-percent");
   const messageOutput = document.querySelector("#endless-boot-message");
   const themeSelect = document.querySelector("#endless-boot-theme");
+  const settingsPanel = document.querySelector("#endless-boot-settings-panel");
+  const settingsToggle = document.querySelector("#endless-boot-settings-toggle");
 
   const subjects = [
     "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
@@ -123,6 +125,33 @@
     window.addEventListener("storage", (event) => {
       if (event.key === "bits-interface-theme" && event.newValue) {
         applyTheme(event.newValue, false);
+      }
+    });
+    settingsToggle.addEventListener("click", () => {
+      const opening = settingsPanel.hidden;
+      settingsPanel.hidden = !opening;
+      settingsToggle.setAttribute("aria-expanded", String(opening));
+      settingsToggle.setAttribute(
+        "aria-label",
+        opening ? "Close display settings" : "Open display settings",
+      );
+      if (opening) {
+        themeSelect.focus();
+      }
+    });
+    document.addEventListener("pointerdown", (event) => {
+      if (!event.target.closest(".endless-boot-settings")) {
+        settingsPanel.hidden = true;
+        settingsToggle.setAttribute("aria-expanded", "false");
+        settingsToggle.setAttribute("aria-label", "Open display settings");
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !settingsPanel.hidden) {
+        settingsPanel.hidden = true;
+        settingsToggle.setAttribute("aria-expanded", "false");
+        settingsToggle.setAttribute("aria-label", "Open display settings");
+        settingsToggle.focus();
       }
     });
   }

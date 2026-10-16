@@ -8,9 +8,9 @@
     <title>BitsofBitsofBits // ENDLESS BOOT</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-9"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-86">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-87">
     <script src="/messages.js?v=messages-13" defer></script>
-    <script src="/endless-boot.js?v=endless-boot-2" defer></script>
+    <script src="/endless-boot.js?v=endless-boot-3" defer></script>
   </head>
   <body class="endless-boot-page">
     <div class="noise" aria-hidden="true"></div>
@@ -21,16 +21,10 @@
           <p class="system-kicker">BITSOFBITS FIRMWARE // CONTINUOUS POST</p>
           <h1 id="endless-boot-heading">INITIALIZING INTERNET PRESENCE</h1>
         </div>
-        <div class="endless-boot-controls">
-          <div class="endless-boot-indicators" aria-label="Boot status">
-            <span><i></i> POWER</span>
-            <span><i></i> SIGNAL</span>
-            <span><i></i> BITS</span>
-          </div>
-          <label>
-            <span>THEME</span>
-            <select id="endless-boot-theme" aria-label="Interface theme"></select>
-          </label>
+        <div class="endless-boot-indicators" aria-label="Boot status">
+          <span><i></i> POWER</span>
+          <span><i></i> SIGNAL</span>
+          <span><i></i> BITS</span>
         </div>
       </header>
       <section class="endless-boot-transmission" aria-label="Current transmission">
@@ -49,6 +43,22 @@
         </div>
         <p><span id="endless-boot-stage">ENUMERATING SUSPICIOUS HARDWARE</span><b id="endless-boot-percent">0%</b></p>
       </footer>
+      <aside class="endless-boot-settings">
+        <div id="endless-boot-settings-panel" class="endless-boot-settings-panel" hidden>
+          <p>DISPLAY_SETTINGS</p>
+          <label>
+            <span>INTERFACE THEME</span>
+            <select id="endless-boot-theme" aria-label="Interface theme"></select>
+          </label>
+        </div>
+        <button
+          id="endless-boot-settings-toggle"
+          type="button"
+          aria-label="Open display settings"
+          aria-controls="endless-boot-settings-panel"
+          aria-expanded="false"
+        >&#9881;</button>
+      </aside>
     </main>
   </body>
 </html>
