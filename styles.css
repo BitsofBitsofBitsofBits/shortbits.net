@@ -8525,8 +8525,15 @@ html[data-boot="pending"] .boot-screen[hidden] {
 }
 
 .endless-boot-eta {
+  flex: 0 1 19ch !important;
   min-width: 0;
   margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.endless-boot-eta strong {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }

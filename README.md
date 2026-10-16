@@ -63,8 +63,9 @@ is a personal project and largely a learning exercise for me.
   rotating main-site transmissions, an endless randomized firmware log with
   speed-sensitive bursts, occasional long-running operations, and rare warning,
   error, and rainbow messages. Distinct boot phases drive correlated hardware
-  telemetry, POST codes, activity lights, theme-aware messages, unreliable ETA
-  estimates, chained incidents, uptime milestones, and gradual idle degradation.
+  telemetry, POST codes, activity lights, expanded theme-exclusive message pools,
+  rapidly changing unreliable ETA estimates, chained incidents, uptime milestones,
+  and gradual idle degradation.
   Locally persistent fake hardware, keyboard shortcuts, fullscreen presentation,
   and compact square/portrait case-screen layouts support long-running displays
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,

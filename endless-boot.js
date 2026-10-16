@@ -365,32 +365,212 @@
     ],
   ];
   const themeBootMessages = {
-    "aero-glass": ["COMPOSITING GLASS FRAME .............. SHINY ENOUGH"],
-    "amber-crt": ["WARMING AMBER PHOSPHOR ............... GLOWING"],
-    aurora: ["ALIGNING AURORA BANDS ................ MAGNETICALLY PRETTY"],
-    "candy-pop": ["SORTING CANDY-COLORED BITS ........... DELICIOUSLY INVALID"],
-    christmas: ["ALLOCATING PRESENTS .................. NICE LIST CACHED"],
-    "cozy-blossom": ["ARRANGING DESKTOP BLOSSOMS ........... COZY"],
-    cyberpunk: ["NEGOTIATING WITH MEGACORP ............ TERMS REJECTED"],
-    default: ["LOADING STANDARD ISSUE BITS .......... NONSTANDARD"],
-    "dos-blue": ["CHECKING CONVENTIONAL MEMORY ......... NEVER ENOUGH"],
-    dracula: ["COUNTING BACKGROUND PROCESSES ......... BLEH BLEH BLEH"],
-    fluent: ["APPLYING FLUENT MATERIAL .............. FLOWING"],
-    macos: ["POLISHING MENU BAR .................... COURAGEOUS"],
-    mica: ["SAMPLING DESKTOP WALLPAPER ........... MATERIALIZED"],
-    "midnight-oled": ["TURNING OFF UNUSED PIXELS ............. MOST OF THEM"],
-    minebits: ["GENERATING BOOT CHUNKS ................ CREEPER NEARBY"],
-    "new-year": ["SYNCHRONIZING MIDNIGHT CLOCK .......... ALMOST THIS YEAR"],
-    nord: ["COOLING NORDIC PALETTE ................ FROSTY"],
-    rgb: ["SYNCHRONIZING RGB CONTROLLERS ......... STILL RAINBOW"],
-    solarized: ["CALCULATING SOLAR ANGLE ............... BLUE HOUR"],
-    spooky: ["ENUMERATING GHOST DEVICES ............. ONE TOO MANY"],
-    terminal: ["SPAWNING /dev/vibes ................... PID 1337"],
-    vaporwave: ["LOADING AESTHETIC DRIVERS ............. AESTHETIC 420"],
-    winter: ["DEFROSTING NETWORK STACK .............. SLUSHY"],
-    "windows-95": ["RESOLVING IRQ CONFLICT ................ NEW CONFLICT CREATED"],
-    "y2k-silver": ["CHECKING DATE FIELD WIDTH .............. TWO DIGITS ENOUGH"],
+    "aero-glass": [
+      "COMPOSITING GLASS FRAME .............. SHINY ENOUGH",
+      "BUFFERING WINDOW REFLECTIONS ......... CLOUDY",
+      "POLISHING TRANSPARENT CHROME .......... FINGERPRINTED",
+      "CALCULATING GLASS INDEX ............... 7.9",
+      "STARTING SIDEBAR GADGETS .............. WEATHER UNKNOWN",
+    ],
+    "amber-crt": [
+      "WARMING AMBER PHOSPHOR ............... GLOWING",
+      "ALIGNING ELECTRON BEAM ................ MOSTLY STRAIGHT",
+      "BURNING IN STATUS TEXT ................ TEMPORARILY FOREVER",
+      "ADJUSTING CRT HUM ..................... VISIBLY SILENT",
+      "DEGAUSSING PERSONALITY ................ MAGNETICALLY CALM",
+    ],
+    aurora: [
+      "ALIGNING AURORA BANDS ................ MAGNETICALLY PRETTY",
+      "CHARGING SOLAR PARTICLES .............. ATMOSPHERIC",
+      "CALIBRATING NORTHERN LIGHTS ........... NORTHISH",
+      "MEASURING GEOMAGNETIC VIBES ........... SHIMMERING",
+      "ROUTING PACKETS THROUGH SKY ........... SCENIC",
+    ],
+    "candy-pop": [
+      "SORTING CANDY-COLORED BITS ........... DELICIOUSLY INVALID",
+      "INFLATING BUBBLEGUM BUFFER ............ POPPED",
+      "SPRINKLING UI CONTROLS ................ EXTRA SPRINKLES",
+      "CALIBRATING CUTE OVERLOAD ............. ADORABLE",
+      "COUNTING JELLYBEAN CORES .............. ONE EATEN",
+    ],
+    christmas: [
+      "ALLOCATING PRESENTS .................. NICE LIST CACHED",
+      "SYNCHRONIZING SLEIGH TELEMETRY ........ REINDEER ONLINE",
+      "CHECKING CHIMNEY COMPATIBILITY ........ NARROW",
+      "COMPILING FESTIVE LIGHTS .............. ONE BULB OUT",
+      "MOUNTING NORTH POLE SHARE ............. SNOWY",
+    ],
+    "cozy-blossom": [
+      "ARRANGING DESKTOP BLOSSOMS ........... COZY",
+      "WARMING PASTEL CACHE .................. COMFORTABLE",
+      "STEEPING BACKGROUND PROCESS ........... FLORAL",
+      "SOFTENING WINDOW CORNERS .............. PILLOWY",
+      "WATERING DECORATIVE THREADS ........... BLOOMING",
+    ],
+    cyberpunk: [
+      "NEGOTIATING WITH MEGACORP ............ TERMS REJECTED",
+      "JACKING INTO LOCALHOST ................ NEON HANDSHAKE",
+      "SCANNING STREET-LEVEL PACKETS ......... WANTED",
+      "BYPASSING CORPORATE FIREWALL .......... DRAMATICALLY",
+      "INSTALLING SYNTHETIC ATTITUDE ......... EDGY",
+    ],
+    default: [
+      "LOADING STANDARD ISSUE BITS .......... NONSTANDARD",
+      "APPLYING FACTORY DEFAULTS ............. CUSTOMIZED",
+      "CHECKING GENERIC SUBSYSTEM ............ SPECIFICALLY FINE",
+      "INITIALIZING BASELINE VIBES ........... ACCEPTABLE",
+      "SELECTING DEFAULT OPTION .............. BOLD CHOICE",
+    ],
+    "dos-blue": [
+      "CHECKING CONVENTIONAL MEMORY ......... NEVER ENOUGH",
+      "LOADING HIMEM.SYS ..................... HIGH ENOUGH",
+      "SEARCHING AUTOEXEC.BAT ................ FOUND AUTOEXEC.CAT",
+      "MOUNTING DRIVE C: ..................... COLON VERIFIED",
+      "COUNTING FREE KILOBYTES ............... ASK AGAIN IN 1994",
+    ],
+    dracula: [
+      "COUNTING BACKGROUND PROCESSES ......... BLEH BLEH BLEH",
+      "LOADING NIGHT MODE .................... PERMANENTLY",
+      "CHECKING MIRROR DEVICE ................ NOT DETECTED",
+      "MOUNTING /dev/coffin .................. COMFORTABLE",
+      "STARTING BLOOD TYPE SERVICE ........... O NEGATIVE",
+    ],
+    fluent: [
+      "APPLYING FLUENT MATERIAL .............. FLOWING",
+      "REVEALING HIDDEN HIGHLIGHTS ........... REVEALED",
+      "BLURRING ACRYLIC BUFFER ............... TASTEFULLY",
+      "CALCULATING DESIGN DEPTH .............. 2.5D",
+      "ALIGNING MOTION CURVES ................ ELEGANTISH",
+    ],
+    macos: [
+      "POLISHING MENU BAR .................... COURAGEOUS",
+      "VERIFYING DONGLE INVENTORY ............ ONE MORE REQUIRED",
+      "INDEXING SPOTLIGHT INDEX .............. INDEXED TWICE",
+      "ASKING GATEKEEPER NICELY .............. APP NOTARIZEDISH",
+      "CALCULATING PREMIUM PIXELS ............ EXPENSIVE",
+    ],
+    mica: [
+      "SAMPLING DESKTOP WALLPAPER ........... MATERIALIZED",
+      "MIXING MICA PARTICLES ................. TRANSLUCENT",
+      "READING BACKDROP COLOR ................ TASTEFUL",
+      "COMPOSITING SUBTLE DEPTH .............. SUBTLE ENOUGH",
+      "APPLYING MATERIAL LAYERS .............. LAYERED",
+    ],
+    "midnight-oled": [
+      "TURNING OFF UNUSED PIXELS ............. MOST OF THEM",
+      "MEASURING ABSOLUTE BLACK .............. ABSOLUTELY",
+      "DIMMING BACKLIGHT ..................... BACKLIGHT NOT FOUND",
+      "COUNTING LIT PIXELS ................... SEVEN",
+      "SAVING PHOTONS ........................ DARK MODE COMPLETE",
+    ],
+    minebits: [
+      "GENERATING BOOT CHUNKS ................ CREEPER NEARBY",
+      "PUNCHING STARTUP TREE .................. WOOD ACQUIRED",
+      "CRAFTING NETWORK STACK ................ RECIPE UNKNOWN",
+      "LIGHTING REDSTONE BUS ................. POWERED",
+      "CHECKING SPAWN POINT .................. BED MISSING",
+    ],
+    "new-year": [
+      "SYNCHRONIZING MIDNIGHT CLOCK .......... ALMOST THIS YEAR",
+      "COUNTING DOWN BOOT TIMER ............... COUNTING UP",
+      "QUEUEING FIREWORK PACKETS ............. COLORFUL",
+      "ARCHIVING OLD YEAR .................... STILL IN USE",
+      "RESOLVING NEW YEAR VERSION ............ BETA",
+    ],
+    nord: [
+      "COOLING NORDIC PALETTE ................ FROSTY",
+      "ALIGNING POLAR NIGHT MODE .............. NORTHBOUND",
+      "FREEZING BACKGROUND THREADS ............ SUSPENDED",
+      "MOUNTING FJORD STORAGE ................. DEEP",
+      "CALIBRATING SNOW CONTRAST .............. CRISP",
+    ],
+    rgb: [
+      "SYNCHRONIZING RGB CONTROLLERS ......... STILL RAINBOW",
+      "ALLOCATING RED CHANNEL ................ 255",
+      "ALLOCATING GREEN CHANNEL .............. ALSO 255",
+      "ALLOCATING BLUE CHANNEL ............... DEFINITELY 255",
+      "DOWNLOADING MORE LIGHTING SOFTWARE .... CPU +12%",
+    ],
+    solarized: [
+      "CALCULATING SOLAR ANGLE ............... BLUE HOUR",
+      "BALANCING CYAN AND YELLOW .............. SCIENTIFICALLY",
+      "MEASURING TERMINAL LUMINANCE ........... PRECISEISH",
+      "ALIGNING BASE03 WITH BASE3 ............. CONTRASTED",
+      "CHARGING SOLARIZED BATTERY ............. LOW BLUE",
+    ],
+    spooky: [
+      "ENUMERATING GHOST DEVICES ............. ONE TOO MANY",
+      "MOUNTING HAUNTED VOLUME ................ READ-ONLY WAILS",
+      "CHECKING CLOSET PORT ................... SOMETHING MOVED",
+      "STARTING SKELETON SERVICE .............. NO BODY",
+      "RESOLVING PHANTOM INTERRUPT ............ BOO",
+    ],
+    terminal: [
+      "SPAWNING /dev/vibes ................... PID 1337",
+      "CHMOD +X PERSONALITY ................... EXECUTABLE",
+      "PIPING OUTPUT TO /dev/DRAMATIC ......... VERBOSE",
+      "GREPPING FOR PRODUCTIVITY .............. 0 MATCHES",
+      "SUDOING THE NEEDFUL .................... PERMISSION MAYBE",
+    ],
+    vaporwave: [
+      "LOADING AESTHETIC DRIVERS ............. AESTHETIC 420",
+      "MOUNTING VIRTUAL PLAZA ................. ABANDONED",
+      "BUFFERING ELEVATOR MUSIC ............... SLOWED",
+      "RENDERING MARBLE BUST .................. LOW POLY",
+      "CONNECTING TO 199X INTERNET ............ 56K DREAMS",
+    ],
+    winter: [
+      "DEFROSTING NETWORK STACK .............. SLUSHY",
+      "SHOVELING BOOT SECTOR .................. PATH CLEARED",
+      "CHECKING MITTEN DRIVERS ................ LEFT ONLY",
+      "FREEZING UNUSED PROCESSES .............. PRESERVED",
+      "MOUNTING SNOW VOLUME ................... POWDERED",
+    ],
+    "windows-95": [
+      "RESOLVING IRQ CONFLICT ................ NEW CONFLICT CREATED",
+      "INSTALLING PLUG AND PRAY DEVICE ........ PRAYING",
+      "SEARCHING FOR FLOPPY DRIVE ............. PLEASE WAIT",
+      "RUNNING SCANDISK ....................... CLUSTERS NERVOUS",
+      "LOADING DESKTOP CHANNELS ............... ACTIVE DESKTOPISH",
+    ],
+    "y2k-silver": [
+      "CHECKING DATE FIELD WIDTH .............. TWO DIGITS ENOUGH",
+      "POLISHING CHROME BUTTONS ............... VERY WEB",
+      "CONNECTING THROUGH WAP GATEWAY ......... TINY INTERNET",
+      "LOADING FUTURE FROM CD-ROM ............. 4X SPEED",
+      "VERIFYING MILLENNIUM BUG ............... FEATURE CONFIRMED",
+    ],
   };
+  const etaGoofs = [
+    "EVENTUALLY",
+    "YESTERDAY",
+    "UNKNOWN",
+    "RECALCULATING",
+    "SOON-ISH",
+    "WHEN READY",
+    "AFTER COFFEE",
+    "ASK BIOS",
+    "PENDING",
+    "MAYBE",
+    "TUESDAY",
+    "LAST WEEK",
+    "NEXT REBOOT",
+    "ALMOST",
+    "SEE MANUAL",
+    "404 ETA",
+    "CALENDAR TBD",
+    "ONE MOMENT",
+    "MOMENT EXTENDED",
+    "TIMEOUT",
+    "ON SCHEDULE*",
+    "3-5 BUSINESS BOOTS",
+    "BEFORE HEAT DEATH",
+    "NOW + 1",
+    "YES",
+    "NO",
+    "00:??",
+    "INFINITE",
+  ];
   const degradationMessages = [
     "RECOUNTING INSTALLED MEMORY .......... TOTAL CHANGED",
     "SYSTEM CLOCK DRIFT DETECTED .......... TIME IS SUBJECTIVE",
@@ -510,6 +690,7 @@
   let processedBits = 0;
   let ignoredErrors = 0;
   let lastTransmission = "";
+  let lastEta = "";
   const recentMessages = [];
   const recentMessageSet = new Set();
   let timer = 0;
@@ -906,15 +1087,22 @@
       Math.round((remaining / 4.5) * (averageDelays[speed] ?? 270) / 1000),
     );
     const unreliable = Math.random();
-    if (unreliable < 0.08) {
-      etaOutput.textContent = randomItem(["YESTERDAY", "EVENTUALLY", "UNKNOWN", "RECALCULATING"]);
-    } else if (unreliable < 0.18) {
-      etaOutput.textContent = `00:${String(estimatedSeconds + randomDelay(30, 480)).padStart(2, "0")}`;
+    let eta;
+    if (unreliable < 0.28) {
+      do {
+        eta = randomItem(etaGoofs);
+      } while (eta === lastEta && etaGoofs.length > 1);
+    } else if (unreliable < 0.42) {
+      const exaggeratedSeconds = estimatedSeconds + randomDelay(45, 720);
+      eta = `${String(Math.floor(exaggeratedSeconds / 60)).padStart(2, "0")}:${String(exaggeratedSeconds % 60).padStart(2, "0")}`;
+    } else if (unreliable < 0.5) {
+      eta = randomItem(["99:99", "-00:04", "00:00", "12:60", "??:??"]);
     } else {
-      const minutes = Math.floor(estimatedSeconds / 60);
-      const seconds = estimatedSeconds % 60;
-      etaOutput.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      const jitteredSeconds = Math.max(0, estimatedSeconds + randomDelay(-4, 8));
+      eta = `${String(Math.floor(jitteredSeconds / 60)).padStart(2, "0")}:${String(jitteredSeconds % 60).padStart(2, "0")}`;
     }
+    etaOutput.textContent = eta;
+    lastEta = eta;
   }
 
   function updateBootPhase(force = false) {
@@ -1037,7 +1225,7 @@
     if (degradation > 0 && Math.random() < degradation * 0.025) {
       return { text: randomItem(degradationMessages), state: "error" };
     }
-    if (themeMessages.length && Math.random() < 0.09) {
+    if (themeMessages.length && Math.random() < 0.14) {
       return { text: randomItem(themeMessages) };
     }
     if (Math.random() < 0.16) {
@@ -1584,6 +1772,6 @@
   window.setInterval(updateElapsed, 1000);
   window.setInterval(renderTransmission, 7000);
   window.setInterval(tickTelemetry, 700);
-  window.setInterval(updateEta, 5000);
+  window.setInterval(updateEta, 2800);
   scheduleNextMessage();
 })();
