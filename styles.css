@@ -366,8 +366,8 @@
 }
 
 :root[data-interface-theme="macos"] {
-  --accent: #0a84ff;
-  --accent-rgb: 10, 132, 255;
+  --accent: #55b0ff;
+  --accent-rgb: 85, 176, 255;
   --bg: #18181a;
   --panel: rgba(38, 38, 41, 0.82);
   --panel-2: rgba(54, 54, 58, 0.88);
@@ -528,8 +528,8 @@
 }
 
 :root[data-interface-theme="y2k-silver"] {
-  --accent: #9acfff;
-  --accent-rgb: 154, 207, 255;
+  --accent: #c0e0ff;
+  --accent-rgb: 192, 224, 255;
   --bg: #252a33;
   --panel: rgba(61, 69, 82, 0.94);
   --panel-2: rgba(92, 102, 117, 0.94);
@@ -673,8 +673,8 @@
 }
 
 :root[data-interface-theme="solarized"] {
-  --accent: #268bd2;
-  --accent-rgb: 38, 139, 210;
+  --accent: #78c7ff;
+  --accent-rgb: 120, 199, 255;
   --bg: #002b36;
   --panel: #073642;
   --panel-2: #0c4653;
@@ -711,8 +711,8 @@
 }
 
 :root[data-interface-theme="nord"] {
-  --accent: #88c0d0;
-  --accent-rgb: 136, 192, 208;
+  --accent: #a7d8e5;
+  --accent-rgb: 167, 216, 229;
   --bg: #2e3440;
   --panel: #3b4252;
   --panel-2: #434c5e;
@@ -749,8 +749,8 @@
 }
 
 :root[data-interface-theme="dracula"] {
-  --accent: #bd93f9;
-  --accent-rgb: 189, 147, 249;
+  --accent: #d2b7ff;
+  --accent-rgb: 210, 183, 255;
   --bg: #282a36;
   --panel: #343746;
   --panel-2: #44475a;
@@ -868,8 +868,8 @@
 }
 
 :root[data-interface-theme="aero-glass"] {
-  --accent: #38b6ff;
-  --accent-rgb: 56, 182, 255;
+  --accent: #76d0ff;
+  --accent-rgb: 118, 208, 255;
   --bg: #0d3358;
   --panel: rgba(16, 58, 92, 0.48);
   --panel-2: rgba(104, 158, 190, 0.3);
@@ -907,14 +907,14 @@
 }
 
 :root[data-interface-theme="minebits"] {
-  --accent: #7fbd45;
-  --accent-rgb: 127, 189, 69;
+  --accent: #a4d878;
+  --accent-rgb: 164, 216, 120;
   --bg: #332719;
   --panel: #4a4d45;
   --panel-2: #65452e;
   --panel-strong: #363a36;
   --ink: #f4f0d4;
-  --muted: #c7b993;
+  --muted: #d1c6a7;
   --warning: #f3c95f;
   --border: #20251e;
   --shadow: 8px 8px 0 rgba(17, 13, 8, 0.58);
@@ -925,7 +925,7 @@
   --scanline-opacity: 0;
   --name-field-opacity: 0.025;
   --icon-filter: brightness(0) invert(0.96) sepia(0.18);
-  --spotify-accent: #76b947;
+  --spotify-accent: #a4d878;
   --body-background:
     repeating-linear-gradient(0deg, transparent 0 31px, rgba(20, 17, 12, 0.16) 31px 32px),
     repeating-linear-gradient(90deg, transparent 0 31px, rgba(20, 17, 12, 0.16) 31px 32px),
@@ -1984,6 +1984,10 @@ html.is-page-hidden * {
   backdrop-filter: blur(var(--material-blur)) saturate(1.18);
 }
 
+.app-menu:not([open]) > .app-menu-popup {
+  display: none;
+}
+
 .app-menu:last-child .app-menu-popup {
   right: 0;
   left: auto;
@@ -2563,6 +2567,7 @@ html.is-page-hidden * {
   justify-content: flex-start;
   align-items: center;
   gap: 7px;
+  min-height: 24px;
   padding: 0;
   border: 0;
   color: var(--accent);
@@ -2873,6 +2878,7 @@ h1 .dim {
 }
 
 .pronoun-window-launch {
+  min-height: 24px;
   background: transparent;
   cursor: pointer;
   font-family: inherit;
@@ -3743,7 +3749,7 @@ footer span {
 
 .error-achievement {
   margin-top: 24px;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--muted) 50%, var(--ink));
 }
 
 .error-page.has-shortbit-display .error-window {
@@ -3872,7 +3878,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 .useless-summary {
   max-width: 64ch;
   margin-bottom: 0;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--muted) 50%, var(--ink));
   line-height: 1.7;
 }
 
@@ -3885,14 +3891,14 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .useless-diagnostic span {
-  color: var(--muted);
+  color: var(--ink);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
 }
 
 .useless-diagnostic strong {
   overflow-wrap: anywhere;
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 30%, var(--ink));
   font-size: 0.88rem;
 }
 
@@ -3906,7 +3912,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .useless-warning strong {
-  color: var(--warning);
+  color: color-mix(in srgb, var(--warning) 50%, var(--ink));
 }
 
 .useless-window h2 {
@@ -4078,7 +4084,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 
 .useless-source {
   margin: 20px 0 0;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--muted) 50%, var(--ink));
   font-size: 0.75rem;
   line-height: 1.5;
 }
@@ -4092,7 +4098,14 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .useless-source a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: inherit;
+}
+
+.useless-window .system-kicker {
+  color: color-mix(in srgb, var(--accent) 30%, var(--ink));
 }
 
 @media (max-width: 720px) {
@@ -4140,6 +4153,9 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .admin-header a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: var(--accent);
   font-size: 0.7rem;
   text-decoration: none;
@@ -6250,6 +6266,7 @@ body.is-black-screen-staging .binary-rain {
 
 .footer-select-control select {
   max-width: 130px;
+  min-height: 24px;
   padding: 6px 22px 6px 5px;
   border: 0;
   outline: none;
@@ -7806,7 +7823,7 @@ html[data-boot="pending"] .boot-screen[hidden] {
   background: color-mix(in srgb, var(--panel) 88%, transparent);
   cursor: pointer;
   font: 0.52rem/1 var(--font-family);
-  opacity: 0.46;
+  opacity: 0.82;
   text-decoration: none;
   transition: border-color 150ms ease, color 150ms ease, opacity 150ms ease;
 }
@@ -7993,8 +8010,8 @@ html[data-boot="pending"] .boot-screen[hidden] {
   }
 
   .endless-boot-settings > button {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     font-size: 0.78rem;
   }
 
@@ -9714,7 +9731,7 @@ html[data-interface-theme="windows-95"] .system-bar,
 html[data-interface-theme="windows-95"] .desktop-window-bar,
 html[data-interface-theme="windows-95"] .fake-desktop-app > header {
   color: #fff;
-  background: linear-gradient(90deg, #000080, #1084d0);
+  background: #000080 linear-gradient(90deg, #000080, #1084d0);
 }
 
 html[data-interface-theme="windows-95"] .system-bar {
@@ -9748,6 +9765,12 @@ html[data-interface-theme="windows-95"] .system-status:focus-visible {
   color: #fff;
   background: rgba(255, 255, 255, 0.14);
   box-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] #achievements-button,
+html[data-interface-theme="windows-95"] #settings-button {
+  color: #000;
+  background: #c0c0c0;
 }
 
 html[data-interface-theme="windows-95"] .status-dot {
@@ -9844,6 +9867,30 @@ html[data-interface-theme="windows-95"] .link-icon {
   background: color-mix(in srgb, var(--card-accent) 8%, #d4d0c8);
 }
 
+html[data-interface-theme="windows-95"] .fake-playing-dead > header strong,
+html[data-interface-theme="windows-95"] .fake-desktop-app > header strong {
+  color: #fff;
+}
+
+html[data-interface-theme="windows-95"] .endless-boot-console {
+  --accent: #7fbfff;
+  --accent-rgb: 127, 191, 255;
+  --border: #808080;
+  --ink: #fff;
+  --muted: #c0c0c0;
+  --panel: #202020;
+  --warning: #ffff00;
+  background: #000;
+}
+
+html[data-interface-theme="windows-95"] .useless-tool-console {
+  background: #fff;
+}
+
+html[data-interface-theme="windows-95"] .useless-warning strong {
+  color: #704d00;
+}
+
 html[data-interface-theme="dracula"] .system-bar,
 html[data-interface-theme="dracula"] .desktop-window-bar {
   background: linear-gradient(90deg, rgba(189, 147, 249, 0.2), rgba(255, 121, 198, 0.14));
@@ -9878,6 +9925,13 @@ html[data-interface-theme="minebits"] .fake-desktop-app > header {
     ),
     #5d713f;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.58);
+}
+
+html[data-interface-theme="minebits"] .system-status,
+html[data-interface-theme="minebits"] .system-bar > p,
+html[data-interface-theme="minebits"] .fake-playing-dead > header strong,
+html[data-interface-theme="minebits"] .fake-desktop-app > header strong {
+  color: var(--ink);
 }
 
 html[data-interface-theme="minebits"] button,
