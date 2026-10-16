@@ -82,6 +82,93 @@
   --spotify-accent: #087f37;
 }
 
+:root[data-interface-theme="winter"] {
+  --accent: #8ee7ff;
+  --accent-rgb: 142, 231, 255;
+  --bg: #07131f;
+  --panel: rgba(10, 31, 48, 0.9);
+  --panel-2: rgba(17, 47, 69, 0.92);
+  --ink: #eefbff;
+  --muted: #9bbdca;
+  --border: rgba(174, 235, 255, 0.34);
+  --shell-bg: rgba(5, 22, 36, 0.9);
+  --admin-bg: rgba(5, 22, 36, 0.96);
+  --overlay-bg: rgba(7, 27, 43, 0.97);
+  --body-background:
+    radial-gradient(circle at 15% 8%, rgba(255, 255, 255, 0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 18%, rgba(184, 239, 255, 0.18) 0 1px, transparent 2px),
+    linear-gradient(150deg, rgba(65, 149, 196, 0.2), transparent 42%),
+    var(--bg);
+  --body-background-size: 42px 42px, 64px 64px, auto, auto;
+  --shadow: 0 0 48px rgba(142, 231, 255, 0.13);
+}
+
+:root[data-interface-theme="spooky"] {
+  --accent: #ff9f43;
+  --accent-rgb: 255, 159, 67;
+  --bg: #140b18;
+  --panel: rgba(35, 16, 41, 0.92);
+  --panel-2: rgba(55, 24, 57, 0.94);
+  --ink: #fff0d9;
+  --muted: #c0a3bd;
+  --warning: #b8ff65;
+  --border: rgba(255, 140, 52, 0.35);
+  --shell-bg: rgba(25, 10, 31, 0.92);
+  --admin-bg: rgba(25, 10, 31, 0.97);
+  --overlay-bg: rgba(30, 12, 37, 0.98);
+  --body-background:
+    radial-gradient(circle at 82% 12%, rgba(255, 128, 32, 0.24), transparent 18%),
+    linear-gradient(135deg, rgba(119, 255, 66, 0.07), transparent 38%),
+    repeating-linear-gradient(115deg, transparent 0 36px, rgba(255, 159, 67, 0.025) 37px 38px),
+    var(--bg);
+  --body-background-size: auto;
+  --shadow: 0 0 48px rgba(255, 119, 41, 0.14);
+}
+
+:root[data-interface-theme="christmas"] {
+  --accent: #ffcf5a;
+  --accent-rgb: 255, 207, 90;
+  --bg: #07150f;
+  --panel: rgba(9, 39, 27, 0.92);
+  --panel-2: rgba(18, 57, 39, 0.94);
+  --ink: #fff8e8;
+  --muted: #b7cbbd;
+  --warning: #ff6666;
+  --border: rgba(255, 207, 90, 0.34);
+  --shell-bg: rgba(5, 29, 19, 0.92);
+  --admin-bg: rgba(5, 29, 19, 0.97);
+  --overlay-bg: rgba(7, 34, 23, 0.98);
+  --body-background:
+    radial-gradient(circle at 12% 8%, rgba(255, 63, 63, 0.22), transparent 22%),
+    radial-gradient(circle at 88% 14%, rgba(255, 220, 102, 0.18), transparent 20%),
+    repeating-linear-gradient(135deg, rgba(187, 32, 42, 0.06) 0 12px, transparent 12px 28px),
+    var(--bg);
+  --body-background-size: auto;
+  --shadow: 0 0 50px rgba(255, 207, 90, 0.14);
+}
+
+:root[data-interface-theme="new-year"] {
+  --accent: #f8d878;
+  --accent-rgb: 248, 216, 120;
+  --bg: #080a18;
+  --panel: rgba(15, 19, 42, 0.93);
+  --panel-2: rgba(28, 34, 66, 0.95);
+  --ink: #fffbe9;
+  --muted: #b8bfd5;
+  --warning: #a9e7ff;
+  --border: rgba(248, 216, 120, 0.36);
+  --shell-bg: rgba(9, 12, 31, 0.93);
+  --admin-bg: rgba(9, 12, 31, 0.97);
+  --overlay-bg: rgba(11, 15, 36, 0.98);
+  --body-background:
+    radial-gradient(circle at 18% 12%, rgba(248, 216, 120, 0.2) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 22%, rgba(169, 231, 255, 0.18) 0 2px, transparent 3px),
+    radial-gradient(circle at 52% 75%, rgba(255, 255, 255, 0.1) 0 1px, transparent 2px),
+    linear-gradient(145deg, #11183a, var(--bg) 54%);
+  --body-background-size: 72px 72px, 96px 96px, 52px 52px, auto;
+  --shadow: 0 0 54px rgba(248, 216, 120, 0.16);
+}
+
 :root[data-interface-theme="aurora"] {
   --accent: #68e1d2;
   --accent-rgb: 104, 225, 210;
@@ -1515,6 +1602,69 @@ textarea {
 
 .theme-atmosphere[data-theme="minebits"] .theme-particle:nth-child(3n) {
   background: #777c73;
+}
+
+.theme-atmosphere[data-theme="winter"]::before {
+  inset: 0;
+  background: linear-gradient(165deg, rgba(174, 235, 255, 0.1), transparent 42%);
+}
+
+.theme-atmosphere[data-theme="winter"] .theme-particle {
+  border-radius: 50%;
+  background: rgba(235, 250, 255, 0.76);
+  box-shadow: 0 0 8px rgba(174, 235, 255, 0.5);
+  animation: atmosphere-petal-fall var(--particle-duration) linear infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="spooky"]::before {
+  top: 7vh;
+  right: 8vw;
+  width: min(22vw, 240px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 159, 67, 0.13);
+  box-shadow: 0 0 60px rgba(255, 128, 32, 0.15);
+}
+
+.theme-atmosphere[data-theme="spooky"] .theme-particle {
+  border: 1px solid rgba(184, 255, 101, 0.58);
+  border-radius: 50% 50% 35% 35%;
+  background: rgba(255, 159, 67, 0.18);
+  animation: atmosphere-orb-float var(--particle-duration) ease-in-out infinite alternate;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="christmas"] .theme-particle {
+  border-radius: 50%;
+  background: #e94343;
+  box-shadow: 0 0 10px rgba(233, 67, 67, 0.56);
+  animation: atmosphere-node-pulse var(--particle-duration) ease-in-out infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="christmas"] .theme-particle:nth-child(3n + 2) {
+  background: #ffcf5a;
+  box-shadow: 0 0 10px rgba(255, 207, 90, 0.58);
+}
+
+.theme-atmosphere[data-theme="christmas"] .theme-particle:nth-child(3n) {
+  background: #65d98a;
+  box-shadow: 0 0 10px rgba(101, 217, 138, 0.52);
+}
+
+.theme-atmosphere[data-theme="new-year"] .theme-particle {
+  background: #f8d878;
+  box-shadow: 0 0 12px rgba(248, 216, 120, 0.64);
+  transform: rotate(45deg);
+  animation: atmosphere-star-twinkle var(--particle-duration) ease-in-out infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="new-year"] .theme-particle:nth-child(even) {
+  border-radius: 50%;
+  background: #a9e7ff;
+  box-shadow: 0 0 12px rgba(169, 231, 255, 0.56);
 }
 
 .theme-atmosphere[data-motion="reduced"]::before,

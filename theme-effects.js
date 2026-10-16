@@ -11,6 +11,10 @@ const themeParticleCounts = {
   macos: 0,
   terminal: 10,
   minebits: 18,
+  winter: 34,
+  spooky: 18,
+  christmas: 28,
+  "new-year": 36,
 };
 
 function hasReducedAtmosphereMotion() {

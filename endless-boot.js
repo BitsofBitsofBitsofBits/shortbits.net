@@ -297,7 +297,11 @@
     document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
     themeSelect.value = theme.id;
     if (persist) {
-      localStorage.setItem("bits-interface-theme", theme.id);
+      if (window.BITS_THEME_PREFERENCE) {
+        window.BITS_THEME_PREFERENCE.select(theme.id);
+      } else {
+        localStorage.setItem("bits-interface-theme", theme.id);
+      }
     }
   }
 
@@ -312,8 +316,14 @@
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
     window.addEventListener("storage", (event) => {
-      if (event.key === "bits-interface-theme" && event.newValue) {
-        applyTheme(event.newValue, false);
+      const themePreferenceKeys = [
+        "bits-interface-theme",
+        window.BITS_THEME_PREFERENCE?.choiceKey,
+        window.BITS_THEME_PREFERENCE?.dismissalKey,
+      ];
+      if (themePreferenceKeys.includes(event.key)) {
+        const themeId = window.BITS_THEME_PREFERENCE?.resolve() ?? event.newValue;
+        applyTheme(themeId, false);
       }
     });
     settingsToggle.addEventListener("click", () => {

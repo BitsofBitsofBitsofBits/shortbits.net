@@ -481,6 +481,49 @@
       glitchMessages: ["DAT3 ERROR: February exceeded expected bounds"],
     },
     {
+      id: "thanksgiving",
+      mode: "additive",
+      matches: (date) => (
+        date.getMonth() === 10
+        && date.getDay() === 4
+        && date.getDate() >= 22
+        && date.getDate() <= 28
+      ),
+      messages: weighted([
+        "overclocking the turkey until every core is dry...",
+        "benchmarking six beige foods with identical textures...",
+        "opening a family group chat with no moderation tools...",
+        "installing a gratitude patch over deeply questionable legacy code...",
+        "waiting four hours for dinner and twelve minutes to regret it...",
+        "deploying cranberry sauce from a perfectly cylindrical container...",
+        "asking whether this argument really needed a production release...",
+        "compressing leftovers into every available storage container...",
+      ], 18),
+      activities: weighted([
+        "Overclocking a defenseless turkey",
+        "Benchmarking structurally identical casseroles",
+        "Muting the family group chat",
+      ], 12),
+      bootMessages: [
+        "OVERCOOKING TURKEY .................. TRADITION PRESERVED",
+        "MOUNTING CASSEROLE .................. BEIGE",
+        "OPENING FAMILY CHAT ................. TERRIBLE IDEA",
+        "PACKAGING LEFTOVERS ................. CONTAINERS MISSING",
+      ],
+      initialBootSteps: ["LOAD thanksgiving.patch ... LEGACY ISSUES"],
+      monitorJokes: allMonitorMetrics({
+        cpu: ["Calculating how the turkey is both frozen and dry."],
+        gpu: ["Rendering another casserole in twelve shades of beige."],
+        network: ["Family group chat traffic has exceeded safe limits."],
+        ram: ["Remembering which relative started the argument."],
+        storage: ["Leftovers have consumed every available container."],
+        thermal: ["Turkey thermals passed safe limits forty minutes ago."],
+      }),
+      shutdownMessages: ["TURKEY_OVERCLOCKED_AND_DRY"],
+      playingDeadMessages: ["The process is hiding from the family group chat."],
+      glitchMessages: ["CASS3ROLE ERROR: texture not found"],
+    },
+    {
       id: "friday-the-13th",
       mode: "additive",
       matches: (date) => date.getDate() === 13 && date.getDay() === 5,
@@ -543,19 +586,6 @@
   const activeProfile = resolveProfile();
   window.BITS_GET_SEASONAL_PROFILE = resolveProfile;
   window.BITS_SEASONAL_PROFILE = activeProfile;
-
-  if (typeof window.setTimeout === "function" && window.location?.reload) {
-    const now = new Date();
-    const nextDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1,
-      0,
-      0,
-      1,
-    );
-    window.setTimeout(() => window.location.reload(), nextDay.getTime() - now.getTime());
-  }
 
   if (!activeProfile.active) {
     return;

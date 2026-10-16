@@ -1219,20 +1219,32 @@ function updateBrowserThemeColor() {
   document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
 }
 
-function applyInterfaceTheme(theme) {
+function applyInterfaceTheme(theme, persist = true) {
   document.documentElement.style.removeProperty("--accent");
   document.documentElement.style.removeProperty("--accent-rgb");
   document.documentElement.dataset.colorScheme = "dark";
   document.documentElement.dataset.interfaceTheme = theme.id;
   setRgbMode(theme.id === "rgb");
   interfaceThemeSelect.value = theme.id;
-  localStorage.setItem("bits-interface-theme", theme.id);
+  if (persist) {
+    if (window.BITS_THEME_PREFERENCE) {
+      window.BITS_THEME_PREFERENCE.select(theme.id);
+    } else {
+      localStorage.setItem("bits-interface-theme", theme.id);
+    }
+  }
   localStorage.removeItem("bits-accent");
   localStorage.removeItem("bits-color-scheme");
   localStorage.removeItem("bits-rgb-mode");
   updateBrowserThemeColor();
 }
 
+interfaceThemeSelect.replaceChildren(...interfaceThemes.map((theme) => {
+  const option = document.createElement("option");
+  option.value = theme.id;
+  option.textContent = theme.name;
+  return option;
+}));
 interfaceThemeSelect.value = interfaceThemes[interfaceThemeIndex].id;
 interfaceThemeSelect.addEventListener("change", () => {
   const selectedIndex = interfaceThemes.findIndex(
@@ -1258,6 +1270,22 @@ interfaceThemeSelect.addEventListener("change", () => {
       value: interfaceThemes[interfaceThemeIndex].name,
     },
   }));
+});
+window.addEventListener("storage", (event) => {
+  const themePreferenceKeys = [
+    "bits-interface-theme",
+    window.BITS_THEME_PREFERENCE?.choiceKey,
+    window.BITS_THEME_PREFERENCE?.dismissalKey,
+  ];
+  if (!themePreferenceKeys.includes(event.key)) {
+    return;
+  }
+  const themeId = window.BITS_THEME_PREFERENCE?.resolve() ?? event.newValue;
+  const selectedIndex = interfaceThemes.findIndex((theme) => theme.id === themeId);
+  if (selectedIndex >= 0) {
+    interfaceThemeIndex = selectedIndex;
+    applyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);
+  }
 });
 
 function triggerChaosMode() {
@@ -3527,7 +3555,7 @@ async function loadBuildMetadata() {
   }
 }
 
-applyInterfaceTheme(interfaceThemes[interfaceThemeIndex]);
+applyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);
 renderMessageText(
   typedText,
   currentMessageCharacters,

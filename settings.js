@@ -11,6 +11,8 @@ const toolbarTheme = document.querySelector("#interface-theme-select");
 
 const preferenceKeys = [
   "bits-interface-theme",
+  "bits-seasonal-theme-choice",
+  "bits-seasonal-theme-dismissed",
   "bits-accent",
   "bits-color-scheme",
   "bits-rgb-mode",
