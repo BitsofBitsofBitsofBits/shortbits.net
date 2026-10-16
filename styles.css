@@ -10193,10 +10193,20 @@ html[data-interface-theme="windows-95"] .endless-boot-progress span {
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer p {
+  padding-right: 96px;
+  box-sizing: border-box;
   color: #3d3d3d;
 }
 
+html[data-interface-theme="windows-95"] .endless-boot-footer p > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 html[data-interface-theme="windows-95"] .endless-boot-footer b {
+  flex: none;
   color: #000080;
 }
 
