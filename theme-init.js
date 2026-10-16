@@ -77,7 +77,8 @@ const availableSeasonalThemes = themeDebugEnabled
   : seasonalThemeState.availableThemeIds.map(
     (themeId) => seasonalInterfaceThemes[themeId],
   );
-window.BITS_INTERFACE_THEMES = [...baseInterfaceThemes, ...availableSeasonalThemes];
+window.BITS_INTERFACE_THEMES = [...baseInterfaceThemes, ...availableSeasonalThemes]
+  .sort((left, right) => left.name.localeCompare(right.name));
 window.BITS_GET_SEASONAL_THEME_STATE = getSeasonalThemeState;
 window.BITS_SEASONAL_THEME_STATE = seasonalThemeState;
 
