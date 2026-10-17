@@ -9421,7 +9421,7 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
   content: "";
 }
 
-.endless-boot-crash-inner {
+.endless-boot-crash-content {
   width: min(920px, 100%);
   padding: clamp(22px, 7vw, 82px);
 }
@@ -9488,7 +9488,7 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
   background: #050505;
 }
 
-.endless-boot-crash[data-kind="black"] .endless-boot-crash-inner {
+.endless-boot-crash[data-kind="black"] .endless-boot-crash-content {
   border-left: 1px solid #555;
 }
 
@@ -9925,7 +9925,7 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
     place-items: start;
   }
 
-  .endless-boot-crash-inner {
+  .endless-boot-crash-content {
     padding: 14px;
   }
 
