@@ -75,7 +75,8 @@ is a personal project and largely a learning exercise for me.
   presentation, and compact square/portrait case-screen layouts support
   long-running displays. Sparse, theme-colored binary digits drift behind the
   terminal log, respecting reduced motion, paused output, and display power.
-  The offline/restore screen uses the active theme's accent, background, and font
+  The offline/restore screen uses the active theme's accent, background, and
+  font, with CRT-style power-down and power-up transitions
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
 - Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser

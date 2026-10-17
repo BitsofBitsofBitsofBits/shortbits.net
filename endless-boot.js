@@ -30,6 +30,7 @@
   const fallingBits = document.querySelector("#endless-boot-falling-bits");
   const fallingBitsMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let nextFallingBitAt = Date.now() + 4000;
+  let powerTransitionTimer = 0;
   const powerRestore = document.querySelector("#endless-boot-power-restore");
   const postButton = document.querySelector("#endless-boot-post");
   const postCodeOutput = document.querySelector("#endless-boot-post-code");
@@ -1949,20 +1950,44 @@
     window.setTimeout(() => particles.replaceChildren(), 2600);
   }
 
+  function powerMotionReduced() {
+    return fallingBitsMotion.matches || document.documentElement.dataset.motion === "reduced";
+  }
+
   function cyclePower() {
+    window.clearTimeout(powerTransitionTimer);
     document.documentElement.classList.add("is-boot-powered-off");
+    powerRestore.dataset.state = powerMotionReduced() ? "on" : "opening";
     powerRestore.hidden = false;
     window.clearTimeout(timer);
     powerRestore.focus();
+    if (powerRestore.dataset.state === "opening") {
+      powerTransitionTimer = window.setTimeout(() => {
+        powerRestore.dataset.state = "on";
+      }, 650);
+    }
   }
 
   function restorePower() {
-    powerRestore.hidden = true;
-    document.documentElement.classList.remove("is-boot-powered-off");
-    appendSystemLine("RESTORING DISPLAY POWER .............. USER FOUND BUTTON");
-    if (!paused) {
-      scheduleNextMessage();
+    if (powerRestore.hidden || powerRestore.dataset.state === "closing") {
+      return;
     }
+    window.clearTimeout(powerTransitionTimer);
+    const finishRestore = () => {
+      powerRestore.hidden = true;
+      delete powerRestore.dataset.state;
+      document.documentElement.classList.remove("is-boot-powered-off");
+      appendSystemLine("RESTORING DISPLAY POWER .............. USER FOUND BUTTON");
+      if (!paused) {
+        scheduleNextMessage();
+      }
+    };
+    if (powerMotionReduced()) {
+      finishRestore();
+      return;
+    }
+    powerRestore.dataset.state = "closing";
+    powerTransitionTimer = window.setTimeout(finishRestore, 650);
   }
 
   function scanSignal() {
