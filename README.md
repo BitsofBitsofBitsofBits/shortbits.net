@@ -64,8 +64,8 @@ is a personal project and largely a learning exercise for me.
   speed-sensitive bursts, occasional long-running operations, and rare warning,
   error, and rainbow messages. Distinct boot phases drive correlated hardware
   telemetry, POST codes, activity lights, expanded theme-exclusive message pools,
-  rapidly changing unreliable ETA estimates, chained incidents, uptime milestones,
-  and gradual idle degradation.
+  rapidly changing unreliable ETA estimates with live numeric countdowns, chained
+  incidents, uptime milestones, and gradual idle degradation.
   Locally persistent fake hardware, keyboard shortcuts, fullscreen presentation,
   and compact square/portrait case-screen layouts support long-running displays
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,

@@ -691,6 +691,7 @@
   let ignoredErrors = 0;
   let lastTransmission = "";
   let lastEta = "";
+  let etaCountdownSeconds = null;
   const recentMessages = [];
   const recentMessageSet = new Set();
   let timer = 0;
@@ -1079,6 +1080,36 @@
     telemetry.overrideUntil = Date.now() + duration;
   }
 
+  function formatEta(totalSeconds) {
+    const seconds = Math.max(0, Math.floor(totalSeconds));
+    return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+
+  function setEtaMessage(message) {
+    etaCountdownSeconds = null;
+    etaOutput.textContent = message;
+    lastEta = message;
+  }
+
+  function setEtaCountdown(totalSeconds, initialText = "") {
+    etaCountdownSeconds = Math.max(0, Math.floor(totalSeconds));
+    etaOutput.textContent = initialText || formatEta(etaCountdownSeconds);
+    lastEta = etaOutput.textContent;
+  }
+
+  function tickEtaCountdown() {
+    if (etaCountdownSeconds === null) {
+      return;
+    }
+    if (etaCountdownSeconds <= 0) {
+      setEtaMessage(randomItem(["OVERTIME", "MISSED IT", "STILL GOING"]));
+      return;
+    }
+    etaCountdownSeconds -= 1;
+    etaOutput.textContent = formatEta(etaCountdownSeconds);
+    lastEta = etaOutput.textContent;
+  }
+
   function updateEta() {
     const remaining = Math.max(1, 100 - progress);
     const averageDelays = { slow: 800, normal: 270, fast: 98, absurd: 31 };
@@ -1092,17 +1123,27 @@
       do {
         eta = randomItem(etaGoofs);
       } while (eta === lastEta && etaGoofs.length > 1);
+      setEtaMessage(eta);
     } else if (unreliable < 0.42) {
       const exaggeratedSeconds = estimatedSeconds + randomDelay(45, 720);
-      eta = `${String(Math.floor(exaggeratedSeconds / 60)).padStart(2, "0")}:${String(exaggeratedSeconds % 60).padStart(2, "0")}`;
+      setEtaCountdown(exaggeratedSeconds);
     } else if (unreliable < 0.5) {
-      eta = randomItem(["99:99", "-00:04", "00:00", "12:60", "??:??"]);
+      const impossibleEta = randomItem([
+        ["99:99", 6039],
+        ["-00:04", 4],
+        ["00:00", 0],
+        ["12:60", 780],
+        ["??:??", null],
+      ]);
+      if (impossibleEta[1] === null) {
+        setEtaMessage(impossibleEta[0]);
+      } else {
+        setEtaCountdown(impossibleEta[1], impossibleEta[0]);
+      }
     } else {
       const jitteredSeconds = Math.max(0, estimatedSeconds + randomDelay(-4, 8));
-      eta = `${String(Math.floor(jitteredSeconds / 60)).padStart(2, "0")}:${String(jitteredSeconds % 60).padStart(2, "0")}`;
+      setEtaCountdown(jitteredSeconds);
     }
-    etaOutput.textContent = eta;
-    lastEta = eta;
   }
 
   function updateBootPhase(force = false) {
@@ -1772,6 +1813,7 @@
   window.setInterval(updateElapsed, 1000);
   window.setInterval(renderTransmission, 7000);
   window.setInterval(tickTelemetry, 700);
+  window.setInterval(tickEtaCountdown, 1000);
   window.setInterval(updateEta, 2800);
   scheduleNextMessage();
 })();
