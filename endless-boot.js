@@ -1815,14 +1815,13 @@
     crashMeterFill.style.width = `${Math.min(100, value)}%`;
     crashCopy.textContent = profile.copies[stepIndex % profile.copies.length];
     if (stepIndex >= profile.steps.length - 1) {
-      crashRecover.hidden = false;
-      crashRecover.focus();
-      crashRecoveryTimer = window.setTimeout(recoverFromCrash, 4200);
+      crashCopy.textContent = "Recovery complete. Automatically resuming endless boot.";
+      crashRecoveryTimer = window.setTimeout(recoverFromCrash, 900);
       return;
     }
     crashRecoveryTimer = window.setTimeout(
       () => scheduleCrashRecovery(profile, stepIndex + 1),
-      randomDelay(650, 1500),
+      randomDelay(350, 850),
     );
   }
 
