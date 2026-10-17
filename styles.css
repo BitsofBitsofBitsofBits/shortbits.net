@@ -8332,10 +8332,11 @@ html[data-boot="pending"] .boot-screen[hidden] {
   z-index: 2;
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
-  width: 100vw;
-  height: 100vh;
-  height: var(--boot-viewport-height, 100dvh);
+  width: calc(100vw - 4px);
+  height: calc(100vh - 4px);
+  height: calc(var(--boot-viewport-height, 100dvh) - 4px);
   min-height: 0;
+  margin: 2px;
   padding: clamp(18px, 3.5vw, 52px);
   box-sizing: border-box;
   font-family: var(--font-family);
@@ -8448,6 +8449,23 @@ html[data-boot="pending"] .boot-screen[hidden] {
   color: var(--ink);
 }
 
+.endless-boot-status-button {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dashed var(--border);
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.endless-boot-status-button:hover,
+.endless-boot-status-button:focus-visible {
+  border-color: var(--accent);
+  outline: 1px dashed var(--accent);
+  outline-offset: 3px;
+}
+
 .endless-boot-machine {
   display: flex;
   align-items: center;
@@ -8477,6 +8495,25 @@ html[data-boot="pending"] .boot-screen[hidden] {
 .endless-boot-machine small {
   color: var(--muted);
   font: inherit;
+}
+
+.endless-boot-spark {
+  display: inline-block;
+  width: 14ch;
+  overflow: hidden;
+  color: var(--accent);
+  font: 0.85em/1 var(--font-family);
+  letter-spacing: -0.12em;
+  opacity: 0.78;
+}
+
+html[data-boot-network="offline"] .endless-boot-machine [data-meter="network"] {
+  color: #ff6d7a;
+}
+
+html[data-boot-network="offline"] .endless-boot-machine [data-meter="network"] i {
+  background: #ff6d7a;
+  box-shadow: 0 0 7px #ff6d7a;
 }
 
 .endless-boot-post {
@@ -9019,6 +9056,9 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
 .endless-boot-command[hidden],
 .endless-boot-event[hidden],
 .endless-boot-hardware[hidden],
+.endless-boot-inspector[hidden],
+.endless-boot-achievement[hidden],
+.endless-boot-crash[hidden],
 .endless-boot-power-restore[hidden] {
   display: none;
 }
@@ -9216,6 +9256,300 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
   line-height: 1.5;
 }
 
+.endless-boot-inspector {
+  position: absolute;
+  z-index: 12;
+  inset: clamp(10px, 4vw, 56px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(760px, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid var(--accent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel) 98%, #000);
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.78), 0 0 34px rgba(var(--accent-rgb), 0.24);
+  clip-path: inset(-100vmax);
+}
+
+.endless-boot-inspector header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.endless-boot-inspector h2,
+.endless-boot-inspector p {
+  margin: 0;
+}
+
+.endless-boot-inspector header p {
+  color: var(--muted);
+  font-size: 0.48rem;
+  letter-spacing: 0.08em;
+}
+
+.endless-boot-inspector h2 {
+  margin-top: 5px;
+  color: var(--accent);
+  font-size: clamp(0.8rem, 2.6vw, 1.3rem);
+}
+
+.endless-boot-inspector header button,
+.endless-boot-crash button {
+  flex: none;
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid currentColor;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font: 0.65rem/1 var(--font-family);
+}
+
+.endless-boot-inspector header button:focus-visible,
+.endless-boot-inspector header button:hover,
+.endless-boot-crash button:focus-visible,
+.endless-boot-crash button:hover {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.endless-boot-inspector-content {
+  min-height: 0;
+  padding: 14px;
+  overflow: auto;
+}
+
+.endless-boot-records {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.endless-boot-records li {
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: rgba(var(--accent-rgb), 0.035);
+}
+
+.endless-boot-records li > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.endless-boot-records strong,
+.endless-boot-records time,
+.endless-boot-records p,
+.endless-boot-records small,
+.endless-boot-records-empty {
+  margin: 0;
+  font-size: clamp(0.46rem, 1.3vw, 0.62rem);
+  line-height: 1.5;
+}
+
+.endless-boot-records strong {
+  color: var(--ink);
+}
+
+.endless-boot-records time,
+.endless-boot-records small {
+  color: var(--accent);
+}
+
+.endless-boot-records p,
+.endless-boot-records-empty {
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.endless-boot-achievement {
+  position: fixed;
+  z-index: 25;
+  right: clamp(10px, 3vw, 36px);
+  top: clamp(10px, 3vw, 36px);
+  width: min(320px, calc(100vw - 20px));
+  padding: 12px 14px;
+  border: 1px solid #ffda62;
+  color: #fff5bd;
+  background: rgba(20, 15, 0, 0.96);
+  box-shadow: 0 0 22px rgba(255, 218, 98, 0.28);
+  pointer-events: none;
+  animation: endless-boot-achievement-in 380ms steps(5);
+}
+
+.endless-boot-achievement p {
+  margin: 0;
+}
+
+.endless-boot-achievement p:first-child {
+  color: #ffda62;
+  font-size: 0.48rem;
+  letter-spacing: 0.12em;
+}
+
+.endless-boot-achievement p:last-child {
+  margin-top: 7px;
+  font-size: clamp(0.62rem, 2vw, 0.86rem);
+}
+
+.endless-boot-crash {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  color: #fff;
+  background: #0877d1;
+  font-family: var(--font-family);
+}
+
+.endless-boot-crash::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.endless-boot-crash-inner {
+  width: min(920px, 100%);
+  padding: clamp(22px, 7vw, 82px);
+}
+
+.endless-boot-crash-label {
+  margin: 0 0 clamp(18px, 4vh, 40px);
+  font-size: clamp(0.5rem, 1.3vw, 0.75rem);
+  letter-spacing: 0.12em;
+}
+
+.endless-boot-crash-face {
+  margin: 0 0 clamp(10px, 2vh, 20px);
+  font-size: clamp(2.7rem, 11vw, 7rem);
+  line-height: 1;
+}
+
+.endless-boot-crash h2 {
+  max-width: 25ch;
+  margin: 0;
+  font-size: clamp(1.1rem, 4.2vw, 2.6rem);
+  line-height: 1.2;
+}
+
+.endless-boot-crash-copy {
+  min-height: 1.5em;
+  margin: clamp(16px, 4vh, 36px) 0 8px;
+  font-size: clamp(0.6rem, 1.8vw, 0.9rem);
+}
+
+.endless-boot-crash-meter {
+  width: min(520px, 100%);
+  height: 10px;
+  border: 1px solid currentColor;
+}
+
+.endless-boot-crash-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: currentColor;
+  transition: width 600ms steps(6);
+}
+
+.endless-boot-crash-progress {
+  margin: 8px 0 clamp(18px, 4vh, 34px);
+  font-size: clamp(0.7rem, 2vw, 1rem);
+}
+
+.endless-boot-crash-code,
+.endless-boot-crash-fault,
+.endless-boot-crash-build {
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(0.48rem, 1.35vw, 0.7rem);
+}
+
+.endless-boot-crash button {
+  margin-top: clamp(18px, 4vh, 34px);
+  padding: 9px 13px;
+}
+
+.endless-boot-crash[data-kind="black"] {
+  color: #ddd;
+  background: #050505;
+}
+
+.endless-boot-crash[data-kind="black"] .endless-boot-crash-inner {
+  border-left: 1px solid #555;
+}
+
+.endless-boot-crash[data-kind="green"] {
+  color: #fff;
+  background: #008744;
+}
+
+.endless-boot-crash[data-kind="green"]::before {
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.07) 3px 4px);
+}
+
+.endless-boot-crash[data-kind="red"] {
+  color: #fff;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(255, 180, 120, 0.16), transparent 34%),
+    #a20e18;
+}
+
+.endless-boot-crash[data-kind="red"] h2,
+.endless-boot-crash[data-kind="red"] .endless-boot-crash-face {
+  text-shadow: 3px 0 rgba(0, 0, 0, 0.22);
+}
+
+.endless-boot-crash[data-kind="purple"] {
+  color: #fff;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 0, 240, 0.3), transparent 34%),
+    linear-gradient(132deg, #180020, #4d075d 58%, #120018);
+  animation: endless-boot-virus-flicker 5s steps(2) infinite;
+}
+
+.endless-boot-crash[data-kind="purple"]::before {
+  background:
+    linear-gradient(90deg, transparent 0 9%, rgba(0, 255, 255, 0.12) 9% 9.4%, transparent 9.4% 72%, rgba(255, 0, 120, 0.1) 72% 72.5%, transparent 72.5%),
+    repeating-linear-gradient(0deg, transparent 0 4px, rgba(0, 0, 0, 0.2) 4px 6px);
+  animation: endless-boot-virus-tear 1.7s steps(3) infinite;
+}
+
+.endless-boot-crash[data-kind="purple"] h2 {
+  text-shadow: -3px 0 #00e5ff, 3px 0 #ff127d;
+  animation: endless-boot-virus-heading 1.3s steps(2) infinite;
+}
+
+.endless-boot-crash[data-kind="purple"] .endless-boot-crash-meter span {
+  background: linear-gradient(90deg, #00e5ff, #ff127d);
+}
+
+html.is-boot-user-idle .endless-boot-console {
+  opacity: 0.86;
+}
+
+html.is-boot-user-away .endless-boot-console {
+  opacity: 0.68;
+}
+
+.endless-boot-console {
+  transform: translate(var(--boot-shift-x, 0), var(--boot-shift-y, 0));
+  transition: transform 4s ease, opacity 2s ease;
+}
+
 .endless-boot-bits-particles {
   position: fixed;
   z-index: 10;
@@ -9261,6 +9595,59 @@ html.is-boot-presentation .endless-boot-settings.is-revealed,
 html.is-boot-presentation .endless-boot-settings:focus-within {
   opacity: 1;
   pointer-events: auto;
+}
+
+@keyframes endless-boot-achievement-in {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+@keyframes endless-boot-virus-flicker {
+  48% {
+    filter: none;
+  }
+
+  49% {
+    filter: contrast(1.3) hue-rotate(8deg);
+  }
+
+  51% {
+    filter: none;
+  }
+}
+
+@keyframes endless-boot-virus-tear {
+  40% {
+    transform: translateX(0);
+  }
+
+  42% {
+    transform: translateX(7px);
+  }
+
+  45% {
+    transform: translateX(-4px);
+  }
+
+  47% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes endless-boot-virus-heading {
+  70% {
+    transform: translateX(0);
+  }
+
+  72% {
+    transform: translateX(4px);
+  }
+
+  75% {
+    transform: translateX(-2px);
+  }
 }
 
 @keyframes endless-boot-event-in {
@@ -9335,6 +9722,10 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
     gap: 9px;
   }
 
+  .endless-boot-spark {
+    display: none;
+  }
+
   .endless-boot-host,
   .endless-boot-machine [data-meter="network"] {
     display: none;
@@ -9365,6 +9756,17 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
 
   .endless-boot-hardware dd {
     margin-bottom: 6px;
+  }
+
+  .endless-boot-inspector {
+    inset: 8px;
+    width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
+  }
+
+  .endless-boot-records li > div {
+    display: grid;
+    gap: 2px;
   }
 }
 
@@ -9507,6 +9909,50 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
     margin: 8px 0;
     font-size: 0.42rem;
   }
+
+  .endless-boot-inspector {
+    inset: 6px;
+    width: calc(100% - 12px);
+    max-height: calc(100% - 12px);
+  }
+
+  .endless-boot-inspector header,
+  .endless-boot-inspector-content {
+    padding: 9px;
+  }
+
+  .endless-boot-crash {
+    place-items: start;
+  }
+
+  .endless-boot-crash-inner {
+    padding: 14px;
+  }
+
+  .endless-boot-crash-label {
+    margin-bottom: 10px;
+  }
+
+  .endless-boot-crash-face {
+    margin-bottom: 5px;
+    font-size: 2rem;
+  }
+
+  .endless-boot-crash h2 {
+    font-size: 0.86rem;
+  }
+
+  .endless-boot-crash-copy {
+    margin: 10px 0 6px;
+  }
+
+  .endless-boot-crash-progress {
+    margin-bottom: 10px;
+  }
+
+  .endless-boot-crash button {
+    margin-top: 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -9516,6 +9962,22 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
   .endless-boot-transmission p,
   .endless-boot-event {
     animation: none;
+  }
+
+  .endless-boot-console {
+    transform: none;
+    transition: opacity 200ms linear;
+  }
+
+  .endless-boot-achievement,
+  .endless-boot-crash,
+  .endless-boot-crash::before,
+  .endless-boot-crash h2 {
+    animation: none !important;
+  }
+
+  .endless-boot-crash-meter span {
+    transition: none;
   }
 
   .endless-boot-bits-particles i {

@@ -65,9 +65,15 @@ is a personal project and largely a learning exercise for me.
   error, and rainbow messages. Distinct boot phases drive correlated hardware
   telemetry, POST codes, activity lights, expanded theme-exclusive message pools,
   rapidly changing unreliable ETA estimates with live numeric countdowns, chained
-  incidents, uptime milestones, and gradual idle degradation.
-  Locally persistent fake hardware, keyboard shortcuts, fullscreen presentation,
-  and compact square/portrait case-screen layouts support long-running displays
+  incidents, persistent incident history, telemetry sparklines, uptime milestones,
+  daily machine personalities, one anomaly per browser session, real online/offline
+  reactions, user-presence responses, long narrative sequences, and gradual idle
+  degradation. Local boot achievements, expanded diagnostic/export commands,
+  subtle burn-in protection, and rare self-recovering Blue, Black, Green Insider,
+  Red, and Purple bootkit crash screens add depth without taking permanent log
+  space. Locally persistent fake hardware, keyboard shortcuts, fullscreen
+  presentation, and compact square/portrait case-screen layouts support
+  long-running displays
 - An in-site `NOTIFICATIONS.LOG` with persistent history, unread tracking,
   transient toast alerts, individual dismissal, and clear-all controls
 - Public `STATS.EXE` aggregate telemetry showing daily/all-time views, browser

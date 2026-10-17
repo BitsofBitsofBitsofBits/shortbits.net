@@ -41,6 +41,30 @@
   const hardwareList = document.querySelector("#endless-boot-hardware-list");
   const hardwareClose = document.querySelector("#endless-boot-hardware-close");
   const presentationButton = document.querySelector("#endless-boot-presentation");
+  const incidentsOpen = document.querySelector("#endless-boot-incidents-open");
+  const inspectorPanel = document.querySelector("#endless-boot-inspector");
+  const inspectorKicker = document.querySelector("#endless-boot-inspector-kicker");
+  const inspectorTitle = document.querySelector("#endless-boot-inspector-title");
+  const inspectorContent = document.querySelector("#endless-boot-inspector-content");
+  const inspectorClose = document.querySelector("#endless-boot-inspector-close");
+  const achievementToast = document.querySelector("#endless-boot-achievement");
+  const achievementMessage = document.querySelector("#endless-boot-achievement-message");
+  const crashScreen = document.querySelector("#endless-boot-crash");
+  const crashLabel = document.querySelector("#endless-boot-crash-label");
+  const crashFace = document.querySelector("#endless-boot-crash-face");
+  const crashTitle = document.querySelector("#endless-boot-crash-title");
+  const crashCopy = document.querySelector("#endless-boot-crash-copy");
+  const crashProgress = document.querySelector("#endless-boot-crash-progress");
+  const crashMeterFill = document.querySelector("#endless-boot-crash-meter-fill");
+  const crashCode = document.querySelector("#endless-boot-crash-code");
+  const crashFault = document.querySelector("#endless-boot-crash-fault");
+  const crashBuild = document.querySelector("#endless-boot-crash-build");
+  const crashRecover = document.querySelector("#endless-boot-crash-recover");
+  const sparkOutputs = Object.fromEntries(
+    ["cpu", "memory", "temperature", "disk", "network"].map((meter) => (
+      [meter, document.querySelector(`#endless-boot-${meter}-spark`)]
+    )),
+  );
 
   const subjects = [
     "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
@@ -571,6 +595,154 @@
     "00:??",
     "INFINITE",
   ];
+  const dailyPersonalities = [
+    {
+      id: "cooperative",
+      name: "COOPERATIVE",
+      messages: ["SYSTEM IS FEELING HELPFUL ............ THIS IS SUSPICIOUS", "FOLLOWING INSTRUCTIONS ................ FOR NOW"],
+      fortune: "Today is an excellent day to finish booting. We will not.",
+    },
+    {
+      id: "suspicious",
+      name: "SUSPICIOUS",
+      messages: ["VERIFYING USER INTENT ................. UNCONVINCING", "WATCHING INPUT DEVICES ................ RESPECTFULLY"],
+      fortune: "Trust no peripheral reporting fewer than three concerns.",
+    },
+    {
+      id: "sleepy",
+      name: "SLEEPY",
+      messages: ["WAKING BACKGROUND THREADS ............. SNOOZED", "REDUCING CLOCK SPEED .................. FIVE MORE MINUTES"],
+      fortune: "A process at rest remains at rest until coffee.",
+    },
+    {
+      id: "dramatic",
+      name: "DRAMATIC",
+      messages: ["ANNOUNCING ROUTINE CHECK .............. CATASTROPHICALLY", "DIMMING LIGHTS FOR BOOT ............... CINEMATIC"],
+      fortune: "Every warning deserves a full-screen entrance.",
+    },
+    {
+      id: "overconfident",
+      name: "OVERCONFIDENT",
+      messages: ["SKIPPING VERIFICATION ................. DEFINITELY FINE", "ASSUMING SUCCESS ...................... OPTIMIZED"],
+      fortune: "Confidence is just cached certainty.",
+    },
+    {
+      id: "haunted",
+      name: "HAUNTED",
+      messages: ["PROCESS 0000 WHISPERED ................ IGNORED", "CHECKING EMPTY PORT ................... SOMETHING ANSWERED"],
+      fortune: "The ghost in the machine has administrator privileges.",
+    },
+    {
+      id: "corporate",
+      name: "CORPORATE",
+      messages: ["ALIGNING BOOT DELIVERABLES ............ SYNERGIZED", "ESCALATING STARTUP BLOCKER ............ MEETING SCHEDULED"],
+      fortune: "This boot is a cross-functional opportunity.",
+    },
+    {
+      id: "literal",
+      name: "EXTREMELY LITERAL",
+      messages: ["BOOTING BOOT PROCESS .................. BOOTED", "COUNTING BITS ......................... IN BINARY"],
+      fortune: "The estimated time is an estimate of time.",
+    },
+  ];
+  const sessionAnomalies = [
+    "memory-creep",
+    "post-language",
+    "hostname-drift",
+    "network-ghost",
+    "temperature-opinion",
+    "eta-reversal",
+    "boot-zero",
+    "lazy-core",
+  ];
+  const narrativeStories = [
+    [
+      "ONE LOOSE BIT ESCAPED ................ LAST SEEN NEAR MEMORY",
+      "DISPATCHING SEARCH THREAD ............. THREAD GOT DISTRACTED",
+      "LOOSE BIT ENTERED NETWORK STACK ....... PACKET DISGUISE POOR",
+      "CORNERING LOOSE BIT ................... BIT CLAIMS INNOCENCE",
+      "RETURNING BIT TO CONTAINMENT .......... COUNT NOW OFF BY ONE",
+    ],
+    [
+      "DETECTING PRINTER ..................... PRINTER DENIES EXISTING",
+      "REQUESTING PRINTER IDENTIFICATION ..... TONER LOW",
+      "PRINTER FILED FORMAL COMPLAINT ......... PAPER JAM ATTACHED",
+      "ESCALATING TO PRINT SPOOLER ............ SPOOLER HIDING",
+      "PRINTER INCIDENT CLOSED ............... DEVICE STILL PRINTING",
+    ],
+    [
+      "SYSTEM CLOCK A REPORTS 19:37 ........... CONFIDENT",
+      "SYSTEM CLOCK B REPORTS TUESDAY ......... ALSO CONFIDENT",
+      "ARBITRATING TEMPORAL DISPUTE ........... HEATED",
+      "CLOCKS AGREED TO DISAGREE .............. TIME RESUMED",
+    ],
+    [
+      "BACKGROUND PROCESS REQUESTED PROMOTION . REVIEW OPENED",
+      "INTERVIEWING BACKGROUND PROCESS ........ VERY AMBITIOUS",
+      "PROMOTING PROCESS TO FOREGROUND ......... NOTHING CHANGED",
+      "PROCESS REQUESTED BACKGROUND AGAIN ...... APPROVED",
+    ],
+  ];
+  const bootAchievements = [
+    ["still-waiting", "STILL WAITING"],
+    ["committed-bit", "COMMITTED TO THE BIT"],
+    ["speedrunner", "BOOT SPEEDRUNNER"],
+    ["technician", "CERTIFIED-ISH TECHNICIAN"],
+    ["incident-response", "IT WAS LIKE THAT"],
+    ["do-not-turn-off", "DO NOT TURN OFF"],
+    ["eta-expired", "EVENTUALLY MEANS EVENTUALLY"],
+    ["night-shift", "NIGHT SHIFT"],
+    ["full-spectrum", "FULL BOOT FAILURE SPECTRUM"],
+    ["command-center", "COMMAND CENTER"],
+  ];
+  const crashProfiles = {
+    blue: {
+      label: "BITS STOP RESPONSE // BLUE CHANNEL",
+      face: ":(",
+      title: "Your endless boot ran into a finite problem.",
+      copies: ["Collecting boot fragments.", "Asking the ETA what happened.", "Restarting the restart process."],
+      codes: ["ENDLESS_BOOT_COMPLETION_LOOP", "ETA_COUNTER_REACHED_TOMORROW", "POST_PHASE_REFUSED_HANDOFF", "BOOT_CYCLE_INTEGER_TIRED"],
+      fault: "boot_completion_verifier.sys",
+      steps: [8, 23, 47, 71, 92, 100],
+    },
+    black: {
+      label: "BIT BUCKET RECOVERY // NO COLOR CHANNEL",
+      face: "[    ]",
+      title: "The boot display encountered absolutely nothing.",
+      copies: ["Searching the Bit Bucket.", "Increasing darkness for visibility.", "Fabricating the missing final percent."],
+      codes: ["BOOT_BIT_BUCKET_EMPTY", "DISPLAY_OUTPUT_ABSENT_WITH_CONFIDENCE", "NULL_PROGRESS_REFERENCE", "POST_CODE_NOT_VISIBLE"],
+      fault: "nothing_at_all.dll",
+      steps: [18, 41, 67, 86, 99, 100],
+    },
+    green: {
+      label: "BITS INSIDER PREVIEW // CANARY BOOT RING",
+      face: ":(",
+      title: "Your experimental boot installed tomorrow's problem today.",
+      copies: ["Collecting speculative error info.", "Promoting unstable code to production.", "Thank you for testing this without volunteering."],
+      codes: ["INSIDER_BOOT_AHEAD_OF_ITSELF", "CANARY_ESCAPED_BOOT_RING", "EXPERIMENTAL_ETA_LEAK", "PREVIEW_BUILD_PREVIEWED_TOO_HARD"],
+      fault: "definitely-ready-for-boot.sys",
+      build: "Evaluation copy. Build B17.26052.bits_canary_endless.1016-1906",
+      steps: [12, 29, 47, 68, 86, 100, 103],
+    },
+    red: {
+      label: "FATAL BOOT EXCEPTION // RED CHANNEL",
+      face: "[x_x]",
+      title: "The boot process became too bootable.",
+      copies: ["Containing recursive startup calls.", "Cooling the POST code.", "Reassembling the progress bar."],
+      codes: ["POST_CODE_CAUGHT_FIRE", "BOOT_RECURSION_LIMIT_EXCEEDED", "PROGRESS_BAR_OVERPRESSURE", "FIRMWARE_VIBES_CRITICAL"],
+      fault: "recursive_bootstrap.exe",
+      steps: [9, 31, 58, 79, 96, 100],
+    },
+    purple: {
+      label: "BITPROTECTOR // BOOTKIT NARRATIVE ACTIVE",
+      face: "[!_!]",
+      title: "A virus has claimed ownership of the boot sequence.",
+      copies: ["Encrypting the fake hardware inventory.", "Installing three complimentary boot toolbars.", "Virus requesting administrator vibes.", "Quarantining everything except the virus."],
+      codes: ["BOOTKIT_REQUESTED_ADMIN_VIBES", "VIRUS_OWNS_THE_ETA_NOW", "MALWARE_ADDED_MORE_BITS", "QUARANTINE_QUARANTINED_ITSELF"],
+      fault: "totally_legitimate_bootkit.b17",
+      steps: [10, 20, 30, 45, 63, 82, 97, 100],
+    },
+  };
   const degradationMessages = [
     "RECOUNTING INSTALLED MEMORY .......... TOTAL CHANGED",
     "SYSTEM CLOCK DRIFT DETECTED .......... TIME IS SUBJECTIVE",
@@ -680,6 +852,9 @@
   const preferenceKey = "bits-endless-boot-preferences";
   const statsKey = "bits-endless-boot-stats";
   const hardwareKey = "bits-endless-boot-hardware";
+  const incidentHistoryKey = "bits-endless-boot-incidents";
+  const achievementKey = "bits-endless-boot-achievements";
+  const crashHistoryKey = "bits-endless-boot-crashes";
   const speedOrder = ["slow", "normal", "fast", "absurd"];
   const densityOrder = ["relaxed", "normal", "compact"];
 
@@ -705,8 +880,33 @@
   let currentPhaseIndex = 0;
   let activeOperation = null;
   let operationGap = 0;
+  let activeNarrative = null;
+  let narrativeGap = 0;
   let presentationRevealTimer = 0;
+  let achievementTimer = 0;
+  let crashTimer = 0;
+  let crashRecoveryTimer = 0;
+  let crashActive = false;
+  let crashPreviousFocus = null;
+  let lastCrashAt = 0;
+  let lastUserActivityAt = Date.now();
+  let userIdleStage = 0;
+  let networkOnline = navigator.onLine;
+  let commandHistory = [];
+  let commandHistoryIndex = 0;
+  let incidentHistory = [];
+  let unlockedBootAchievements = [];
+  let survivedBootCrashes = new Set();
+  let telemetryHistory = {
+    cpu: [],
+    memory: [],
+    temperature: [],
+    disk: [],
+    network: [],
+  };
   let hardware = null;
+  const dailyPersonality = getDailyPersonality();
+  const sessionAnomaly = getSessionAnomaly();
   const reachedMilestones = new Set();
   const telemetry = {
     cpu: 18,
@@ -740,6 +940,161 @@
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.warn(`Unable to save ${key} to local storage.`, error);
+    }
+  }
+
+  function hashString(value) {
+    return [...value].reduce(
+      (hash, character) => ((hash * 31) + character.charCodeAt(0)) >>> 0,
+      2166136261,
+    );
+  }
+
+  function getDailyPersonality(date = new Date()) {
+    const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    return dailyPersonalities[hashString(key) % dailyPersonalities.length];
+  }
+
+  function getSessionAnomaly() {
+    const key = "bits-endless-boot-session-anomaly";
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (sessionAnomalies.includes(stored)) {
+        return stored;
+      }
+      const anomaly = randomItem(sessionAnomalies);
+      sessionStorage.setItem(key, anomaly);
+      return anomaly;
+    } catch (error) {
+      console.warn("Unable to retain the boot session anomaly.", error);
+      return randomItem(sessionAnomalies);
+    }
+  }
+
+  function loadStoredArray(key, validator) {
+    const stored = readStorage(key, []);
+    if (!Array.isArray(stored)) {
+      console.error(`Stored ${key} data is not an array.`);
+      return [];
+    }
+    return stored.filter(validator);
+  }
+
+  function initializeBootRecords() {
+    incidentHistory = loadStoredArray(incidentHistoryKey, (entry) => (
+      entry
+      && typeof entry.id === "string"
+      && typeof entry.code === "string"
+      && typeof entry.title === "string"
+      && typeof entry.createdAt === "string"
+    )).slice(-50);
+    unlockedBootAchievements = loadStoredArray(achievementKey, (entry) => (
+      entry
+      && bootAchievements.some(([id]) => id === entry.id)
+      && typeof entry.unlockedAt === "string"
+    ));
+    survivedBootCrashes = new Set(
+      loadStoredArray(crashHistoryKey, (kind) => Object.hasOwn(crashProfiles, kind)),
+    );
+  }
+
+  function unlockBootAchievement(id) {
+    const achievement = bootAchievements.find(([candidate]) => candidate === id);
+    if (!achievement || unlockedBootAchievements.some((entry) => entry.id === id)) {
+      return false;
+    }
+    unlockedBootAchievements.push({ id, unlockedAt: new Date().toISOString() });
+    writeStorage(achievementKey, unlockedBootAchievements);
+    window.clearTimeout(achievementTimer);
+    achievementMessage.textContent = achievement[1];
+    achievementToast.hidden = false;
+    achievementTimer = window.setTimeout(() => {
+      achievementToast.hidden = true;
+    }, 4200);
+    return true;
+  }
+
+  function recordIncident({ code, title, detail, kind = "incident" }) {
+    incidentHistory.push({
+      id: `${Date.now()}-${randomHex(4)}`,
+      code,
+      title,
+      detail,
+      kind,
+      createdAt: new Date().toISOString(),
+      telemetry: {
+        cpu: Math.round(telemetry.cpu),
+        temperature: Math.round(telemetry.temperature),
+        disk: Math.round(telemetry.disk),
+        network: Math.round(telemetry.network),
+      },
+    });
+    incidentHistory = incidentHistory.slice(-50);
+    writeStorage(incidentHistoryKey, incidentHistory);
+  }
+
+  function createRecordList(entries, emptyMessage) {
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "endless-boot-records-empty";
+      empty.textContent = emptyMessage;
+      return empty;
+    }
+    const list = document.createElement("ol");
+    list.className = "endless-boot-records";
+    entries.forEach((entry) => {
+      const item = document.createElement("li");
+      const header = document.createElement("div");
+      const title = document.createElement("strong");
+      const time = document.createElement("time");
+      const detail = document.createElement("p");
+      title.textContent = `${entry.code} // ${entry.title}`;
+      time.dateTime = entry.createdAt;
+      time.textContent = new Date(entry.createdAt).toLocaleString();
+      detail.textContent = entry.detail;
+      header.append(title, time);
+      item.append(header, detail);
+      if (entry.telemetry) {
+        const telemetryLine = document.createElement("small");
+        telemetryLine.textContent = `CPU ${entry.telemetry.cpu}% // TEMP ${entry.telemetry.temperature}C // DISK ${entry.telemetry.disk}% // NET ${entry.telemetry.network}K`;
+        item.append(telemetryLine);
+      }
+      list.append(item);
+    });
+    return list;
+  }
+
+  function openInspector(mode = "incidents") {
+    inspectorContent.replaceChildren();
+    if (mode === "achievements") {
+      inspectorKicker.textContent = "LOCAL_BOOT_ACHIEVEMENTS";
+      inspectorTitle.textContent = `${unlockedBootAchievements.length} / ${bootAchievements.length} DISCOVERED`;
+      const entries = bootAchievements.map(([id, label]) => {
+        const unlocked = unlockedBootAchievements.find((entry) => entry.id === id);
+        return {
+          code: unlocked ? "UNLOCKED" : "LOCKED",
+          title: unlocked ? label : "????????",
+          detail: unlocked ? `Achievement ID: ${id}` : "Continue interacting with the endless boot display.",
+          createdAt: unlocked?.unlockedAt ?? new Date(0).toISOString(),
+        };
+      });
+      inspectorContent.append(createRecordList(entries, "No achievements discovered."));
+    } else {
+      inspectorKicker.textContent = "PERSISTENT_INCIDENT_HISTORY";
+      inspectorTitle.textContent = `${incidentHistory.length} IGNORED INCIDENTS`;
+      inspectorContent.append(createRecordList(
+        [...incidentHistory].reverse(),
+        "No incidents recorded. The machine finds this suspicious.",
+      ));
+    }
+    inspectorPanel.hidden = false;
+    inspectorClose.focus();
+  }
+
+  function closeInspector({ restoreFocus = true } = {}) {
+    inspectorPanel.hidden = true;
+    if (restoreFocus) {
+      incidentsOpen.focus();
     }
   }
 
@@ -1030,12 +1385,36 @@
     ];
     const load = phaseLoads[currentPhaseIndex] ?? phaseLoads[0];
     const degradation = getDegradationLevel();
+    const memoryDrift = sessionAnomaly === "memory-creep"
+      ? Math.min(24, Math.floor((Date.now() - startedAt) / 45000))
+      : 0;
     telemetry.targets = {
       cpu: clamp(load.cpu + randomDelay(-14, 18) + (degradation * 4), 2, 100),
-      memory: clamp(38 + (currentPhaseIndex * 5) + randomDelay(-5, 7), 8, 97),
+      memory: clamp(38 + (currentPhaseIndex * 5) + randomDelay(-5, 7) + memoryDrift, 8, 97),
       disk: clamp(load.disk + randomDelay(-12, 16), 0, 100),
-      network: clamp(load.network + randomDelay(-15, 22), 0, 999),
+      network: networkOnline
+        ? clamp(load.network + randomDelay(-15, 22), 0, 999)
+        : 0,
     };
+    if (sessionAnomaly === "lazy-core" && Math.random() < 0.35) {
+      telemetry.targets.cpu = 1;
+    }
+  }
+
+  function renderSparkline(name, value, maximum = 100) {
+    const output = sparkOutputs[name];
+    if (!output) {
+      return;
+    }
+    const blocks = "▁▂▃▄▅▆▇█";
+    const history = telemetryHistory[name];
+    history.push(clamp(value, 0, maximum));
+    while (history.length > 14) {
+      history.shift();
+    }
+    output.textContent = history.map((sample) => (
+      blocks[Math.round((sample / maximum) * (blocks.length - 1))]
+    )).join("");
   }
 
   function renderTelemetry() {
@@ -1052,7 +1431,14 @@
     memoryOutput.textContent = `${usedMemory}M`;
     temperatureOutput.textContent = `${Math.round(telemetry.temperature)}C`;
     diskOutput.textContent = `${Math.round(telemetry.disk).toString().padStart(2, "0")}%`;
-    networkOutput.textContent = `${Math.round(telemetry.network).toString().padStart(3, "0")}K`;
+    networkOutput.textContent = networkOnline
+      ? `${Math.round(telemetry.network).toString().padStart(3, "0")}K`
+      : "OFF";
+    renderSparkline("cpu", telemetry.cpu);
+    renderSparkline("memory", telemetry.memory);
+    renderSparkline("temperature", telemetry.temperature, 90);
+    renderSparkline("disk", telemetry.disk);
+    renderSparkline("network", telemetry.network, 160);
 
     const levels = {
       cpu: telemetry.cpu,
@@ -1103,6 +1489,7 @@
     }
     if (etaCountdownSeconds <= 0) {
       setEtaMessage(randomItem(["OVERTIME", "MISSED IT", "STILL GOING"]));
+      unlockBootAchievement("eta-expired");
       return;
     }
     etaCountdownSeconds -= 1;
@@ -1231,6 +1618,24 @@
   }
 
   function nextBootMessage() {
+    if (activeNarrative && narrativeGap <= 0) {
+      const text = activeNarrative.messages[activeNarrative.index];
+      const finalStep = activeNarrative.index === activeNarrative.messages.length - 1;
+      activeNarrative.index += 1;
+      narrativeGap = randomDelay(1, 3);
+      if (finalStep) {
+        activeNarrative = null;
+      }
+      return { text, state: finalStep ? "rainbow" : "warning", longRunning: !finalStep };
+    }
+    if (activeNarrative) {
+      narrativeGap -= 1;
+    } else if (Date.now() - startedAt > 45000 && Math.random() < 0.0018) {
+      activeNarrative = { messages: [...randomItem(narrativeStories)], index: 1 };
+      narrativeGap = 2;
+      return { text: activeNarrative.messages[0], state: "warning", longRunning: true };
+    }
+
     if (activeOperation && operationGap <= 0) {
       const text = activeOperation.messages[activeOperation.index];
       const finalStep = activeOperation.index === activeOperation.messages.length - 1;
@@ -1263,6 +1668,22 @@
 
     const themeMessages = themeBootMessages[document.documentElement.dataset.interfaceTheme] ?? [];
     const degradation = getDegradationLevel();
+    if (Math.random() < 0.035) {
+      return { text: randomItem(dailyPersonality.messages) };
+    }
+    if (Math.random() < 0.012) {
+      const anomalyMessages = {
+        "memory-creep": "MEMORY USAGE CREEPING .................. BEING VERY QUIET",
+        "post-language": "POST CODE TRANSLATED .................. SAYS HELLO",
+        "hostname-drift": `HOSTNAME DRIFT DETECTED ............... ${hardware.hostname}-${randomHex(1)}`,
+        "network-ghost": "OFFLINE PACKET RECEIVED ............... FROM SOMEWHERE",
+        "temperature-opinion": `THERMAL SENSOR REPORTS ................ ${randomItem(["COZY", "A BIT MUCH", "WEATHER"])} `,
+        "eta-reversal": "ETA DIRECTION CHECK ................... TEMPORARILY BACKWARD",
+        "boot-zero": "BOOT DEVICE ZERO ...................... CLAIMS TO BE DEVICE ONE",
+        "lazy-core": "CPU CORE 03 ........................... TAKING PERSONAL DAY",
+      };
+      return { text: anomalyMessages[sessionAnomaly], state: "warning" };
+    }
     if (degradation > 0 && Math.random() < degradation * 0.025) {
       return { text: randomItem(degradationMessages), state: "error" };
     }
@@ -1334,6 +1755,7 @@
     eventPanel.dataset.kind = kind;
     eventPanel.hidden = false;
     document.documentElement.classList.add("has-boot-event");
+    recordIncident({ code, title, detail, kind });
     window.setTimeout(() => {
       eventPanel.hidden = true;
       delete eventPanel.dataset.kind;
@@ -1371,6 +1793,7 @@
       return false;
     }
     overrideTelemetry(chain.telemetry, 13000);
+    unlockBootAchievement("incident-response");
     chain.messages.forEach(([message, state], index) => {
       window.setTimeout(() => {
         appendSystemLine(message, state || "normal");
@@ -1380,6 +1803,103 @@
       }, 2100 + (index * 2500));
     });
     return true;
+  }
+
+  function scheduleCrashRecovery(profile, stepIndex = 0) {
+    window.clearTimeout(crashRecoveryTimer);
+    if (!crashActive) {
+      return;
+    }
+    const value = profile.steps[Math.min(stepIndex, profile.steps.length - 1)];
+    crashProgress.textContent = `${value}%`;
+    crashMeterFill.style.width = `${Math.min(100, value)}%`;
+    crashCopy.textContent = profile.copies[stepIndex % profile.copies.length];
+    if (stepIndex >= profile.steps.length - 1) {
+      crashRecover.hidden = false;
+      crashRecover.focus();
+      crashRecoveryTimer = window.setTimeout(recoverFromCrash, 4200);
+      return;
+    }
+    crashRecoveryTimer = window.setTimeout(
+      () => scheduleCrashRecovery(profile, stepIndex + 1),
+      randomDelay(650, 1500),
+    );
+  }
+
+  function triggerCrash(kind, { manual = false } = {}) {
+    const profile = crashProfiles[kind];
+    if (!profile || crashActive || document.hidden) {
+      return false;
+    }
+    crashActive = true;
+    lastCrashAt = Date.now();
+    crashPreviousFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    window.clearTimeout(timer);
+    window.clearTimeout(crashTimer);
+    const code = randomItem(profile.codes);
+    crashScreen.dataset.kind = kind;
+    crashLabel.textContent = profile.label;
+    crashFace.textContent = profile.face;
+    crashTitle.textContent = profile.title;
+    crashCopy.textContent = profile.copies[0];
+    crashProgress.textContent = "0%";
+    crashMeterFill.style.width = "0%";
+    crashCode.textContent = code;
+    crashFault.textContent = `FAULT: ${profile.fault}`;
+    crashBuild.textContent = profile.build ?? `BITS Endless Boot recovery channel // ${hardware.hostname}`;
+    crashRecover.hidden = true;
+    crashScreen.hidden = false;
+    document.documentElement.classList.add("has-boot-crash");
+    recordIncident({
+      code,
+      title: `${kind.toUpperCase()} BOOT CRASH`,
+      detail: manual ? "Crash invoked through local diagnostics." : "Rare automatic boot failure recovered locally.",
+      kind: `crash-${kind}`,
+    });
+    scheduleCrashRecovery(profile);
+    return true;
+  }
+
+  function recoverFromCrash() {
+    if (!crashActive) {
+      return;
+    }
+    const kind = crashScreen.dataset.kind;
+    window.clearTimeout(crashRecoveryTimer);
+    crashActive = false;
+    crashScreen.hidden = true;
+    crashRecover.hidden = true;
+    delete crashScreen.dataset.kind;
+    document.documentElement.classList.remove("has-boot-crash");
+    survivedBootCrashes.add(kind);
+    writeStorage(crashHistoryKey, [...survivedBootCrashes]);
+    appendSystemLine(`${kind.toUpperCase()} CHANNEL RECOVERY ............... BOOT RESUMED`, "rainbow");
+    if (survivedBootCrashes.size >= Object.keys(crashProfiles).length) {
+      unlockBootAchievement("full-spectrum");
+    } else {
+      unlockBootAchievement("do-not-turn-off");
+    }
+    if (!paused && !document.hidden) {
+      scheduleNextMessage();
+    }
+    crashPreviousFocus?.focus();
+    crashPreviousFocus = null;
+  }
+
+  function maybeTriggerCrash() {
+    if (
+      crashActive
+      || incidentActive
+      || document.hidden
+      || Date.now() - startedAt < 90000
+      || Date.now() - lastCrashAt < 420000
+      || Math.random() >= 0.00025
+    ) {
+      return;
+    }
+    triggerCrash(randomItem(Object.keys(crashProfiles)));
   }
 
   function releaseBits(amount = 18) {
@@ -1426,6 +1946,7 @@
   function openHardwarePanel() {
     hardwarePanel.hidden = false;
     postButton.setAttribute("aria-expanded", "true");
+    unlockBootAchievement("technician");
     hardwareClose.focus();
   }
 
@@ -1552,18 +2073,126 @@
     });
   }
 
-  function runCommand(rawCommand) {
+  function logText() {
+    return [...log.querySelectorAll(".endless-boot-log-entry > span")]
+      .map((entry) => entry.textContent)
+      .join("\n");
+  }
+
+  function diagnosticText() {
+    return [
+      "BITS ENDLESS BOOT DIAGNOSTICS",
+      `Generated: ${new Date().toISOString()}`,
+      `Host: ${hardware.hostname} (${hardware.serial})`,
+      `Personality: ${dailyPersonality.name}`,
+      `Session anomaly: ${sessionAnomaly}`,
+      `Online: ${networkOnline ? "yes" : "no"}`,
+      `Uptime: ${formatDuration(Math.floor((Date.now() - startedAt) / 1000))}`,
+      `Cycle: ${cycle} // Phase: ${currentPhaseIndex + 1}/${bootPhases.length}`,
+      `CPU: ${Math.round(telemetry.cpu)}% // Memory: ${Math.round(telemetry.memory)}%`,
+      `Temperature: ${Math.round(telemetry.temperature)}C // Fan: ${Math.round(telemetry.fan)} RPM`,
+      `Disk: ${Math.round(telemetry.disk)}% // Network: ${Math.round(telemetry.network)}K`,
+      `Incidents: ${incidentHistory.length} // Crash channels survived: ${survivedBootCrashes.size}/5`,
+      "",
+      logText(),
+    ].join("\n");
+  }
+
+  async function copyText(text, label) {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API is unavailable in this browser.");
+      }
+      await navigator.clipboard.writeText(text);
+      return `${label} COPIED TO CLIPBOARD.`;
+    } catch (error) {
+      console.error(`Unable to copy ${label.toLowerCase()}.`, error);
+      return `${label} COPY FAILED: ${error.message}`;
+    }
+  }
+
+  function downloadText(text, filename) {
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      return `DOWNLOAD STARTED: ${filename}`;
+    } catch (error) {
+      console.error("Unable to download boot diagnostics.", error);
+      return `DOWNLOAD FAILED: ${error.message}`;
+    }
+  }
+
+  async function runCommand(rawCommand) {
     const [command = "", ...argumentsList] = rawCommand.trim().toLowerCase().split(/\s+/);
     const argument = argumentsList.join(" ");
     const responses = {
-      help: "COMMANDS: HELP, STATUS, STATS, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
+      help: "COMMANDS: STATUS, STATS, SENSORS, LSHW, LSPCI, DMESG, UPTIME, WHOAMI, PS, NETSTAT, SMART, FORTUNE, HISTORY, MAN <COMMAND>, COPY <LOG|HARDWARE|DIAGNOSTICS>, DOWNLOAD LOG, INCIDENTS, ACHIEVEMENTS, CRASH <COLOR>, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
       status: `CYCLE ${cycle} // PHASE ${currentPhaseIndex + 1}/${bootPhases.length} // ${count} MESSAGES // ${processedBits} BITS // ${ignoredErrors} ERRORS IGNORED // ${paused ? "PAUSED" : "RUNNING"}`,
       stats: `TOTAL BOOTS ${stats.totalBoots} // MESSAGES SEEN ${stats.messagesSeen} // LONGEST UPTIME ${formatDuration(stats.longestUptime)} // INCIDENTS IGNORED ${stats.incidentsIgnored}`,
       diagnose: `DIAGNOSTIC COMPLETE: CPU ${Math.round(telemetry.cpu)}% // TEMP ${Math.round(telemetry.temperature)}C // FAN ${Math.round(telemetry.fan)} RPM // 0 ERRORS, 3 CONCERNS.`,
+      sensors: `CPU ${Math.round(telemetry.cpu)}% // MEMORY ${Math.round(telemetry.memory)}% // TEMP ${Math.round(telemetry.temperature)}C // FAN ${Math.round(telemetry.fan)} RPM // DISK ${Math.round(telemetry.disk)}% // NET ${networkOnline ? `${Math.round(telemetry.network)}K` : "OFFLINE"}`,
+      lspci: `00:00.0 Host bridge: ${hardware.cpu}\n01:00.0 Display controller: ${hardware.gpu}\n02:00.0 Network controller: QUESTIONABLE ETHERNET\n03:00.0 Unclassified device: LOOSE BIT CAGE`,
+      uptime: `${formatDuration(Math.floor((Date.now() - startedAt) / 1000))} UP // ${cycle} BOOT CYCLES // LOAD ${Math.round(telemetry.cpu / 10) / 10}, ${Math.round(telemetry.disk / 10) / 10}, 17.00`,
+      whoami: `visitor@${hardware.hostname.toLowerCase()} // GROUPS: bits, boot, sudo-ish`,
+      ps: "PID  COMMAND\n001  endless-boot\n017  eta-daemon --unreliable\n042  bit-counter --off-by-one\n404  final-stage [missing]",
+      netstat: networkOnline
+        ? `tcp  0  0  ${hardware.hostname}:17  internet:443  ESTABLISHED-ISH`
+        : "NO ACTIVE CONNECTIONS // BROWSER REPORTS OFFLINE",
+      smart: `SMART OVERALL-HEALTH: OPTIMISTIC\nDEVICE: ${hardware.storage}\nPOWER-ON BOOTS: ${stats.totalBoots}\nQUESTIONABLE SECTORS: 17`,
+      fortune: dailyPersonality.fortune,
+      dmesg: [...log.querySelectorAll(".endless-boot-log-entry > span")].slice(-12).map((entry) => entry.textContent).join("\n"),
     };
 
     if (responses[command]) {
       return responses[command];
+    }
+    if (command === "lshw") {
+      return `HOST ${hardware.hostname}\nCPU ${hardware.cpu}\nMEMORY ${hardware.memory} MB\nSTORAGE ${hardware.storage}\nDISPLAY ${hardware.gpu}\nBIOS ${hardware.bios}\nSERIAL ${hardware.serial}`;
+    }
+    if (command === "history") {
+      return commandHistory.length ? commandHistory.join("\n") : "NO COMMAND HISTORY YET.";
+    }
+    if (command === "man") {
+      return argumentsList[0]
+        ? `${argumentsList[0].toUpperCase()}(17) // See HELP. Accuracy not guaranteed.`
+        : "WHAT MANUAL PAGE DO YOU WANT?";
+    }
+    if (command === "incidents") {
+      openInspector("incidents");
+      return `${incidentHistory.length} INCIDENT RECORDS OPENED.`;
+    }
+    if (command === "achievements") {
+      openInspector("achievements");
+      return `${unlockedBootAchievements.length}/${bootAchievements.length} ACHIEVEMENTS OPENED.`;
+    }
+    if (command === "crash") {
+      const kind = argumentsList[0];
+      if (!Object.hasOwn(crashProfiles, kind)) {
+        return "CRASH COLORS: BLUE, BLACK, GREEN, RED, PURPLE.";
+      }
+      return triggerCrash(kind, { manual: true })
+        ? `${kind.toUpperCase()} CRASH CHANNEL REQUESTED.`
+        : "CRASH REQUEST REFUSED: ANOTHER OVERLAY IS ACTIVE.";
+    }
+    if (command === "copy") {
+      const targets = {
+        log: logText(),
+        hardware: `HOST ${hardware.hostname}\nCPU ${hardware.cpu}\nMEMORY ${hardware.memory} MB\nSTORAGE ${hardware.storage}\nDISPLAY ${hardware.gpu}\nBIOS ${hardware.bios}\nSERIAL ${hardware.serial}\nMAC ${hardware.mac}`,
+        diagnostics: diagnosticText(),
+      };
+      const target = argumentsList[0];
+      return Object.hasOwn(targets, target)
+        ? copyText(targets[target], target.toUpperCase())
+        : "COPY TARGETS: LOG, HARDWARE, DIAGNOSTICS.";
+    }
+    if (command === "download") {
+      return argumentsList[0] === "log"
+        ? downloadText(diagnosticText(), `bits-boot-${Date.now()}.txt`)
+        : "DOWNLOAD TARGET: LOG.";
     }
     if (command === "clear") {
       log.replaceChildren();
@@ -1635,6 +2264,63 @@
     return `COMMAND NOT FOUND: ${command.toUpperCase()}. TRY HELP.`;
   }
 
+  function updatePresenceState() {
+    const idleFor = Date.now() - lastUserActivityAt;
+    const nextStage = idleFor >= 300000 ? 2 : idleFor >= 75000 ? 1 : 0;
+    if (nextStage === userIdleStage) {
+      return;
+    }
+    userIdleStage = nextStage;
+    document.documentElement.classList.toggle("is-boot-user-idle", nextStage > 0);
+    document.documentElement.classList.toggle("is-boot-user-away", nextStage > 1);
+    if (nextStage === 1) {
+      appendSystemLine("USER PRESENCE TIMED OUT ............... CONTINUING WITHOUT SUPERVISION");
+    } else if (nextStage === 2) {
+      appendSystemLine("USER STILL ABSENT ..................... MACHINE ASSUMING NIGHT SHIFT");
+    }
+  }
+
+  function noteUserActivity() {
+    const previousStage = userIdleStage;
+    lastUserActivityAt = Date.now();
+    if (previousStage > 0) {
+      userIdleStage = 0;
+      document.documentElement.classList.remove("is-boot-user-idle", "is-boot-user-away");
+      appendSystemLine("USER SIGNAL RESTORED .................. PRETENDING NOTHING HAPPENED", "rainbow");
+    }
+  }
+
+  function shiftBurnInProtection() {
+    const offsetX = randomDelay(-2, 2);
+    const offsetY = randomDelay(-2, 2);
+    document.documentElement.style.setProperty("--boot-shift-x", `${offsetX}px`);
+    document.documentElement.style.setProperty("--boot-shift-y", `${offsetY}px`);
+  }
+
+  function setNetworkState(isOnline) {
+    if (networkOnline === isOnline && document.documentElement.hasAttribute("data-boot-network")) {
+      return;
+    }
+    networkOnline = isOnline;
+    document.documentElement.dataset.bootNetwork = isOnline ? "online" : "offline";
+    appendSystemLine(
+      isOnline
+        ? "NETWORK LINK RESTORED .................. PACKETS ACTING CASUAL"
+        : "NETWORK LINK LOST ...................... BOOTING FROM MEMORY",
+      isOnline ? "rainbow" : "error",
+    );
+    recordIncident({
+      code: isOnline ? "NETWORK_LINK_RESTORED" : "BROWSER_REPORTED_OFFLINE",
+      title: isOnline ? "NETWORK RETURNED" : "NETWORK UNAVAILABLE",
+      detail: isOnline
+        ? "The browser online signal returned."
+        : "The browser online signal was lost; network telemetry was suspended.",
+      kind: "network",
+    });
+    updateTelemetryTargets();
+    renderTelemetry();
+  }
+
   function updateElapsed() {
     const elapsed = Math.floor((Date.now() - startedAt) / 1000);
     const degradation = getDegradationLevel(elapsed);
@@ -1643,7 +2329,21 @@
     document.documentElement.dataset.bootDegradation = String(degradation);
     stats.longestUptime = Math.max(stats.longestUptime, elapsed);
     checkUptimeMilestones(elapsed);
+    updatePresenceState();
     maybeTriggerEvent();
+    maybeTriggerCrash();
+    if (elapsed > 300) {
+      unlockBootAchievement("still-waiting");
+    }
+    if (cycle >= 17) {
+      unlockBootAchievement("committed-bit");
+    }
+    if (speed === "absurd" && cycle >= 3) {
+      unlockBootAchievement("speedrunner");
+    }
+    if (new Date().getHours() < 5) {
+      unlockBootAchievement("night-shift");
+    }
   }
 
   function appendMessage() {
@@ -1718,6 +2418,14 @@
   });
   powerRestore.addEventListener("click", restorePower);
   postButton.addEventListener("click", openHardwarePanel);
+  incidentsOpen.addEventListener("click", () => openInspector("incidents"));
+  inspectorClose.addEventListener("click", () => closeInspector());
+  inspectorPanel.addEventListener("click", (event) => {
+    if (event.target === inspectorPanel) {
+      closeInspector();
+    }
+  });
+  crashRecover.addEventListener("click", recoverFromCrash);
   hardwareClose.addEventListener("click", () => closeHardwarePanel());
   hardwarePanel.addEventListener("click", (event) => {
     if (event.target === hardwarePanel) {
@@ -1732,11 +2440,29 @@
     }
   });
   commandClose.addEventListener("click", closeCommandLine);
-  commandForm.addEventListener("submit", (event) => {
+  commandForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const command = commandInput.value;
-    commandOutput.textContent = `boot> ${command}\n${runCommand(command)}`;
+    const command = commandInput.value.trim();
+    if (command) {
+      commandHistory.push(command);
+      commandHistory = commandHistory.slice(-50);
+      commandHistoryIndex = commandHistory.length;
+      if (new Set(commandHistory.map((entry) => entry.split(/\s+/)[0].toLowerCase())).size >= 10) {
+        unlockBootAchievement("command-center");
+      }
+    }
+    commandOutput.textContent = `boot> ${command}\n${await runCommand(command)}`;
     commandInput.value = "";
+  });
+  commandInput.addEventListener("keydown", (event) => {
+    if (!["ArrowUp", "ArrowDown"].includes(event.key) || !commandHistory.length) {
+      return;
+    }
+    event.preventDefault();
+    commandHistoryIndex = event.key === "ArrowUp"
+      ? Math.max(0, commandHistoryIndex - 1)
+      : Math.min(commandHistory.length, commandHistoryIndex + 1);
+    commandInput.value = commandHistory[commandHistoryIndex] ?? "";
   });
   document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && (event.key === "`" || event.key === "~")) {
@@ -1749,7 +2475,11 @@
       return;
     }
     if (event.key === "Escape") {
-      if (!hardwarePanel.hidden) {
+      if (crashActive) {
+        recoverFromCrash();
+      } else if (!inspectorPanel.hidden) {
+        closeInspector();
+      } else if (!hardwarePanel.hidden) {
         closeHardwarePanel();
       } else if (!commandPanel.hidden) {
         closeCommandLine();
@@ -1788,6 +2518,11 @@
       showShortcutHelp();
     }
   });
+  ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+    document.addEventListener(eventName, noteUserActivity, { passive: true });
+  });
+  window.addEventListener("online", () => setNetworkState(true));
+  window.addEventListener("offline", () => setNetworkState(false));
   window.addEventListener("pagehide", saveStats);
   window.addEventListener("resize", reconcileViewport);
   window.addEventListener("orientationchange", reconcileViewport);
@@ -1801,7 +2536,11 @@
   }
   countOutput.textContent = String(count).padStart(6, "0");
   initializePersistentState();
+  initializeBootRecords();
   initializeHardwareIdentity();
+  document.documentElement.dataset.bootPersonality = dailyPersonality.id;
+  document.documentElement.dataset.bootAnomaly = sessionAnomaly;
+  document.documentElement.dataset.bootNetwork = networkOnline ? "online" : "offline";
   reconcileViewport();
   initializeThemePicker();
   updateBootPhase(true);
@@ -1810,10 +2549,13 @@
   updateEta();
   renderTransmission();
   updateElapsed();
+  appendSystemLine(`DAILY BOOT PERSONALITY ................. ${dailyPersonality.name}`);
+  appendSystemLine(`SESSION ANOMALY SEEDED ................. ${sessionAnomaly.toUpperCase()}`);
   window.setInterval(updateElapsed, 1000);
   window.setInterval(renderTransmission, 7000);
   window.setInterval(tickTelemetry, 700);
   window.setInterval(tickEtaCountdown, 1000);
   window.setInterval(updateEta, 2800);
+  window.setInterval(shiftBurnInProtection, 30000);
   scheduleNextMessage();
 })();

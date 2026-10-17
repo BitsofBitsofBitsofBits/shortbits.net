@@ -8,10 +8,10 @@
     <title>BitsofBitsofBits // ENDLESS BOOT</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-104">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-105">
     <script src="/messages.js?v=messages-13" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
-    <script src="/endless-boot.js?v=endless-boot-14" defer></script>
+    <script src="/endless-boot.js?v=endless-boot-15" defer></script>
   </head>
   <body class="endless-boot-page">
     <div class="noise" aria-hidden="true"></div>
@@ -37,7 +37,9 @@
         <span>MESSAGES <strong id="endless-boot-count">000000</strong></span>
         <span>ELAPSED <strong id="endless-boot-elapsed">00:00:00</strong></span>
         <span>BITS PROCESSED <strong id="endless-boot-bits">00000000</strong></span>
-        <span>ERRORS IGNORED <strong id="endless-boot-errors">0000</strong></span>
+        <button id="endless-boot-incidents-open" type="button" aria-label="Open ignored incident history">
+          ERRORS IGNORED <strong id="endless-boot-errors">0000</strong>
+        </button>
       </div>
       <section class="endless-boot-machine" aria-label="Live machine telemetry">
         <button
@@ -52,11 +54,11 @@
           <strong id="endless-boot-post-code">A2</strong>
         </button>
         <span class="endless-boot-host"><small>HOST</small> <strong id="endless-boot-hostname">BITS-BOOT</strong></span>
-        <span data-meter="cpu"><i></i> CPU <strong id="endless-boot-cpu">00%</strong></span>
-        <span data-meter="memory"><i></i> MEM <strong id="endless-boot-memory">0000M</strong></span>
-        <span data-meter="temperature"><i></i> TEMP <strong id="endless-boot-temperature">00C</strong></span>
-        <span data-meter="disk"><i></i> DISK <strong id="endless-boot-disk">00%</strong></span>
-        <span data-meter="network"><i></i> NET <strong id="endless-boot-network">000K</strong></span>
+        <span data-meter="cpu"><i></i> CPU <strong id="endless-boot-cpu">00%</strong><small id="endless-boot-cpu-spark" class="endless-boot-spark" aria-hidden="true"></small></span>
+        <span data-meter="memory"><i></i> MEM <strong id="endless-boot-memory">0000M</strong><small id="endless-boot-memory-spark" class="endless-boot-spark" aria-hidden="true"></small></span>
+        <span data-meter="temperature"><i></i> TEMP <strong id="endless-boot-temperature">00C</strong><small id="endless-boot-temperature-spark" class="endless-boot-spark" aria-hidden="true"></small></span>
+        <span data-meter="disk"><i></i> DISK <strong id="endless-boot-disk">00%</strong><small id="endless-boot-disk-spark" class="endless-boot-spark" aria-hidden="true"></small></span>
+        <span data-meter="network"><i></i> NET <strong id="endless-boot-network">000K</strong><small id="endless-boot-network-spark" class="endless-boot-spark" aria-hidden="true"></small></span>
         <span class="endless-boot-eta">ETA <strong id="endless-boot-eta">CALCULATING</strong></span>
       </section>
       <ol id="endless-boot-log" class="endless-boot-log" aria-live="off"></ol>
@@ -135,10 +137,50 @@
         <dl id="endless-boot-hardware-list"></dl>
         <p>Identity is generated once and retained locally for future boot sessions.</p>
       </section>
+      <section id="endless-boot-inspector" class="endless-boot-inspector" aria-labelledby="endless-boot-inspector-title" hidden>
+        <header>
+          <div>
+            <p id="endless-boot-inspector-kicker">SYSTEM_RECORDS</p>
+            <h2 id="endless-boot-inspector-title">IGNORED INCIDENTS</h2>
+          </div>
+          <button id="endless-boot-inspector-close" type="button" aria-label="Close system records">X</button>
+        </header>
+        <div id="endless-boot-inspector-content" class="endless-boot-inspector-content"></div>
+      </section>
+      <div id="endless-boot-achievement" class="endless-boot-achievement" role="status" aria-live="polite" hidden>
+        <span>BOOT ACHIEVEMENT UNLOCKED</span>
+        <strong id="endless-boot-achievement-message">STILL WAITING</strong>
+      </div>
       <div id="endless-boot-bits-particles" class="endless-boot-bits-particles" aria-hidden="true"></div>
       <button id="endless-boot-power-restore" class="endless-boot-power-restore" type="button" hidden>
         DISPLAY OFFLINE — CLICK TO RESTORE
       </button>
     </main>
+    <section
+      id="endless-boot-crash"
+      class="endless-boot-crash"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="endless-boot-crash-title"
+      tabindex="-1"
+      hidden
+    >
+      <div class="endless-boot-crash-content">
+        <p id="endless-boot-crash-label" class="endless-boot-crash-label">BOOT FAILURE</p>
+        <div id="endless-boot-crash-face" class="endless-boot-crash-face" aria-hidden="true">:(</div>
+        <h2 id="endless-boot-crash-title">Your endless boot encountered a finite problem.</h2>
+        <p id="endless-boot-crash-copy">Collecting questionable information before resuming.</p>
+        <p class="endless-boot-crash-progress" aria-live="assertive">
+          Recovery progress: <strong id="endless-boot-crash-progress">0%</strong>
+        </p>
+        <div class="endless-boot-crash-meter" aria-hidden="true"><span id="endless-boot-crash-meter-fill"></span></div>
+        <p class="endless-boot-crash-code">
+          Stop code: <strong id="endless-boot-crash-code">ENDLESS_BOOT_COMPLETION_LOOP</strong><br>
+          What failed: <span id="endless-boot-crash-fault">boot_completion_verifier.sys</span>
+        </p>
+        <p id="endless-boot-crash-build" class="endless-boot-crash-build" hidden></p>
+        <button id="endless-boot-crash-recover" type="button">RESUME ENDLESS BOOT</button>
+      </div>
+    </section>
   </body>
 </html>
