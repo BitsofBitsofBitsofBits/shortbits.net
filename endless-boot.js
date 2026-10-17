@@ -27,6 +27,9 @@
   const eventTitle = document.querySelector("#endless-boot-event-title");
   const eventDetail = document.querySelector("#endless-boot-event-detail");
   const particles = document.querySelector("#endless-boot-bits-particles");
+  const fallingBits = document.querySelector("#endless-boot-falling-bits");
+  const fallingBitsMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let nextFallingBitAt = Date.now() + 4000;
   const powerRestore = document.querySelector("#endless-boot-power-restore");
   const postButton = document.querySelector("#endless-boot-post");
   const postCodeOutput = document.querySelector("#endless-boot-post-code");
@@ -1901,6 +1904,35 @@
     triggerCrash(randomItem(Object.keys(crashProfiles)));
   }
 
+  function tickFallingBits() {
+    if (
+      document.hidden
+      || paused
+      || crashActive
+      || !powerRestore.hidden
+      || fallingBitsMotion.matches
+      || document.documentElement.dataset.motion === "reduced"
+      || document.documentElement.dataset.effects === "off"
+    ) {
+      fallingBits.replaceChildren();
+      nextFallingBitAt = Date.now() + randomDelay(4000, 9000);
+      return;
+    }
+    if (Date.now() < nextFallingBitAt || fallingBits.childElementCount >= 3) {
+      return;
+    }
+
+    const bit = document.createElement("span");
+    bit.textContent = Math.random() < 0.5 ? "0" : "1";
+    bit.style.setProperty("--falling-bit-x", `${randomDelay(2, 96)}%`);
+    bit.style.setProperty("--falling-bit-duration", `${randomDelay(7000, 11000)}ms`);
+    bit.style.setProperty("--falling-bit-distance", `${fallingBits.clientHeight + 48}px`);
+    bit.style.setProperty("--falling-bit-spin", `${randomDelay(-35, 35)}deg`);
+    bit.addEventListener("animationend", () => bit.remove(), { once: true });
+    fallingBits.append(bit);
+    nextFallingBitAt = Date.now() + randomDelay(4000, 9000);
+  }
+
   function releaseBits(amount = 18) {
     particles.replaceChildren();
     const countToRelease = Math.min(64, Math.max(1, Number(amount) || 18));
@@ -2398,6 +2430,7 @@
   }
 
   document.addEventListener("visibilitychange", () => {
+    tickFallingBits();
     if (document.hidden) {
       window.clearTimeout(timer);
       saveStats();
@@ -2556,5 +2589,6 @@
   window.setInterval(tickEtaCountdown, 1000);
   window.setInterval(updateEta, 2800);
   window.setInterval(shiftBurnInProtection, 30000);
+  window.setInterval(tickFallingBits, 1000);
   scheduleNextMessage();
 })();

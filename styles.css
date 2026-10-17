@@ -8575,7 +8575,58 @@ html[data-boot-network="offline"] .endless-boot-machine [data-meter="network"] i
   text-overflow: ellipsis;
 }
 
+.endless-boot-terminal {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.endless-boot-falling-bits {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.endless-boot-falling-bits span {
+  position: absolute;
+  top: -1.5em;
+  left: var(--falling-bit-x);
+  color: var(--accent);
+  font: 700 clamp(0.7rem, 1.6vw, 1rem)/1 var(--font-family);
+  text-shadow: 0 0 6px var(--accent);
+  animation: endless-boot-falling-bit var(--falling-bit-duration) linear both;
+}
+
+@keyframes endless-boot-falling-bit {
+  0% {
+    opacity: 0;
+    transform: translateY(0) rotate(0deg);
+  }
+  12%, 80% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--falling-bit-distance)) rotate(var(--falling-bit-spin));
+  }
+}
+
+html[data-motion="reduced"] .endless-boot-falling-bits,
+html[data-effects="off"] .endless-boot-falling-bits,
+html.is-boot-paused .endless-boot-falling-bits,
+html.is-boot-powered-off .endless-boot-falling-bits,
+html.has-boot-crash .endless-boot-falling-bits {
+  display: none;
+}
+
 .endless-boot-log {
+  position: relative;
+  z-index: 1;
   min-height: 0;
   margin: 0;
   padding: 0 8px 0 0;
@@ -9568,14 +9619,14 @@ html.is-boot-user-away .endless-boot-console {
   animation: endless-boot-loose-bit 2.3s var(--bit-delay) ease-out both;
 }
 
-.endless-boot-power-restore {
+#endless-boot-power-restore {
   position: fixed;
   z-index: 20;
   inset: 0;
   width: 100%;
   border: 0;
-  color: #5f5;
-  background: #000;
+  color: var(--accent);
+  background: var(--bg);
   cursor: pointer;
   font: clamp(0.62rem, 2vw, 1rem)/1.5 var(--font-family);
 }
@@ -9980,7 +10031,8 @@ html.is-boot-presentation .endless-boot-settings:focus-within {
     transition: none;
   }
 
-  .endless-boot-bits-particles i {
+  .endless-boot-bits-particles i,
+  .endless-boot-falling-bits {
     display: none;
   }
 }
@@ -12125,12 +12177,16 @@ html[data-interface-theme="windows-95"] .endless-boot-machine [data-meter] i {
   border-radius: 0;
 }
 
+html[data-interface-theme="windows-95"] .endless-boot-terminal {
+  background: #fff;
+}
+
 html[data-interface-theme="windows-95"] .endless-boot-log {
   margin: 4px;
   padding: 7px 8px;
   border: 2px solid #808080;
   color: #000;
-  background: #fff;
+  background: transparent;
   box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
   mask-image: none;
 }
