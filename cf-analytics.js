@@ -6,6 +6,10 @@
   if (!token || privacySignal || /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
     return;
   }
+  // Cloudflare's automatic setup injects its own beacon; avoid counting visits twice.
+  if (document.querySelector('script[src*="static.cloudflareinsights.com/beacon"]')) {
+    return;
+  }
   const beacon = document.createElement("script");
   beacon.defer = true;
   beacon.src = "https://static.cloudflareinsights.com/beacon.min.js";
