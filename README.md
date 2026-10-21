@@ -171,19 +171,22 @@ is a personal project and largely a learning exercise for me.
   reduced-motion, forced-colors, and performance preferences
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
-- Thirty-two persistent full-interface themes, each with its own fixed accent,
+- Forty-five persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
   Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Windows XP
   (Luna), Solarized, Nord, Dracula, Candy Pop, RGB, Aero Glass, Catppuccin,
   Gruvbox, Tokyo Night, Monokai, Game Bit, High Contrast, Deep Ocean, Coffee
-  Shop, Matrix, Sunset, and the original voxel-inspired MineBits.
+  Shop, Matrix, Sunset, the original voxel-inspired MineBits, Windows 3.1,
+  Spotify, UEFI, Mac OS X Aqua, Aquatic (underwater), Atari, Commodore 64,
+  Mac OS 9 Platinum, Winamp, iPod Classic, Ubuntu, PlayStation, and Xbox.
 - Experimental layout themes that restyle the whole interface rather than just
-  its colors: Windows 10, Windows 11, Termius, YouTube (BitsTube), Bits 365,
-  Google, and Browser. They are grouped under EXPERIMENTAL LAYOUTS in every
+  its colors: Windows 10, Windows 11, Windows 8 (Metro), Termius, YouTube
+  (BitsTube), YouTube Music, Bits 365, Google, Browser, and Legacy BIOS. They
+  are grouped under EXPERIMENTAL LAYOUTS in every
   theme picker, show a dismissible experimental notice with a one-click way
-  back to the last standard theme, and are skipped by RANDOM THEME. Windows 10
-  and 11 also restyle the BITS OS desktop; the others temporarily switch the
+  back to the last standard theme, and are skipped by RANDOM THEME. Windows 8,
+  10, and 11 also restyle the BITS OS desktop; the others temporarily switch the
   desktop to the last standard theme (with a notification) and come back when
   the desktop is closed. Each layout lives in `layouts/<id>.css` and
   `layouts/<id>.js` and is only downloaded while that theme is active;
@@ -192,15 +195,26 @@ is a personal project and largely a learning exercise for me.
   app menu, Settings, `/boot`, and `/professional`. Most themes have a dark and
   a light palette. Theme default keeps each theme's native look; Windows 95
   defaults to classic light and offers a charcoal dark mode. Aurora, Midnight
-  OLED, MineBits, Terminal, Matrix, and Amber CRT are dark-only, so COLOR MODE shows
-  "DARK ONLY" while they are active
+  OLED, MineBits, Terminal, Matrix, Amber CRT, Spotify, and the console/firmware
+  themes are dark-only; Aqua and Mac OS 9 are light-only, so COLOR MODE shows
+  "DARK ONLY" or "LIGHT ONLY" while they are active
+- A classic text-mode crash screen on the Windows 3.1, 95, XP, and Aero Glass
+  themes: every death screen switches to a 9x "fatal exception" box or an NT
+  STOP-error wall of text in that screen's color, with a troubleshooting link
+  instead of a QR code
 - A VARIANT picker beside COLOR MODE for themes with alternate styles:
   Windows XP (Luna Blue, Olive Green, Silver, Royale/Media Center, Royale Noir,
   Zune, Embedded), MineBits biomes and mobs (Overworld, Cherry Grove, Jungle,
   Desert, Snowy Taiga, Ocean Monument, Deep Dark, Nether, The End, Creeper),
   Aurora colors (Borealis, Australis, Solar Storm, Glacier, Amethyst),
-  Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert), and
-  Midnight OLED accents (Classic, Cyan, Crimson, Violet, Amber, Monochrome).
+  Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert),
+  Midnight OLED accents (Classic, Cyan, Crimson, Violet, Amber, Monochrome),
+  DOS Blue (Classic, Norton Commander, Turbo Pascal, QBasic, Amber, Green,
+  Hercules), Game Bit (DMG, Pocket, Color, Advance, Advance SP), Windows 3.1
+  (3.1, 2.x, 1.0, Hotdog Stand, Arizona, Ocean, Plasma), Legacy BIOS (Award,
+  Phoenix, AMI), UEFI vendors, Atari (2600, 7800, ST GEM, Pong), Commodore
+  machines, Winamp skins, iPod finishes, Ubuntu/GNOME/KDE desktops,
+  PlayStation and Xbox dashboards, Windows 8 accents, and more.
   Each theme remembers its own variant; styles live in `layouts/<id>.css`
 - A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
   `theme dark`, `theme light`, `theme auto`, and `theme variant <name>`

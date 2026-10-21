@@ -1,0 +1,243 @@
+:root[data-interface-theme="commodore-64"] {
+  color-scheme: dark;
+  --accent: #a5a5ff;
+  --accent-rgb: 165, 165, 255;
+  --spotify-accent: #a5a5ff;
+  --bg: #7869c4;
+  --panel: #40318d;
+  --panel-2: #332577;
+  --panel-strong: #261b64;
+  --ink: #b5b5ff;
+  --muted: #a5a5e8;
+  --border: #a5a5ff;
+  --line: #8677d5;
+  --shell-bg: #40318d;
+  --admin-bg: #40318d;
+  --overlay-bg: #332577;
+  --body-background: #7869c4;
+  --body-background-size: auto;
+  --control-radius: 0;
+  --window-radius: 0;
+  --shell-radius: 0;
+  --font-family: "C64 Pro Mono", "Press Start 2P", "Courier New", monospace;
+  --material-blur: 0px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --icon-filter: brightness(0) invert(.82) sepia(.18) hue-rotate(202deg);
+  --scrollbar-size: 14px;
+  --scrollbar-track: #40318d;
+  --scrollbar-track-border: #241b63;
+  --scrollbar-thumb-color: #a5a5ff;
+  --scrollbar-thumb-background: repeating-linear-gradient(90deg,#c5c5ff 0 3px,#8072dd 3px 6px);
+  --scrollbar-thumb-hover: #fff;
+  --scrollbar-thumb-active: #a5a5ff;
+  --scrollbar-thumb-border: 2px solid #40318d;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+}
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] {
+  --accent: #d76b36;
+  --accent-rgb: 215, 107, 54;
+  --spotify-accent: #d76b36;
+  --bg: #28251e;
+  --panel: #d0bd91;
+  --panel-2: #b39c70;
+  --panel-strong: #e0d0a9;
+  --ink: #282218;
+  --muted: #514735;
+  --border: #66583d;
+  --line: #85734e;
+  --shell-bg: #d0bd91;
+  --admin-bg: #c9b587;
+  --overlay-bg: #d0bd91;
+  --body-background: repeating-linear-gradient(0deg, transparent 0 29px, rgba(0,0,0,.12) 29px 31px), linear-gradient(180deg,#4a4438 0 16%,#cbb98f 16% 100%);
+  --body-background-size: auto;
+  --icon-filter: none;
+  --scrollbar-track: #a99468;
+  --scrollbar-thumb-color: #685b41;
+  --scrollbar-thumb-background: linear-gradient(90deg,#ded1b1,#897754 50%,#c3b28c);
+  --scrollbar-thumb-border: 2px solid #514632;
+}
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="vic-20"] {
+  --accent: #00d9e8;
+  --accent-rgb: 0, 217, 232;
+  --spotify-accent: #00d9e8;
+  --bg: #f0f5f5;
+  --panel: #c9fbff;
+  --panel-2: #e3ffff;
+  --panel-strong: #fff;
+  --ink: #073b87;
+  --muted: #185a8b;
+  --border: #083d92;
+  --line: #378eae;
+  --shell-bg: #d8fbff;
+  --admin-bg: #eefeff;
+  --overlay-bg: #d8fbff;
+  --body-background: linear-gradient(135deg,#fff 0 18%,#aaf6ff 18% 28%,#f5ffff 28% 100%);
+  --body-background-size: auto;
+  --icon-filter: none;
+  --scrollbar-track: #c9fbff;
+  --scrollbar-thumb-color: #0572bd;
+  --scrollbar-thumb-background: linear-gradient(90deg,#00deed,#087cae 50%,#00d9e8);
+  --scrollbar-thumb-border: 2px solid #073b87;
+}
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="pet"] {
+  --accent: #79ff7b;
+  --accent-rgb: 121, 255, 123;
+  --spotify-accent: #79ff7b;
+  --bg: #020805;
+  --panel: #07150b;
+  --panel-2: #0b2110;
+  --panel-strong: #040d06;
+  --ink: #a4ff9d;
+  --muted: #6dc878;
+  --border: #369847;
+  --line: #266937;
+  --shell-bg: #050d06;
+  --admin-bg: #050d06;
+  --overlay-bg: #07150b;
+  --body-background: repeating-linear-gradient(0deg,rgba(121,255,123,.035) 0 1px,transparent 1px 4px),radial-gradient(ellipse at center,#102614,#020805 78%);
+  --body-background-size: auto;
+  --icon-filter: brightness(0) invert(.87) sepia(1) saturate(4) hue-rotate(65deg);
+  --scrollbar-track: #020805;
+  --scrollbar-thumb-color: #4ac65d;
+  --scrollbar-thumb-background: repeating-linear-gradient(90deg,#72ed79 0 4px,#318b42 4px 8px);
+  --scrollbar-thumb-border: 2px solid #07150b;
+}
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="c128"] {
+  --accent: #68e6d8;
+  --accent-rgb: 104, 230, 216;
+  --spotify-accent: #68e6d8;
+  --bg: #171a1c;
+  --panel: #24292b;
+  --panel-2: #2c3335;
+  --panel-strong: #111415;
+  --ink: #9ff3dc;
+  --muted: #93cbbd;
+  --border: #60716b;
+  --line: #42554f;
+  --shell-bg: #1c2022;
+  --admin-bg: #1c2022;
+  --overlay-bg: #24292b;
+  --body-background: repeating-linear-gradient(0deg,rgba(104,230,216,.035) 0 1px,transparent 1px 4px),linear-gradient(135deg,#272c2e,#111415 75%);
+  --body-background-size: auto;
+  --scrollbar-track: #111415;
+  --scrollbar-thumb-color: #63cabc;
+  --scrollbar-thumb-background: repeating-linear-gradient(90deg,#83e5d4 0 4px,#397e75 4px 8px);
+  --scrollbar-thumb-border: 2px solid #171a1c;
+}
+
+:root[data-interface-theme="commodore-64"] body {
+  color: var(--ink);
+  background: var(--body-background);
+  background-attachment: fixed;
+  font-family: "C64 Pro Mono", "Press Start 2P", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: .025em;
+  text-shadow: none;
+  -webkit-font-smoothing: none;
+}
+
+:root[data-interface-theme="commodore-64"] :is(h1,h2,h3,h4,.section-label,.system-kicker,.profile-kicker,.profile-subheading,.blog-post-card-meta) {
+  font-family: "C64 Pro Mono", "Press Start 2P", "Courier New", monospace;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  line-height: 1.55;
+}
+
+:root[data-interface-theme="commodore-64"] :is(button,input,select,textarea,.footer-select-control) {
+  border-radius: 0;
+  font-family: "C64 Pro Mono", "Courier New", monospace;
+}
+
+:root[data-interface-theme="commodore-64"] :is(.shell,.desktop-window,.system-window,.fake-desktop-app,.error-window,.blog-shell,.profile-card,.link-card,.spotify-widget,.now-playing) {
+  border: 2px solid var(--border);
+  border-radius: 0;
+  color: var(--ink);
+  background-color: var(--panel);
+  box-shadow: 4px 4px 0 rgba(0,0,0,.32);
+}
+
+:root[data-interface-theme="commodore-64"] :is(.system-bar,.app-menu-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) {
+  color: var(--ink);
+  background: var(--panel-strong);
+  border-bottom: 2px solid var(--border);
+}
+
+:root[data-interface-theme="commodore-64"] :is(.chooser-terminal,.boot-console,.endless-boot-terminal,.root-panel) {
+  border: 2px solid var(--border);
+  border-radius: 0;
+  background: var(--panel-strong);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.04), 4px 4px 0 rgba(0,0,0,.3);
+}
+
+:root[data-interface-theme="commodore-64"] :is(.chooser-bar,.chooser-options,.endless-boot-header,.endless-boot-footer) {
+  border-color: var(--border);
+  background: var(--panel-strong);
+}
+
+:root[data-interface-theme="commodore-64"] :is(button,.profile-button) {
+  color: var(--ink);
+  background: linear-gradient(180deg,var(--panel-2),var(--panel-strong));
+  border: 2px solid var(--border);
+  box-shadow: inset 1px 1px rgba(255,255,255,.12), 2px 2px 0 rgba(0,0,0,.35);
+}
+:root[data-interface-theme="commodore-64"] :is(button,.profile-button):hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+:root[data-interface-theme="commodore-64"] a { color: var(--accent); }
+:root[data-interface-theme="commodore-64"] :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:root[data-interface-theme="commodore-64"] ::selection { color: var(--bg); background: var(--accent); }
+
+:root[data-interface-theme="commodore-64"] .chooser-cursor,
+:root[data-interface-theme="commodore-64"] .endless-boot-command::after {
+  display: inline-block;
+  color: var(--accent);
+  animation: c64-cursor-blink 1s steps(1,end) infinite;
+}
+
+:root[data-interface-theme="commodore-64"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg,var(--accent) 0 10px,transparent 10px 13px);
+  box-shadow: none;
+}
+:root[data-interface-theme="commodore-64"] .blog-post-list article,
+:root[data-interface-theme="commodore-64"] .profile-section,
+:root[data-interface-theme="commodore-64"] .profile-hero,
+:root[data-interface-theme="commodore-64"] .profile-overview { border-color: var(--border); }
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64"] :is(.system-bar,.app-menu-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) { background: #332577; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64"] :is(.chooser-terminal,.boot-console,.endless-boot-terminal,.root-panel) { background: #40318d; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64"] .chooser-cursor { width: .65em; height: 1em; vertical-align: -.12em; background: var(--accent); color: transparent; }
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] :is(.system-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) { color: #282218; background: linear-gradient(180deg,#e1d1aa,#b49d70); }
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] :is(.shell,.desktop-window,.system-window,.fake-desktop-app,.error-window,.blog-shell,.profile-card,.link-card) { border-color: #66583d; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] .chooser-terminal::before,
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] .system-bar::after {
+  content: "";
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg,#e33b2f 0 17%,#f68b25 17% 34%,#f4d037 34% 51%,#6cbf43 51% 68%,#3595ce 68% 84%,#7851a1 84%);
+}
+:root[data-interface-theme="commodore-64"][data-theme-variant="c64-breadbin"] :is(button,.profile-button) { color: #282218; background: linear-gradient(#e5d6b2,#b3a078); border-color: #655739; }
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="vic-20"] :is(.system-bar,.app-menu-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) { color: #073b87; background: linear-gradient(90deg,#fff,#aaf6ff 42%,#fff); }
+:root[data-interface-theme="commodore-64"][data-theme-variant="vic-20"] :is(.shell,.desktop-window,.system-window,.fake-desktop-app,.error-window,.blog-shell,.profile-card,.link-card,.spotify-widget,.now-playing) { color: #073b87; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="vic-20"] :is(button,.profile-button) { color: #073b87; background: linear-gradient(#fff,#aaf6ff); }
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="pet"] :is(.shell,.desktop-window,.system-window,.fake-desktop-app,.error-window,.blog-shell,.profile-card,.link-card,.spotify-widget,.now-playing) { box-shadow: 0 0 16px rgba(121,255,123,.12); }
+:root[data-interface-theme="commodore-64"][data-theme-variant="pet"] :is(.system-bar,.app-menu-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) { background: #040d06; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="pet"] :is(.chooser-terminal,.boot-console,.endless-boot-terminal,.root-panel) { background: rgba(2,8,5,.96); }
+
+:root[data-interface-theme="commodore-64"][data-theme-variant="c128"] :is(.system-bar,.app-menu-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) { background: #111415; }
+:root[data-interface-theme="commodore-64"][data-theme-variant="c128"] :is(.shell,.desktop-window,.system-window,.fake-desktop-app,.error-window,.blog-shell,.profile-card,.link-card) { box-shadow: inset 0 0 0 1px rgba(104,230,216,.08), 3px 3px 0 rgba(0,0,0,.4); }
+
+@keyframes c64-cursor-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="commodore-64"] *, :root[data-interface-theme="commodore-64"] *::before, :root[data-interface-theme="commodore-64"] *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
+:root[data-interface-theme="commodore-64"][data-motion="reduced"] *,
+:root[data-interface-theme="commodore-64"][data-motion="reduced"] *::before,
+:root[data-interface-theme="commodore-64"][data-motion="reduced"] *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }

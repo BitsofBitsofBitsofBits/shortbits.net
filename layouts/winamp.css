@@ -1,0 +1,227 @@
+/* Winamp skins: shared chassis with variant-specific metal, display and trim. */
+:root[data-interface-theme="winamp"] {
+  color-scheme: dark;
+  --wa-metal: #343443;
+  --wa-face: #242432;
+  --wa-edge: #696978;
+  --wa-trim: #e2c56c;
+  --wa-title-ink: #1a1920;
+  --wa-lcd: #00e000;
+  --wa-radius: 2px;
+  --wa-title: repeating-linear-gradient(0deg, #a68a48 0 1px, #e2c56c 1px 3px);
+  --accent: #e2c56c;
+  --accent-rgb: 226, 197, 108;
+  --accent-hover: #fff1af;
+  --bg: #1c1c2c;
+  --panel: var(--wa-face);
+  --panel-2: var(--wa-metal);
+  --panel-strong: #171720;
+  --ink: #e7e7ec;
+  --muted: #b9bac8;
+  --border: var(--wa-edge);
+  --warning: #ffd66b;
+  --danger: #ff9292;
+  --success: #6bea89;
+  --accent-soft: rgba(var(--accent-rgb), .14);
+  --shell-bg: var(--wa-face);
+  --admin-bg: var(--wa-face);
+  --overlay-bg: var(--wa-face);
+  --shadow: 3px 4px 0 #07070c, inset 1px 1px #85858e, inset -1px -1px #08080f;
+  --font-family: "Lucida Console", "Cascadia Mono", Consolas, monospace;
+  --control-radius: var(--wa-radius);
+  --shell-radius: var(--wa-radius);
+  --window-radius: var(--wa-radius);
+  --material-blur: 0px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: brightness(0) invert(1);
+  --spotify-accent: var(--wa-lcd);
+  --body-background: repeating-linear-gradient(135deg, #ffffff03 0 1px, transparent 1px 5px), var(--bg);
+  --body-background-size: auto;
+  --scrollbar-track: #08090c;
+  --scrollbar-thumb-color: var(--wa-metal);
+  --scrollbar-thumb-background: linear-gradient(90deg, var(--wa-edge), var(--wa-metal));
+  --scrollbar-thumb-hover: var(--wa-trim);
+  --scrollbar-thumb-active: var(--wa-trim);
+  --scrollbar-thumb-border: 1px solid #09090d;
+  --scrollbar-thumb-radius: var(--wa-radius);
+  --scrollbar-track-radius: 0;
+  --scrollbar-size: 13px;
+}
+:root[data-interface-theme="winamp"][data-theme-variant="modern"] {
+  --bg: #171e29;
+  --wa-metal: #354655;
+  --wa-face: #202c38;
+  --wa-edge: #657e90;
+  --wa-trim: #78d9ef;
+  --wa-title-ink: #eafaff;
+  --wa-lcd: #77eaff;
+  --wa-radius: 14px;
+  --wa-title: linear-gradient(#536a7c, #293b4d 55%, #203242);
+  --accent: #78d9ef;
+  --accent-rgb: 120, 217, 239;
+  --accent-hover: #c7f7ff;
+}
+:root[data-interface-theme="winamp"][data-theme-variant="bento"] {
+  --bg: #1a1a1a;
+  --wa-metal: #3c3c3c;
+  --wa-face: #272727;
+  --wa-edge: #666;
+  --wa-trim: #ffa544;
+  --wa-title-ink: #fff2df;
+  --wa-lcd: #ffb653;
+  --wa-radius: 5px;
+  --wa-title: linear-gradient(#444, #242424);
+  --accent: #ffa544;
+  --accent-rgb: 255, 165, 68;
+  --accent-hover: #ffcf8a;
+}
+:root[data-interface-theme="winamp"][data-theme-variant="nucleo"] {
+  --bg: #0a0f14;
+  --wa-metal: #26303b;
+  --wa-face: #11171e;
+  --wa-edge: #6b7c8c;
+  --wa-trim: #7ecaff;
+  --wa-title-ink: #eef7ff;
+  --wa-lcd: #72caff;
+  --wa-radius: 8px;
+  --wa-title: linear-gradient(#64717e, #242d36 48%, #11171e 52%, #28343f);
+  --accent: #7ecaff;
+  --accent-rgb: 126, 202, 255;
+  --accent-hover: #d0ecff;
+  --shadow: 0 0 0 1px #657583, 0 0 22px #279eff26, 0 18px 40px #0008;
+}
+:root[data-interface-theme="winamp"][data-theme-variant="llama"] {
+  --bg: #2a1606;
+  --wa-metal: #6a4027;
+  --wa-face: #402718;
+  --wa-edge: #af7b49;
+  --wa-trim: #ffc36b;
+  --wa-title-ink: #2a1606;
+  --wa-lcd: #ffd58a;
+  --wa-radius: 10px;
+  --wa-title: repeating-linear-gradient(115deg, #e2a255 0 3px, #f8be72 3px 6px);
+  --accent: #ffc36b;
+  --accent-rgb: 255, 195, 107;
+  --accent-hover: #ffe0a9;
+  --muted: #dbc1a4;
+  --ink: #fff1df;
+  --body-background: repeating-linear-gradient(115deg, #df913908 0 2px, transparent 2px 8px), radial-gradient(ellipse at top, #61371e, var(--bg) 70%);
+}
+:root[data-interface-theme="winamp"] body {
+  background: var(--body-background);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-family);
+}
+:root[data-interface-theme="winamp"] :is(.shell, .desktop-window, .fake-desktop-app, .chooser-terminal, .error-window, .blog-shell, .profile-skills article, .profile-projects article, .profile-panel) {
+  border: 2px solid var(--wa-edge);
+  border-radius: var(--wa-radius);
+  background: var(--wa-face);
+  box-shadow: var(--shadow);
+}
+:root[data-interface-theme="winamp"] :is(.system-bar, .desktop-window-bar, .fake-desktop-app > header, .chooser-bar, .profile-panel-bar, .endless-boot-header) {
+  color: var(--wa-title-ink);
+  background: var(--wa-title);
+  border-bottom: 2px solid #08090f;
+  box-shadow: inset 0 1px #ffffff66;
+  font-size: .69rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-shadow: none;
+  border-radius: var(--wa-radius) var(--wa-radius) 0 0;
+}
+:root[data-interface-theme="winamp"] :is(.system-bar, .chooser-bar) { padding: 8px 12px; }
+:root[data-interface-theme="winamp"] :is(.system-bar p, .system-status, .desktop-window-bar > p, .chooser-bar span, .profile-panel-bar span, .endless-boot-header h1, .endless-boot-header p) {
+  color: var(--wa-title-ink);
+  text-shadow: none;
+}
+:root[data-interface-theme="winamp"] :is(button, .fake-start-menu summary, .profile-button, .chooser-key, .footer-select-control) {
+  color: var(--ink);
+  border: 1px solid #08090e;
+  border-radius: var(--wa-radius);
+  background: linear-gradient(var(--wa-edge), var(--wa-metal) 48%, var(--wa-face));
+  box-shadow: inset 1px 1px #ffffff42, inset -1px -1px #0009;
+  font-family: var(--font-family);
+}
+:root[data-interface-theme="winamp"] :is(button, .fake-start-menu summary):hover { color: var(--wa-trim); border-color: var(--wa-trim); }
+:root[data-interface-theme="winamp"] button:active { box-shadow: inset 1px 1px #000b; }
+:root[data-interface-theme="winamp"] :is(input, select, textarea) {
+  color: var(--wa-lcd);
+  background-color: #080a0b;
+  border-color: var(--wa-edge);
+  font-family: var(--font-family);
+}
+:root[data-interface-theme="winamp"] :focus-visible { outline: 2px solid var(--wa-trim); outline-offset: 3px; }
+:root[data-interface-theme="winamp"] ::selection { color: #090b0d; background: var(--wa-trim); }
+:root[data-interface-theme="winamp"] .window-button { border-radius: 1px; }
+:root[data-interface-theme="winamp"] .desktop-window-controls { gap: 3px; padding: 5px; }
+:root[data-interface-theme="winamp"] .desktop-window-controls button { width: 26px; min-height: 23px; color: var(--ink); }
+:root[data-interface-theme="winamp"] :is(.chooser-options a, .blog-post-list article, .profile-monogram) {
+  border: 1px solid var(--wa-edge);
+  border-radius: var(--wa-radius);
+  background: #090b10;
+  box-shadow: inset 1px 1px #000, 1px 1px #ffffff20;
+}
+:root[data-interface-theme="winamp"] :is(.chooser-options strong, .chooser h1, .blog-header h1, .profile-hero h1, .error-code) { color: var(--wa-lcd); }
+:root[data-interface-theme="winamp"] :is(.chooser-options a:hover, .blog-post-list article:has(a:hover)) { background: var(--accent-soft); border-color: var(--wa-trim); }
+:root[data-interface-theme="winamp"] .blog-shell { padding: clamp(22px, 4vw, 48px); }
+:root[data-interface-theme="winamp"] .blog-header { border-top: 8px solid var(--wa-trim); padding-top: 18px; }
+:root[data-interface-theme="winamp"] .profile-header { border-bottom: 4px double var(--wa-trim); }
+:root[data-interface-theme="winamp"] .profile-skills article { padding: 20px; }
+:root[data-interface-theme="winamp"] :is(.fake-taskbar, .fake-start-menu > div) {
+  background: linear-gradient(var(--wa-metal), var(--wa-face));
+  border-color: var(--wa-edge);
+  box-shadow: inset 0 1px #ffffff4d, 0 -3px 0 #0008;
+}
+/* The music widget becomes a compact main player; display and analyzer stay CSS-only. */
+:root[data-interface-theme="winamp"] .spotify-widget {
+  position: relative;
+  padding: 32px 14px 16px;
+  border: 3px ridge var(--wa-edge);
+  border-radius: var(--wa-radius);
+  background: linear-gradient(var(--wa-metal), var(--wa-face));
+  box-shadow: inset 0 0 0 2px #09090e, 2px 3px 0 #0008;
+}
+:root[data-interface-theme="winamp"] .spotify-widget::before {
+  content: "W I N A M P  //  B I T S";
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  right: 5px;
+  padding: 2px 8px;
+  color: var(--wa-title-ink);
+  background: var(--wa-title);
+  font: 700 10px/16px var(--font-family);
+  letter-spacing: .1em;
+  text-align: center;
+}
+:root[data-interface-theme="winamp"] .spotify-copy {
+  padding: 9px;
+  border: 2px inset var(--wa-edge);
+  background: #030705;
+  color: var(--wa-lcd);
+}
+:root[data-interface-theme="winamp"] .spotify-copy :is(p, span) { color: var(--wa-lcd); }
+:root[data-interface-theme="winamp"] .spotify-progress {
+  background: linear-gradient(90deg, #00e000 0 55%, #e6dd21 70%, #ef533c);
+  border-radius: 0;
+}
+:root[data-interface-theme="winamp"] .spotify-placeholder {
+  background: repeating-linear-gradient(90deg, transparent 0 5px, #090b0d 5px 8px), repeating-linear-gradient(0deg, transparent 0 3px, #090b0d 3px 5px), linear-gradient(0deg, #00c32b, #dfdc20 70%, #e84427);
+  border: 2px inset var(--wa-edge);
+  border-radius: 0;
+}
+:root[data-interface-theme="winamp"] .spotify-placeholder img { opacity: .25; }
+:root[data-interface-theme="winamp"] .spotify-track-link { color: var(--wa-trim); }
+:root[data-interface-theme="winamp"] .desktop-spotify-content { background: #030705; color: var(--wa-lcd); padding: 16px; border: 2px inset var(--wa-edge); }
+:root[data-interface-theme="winamp"] .endless-boot-console { background: #060a08; color: var(--wa-lcd); border: 3px ridge var(--wa-edge); }
+:root[data-interface-theme="winamp"] .endless-boot-header { padding: 14px; }
+:root[data-interface-theme="winamp"] .endless-boot-log { color: var(--wa-lcd); }
+:root[data-interface-theme="winamp"] .boot-screen { background: #060a08; color: var(--wa-lcd); }
+@media (max-width: 640px) {
+  :root[data-interface-theme="winamp"] .system-bar { letter-spacing: normal; }
+  :root[data-interface-theme="winamp"] .spotify-widget { padding-inline: 10px; }
+  :root[data-interface-theme="winamp"] .blog-shell { padding: 18px; }
+}

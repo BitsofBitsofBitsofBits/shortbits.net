@@ -1,0 +1,220 @@
+/* Game Boy family variants. Original DMG stays entirely in styles.css. */
+:root[data-interface-theme="game-bit"][data-theme-variant="pocket"] {
+  --accent: #65665f; --accent-rgb: 101, 102, 95; --accent-soft: rgba(101, 102, 95, .14);
+  --bg: #393a36; --panel: #b8bab3; --panel-2: #a2a49d; --panel-strong: #c6c8c1;
+  --ink: #242521; --muted: #555750; --border: #6d6f68; --line: #8d8f88;
+  --warning: #4c4d47; --success: #39483b; --danger: #813c38;
+  --shell-bg: #aeb0aa; --admin-bg: #b8bab3; --overlay-bg: #c6c8c1;
+  --body-background: radial-gradient(circle at 50% 12%, #565751, #393a36 72%);
+  --shadow: 5px 5px 0 rgba(15, 15, 13, .45);
+  --scrollbar-track: #b8bab3; --scrollbar-track-border: #555750; --scrollbar-thumb-color: #65665f;
+  --scrollbar-thumb-background: #8e9089; --scrollbar-thumb-hover: #d3d4cf; --scrollbar-thumb-active: #4c4d47;
+  --scrollbar-thumb-border: 2px solid #b8bab3;
+  --variant-frame: #9da099; --variant-frame-edge: #565852; --variant-screen: #d9dad4; --variant-screen-ink: #363731; --variant-select-ink: #fff;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="pocket"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #50514c; --accent-rgb: 80, 81, 76; --accent-soft: rgba(80, 81, 76, .12);
+  --bg: #e5e6e0; --panel: #f1f2ed; --panel-2: #d4d6cf; --panel-strong: #fafaf7;
+  --ink: #262722; --muted: #555750; --border: #85877f; --line: #c1c3bc;
+  --warning: #484943; --success: #34443a; --danger: #813c38;
+  --shell-bg: #d4d6cf; --admin-bg: #f1f2ed; --overlay-bg: #e5e6e0;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #e5e6e0 72%);
+  --shadow: 4px 4px 0 rgba(40, 41, 36, .2);
+  --scrollbar-track: #f1f2ed; --scrollbar-track-border: #85877f; --scrollbar-thumb-color: #50514c;
+  --scrollbar-thumb-background: #b7b9b2; --scrollbar-thumb-hover: #fff; --scrollbar-thumb-active: #343530;
+  --scrollbar-thumb-border: 2px solid #f1f2ed;
+  --variant-frame: #c7c9c2; --variant-frame-edge: #777970; --variant-screen: #f8f8f4; --variant-screen-ink: #363731; --variant-select-ink: #fff;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant="color-berry"] {
+  --accent: #ed68a8; --accent-rgb: 237, 104, 168; --accent-soft: rgba(237, 104, 168, .17);
+  --bg: #351328; --panel: #53213f; --panel-2: #71304f; --panel-strong: #5f2848;
+  --ink: #fff0f8; --muted: #e3b0cb; --border: #c44d8b; --line: #8d3e69;
+  --warning: #ffdc69; --success: #76e0a4; --danger: #ff8d9b;
+  --shell-bg: #4b1d39; --admin-bg: #53213f; --overlay-bg: #612746;
+  --body-background: radial-gradient(circle at 50% 12%, #693052, #351328 74%);
+  --shadow: 5px 5px 0 rgba(12, 3, 10, .48);
+  --scrollbar-track: #53213f; --scrollbar-track-border: #ed68a8; --scrollbar-thumb-color: #ed68a8;
+  --scrollbar-thumb-background: #a83c76; --scrollbar-thumb-hover: #ff9dca; --scrollbar-thumb-active: #ffdc69;
+  --scrollbar-thumb-border: 2px solid #351328;
+  --variant-frame: #a93673; --variant-frame-edge: #48142f; --variant-screen: #f3e9f4; --variant-screen-ink: #38253d; --variant-select-ink: #351328;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="color-berry"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #9f2868; --accent-rgb: 159, 40, 104; --accent-soft: rgba(159, 40, 104, .12);
+  --bg: #fff1f7; --panel: #f7dce9; --panel-2: #edc5d9; --panel-strong: #fbe7f0;
+  --ink: #392034; --muted: #70465f; --border: #bd5b8d; --line: #d9aac3;
+  --warning: #755200; --success: #17623b; --danger: #9b2436;
+  --shell-bg: #f0cddd; --admin-bg: #f7dce9; --overlay-bg: #fbe7f0;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #fff1f7 72%);
+  --shadow: 4px 4px 0 rgba(72, 15, 48, .18);
+  --scrollbar-track: #f7dce9; --scrollbar-track-border: #bd5b8d; --scrollbar-thumb-color: #9f2868;
+  --scrollbar-thumb-background: #d79ab9; --scrollbar-thumb-hover: #f7e0ed; --scrollbar-thumb-active: #755200;
+  --scrollbar-thumb-border: 2px solid #fff1f7;
+  --variant-frame: #d64e91; --variant-frame-edge: #8a2057; --variant-screen: #fff7fc; --variant-screen-ink: #38253d; --variant-select-ink: #351328;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant="color-teal"] {
+  --accent: #63dfd1; --accent-rgb: 99, 223, 209; --accent-soft: rgba(99, 223, 209, .17);
+  --bg: #0c2d31; --panel: #17454b; --panel-2: #226169; --panel-strong: #1b5359;
+  --ink: #e7fffc; --muted: #a8ddd7; --border: #42b9ad; --line: #367b7c;
+  --warning: #ffdb68; --success: #73e6a2; --danger: #ff9296;
+  --shell-bg: #16444a; --admin-bg: #17454b; --overlay-bg: #1b5359;
+  --body-background: radial-gradient(circle at 50% 12%, #26686c, #0c2d31 74%);
+  --shadow: 5px 5px 0 rgba(2, 15, 17, .5);
+  --scrollbar-track: #17454b; --scrollbar-track-border: #63dfd1; --scrollbar-thumb-color: #63dfd1;
+  --scrollbar-thumb-background: #258e88; --scrollbar-thumb-hover: #9dfff1; --scrollbar-thumb-active: #ffdb68;
+  --scrollbar-thumb-border: 2px solid #0c2d31;
+  --variant-frame: #269b9a; --variant-frame-edge: #103b43; --variant-screen: #e4f5ee; --variant-screen-ink: #213f40; --variant-select-ink: #0c2d31;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="color-teal"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #087a76; --accent-rgb: 8, 122, 118; --accent-soft: rgba(8, 122, 118, .12);
+  --bg: #eaf8f6; --panel: #d4eeeb; --panel-2: #bee3df; --panel-strong: #e0f3f0;
+  --ink: #173d3d; --muted: #456b69; --border: #4b9992; --line: #abd1cc;
+  --warning: #765500; --success: #17623b; --danger: #982d3a;
+  --shell-bg: #c9e8e4; --admin-bg: #d4eeeb; --overlay-bg: #e0f3f0;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #eaf8f6 72%);
+  --shadow: 4px 4px 0 rgba(9, 63, 62, .17);
+  --scrollbar-track: #d4eeeb; --scrollbar-track-border: #4b9992; --scrollbar-thumb-color: #087a76;
+  --scrollbar-thumb-background: #98ccc6; --scrollbar-thumb-hover: #e4f8f5; --scrollbar-thumb-active: #765500;
+  --scrollbar-thumb-border: 2px solid #eaf8f6;
+  --variant-frame: #37aaa1; --variant-frame-edge: #17696b; --variant-screen: #f4fffc; --variant-screen-ink: #213f40; --variant-select-ink: #0c2d31;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant="color-dandelion"] {
+  --accent: #ffe064; --accent-rgb: 255, 224, 100; --accent-soft: rgba(255, 224, 100, .18);
+  --bg: #372d0c; --panel: #554515; --panel-2: #765d1b; --panel-strong: #614e18;
+  --ink: #fff8db; --muted: #e8d99e; --border: #d4b846; --line: #8d762e;
+  --warning: #ff8b83; --success: #88e2a5; --danger: #ff938c;
+  --shell-bg: #554315; --admin-bg: #554515; --overlay-bg: #614e18;
+  --body-background: radial-gradient(circle at 50% 12%, #796021, #372d0c 74%);
+  --shadow: 5px 5px 0 rgba(15, 10, 0, .5);
+  --scrollbar-track: #554515; --scrollbar-track-border: #ffe064; --scrollbar-thumb-color: #ffe064;
+  --scrollbar-thumb-background: #ad851f; --scrollbar-thumb-hover: #fff1a8; --scrollbar-thumb-active: #ff8b83;
+  --scrollbar-thumb-border: 2px solid #372d0c;
+  --variant-frame: #c39c27; --variant-frame-edge: #594512; --variant-screen: #fff5d8; --variant-screen-ink: #44351b; --variant-select-ink: #372d0c;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="color-dandelion"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #8a6810; --accent-rgb: 138, 104, 16; --accent-soft: rgba(138, 104, 16, .12);
+  --bg: #fff8df; --panel: #f4e9bf; --panel-2: #ead99c; --panel-strong: #f8efcf;
+  --ink: #433417; --muted: #715c30; --border: #ad8b34; --line: #d4c28d;
+  --warning: #8c342d; --success: #19613d; --danger: #a33032;
+  --shell-bg: #f0e1ae; --admin-bg: #f4e9bf; --overlay-bg: #f8efcf;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #fff8df 72%);
+  --shadow: 4px 4px 0 rgba(83, 62, 13, .16);
+  --scrollbar-track: #f4e9bf; --scrollbar-track-border: #ad8b34; --scrollbar-thumb-color: #8a6810;
+  --scrollbar-thumb-background: #d5bb67; --scrollbar-thumb-hover: #fff5d8; --scrollbar-thumb-active: #8c342d;
+  --scrollbar-thumb-border: 2px solid #fff8df;
+  --variant-frame: #d6b239; --variant-frame-edge: #8a6810; --variant-screen: #fffdf1; --variant-screen-ink: #44351b; --variant-select-ink: #372d0c;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant="advance-indigo"] {
+  --accent: #a99cff; --accent-rgb: 169, 156, 255; --accent-soft: rgba(169, 156, 255, .18);
+  --bg: #201a4c; --panel: #30296c; --panel-2: #403982; --panel-strong: #393276;
+  --ink: #f0edff; --muted: #c2baff; --border: #8174db; --line: #5e56a2;
+  --warning: #ffe36b; --success: #83eba8; --danger: #ff8c9b;
+  --shell-bg: #30296c; --admin-bg: #30296c; --overlay-bg: #393276;
+  --body-background: radial-gradient(circle at 50% 12%, #4d438f, #201a4c 74%);
+  --shadow: 5px 5px 0 rgba(9, 7, 31, .48);
+  --scrollbar-track: #30296c; --scrollbar-track-border: #a99cff; --scrollbar-thumb-color: #a99cff;
+  --scrollbar-thumb-background: #6257b0; --scrollbar-thumb-hover: #cec7ff; --scrollbar-thumb-active: #ffe36b;
+  --scrollbar-thumb-border: 2px solid #201a4c;
+  --variant-frame: #6254bd; --variant-frame-edge: #231d5b; --variant-screen: #e7efff; --variant-screen-ink: #242d50; --variant-select-ink: #201a4c;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="advance-indigo"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #5141a8; --accent-rgb: 81, 65, 168; --accent-soft: rgba(81, 65, 168, .12);
+  --bg: #f0efff; --panel: #dfdcfa; --panel-2: #cecaef; --panel-strong: #e8e6fc;
+  --ink: #29264a; --muted: #5a5680; --border: #877bc7; --line: #bbb6df;
+  --warning: #765300; --success: #176244; --danger: #9e293a;
+  --shell-bg: #d7d3f4; --admin-bg: #dfdcfa; --overlay-bg: #e8e6fc;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #f0efff 72%);
+  --shadow: 4px 4px 0 rgba(42, 34, 93, .18);
+  --scrollbar-track: #dfdcfa; --scrollbar-track-border: #877bc7; --scrollbar-thumb-color: #5141a8;
+  --scrollbar-thumb-background: #b0a8dc; --scrollbar-thumb-hover: #f1efff; --scrollbar-thumb-active: #765300;
+  --scrollbar-thumb-border: 2px solid #f0efff;
+  --variant-frame: #8173d0; --variant-frame-edge: #443791; --variant-screen: #f7f8ff; --variant-screen-ink: #242d50; --variant-select-ink: #201a4c;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant="advance-sp"] {
+  --accent: #c6d5e8; --accent-rgb: 198, 213, 232; --accent-soft: rgba(198, 213, 232, .16);
+  --bg: #252a31; --panel: #3b424c; --panel-2: #4a5360; --panel-strong: #414a56;
+  --ink: #f4f7fb; --muted: #c0cbd7; --border: #8496a9; --line: #677483;
+  --warning: #ffe27a; --success: #81edb1; --danger: #ff9098;
+  --shell-bg: #3b424c; --admin-bg: #3b424c; --overlay-bg: #414a56;
+  --body-background: radial-gradient(circle at 50% 12%, #535d69, #252a31 74%);
+  --shadow: 5px 5px 0 rgba(5, 8, 11, .48);
+  --scrollbar-track: #3b424c; --scrollbar-track-border: #aebccd; --scrollbar-thumb-color: #c6d5e8;
+  --scrollbar-thumb-background: #7c8998; --scrollbar-thumb-hover: #e1eaf4; --scrollbar-thumb-active: #ffe27a;
+  --scrollbar-thumb-border: 2px solid #252a31;
+  --variant-frame: #aeb9c6; --variant-frame-edge: #59636e; --variant-screen: #dcf4ff; --variant-screen-ink: #153849; --variant-select-ink: #252a31;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant="advance-sp"][data-color-scheme="light"] {
+  --variant-select-ink: #fff;
+  --accent: #50627a; --accent-rgb: 80, 98, 122; --accent-soft: rgba(80, 98, 122, .12);
+  --bg: #edf1f6; --panel: #dce3ec; --panel-2: #c9d3df; --panel-strong: #e5eaf1;
+  --ink: #263341; --muted: #526273; --border: #8594a5; --line: #b7c2cf;
+  --warning: #725100; --success: #176044; --danger: #9c2936;
+  --shell-bg: #d5dde7; --admin-bg: #dce3ec; --overlay-bg: #e5eaf1;
+  --body-background: radial-gradient(circle at 50% 12%, #fff, #edf1f6 72%);
+  --shadow: 4px 4px 0 rgba(37, 48, 60, .18);
+  --scrollbar-track: #dce3ec; --scrollbar-track-border: #8594a5; --scrollbar-thumb-color: #50627a;
+  --scrollbar-thumb-background: #b4c0cf; --scrollbar-thumb-hover: #f3f6fa; --scrollbar-thumb-active: #725100;
+  --scrollbar-thumb-border: 2px solid #edf1f6;
+  --variant-frame: #bac5d1; --variant-frame-edge: #6f7e8e; --variant-screen: #f2fbff; --variant-screen-ink: #153849; --variant-select-ink: #252a31;
+}
+
+:root[data-interface-theme="game-bit"][data-theme-variant] body {
+  color: var(--ink);
+  background: var(--body-background);
+  background-attachment: fixed;
+  font-family: var(--font-family);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] ::selection {
+  color: var(--variant-select-ink);
+  background: var(--accent);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] :focus-visible {
+  outline: 2px solid var(--warning);
+  outline-offset: 2px;
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] .system-bar,
+:root[data-interface-theme="game-bit"][data-theme-variant] .desktop-window-bar,
+:root[data-interface-theme="game-bit"][data-theme-variant] #admin-blog-window > .desktop-window-bar,
+:root[data-interface-theme="game-bit"][data-theme-variant] .chooser-bar,
+:root[data-interface-theme="game-bit"][data-theme-variant] .profile-panel-bar,
+:root[data-interface-theme="game-bit"][data-theme-variant] .endless-boot-header,
+:root[data-interface-theme="game-bit"][data-theme-variant] .app-menu-bar {
+  color: var(--ink);
+  background: var(--panel-2);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] .shell,
+:root[data-interface-theme="game-bit"][data-theme-variant] .desktop-window,
+:root[data-interface-theme="game-bit"][data-theme-variant] .system-window,
+:root[data-interface-theme="game-bit"][data-theme-variant] .fake-desktop-app {
+  border-color: var(--variant-frame-edge);
+  box-shadow: var(--shadow), inset 0 0 0 2px var(--variant-frame);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] .desktop-window-content,
+:root[data-interface-theme="game-bit"][data-theme-variant] .shell-content,
+:root[data-interface-theme="game-bit"][data-theme-variant] .root-panel {
+  color: var(--variant-screen-ink);
+  background-color: var(--variant-screen);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] :is(.active, .is-active, .selected, [aria-current="page"], [aria-selected="true"]) {
+  color: var(--variant-select-ink);
+  background-color: var(--accent);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] .endless-boot-progress span {
+  background: linear-gradient(90deg, var(--accent), var(--warning));
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), .4);
+}
+:root[data-interface-theme="game-bit"][data-theme-variant] .theme-card,
+:root[data-interface-theme="game-bit"][data-theme-variant] .chooser-card,
+:root[data-interface-theme="game-bit"][data-theme-variant] .blog-card,
+:root[data-interface-theme="game-bit"][data-theme-variant] .professional-card {
+  border-color: var(--border);
+}

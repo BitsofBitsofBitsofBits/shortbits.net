@@ -1,0 +1,151 @@
+:root[data-interface-theme="youtube-music"] {
+  color-scheme: dark;
+  --bg: #030303; --panel: #141414; --panel-2: #222; --panel-strong: #222;
+  --ink: #f5f5f5; --text: #f5f5f5; --muted: #aaa; --accent: #ff777b;
+  --accent-rgb: 255, 119, 123; --accent-soft: #341719; --warning: #ffdb85;
+  --border: #333; --line: #333; --shadow: none; --shell-bg: #030303;
+  --body-background: #030303; --body-background-size: auto; --admin-bg: #141414;
+  --overlay-bg: #222; --noise-opacity: 0; --scanline-opacity: 0; --name-field-opacity: 0;
+  --font-family: Roboto, Arial, Helvetica, sans-serif; --icon-filter: brightness(0) invert(1);
+  --spotify-accent: #ff454e; --control-radius: 8px; --window-radius: 10px;
+  --shell-radius: 0; --material-blur: 0px; --ym-sidebar: 224px;
+  --scrollbar-track: #030303; --scrollbar-thumb-background: #666; --scrollbar-thumb-color: #666;
+}
+:root[data-interface-theme="youtube-music"] body { display: block; min-height: 100vh; margin: 0; padding: 96px 38px 160px calc(var(--ym-sidebar) + 42px); background: radial-gradient(ellipse at 75% 0, #2d172833, transparent 55%), #030303; color: var(--ink); font: 14px/1.5 var(--font-family); letter-spacing: normal; }
+:root[data-interface-theme="youtube-music"] :is(button, input, textarea, select) { font-family: var(--font-family); }
+:root[data-interface-theme="youtube-music"] :is(a, button, input, textarea, select, summary):focus-visible { outline: 2px solid #ff777b; outline-offset: 4px; }
+:root[data-interface-theme="youtube-music"] :is(section, article, [id]) { scroll-margin-top: 95px; }
+:root[data-interface-theme="youtube-music"] :is(.noise, .scanlines, .theme-atmosphere, .falling-bit, .atmosphere-layer) { display: none; }
+:root[data-interface-theme="youtube-music"] :is(h1, h2, h3, strong) { letter-spacing: normal; }
+:root[data-interface-theme="youtube-music"] .ym-header { position: fixed; inset: 0 0 auto; z-index: 300; height: 72px; display: flex; align-items: center; gap: 32px; padding: 0 32px 0 24px; background: #030303f5; border-bottom: 1px solid #ffffff0d; }
+:root[data-interface-theme="youtube-music"] .ym-brand { display: flex; gap: 6px; align-items: center; width: 210px; flex-shrink: 0; text-decoration: none; color: #fff; }
+:root[data-interface-theme="youtube-music"] .ym-brand strong { font-size: 27px; letter-spacing: -1.4px; }
+:root[data-interface-theme="youtube-music"] .ym-logo { display: grid; place-items: center; width: 33px; height: 33px; border: 6px solid #f03; border-radius: 50%; background: #fff; color: #f03; font-size: 15px; line-height: 1; }
+:root[data-interface-theme="youtube-music"] .ym-search { width: min(45vw, 530px); height: 42px; display: flex; align-items: center; gap: 16px; padding: 0 16px; border: 1px solid #444; border-radius: 24px; background: #252525; color: #ddd; }
+:root[data-interface-theme="youtube-music"] .ym-search > span { font-size: 28px; }
+:root[data-interface-theme="youtube-music"] .ym-search input { width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: #fff; font-size: 15px; }
+:root[data-interface-theme="youtube-music"] .ym-search input::placeholder { color: #bcbcbc; }
+:root[data-interface-theme="youtube-music"] :is(.ym-account, .ym-avatar) { display: grid; place-items: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: #a34d74; color: #fff; font-size: 18px; text-decoration: none; }
+:root[data-interface-theme="youtube-music"] .ym-account { margin-left: auto; }
+:root[data-interface-theme="youtube-music"] .ym-sidebar { position: fixed; z-index: 290; top: 72px; bottom: 88px; left: 0; width: var(--ym-sidebar); overflow-y: auto; padding: 16px 12px; border-right: 1px solid #ffffff17; background: #030303; }
+:root[data-interface-theme="youtube-music"] .ym-nav-item { display: flex; align-items: center; gap: 22px; min-height: 48px; padding: 10px 16px; border-radius: 8px; color: #fff; text-decoration: none; font-size: 16px; }
+:root[data-interface-theme="youtube-music"] .ym-nav-item:is(:hover, [aria-current]) { background: #252525; }
+:root[data-interface-theme="youtube-music"] .ym-nav-icon { width: 26px; font-size: 27px; text-align: center; line-height: 1; }
+:root[data-interface-theme="youtube-music"] .ym-playlists { display: flex; flex-direction: column; margin-top: 24px; padding: 24px 8px; border-top: 1px solid #333; }
+:root[data-interface-theme="youtube-music"] .ym-playlists a { padding: 10px 2px 2px; color: #eee; text-decoration: none; font-size: 14px; }
+:root[data-interface-theme="youtube-music"] .ym-playlists a:hover { text-decoration: underline; }
+:root[data-interface-theme="youtube-music"] .ym-playlists .ym-new-playlist { margin-bottom: 20px; padding: 9px 12px; border-radius: 22px; background: #222; text-align: center; }
+:root[data-interface-theme="youtube-music"] :is(.ym-playlists small, .ym-disclaimer) { color: #999; font-size: 11px; }
+:root[data-interface-theme="youtube-music"] .ym-disclaimer { margin-top: 36px; white-space: pre-line; line-height: 1.8; }
+:root[data-interface-theme="youtube-music"] :is(#interface-shell, .profile-layout, .blog-shell, .chooser, .endless-boot-console, .error-window) { width: 100%; min-width: 0; max-width: 1500px; margin: 0 auto; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+:root[data-interface-theme="youtube-music"] .ym-collection { width: 100%; min-width: 0; padding: 8px 0 32px; text-align: left; }
+:root[data-interface-theme="youtube-music"] .ym-greeting { display: flex; align-items: center; gap: 12px; color: #aaa; font-size: 11px; letter-spacing: 1.4px; }
+:root[data-interface-theme="youtube-music"] .ym-welcome { margin: 14px 0 36px; color: #fff; font-size: clamp(26px, 3vw, 40px); font-weight: 750; line-height: 1.15; letter-spacing: -1px; }
+:root[data-interface-theme="youtube-music"] .ym-shelf { min-width: 0; margin: 0 0 36px; }
+:root[data-interface-theme="youtube-music"] .ym-shelf-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+:root[data-interface-theme="youtube-music"] .ym-shelf-heading h2 { margin: 0; color: #fff; font-size: 26px; font-weight: 700; }
+:root[data-interface-theme="youtube-music"] .ym-shelf-controls { display: flex; gap: 12px; }
+:root[data-interface-theme="youtube-music"] .ym-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; padding: 0; border: 1px solid #555; border-radius: 50%; background: transparent; color: #fff; font-size: 24px; cursor: pointer; box-shadow: none; }
+:root[data-interface-theme="youtube-music"] .ym-icon:hover { background: #383838; }
+:root[data-interface-theme="youtube-music"] .ym-row { display: grid; grid-auto-flow: column; grid-auto-columns: 174px; gap: 20px; overflow-x: auto; padding: 4px 4px 14px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: #555 transparent; }
+:root[data-interface-theme="youtube-music"] .ym-card { min-width: 0; scroll-snap-align: start; text-decoration: none; color: #fff; }
+:root[data-interface-theme="youtube-music"] .ym-card[hidden] { display: none; }
+:root[data-interface-theme="youtube-music"] .ym-art { position: relative; display: flex; flex-direction: column; justify-content: center; aspect-ratio: 1; width: 100%; padding: 17px; overflow: hidden; border-radius: 3px; isolation: isolate; color: #fff; background: linear-gradient(145deg, #c76647, #622927 55%, #160c23); }
+:root[data-interface-theme="youtube-music"] .ym-art::before { position: absolute; z-index: -1; inset: 17% -30% -20% 24%; content: ""; border: 24px solid #ffffff24; border-radius: 50%; box-shadow: 0 0 0 14px #ffffff0a, 0 0 0 32px #ffffff0a; }
+:root[data-interface-theme="youtube-music"] .ym-art-1 { background: linear-gradient(135deg, #24343a, #317677, #a8b083); }
+:root[data-interface-theme="youtube-music"] .ym-art-2 { background: linear-gradient(140deg, #9581ae, #554173 55%, #19172b); }
+:root[data-interface-theme="youtube-music"] .ym-art-3 { background: linear-gradient(120deg, #c17938, #825d21, #25251a); }
+:root[data-interface-theme="youtube-music"] .ym-art-4 { background: linear-gradient(160deg, #276d9c, #153355 60%, #0a1526); }
+:root[data-interface-theme="youtube-music"] .ym-art-5 { background: linear-gradient(145deg, #ab446b, #633346, #251722); }
+:root[data-interface-theme="youtube-music"] .ym-art small { position: absolute; top: 12px; left: 14px; font-size: 8px; letter-spacing: 2px; }
+:root[data-interface-theme="youtube-music"] .ym-art strong { max-width: 100%; font-size: 18px; font-weight: 800; line-height: 1.15; overflow-wrap: normal; text-shadow: 0 2px 8px #0006; }
+:root[data-interface-theme="youtube-music"] .ym-art-play { position: absolute; right: 12px; bottom: 10px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #0009; font-size: 13px; }
+:root[data-interface-theme="youtube-music"] .ym-card:hover .ym-art { filter: brightness(1.18); }
+:root[data-interface-theme="youtube-music"] .ym-card-title { display: block; margin-top: 10px; font-size: 14px; line-height: 1.4; }
+:root[data-interface-theme="youtube-music"] .ym-card-meta { display: block; margin-top: 4px; color: #aaa; font-size: 12px; }
+:root[data-interface-theme="youtube-music"] .ym-player { flex-direction: row; flex-wrap: nowrap; margin: 0; text-align: left; border: 0; position: fixed; z-index: 400; inset: auto 0 0; display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 14px 26px; background: #212121; color: #fff; }
+:root[data-interface-theme="youtube-music"] .ym-progress { --ym-progress: 29%; position: absolute; inset: 0 0 auto; height: 2px; background: #555; }
+:root[data-interface-theme="youtube-music"] .ym-progress > span { display: block; width: var(--ym-progress); height: 100%; background: #f03; }
+:root[data-interface-theme="youtube-music"] .ym-preview-active > span { animation: ym-preview 20s linear infinite; }
+@keyframes ym-preview { from { width: 0; } to { width: 100%; } }
+:root[data-interface-theme="youtube-music"] .ym-player-controls { display: flex; align-items: center; gap: 12px; margin-right: 16px; }
+:root[data-interface-theme="youtube-music"] .ym-player-controls .ym-icon { border: 0; font-size: 18px; }
+:root[data-interface-theme="youtube-music"] .ym-player-controls .ym-play { width: 42px; height: 42px; font-size: 26px; }
+:root[data-interface-theme="youtube-music"] .ym-player-art { display: block; flex-shrink: 0; width: 48px; height: 48px; }
+:root[data-interface-theme="youtube-music"] .ym-player-art :is(img, .ym-art) { width: 48px; height: 48px; object-fit: cover; padding: 5px; }
+:root[data-interface-theme="youtube-music"] .ym-player-art .ym-art strong { font-size: 10px; }
+:root[data-interface-theme="youtube-music"] .ym-player-art :is(small, .ym-art-play) { display: none; }
+:root[data-interface-theme="youtube-music"] .ym-player-copy { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
+:root[data-interface-theme="youtube-music"] .ym-player-copy a { overflow: hidden; color: #fff; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+:root[data-interface-theme="youtube-music"] .ym-player-copy a:hover { text-decoration: underline; }
+:root[data-interface-theme="youtube-music"] .ym-player-copy > span { overflow: hidden; color: #aaa; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-interface-theme="youtube-music"] .ym-player-note { margin-left: auto; flex-shrink: 0; color: #aaa; font-size: 11px; }
+:root[data-interface-theme="youtube-music"] :is(.chooser-terminal, .chooser-bar, .chooser-body, .profile-header, .blog-header, .endless-boot-header) { border-color: #333; background: transparent; box-shadow: none; }
+:root[data-interface-theme="youtube-music"] :is(.chooser-body, .chooser-bar) { padding-inline: 0; }
+:root[data-interface-theme="youtube-music"] :is(.chooser h1, .blog-header h1, .professional-page h1, .endless-boot-header h1) { color: #fff; font-family: var(--font-family); font-size: clamp(28px, 4vw, 48px); line-height: 1.15; }
+:root[data-interface-theme="youtube-music"] .chooser-options a { border: 1px solid #333; border-radius: 8px; background: #171717; color: #fff; }
+:root[data-interface-theme="youtube-music"] :is(.chooser-options a:hover, .chooser-options a:focus-visible) { background: #292929; border-color: #999; }
+:root[data-interface-theme="youtube-music"] :is(.chooser-copy span, .chooser-intro, .chooser-hint, .profile-hero-summary, .profile-section-intro, .blog-status) { color: #bcbcbc; }
+:root[data-interface-theme="youtube-music"] :is(.profile-section, .link-section, .featured-section, .content-files-section, .contact-section) { border-color: #333; }
+:root[data-interface-theme="youtube-music"] :is(.profile-overview, .profile-experience article, .profile-projects article, .profile-skill-grid article, .featured-project, .link-card, .content-file-grid button, .blog-post-list article, .desktop-window) { border: 1px solid #333; border-radius: 8px; background: #141414; color: #eee; box-shadow: none; }
+:root[data-interface-theme="youtube-music"] :is(.profile-button, .contact-form button[type="submit"]) { border-radius: 24px; background: #eee; color: #111; border: 0; }
+:root[data-interface-theme="youtube-music"] :is(input, textarea, select) { color: #eee; background: #1d1d1d; border-color: #555; }
+:root[data-interface-theme="youtube-music"] .profile-header { flex-wrap: wrap; }
+:root[data-interface-theme="youtube-music"] .blog-post-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+:root[data-interface-theme="youtube-music"] .blog-post-content { color: #ddd; }
+:root[data-interface-theme="youtube-music"] .endless-boot-console { display: block; height: auto; padding: 0; transform: none; }
+:root[data-interface-theme="youtube-music"] .endless-boot-log { height: 320px; overflow-y: auto; background: #101010; color: #eee; border-color: #333; }
+:root[data-interface-theme="youtube-music"] .error-window { padding: 0; text-align: left; }
+:root[data-interface-theme="youtube-music"] .error-code { color: #ff6174; text-shadow: none; font-size: clamp(64px, 12vw, 130px); }
+:root[data-interface-theme="youtube-music"] .bits-layout-notice { bottom: 104px; z-index: 410; max-width: min(560px, calc(100vw - 24px)); border-color: #555; border-radius: 8px; background: #242424; color: #eee; font-family: var(--font-family); }
+@media (max-width: 1050px) {
+  :root[data-interface-theme="youtube-music"] { --ym-sidebar: 176px; }
+  :root[data-interface-theme="youtube-music"] body { padding-inline: calc(var(--ym-sidebar) + 24px) 24px; }
+  :root[data-interface-theme="youtube-music"] .ym-brand { width: 160px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-note { display: none; }
+}
+@media (max-width: 700px) {
+  :root[data-interface-theme="youtube-music"] body { padding: 88px 18px 205px; }
+  :root[data-interface-theme="youtube-music"] .ym-header { height: 64px; padding-inline: 16px; gap: 14px; }
+  :root[data-interface-theme="youtube-music"] .ym-brand { width: auto; }
+  :root[data-interface-theme="youtube-music"] .ym-brand strong { font-size: 23px; }
+  :root[data-interface-theme="youtube-music"] .ym-logo { width: 28px; height: 28px; border-width: 5px; font-size: 12px; }
+  :root[data-interface-theme="youtube-music"] .ym-search { width: auto; min-width: 0; flex: 1; height: 36px; gap: 5px; padding-inline: 10px; }
+  :root[data-interface-theme="youtube-music"] .ym-search input { font-size: 12px; }
+  :root[data-interface-theme="youtube-music"] .ym-account { width: 28px; height: 28px; font-size: 14px; }
+  :root[data-interface-theme="youtube-music"] .ym-sidebar { inset: auto 0 0; z-index: 401; display: flex; justify-content: space-around; width: 100%; height: calc(64px + env(safe-area-inset-bottom)); padding: 3px 10px env(safe-area-inset-bottom); overflow: visible; border: 0; border-top: 1px solid #444; background: #111; }
+  :root[data-interface-theme="youtube-music"] .ym-nav-item { flex: 1; flex-direction: column; justify-content: center; gap: 2px; min-height: 0; padding: 5px 12px; font-size: 10px; }
+  :root[data-interface-theme="youtube-music"] .ym-nav-icon { font-size: 24px; }
+  :root[data-interface-theme="youtube-music"] .ym-playlists { display: none; }
+  :root[data-interface-theme="youtube-music"] .ym-welcome { font-size: 29px; margin-bottom: 30px; }
+  :root[data-interface-theme="youtube-music"] .ym-shelf-heading h2 { font-size: 23px; }
+  :root[data-interface-theme="youtube-music"] .ym-row { grid-auto-columns: 146px; gap: 16px; }
+  :root[data-interface-theme="youtube-music"] .ym-art strong { font-size: 16px; }
+  :root[data-interface-theme="youtube-music"] .ym-player { bottom: calc(64px + env(safe-area-inset-bottom)); min-height: 68px; padding: 10px 12px; gap: 10px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-controls { order: 3; gap: 0; margin: 0 0 0 auto; }
+  :root[data-interface-theme="youtube-music"] .ym-player-controls .ym-icon { width: 28px; height: 36px; font-size: 13px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-controls .ym-play { font-size: 22px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-art, :root[data-interface-theme="youtube-music"] .ym-player-art :is(img, .ym-art) { width: 40px; height: 40px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-copy { flex: 1; }
+  :root[data-interface-theme="youtube-music"] .ym-player-copy a { font-size: 12px; }
+  :root[data-interface-theme="youtube-music"] .ym-player-copy > span { font-size: 10px; }
+  :root[data-interface-theme="youtube-music"] :is(.profile-hero, .profile-contact, .profile-skill-grid, .profile-projects, .blog-post-list, .content-file-grid, .link-grid) { grid-template-columns: minmax(0, 1fr); }
+  :root[data-interface-theme="youtube-music"] :is(.chooser-body, .chooser-bar) { padding-inline: 0; }
+  :root[data-interface-theme="youtube-music"] .chooser-options a { padding: 16px 12px; }
+  :root[data-interface-theme="youtube-music"] .bits-layout-notice { bottom: calc(145px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="youtube-music"] .ym-preview-active > span { animation: none; }
+}
+:root[data-interface-theme="youtube-music"][data-motion="reduced"] .ym-preview-active > span,
+:root[data-interface-theme="youtube-music"][data-effects="off"] .ym-preview-active > span { animation: none; }
+
+:root[data-interface-theme="youtube-music"] .chooser { display: block; min-height: 0; padding: 0; }
+
+:root[data-interface-theme="youtube-music"] body.endless-boot-page { height: auto; overflow: auto; }
+:root[data-interface-theme="youtube-music"] :is(.endless-boot-header, .endless-boot-transmission, .endless-boot-status, .endless-boot-machine, .endless-boot-controls, .endless-boot-footer) { padding: 16px 0; }
+:root[data-interface-theme="youtube-music"] .endless-boot-header { scroll-margin-top: 88px; }
+:root[data-interface-theme="youtube-music"] .endless-boot-log { font-size: 12px; line-height: 1.65; }
+:root[data-interface-theme="youtube-music"] .endless-boot-status { font-size: 11px; }
+:root[data-interface-theme="youtube-music"] .endless-boot-machine { flex-wrap: wrap; font-size: 11px; }
+:root[data-interface-theme="youtube-music"] .endless-boot-transmission p { font-size: 13px; }

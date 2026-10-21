@@ -11,6 +11,7 @@ const themeParticleCounts = {
   macos: 0,
   terminal: 10,
   minebits: 18,
+  aquatic: 16,
   winter: 34,
   spooky: 18,
   christmas: 28,

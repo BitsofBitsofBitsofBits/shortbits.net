@@ -1,0 +1,443 @@
+/* Windows 3.1: solid caption bars, double frames, and Program Manager groups. */
+:root[data-interface-theme="windows-31"] {
+  color-scheme: light;
+  --w31-desktop: #008080;
+  --w31-face: #c0c0c0;
+  --w31-field: #fff;
+  --w31-ink: #000;
+  --w31-muted: #363636;
+  --w31-title: #000080;
+  --w31-caption: #fff;
+  --w31-link: #000080;
+  --w31-hi: #fff;
+  --w31-low: #808080;
+  --w31-edge: #000;
+  --w31-bevel: inset 1px 1px var(--w31-hi), inset -1px -1px var(--w31-low);
+  --w31-inset: inset 1px 1px var(--w31-low), inset -1px -1px var(--w31-hi);
+  --accent: var(--w31-link);
+  --accent-hover: var(--w31-ink);
+  --accent-rgb: 0, 0, 128;
+  --accent-soft: color-mix(in srgb, var(--w31-link) 12%, var(--w31-field));
+  --bg: var(--w31-desktop);
+  --panel: var(--w31-face);
+  --panel-2: var(--w31-field);
+  --panel-strong: var(--w31-face);
+  --ink: var(--w31-ink);
+  --text: var(--w31-ink);
+  --muted: var(--w31-muted);
+  --border: var(--w31-low);
+  --line: var(--w31-low);
+  --danger: #a00000;
+  --warning: #754600;
+  --success: #006000;
+  --shell-bg: var(--w31-face);
+  --admin-bg: var(--w31-face);
+  --overlay-bg: var(--w31-face);
+  --body-background: var(--w31-desktop);
+  --body-background-size: auto;
+  --shadow: 3px 3px 0 var(--w31-edge);
+  --font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif;
+  --control-radius: 0px;
+  --shell-radius: 0px;
+  --window-radius: 0px;
+  --material-blur: 0px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: none;
+  --spotify-accent: var(--w31-link);
+  --scrollbar-size: 17px;
+  --scrollbar-track: var(--w31-face);
+  --scrollbar-track-border: var(--w31-low);
+  --scrollbar-thumb-color: var(--w31-face);
+  --scrollbar-thumb-background: var(--w31-face);
+  --scrollbar-thumb-hover: var(--w31-hi);
+  --scrollbar-thumb-active: var(--w31-face);
+  --scrollbar-thumb-border: 1px solid var(--w31-edge);
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: var(--w31-bevel);
+}
+
+:root[data-interface-theme="windows-31"][data-color-scheme="dark"] {
+  color-scheme: dark;
+  --w31-desktop: #004545;
+  --w31-face: #333;
+  --w31-field: #171717;
+  --w31-ink: #fff;
+  --w31-muted: #d0d0d0;
+  --w31-link: #a9caff;
+  --w31-hi: #777;
+  --w31-low: #151515;
+  --danger: #ffaaaa;
+  --warning: #ffdc9b;
+  --success: #a0e2a0;
+  --accent-rgb: 169, 202, 255;
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-2"] {
+  --w31-desktop: #c0c0c0;
+  --w31-face: #ddd;
+  --w31-title: #007b9d;
+  --w31-edge: #000;
+  --w31-bevel: inset 2px 2px var(--w31-hi), inset -2px -2px var(--w31-low);
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-1"] {
+  --w31-desktop: #fff;
+  --w31-face: #fff;
+  --w31-title: #0000a0;
+  --w31-link: #0000a0;
+  --w31-hi: #fff;
+  --w31-low: #000;
+  --w31-bevel: none;
+  --w31-inset: none;
+  --font-family: "Courier New", Courier, monospace;
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="hotdog-stand"] {
+  --w31-desktop: #f00;
+  --w31-face: #ff0;
+  --w31-field: #fff7b0;
+  --w31-ink: #000;
+  --w31-muted: #292000;
+  --w31-title: #f00;
+  --w31-caption: #000;
+  --w31-link: #970000;
+  --w31-hi: #ffffb5;
+  --w31-low: #840000;
+  --accent-rgb: 151, 0, 0;
+  --danger: #970000;
+  --warning: #693600;
+  --success: #005500;
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="arizona"] {
+  --w31-desktop: #a5683f;
+  --w31-face: #e1c3a1;
+  --w31-field: #fff4df;
+  --w31-title: #713515;
+  --w31-link: #6b2f11;
+  --w31-hi: #fff5dc;
+  --w31-low: #826349;
+  --accent-rgb: 107, 47, 17;
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="ocean"] {
+  --w31-desktop: #4f7fa8;
+  --w31-face: #bad1da;
+  --w31-field: #f0fbff;
+  --w31-title: #003e65;
+  --w31-link: #003e65;
+  --w31-hi: #efffff;
+  --w31-low: #52748a;
+  --accent-rgb: 0, 62, 101;
+}
+
+:root[data-interface-theme="windows-31"][data-theme-variant="plasma-power-saver"] {
+  --w31-desktop: #000080;
+  --w31-face: #aaaac8;
+  --w31-field: #efefff;
+  --w31-title: #400080;
+  --w31-link: #400080;
+  --w31-hi: #fff;
+  --w31-low: #555580;
+  --accent-rgb: 64, 0, 128;
+}
+
+/* Night mode preserves each scheme's caption and desktop identity. */
+:root[data-interface-theme="windows-31"][data-color-scheme="dark"][data-theme-variant] {
+  --w31-face: #333;
+  --w31-field: #171717;
+  --w31-ink: #fff;
+  --w31-muted: #ddd;
+  --w31-link: #b9d6ff;
+  --w31-hi: #777;
+  --w31-low: #111;
+  --accent-rgb: 185, 214, 255;
+}
+:root[data-interface-theme="windows-31"][data-color-scheme="dark"][data-theme-variant="windows-1"] {
+  --w31-desktop: #000;
+  --w31-face: #000;
+  --w31-field: #000;
+  --w31-link: #fff;
+  --w31-hi: #fff;
+  --w31-low: #fff;
+}
+:root[data-interface-theme="windows-31"][data-color-scheme="dark"][data-theme-variant="hotdog-stand"] {
+  --w31-desktop: #800000;
+  --w31-face: #ff0;
+  --w31-field: #fff7b0;
+  --w31-ink: #000;
+  --w31-muted: #292000;
+  --w31-link: #970000;
+  --w31-hi: #ffffb5;
+  --w31-low: #840000;
+  --danger: #970000;
+  --warning: #693600;
+  --success: #005500;
+  --accent-rgb: 151, 0, 0;
+}
+
+:root[data-interface-theme="windows-31"] body {
+  font-family: var(--font-family);
+  color: var(--ink);
+  background: var(--w31-desktop);
+  letter-spacing: normal;
+  text-shadow: none;
+}
+:root[data-interface-theme="windows-31"] :is(button, input, select, textarea, kbd) {
+  font-family: var(--font-family);
+  border-radius: 0;
+}
+:root[data-interface-theme="windows-31"] :is(h1, h2, h3, h4) {
+  font-family: var(--font-family);
+  letter-spacing: normal;
+  text-shadow: none;
+}
+:root[data-interface-theme="windows-31"] ::selection {
+  background: var(--w31-title);
+  color: var(--w31-caption);
+}
+:root[data-interface-theme="windows-31"] :focus-visible {
+  outline: 2px dotted var(--ink);
+  outline-offset: 3px;
+}
+:root[data-interface-theme="windows-31"] :is(.noise, .scanlines, .binary-rain, .theme-atmosphere) {
+  display: none;
+}
+:root[data-interface-theme="windows-31"] :is(.chooser-terminal, .shell, .desktop-window, .system-window, .fake-desktop-app, .blog-shell, .error-window, .profile-layout, .endless-boot-console) {
+  border: 1px solid var(--w31-edge);
+  outline: 1px solid var(--w31-hi);
+  outline-offset: -3px;
+  border-radius: 0;
+  background: var(--w31-face);
+  box-shadow: var(--w31-bevel), 3px 3px 0 var(--w31-edge);
+  color: var(--ink);
+  backdrop-filter: none;
+}
+:root[data-interface-theme="windows-31"] :is(.system-bar, .desktop-window-bar, .fake-desktop-app > header, .chooser-bar, .profile-panel-bar, .endless-boot-header) {
+  background: var(--w31-title);
+  color: var(--w31-caption);
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  box-shadow: none;
+  font-weight: 700;
+  text-shadow: none;
+  letter-spacing: normal;
+}
+:root[data-interface-theme="windows-31"] :is(.system-bar, .desktop-window-bar) {
+  min-height: 32px;
+  margin: 3px;
+  padding: 0 3px 0 8px;
+}
+:root[data-interface-theme="windows-31"] :is(.system-bar > p, .desktop-window-bar > p, .system-status, .system-status:hover, .system-status:focus-visible, .endless-boot-header h1, .endless-boot-header .system-kicker) {
+  color: var(--w31-caption);
+  font-weight: 700;
+  text-shadow: none;
+}
+:root[data-interface-theme="windows-31"] .system-status {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+:root[data-interface-theme="windows-31"] :is(button, .profile-button, .chooser-options a, .fake-start-menu > summary, .error-actions a, .footer-select-control) {
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  background: var(--w31-face);
+  color: var(--ink);
+  box-shadow: var(--w31-bevel);
+  text-shadow: none;
+  transition: none;
+}
+:root[data-interface-theme="windows-31"] :is(button, .profile-button, .chooser-options a, .error-actions a):hover {
+  background: var(--w31-field);
+  color: var(--ink);
+  transform: none;
+}
+:root[data-interface-theme="windows-31"] :is(button, .profile-button):active {
+  box-shadow: var(--w31-inset);
+}
+:root[data-interface-theme="windows-31"] :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  color: var(--ink);
+  background: var(--w31-field);
+  border: 1px solid var(--w31-edge);
+  box-shadow: var(--w31-inset);
+}
+:root[data-interface-theme="windows-31"] :is(.window-controls, .desktop-window-controls) { gap: 0; }
+:root[data-interface-theme="windows-31"] :is(.window-button, .desktop-window-controls button) {
+  position: relative;
+  min-width: 27px;
+  width: 27px;
+  min-height: 25px;
+  height: 25px;
+  border: 1px solid var(--w31-edge);
+  background: var(--w31-face);
+  color: var(--ink);
+  padding: 0;
+  font-weight: 700;
+}
+/* Replace modern underscore/square glyphs without changing the accessible labels. */
+:root[data-interface-theme="windows-31"] :is(.minimize-button, .maximize-button, [data-window-minimize]) { font-size: 0; }
+:root[data-interface-theme="windows-31"] :is(.minimize-button, .maximize-button) .control-icon { display: none; }
+:root[data-interface-theme="windows-31"] :is(.minimize-button, [data-window-minimize])::after {
+  content: "\25bc";
+  font: bold 15px/1 Arial, sans-serif;
+  color: var(--ink);
+}
+:root[data-interface-theme="windows-31"] .maximize-button::after {
+  content: "\25b2";
+  font: bold 15px/1 Arial, sans-serif;
+  color: var(--ink);
+}
+:root[data-interface-theme="windows-31"] .maximize-button[aria-pressed="true"]::after { content: "\25c6"; }
+:root[data-interface-theme="windows-31"] :is(.app-menu-bar, .fake-taskbar, .fake-start-menu > div, .app-menu-popup) {
+  background: var(--w31-face);
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  color: var(--ink);
+  box-shadow: var(--w31-bevel);
+  backdrop-filter: none;
+}
+:root[data-interface-theme="windows-31"] :is(.app-menu summary, .app-menu-popup a, .app-menu-popup button) {
+  background: var(--w31-face);
+  color: var(--ink);
+  box-shadow: none;
+  border-radius: 0;
+}
+:root[data-interface-theme="windows-31"] :is(.app-menu summary:hover, .app-menu[open] summary, .app-menu-popup a:hover, .app-menu-popup button:hover, .app-menu-popup a:focus-visible, .app-menu-popup button:focus-visible) {
+  background: var(--w31-title);
+  color: var(--w31-caption);
+}
+:root[data-interface-theme="windows-31"] :is(.desktop-window-content, .shell-content, .system-window > div, .fake-desktop-app > div) {
+  color: var(--ink);
+  background: var(--w31-face);
+}
+:root[data-interface-theme="windows-31"] :is(.panel, .system-panel, .profile-card, .link-card, .profile-overview, .profile-skills article, .profile-projects article, .blog-post-list article, .section-label, .profile-section-heading, .fake-action-center, .fake-playing-dead) {
+  border: 1px solid var(--w31-low);
+  border-radius: 0;
+  background: var(--w31-field);
+  color: var(--ink);
+  box-shadow: var(--w31-inset);
+}
+:root[data-interface-theme="windows-31"] :is(.fake-desktop, .chooser-page, .professional-page, .blog-page, .error-page, .endless-boot-page) {
+  background: var(--w31-desktop);
+  color: var(--ink);
+}
+:root[data-interface-theme="windows-31"] .fake-desktop::before { display: none; }
+:root[data-interface-theme="windows-31"] .fake-desktop-icons button {
+  background: var(--w31-face);
+  color: var(--ink);
+  border: 1px solid transparent;
+  box-shadow: none;
+  text-shadow: none;
+  border-radius: 0;
+}
+:root[data-interface-theme="windows-31"] .fake-desktop-icons button:hover,
+:root[data-interface-theme="windows-31"] .fake-desktop-icons button:focus-visible {
+  background: var(--w31-title);
+  color: var(--w31-caption);
+  border: 1px dotted var(--w31-caption);
+}
+:root[data-interface-theme="windows-31"] .fake-desktop-icon {
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  background: var(--w31-field);
+  color: var(--w31-link);
+  box-shadow: 2px 2px 0 var(--w31-edge);
+}
+:root[data-interface-theme="windows-31"] .fake-taskbar { border-top: 3px double var(--w31-hi); }
+:root[data-interface-theme="windows-31"] :is(.fake-desktop-clock, .fake-start-menu strong) { color: var(--ink); }
+:root[data-interface-theme="windows-31"] .fake-taskbar button[aria-pressed="true"] { box-shadow: var(--w31-inset); }
+:root[data-interface-theme="windows-31"] :is(.chooser-boot, .chooser-copy strong, .chooser-key, .chooser-path, .blog-header h1, .blog-post-list h3 a, .blog-markdown :is(h2, h3, h4), .profile-kicker, .profile-card-index, .error-code) { color: var(--accent); }
+:root[data-interface-theme="windows-31"] :is(.chooser-copy > span, .chooser-intro, .chooser-hint, .chooser-remember, .profile-description, .profile-help, .profile-subtitle, .blog-status) { color: var(--muted); }
+:root[data-interface-theme="windows-31"] .chooser-bar { padding: 9px 12px; }
+:root[data-interface-theme="windows-31"] .chooser-led { background: var(--w31-caption); box-shadow: none; border-radius: 0; }
+:root[data-interface-theme="windows-31"] :is(.chooser-cursor, .profile-monogram > span) { animation: none; }
+:root[data-interface-theme="windows-31"] .profile-layout {
+  padding-inline: clamp(16px, 4vw, 40px);
+  margin-block: 24px;
+}
+:root[data-interface-theme="windows-31"] :is(.profile-header, .profile-footer) { border-color: var(--w31-low); }
+:root[data-interface-theme="windows-31"] :is(.profile-brand, .profile-header nav a, .profile-intro h1, .profile-section h2, .profile-timeline h3) { color: var(--ink); }
+:root[data-interface-theme="windows-31"] :is(.profile-monogram, .profile-tags span, .profile-skills li, .profile-certifications article) {
+  color: var(--ink);
+  background: var(--w31-face);
+  border: 1px solid var(--w31-low);
+  border-radius: 0;
+}
+:root[data-interface-theme="windows-31"] :is(.profile-text-link, .profile-socials a, .profile-footer a, .blog-header a, .blog-markdown a) { color: var(--accent); }
+:root[data-interface-theme="windows-31"] :is(.blog-markdown pre, .blog-markdown code, .blog-markdown blockquote) {
+  background: var(--w31-field);
+  color: var(--ink);
+  border-color: var(--w31-low);
+  border-radius: 0;
+}
+:root[data-interface-theme="windows-31"] .error-window::before {
+  content: "Windows — Application Error";
+  display: block;
+  margin: -16px -16px 24px;
+  padding: 8px 12px;
+  background: var(--w31-title);
+  color: var(--w31-caption);
+  border: 1px solid var(--w31-edge);
+  font-weight: 700;
+}
+:root[data-interface-theme="windows-31"] .endless-boot-console { padding: clamp(12px, 3vw, 32px); }
+:root[data-interface-theme="windows-31"] .endless-boot-header { padding: 12px; }
+:root[data-interface-theme="windows-31"] :is(.endless-boot-terminal, .endless-boot-settings-panel, .endless-boot-command, .endless-boot-event, .endless-boot-hardware, .endless-boot-inspector) {
+  background: var(--w31-field);
+  color: var(--ink);
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  box-shadow: var(--w31-inset);
+}
+:root[data-interface-theme="windows-31"] .endless-boot-log { color: var(--ink); mask-image: none; }
+:root[data-interface-theme="windows-31"] :is(.endless-boot-status, .endless-boot-machine, .endless-boot-footer p, .endless-boot-transmission p, .endless-boot-machine strong) { color: var(--ink); }
+:root[data-interface-theme="windows-31"] :is(.endless-boot-transmission > span, .endless-boot-post strong, .endless-boot-log-entry > span::before) { color: var(--accent); }
+:root[data-interface-theme="windows-31"] .endless-boot-progress {
+  background: var(--w31-field);
+  border: 1px solid var(--w31-edge);
+  border-radius: 0;
+  box-shadow: var(--w31-inset);
+  padding: 2px;
+  height: 20px;
+}
+:root[data-interface-theme="windows-31"] .endless-boot-progress span {
+  background: var(--w31-title);
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-2"] :is(.shell, .desktop-window, .chooser-terminal, .blog-shell) { border: 3px double var(--w31-edge); }
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-2"] :is(.system-bar, .desktop-window-bar, .chooser-bar) { min-height: 37px; border-width: 2px; }
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-1"] :is(.shell, .desktop-window, .chooser-terminal, .blog-shell, .profile-layout, .error-window, .endless-boot-console) { box-shadow: none; outline: none; border: 2px solid var(--w31-low); }
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-1"] :is(.system-bar, .desktop-window-bar, .chooser-bar) { margin: 0; border-bottom: 3px double var(--w31-caption); }
+:root[data-interface-theme="windows-31"][data-theme-variant="windows-1"] .fake-desktop-icons button { border: 1px solid var(--w31-low); }
+@media (max-width: 640px) {
+  :root[data-interface-theme="windows-31"] .profile-layout { margin-block: 10px; }
+  :root[data-interface-theme="windows-31"] .chooser-bar { gap: 8px; flex-wrap: wrap; }
+  :root[data-interface-theme="windows-31"] .system-bar { padding-left: 4px; }
+  :root[data-interface-theme="windows-31"] .system-bar > p { font-size: .7rem; }
+}
+:root[data-interface-theme="windows-31"] .error-window { padding: 16px; }
+:root[data-interface-theme="windows-31"] .endless-boot-log-entry {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+}
+:root[data-interface-theme="windows-31"] .endless-boot-log li[data-state="error"] { color: var(--danger); }
+:root[data-interface-theme="windows-31"] .endless-boot-log li[data-state="rainbow"] .endless-boot-log-entry > span {
+  color: var(--accent);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  animation: none;
+}
+:root[data-interface-theme="windows-31"] .system-bar button.system-status,
+:root[data-interface-theme="windows-31"] .system-bar button.system-status:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--w31-caption);
+}
+:root[data-interface-theme="windows-31"] .system-bar #status-text { color: var(--w31-caption); }

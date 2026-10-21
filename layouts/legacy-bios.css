@@ -1,0 +1,184 @@
+:root[data-interface-theme="legacy-bios"] {
+  --bg: #0000a8;
+  --panel: #0000a8;
+  --panel-2: #000080;
+  --panel-strong: #000080;
+  --ink: #fff;
+  --text: #fff;
+  --muted: #d5d5ee;
+  --accent: #ffff55;
+  --accent-rgb: 255, 255, 85;
+  --accent-soft: #000080;
+  --warning: #ffff55;
+  --line: #a8a8a8;
+  --border: #a8a8a8;
+  --shell-bg: #0000a8;
+  --body-background: #0000a8;
+  --overlay-bg: #000080;
+  --font-family: "Perfect DOS VGA 437", "Lucida Console", Consolas, monospace;
+  --control-radius: 0;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --material-blur: 0px;
+  --shadow: none;
+  --name-field-opacity: 0;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --icon-filter: none;
+  --bios-selection: #a80000;
+  --bios-selection-ink: #fff;
+  --bios-title-bg: #a8a8a8;
+  --bios-title-ink: #0000a8;
+  --scrollbar-thumb-background: #a8a8a8;
+  --scrollbar-track-background: #000080;
+  color-scheme: dark;
+}
+:root[data-interface-theme="legacy-bios"][data-theme-variant="phoenix"] {
+  --bg: #c0c0c0;
+  --panel: #c0c0c0;
+  --panel-2: #d8e2ed;
+  --panel-strong: #d8e2ed;
+  --ink: #000060;
+  --text: #000060;
+  --muted: #303050;
+  --accent: #000080;
+  --accent-rgb: 0, 0, 128;
+  --accent-soft: #d8e2ed;
+  --warning: #800000;
+  --line: #000080;
+  --border: #000080;
+  --shell-bg: #c0c0c0;
+  --body-background: #c0c0c0;
+  --overlay-bg: #c0c0c0;
+  --bios-selection: #000080;
+  --bios-selection-ink: #fff;
+  --bios-title-bg: #000080;
+  --bios-title-ink: #fff;
+  color-scheme: light;
+}
+:root[data-interface-theme="legacy-bios"][data-theme-variant="ami"] {
+  --bg: #000080;
+  --panel: #c0c0c0;
+  --panel-2: #d4d4d4;
+  --panel-strong: #d4d4d4;
+  --ink: #000080;
+  --text: #000080;
+  --muted: #33334d;
+  --accent: #000080;
+  --accent-rgb: 0, 0, 128;
+  --accent-soft: #ddd;
+  --warning: #800000;
+  --line: #000080;
+  --border: #000080;
+  --shell-bg: #c0c0c0;
+  --body-background: #000080;
+  --overlay-bg: #c0c0c0;
+  --bios-selection: #000080;
+  --bios-selection-ink: #fff;
+  --bios-title-bg: #000080;
+  --bios-title-ink: #fff;
+  color-scheme: light;
+}
+:root[data-interface-theme="legacy-bios"] body {
+  display: block;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px 28px 104px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.6 var(--font-family);
+  letter-spacing: 0;
+  animation: none;
+}
+:root[data-interface-theme="legacy-bios"] body::before,
+:root[data-interface-theme="legacy-bios"] body::after,
+:root[data-interface-theme="legacy-bios"] .theme-atmosphere { display: none; }
+:root[data-interface-theme="legacy-bios"] :is(h1,h2,h3,h4,p,a,button,input,select,textarea,pre,code,kbd) { font-family: var(--font-family); text-shadow: none; }
+:root[data-interface-theme="legacy-bios"] :is(h1,h2,h3,h4) { color: var(--ink); letter-spacing: 0; }
+:root[data-interface-theme="legacy-bios"] :is(a,button,input,select,textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:root[data-interface-theme="legacy-bios"] a { color: var(--accent); }
+:root[data-interface-theme="legacy-bios"] .bios-setup { max-width: 1180px; margin: 0 auto 22px; background: var(--panel); border: 3px double var(--line); box-shadow: none; }
+:root[data-interface-theme="legacy-bios"] .bios-header { text-align: center; }
+:root[data-interface-theme="legacy-bios"] .bios-title { padding: 6px 12px; color: var(--bios-title-ink); background: var(--bios-title-bg); font-size: 16px; font-weight: bold; }
+:root[data-interface-theme="legacy-bios"] .bios-subtitle { padding: 10px; color: var(--ink); font-size: 12px; letter-spacing: .08em; border-bottom: 3px double var(--line); }
+:root[data-interface-theme="legacy-bios"] .bios-tabs { display: none; }
+:root[data-interface-theme="legacy-bios"] .bios-workspace { display: block; }
+:root[data-interface-theme="legacy-bios"] .bios-menu { display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 9px 30px; padding: 24px; }
+:root[data-interface-theme="legacy-bios"] .bios-menu-item { display: flex; align-items: baseline; gap: 12px; padding: 5px 10px; color: var(--accent); text-decoration: none; font-weight: bold; line-height: 1.6; }
+:root[data-interface-theme="legacy-bios"] .bios-menu-item:nth-child(n+5) { color: var(--ink); }
+:root[data-interface-theme="legacy-bios"] .bios-marker { flex: 0 0 auto; font-size: 12px; }
+:root[data-interface-theme="legacy-bios"] :is(.bios-menu-item,.bios-tabs a):is(:hover,:focus-visible,[aria-current]) { color: var(--bios-selection-ink); background: var(--bios-selection); outline-offset: 2px; }
+:root[data-interface-theme="legacy-bios"] .bios-item-help { display: none; }
+:root[data-interface-theme="legacy-bios"] .bios-description { min-height: 3.2em; margin: 0; padding: 12px 24px; color: var(--ink); border-top: 3px double var(--line); }
+:root[data-interface-theme="legacy-bios"] .bios-content-label { max-width: 1180px; box-sizing: border-box; margin: 0 auto; padding: 8px 16px; color: #fff; background: #a80000; font-size: 12px; }
+:root[data-interface-theme="legacy-bios"] .bios-footer { position: fixed; z-index: 50; inset: auto 0 0; padding: 9px 24px; color: var(--bios-title-ink); background: var(--bios-title-bg); border-top: 3px double currentColor; text-align: center; }
+:root[data-interface-theme="legacy-bios"] .bios-footer p { margin: 0; }
+:root[data-interface-theme="legacy-bios"] .bios-key-help { white-space: pre-wrap; font-weight: bold; }
+:root[data-interface-theme="legacy-bios"] .bios-copyright { font-size: 12px; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-tabs { display: flex; flex-wrap: wrap; gap: 0; padding: 0 14px; background: #000080; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-tabs a { padding: 5px 16px; color: #fff; text-decoration: none; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-tabs a:is(:hover,:focus-visible,[aria-current]) { color: #000080; background: #c0c0c0; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .4fr); }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-menu { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; gap: 2px; padding: 22px; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-menu-item { font-weight: normal; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-item-help { display: block; padding: 18px; border-left: 2px solid var(--line); }
+:root[data-interface-theme="legacy-bios"] .bios-item-help h2 { margin: 0 -18px 16px; padding: 0 18px 12px; font-size: 15px; border-bottom: 1px solid var(--line); }
+:root[data-interface-theme="legacy-bios"] .bios-item-help p { margin: 0 0 20px; }
+:root[data-interface-theme="legacy-bios"] .bios-help-hint { color: var(--muted); font-size: 12px; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant="phoenix"] .bios-content-label { color: #000080; background: #d8e2ed; border: 1px solid #000080; }
+:root[data-interface-theme="legacy-bios"][data-theme-variant="ami"] .bios-content-label { color: #fff; background: #000080; border: 1px solid #a8a8a8; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser,.profile-layout,.blog-shell,.error-window,.endless-boot-console,.resume-page) { width: 100%; max-width: 1180px; min-width: 0; box-sizing: border-box; margin: 0 auto; background: var(--panel); color: var(--ink); border: 3px double var(--line); border-radius: 0; box-shadow: none; backdrop-filter: none; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser-terminal,.chooser-options a,.profile-overview,.profile-experience article,.profile-education article,.profile-skill-groups article,.profile-skills article,.profile-projects > article,.profile-project,.profile-contact-card,.blog-post-card,.blog-article,.endless-boot-transmission,.endless-boot-machine,.endless-boot-status) { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser-bar,.profile-panel-bar,.endless-boot-header,.blog-breadcrumbs) { background: var(--panel-2); color: var(--ink); border-radius: 0; border-bottom: 1px solid var(--line); }
+:root[data-interface-theme="legacy-bios"] .chooser-terminal { border: 0; }
+:root[data-interface-theme="legacy-bios"] .chooser-body { padding: 24px; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser h1,.profile-hero h1,.blog-header h1,.error-window h1) { font-size: clamp(22px, 3vw, 34px); font-weight: bold; line-height: 1.35; letter-spacing: 0; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser-cursor,.chooser-led,.profile-monogram,.profile-hero::after) { display: none; }
+:root[data-interface-theme="legacy-bios"] .chooser-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+:root[data-interface-theme="legacy-bios"] .chooser-options a { height: 100%; padding: 16px; transform: none; }
+:root[data-interface-theme="legacy-bios"] .chooser-options a:is(:hover,:focus-visible) { background: var(--bios-selection); color: var(--bios-selection-ink); }
+:root[data-interface-theme="legacy-bios"] .chooser-options a:is(:hover,:focus-visible) :is(strong,span) { color: inherit; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser-copy strong,.chooser-key,.profile-kicker,.profile-hero h1 span,.profile-socials a,.profile-text-link,.blog-post-card h3,.blog-article h2,.error-code) { color: var(--accent); text-shadow: none; }
+:root[data-interface-theme="legacy-bios"] :is(.chooser-copy > span,.chooser-intro,.chooser-hint,.chooser-path,.profile-intro,.profile-description,.profile-overview dt,.profile-overview dd,.blog-status,.blog-article-excerpt,.blog-article-meta) { color: var(--muted); }
+:root[data-interface-theme="legacy-bios"] :is(.profile-header,.profile-hero,.profile-section,.profile-footer) { padding: 24px; background: var(--panel); color: var(--ink); border-color: var(--line); }
+:root[data-interface-theme="legacy-bios"] .profile-header { position: static; flex-wrap: wrap; box-shadow: none; border-bottom: 3px double var(--line); }
+:root[data-interface-theme="legacy-bios"] .profile-header-tools { flex-wrap: wrap; }
+:root[data-interface-theme="legacy-bios"] .profile-brand { color: var(--ink); }
+:root[data-interface-theme="legacy-bios"] .profile-header nav a { color: var(--accent); }
+:root[data-interface-theme="legacy-bios"] :is(.profile-button,button,select,input,textarea,kbd) { color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+:root[data-interface-theme="legacy-bios"] .profile-button { color: var(--bios-selection-ink); background: var(--bios-selection); }
+:root[data-interface-theme="legacy-bios"] :is(.blog-shell,.error-window) { padding: 28px; }
+:root[data-interface-theme="legacy-bios"] .blog-post-card { border-bottom: 1px solid var(--line); padding: 18px; }
+:root[data-interface-theme="legacy-bios"] .blog-markdown { color: var(--ink); }
+:root[data-interface-theme="legacy-bios"] .blog-markdown :is(pre,blockquote,code) { color: var(--ink); background: var(--panel-2); border-color: var(--line); border-radius: 0; }
+:root[data-interface-theme="legacy-bios"] .endless-boot-page { overflow: auto; height: auto; }
+:root[data-interface-theme="legacy-bios"] .endless-boot-console { height: min(850px, 100vh); min-height: 600px; }
+:root[data-interface-theme="legacy-bios"] .endless-boot-terminal { background: var(--panel-2); color: var(--ink); }
+:root[data-interface-theme="legacy-bios"] :is(.endless-boot-log,.endless-boot-log li,.endless-boot-log time,.endless-boot-log span) { color: var(--ink); }
+:root[data-interface-theme="legacy-bios"] :is(.endless-boot-footer,.endless-boot-settings-panel,.endless-boot-command,.endless-boot-modal) { background: var(--panel); color: var(--ink); border-color: var(--line); border-radius: 0; }
+:root[data-interface-theme="legacy-bios"] .bits-layout-notice { position: static; width: auto; max-width: 1180px; margin: 18px auto 0; transform: none; border-radius: 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+@media (max-width: 700px) {
+  :root[data-interface-theme="legacy-bios"] body { padding: 8px 8px 126px; font-size: 13px; }
+  :root[data-interface-theme="legacy-bios"] .bios-title { font-size: 13px; line-height: 1.5; }
+  :root[data-interface-theme="legacy-bios"] .bios-subtitle { padding: 8px 5px; font-size: 10px; letter-spacing: 0; }
+  :root[data-interface-theme="legacy-bios"] .bios-menu { gap: 8px; padding: 14px 6px; }
+  :root[data-interface-theme="legacy-bios"] .bios-menu-item { gap: 5px; padding: 6px 4px; font-size: 12px; }
+  :root[data-interface-theme="legacy-bios"] .bios-description { padding: 10px; font-size: 12px; }
+  :root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-tabs { padding: 0 3px; justify-content: space-between; }
+  :root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-tabs a { padding: 6px 4px; font-size: 11px; }
+  :root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-workspace { grid-template-columns: minmax(0,1fr); }
+  :root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-menu { padding: 12px; }
+  :root[data-interface-theme="legacy-bios"][data-theme-variant] .bios-item-help { border-left: 0; border-top: 1px solid var(--line); padding: 12px; }
+  :root[data-interface-theme="legacy-bios"] .bios-item-help h2 { margin: 0 0 8px; padding: 0 0 8px; font-size: 13px; }
+  :root[data-interface-theme="legacy-bios"] .bios-item-help p { margin-bottom: 8px; }
+  :root[data-interface-theme="legacy-bios"] .bios-footer { padding: 6px 10px; font-size: 11px; }
+  :root[data-interface-theme="legacy-bios"] .bios-copyright { font-size: 10px; }
+  :root[data-interface-theme="legacy-bios"] .bios-content-label { padding: 8px; font-size: 10px; }
+  :root[data-interface-theme="legacy-bios"] :is(.chooser-body,.profile-header,.profile-hero,.profile-section,.profile-footer,.blog-shell,.error-window) { padding: 16px; }
+  :root[data-interface-theme="legacy-bios"] :is(.chooser-options,.profile-hero) { grid-template-columns: minmax(0,1fr); }
+  :root[data-interface-theme="legacy-bios"] .chooser-options a { padding: 12px; }
+  :root[data-interface-theme="legacy-bios"] .chooser-path { display: none; }
+  :root[data-interface-theme="legacy-bios"] .profile-header nav { flex-wrap: wrap; }
+  :root[data-interface-theme="legacy-bios"] .endless-boot-console { min-height: 680px; }
+  :root[data-interface-theme="legacy-bios"] .bits-layout-notice { flex-wrap: wrap; }
+}

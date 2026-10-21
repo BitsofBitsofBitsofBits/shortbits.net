@@ -1,0 +1,275 @@
+/* Ubuntu desktops share a GNOME/Breeze control vocabulary without changing markup. */
+:root[data-interface-theme="ubuntu"] {
+  color-scheme: dark;
+  --ub-orange: #e95420;
+  --ub-purple: #77216f;
+  --ub-header: #363432;
+  --ub-header-ink: #f6f5f4;
+  --ub-radius: 12px;
+  --ub-wallpaper: linear-gradient(145deg, #77216f, #47143e 42%, #2c001e 80%);
+  --accent: #ff946d;
+  --accent-hover: #ffc4a9;
+  --accent-rgb: 255, 148, 109;
+  --accent-soft: rgba(var(--accent-rgb), .13);
+  --bg: #2c001e;
+  --panel: #2d2b29;
+  --panel-2: #3d3a38;
+  --panel-strong: #242220;
+  --ink: #f6f5f4;
+  --muted: #c5c0bc;
+  --border: #625d59;
+  --warning: #f6c65b;
+  --danger: #ff9690;
+  --success: #8ed89c;
+  --shell-bg: var(--panel);
+  --admin-bg: var(--panel);
+  --overlay-bg: var(--panel);
+  --shadow: 0 16px 44px #0005, 0 1px 3px #0007;
+  --font-family: "Ubuntu", "Cantarell", "Noto Sans", sans-serif;
+  --control-radius: 7px;
+  --shell-radius: var(--ub-radius);
+  --window-radius: var(--ub-radius);
+  --material-blur: 0px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: brightness(0) invert(1);
+  --spotify-accent: var(--accent);
+  --body-background: var(--ub-wallpaper);
+  --body-background-size: cover;
+  --scrollbar-size: 12px;
+  --scrollbar-track: var(--panel);
+  --scrollbar-thumb-color: var(--border);
+  --scrollbar-thumb-background: var(--border);
+  --scrollbar-thumb-hover: var(--accent);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 3px solid var(--panel);
+  --scrollbar-thumb-radius: 12px;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: none;
+}
+:root[data-interface-theme="ubuntu"][data-color-scheme="light"] {
+  color-scheme: light;
+  --bg: #f6f5f4;
+  --panel: #fff;
+  --panel-2: #eeecea;
+  --panel-strong: #f6f5f4;
+  --ink: #302d2b;
+  --muted: #635e59;
+  --border: #c2bdb8;
+  --accent: #b83d12;
+  --accent-hover: #8f2d0b;
+  --accent-rgb: 184, 61, 18;
+  --ub-header: #e9e6e3;
+  --ub-header-ink: #302d2b;
+  --warning: #855c00;
+  --danger: #b72c26;
+  --success: #257a3a;
+  --icon-filter: brightness(0);
+  --shadow: 0 16px 44px #24112626, 0 1px 3px #0003;
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="human"] {
+  --bg: #2b1d0e;
+  --panel: #352a20;
+  --panel-2: #4a3b2a;
+  --panel-strong: #2b2119;
+  --muted: #d2bfa8;
+  --border: #8d7254;
+  --accent: #ffc074;
+  --accent-rgb: 255, 192, 116;
+  --ub-orange: #bd6a2d;
+  --ub-header: linear-gradient(#7e5a37, #49331f);
+  --ub-header-ink: #fff3df;
+  --ub-radius: 5px;
+  --ub-wallpaper: radial-gradient(ellipse at 70% 20%, #bb7a38, #754a29 38%, #2b1d0e 85%);
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="human"][data-color-scheme="light"] {
+  --bg: #e9dcc5;
+  --panel: #f5eddc;
+  --panel-2: #e4d7bd;
+  --panel-strong: #eee1c9;
+  --ink: #3d2918;
+  --muted: #70563d;
+  --border: #b9a081;
+  --accent: #8d450c;
+  --accent-rgb: 141, 69, 12;
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="unity"] {
+  --ub-header: linear-gradient(#514e49, #35322f);
+  --ub-header-ink: #f5f1e9;
+  --ub-radius: 6px;
+  --ub-wallpaper: linear-gradient(155deg, #a53e59, #762d69 32%, #431847 65%, #2c001e);
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="unity"][data-color-scheme="light"] {
+  --bg: #f2f1f0;
+  --panel: #f8f7f6;
+  --panel-2: #e6e3df;
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="adwaita"] {
+  --bg: #242424;
+  --panel: #303030;
+  --panel-2: #3d3d3d;
+  --panel-strong: #242424;
+  --ink: #f6f5f4;
+  --muted: #c6c6c6;
+  --border: #626262;
+  --accent: #8ec0ff;
+  --accent-rgb: 142, 192, 255;
+  --ub-orange: #3584e4;
+  --ub-header: #3b3b3b;
+  --ub-header-ink: #fff;
+  --ub-wallpaper: radial-gradient(ellipse at top right, #355e88, #242a36 55%, #171e28);
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="adwaita"][data-color-scheme="light"] {
+  --bg: #fafafa;
+  --panel: #fff;
+  --panel-2: #ebebeb;
+  --panel-strong: #f6f5f4;
+  --ink: #242424;
+  --muted: #5e5c64;
+  --border: #c5c5c5;
+  --accent: #1c63b4;
+  --accent-rgb: 28, 99, 180;
+  --ub-header: #ebebeb;
+  --ub-header-ink: #242424;
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="kubuntu"] {
+  --bg: #1b1e20;
+  --panel: #232629;
+  --panel-2: #31363b;
+  --panel-strong: #1b1e20;
+  --ink: #eff0f1;
+  --muted: #bcc5ce;
+  --border: #616b73;
+  --accent: #70c8f5;
+  --accent-rgb: 112, 200, 245;
+  --ub-orange: #3daee9;
+  --ub-header: #31363b;
+  --ub-header-ink: #eff0f1;
+  --ub-radius: 3px;
+  --control-radius: 3px;
+  --ub-wallpaper: linear-gradient(140deg, #17354a 0 25%, #256384 25% 48%, #17465b 48% 65%, #1b1e20 65%);
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="kubuntu"][data-color-scheme="light"] {
+  --bg: #eff0f1;
+  --panel: #fcfcfc;
+  --panel-2: #e3e5e7;
+  --panel-strong: #eff0f1;
+  --ink: #232629;
+  --muted: #56616a;
+  --border: #b4bdc4;
+  --accent: #126c9b;
+  --accent-rgb: 18, 108, 155;
+  --ub-header: #eff0f1;
+  --ub-header-ink: #232629;
+}
+:root[data-interface-theme="ubuntu"] body {
+  color: var(--ink);
+  background: var(--body-background);
+  background-attachment: fixed;
+  font-family: var(--font-family);
+  letter-spacing: normal;
+  text-shadow: none;
+}
+:root[data-interface-theme="ubuntu"] :is(.shell, .desktop-window, .fake-desktop-app, .chooser-terminal, .error-window) {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--ub-radius);
+  box-shadow: var(--shadow);
+}
+:root[data-interface-theme="ubuntu"] :is(.system-bar, .desktop-window-bar, .fake-desktop-app > header, .chooser-bar, .profile-panel-bar) {
+  color: var(--ub-header-ink);
+  background: var(--ub-header);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--ub-radius) var(--ub-radius) 0 0;
+  min-height: 44px;
+  align-items: center;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: inset 0 1px #ffffff14;
+}
+:root[data-interface-theme="ubuntu"] :is(.system-bar p, .system-status, .desktop-window-bar > p, .chooser-bar span) { color: var(--ub-header-ink); }
+:root[data-interface-theme="ubuntu"] .window-controls { margin-left: auto; gap: 7px; }
+:root[data-interface-theme="ubuntu"] .desktop-window-controls { gap: 7px; padding: 8px; }
+:root[data-interface-theme="ubuntu"] :is(.window-button, .desktop-window-controls button) {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--ub-header-ink);
+  background: #80808030;
+  box-shadow: none;
+}
+:root[data-interface-theme="ubuntu"] :is(.close-button, [data-window-close]) { color: #fff; background: var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] :is(button, input, select, textarea, .footer-select-control, .profile-button) {
+  font-family: var(--font-family);
+  border-radius: var(--control-radius);
+}
+:root[data-interface-theme="ubuntu"] :is(input, select, textarea) { color: var(--ink); background-color: var(--panel-strong); border-color: var(--border); accent-color: var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] button { color: var(--ink); background-color: var(--panel-2); border-color: var(--border); }
+:root[data-interface-theme="ubuntu"] :is(.close-button, .desktop-window-controls [data-window-close]) { color: white; background-color: var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] :is(button:hover, .profile-button:hover) { border-color: var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:root[data-interface-theme="ubuntu"] ::selection { color: #fff; background: #77216f; }
+:root[data-interface-theme="ubuntu"] :is(.chooser-options a, .profile-skills article, .profile-projects article, .profile-panel, .blog-post-list article) {
+  border: 1px solid var(--border);
+  border-radius: var(--ub-radius);
+  background: var(--panel);
+  box-shadow: 0 2px 5px #0000000c;
+}
+:root[data-interface-theme="ubuntu"] .chooser-options a:hover { background: var(--accent-soft); border-color: var(--accent); }
+:root[data-interface-theme="ubuntu"] .chooser-key { border-radius: 8px; padding: 8px; background: var(--accent-soft); }
+:root[data-interface-theme="ubuntu"] .chooser-cursor { display: none; }
+:root[data-interface-theme="ubuntu"] .blog-shell { background: var(--panel); border: 1px solid var(--border); border-radius: var(--ub-radius); padding: clamp(24px, 4vw, 48px); box-shadow: var(--shadow); }
+:root[data-interface-theme="ubuntu"] .blog-header { border-bottom: 3px solid var(--ub-orange); padding-bottom: 20px; }
+:root[data-interface-theme="ubuntu"] .professional-page { background: var(--bg); }
+:root[data-interface-theme="ubuntu"] .profile-header { border-bottom: 3px solid var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] .profile-monogram { color: #fff; background: var(--ub-orange); border: none; border-radius: 50%; }
+:root[data-interface-theme="ubuntu"] .profile-skills article { padding: 20px; }
+:root[data-interface-theme="ubuntu"] .profile-button { color: #fff; background: #b83d12; border-color: #b83d12; }
+:root[data-interface-theme="ubuntu"][data-theme-variant="adwaita"] .profile-button { background: #1c63b4; border-color: #1c63b4; }
+:root[data-interface-theme="ubuntu"][data-theme-variant="kubuntu"] .profile-button { background: #126c9b; border-color: #126c9b; }
+:root[data-interface-theme="ubuntu"] :is(.fake-taskbar, .fake-start-menu > div) { color: #f6f5f4; background: #241c25f5; border-color: #5e505d; }
+:root[data-interface-theme="ubuntu"] .fake-taskbar { border-top: 2px solid var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] .fake-taskbar button { border-radius: 7px; }
+:root[data-interface-theme="ubuntu"] .fake-start-menu summary { color: #fff; background: var(--ub-orange); border: none; border-radius: 8px; }
+:root[data-interface-theme="ubuntu"] .spotify-widget { border-radius: var(--ub-radius); background: var(--panel-2); }
+:root[data-interface-theme="ubuntu"] .endless-boot-console { color: #f6eafa; background: #2c001e; font-family: "Ubuntu Mono", "Cascadia Mono", Consolas, monospace; border: 1px solid #77506e; }
+:root[data-interface-theme="ubuntu"] .endless-boot-header { padding: 12px; background: #363432; border-radius: 8px; border-bottom: 2px solid var(--ub-orange); }
+:root[data-interface-theme="ubuntu"] .endless-boot-header :is(h1, p) { color: #f6f5f4; text-shadow: none; }
+:root[data-interface-theme="ubuntu"] .endless-boot-log { color: #f6eafa; }
+:root[data-interface-theme="ubuntu"] .endless-boot-console { --muted: #d3bfce; --accent: #ffab88; --border: #806179; --warning: #f6c65b; --success: #8ed89c; }
+:root[data-interface-theme="ubuntu"] .boot-screen { color: #f6eafa; background: #2c001e; }
+/* Keep the dock compact and the start menu reachable; retain the bottom bar on phones. */
+@media (min-width: 1000px) {
+  :root[data-interface-theme="ubuntu"] .fake-taskbar {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 8px;
+    width: 104px;
+    min-height: 0;
+    box-sizing: border-box;
+    transform: translateY(-50%);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 7px;
+    border: 1px solid #655063;
+    border-left: 3px solid var(--ub-orange);
+    border-radius: 12px;
+  }
+  :root[data-interface-theme="ubuntu"] .fake-task-running { width: 100%; white-space: normal; font-size: .6rem; padding: 10px 4px; }
+  :root[data-interface-theme="ubuntu"] .fake-task-running span { display: block; margin: 0 0 6px; }
+  :root[data-interface-theme="ubuntu"] .fake-start-menu > div { left: calc(100% + 14px); bottom: 0; border-radius: 10px; }
+  :root[data-interface-theme="ubuntu"] .shell:not(.is-maximized) { width: min(clamp(960px, 68vw, 1120px), calc(100% - 154px)); margin-left: max(130px, calc((100vw - 1120px) / 2)); margin-right: 24px; }
+  :root[data-interface-theme="ubuntu"][data-theme-variant="unity"] .fake-taskbar { left: 0; border-radius: 0 8px 8px 0; }
+}
+:root[data-interface-theme="ubuntu"][data-theme-variant="kubuntu"] .fake-taskbar { background: var(--panel); border-color: var(--border); }
+:root[data-interface-theme="ubuntu"][data-theme-variant="kubuntu"] :is(.window-button, .desktop-window-controls button) { border-radius: 2px; }
+@media (max-width: 640px) {
+  :root[data-interface-theme="ubuntu"] .blog-shell { padding: 20px; }
+  :root[data-interface-theme="ubuntu"] .system-bar { gap: 6px; }
+  :root[data-interface-theme="ubuntu"] .window-controls { gap: 4px; }
+}

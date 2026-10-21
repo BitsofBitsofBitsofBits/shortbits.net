@@ -1,0 +1,95 @@
+:root[data-interface-theme="xbox"] {
+ color-scheme:dark; --bg:#081406; --panel:rgba(11,30,8,.92); --panel-2:rgba(20,45,15,.92); --panel-strong:#10220c;
+ --ink:#eaffdf; --text:#eaffdf; --muted:#bad3ae; --border:rgba(151,234,47,.43); --line:rgba(151,234,47,.3);
+ --accent:#9bea2f; --accent-rgb:155,234,47; --accent-soft:rgba(155,234,47,.16); --accent-hover:#c7ff74; --success:#9bea2f; --warning:#ffd45f; --danger:#ff7777;
+ --shadow:0 18px 48px rgba(0,0,0,.5),0 0 25px rgba(119,221,24,.12); --shell-bg:rgba(8,22,5,.96); --admin-bg:rgba(8,22,5,.97); --overlay-bg:#10220c;
+ --body-background:radial-gradient(ellipse at 52% 30%,rgba(100,184,22,.25),transparent 42%),linear-gradient(145deg,#030701,#0b1b06 56%,#020401);
+ --font-family:"Trebuchet MS","Segoe UI",sans-serif; --control-radius:16px; --shell-radius:22px; --window-radius:18px; --material-blur:12px;
+ --scrollbar-track:#071005; --scrollbar-thumb-color:#477926; --scrollbar-thumb-background:linear-gradient(90deg,#274516,#75b926); --scrollbar-thumb-hover:#9bea2f;
+}
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] { color-scheme:light;
+ --bg:#18202a; --panel:#f3f5f4; --panel-2:#fff; --panel-strong:#e4e8e9; --ink:#20292e; --text:#20292e; --muted:#54636a;
+ --border:#9da9ad; --line:#c1c9cb; --accent:#60a92e; --accent-rgb:96,169,46; --accent-soft:rgba(96,169,46,.14); --accent-hover:#3d781b;
+ --success:#4f9c28; --warning:#a96808; --danger:#a82e35; --shell-bg:#f1f3f2; --admin-bg:#f1f3f2; --overlay-bg:#e8eceb;
+ --body-background:linear-gradient(180deg,#202a31,#c4cbcd 42%,#f2f3f2 43%,#aeb7bb); --shadow:0 14px 38px rgba(0,0,0,.32); --material-blur:0px;
+ --control-radius:2px; --shell-radius:8px; --window-radius:5px; --scrollbar-track:#e4e8e8; --scrollbar-thumb-color:#9ca7aa; --scrollbar-thumb-background:linear-gradient(90deg,#edf0f0,#abb4b6); --scrollbar-thumb-hover:#7f8b8e;
+}
+:root[data-interface-theme="xbox"][data-theme-variant="nxe"] { color-scheme:light;
+ --bg:#101b13; --panel:rgba(245,248,244,.97); --panel-2:#fff; --panel-strong:#e8efe7; --ink:#1d2a20; --text:#1d2a20; --muted:#526655;
+ --border:#94aa91; --line:#cfdbce; --accent:#5d9c36; --accent-rgb:93,156,54; --accent-soft:rgba(93,156,54,.15); --accent-hover:#376d1e;
+ --success:#4e9530; --warning:#966200; --danger:#b43f3f; --shell-bg:#f3f7f1; --admin-bg:#f3f7f1; --overlay-bg:#e7eee4;
+ --body-background:radial-gradient(ellipse at 50% 10%,rgba(206,235,180,.58),transparent 44%),linear-gradient(145deg,#b6c9ae,#e4eadd 55%,#8fa38a);
+ --shadow:0 18px 42px rgba(27,49,27,.26); --material-blur:0px; --control-radius:3px; --shell-radius:10px; --window-radius:7px;
+}
+:root[data-interface-theme="xbox"][data-theme-variant="one"] {
+ --bg:#121212; --panel:#1d1d1d; --panel-2:#252525; --panel-strong:#181818; --ink:#f5f5f5; --text:#f5f5f5; --muted:#c6c6c6;
+ --border:#484848; --line:#373737; --accent:#107c10; --accent-rgb:16,124,16; --accent-soft:rgba(16,124,16,.2); --accent-hover:#37b439;
+ --success:#58c957; --warning:#ffce54; --danger:#ff6b6b; --shell-bg:#171717; --admin-bg:#171717; --overlay-bg:#202020;
+ --body-background:radial-gradient(ellipse at 15% 0%,rgba(16,124,16,.2),transparent 36%),#101010; --shadow:0 12px 36px rgba(0,0,0,.42); --material-blur:0px;
+ --control-radius:2px; --shell-radius:4px; --window-radius:3px; --font-family:"Segoe UI","Segoe UI Variable",Arial,sans-serif;
+}
+:root[data-interface-theme="xbox"] body { min-height:100%; color:var(--ink); background:var(--body-background); background-attachment:fixed; font-family:var(--font-family); -webkit-font-smoothing:antialiased; }
+:root[data-interface-theme="xbox"] ::selection { color:#071005; background:var(--accent); }
+:root[data-interface-theme="xbox"] :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+:root[data-interface-theme="xbox"] a { color:var(--accent); }
+:root[data-interface-theme="xbox"] a:hover { color:var(--accent-hover); }
+:root[data-interface-theme="xbox"] button,:root[data-interface-theme="xbox"] input,:root[data-interface-theme="xbox"] select,:root[data-interface-theme="xbox"] textarea,:root[data-interface-theme="xbox"] .footer-select-control { border-color:var(--border); border-radius:var(--control-radius); color:var(--ink); background-color:var(--panel-strong); font-family:var(--font-family); }
+:root[data-interface-theme="xbox"] button { box-shadow:inset 0 1px rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.17); }
+:root[data-interface-theme="xbox"] button:hover,:root[data-interface-theme="xbox"] button:focus-visible { border-color:var(--accent); background-color:var(--accent-soft); }
+:root[data-interface-theme="xbox"] .shell,:root[data-interface-theme="xbox"] .desktop-window,:root[data-interface-theme="xbox"] .system-window,:root[data-interface-theme="xbox"] .fake-desktop-app,:root[data-interface-theme="xbox"] .blog-shell,:root[data-interface-theme="xbox"] .chooser-terminal,:root[data-interface-theme="xbox"] .profile-layout,:root[data-interface-theme="xbox"] .error-window,:root[data-interface-theme="xbox"] .endless-boot-console { color:var(--ink); border:1px solid var(--border); border-radius:var(--window-radius); background:var(--panel); box-shadow:var(--shadow); backdrop-filter:blur(var(--material-blur)); }
+:root[data-interface-theme="xbox"] .system-bar,:root[data-interface-theme="xbox"] .desktop-window-bar,:root[data-interface-theme="xbox"] .fake-desktop-app>header,:root[data-interface-theme="xbox"] #admin-blog-window>.desktop-window-bar,:root[data-interface-theme="xbox"] .chooser-bar,:root[data-interface-theme="xbox"] .profile-panel-bar,:root[data-interface-theme="xbox"] .endless-boot-header { color:var(--ink); border-bottom:1px solid var(--border); background:linear-gradient(100deg,rgba(var(--accent-rgb),.18),var(--panel-strong) 72%); }
+:root[data-interface-theme="xbox"] .desktop-window-content,:root[data-interface-theme="xbox"] .shell-content,:root[data-interface-theme="xbox"] .system-window>div { color:var(--ink); background:transparent; }
+:root[data-interface-theme="xbox"] .section-label,:root[data-interface-theme="xbox"] .profile-section-heading,:root[data-interface-theme="xbox"] .profile-overview,:root[data-interface-theme="xbox"] .profile-skills article,:root[data-interface-theme="xbox"] .profile-projects article,:root[data-interface-theme="xbox"] .blog-post-list article,:root[data-interface-theme="xbox"] .blog-markdown pre,:root[data-interface-theme="xbox"] .profile-card,:root[data-interface-theme="xbox"] .link-card,:root[data-interface-theme="xbox"] .system-panel,:root[data-interface-theme="xbox"] .panel,:root[data-interface-theme="xbox"] .fake-playing-dead,:root[data-interface-theme="xbox"] .fake-action-center,:root[data-interface-theme="xbox"] .profile-section { color:var(--ink); border:1px solid var(--line); border-radius:var(--window-radius); background:var(--panel-2); }
+:root[data-interface-theme="xbox"] .chooser-page,:root[data-interface-theme="xbox"] .blog-page,:root[data-interface-theme="xbox"] .professional-page,:root[data-interface-theme="xbox"] .error-page,:root[data-interface-theme="xbox"] .endless-boot-page { color:var(--ink); background:var(--body-background); }
+:root[data-interface-theme="xbox"] .chooser-terminal,:root[data-interface-theme="xbox"] .blog-shell,:root[data-interface-theme="xbox"] .error-window { background:var(--panel); }
+:root[data-interface-theme="xbox"] .chooser-boot,:root[data-interface-theme="xbox"] .chooser-copy strong,:root[data-interface-theme="xbox"] .blog-header h1,:root[data-interface-theme="xbox"] .blog-post-list h3 a,:root[data-interface-theme="xbox"] .blog-markdown h2,:root[data-interface-theme="xbox"] .blog-markdown h3,:root[data-interface-theme="xbox"] .blog-markdown h4,:root[data-interface-theme="xbox"] .profile-kicker,:root[data-interface-theme="xbox"] .profile-card-index,:root[data-interface-theme="xbox"] .error-code { color:var(--accent); }
+:root[data-interface-theme="xbox"] .chooser-options a,:root[data-interface-theme="xbox"] .blog-post-list article,:root[data-interface-theme="xbox"] .blog-markdown pre { color:var(--ink); border:1px solid var(--border); border-radius:var(--window-radius); background:var(--panel-2); }
+:root[data-interface-theme="xbox"] .chooser-options a:hover,:root[data-interface-theme="xbox"] .chooser-options a:focus-visible { border-color:var(--accent); background:var(--accent-soft); transform:translateY(-2px); }
+:root[data-interface-theme="xbox"] .chooser-hint,:root[data-interface-theme="xbox"] .chooser-intro,:root[data-interface-theme="xbox"] .chooser-copy span,:root[data-interface-theme="xbox"] .blog-header p:last-child,:root[data-interface-theme="xbox"] .blog-post-list article>p:not(.blog-post-card-meta),:root[data-interface-theme="xbox"] .blog-article-excerpt,:root[data-interface-theme="xbox"] .blog-markdown,:root[data-interface-theme="xbox"] .profile-layout,:root[data-interface-theme="xbox"] .profile-layout p,:root[data-interface-theme="xbox"] .profile-layout dd { color:var(--ink); }
+:root[data-interface-theme="xbox"] .blog-article-meta,:root[data-interface-theme="xbox"] .blog-post-card-meta,:root[data-interface-theme="xbox"] .profile-text-link,:root[data-interface-theme="xbox"] .profile-socials a,:root[data-interface-theme="xbox"] .profile-footer a { color:var(--accent); }
+:root[data-interface-theme="xbox"] .profile-header,:root[data-interface-theme="xbox"] .profile-footer { border-color:var(--line); }
+:root[data-interface-theme="xbox"] .profile-button { color:var(--ink); border:1px solid var(--border); border-radius:var(--control-radius); background:linear-gradient(135deg,var(--accent-soft),var(--panel-strong)); }
+:root[data-interface-theme="xbox"] .fake-desktop { position:relative; overflow:hidden; background:var(--body-background); }
+:root[data-interface-theme="xbox"] .fake-desktop::before,:root[data-interface-theme="xbox"] .fake-desktop::after { content:""; position:absolute; pointer-events:none; z-index:0; }
+:root[data-interface-theme="xbox"] .fake-desktop-icons,:root[data-interface-theme="xbox"] .fake-taskbar { position:relative; z-index:1; }
+:root[data-interface-theme="xbox"] .fake-desktop-icons button { color:var(--ink); border-color:transparent; background:transparent; box-shadow:none; }
+:root[data-interface-theme="xbox"] .fake-desktop-icons button:hover,:root[data-interface-theme="xbox"] .fake-desktop-icons button:focus-visible { border:1px solid var(--border); background:var(--accent-soft); }
+:root[data-interface-theme="xbox"] .fake-desktop-icon { border:1px solid var(--border); border-radius:13px; background:linear-gradient(145deg,rgba(var(--accent-rgb),.68),rgba(var(--accent-rgb),.14)); box-shadow:0 5px 15px rgba(0,0,0,.3); }
+:root[data-interface-theme="xbox"] .fake-taskbar { border-top:1px solid var(--border); background:rgba(5,12,4,.84); backdrop-filter:blur(12px); }
+:root[data-interface-theme="xbox"] .fake-taskbar button { color:var(--ink); border-color:var(--line); background:var(--accent-soft); }
+:root[data-interface-theme="xbox"] .fake-start-menu>div,:root[data-interface-theme="xbox"] .app-menu-popup { color:var(--ink); border:1px solid var(--border); background:var(--panel-strong); box-shadow:var(--shadow); }
+:root[data-interface-theme="xbox"] .endless-boot-console { display:grid; padding:clamp(16px,3vw,42px); }
+:root[data-interface-theme="xbox"] .endless-boot-terminal { color:var(--ink); border:1px solid var(--line); background:rgba(2,7,2,.9); }
+:root[data-interface-theme="xbox"] .endless-boot-log { color:var(--ink); mask-image:none; }
+:root[data-interface-theme="xbox"] .endless-boot-log-entry>span::before,:root[data-interface-theme="xbox"] .endless-boot-transmission>span,:root[data-interface-theme="xbox"] .endless-boot-post strong,:root[data-interface-theme="xbox"] .endless-boot-header h1 { color:var(--accent); }
+:root[data-interface-theme="xbox"] .endless-boot-progress { border:1px solid var(--border); border-radius:5px; background:var(--panel-strong); }
+:root[data-interface-theme="xbox"] .endless-boot-progress span { border-radius:3px; background:linear-gradient(90deg,#438b11,#b0f450); box-shadow:0 0 14px rgba(var(--accent-rgb),.4); }
+:root[data-interface-theme="xbox"] .endless-boot-settings-panel,:root[data-interface-theme="xbox"] .endless-boot-command,:root[data-interface-theme="xbox"] .endless-boot-event { color:var(--ink); border:1px solid var(--border); border-radius:var(--window-radius); background:var(--panel); }
+:root[data-interface-theme="xbox"] .blog-shell::before,:root[data-interface-theme="xbox"] .profile-layout::before { display:block; margin:calc(0px - clamp(22px,5vw,52px)) calc(0px - clamp(22px,5vw,52px)) 24px; padding:9px 16px; border-bottom:1px solid var(--border); border-radius:var(--window-radius) var(--window-radius) 0 0; color:var(--ink); background:linear-gradient(100deg,var(--accent-soft),var(--panel-strong)); font-size:.78rem; letter-spacing:.08em; }
+:root[data-interface-theme="xbox"] .blog-shell::before { content:"XBOX LIVE  //  COMMUNITY"; }
+:root[data-interface-theme="xbox"] .blog-post-page .blog-shell::before { content:"XBOX LIVE  //  READER"; }
+:root[data-interface-theme="xbox"] .profile-layout::before { margin:0 calc(0px - clamp(16px,4vw,34px)) 18px; content:"XBOX LIVE  //  PLAYER PROFILE"; }
+:root[data-interface-theme="xbox"]:not([data-theme-variant]) .fake-desktop::before,:root[data-interface-theme="xbox"][data-theme-variant="original"] .fake-desktop::before { inset:0; background:radial-gradient(ellipse 33% 44% at 72% 29%,rgba(158,255,27,.33),transparent 65%),radial-gradient(ellipse 45% 48% at 76% 28%,rgba(74,140,18,.28),transparent 70%),radial-gradient(ellipse at 14% 100%,rgba(55,100,25,.3),transparent 46%); }
+:root[data-interface-theme="xbox"]:not([data-theme-variant]) .fake-desktop::after,:root[data-interface-theme="xbox"][data-theme-variant="original"] .fake-desktop::after { width:min(39vw,420px); aspect-ratio:1; top:5%; right:7%; border:1px solid rgba(155,234,47,.4); border-radius:46% 54% 54% 46%; background:radial-gradient(circle at 35% 34%,rgba(232,255,191,.23),transparent 15%),radial-gradient(ellipse at 42% 38%,rgba(163,255,43,.26),rgba(70,139,15,.17) 38%,rgba(2,10,1,.16) 71%); box-shadow:0 0 42px rgba(117,221,24,.21),inset 0 0 42px rgba(155,234,47,.13); transform:rotate(-17deg); }
+:root[data-interface-theme="xbox"]:not([data-theme-variant]) .fake-desktop-icon,:root[data-interface-theme="xbox"][data-theme-variant="original"] .fake-desktop-icon { border-radius:48% 52% 46% 54%; }
+:root[data-interface-theme="xbox"]:not([data-theme-variant]) .system-status::before,:root[data-interface-theme="xbox"][data-theme-variant="original"] .system-status::before { content:"◉"; color:#9bea2f; text-shadow:0 0 10px #9bea2f; }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .system-bar,:root[data-interface-theme="xbox"][data-theme-variant="blades"] .desktop-window-bar,:root[data-interface-theme="xbox"][data-theme-variant="blades"] .chooser-bar,:root[data-interface-theme="xbox"][data-theme-variant="blades"] .profile-panel-bar { color:#fff; border:0; background:linear-gradient(90deg,#4c9b2b 0 25%,#267db0 25% 50%,#c2761c 50% 75%,#78838a 75%); text-shadow:0 1px 2px rgba(0,0,0,.5); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .system-bar>p,:root[data-interface-theme="xbox"][data-theme-variant="blades"] .desktop-window-bar>p { color:#fff; }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-desktop { background:linear-gradient(180deg,#25313a,#9ba6aa 45%,#e4e8e7 46%,#aeb8ba); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-desktop::before { inset:0 0 auto; height:28%; background:linear-gradient(90deg,#5ba936 0 25%,#2482b8 25% 50%,#d28127 50% 75%,#a7b0b4 75%); box-shadow:0 5px 16px rgba(0,0,0,.22); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-desktop::after { inset:28% 0 0; background:linear-gradient(180deg,rgba(250,251,250,.98),rgba(224,230,231,.95)); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-desktop-icons button { color:#253137; text-shadow:none; }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-taskbar { color:#fff; background:linear-gradient(90deg,#4c9b2b 0 25%,#267db0 25% 50%,#c2761c 50% 75%,#78838a 75%); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-taskbar button { color:#253137; background:rgba(255,255,255,.86); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .fake-desktop-icon { background:linear-gradient(145deg,#fff,#b8c0c2); }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .endless-boot-terminal { background:#fff; }
+:root[data-interface-theme="xbox"][data-theme-variant="blades"] .endless-boot-log { color:#20292e; }
+:root[data-interface-theme="xbox"][data-theme-variant="nxe"] .fake-desktop { background:var(--body-background); }
+:root[data-interface-theme="xbox"][data-theme-variant="nxe"] .fake-desktop::before { inset:0; background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.56),transparent 56%),linear-gradient(140deg,rgba(105,154,74,.12),transparent 58%); }
+:root[data-interface-theme="xbox"][data-theme-variant="nxe"] .fake-desktop-icon { border-radius:4px; background:linear-gradient(145deg,#fbfff8,#a9c29c 58%,#5b8749); box-shadow:0 12px 22px rgba(34,58,29,.28),0 1px 3px rgba(0,0,0,.25); }
+:root[data-interface-theme="xbox"][data-theme-variant="nxe"] .chooser-options a { border-radius:3px; background:linear-gradient(135deg,#fff,#e1ebdd); box-shadow:0 8px 18px rgba(47,76,42,.18); }
+:root[data-interface-theme="xbox"][data-theme-variant="one"] .fake-desktop::before { inset:0; background:linear-gradient(90deg,rgba(16,124,16,.2),transparent 50%),radial-gradient(ellipse at 80% 25%,rgba(16,124,16,.14),transparent 40%); }
+:root[data-interface-theme="xbox"][data-theme-variant="one"] .fake-desktop-icon { border-radius:2px; background:linear-gradient(145deg,#178d17,#0b560b); }
+:root[data-interface-theme="xbox"][data-theme-variant="one"] .chooser-options a { border-radius:2px; }
+:root[data-interface-theme="xbox"][data-theme-variant="one"] .system-bar,:root[data-interface-theme="xbox"][data-theme-variant="one"] .desktop-window-bar,:root[data-interface-theme="xbox"][data-theme-variant="one"] .chooser-bar { background:#1d1d1d; }
+@media (max-width:640px) { :root[data-interface-theme="xbox"] .fake-taskbar { gap:4px; padding-inline:5px; } :root[data-interface-theme="xbox"] .system-bar>p { max-width:36vw; } }

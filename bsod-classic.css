@@ -1,0 +1,303 @@
+/* Classic text-mode stop screens for the Windows-family interface themes. */
+
+.bsod-classic,
+.bsod-classic[hidden] {
+  display: none;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#shutdown-screen, #kernel-panic, #black-screen, #green-screen, #red-screen, #virus-screen, #endless-boot-crash) {
+  --bsod-bg: #0000aa;
+  --bsod-fg: #ffffff;
+  --bsod-dim: #c0c0c0;
+  --bsod-label-bg: #aaaaaa;
+  color: var(--bsod-fg);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.1) 3px 4px),
+    var(--bsod-bg);
+  text-align: left;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#kernel-panic, #black-screen, #endless-boot-crash[data-kind="black"]) {
+  --bsod-bg: #000000;
+  --bsod-fg: #c0c0c0;
+  --bsod-dim: #a8a8a8;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, 0.025) 3px 4px),
+    #000000;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#green-screen, #endless-boot-crash[data-kind="green"]) {
+  --bsod-bg: #005f00;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#red-screen, #endless-boot-crash[data-kind="red"]) {
+  --bsod-bg: #aa0000;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#virus-screen, #endless-boot-crash[data-kind="purple"]) {
+  --bsod-bg: #5f00aa;
+}
+
+/* Hide the modern layout (including its QR codes) while keeping the screen, its effects and timers intact. */
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) :is(#shutdown-screen, #kernel-panic, #black-screen, #green-screen, #red-screen, #virus-screen, #endless-boot-crash) > :not(.bsod-classic) {
+  display: none !important;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic[hidden] {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  overflow: auto;
+  margin: 0;
+  color: var(--bsod-fg);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-align: left;
+  text-shadow: none;
+  text-transform: none;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic :is(p, a, button, span) {
+  font: inherit;
+  letter-spacing: inherit;
+  text-shadow: none;
+  text-transform: none;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic p {
+  max-width: none;
+  margin: 0 0 1.25em;
+  color: inherit;
+  line-height: inherit;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic .bsod-classic-9x,
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic .bsod-classic-nt {
+  display: none;
+}
+
+/* Windows 3.1 / 95: centred 9x fatal exception. */
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-9x {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(66ch, 100%);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(18px, 4vh, 48px) clamp(14px, 3vw, 32px);
+  font-family: "Perfect DOS VGA 437", Fixedsys, "Lucida Console", Consolas, "Courier New", monospace;
+  font-size: clamp(14px, 1.75vw, 21px);
+  line-height: 1.3;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-title {
+  margin-bottom: 1.4em;
+  text-align: center;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-title > span {
+  padding: 0 0.15em;
+  color: var(--bsod-bg);
+  background: var(--bsod-label-bg);
+  white-space: pre;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-bullets > p {
+  margin-bottom: 0.4em;
+  padding-left: 3ch;
+  text-indent: -3ch;
+  white-space: pre-wrap;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-bullets {
+  margin-bottom: 1.25em;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .bsod-classic .bsod-classic-prompt {
+  margin: 0.6em 0 0;
+  text-align: center;
+}
+
+/* Windows XP / Aero: NT stop error wall of text. */
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .bsod-classic .bsod-classic-nt {
+  display: block;
+  max-width: 100ch;
+  padding: clamp(14px, 2.4vh, 28px) clamp(12px, 1.6vw, 24px);
+  font-family: "Lucida Console", Consolas, "Courier New", monospace;
+  font-size: clamp(12px, 1.3vw, 17px);
+  line-height: 1.3;
+}
+
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .bsod-classic .bsod-classic-nt p {
+  margin-bottom: 1.05em;
+}
+
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .bsod-classic .bsod-classic-dump p {
+  margin-bottom: 0;
+}
+
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .bsod-classic .bsod-classic-dump {
+  margin-bottom: 1.05em;
+}
+
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .bsod-classic .bsod-classic-stop-name {
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+/* Text-styled link and action. */
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic .bsod-classic-link a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  overflow-wrap: anywhere;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic .bsod-classic-action {
+  display: inline;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic :is(.bsod-classic-link a, .bsod-classic-action):is(:hover, :focus-visible) {
+  color: var(--bsod-bg);
+  background: var(--bsod-fg);
+  outline: none;
+  text-decoration: none;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .bsod-classic .bsod-classic-cursor {
+  animation: bsod-classic-blink 1.06s steps(1, end) infinite;
+}
+
+@keyframes bsod-classic-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bsod-classic .bsod-classic-cursor {
+    animation: none !important;
+  }
+}
+
+html[data-motion="reduced"] .bsod-classic .bsod-classic-cursor,
+html[data-effects="off"] .bsod-classic .bsod-classic-cursor {
+  animation: none !important;
+}
+
+/* Endless boot "bsod" transformation event gets the 9x / NT treatment too. */
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .endless-boot-event[data-kind="bsod"] {
+  border-color: #aaaaaa;
+  font-family: "Perfect DOS VGA 437", Fixedsys, "Lucida Console", Consolas, "Courier New", monospace;
+}
+
+:root:is([data-interface-theme="windows-31"], [data-interface-theme="windows-95"]) .endless-boot-event[data-kind="bsod"] #endless-boot-event-code {
+  justify-self: center;
+  padding: 0 0.4em;
+  color: #0000aa;
+  background: #aaaaaa;
+}
+
+:root:is([data-interface-theme="windows-xp"], [data-interface-theme="aero-glass"]) .endless-boot-event[data-kind="bsod"] {
+  border-color: #ffffff;
+  font-family: "Lucida Console", Consolas, "Courier New", monospace;
+  text-align: left;
+}
+
+:root:is(
+  [data-interface-theme="windows-31"],
+  [data-interface-theme="windows-95"],
+  [data-interface-theme="windows-xp"],
+  [data-interface-theme="aero-glass"]
+) .endless-boot-event[data-kind="bsod"] :is(h2, p) {
+  color: #ffffff;
+  font-family: inherit;
+  text-shadow: none;
+}

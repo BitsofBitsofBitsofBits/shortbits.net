@@ -1,0 +1,117 @@
+:root[data-interface-theme="uefi"] {
+  color-scheme: dark;
+  --uefi-bg: #0b0d12;
+  --uefi-panel: #111821;
+  --uefi-panel-2: #17232d;
+  --uefi-ink: #e7f0f5;
+  --uefi-muted: #a8bac6;
+  --uefi-accent: #29d8f2;
+  --uefi-glow: rgba(41,216,242,.25);
+  --bg: #090d13;
+  --panel: #111821;
+  --panel-2: #17232d;
+  --panel-strong: #101820;
+  --ink: #e7f0f5;
+  --text: #e7f0f5;
+  --muted: #a8bac6;
+  --accent: #29d8f2;
+  --accent-rgb: 41, 216, 242;
+  --accent-soft: rgba(41,216,242,.15);
+  --spotify-accent: #29d8f2;
+  --success: #55dfad;
+  --warning: #ffc45b;
+  --danger: #ff6472;
+  --border: #244351;
+  --line: #244351;
+  --shell-bg: #0d141d;
+  --admin-bg: #0d141d;
+  --overlay-bg: #101923;
+  --body-background: radial-gradient(ellipse at 50% -12%, rgba(24,117,152,.27), transparent 56%), linear-gradient(145deg, #0a1018, #0b0d12 60%, #101720);
+  --body-background-size: cover;
+  --control-radius: 3px;
+  --shell-radius: 4px;
+  --window-radius: 4px;
+  --font-family: "Rajdhani", "Orbitron", "Segoe UI", Arial, sans-serif;
+  --shadow: 0 0 28px rgba(0,0,0,.45);
+  --material-blur: 0px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: brightness(0) invert(1);
+  --scrollbar-track: #0d141d;
+  --scrollbar-track-border: #244351;
+  --scrollbar-thumb-color: #29d8f2;
+  --scrollbar-thumb-background: linear-gradient(180deg,#45e6f8,#188ca7);
+  --scrollbar-thumb-hover: #82f2ff;
+  --scrollbar-thumb-active: #b2f8ff;
+  --scrollbar-thumb-border: 2px solid #0b0d12;
+  --scrollbar-thumb-radius: 2px;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 9px rgba(41,216,242,.25);
+}
+:root[data-interface-theme="uefi"][data-theme-variant="gamer-red"] {
+  --uefi-bg: #120405; --uefi-panel: #1b090c; --uefi-panel-2: #280d12; --uefi-ink: #fff0f1; --uefi-muted: #d1aeb2; --uefi-accent: #ff304f; --uefi-glow: rgba(255,48,79,.27);
+  --bg: #100407; --panel: #1b090c; --panel-2: #280d12; --panel-strong: #19070a; --ink: #fff0f1; --text: #fff0f1; --muted: #d1aeb2; --accent: #ff304f; --accent-rgb: 255,48,79; --accent-soft: rgba(255,48,79,.15); --spotify-accent: #ff304f; --border: #55202a; --line: #55202a; --shell-bg: #18080c; --admin-bg: #18080c; --overlay-bg: #1b090c;
+  --body-background: radial-gradient(ellipse at 50% -15%, rgba(174,18,43,.32), transparent 55%), linear-gradient(145deg,#100407,#13090d 65%,#090609); --scrollbar-thumb-color: #ff304f; --scrollbar-thumb-background: linear-gradient(180deg,#ff566c,#a80c27); --scrollbar-thumb-hover: #ff7a8b;
+}
+:root[data-interface-theme="uefi"][data-theme-variant="dragon"] {
+  --uefi-bg: #0e0e0e; --uefi-panel: #181818; --uefi-panel-2: #242020; --uefi-ink: #f5eeee; --uefi-muted: #c1b1b1; --uefi-accent: #ed3347; --uefi-glow: rgba(237,51,71,.24);
+  --bg: #0e0e0e; --panel: #181818; --panel-2: #242020; --panel-strong: #151414; --ink: #f5eeee; --text: #f5eeee; --muted: #c1b1b1; --accent: #ed3347; --accent-rgb: 237,51,71; --accent-soft: rgba(237,51,71,.16); --spotify-accent: #ed3347; --border: #4a282d; --line: #4a282d; --shell-bg: #151414; --admin-bg: #151414; --overlay-bg: #181818;
+  --body-background: radial-gradient(circle at 82% 9%, rgba(135,22,34,.25), transparent 30%), linear-gradient(145deg,#0b0b0b,#151111 60%,#090909); --scrollbar-thumb-color: #ed3347; --scrollbar-thumb-background: linear-gradient(180deg,#fc485c,#8d1727); --scrollbar-thumb-hover: #ff7b87;
+}
+:root[data-interface-theme="uefi"][data-theme-variant="aorus"] {
+  --uefi-bg: #0f0a05; --uefi-panel: #1b130a; --uefi-panel-2: #291d0e; --uefi-ink: #fff4df; --uefi-muted: #d3c0a2; --uefi-accent: #ff9c28; --uefi-glow: rgba(255,156,40,.25);
+  --bg: #0f0a05; --panel: #1b130a; --panel-2: #291d0e; --panel-strong: #181108; --ink: #fff4df; --text: #fff4df; --muted: #d3c0a2; --accent: #ff9c28; --accent-rgb: 255,156,40; --accent-soft: rgba(255,156,40,.16); --spotify-accent: #ff9c28; --border: #554027; --line: #554027; --shell-bg: #171109; --admin-bg: #171109; --overlay-bg: #1b130a;
+  --body-background: radial-gradient(ellipse at 50% -10%, rgba(197,105,12,.3), transparent 57%), linear-gradient(145deg,#100b06,#191207 62%,#0a0805); --scrollbar-thumb-color: #ff9c28; --scrollbar-thumb-background: linear-gradient(180deg,#ffbd59,#bd6411); --scrollbar-thumb-hover: #ffd082;
+}
+:root[data-interface-theme="uefi"][data-theme-variant="workstation"] {
+  --uefi-bg: #0a1220; --uefi-panel: #121e2d; --uefi-panel-2: #1b2b3c; --uefi-ink: #edf4fa; --uefi-muted: #b3c3d2; --uefi-accent: #78b9ed; --uefi-glow: rgba(120,185,237,.2);
+  --bg: #0a1220; --panel: #121e2d; --panel-2: #1b2b3c; --panel-strong: #101a28; --ink: #edf4fa; --text: #edf4fa; --muted: #b3c3d2; --accent: #78b9ed; --accent-rgb: 120,185,237; --accent-soft: rgba(120,185,237,.14); --spotify-accent: #78b9ed; --border: #38536a; --line: #38536a; --shell-bg: #101a28; --admin-bg: #101a28; --overlay-bg: #121e2d;
+  --body-background: radial-gradient(ellipse at 50% -14%, rgba(62,114,157,.26), transparent 58%), linear-gradient(145deg,#09111d,#0c1522 62%,#101b29); --scrollbar-thumb-color: #78b9ed; --scrollbar-thumb-background: linear-gradient(180deg,#a5d8ff,#4c85b3); --scrollbar-thumb-hover: #c7e7ff;
+}
+:root[data-interface-theme="uefi"] body { min-height: 100vh; color: var(--uefi-ink); background: var(--body-background); background-attachment: fixed; font-family: var(--font-family); font-size: 14px; letter-spacing: .015em; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+:root[data-interface-theme="uefi"] :is(button,input,select,textarea) { font-family: inherit; }
+:root[data-interface-theme="uefi"] :is(h1,h2,h3,h4) { color: var(--uefi-ink); font-family: var(--font-family); font-weight: 700; letter-spacing: .035em; text-shadow: 0 0 16px var(--uefi-glow); }
+:root[data-interface-theme="uefi"] :is(a,button,input,select,textarea,summary):focus-visible { outline: 2px solid var(--uefi-accent); outline-offset: 3px; }
+:root[data-interface-theme="uefi"] ::selection { color: #080b0f; background: var(--uefi-accent); }
+:root[data-interface-theme="uefi"] :is(.chooser-terminal,.shell,.blog-shell,.error-window,.profile-panel,.profile-card,.endless-boot-console,.endless-boot-inspector,.endless-boot-settings,.desktop-window) {
+  border: 1px solid color-mix(in srgb,var(--uefi-accent) 58%,#26323b);
+  border-radius: 3px;
+  color: var(--uefi-ink);
+  background-color: var(--uefi-panel);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb),.08), 0 12px 32px rgba(0,0,0,.36), 0 0 22px var(--uefi-glow);
+  clip-path: polygon(0 10px,10px 0,calc(100% - 16px) 0,100% 16px,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%);
+}
+:root[data-interface-theme="uefi"] :is(.chooser, .profile-page, .blog-page, .endless-boot-page, .error-page) { color: var(--uefi-ink); background: var(--body-background); }
+:root[data-interface-theme="uefi"] :is(.system-bar,.app-menu-bar,.chooser-bar,.desktop-window-bar,.profile-panel-bar) { border-color: color-mix(in srgb,var(--uefi-accent) 46%,#26323b); color: var(--uefi-accent); background: linear-gradient(90deg,color-mix(in srgb,var(--uefi-accent) 14%,var(--uefi-panel)),var(--uefi-panel)); }
+:root[data-interface-theme="uefi"] :is(.system-bar,.chooser-bar,.desktop-window-bar,.profile-panel-bar,.section-label,.profile-kicker,.activity-label,.endless-boot-transmission,.endless-boot-host,.endless-boot-meter,.endless-boot-settings label) { font-family: "Consolas","Cascadia Mono","SFMono-Regular",monospace; letter-spacing: .075em; }
+:root[data-interface-theme="uefi"] :is(.chooser-options li,.chooser-option,.featured-card,.link-card,.profile-card,.blog-post-list article,.achievement-entry,.spotify-widget,.spotify-history-section) { border: 1px solid color-mix(in srgb,var(--uefi-accent) 38%,#26323b); border-radius: 2px; color: var(--uefi-ink); background: linear-gradient(135deg,color-mix(in srgb,var(--uefi-accent) 7%,var(--uefi-panel)),var(--uefi-panel) 62%); }
+:root[data-interface-theme="uefi"] :is(.chooser-options li,.chooser-option,.featured-card,.link-card,.profile-card,.blog-post-list article,.achievement-entry):hover { border-color: var(--uefi-accent); background: color-mix(in srgb,var(--uefi-accent) 12%,var(--uefi-panel)); }
+:root[data-interface-theme="uefi"] :is(.chooser-intro,.chooser-hint,.chooser-copy span,.profile-description,.blog-status,.blog-header p:last-child,.endless-boot-settings) { color: var(--uefi-muted); }
+:root[data-interface-theme="uefi"] :is(.chooser-copy strong,.profile-section-heading h2,.blog-header h1,.section-label h2) { color: var(--uefi-ink); }
+:root[data-interface-theme="uefi"] :is(button,.button,.profile-cta,.chooser-path,.mini-window-launch) { border-radius: 2px; border-color: var(--uefi-accent); color: var(--uefi-ink); background: linear-gradient(180deg,color-mix(in srgb,var(--uefi-accent) 24%,var(--uefi-panel)),var(--uefi-panel)); }
+:root[data-interface-theme="uefi"] :is(button,.button,.profile-cta,.chooser-path,.mini-window-launch):hover { border-color: var(--uefi-accent); color: #fff; background: color-mix(in srgb,var(--uefi-accent) 26%,var(--uefi-panel)); box-shadow: 0 0 12px var(--uefi-glow); }
+:root[data-interface-theme="uefi"] .desktop-window { overflow: hidden; background: var(--uefi-panel); backdrop-filter: none; }
+:root[data-interface-theme="uefi"] .desktop-window-bar { min-height: 40px; border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="uefi"] .desktop-window-bar > p { color: var(--uefi-accent); }
+:root[data-interface-theme="uefi"] .desktop-window-controls button { color: var(--uefi-muted); background: transparent; }
+:root[data-interface-theme="uefi"] .desktop-window-controls button:hover { color: var(--uefi-ink); background: color-mix(in srgb,var(--uefi-accent) 20%,var(--uefi-panel)); }
+:root[data-interface-theme="uefi"] .spotify-widget { background: linear-gradient(90deg,var(--uefi-glow),transparent 46%),var(--uefi-panel); }
+:root[data-interface-theme="uefi"] .spotify-progress { height: 3px; background: var(--border); }
+:root[data-interface-theme="uefi"] .spotify-progress::after { background: var(--uefi-accent); box-shadow: 0 0 8px var(--uefi-glow); }
+:root[data-interface-theme="uefi"] :is(.blog-header,.profile-section-heading) { border-color: var(--border); }
+:root[data-interface-theme="uefi"] :is(.endless-boot-console,.endless-boot-inspector,.endless-boot-settings) { background-color: var(--uefi-panel); }
+:root[data-interface-theme="uefi"] .endless-boot-progress span { background: var(--uefi-accent); box-shadow: 0 0 12px var(--uefi-glow); }
+:root[data-interface-theme="uefi"] .endless-boot-log-entry { color: var(--uefi-muted); font-family: "Consolas","Cascadia Mono",monospace; }
+:root[data-interface-theme="uefi"] .bits-layout-notice { border-color: var(--border); color: var(--uefi-ink); background: var(--uefi-panel); }
+:root[data-interface-theme="uefi"] a { color: var(--uefi-accent); }
+:root[data-interface-theme="uefi"] a:hover { color: var(--uefi-ink); }
+:root[data-interface-theme="uefi"] .professional-page .profile-button { border-radius: 2px; color: #fff; background: linear-gradient(180deg,color-mix(in srgb,var(--uefi-accent) 55%,var(--uefi-panel)),color-mix(in srgb,var(--uefi-accent) 30%,var(--uefi-panel))); text-shadow: 0 1px 2px #000; }
+:root[data-interface-theme="uefi"] .professional-page .profile-button:hover { color: #fff; background: color-mix(in srgb,var(--uefi-accent) 40%,var(--uefi-panel)); box-shadow: 0 0 12px var(--uefi-glow); }
+@media (max-width: 700px) {
+  :root[data-interface-theme="uefi"] :is(.chooser-terminal,.shell,.blog-shell,.error-window,.profile-panel,.profile-card,.endless-boot-console,.desktop-window) { clip-path: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="uefi"] *, :root[data-interface-theme="uefi"] *::before, :root[data-interface-theme="uefi"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+:root[data-interface-theme="uefi"][data-motion="reduced"] *, :root[data-interface-theme="uefi"][data-motion="reduced"] *::before, :root[data-interface-theme="uefi"][data-motion="reduced"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

@@ -160,6 +160,7 @@ jobs:
             404.html \
             admin.html \
             admin \
+            bsod-classic.css \
             build-info.json \
             chooser.css \
             index.html \
