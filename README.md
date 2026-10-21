@@ -109,6 +109,11 @@ is a personal project and largely a learning exercise for me.
   every second, and shows a machine as LIVE when it reported within the last
   minute. Re-running the installer upgrades the agent and can keep the saved
   token
+- Linux / Unraid machines (e.g. a NAS) use IMPORT_FROM_PC with the
+  `LINUX / UNRAID (BASH)` platform: a one-shot bash scan (run as root for RAM
+  module details) that prints CPU, RAM, motherboard, GPUs, network cards with
+  link speed, storage grouped by identical drive, and OS as one JSON line. It
+  uploads nothing and has no live agent; paste the JSON into Admin and save
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
   Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
   Null Tac Toe, endless wave-based Packet Breaker, and Flappy Bit, plus local

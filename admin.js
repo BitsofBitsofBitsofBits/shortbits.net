@@ -144,6 +144,176 @@ const hardwareScanScript = [
   "Write-Host ('Copied ' + @($rows).Count + ' hardware rows to the clipboard.') -ForegroundColor Green",
   "}",
 ].join("\n");
+// Bash for Linux / Unraid; run as root for RAM details. Prints JSON only.
+const hardwareLinuxScanScript = [
+  "bash <<'BITS_SCAN'",
+  "# BitsofBits hardware scan for Linux / Unraid. Prints JSON; uploads nothing and",
+  "# collects no serial numbers or hostname.",
+  "export LC_ALL=C",
+  "row() { printf '%s\\t%s\\t%s\\n' \"$1\" \"${2//$'\\t'/ }\" \"${3//$'\\t'/ }\"; }",
+  "blank() { case \"$1\" in ''|*'To be filled'*|*'Default string'*|*'Not Specified'*|*'System Product'*) return 0;; esac; return 1; }",
+  "{",
+  "  cpu=$(awk -F': ' '/^model name/ {print $2; exit}' /proc/cpuinfo)",
+  "  [ -n \"$cpu\" ] || cpu=$(lscpu 2>/dev/null | awk -F': *' '/^Model name/ {print $2; exit}')",
+  "  if [ -n \"$cpu\" ]; then",
+  "    threads=$(grep -c '^processor' /proc/cpuinfo)",
+  "    cores=$(lscpu -p=core,socket 2>/dev/null | grep -v '^#' | sort -u | wc -l)",
+  "    sockets=$(lscpu -p=socket 2>/dev/null | grep -v '^#' | sort -u | wc -l)",
+  "    mhz=$(lscpu 2>/dev/null | awk -F': *' '/^CPU max MHz/ {print $2; exit}')",
+  "    detail=\"$cores cores / $threads threads\"",
+  "    [ \"${cores:-0}\" -gt 0 ] || detail=\"$threads threads\"",
+  "    [ -n \"$mhz\" ] && detail=\"$detail, $(awk -v m=\"$mhz\" 'BEGIN {printf \"%.2f GHz max\", m / 1000}')\"",
+  "    [ \"${sockets:-1}\" -gt 1 ] && detail=\"$sockets sockets, $detail\"",
+  "    row CPU \"$cpu\" \"$detail\"",
+  "  fi",
+  "",
+  "  mem=\"\"",
+  "  if [ \"$(id -u)\" = 0 ] && command -v dmidecode >/dev/null 2>&1; then",
+  "    mem=$(dmidecode -t 17 2>/dev/null | awk '",
+  "      function flush() {",
+  "        if (size > 0) {",
+  "          n++; total += size",
+  "          if (n == 1) { fsize = size; ftype = type; fspeed = (cfg > 0 ? cfg : speed); fmfr = mfr }",
+  "        }",
+  "        size = 0; type = \"\"; speed = 0; cfg = 0; mfr = \"\"",
+  "      }",
+  "      /^Memory Device/ { flush(); next }",
+  "      /^\\t[A-Za-z ]+: / {",
+  "        key = $0; sub(/^\\t/, \"\", key); value = key",
+  "        sub(/: .*/, \"\", key); sub(/^[^:]*: /, \"\", value)",
+  "        if (key == \"Size\") {",
+  "          if (value ~ / GB/) size = value + 0",
+  "          else if (value ~ / MB/) size = (value + 0) / 1024",
+  "          else if (value ~ / TB/) size = (value + 0) * 1024",
+  "        } else if (key == \"Type\") type = value",
+  "        else if (key == \"Speed\") speed = value + 0",
+  "        else if (key ~ /^Configured (Memory|Clock) Speed$/) cfg = value + 0",
+  "        else if (key == \"Manufacturer\") mfr = value",
+  "      }",
+  "      END {",
+  "        flush()",
+  "        if (n) {",
+  "          detail = sprintf(\"%d x %g GB\", n, fsize)",
+  "          if (ftype ~ /^[A-Za-z0-9]/ && (ftype ~ /Unknown|Other/) == 0) detail = detail \" \" ftype",
+  "          if (fspeed > 0) detail = detail \" @ \" fspeed \" MT/s\"",
+  "          if (fmfr ~ /[A-Za-z]/ && (fmfr ~ /Unknown|Not Specified/) == 0) detail = detail \" \" fmfr",
+  "          printf \"%g GB\\t%s\\n\", total, detail",
+  "        }",
+  "      }')",
+  "  fi",
+  "  if [ -n \"$mem\" ]; then",
+  "    row RAM \"${mem%%$'\\t'*}\" \"${mem#*$'\\t'}\"",
+  "  else",
+  "    row RAM \"$(awk '/^MemTotal/ {printf \"%d GB\", $2 / 1048576 + 0.5}' /proc/meminfo)\" \"\"",
+  "  fi",
+  "",
+  "  vendor=$(cat /sys/class/dmi/id/board_vendor 2>/dev/null)",
+  "  board=$(cat /sys/class/dmi/id/board_name 2>/dev/null)",
+  "  blank \"$vendor\" && vendor=\"\"",
+  "  blank \"$board\" || row MOTHERBOARD \"$vendor $board\" \"\"",
+  "",
+  "  # Link speeds by PCI address, for network cards.",
+  "  links=\"\"",
+  "  for dev in /sys/class/net/*/device; do",
+  "    [ -e \"$dev\" ] || continue",
+  "    iface=${dev%/device}",
+  "    speed=$(cat \"$iface/speed\" 2>/dev/null)",
+  "    links=\"$links$(basename \"$(readlink -f \"$dev\")\") ${speed:--1}\"$'\\n'",
+  "  done",
+  "  if command -v lspci >/dev/null 2>&1; then",
+  "    lspci -Dmm 2>/dev/null | while IFS= read -r line; do",
+  "      slot=${line%% *}",
+  "      class=$(printf '%s' \"$line\" | awk -F'\"' '{print $2}')",
+  "      case \"$class\" in",
+  "        *VGA*|*3D*|*Display*) kind=GPU ;;",
+  "        *Ethernet*|*Network*) kind=NETWORK ;;",
+  "        *) continue ;;",
+  "      esac",
+  "      name=$(printf '%s' \"$line\" | awk -F'\"' '",
+  "        function short(s, b) {",
+  "          if (match(s, /\\[[^]]+\\]$/)) return substr(s, RSTART + 1, RLENGTH - 2)",
+  "          return s",
+  "        }",
+  "        {",
+  "          v = $4; d = $6",
+  "          if (match(v, /\\[[^]]+\\]/)) v = substr(v, RSTART + 1, RLENGTH - 2)",
+  "          sub(/,? (Corporation|Corp\\.|Inc\\.|Co\\., Ltd\\.|Technology.*|Semiconductor.*)$/, \"\", v)",
+  "          d = short(d)",
+  "          print (index(d, v) == 1 ? d : v \" \" d)",
+  "        }')",
+  "      detail=\"\"",
+  "      if [ \"$kind\" = NETWORK ]; then",
+  "        speed=$(printf '%s' \"$links\" | awk -v s=\"$slot\" '$1 == s {print $2; exit}')",
+  "        if [ \"${speed:--1}\" -gt 0 ] 2>/dev/null; then",
+  "          if [ \"$speed\" -ge 1000 ]; then detail=\"$((speed / 1000)) GbE link\"; else detail=\"$speed Mb/s link\"; fi",
+  "        fi",
+  "      fi",
+  "      row \"$kind\" \"$name\" \"$detail\"",
+  "    done",
+  "  fi",
+  "",
+  "  lsblk -dbn -P -o NAME,TYPE,SIZE,ROTA,TRAN,MODEL 2>/dev/null | awk '",
+  "    function hex(c) { return index(\"0123456789abcdef\", tolower(c)) - 1 }",
+  "    function get(k,   s, out) {",
+  "      if (match($0, \"(^| )\" k \"=\\\"([^\\\"\\\\\\\\]|\\\\\\\\.)*\\\"\") == 0) return \"\"",
+  "      s = substr($0, RSTART, RLENGTH); sub(/^ /, \"\", s)",
+  "      s = substr(s, length(k) + 3, length(s) - length(k) - 3)",
+  "      out = \"\"",
+  "      while (match(s, /\\\\x[0-9A-Fa-f][0-9A-Fa-f]/)) {",
+  "        out = out substr(s, 1, RSTART - 1) sprintf(\"%c\", hex(substr(s, RSTART + 2, 1)) * 16 + hex(substr(s, RSTART + 3, 1)))",
+  "        s = substr(s, RSTART + RLENGTH)",
+  "      }",
+  "      return out s",
+  "    }",
+  "    {",
+  "      name = get(\"NAME\"); tran = get(\"TRAN\"); model = get(\"MODEL\")",
+  "      if ((get(\"TYPE\") == \"disk\") == 0 || name ~ /^(loop|zram|ram|md|nbd|dm-)/) next",
+  "      bytes = get(\"SIZE\") + 0",
+  "      if (bytes <= 0) next",
+  "      if (bytes >= 1e12) { size = sprintf(\"%.1f TB\", bytes / 1e12); sub(/\\.0 TB$/, \" TB\", size) }",
+  "      else size = sprintf(\"%d GB\", bytes / 1e9 + 0.5)",
+  "      if (tran == \"nvme\") kind = \"NVMe SSD\"",
+  "      else if (tran == \"usb\") kind = \"USB\"",
+  "      else if (get(\"ROTA\") == \"1\") kind = \"HDD / \" toupper(tran)",
+  "      else kind = \"SSD / \" toupper(tran)",
+  "      sub(/ \\/ $/, \"\", kind)",
+  "      if (model == \"\") model = \"Disk\"",
+  "      printf \"STORAGE\\t%s\\t%s / %s\\n\", model, size, kind",
+  "    }'",
+  "",
+  "  kernel=\"Linux $(uname -r)\"",
+  "  if [ -f /etc/unraid-version ]; then",
+  "    row OS \"Unraid OS $(sed -n 's/^version=\"\\(.*\\)\"/\\1/p' /etc/unraid-version)\" \"$kernel\"",
+  "  elif [ -f /etc/os-release ]; then",
+  "    row OS \"$(. /etc/os-release; printf '%s' \"${PRETTY_NAME:-$NAME}\")\" \"$kernel\"",
+  "  else",
+  "    row OS \"$kernel\" \"\"",
+  "  fi",
+  "} | awk -F'\\t' '",
+  "  function trim(s) { gsub(/[[:space:]]+/, \" \", s); sub(/^ /, \"\", s); sub(/ $/, \"\", s); return s }",
+  "  function esc(s) { gsub(/[\\\\\"]/, \"\\\\\\\\&\", s); gsub(/[\\001-\\037]/, \"\", s); return s }",
+  "  {",
+  "    c = trim($1); n = trim($2); d = trim($3)",
+  "    if (c == \"\" || n == \"\") next",
+  "    # Multi-port network cards share one row; keep the port that has a link.",
+  "    k = c SUBSEP n SUBSEP (c == \"NETWORK\" ? \"\" : d)",
+  "    if ((k in count) == 0) { order[++m] = k; comp[k] = c; nm[k] = n; det[k] = d }",
+  "    else if (det[k] == \"\") det[k] = d",
+  "    count[k]++",
+  "  }",
+  "  END {",
+  "    printf \"[\"",
+  "    for (i = 1; i <= m; i++) {",
+  "      k = order[i]; d = det[k]",
+  "      if (count[k] > 1 && comp[k] == \"NETWORK\") d = count[k] \" ports\" (d == \"\" ? \"\" : \", \" d)",
+  "      else if (count[k] > 1) d = count[k] \" x \" d",
+  "      printf \"%s{\\\"component\\\":\\\"%s\\\",\\\"name\\\":\\\"%s\\\",\\\"detail\\\":\\\"%s\\\"}\", (i > 1 ? \",\" : \"\"), esc(comp[k]), esc(nm[k]), esc(trim(d))",
+  "    }",
+  "    print \"]\"",
+  "    printf \"\\nScanned %d hardware rows. Copy the JSON line above into Admin.\\n\", m > \"/dev/stderr\"",
+  "  }'",
+  "BITS_SCAN",
+].join("\n");
 const hardwareAgentTaskName = "BitsHardwareAgent";
 const hardwareAgentUninstallScript = [
   `Unregister-ScheduledTask -TaskName '${hardwareAgentTaskName}' -Confirm:$false -ErrorAction SilentlyContinue`,
@@ -1207,7 +1377,18 @@ async function loadHardware() {
 }
 
 function parseHardwareScan(text) {
-  const parsed = JSON.parse(text);
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (error) {
+    // Terminal copies often include the prompt or the script's closing message.
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    if (start < 0 || end <= start) {
+      throw error;
+    }
+    parsed = JSON.parse(text.slice(start, end + 1));
+  }
   const items = Array.isArray(parsed)
     ? parsed
     : Array.isArray(parsed?.components) ? parsed.components : [parsed];
@@ -1236,7 +1417,7 @@ function importHardwareScan() {
   } catch {
     setAdminStatus(
       hardwareAdminStatus,
-      "That doesn't look like scan output. Paste the JSON the script copied.",
+      "That doesn't look like scan output. Paste the JSON the scan script printed or copied.",
       "error",
     );
     return;
@@ -2601,17 +2782,35 @@ if (adminClient) {
     setAdminStatus(gamesAdminStatus, "Favorite games updated.", "success");
   });
 
-  hardwareImportScript.value = hardwareScanScript;
+  const hardwareImportPlatform = document.querySelector("#hardware-import-platform");
+  const getHardwareScanScript = () => (
+    hardwareImportPlatform.value === "linux" ? hardwareLinuxScanScript : hardwareScanScript
+  );
+  const showHardwareScanScript = () => {
+    const linux = hardwareImportPlatform.value === "linux";
+    hardwareImportScript.value = getHardwareScanScript();
+    hardwareImportScript.setAttribute(
+      "aria-label",
+      linux ? "Bash hardware scan script for Linux and Unraid" : "PowerShell hardware scan script",
+    );
+    if (linux && hardwareImportMachine.value === "Desktop") {
+      hardwareImportMachine.value = "NAS";
+    }
+  };
+  showHardwareScanScript();
+  hardwareImportPlatform.addEventListener("change", showHardwareScanScript);
   hardwareImportCopy.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(hardwareScanScript);
+      await navigator.clipboard.writeText(getHardwareScanScript());
     } catch {
       hardwareImportScript.select();
       document.execCommand("copy");
     }
     setAdminStatus(
       hardwareAdminStatus,
-      "Scan script copied. Paste it into PowerShell on the machine.",
+      hardwareImportPlatform.value === "linux"
+        ? "Scan script copied. Paste it into a terminal on the machine, then copy the JSON line it prints."
+        : "Scan script copied. Paste it into PowerShell on the machine.",
       "success",
     );
   });

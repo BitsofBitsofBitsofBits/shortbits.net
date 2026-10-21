@@ -16,7 +16,7 @@
     <script src="/admin-windows.js?v=admin-windows-10" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/windows.js?v=windows-11" defer></script>
-    <script src="/admin.js?v=admin-23" defer></script>
+    <script src="/admin.js?v=admin-24" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -265,10 +265,11 @@
             <summary>IMPORT_FROM_PC</summary>
             <div class="admin-form hardware-import-body">
             <ol class="hardware-import-steps">
-              <li>Copy the scan script, open <strong>PowerShell</strong> on the machine, paste it, and press Enter.</li>
-              <li>It reads CPU, GPU, RAM, motherboard, storage, displays, and OS, then copies the result to your clipboard. Nothing is uploaded.</li>
+              <li>Pick the platform and copy the scan script. On Windows, paste it into <strong>PowerShell</strong>. On Linux or Unraid, paste it into a terminal (Unraid: the <strong>&gt;_</strong> terminal icon, or SSH as root).</li>
+              <li>It reads CPU, GPU, RAM, motherboard, storage, and OS (plus displays on Windows and network cards on Linux). Windows copies the result to your clipboard; Linux prints one JSON line to copy. Nothing is uploaded.</li>
               <li>Name the machine below, paste the result, and import. Review the rows, then save.</li>
             </ol>
+            <label><span>PLATFORM</span><select id="hardware-import-platform"><option value="windows">WINDOWS (POWERSHELL)</option><option value="linux">LINUX / UNRAID (BASH)</option></select></label>
             <textarea id="hardware-import-script" class="hardware-import-script" rows="8" readonly aria-label="PowerShell hardware scan script"></textarea>
             <div class="repeatable-admin-actions">
               <button id="hardware-import-copy" type="button">COPY_SCAN_SCRIPT</button>
