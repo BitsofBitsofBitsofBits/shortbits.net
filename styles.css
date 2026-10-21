@@ -3671,6 +3671,17 @@ footer span {
   color: var(--accent);
 }
 
+.site-switch-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.site-switch-link:hover,
+.site-switch-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .build-link {
   color: var(--accent);
   text-decoration: none;

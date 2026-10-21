@@ -87,6 +87,7 @@ jobs:
             404.html \
             admin.html \
             build-info.json \
+            chooser.css \
             index.html \
             ./*.js \
             robots.txt \
@@ -96,6 +97,7 @@ jobs:
             useless.html \
             blog \
             boot \
+            online \
             professional \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"

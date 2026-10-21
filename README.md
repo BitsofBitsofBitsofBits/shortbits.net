@@ -3,6 +3,21 @@
 The source for [shortbits.net](https://www.shortbits.net/), the terminal-themed
 internet presence of BitsofBitsofBits.
 
+## Site layout
+
+| Path | Page | Source |
+| --- | --- | --- |
+| `/` | Themed boot-menu chooser between the two sites | `index.html`, `chooser.js`, `chooser.css` |
+| `/online/` | The playful internet presence (desktop windows, games, Easter eggs) | `online/index.html` |
+| `/professional/` | Recruiter-facing professional profile | `professional/` |
+
+The chooser can remember a visitor's pick in `localStorage` (`bits-site-choice`)
+and redirect on later visits; `/?choose` always shows the menu, and both sites
+link to it from their footers. Legacy deep links such as `/?window=resume` or
+`/#…` are forwarded to `/online/` with their query and hash intact. Shared
+scripts, styles, and images stay at the site root, so pages in subfolders must
+reference them with root-absolute paths (`/script.js`, `/images/...`).
+
 ## AI Notice
 
 Some features of this site were created and are maintained with the help of AI.
