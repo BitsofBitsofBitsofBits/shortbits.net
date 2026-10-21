@@ -3,5 +3,5 @@ window.SITE_CONFIG = Object.freeze({
   // Cloudflare dashboard > Analytics & Logs > Web Analytics > Add a site > copy the "token" from the JS snippet.
   cloudflareAnalyticsToken: "",
   // Cloudflare dashboard > Turnstile > Add widget > "Site Key". The matching Secret Key belongs in GitHub secrets.
-  turnstileSiteKey: "",
+  turnstileSiteKey: "0x4AAAAAAFekKmeFCUNfAXEN",
 });
