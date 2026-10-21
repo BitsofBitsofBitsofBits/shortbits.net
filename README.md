@@ -71,7 +71,8 @@ is a personal project and largely a learning exercise for me.
 - Admin-managed `CAREER.SYS`, `NOW.TXT`, and `CHANGELOG.LOG` windows with
   shareable URLs, responsive layouts, five-minute public caching, and clean
   unpublished states
-- A desktop-style Admin Portal with draggable, resizable, deep-linkable windows
+- A desktop-style Admin Portal at `/admin` (legacy `/admin.html` links
+  redirect there) with draggable, resizable, deep-linkable windows
   for the inbox and every public-content editor
 - An accessible public `BLOG.LOG` with draft-aware Supabase publishing,
   semantic article pages, safe Markdown rendering, and a live Markdown preview

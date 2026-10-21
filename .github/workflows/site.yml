@@ -150,6 +150,7 @@ jobs:
             -e "ssh -p ${DEPLOY_PORT}" \
             404.html \
             admin.html \
+            admin \
             build-info.json \
             chooser.css \
             index.html \

@@ -6,6 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const htmlFiles = [
   "index.html",
   "admin.html",
+  "admin/index.html",
   "404.html",
   "source.html",
   "useless.html",
