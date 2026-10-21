@@ -388,7 +388,7 @@ function renderFavoriteGames(games) {
 const hardwareCollapsedKey = "bits-hardware-collapsed";
 const hardwareStatusPollMs = 30_000;
 const hardwareOnlineWindowMs = 3 * 60_000;
-const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0 };
+const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0, ticker: 0 };
 
 function readCollapsedHardware() {
   try {
@@ -410,11 +410,19 @@ function saveCollapsedHardware(machine, collapsed) {
 }
 
 function formatHardwareUptime(bootedAt) {
-  const totalMinutes = Math.max(0, Math.floor((Date.now() - new Date(bootedAt).getTime()) / 60_000));
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-  return `${days ? `${days}d ` : ""}${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+  const totalSeconds = Math.max(0, Math.floor((Date.now() - new Date(bootedAt).getTime()) / 1000));
+  const days = Math.floor(totalSeconds / 86_400);
+  const pad = (value) => String(value).padStart(2, "0");
+  const hours = pad(Math.floor((totalSeconds % 86_400) / 3600));
+  const minutes = pad(Math.floor((totalSeconds % 3600) / 60));
+  const seconds = pad(totalSeconds % 60);
+  return `${days ? `${days}d ` : ""}${hours}h ${minutes}m ${seconds}s`;
+}
+
+function tickHardwareUptime() {
+  hardwareMachines.querySelectorAll(".hardware-live-uptime[data-booted-at]").forEach((uptime) => {
+    uptime.textContent = `UPTIME ${formatHardwareUptime(uptime.dataset.bootedAt)}`;
+  });
 }
 
 function createHardwareMeter(label) {
@@ -567,9 +575,14 @@ function updateHardwareStatus() {
         ? ""
         : `${(status.memory_used_mb / 1024).toFixed(1)} / ${Math.round(status.memory_total_mb / 1024)} GB`,
     );
-    live.querySelector(".hardware-live-uptime").textContent = online
-      ? (status.booted_at ? `UPTIME ${formatHardwareUptime(status.booted_at)}` : "")
-      : `LAST SEEN ${formatContentDate(status.updated_at, true)}`;
+    const uptime = live.querySelector(".hardware-live-uptime");
+    if (online && status.booted_at) {
+      uptime.dataset.bootedAt = status.booted_at;
+      uptime.textContent = `UPTIME ${formatHardwareUptime(status.booted_at)}`;
+    } else {
+      delete uptime.dataset.bootedAt;
+      uptime.textContent = online ? "" : `LAST SEEN ${formatContentDate(status.updated_at, true)}`;
+    }
   });
 }
 
@@ -593,11 +606,14 @@ function startHardwareStatus() {
   }
   refreshHardwareStatus();
   hardwareState.timer = window.setInterval(refreshHardwareStatus, hardwareStatusPollMs);
+  hardwareState.ticker = window.setInterval(tickHardwareUptime, 1000);
 }
 
 function stopHardwareStatus() {
   window.clearInterval(hardwareState.timer);
+  window.clearInterval(hardwareState.ticker);
   hardwareState.timer = 0;
+  hardwareState.ticker = 0;
 }
 
 function renderHardware(items) {
