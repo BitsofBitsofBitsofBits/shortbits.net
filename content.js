@@ -11,6 +11,8 @@ const resumeDownload = document.querySelector("#resume-download");
 const resumeEntries = document.querySelector("#resume-entries");
 const resumeEducationHeading = document.querySelector("#resume-education-heading");
 const resumeEducation = document.querySelector("#resume-education");
+const resumeCertificationsHeading = document.querySelector("#resume-certifications-heading");
+const resumeCertifications = document.querySelector("#resume-certifications");
 const nowEmpty = document.querySelector("#now-empty");
 const nowContent = document.querySelector("#now-content");
 const nowHeadline = document.querySelector("#now-headline");
@@ -27,7 +29,7 @@ const publicContentWindowIds = new Set([
   "changelog-window",
   "games-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v4";
+const publicContentCacheKey = "bits-public-content-v5";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -91,7 +93,7 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, educationItems, nowProfiles, changelogItems, gameItems] =
+  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
@@ -103,6 +105,12 @@ async function requestPublicContent() {
         "site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc",
       ).catch((error) => {
         console.warn("Unable to load education:", error);
+        return [];
+      }),
+      fetchPublicContentTable(
+        "site_resume_certifications?select=position,name,issuer,issued,credential_id,credential_url&enabled=eq.true&order=position.asc",
+      ).catch((error) => {
+        console.warn("Unable to load certifications:", error);
         return [];
       }),
       fetchPublicContentTable(
@@ -119,6 +127,7 @@ async function requestPublicContent() {
     resumeProfile: resumeProfiles[0] ?? null,
     resumeEntries: resumeItems,
     resumeEducation: educationItems,
+    resumeCertifications: certificationItems,
     nowProfile: nowProfiles[0] ?? null,
     changelogEntries: changelogItems,
     favoriteGames: gameItems,
@@ -207,7 +216,42 @@ function createEducationEntry(entry) {
   return item;
 }
 
-function renderResume(profile, entries, education = []) {
+function createCertificationEntry(entry) {
+  const item = document.createElement("li");
+  const header = document.createElement("header");
+  const titleGroup = document.createElement("div");
+  const name = document.createElement("h3");
+  const issuer = document.createElement("p");
+  const issued = document.createElement("p");
+  name.textContent = entry.name;
+  issuer.textContent = entry.issuer;
+  issued.textContent = entry.issued;
+  titleGroup.append(name, issuer);
+  header.append(titleGroup, issued);
+  item.append(header);
+  if (entry.credential_id || entry.credential_url) {
+    const meta = document.createElement("p");
+    meta.className = "resume-certification-meta";
+    if (entry.credential_id) {
+      meta.append(`CREDENTIAL ID: ${entry.credential_id}`);
+    }
+    if (entry.credential_url && /^https:\/\//i.test(entry.credential_url)) {
+      if (entry.credential_id) {
+        meta.append(" // ");
+      }
+      const link = document.createElement("a");
+      link.href = entry.credential_url;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = "VERIFY ↗";
+      meta.append(link);
+    }
+    item.append(meta);
+  }
+  return item;
+}
+
+function renderResume(profile, entries, education = [], certifications = []) {
   if (!profile) {
     resumeEmpty.textContent = "Résumé data is awaiting operator input.";
     resumeEmpty.hidden = false;
@@ -222,12 +266,8 @@ function renderResume(profile, entries, education = []) {
   resumeLocation.textContent = profile.location ?? "";
   resumeLocationRow.hidden = !profile.location;
   resumeUpdated.textContent = formatContentDate(profile.updated_at, true);
-  resumeDownload.hidden = !profile.resume_url;
-  if (profile.resume_url) {
-    resumeDownload.href = profile.resume_url;
-  } else {
-    resumeDownload.removeAttribute("href");
-  }
+  resumeDownload.hidden = false;
+  resumeDownload.href = profile.resume_url || "/professional/resume/";
   resumeEntries.replaceChildren(
     ...entries.map(createResumeEntry),
   );
@@ -236,6 +276,11 @@ function renderResume(profile, entries, education = []) {
     resumeEducation.replaceChildren(...education.map(createEducationEntry));
     resumeEducation.hidden = education.length === 0;
     resumeEducationHeading.hidden = education.length === 0;
+  }
+  if (resumeCertifications) {
+    resumeCertifications.replaceChildren(...certifications.map(createCertificationEntry));
+    resumeCertifications.hidden = certifications.length === 0;
+    resumeCertificationsHeading.hidden = certifications.length === 0;
   }
   resumeEmpty.hidden = true;
   resumeContent.hidden = false;
@@ -341,6 +386,7 @@ async function loadPublicContent() {
           content.resumeProfile,
           content.resumeEntries,
           content.resumeEducation ?? [],
+          content.resumeCertifications ?? [],
         );
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);

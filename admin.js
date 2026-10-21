@@ -37,6 +37,8 @@ const resumeEntrySlots = document.querySelector("#resume-entry-slots");
 const resumeEntryAdd = document.querySelector("#resume-entry-add");
 const resumeEducationSlots = document.querySelector("#resume-education-slots");
 const resumeEducationAdd = document.querySelector("#resume-education-add");
+const resumeCertificationSlots = document.querySelector("#resume-certification-slots");
+const resumeCertificationAdd = document.querySelector("#resume-certification-add");
 const nowForm = document.querySelector("#now-form");
 const nowSubmit = document.querySelector("#now-submit");
 const nowAdminStatus = document.querySelector("#now-admin-status");
@@ -150,11 +152,27 @@ const repeatableEditors = {
     addButton: resumeEducationAdd,
     status: resumeAdminStatus,
     itemName: "education",
+    selectFields: "position, school, credential, period, details, enabled",
     fields: [
       { key: "school", label: "SCHOOL", maxLength: 120 },
       { key: "credential", label: "DEGREE / CREDENTIAL", maxLength: 160 },
       { key: "period", label: "PERIOD", maxLength: 100 },
       { key: "details", label: "DETAILS (OPTIONAL)", maxLength: 600, multiline: true },
+    ],
+  },
+  certifications: {
+    table: "site_resume_certifications",
+    container: resumeCertificationSlots,
+    addButton: resumeCertificationAdd,
+    status: resumeAdminStatus,
+    itemName: "certification",
+    selectFields: "position, name, issuer, issued, credential_id, credential_url, enabled",
+    fields: [
+      { key: "name", label: "CERTIFICATION", maxLength: 160 },
+      { key: "issuer", label: "ISSUER", maxLength: 120 },
+      { key: "issued", label: "ISSUED (E.G. JAN 2023)", maxLength: 100 },
+      { key: "credential_id", label: "CREDENTIAL ID (OPTIONAL)", maxLength: 100 },
+      { key: "credential_url", label: "VERIFY URL (OPTIONAL)", type: "url" },
     ],
   },
   changelog: {
@@ -746,24 +764,31 @@ async function loadResumeContent() {
 
   renderRepeatableEntries(repeatableEditors.resume, entriesResult.data);
 
-  const educationEditor = repeatableEditors.education;
-  const educationResult = await adminClient
-    .from("site_resume_education")
-    .select("position, school, credential, period, details, enabled")
-    .order("position", { ascending: true });
-  educationEditor.unavailable = Boolean(educationResult.error);
-  educationEditor.addButton.disabled = educationEditor.unavailable;
-  if (educationResult.error) {
-    console.error("Unable to load education:", educationResult.error);
-    renderRepeatableEntries(educationEditor, []);
+  const unavailableSections = [];
+  for (const editorKey of ["education", "certifications"]) {
+    const editor = repeatableEditors[editorKey];
+    const result = await adminClient
+      .from(editor.table)
+      .select(editor.selectFields)
+      .order("position", { ascending: true });
+    editor.unavailable = Boolean(result.error);
+    editor.addButton.disabled = editor.unavailable;
+    if (result.error) {
+      console.error(`Unable to load ${editorKey}:`, result.error);
+      renderRepeatableEntries(editor, []);
+      unavailableSections.push(editorKey);
+    } else {
+      renderRepeatableEntries(editor, result.data);
+    }
+  }
+  if (unavailableSections.length) {
     setAdminStatus(
       resumeAdminStatus,
-      `Résumé data loaded, but education is unavailable: ${educationResult.error.message}`,
+      `Résumé data loaded, but ${unavailableSections.join(" and ")} ${unavailableSections.length > 1 ? "are" : "is"} unavailable until the database migration is applied.`,
       "error",
     );
     return true;
   }
-  renderRepeatableEntries(educationEditor, educationResult.data);
   setAdminStatus(resumeAdminStatus, "Résumé data loaded.", "success");
   return true;
 }
@@ -1927,6 +1952,13 @@ if (adminClient) {
     const invalidEducation = educationEntries.find((entry) => (
       entry.enabled && (!entry.school || !entry.credential || !entry.period)
     ));
+    const certificationEntries = collectRepeatableEntries(repeatableEditors.certifications);
+    const invalidCertification = certificationEntries.find((entry) => (
+      entry.enabled && (!entry.name || !entry.issuer || !entry.issued)
+    ));
+    const invalidCertificationUrl = certificationEntries.find((entry) => (
+      entry.credential_url && !httpsUrlPattern.test(entry.credential_url)
+    ));
 
     if (profile.enabled && (!profile.headline || !profile.summary)) {
       setAdminStatus(
@@ -1956,6 +1988,18 @@ if (adminClient) {
       );
       return;
     }
+    if (invalidCertification) {
+      setAdminStatus(
+        resumeAdminStatus,
+        "Every enabled certification needs a name, issuer, and issued date.",
+        "error",
+      );
+      return;
+    }
+    if (invalidCertificationUrl) {
+      setAdminStatus(resumeAdminStatus, "Certification verify URLs must use HTTPS.", "error");
+      return;
+    }
 
     resumeSubmit.disabled = true;
     resumeSubmit.textContent = "> SAVING...";
@@ -1978,6 +2022,13 @@ if (adminClient) {
       repeatableEditors.education.unavailable
         ? null
         : syncRepeatableEntries(repeatableEditors.education, educationEntries, updatedAt),
+      repeatableEditors.certifications.unavailable
+        ? null
+        : syncRepeatableEntries(
+          repeatableEditors.certifications,
+          certificationEntries,
+          updatedAt,
+        ),
     ]);
     const failedUpdate = results.find((result) => result?.error);
     resumeSubmit.disabled = false;

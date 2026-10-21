@@ -1,5 +1,5 @@
 const repositoryUrl = "https://github.com/BitsofBitsofBitsofBits/shortbits.net";
-const siteUrl = "https://www.shortbits.net/";
+const siteUrl = "https://www.shortbits.net/online/";
 const sourceUrl = repositoryUrl;
 
 const links = [
