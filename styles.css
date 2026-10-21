@@ -10816,6 +10816,36 @@ html[data-boot-degradation="3"] .endless-boot-machine {
   letter-spacing: 0.06em;
 }
 
+.resume-entry-bullets {
+  display: grid;
+  gap: 6px;
+  margin: 9px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.6;
+}
+
+.resume-entry-bullets li::marker {
+  color: var(--accent);
+}
+
+ul.resume-entry-technologies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul.resume-entry-technologies li {
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  line-height: 1.4;
+}
+
 .changelog-entry-list > li {
   display: grid;
   grid-template-columns: minmax(110px, auto) 1fr;

@@ -128,15 +128,32 @@ function createResumeEntry(entry) {
   const role = document.createElement("h3");
   const organization = document.createElement("p");
   const period = document.createElement("p");
-  const summary = document.createElement("p");
   role.textContent = entry.role;
   organization.textContent = entry.organization;
   period.textContent = entry.period;
-  summary.textContent = entry.summary;
   titleGroup.append(role, organization);
   header.append(titleGroup, period);
-  item.append(header, summary);
+  item.append(header);
 
+  const format = window.CareerFormat;
+  if (format) {
+    item.append(format.buildSummary(entry.summary, {
+      list: "resume-entry-bullets",
+    }));
+    const technologies = format.buildTechnologyList(
+      entry.technologies,
+      "resume-entry-technologies",
+      `${entry.role} skills`,
+    );
+    if (technologies) {
+      item.append(technologies);
+    }
+    return item;
+  }
+
+  const summary = document.createElement("p");
+  summary.textContent = entry.summary;
+  item.append(summary);
   if (entry.technologies) {
     const technologies = document.createElement("p");
     technologies.className = "resume-entry-technologies";

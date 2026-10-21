@@ -15,9 +15,12 @@ is a personal project and largely a learning exercise for me.
 - A recruiter-facing `/professional/` profile with career highlights, skills,
   selected independent projects, LinkedIn/GitHub links, and the shared private
   contact form. It inherits the saved theme without loading games, simulated
-  desktop windows, boot screens, or Easter eggs. Profile copy lives in
-  `professional/index.html`, based on the existing career profile and LinkedIn;
-  update it when professional details change.
+  desktop windows, boot screens, or Easter eggs. Its experience timeline,
+  location, and availability load from the Admin-managed `RESUME_PROFILE` data
+  shared with `CAREER.SYS`; the hand-written cards in `professional/index.html`
+  are only a fallback when Supabase is unreachable. Summary lines starting with
+  `•` or `-` render as bullets, and technologies (comma- or double-space-
+  separated) render as tags via `career-format.js`.
 - Theme-driven, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard
@@ -146,7 +149,7 @@ after setting `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the local
 shell. The helper completes OAuth locally and writes the refresh token directly
 to the linked Supabase project without printing it.
 
-The Admin Portal also manages the public résumé profile and six career entries,
+The Admin Portal also manages the public résumé profile and career entries,
 the singleton NOW profile, and ten ordered changelog entries. Draft rows remain
 hidden from anonymous Supabase clients through row-level security until their
 publish controls are enabled.

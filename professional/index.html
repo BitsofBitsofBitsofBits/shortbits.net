@@ -18,9 +18,11 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <title>Caleb K Masters | IT Support &amp; Systems</title>
     <script src="/theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-109">
-    <link rel="stylesheet" href="/professional/profile.css?v=profile-1">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-110">
+    <link rel="stylesheet" href="/professional/profile.css?v=profile-2">
     <script src="/supabase-config.js" defer></script>
+    <script src="/career-format.js?v=career-1" defer></script>
+    <script src="/professional/profile.js?v=profile-1" defer></script>
     <script src="/contact.js?v=contact-4" defer></script>
   </head>
   <body class="professional-page">
@@ -55,7 +57,8 @@
             <div class="profile-panel-bar"><span aria-hidden="true">&gt;_</span> PROFILE.SYS</div>
             <dl>
               <div><dt>NAME</dt><dd>Caleb K Masters</dd></div>
-              <div><dt>BASED IN</dt><dd>Carbondale, Kansas, US</dd></div>
+              <div><dt>BASED IN</dt><dd id="profile-location">Carbondale, Kansas, US</dd></div>
+              <div id="profile-availability-row" hidden><dt>AVAILABILITY</dt><dd id="profile-availability"></dd></div>
               <div><dt>FOCUS</dt><dd>IT support &amp; systems administration</dd></div>
               <div><dt>APPROACH</dt><dd>Hands-on learning.<br>Practical automation.</dd></div>
             </dl>
@@ -71,7 +74,7 @@
             <div><p class="profile-kicker">EXPERIENCE / 02</p><h2 id="experience-heading">People, platforms, and problem-solving.</h2></div>
             <a class="profile-text-link" href="https://www.linkedin.com/in/calebkmasters/details/experience/" target="_blank" rel="noreferrer">Full experience on LinkedIn &nearr;</a>
           </header>
-          <div class="profile-experience">
+          <div id="profile-experience-fallback" class="profile-experience">
             <article>
               <p class="profile-kicker">PROFESSIONAL WORK</p>
               <h3>IT Technician</h3>
@@ -87,6 +90,8 @@
               <p>Developing PowerShell, Bash, and Batch scripts to streamline provisioning, monitoring, and backup operations.</p>
             </article>
           </div>
+          <ol id="profile-timeline" class="profile-timeline" aria-label="Work history" hidden></ol>
+          <p id="profile-experience-updated" class="profile-updated" hidden></p>
         </section>
 
         <section id="skills" class="profile-section" aria-labelledby="skills-heading">
