@@ -49,7 +49,7 @@
   --scanline-opacity: 0.05;
   --name-field-opacity: 0.05;
   --icon-filter: brightness(0) invert(1);
-  --spotify-accent: #1ed760;
+  --spotify-accent: var(--accent);
   --body-background:
     radial-gradient(circle at 50% -20%, rgba(var(--accent-rgb), 0.14), transparent 40%),
     linear-gradient(rgba(var(--accent-rgb), 0.025) 1px, transparent 1px),
@@ -79,7 +79,7 @@
   --scanline-opacity: 0.025;
   --name-field-opacity: 0.06;
   --icon-filter: brightness(0);
-  --spotify-accent: #087f37;
+  --spotify-accent: color-mix(in srgb, var(--accent) 35%, var(--ink));
 }
 
 :root[data-interface-theme="winter"] {
@@ -665,7 +665,7 @@
   --scanline-opacity: 0.035;
   --name-field-opacity: 0;
   --icon-filter: none;
-  --spotify-accent: #005a25;
+  --spotify-accent: var(--accent);
   --scrollbar-size: 16px;
   --scrollbar-track: #d4d0c8;
   --scrollbar-track-border: #808080;
@@ -845,7 +845,6 @@
   --accent: rgb(var(--rgb-accent-red), var(--rgb-accent-green), var(--rgb-accent-blue));
   --accent-rgb: var(--rgb-accent-red), var(--rgb-accent-green), var(--rgb-accent-blue);
   --rgb-scrollbar-color: var(--accent);
-  --spotify-accent: var(--accent);
   --bg: #090713;
   --panel: rgba(22, 17, 38, 0.9);
   --panel-2: rgba(34, 25, 55, 0.94);
@@ -937,7 +936,6 @@
   --scanline-opacity: 0;
   --name-field-opacity: 0.025;
   --icon-filter: brightness(0) invert(0.96) sepia(0.18);
-  --spotify-accent: #a4d878;
   --body-background:
     repeating-linear-gradient(0deg, transparent 0 31px, rgba(20, 17, 12, 0.16) 31px 32px),
     repeating-linear-gradient(90deg, transparent 0 31px, rgba(20, 17, 12, 0.16) 31px 32px),
