@@ -10,6 +10,44 @@ html[data-contrast="high"] .professional-page {
   background: var(--bg);
 }
 
+/* Windows 95 colours are designed for grey windows, so present the page as one on the teal desktop. */
+html[data-interface-theme="windows-95"] .professional-page {
+  background: var(--bg);
+  padding: 24px 0;
+}
+
+html[data-interface-theme="windows-95"] .profile-layout {
+  width: min(1224px, calc(100% - 32px));
+  padding: 0 32px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf, 2px 2px 0 #000;
+}
+
+html[data-interface-theme="windows-95"] .profile-skip {
+  background: var(--panel);
+}
+
+html[data-interface-theme="windows-95"] .professional-page .profile-button {
+  color: #fff;
+}
+
+html[data-interface-theme="windows-95"] .professional-page .profile-button:hover {
+  color: var(--accent);
+}
+
+html[data-interface-theme="windows-95"] .professional-page .profile-button:hover,
+html[data-interface-theme="windows-95"] .profile-skills article {
+  background: var(--panel);
+}
+
+/* Keep Aero's light bloom subtle enough that text over it stays readable. */
+html[data-interface-theme="aero-glass"] .professional-page::before {
+  opacity: 0.2;
+}
+
 .professional-page *,
 .professional-page *::before,
 .professional-page *::after {
@@ -498,6 +536,11 @@ html[data-contrast="high"] .professional-page {
   line-height: 1.6;
 }
 
+/* Field edges need 3:1 against the page in every theme (WCAG 1.4.11). */
+html .professional-page .contact-form :is(input, textarea) {
+  border-color: var(--muted);
+}
+
 .professional-page .profile-help {
   margin: -8px 0 0;
   font-size: 0.68rem;
@@ -550,6 +593,15 @@ html[data-contrast="high"] .professional-page {
 @media (max-width: 650px) {
   .profile-layout {
     width: calc(100% - 36px);
+  }
+
+  html[data-interface-theme="windows-95"] .professional-page {
+    padding: 8px 0;
+  }
+
+  html[data-interface-theme="windows-95"] .profile-layout {
+    width: calc(100% - 16px);
+    padding: 0 14px;
   }
 
   .profile-hero,
@@ -612,8 +664,16 @@ html[data-contrast="high"] .professional-page {
     background: #fff;
   }
 
-  .profile-layout {
+  .profile-layout,
+  html[data-interface-theme] .profile-layout {
     width: 100%;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  html[data-interface-theme] .professional-page {
+    padding: 0;
   }
 
   .profile-header nav,
