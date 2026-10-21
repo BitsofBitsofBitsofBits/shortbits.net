@@ -88,11 +88,59 @@ html[data-contrast="high"] .professional-page {
 .profile-header nav,
 .profile-footer nav,
 .profile-socials,
-.profile-actions {
+.profile-actions,
+.profile-header-tools {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 20px;
+}
+
+.profile-header-tools {
+  gap: 28px;
+}
+
+.profile-theme-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.profile-theme-picker[hidden] {
+  display: none;
+}
+
+.profile-theme-picker select {
+  min-height: 34px;
+  padding: 4px 30px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--accent) 50%) right 14px center / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--accent) 50%, transparent 50%) right 9px center / 5px 5px no-repeat,
+    var(--panel);
+  font: inherit;
+  font-size: 0.72rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+.profile-theme-picker select:hover,
+.profile-theme-picker select:focus-visible {
+  border-color: var(--accent);
+}
+
+.profile-theme-picker select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.profile-theme-picker option {
+  color: var(--ink);
+  background: var(--panel);
 }
 
 .profile-header nav,
@@ -569,6 +617,7 @@ html[data-contrast="high"] .professional-page {
   }
 
   .profile-header nav,
+  .profile-theme-picker,
   .profile-actions,
   .profile-contact,
   .profile-skip {

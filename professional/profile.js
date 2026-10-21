@@ -1,4 +1,41 @@
 (() => {
+  const themeSelect = document.querySelector("#profile-theme-select");
+  const themes = window.BITS_INTERFACE_THEMES ?? [];
+  if (!themeSelect || themes.length === 0) {
+    return;
+  }
+
+  themeSelect.replaceChildren(...themes.map((theme) => {
+    const option = document.createElement("option");
+    option.value = theme.id;
+    option.textContent = theme.name
+      .toLowerCase()
+      .replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+      .replace(/\b(Rgb|Oled|Crt|Dos|Y2k|Macos)\b/g, (word) => (
+        word === "Macos" ? "macOS" : word.toUpperCase()
+      ));
+    return option;
+  }));
+  themeSelect.value = document.documentElement.dataset.interfaceTheme ?? themes[0].id;
+  themeSelect.closest("label").hidden = false;
+
+  themeSelect.addEventListener("change", () => {
+    const theme = themes.find((entry) => entry.id === themeSelect.value);
+    if (!theme) {
+      return;
+    }
+    document.documentElement.dataset.interfaceTheme = theme.id;
+    document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
+    document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
+    if (window.BITS_THEME_PREFERENCE) {
+      window.BITS_THEME_PREFERENCE.select(theme.id);
+    } else {
+      localStorage.setItem("bits-interface-theme", theme.id);
+    }
+  });
+})();
+
+(() => {
   const timeline = document.querySelector("#profile-timeline");
   const fallback = document.querySelector("#profile-experience-fallback");
   const updated = document.querySelector("#profile-experience-updated");
