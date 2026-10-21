@@ -52,6 +52,61 @@ const gamesSubmit = document.querySelector("#games-submit");
 const gamesAdminStatus = document.querySelector("#games-admin-status");
 const gamesSlots = document.querySelector("#games-slots");
 const gamesEntryAdd = document.querySelector("#games-entry-add");
+const hardwareForm = document.querySelector("#hardware-form");
+const hardwareSubmit = document.querySelector("#hardware-submit");
+const hardwareAdminStatus = document.querySelector("#hardware-admin-status");
+const hardwareSlots = document.querySelector("#hardware-slots");
+const hardwareEntryAdd = document.querySelector("#hardware-entry-add");
+const hardwareImportScript = document.querySelector("#hardware-import-script");
+const hardwareImportCopy = document.querySelector("#hardware-import-copy");
+const hardwareImportMachine = document.querySelector("#hardware-import-machine");
+const hardwareImportJson = document.querySelector("#hardware-import-json");
+const hardwareImportReplace = document.querySelector("#hardware-import-replace");
+const hardwareImportApply = document.querySelector("#hardware-import-apply");
+// Windows PowerShell 5.1 compatible; collects no serial numbers or computer name.
+const hardwareScanScript = [
+  "& {",
+  "$ErrorActionPreference = 'SilentlyContinue'",
+  "$rows = New-Object System.Collections.ArrayList",
+  "function Add-Row($component, $name, $detail) {",
+  "  $name = ([string]$name).Trim()",
+  "  if ($name) { [void]$rows.Add([ordered]@{ component = $component; name = $name; detail = ([string]$detail).Trim() }) }",
+  "}",
+  "$cpu = Get-CimInstance Win32_Processor | Select-Object -First 1",
+  "if ($cpu) { Add-Row 'CPU' $cpu.Name ('{0} cores / {1} threads, {2:N2} GHz base' -f $cpu.NumberOfCores, $cpu.NumberOfLogicalProcessors, ($cpu.MaxClockSpeed / 1000)) }",
+  "Get-CimInstance Win32_VideoController | Where-Object { $_.Name -notmatch 'Microsoft|Virtual|Remote|Parsec|Meta' } | ForEach-Object { Add-Row 'GPU' $_.Name ('Driver ' + $_.DriverVersion) }",
+  "$mem = @(Get-CimInstance Win32_PhysicalMemory)",
+  "if ($mem.Count) {",
+  "  $total = [math]::Round((($mem | Measure-Object Capacity -Sum).Sum) / 1GB)",
+  "  $stick = $mem[0]",
+  "  $speed = $stick.ConfiguredClockSpeed",
+  "  if (-not $speed) { $speed = $stick.Speed }",
+  "  Add-Row 'RAM' ('{0} GB' -f $total) ('{0} x {1} GB @ {2} MT/s {3}' -f $mem.Count, [math]::Round($stick.Capacity / 1GB), $speed, $stick.Manufacturer)",
+  "}",
+  "$board = Get-CimInstance Win32_BaseBoard | Select-Object -First 1",
+  "if ($board) { Add-Row 'MOTHERBOARD' ($board.Manufacturer + ' ' + $board.Product) '' }",
+  "$disks = @(Get-PhysicalDisk)",
+  "if ($disks.Count) {",
+  "  foreach ($disk in $disks) {",
+  "    $kind = @([string]$disk.MediaType, [string]$disk.BusType) | Where-Object { $_ -and $_ -ne 'Unspecified' }",
+  "    Add-Row 'STORAGE' $disk.FriendlyName ((@(('{0} GB' -f [math]::Round($disk.Size / 1GB))) + $kind) -join ' / ')",
+  "  }",
+  "} else {",
+  "  Get-CimInstance Win32_DiskDrive | ForEach-Object { Add-Row 'STORAGE' $_.Model ('{0} GB / {1}' -f [math]::Round($_.Size / 1GB), $_.InterfaceType) }",
+  "}",
+  "Get-CimInstance -Namespace root\\wmi -ClassName WmiMonitorID | ForEach-Object {",
+  "  $label = ($_.UserFriendlyName | Where-Object { $_ -gt 0 } | ForEach-Object { [char]$_ }) -join ''",
+  "  Add-Row 'DISPLAY' $label ''",
+  "}",
+  "$os = Get-CimInstance Win32_OperatingSystem",
+  "$release = (Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion').DisplayVersion",
+  "if ($os) { Add-Row 'OS' $os.Caption ((@($release, ('build ' + $os.BuildNumber)) | Where-Object { $_ }) -join ' / ') }",
+  "$json = ConvertTo-Json -InputObject @($rows) -Depth 3",
+  "$json | Set-Clipboard",
+  "$json",
+  "Write-Host ('Copied ' + $rows.Count + ' hardware rows to the clipboard.') -ForegroundColor Green",
+  "}",
+].join("\n");
 const blogPostForm = document.querySelector("#blog-post-form");
 const blogPostSave = document.querySelector("#blog-post-save");
 const blogPostDelete = document.querySelector("#blog-post-delete");
@@ -198,6 +253,19 @@ const repeatableEditors = {
       { key: "platform", label: "PAGE LABEL", maxLength: 80 },
       { key: "store_url", label: "STORE / OFFICIAL URL", type: "url", maxLength: 500 },
       { key: "note", label: "NOTE", maxLength: 500, multiline: true },
+    ],
+  },
+  hardware: {
+    table: "site_hardware",
+    container: hardwareSlots,
+    addButton: hardwareEntryAdd,
+    status: hardwareAdminStatus,
+    itemName: "hardware item",
+    fields: [
+      { key: "machine", label: "MACHINE (E.G. DESKTOP)", maxLength: 60 },
+      { key: "component", label: "COMPONENT (E.G. CPU)", maxLength: 40 },
+      { key: "name", label: "NAME", maxLength: 160 },
+      { key: "detail", label: "DETAIL (OPTIONAL)", maxLength: 300, multiline: true },
     ],
   },
 };
@@ -392,6 +460,8 @@ function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v2");
   localStorage.removeItem("bits-public-content-v3");
   localStorage.removeItem("bits-public-content-v4");
+  localStorage.removeItem("bits-public-content-v5");
+  localStorage.removeItem("bits-public-content-v6");
 }
 
 function createMessageElement(message) {
@@ -864,6 +934,102 @@ async function loadFavoriteGames() {
     "success",
   );
   return true;
+}
+
+async function loadHardware() {
+  setAdminStatus(hardwareAdminStatus, "Loading hardware...");
+  const { data, error } = await adminClient
+    .from("site_hardware")
+    .select("position, machine, component, name, detail, enabled")
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Unable to load hardware:", error);
+    setAdminStatus(
+      hardwareAdminStatus,
+      `Hardware failed to load: ${error.message}`,
+      "error",
+    );
+    return false;
+  }
+
+  renderRepeatableEntries(repeatableEditors.hardware, data);
+  setAdminStatus(
+    hardwareAdminStatus,
+    `${data.length} hardware entr${data.length === 1 ? "y" : "ies"} loaded.`,
+    "success",
+  );
+  return true;
+}
+
+function parseHardwareScan(text) {
+  const parsed = JSON.parse(text);
+  const items = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.components) ? parsed.components : [parsed];
+  return items
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      component: String(item.component ?? "").trim().slice(0, 40),
+      name: String(item.name ?? "").trim().slice(0, 160),
+      detail: String(item.detail ?? "").trim().slice(0, 300),
+    }))
+    .filter((item) => item.component && item.name);
+}
+
+function importHardwareScan() {
+  const editor = repeatableEditors.hardware;
+  const machine = hardwareImportMachine.value.trim().slice(0, 60);
+  if (!machine) {
+    setAdminStatus(hardwareAdminStatus, "Name the machine before importing.", "error");
+    hardwareImportMachine.focus();
+    return;
+  }
+
+  let items;
+  try {
+    items = parseHardwareScan(hardwareImportJson.value);
+  } catch {
+    setAdminStatus(
+      hardwareAdminStatus,
+      "That doesn't look like scan output. Paste the JSON the script copied.",
+      "error",
+    );
+    return;
+  }
+  if (items.length === 0) {
+    setAdminStatus(hardwareAdminStatus, "The scan result has no components.", "error");
+    return;
+  }
+
+  let replaced = 0;
+  if (hardwareImportReplace.checked) {
+    editor.container.querySelectorAll("fieldset").forEach((fieldset) => {
+      const machineField = fieldset.querySelector('[data-entry-field="machine"]');
+      if (machineField.value.trim().toLowerCase() !== machine.toLowerCase()) {
+        return;
+      }
+      if (fieldset.dataset.position) {
+        editor.deletedPositions.add(Number(fieldset.dataset.position));
+      }
+      fieldset.remove();
+      replaced += 1;
+    });
+  }
+
+  items.forEach((item) => {
+    editor.container.append(createRepeatableEntry(editor, {
+      machine,
+      ...item,
+      enabled: true,
+    }));
+  });
+  hardwareImportJson.value = "";
+  setAdminStatus(
+    hardwareAdminStatus,
+    `Imported ${items.length} component${items.length === 1 ? "" : "s"} for ${machine}${replaced ? `, replacing ${replaced}` : ""}. Review, then save to publish.`,
+    "success",
+  );
 }
 
 function generateShortLinkSlug(length = 7) {
@@ -1365,6 +1531,7 @@ async function showInbox() {
     loadNowContent(),
     loadChangelogContent(),
     loadFavoriteGames(),
+    loadHardware(),
     loadBlogPosts(),
     loadShortLinks(),
   ]);
@@ -2185,6 +2352,64 @@ if (adminClient) {
     }
     clearPublicContentCache();
     setAdminStatus(gamesAdminStatus, "Favorite games updated.", "success");
+  });
+
+  hardwareImportScript.value = hardwareScanScript;
+  hardwareImportCopy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(hardwareScanScript);
+    } catch {
+      hardwareImportScript.select();
+      document.execCommand("copy");
+    }
+    setAdminStatus(
+      hardwareAdminStatus,
+      "Scan script copied. Paste it into PowerShell on the machine.",
+      "success",
+    );
+  });
+  hardwareImportApply.addEventListener("click", importHardwareScan);
+
+  hardwareForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const entries = collectRepeatableEntries(repeatableEditors.hardware);
+    const invalidEntry = entries.find((entry) => (
+      entry.enabled && (!entry.machine || !entry.component || !entry.name)
+    ));
+    if (invalidEntry) {
+      setAdminStatus(
+        hardwareAdminStatus,
+        "Every enabled hardware row needs a machine, component, and name.",
+        "error",
+      );
+      return;
+    }
+
+    hardwareSubmit.disabled = true;
+    hardwareSubmit.textContent = "> SAVING...";
+    setAdminStatus(hardwareAdminStatus, "Writing hardware...");
+    const failedUpdate = await syncRepeatableEntries(
+      repeatableEditors.hardware,
+      entries,
+      new Date().toISOString(),
+    );
+    hardwareSubmit.disabled = false;
+    hardwareSubmit.textContent = "> SAVE_HARDWARE";
+
+    if (failedUpdate) {
+      console.error("Unable to save hardware:", failedUpdate.error);
+      setAdminStatus(
+        hardwareAdminStatus,
+        `Hardware update failed: ${failedUpdate.error.message}`,
+        "error",
+      );
+      return;
+    }
+    if (!await loadHardware()) {
+      return;
+    }
+    clearPublicContentCache();
+    setAdminStatus(hardwareAdminStatus, "Hardware updated.", "success");
   });
 
   logoutButton.addEventListener("click", async () => {

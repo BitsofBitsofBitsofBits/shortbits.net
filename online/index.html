@@ -31,14 +31,14 @@
     <script src="/theme-init.js?v=theme-12"></script>
     <script src="/boot.js?v=boot-2"></script>
     <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-114">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-115">
     <script src="/messages.js?v=messages-13" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/stop-codes.js?v=stop-codes-2" defer></script>
     <script src="/arg.js?v=arg-3" defer></script>
     <script src="/filesystem.js?v=filesystem-2" defer></script>
     <script src="/supabase-config.js" defer></script>
-    <script src="/analytics.js?v=analytics-3" defer></script>
+    <script src="/analytics.js?v=analytics-4" defer></script>
     <script src="/notifications.js?v=notifications-2" defer></script>
     <script src="/theme-effects.js?v=theme-effects-3" defer></script>
     <script src="/screensaver.js?v=screensaver-1" defer></script>
@@ -48,7 +48,7 @@
     <script src="/settings.js?v=settings-5" defer></script>
     <script src="/death-screens.js?v=death-screens-2" defer></script>
     <script src="/career-format.js?v=career-2" defer></script>
-    <script src="/content.js?v=content-7" defer></script>
+    <script src="/content.js?v=content-8" defer></script>
     <script src="/about.js?v=about-3" defer></script>
     <script src="/pronouns.js?v=pronouns-1" defer></script>
     <script src="/discord.js?v=discord-3" defer></script>
@@ -97,6 +97,10 @@
         <button type="button" data-window-target="games-window">
           <span class="fake-desktop-icon" aria-hidden="true">&gt;_</span>
           <span>GAMES.EXE</span>
+        </button>
+        <button type="button" data-window-target="hardware-window">
+          <span class="fake-desktop-icon" aria-hidden="true">#</span>
+          <span>HARDWARE.SYS</span>
         </button>
         <button class="arcade-desktop-launcher" type="button" data-window-target="arcade-window">
           <span class="fake-desktop-icon" aria-hidden="true">8B</span>
@@ -442,6 +446,7 @@
               NOTICES <span id="notification-unread-count">0</span>
             </button>
             <button type="button" data-window-target="monitor-window">SYSTEM MONITOR</button>
+            <button type="button" data-window-target="hardware-window">HARDWARE.SYS</button>
           </div>
         </details>
         <details class="app-menu" name="application-menu">
@@ -625,6 +630,10 @@
           <button type="button" data-window-target="games-window">
             <strong>GAMES.EXE</strong>
             <span>Browse favorite non-suspicious games</span>
+          </button>
+          <button type="button" data-window-target="hardware-window">
+            <strong>HARDWARE.SYS</strong>
+            <span>Real specs for the operator's machines</span>
           </button>
           <button type="button" data-window-target="stats-window">
             <strong>STATS.EXE</strong>
@@ -1394,6 +1403,36 @@
         <ol id="games-list" class="favorite-games-list" hidden></ol>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Favorite Games window"></button>
+    </section>
+
+    <section
+      id="hardware-window"
+      class="desktop-window hardware-window"
+      role="dialog"
+      aria-labelledby="hardware-window-title"
+      data-window
+      data-window-x="150"
+      data-window-y="95"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="hardware-window-title">HARDWARE.SYS</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Hardware window">_</button>
+          <button type="button" data-window-close aria-label="Close Hardware window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">DEVICE_MANAGER // REAL HARDWARE</p>
+        <h2>OPERATOR HARDWARE</h2>
+        <p class="content-window-summary">The actual machines behind the Bits. Unlike the About window, these specs are not jokes.</p>
+        <div id="hardware-empty" class="content-window-empty">
+          Hardware inventory is awaiting operator input.
+        </div>
+        <div id="hardware-machines" class="hardware-machines" hidden></div>
+        <p id="hardware-updated" class="hardware-updated" hidden></p>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Hardware window"></button>
     </section>
 
     <section

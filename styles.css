@@ -3291,6 +3291,39 @@ h1 .dim {
   gap: 8px;
 }
 
+.hardware-import {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+}
+
+.hardware-import summary {
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.hardware-import-body {
+  margin-top: 12px;
+}
+
+.hardware-import-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.7;
+}
+
+.hardware-import-script {
+  width: 100%;
+  min-height: 140px;
+  font-family: inherit;
+  font-size: 0.64rem;
+  white-space: pre;
+}
+
 .repeatable-entry-actions {
   margin-top: auto;
 }
@@ -5090,7 +5123,8 @@ html[data-interface-theme="minebits"] #admin-blog-window-title {
 }
 
 #admin-changelog-window,
-#admin-games-window {
+#admin-games-window,
+#admin-hardware-window {
   --window-default-height: 760px;
   --window-default-width: 1100px;
 }
@@ -7335,6 +7369,11 @@ body.is-black-screen-staging .binary-rain {
 #games-window {
   --window-default-height: 650px;
   --window-default-width: 880px;
+}
+
+#hardware-window {
+  --window-default-height: 640px;
+  --window-default-width: 860px;
 }
 
 #guestbook-window {
@@ -10976,6 +11015,60 @@ ul.resume-entry-technologies li {
   outline: none;
   color: var(--ink);
   background: var(--accent-soft);
+}
+
+.hardware-machines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.hardware-machines[hidden] {
+  display: none;
+}
+
+.hardware-machine {
+  min-width: 0;
+  padding: 16px 18px 10px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(135deg, var(--accent-soft), transparent 58%),
+    var(--panel);
+}
+
+.hardware-machine h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+}
+
+.hardware-specs {
+  margin-top: 10px;
+}
+
+.hardware-specs dd span,
+.hardware-specs dd small {
+  display: block;
+}
+
+.hardware-specs dd span {
+  color: var(--ink);
+}
+
+.hardware-specs dd small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.hardware-updated {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
 }
 
 @container (min-width: 620px) {

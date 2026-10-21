@@ -85,6 +85,11 @@ is a personal project and largely a learning exercise for me.
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
+- An Admin-managed `HARDWARE.SYS` window listing real machine specs grouped
+  by machine. Admin's `IMPORT_FROM_PC` panel provides a read-only PowerShell
+  scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
+  numbers or computer name) that copies JSON to the clipboard for pasting
+  back into the editor before saving
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
   Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
   Null Tac Toe, endless wave-based Packet Breaker, and Flappy Bit, plus local

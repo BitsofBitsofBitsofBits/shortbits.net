@@ -91,6 +91,15 @@ const adminWindowModules = [
     y: 135,
   },
   {
+    sourceId: "hardware-editor",
+    windowId: "admin-hardware-window",
+    title: "HARDWARE_EDITOR.EXE",
+    label: "HARDWARE",
+    description: "Publish real machine specs, or import them from a PC",
+    x: 265,
+    y: 115,
+  },
+  {
     sourceId: "blog-editor",
     windowId: "admin-blog-window",
     title: "BLOG_EDITOR.EXE",

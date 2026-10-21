@@ -8,15 +8,15 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-114">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-115">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/markdown.js?v=markdown-2" defer></script>
     <script src="/shortbits.js?v=shortbits-1" defer></script>
-    <script src="/admin-windows.js?v=admin-windows-9" defer></script>
+    <script src="/admin-windows.js?v=admin-windows-10" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/windows.js?v=windows-11" defer></script>
-    <script src="/admin.js?v=admin-20" defer></script>
+    <script src="/admin.js?v=admin-21" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -253,6 +253,44 @@
             <div id="games-slots" class="curated-admin-grid"></div>
             <p id="games-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="games-submit" type="submit">&gt; SAVE_GAMES</button>
+          </form>
+        </section>
+
+        <section id="hardware-editor" class="profile-editor" aria-labelledby="hardware-editor-heading">
+          <div class="section-label">
+            <h2 id="hardware-editor-heading">HARDWARE.SYS</h2>
+            <span>REAL MACHINE SPECS</span>
+          </div>
+          <details class="hardware-import">
+            <summary>IMPORT_FROM_PC</summary>
+            <div class="admin-form hardware-import-body">
+            <ol class="hardware-import-steps">
+              <li>Copy the scan script, open <strong>PowerShell</strong> on the machine, paste it, and press Enter.</li>
+              <li>It reads CPU, GPU, RAM, motherboard, storage, displays, and OS, then copies the result to your clipboard. Nothing is uploaded.</li>
+              <li>Name the machine below, paste the result, and import. Review the rows, then save.</li>
+            </ol>
+            <textarea id="hardware-import-script" class="hardware-import-script" rows="8" readonly aria-label="PowerShell hardware scan script"></textarea>
+            <div class="repeatable-admin-actions">
+              <button id="hardware-import-copy" type="button">COPY_SCAN_SCRIPT</button>
+            </div>
+            <label><span>MACHINE NAME</span><input id="hardware-import-machine" maxlength="60" value="Desktop"></label>
+            <label><span>PASTE SCAN RESULT (JSON)</span><textarea id="hardware-import-json" rows="6" spellcheck="false"></textarea></label>
+            <label class="admin-checkbox"><input id="hardware-import-replace" type="checkbox" checked><span>REPLACE EXISTING ROWS FOR THIS MACHINE</span></label>
+            <div class="repeatable-admin-actions">
+              <button id="hardware-import-apply" type="button">IMPORT_TO_EDITOR</button>
+            </div>
+          </details>
+          <form id="hardware-form" class="admin-form content-admin-form">
+            <p class="blog-markdown-help">
+              Publishes to HARDWARE.SYS on <a href="/online/?window=hardware" target="_blank" rel="noreferrer">/online/</a>.
+              Rows with the same machine name are grouped together, in the order shown here.
+            </p>
+            <div class="repeatable-admin-actions">
+              <button id="hardware-entry-add" type="button">+ ADD_COMPONENT</button>
+            </div>
+            <div id="hardware-slots" class="curated-admin-grid"></div>
+            <p id="hardware-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="hardware-submit" type="submit">&gt; SAVE_HARDWARE</button>
           </form>
         </section>
 

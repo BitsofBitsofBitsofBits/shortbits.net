@@ -23,13 +23,17 @@ const changelogEmpty = document.querySelector("#changelog-empty");
 const changelogEntries = document.querySelector("#changelog-entries");
 const gamesEmpty = document.querySelector("#games-empty");
 const gamesList = document.querySelector("#games-list");
+const hardwareEmpty = document.querySelector("#hardware-empty");
+const hardwareMachines = document.querySelector("#hardware-machines");
+const hardwareUpdated = document.querySelector("#hardware-updated");
 const publicContentWindowIds = new Set([
   "resume-window",
   "now-window",
   "changelog-window",
   "games-window",
+  "hardware-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v5";
+const publicContentCacheKey = "bits-public-content-v6";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -93,7 +97,7 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems] =
+  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems, hardwareItems] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
@@ -122,6 +126,12 @@ async function requestPublicContent() {
       fetchPublicContentTable(
         "site_favorite_games?select=position,title,platform,store_url,note&enabled=eq.true&order=position.asc",
       ),
+      fetchPublicContentTable(
+        "site_hardware?select=position,machine,component,name,detail,updated_at&enabled=eq.true&order=position.asc",
+      ).catch((error) => {
+        console.warn("Unable to load hardware:", error);
+        return [];
+      }),
     ]);
   const payload = {
     resumeProfile: resumeProfiles[0] ?? null,
@@ -131,6 +141,7 @@ async function requestPublicContent() {
     nowProfile: nowProfiles[0] ?? null,
     changelogEntries: changelogItems,
     favoriteGames: gameItems,
+    hardware: hardwareItems,
   };
   localStorage.setItem(publicContentCacheKey, JSON.stringify({
     cachedAt: Date.now(),
@@ -374,12 +385,63 @@ function renderFavoriteGames(games) {
   gamesEmpty.textContent = "Favorite games are awaiting operator input.";
 }
 
+function renderHardware(items) {
+  const machines = new Map();
+  let latestUpdate = "";
+  items.forEach((item) => {
+    if (!machines.has(item.machine)) {
+      machines.set(item.machine, []);
+    }
+    machines.get(item.machine).push(item);
+    if (item.updated_at && item.updated_at > latestUpdate) {
+      latestUpdate = item.updated_at;
+    }
+  });
+
+  hardwareMachines.replaceChildren(
+    ...[...machines].map(([machine, components]) => {
+      const section = document.createElement("section");
+      const heading = document.createElement("h3");
+      const list = document.createElement("dl");
+      section.className = "hardware-machine";
+      heading.textContent = machine;
+      list.className = "desktop-window-stats hardware-specs";
+      components.forEach((component) => {
+        const row = document.createElement("div");
+        const term = document.createElement("dt");
+        const value = document.createElement("dd");
+        const name = document.createElement("span");
+        term.textContent = component.component;
+        name.textContent = component.name;
+        value.append(name);
+        if (component.detail) {
+          const detail = document.createElement("small");
+          detail.textContent = component.detail;
+          value.append(detail);
+        }
+        row.append(term, value);
+        list.append(row);
+      });
+      section.append(heading, list);
+      return section;
+    }),
+  );
+  hardwareMachines.hidden = items.length === 0;
+  hardwareEmpty.hidden = items.length > 0;
+  hardwareEmpty.textContent = "Hardware inventory is awaiting operator input.";
+  hardwareUpdated.hidden = !latestUpdate;
+  hardwareUpdated.textContent = latestUpdate
+    ? `LAST SCAN: ${formatContentDate(latestUpdate, true)}`
+    : "";
+}
+
 async function loadPublicContent() {
   if (!publicContentRequest) {
     resumeEmpty.textContent = "Synchronizing résumé data...";
     nowEmpty.textContent = "Synchronizing NOW.TXT...";
     changelogEmpty.textContent = "Synchronizing changelog entries...";
     gamesEmpty.textContent = "Synchronizing favorite games...";
+    hardwareEmpty.textContent = "Scanning hardware inventory...";
     publicContentRequest = requestPublicContent()
       .then((content) => {
         renderResume(
@@ -391,6 +453,7 @@ async function loadPublicContent() {
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);
         renderFavoriteGames(content.favoriteGames);
+        renderHardware(content.hardware ?? []);
       })
       .catch((error) => {
         console.error("Unable to load public content:", error);
@@ -398,6 +461,7 @@ async function loadPublicContent() {
         nowEmpty.textContent = "NOW.TXT is temporarily unavailable.";
         changelogEmpty.textContent = "Changelog data is temporarily unavailable.";
         gamesEmpty.textContent = "Favorite games are temporarily unavailable.";
+        hardwareEmpty.textContent = "Hardware inventory is temporarily unavailable.";
         publicContentRequest = null;
         throw error;
       });
