@@ -30,6 +30,7 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/theme-init.js?v=theme-12"></script>
     <script src="/boot.js?v=boot-2"></script>
+    <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
     <link rel="stylesheet" href="/styles.css?v=upgrade-114">
     <script src="/messages.js?v=messages-13" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
@@ -38,7 +39,7 @@
     <script src="/filesystem.js?v=filesystem-2" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/analytics.js?v=analytics-3" defer></script>
-    <script src="/notifications.js?v=notifications-1" defer></script>
+    <script src="/notifications.js?v=notifications-2" defer></script>
     <script src="/theme-effects.js?v=theme-effects-3" defer></script>
     <script src="/screensaver.js?v=screensaver-1" defer></script>
     <script src="/script.js?v=upgrade-62" defer></script>
@@ -77,6 +78,7 @@
     <div
       id="forbidden-bit-dock"
       class="forbidden-bit-dock"
+      role="group"
       aria-label="Detected anomalous Bits"
     ></div>
     <div class="noise" aria-hidden="true"></div>
@@ -475,10 +477,10 @@
       >
         <div id="avatar-wrap" class="avatar-wrap">
           <button id="avatar-button" class="avatar" type="button" aria-label="Poke the bit avatar" data-reaction="[•_•]">
-            <span class="avatar-bit bit-a">1</span>
-            <span class="avatar-bit bit-b">0</span>
-            <span class="avatar-bit bit-c">1</span>
-            <span class="avatar-bit bit-d">0</span>
+            <span class="avatar-bit bit-a" aria-hidden="true">1</span>
+            <span class="avatar-bit bit-b" aria-hidden="true">0</span>
+            <span class="avatar-bit bit-c" aria-hidden="true">1</span>
+            <span class="avatar-bit bit-d" aria-hidden="true">0</span>
             <span class="avatar-face" aria-hidden="true">
               <span class="eye"></span>
               <span class="eye"></span>
@@ -509,7 +511,7 @@
               class="pronouns pronoun-window-launch"
               type="button"
               data-window-target="pronouns-window"
-              aria-label="Open pronoun profile"
+              aria-label="they/them: open pronoun profile"
             >they/them</button>
           </div>
           <p class="bio" itemprop="description">

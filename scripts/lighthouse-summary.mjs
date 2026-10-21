@@ -36,7 +36,7 @@ for (const file of files) {
     console.log(`  FAIL ${audit.id} (${Math.round(audit.score * 100)}): ${audit.title}${audit.displayValue ? ` - ${audit.displayValue}` : ""}`);
     const items = audit.details?.items ?? [];
     for (const item of items.slice(0, 5)) {
-      const label = item.url ?? item.node?.selector ?? item.node?.snippet ?? item.source?.url ?? item.label;
+      const label = item.url || item.node?.selector || item.node?.snippet || item.source?.url || item.description || item.label;
       if (label) {
         const extra = item.wastedBytes ? ` (${Math.round(item.wastedBytes / 1024)} KiB)` : item.wastedMs ? ` (${Math.round(item.wastedMs)} ms)` : "";
         console.log(`      - ${String(label).slice(0, 160)}${extra}`);

@@ -139,7 +139,7 @@ function markNotificationsRead() {
 }
 
 function showNotificationToast(notification) {
-  const toast = document.createElement("article");
+  const toast = document.createElement("div");
   const copy = document.createElement("div");
   const type = document.createElement("span");
   const title = document.createElement("strong");

@@ -130,8 +130,25 @@ body.resume-page {
   text-decoration: none;
 }
 
-.resume-contact [hidden] {
-  display: none;
+/* Data-driven content stays hidden (keeping its space) until live data arrives, so the swap
+   from fallback content does not cause layout shift. The animation reveals it if scripts fail. */
+.resume-sheet.is-loading .resume-headline,
+.resume-sheet.is-loading > section,
+.resume-sheet.is-loading > footer {
+  visibility: hidden;
+  animation: resume-reveal 0s linear 3s forwards;
+}
+
+@keyframes resume-reveal {
+  to {
+    visibility: visible;
+  }
+}
+
+@media screen {
+  .resume-contact {
+    line-height: 24px;
+  }
 }
 
 .resume-sheet section {
@@ -290,6 +307,13 @@ body.resume-page {
 
   .resume-toolbar {
     display: none;
+  }
+
+  .resume-sheet.is-loading .resume-headline,
+  .resume-sheet.is-loading > section,
+  .resume-sheet.is-loading > footer {
+    visibility: visible;
+    animation: none;
   }
 
   .resume-sheet {
