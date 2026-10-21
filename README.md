@@ -100,7 +100,7 @@ is a personal project and largely a learning exercise for me.
   per-machine device token (only its SHA-256 hash is stored, revocable at any
   time) and a PowerShell installer. The installer saves the token
   DPAPI-encrypted under `%LOCALAPPDATA%\BitsHardwareAgent` and registers a
-  per-user logon task that needs no admin rights. The agent posts CPU, GPU,
+  per-user logon task that needs no admin rights and runs in a headless console, so no PowerShell window stays open. The agent posts CPU, GPU,
   and RAM load plus boot time as lightweight pulses to the
   `hardware_agent_pulse` RPC (token hashed server-side, at most one pulse per
   2 seconds): every 3 seconds while anyone has HARDWARE.SYS open (viewers
