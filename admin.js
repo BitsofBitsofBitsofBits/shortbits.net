@@ -878,6 +878,126 @@ function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v6");
 }
 
+async function setMessageRead(message, read) {
+  const { error } = await adminClient
+    .from("messages")
+    .update({ read })
+    .eq("id", message.id);
+
+  if (error) {
+    console.error("Unable to update message:", error);
+    setAdminStatus(inboxStatus, `Update failed: ${error.message}`, "error");
+    return false;
+  }
+
+  return true;
+}
+
+async function deleteMessage(message) {
+  if (!window.confirm(`Delete the message from ${message.name}?`)) {
+    return false;
+  }
+
+  const { error } = await adminClient
+    .from("messages")
+    .delete()
+    .eq("id", message.id);
+
+  if (error) {
+    console.error("Unable to delete message:", error);
+    setAdminStatus(inboxStatus, `Delete failed: ${error.message}`, "error");
+    return false;
+  }
+
+  return true;
+}
+
+function openMessagePanel(message) {
+  const shell = window.BITS_ADMIN_SHELL;
+  if (!shell) {
+    return;
+  }
+
+  const content = document.createElement("div");
+  const meta = document.createElement("dl");
+  const body = document.createElement("p");
+  const addMeta = (label, value) => {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const detail = document.createElement("dd");
+    term.textContent = label;
+    if (value instanceof Node) {
+      detail.append(value);
+    } else {
+      detail.textContent = value;
+    }
+    row.append(term, detail);
+    meta.append(row);
+  };
+
+  content.className = "ac-message-detail";
+  meta.className = "ac-detail-list";
+  addMeta("From", message.name);
+  if (message.email) {
+    const email = document.createElement("a");
+    email.href = `mailto:${message.email}`;
+    email.textContent = message.email;
+    addMeta("Email", email);
+  }
+  addMeta("Received", new Date(message.created_at).toLocaleString());
+  body.className = "ac-message-body";
+  body.textContent = message.message;
+  content.append(meta, body);
+
+  const actions = [];
+  if (message.email) {
+    const reply = document.createElement("a");
+    reply.className = "ac-button ac-primary";
+    reply.href = `mailto:${message.email}?subject=${encodeURIComponent("Re: your message on shortbits.net")}`;
+    reply.textContent = "Reply";
+    actions.push(reply);
+  }
+
+  const unreadButton = document.createElement("button");
+  unreadButton.type = "button";
+  unreadButton.className = "ac-secondary";
+  unreadButton.textContent = "Mark as unread";
+  unreadButton.addEventListener("click", async () => {
+    if (await setMessageRead(message, false)) {
+      shell.closePanel();
+      await loadMessages();
+    }
+  });
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "ac-danger";
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener("click", async () => {
+    if (await deleteMessage(message)) {
+      shell.closePanel();
+      await loadMessages();
+    }
+  });
+  actions.push(unreadButton, deleteButton);
+
+  shell.openPanel({
+    title: message.name || "Message",
+    content,
+    actions,
+    size: "medium",
+  });
+
+  if (!message.read) {
+    setMessageRead(message, true).then((updated) => {
+      if (updated) {
+        message.read = true;
+        loadMessages();
+      }
+    });
+  }
+}
+
 function createMessageElement(message) {
   const article = document.createElement("article");
   article.className = `message-card${message.read ? "" : " is-unread"}`;
@@ -892,6 +1012,7 @@ function createMessageElement(message) {
   name.textContent = message.name;
   timestamp.dateTime = message.created_at;
   timestamp.textContent = new Date(message.created_at).toLocaleString();
+  body.className = "message-preview";
   body.textContent = message.message;
   identity.append(name, timestamp);
 
@@ -902,53 +1023,43 @@ function createMessageElement(message) {
     identity.append(email);
   }
 
+  const openButton = document.createElement("button");
+  openButton.type = "button";
+  openButton.textContent = "Open";
+  openButton.setAttribute("aria-label", `Open message from ${message.name}`);
+  openButton.addEventListener("click", () => openMessagePanel(message));
+
   const readButton = document.createElement("button");
   readButton.type = "button";
-  readButton.textContent = message.read ? "MARK_UNREAD" : "MARK_READ";
+  readButton.textContent = message.read ? "Mark as unread" : "Mark as read";
   readButton.addEventListener("click", async () => {
-    const { error } = await adminClient
-      .from("messages")
-      .update({ read: !message.read })
-      .eq("id", message.id);
-
-    if (error) {
-      console.error("Unable to update message:", error);
-      setAdminStatus(inboxStatus, `Update failed: ${error.message}`, "error");
-      return;
+    if (await setMessageRead(message, !message.read)) {
+      await loadMessages();
     }
-
-    await loadMessages();
   });
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
-  deleteButton.textContent = "DELETE";
+  deleteButton.textContent = "Delete";
   deleteButton.addEventListener("click", async () => {
-    if (!window.confirm(`Delete the message from ${message.name}?`)) {
+    if (await deleteMessage(message)) {
+      await loadMessages();
+    }
+  });
+
+  article.addEventListener("click", (event) => {
+    if (event.target.closest("button, a")) {
       return;
     }
-
-    const { error } = await adminClient
-      .from("messages")
-      .delete()
-      .eq("id", message.id);
-
-    if (error) {
-      console.error("Unable to delete message:", error);
-      setAdminStatus(inboxStatus, `Delete failed: ${error.message}`, "error");
-      return;
-    }
-
-    await loadMessages();
+    openMessagePanel(message);
   });
 
   actions.className = "message-actions";
-  actions.append(readButton, deleteButton);
+  actions.append(openButton, readButton, deleteButton);
   header.append(identity, actions);
   article.append(header, body);
   return article;
 }
-
 async function loadMessages() {
   setAdminStatus(inboxStatus, "Fetching encrypted packets...");
 
@@ -965,6 +1076,9 @@ async function loadMessages() {
   }
 
   messageList.replaceChildren();
+  const unreadCount = data.filter((message) => !message.read).length;
+  messageList.dataset.unread = String(unreadCount);
+  window.dispatchEvent(new CustomEvent("admin:inbox-updated", { detail: { total: data.length, unread: unreadCount } }));
 
   if (data.length === 0) {
     setAdminStatus(inboxStatus, "No packets received yet.");

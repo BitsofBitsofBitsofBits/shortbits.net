@@ -4,77 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#070b0f">
+    <meta name="theme-color" content="#0f6cbd">
     <title>Bits 365 admin center // BitsofBitsofBits</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
-    <script src="/theme-init.js?v=theme-12"></script>
+    <script src="/admin-appearance.js?v=admin-appearance-1"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-119">
+    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-2">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/markdown.js?v=markdown-2" defer></script>
     <script src="/shortbits.js?v=shortbits-1" defer></script>
-    <script src="/admin-windows.js?v=admin-windows-10" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
-    <script src="/windows.js?v=windows-11" defer></script>
-    <script src="/admin.js?v=admin-25" defer></script>
+    <script src="/admin-shell.js?v=admin-shell-1" defer></script>
+    <script src="/admin.js?v=admin-26" defer></script>
   </head>
-  <body>
-    <div class="noise" aria-hidden="true"></div>
-    <div class="scanlines" aria-hidden="true"></div>
+  <body class="admin-center">
+    <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
 
-    <main class="admin-shell">
-      <header class="admin-header">
-        <div class="admin-suite-brand">
-          <span class="admin-waffle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <div>
-            <p class="eyebrow">RESTRICTED_PROCESS</p>
-            <h1><span class="admin-suite-name">Bits 365</span> admin center</h1>
-          </div>
-        </div>
-        <a href="/online/">&lt; RETURN_HOME</a>
-      </header>
+    <header class="ac-suitebar">
+      <button id="ac-waffle-button" class="ac-suite-button" type="button" aria-label="App launcher" aria-haspopup="dialog">
+        <span class="admin-waffle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </button>
+      <a class="ac-brand" href="/admin/"><span class="admin-suite-name">Bits 365</span> admin center</a>
+      <div id="ac-search" class="ac-search" hidden>
+        <span class="ac-search-icon" data-ac-icon="search" aria-hidden="true"></span>
+        <input id="ac-search-input" type="search" placeholder="Search" autocomplete="off" aria-label="Search the admin center" aria-controls="ac-search-results" aria-expanded="false">
+        <ul id="ac-search-results" class="ac-search-results" role="listbox" aria-label="Search results" hidden></ul>
+      </div>
+      <div class="ac-suite-actions">
+        <button id="ac-settings-button" class="ac-suite-button" type="button" aria-label="Settings" aria-haspopup="dialog" data-ac-icon="settings"></button>
+        <button id="ac-help-button" class="ac-suite-button" type="button" aria-label="Help" aria-haspopup="dialog" data-ac-icon="help"></button>
+        <button id="ac-account-button" class="ac-suite-button ac-avatar-button" type="button" aria-label="Account manager" aria-haspopup="dialog" hidden><span class="ac-avatar" aria-hidden="true">CM</span></button>
+      </div>
+    </header>
 
-      <section id="login-view" class="admin-panel" aria-labelledby="login-heading">
-        <div class="section-label">
-          <h2 id="login-heading">OWNER_AUTHENTICATION</h2>
-          <span>AUTHORIZED USER ONLY</span>
-        </div>
+    <main id="login-view" class="ac-signin" aria-labelledby="login-heading">
+      <div class="ac-signin-card">
+        <p class="ac-signin-brand"><span class="admin-waffle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span> Bits 365</p>
+        <h1 id="login-heading">Sign in</h1>
+        <p class="ac-signin-subtitle">to continue to the Bits 365 admin center</p>
         <form id="login-form" class="admin-form">
           <label>
-            <span>EMAIL</span>
+            <span>Email</span>
             <input name="email" type="email" autocomplete="username" required>
           </label>
           <label>
-            <span>PASSWORD</span>
+            <span>Password</span>
             <input name="password" type="password" autocomplete="current-password" required>
           </label>
           <p id="login-status" class="form-status" role="status" aria-live="polite"></p>
-          <button id="login-submit" type="submit">&gt; AUTHENTICATE</button>
+          <button id="login-submit" class="ac-primary" type="submit">Sign in</button>
         </form>
-      </section>
+        <p class="ac-signin-footer">Restricted process. Authorized operator only. <a href="/online/">Return to BitsofBits</a></p>
+      </div>
+    </main>
 
-      <section id="inbox-view" class="admin-panel" aria-labelledby="inbox-heading" hidden>
-        <div class="inbox-toolbar">
-          <div>
-            <p class="eyebrow admin-breadcrumb">HOME</p>
-            <h2 id="inbox-heading"><span id="admin-greeting">Welcome back</span>, Caleb</h2>
+    <div id="inbox-view" class="ac-app" data-nav="expanded" hidden>
+      <nav id="ac-nav" class="ac-nav" aria-label="Admin center">
+        <button id="ac-nav-toggle" class="ac-nav-toggle" type="button" aria-expanded="true" aria-controls="ac-nav-list" aria-label="Collapse navigation" data-ac-icon="menu"></button>
+        <ul id="ac-nav-list" class="ac-nav-list"></ul>
+      </nav>
+
+      <main id="ac-main" class="ac-main" tabindex="-1">
+        <div class="ac-page-header">
+          <nav aria-label="Breadcrumb"><ol id="ac-breadcrumb" class="ac-breadcrumb"></ol></nav>
+          <h1 id="ac-page-title">Home</h1>
+          <p id="ac-page-description" class="ac-page-description" hidden></p>
+        </div>
+
+        <section id="ac-home" class="ac-page" aria-labelledby="ac-page-title">
+          <div class="ac-home-hero">
+            <h2><span id="admin-greeting">Welcome back</span>, Caleb</h2>
             <p class="admin-subtitle">Your organization of one. All systems nominal-ish.</p>
           </div>
-          <div class="inbox-actions">
-            <span class="admin-window-counter">OPEN MODULES <strong id="desktop-window-count">0</strong></span>
-            <button id="refresh-messages" type="button">REFRESH</button>
-            <button id="logout-button" type="button">LOG_OUT</button>
-          </div>
-        </div>
-        <div class="admin-desktop-dashboard">
-          <p class="system-kicker">CONTROL_DESKTOP // SELECT MODULE</p>
-          <div id="admin-window-launchers" class="admin-window-launchers"></div>
-        </div>
+          <div id="ac-quick-actions" class="ac-quick-actions" aria-label="Quick actions" role="group"></div>
+          <div id="ac-home-cards" class="ac-card-grid"></div>
+        </section>
 
         <section id="message-editor" class="profile-editor" aria-labelledby="message-editor-heading">
           <div class="section-label">
             <h2 id="message-editor-heading">MESSAGE_INBOX</h2>
             <span>INCOMING PACKETS</span>
+          </div>
+          <div class="repeatable-admin-actions ac-commandbar">
+            <button id="refresh-messages" type="button">Refresh</button>
           </div>
           <p id="inbox-status" class="form-status" role="status" aria-live="polite"></p>
           <div id="message-list" class="message-list"></div>
@@ -265,7 +278,7 @@
             <h2 id="hardware-editor-heading">HARDWARE.SYS</h2>
             <span>REAL MACHINE SPECS</span>
           </div>
-          <details class="hardware-import">
+          <details class="hardware-import" data-panel-title="Import from a PC" data-panel-description="Scan a Windows, Linux, or Unraid machine and add its specs.">
             <summary>IMPORT_FROM_PC</summary>
             <div class="admin-form hardware-import-body">
             <ol class="hardware-import-steps">
@@ -286,7 +299,7 @@
             </div>
             </div>
           </details>
-          <details class="hardware-import">
+          <details class="hardware-import" data-panel-title="Live agents" data-panel-description="Issue device tokens and install the live monitoring agent.">
             <summary>LIVE_AGENTS</summary>
             <div class="admin-form hardware-import-body">
               <ol class="hardware-import-steps">
@@ -525,7 +538,75 @@
           </div>
           <div id="short-links-list" class="short-links-admin-list"></div>
         </section>
-      </section>
-    </main>
+      </main>
+    </div>
+
+    <div id="ac-panel-templates" hidden>
+      <div id="ac-account-panel" class="ac-panel-section">
+        <div class="ac-account-identity">
+          <span class="ac-avatar ac-avatar-large" aria-hidden="true">CM</span>
+          <div>
+            <strong>Caleb K Masters</strong>
+            <span id="ac-account-email">Signed in</span>
+            <span class="ac-account-role">Global Administrator (of everything here)</span>
+          </div>
+        </div>
+        <ul class="ac-link-list">
+          <li><a href="/online/">View BitsofBits online</a></li>
+          <li><a href="/professional/">View professional site</a></li>
+        </ul>
+        <button id="logout-button" class="ac-secondary" type="button">Sign out</button>
+      </div>
+      <div id="ac-settings-panel" class="ac-panel-section">
+        <fieldset class="ac-choice-group">
+          <legend>Appearance</legend>
+          <label><input type="radio" name="ac-appearance" value="system"> Use system setting</label>
+          <label><input type="radio" name="ac-appearance" value="light"> Light</label>
+          <label><input type="radio" name="ac-appearance" value="dark"> Dark</label>
+        </fieldset>
+        <fieldset class="ac-choice-group">
+          <legend>Navigation</legend>
+          <label><input id="ac-setting-collapse-nav" type="checkbox"> Start with the navigation collapsed</label>
+        </fieldset>
+        <p class="ac-panel-note">The public site keeps its own themes. These settings only change the admin center on this device.</p>
+      </div>
+      <div id="ac-help-panel" class="ac-panel-section">
+        <p>Need help? Unfortunately, the support engineer is also you.</p>
+        <h3>Keyboard shortcuts</h3>
+        <dl class="ac-shortcuts">
+          <div><dt><kbd>/</kbd></dt><dd>Search the admin center</dd></div>
+          <div><dt><kbd>G</kbd> then <kbd>H</kbd></dt><dd>Go to Home</dd></div>
+          <div><dt><kbd>Esc</kbd></dt><dd>Close a panel</dd></div>
+        </dl>
+        <h3>Service health</h3>
+        <ul class="ac-health-list">
+          <li><span class="ac-health-dot" aria-hidden="true"></span> Website: Healthy</li>
+          <li><span class="ac-health-dot" aria-hidden="true"></span> Supabase: Healthy</li>
+          <li><span class="ac-health-dot is-warning" aria-hidden="true"></span> Operator: Needs coffee</li>
+        </ul>
+      </div>
+      <div id="ac-launcher-panel" class="ac-panel-section">
+        <ul class="ac-app-grid">
+          <li><a href="/online/"><strong>Online</strong><span>The desktop</span></a></li>
+          <li><a href="/professional/"><strong>Professional</strong><span>For recruiters</span></a></li>
+          <li><a href="/blog/"><strong>Blog</strong><span>Published posts</span></a></li>
+          <li><a href="/"><strong>Chooser</strong><span>Pick a site</span></a></li>
+          <li><a href="/online/?window=hardware"><strong>Hardware</strong><span>HARDWARE.SYS</span></a></li>
+          <li><a href="/online/?window=arcade"><strong>Arcade</strong><span>ARCADE.EXE</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="ac-panel-layer" class="ac-panel-layer" hidden>
+      <div class="ac-panel-scrim" data-ac-panel-close></div>
+      <aside id="ac-panel" class="ac-panel" role="dialog" aria-modal="true" aria-labelledby="ac-panel-title">
+        <header class="ac-panel-header">
+          <h2 id="ac-panel-title"></h2>
+          <button class="ac-panel-close" type="button" aria-label="Close panel" data-ac-panel-close data-ac-icon="close"></button>
+        </header>
+        <div id="ac-panel-body" class="ac-panel-body"></div>
+        <footer id="ac-panel-footer" class="ac-panel-footer" hidden></footer>
+      </aside>
+    </div>
   </body>
 </html>

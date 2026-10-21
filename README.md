@@ -71,9 +71,14 @@ is a personal project and largely a learning exercise for me.
 - Admin-managed `CAREER.SYS`, `NOW.TXT`, and `CHANGELOG.LOG` windows with
   shareable URLs, responsive layouts, five-minute public caching, and clean
   unpublished states
-- A desktop-style Admin Portal at `/admin` (legacy `/admin.html` links
-  redirect there) with draggable, resizable, deep-linkable windows
-  for the inbox and every public-content editor
+- A "Bits 365 admin center" at `/admin` (legacy `/admin.html` links
+  redirect there), styled after the Microsoft 365 admin center and separate
+  from the public site themes: a suite bar (app launcher, search, settings,
+  help, account), a collapsible grouped left navigation that becomes a drawer
+  on small screens, hash-routed pages such as `/admin/#/inbox`, a Home
+  dashboard with quick actions and live counts, and right-side flyout panels
+  for messages, hardware import, live agents, and settings. Light, dark, or
+  system appearance is saved per device
 - An accessible public `BLOG.LOG` with draft-aware Supabase publishing,
   semantic article pages, safe Markdown rendering, and a live Markdown preview
   in the Admin Portal
@@ -86,12 +91,12 @@ is a personal project and largely a learning exercise for me.
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 - An Admin-managed `HARDWARE.SYS` window listing real machine specs grouped
-  by machine. Admin's `IMPORT_FROM_PC` panel provides a read-only PowerShell
+  by machine. Admin's **Import from a PC** flyout provides a read-only PowerShell
   scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
   numbers or computer name) that copies JSON to the clipboard for pasting
   back into the editor before saving. Machines are collapsible, and the
   collapsed state is remembered per browser
-- Optional live hardware agents: Admin's `LIVE_AGENTS` panel issues a
+- Optional live hardware agents: Admin's **Live agents** flyout issues a
   per-machine device token (only its SHA-256 hash is stored, revocable at any
   time) and a PowerShell installer. The installer saves the token
   DPAPI-encrypted under `%LOCALAPPDATA%\BitsHardwareAgent` and registers a
@@ -109,7 +114,7 @@ is a personal project and largely a learning exercise for me.
   every second, and shows a machine as LIVE when it reported within the last
   minute. Re-running the installer upgrades the agent and can keep the saved
   token
-- Linux / Unraid machines (e.g. a NAS) use IMPORT_FROM_PC with the
+- Linux / Unraid machines (e.g. a NAS) use **Import from a PC** with the
   `LINUX / UNRAID (BASH)` platform: a one-shot bash scan (run as root for RAM
   module details) that prints CPU, RAM, motherboard, GPUs, network cards with
   link speed, storage grouped by identical drive, and OS as one JSON line. It
