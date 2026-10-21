@@ -1297,6 +1297,7 @@ interfaceThemeSelect.addEventListener("change", () => {
 });
 const interfaceSchemeSelect = document.querySelector("#interface-scheme-select");
 window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(interfaceSchemeSelect);
+window.BITS_THEME_PREFERENCE?.bindVariantSelect?.(document.querySelector("#interface-variant-select"));
 document.querySelector("#interface-theme-random")?.addEventListener("click", () => {
   const themeId = window.BITS_THEME_PREFERENCE?.pickRandom()
     ?? interfaceThemes[Math.floor(Math.random() * interfaceThemes.length)].id;

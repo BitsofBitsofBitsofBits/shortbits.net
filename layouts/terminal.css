@@ -1,0 +1,247 @@
+/* P4 white phosphor. Green intentionally inherits styles.css unchanged. */
+:root[data-interface-theme="terminal"][data-theme-variant="white"] {
+  --accent: #e4e9ee;
+  --accent-rgb: 228, 233, 238;
+  --spotify-accent: var(--accent);
+  --bg: #040506;
+  --panel: #0b0d0f;
+  --panel-2: #14181c;
+  --panel-strong: var(--panel-2);
+  --ink: #f0f4f7;
+  --muted: #9da8b2;
+  --border: #414b55;
+  --shell-bg: rgba(4, 6, 8, 0.96);
+  --admin-bg: rgba(4, 6, 8, 0.98);
+  --overlay-bg: rgba(4, 6, 8, 0.98);
+  --body-background:
+    repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.025) 0 1px, transparent 1px 4px),
+    var(--bg);
+  --body-background-size: auto;
+  --scrollbar-size: 20px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: var(--bg);
+  --scrollbar-track-border: var(--accent);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background:
+    repeating-linear-gradient(90deg, var(--accent) 0 4px, rgba(var(--accent-rgb), 0.62) 4px 7px);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--warning);
+  --scrollbar-thumb-border: 3px solid var(--bg);
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 0 0 0 2px var(--accent);
+  --scrollbar-thumb-min: 44px;
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="white"] .system-bar,
+html[data-interface-theme="terminal"][data-theme-variant="white"] .app-menu-bar,
+html[data-interface-theme="terminal"][data-theme-variant="white"] .desktop-window-bar,
+html[data-interface-theme="terminal"][data-theme-variant="white"] footer {
+  background: var(--panel);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="white"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, var(--accent) 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="white"] .root-panel {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.05) 4px),
+    rgba(4, 6, 8, 0.94);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="white"] body.error-page.has-youtube-shortbit {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.09) 4px, transparent 6px),
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.14), transparent 48%),
+    radial-gradient(circle at center, var(--panel-2) 0, var(--bg) 72%);
+  background-position: 0 0, center, center;
+  background-size: auto, 100% 100%, 100% 100%;
+}
+
+/* Cyan phosphor. Green intentionally inherits styles.css unchanged. */
+:root[data-interface-theme="terminal"][data-theme-variant="cyan"] {
+  --accent: #62efff;
+  --accent-rgb: 98, 239, 255;
+  --spotify-accent: var(--accent);
+  --bg: #000507;
+  --panel: #020c10;
+  --panel-2: #06171d;
+  --panel-strong: var(--panel-2);
+  --ink: #c5f8ff;
+  --muted: #79aab5;
+  --border: #1a4c59;
+  --shell-bg: rgba(0, 7, 10, 0.96);
+  --admin-bg: rgba(0, 7, 10, 0.98);
+  --overlay-bg: rgba(0, 7, 10, 0.98);
+  --body-background:
+    repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.025) 0 1px, transparent 1px 4px),
+    var(--bg);
+  --body-background-size: auto;
+  --scrollbar-size: 20px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: var(--bg);
+  --scrollbar-track-border: var(--accent);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background:
+    repeating-linear-gradient(90deg, var(--accent) 0 4px, rgba(var(--accent-rgb), 0.62) 4px 7px);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--warning);
+  --scrollbar-thumb-border: 3px solid var(--bg);
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 0 0 0 2px var(--accent);
+  --scrollbar-thumb-min: 44px;
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] .system-bar,
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] .app-menu-bar,
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] .desktop-window-bar,
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] footer {
+  background: var(--panel);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, var(--accent) 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] .root-panel {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.05) 4px),
+    rgba(0, 7, 10, 0.94);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="cyan"] body.error-page.has-youtube-shortbit {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.09) 4px, transparent 6px),
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.14), transparent 48%),
+    radial-gradient(circle at center, var(--panel-2) 0, var(--bg) 72%);
+  background-position: 0 0, center, center;
+  background-size: auto, 100% 100%, 100% 100%;
+}
+
+/* IBM blue phosphor. Green intentionally inherits styles.css unchanged. */
+:root[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] {
+  --accent: #4ea6ff;
+  --accent-rgb: 78, 166, 255;
+  --spotify-accent: var(--accent);
+  --bg: #01040b;
+  --panel: #040c19;
+  --panel-2: #09182c;
+  --panel-strong: var(--panel-2);
+  --ink: #c6e0ff;
+  --muted: #8aa7cd;
+  --border: #214368;
+  --shell-bg: rgba(1, 6, 15, 0.96);
+  --admin-bg: rgba(1, 6, 15, 0.98);
+  --overlay-bg: rgba(1, 6, 15, 0.98);
+  --body-background:
+    repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.025) 0 1px, transparent 1px 4px),
+    var(--bg);
+  --body-background-size: auto;
+  --scrollbar-size: 20px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: var(--bg);
+  --scrollbar-track-border: var(--accent);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background:
+    repeating-linear-gradient(90deg, var(--accent) 0 4px, rgba(var(--accent-rgb), 0.62) 4px 7px);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--warning);
+  --scrollbar-thumb-border: 3px solid var(--bg);
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 0 0 0 2px var(--accent);
+  --scrollbar-thumb-min: 44px;
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] .system-bar,
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] .app-menu-bar,
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] .desktop-window-bar,
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] footer {
+  background: var(--panel);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, var(--accent) 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] .root-panel {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.05) 4px),
+    rgba(1, 6, 15, 0.94);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] body.error-page.has-youtube-shortbit {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.09) 4px, transparent 6px),
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.14), transparent 48%),
+    radial-gradient(circle at center, var(--panel-2) 0, var(--bg) 72%);
+  background-position: 0 0, center, center;
+  background-size: auto, 100% 100%, 100% 100%;
+}
+
+/* Red alert phosphor. Green intentionally inherits styles.css unchanged. */
+:root[data-interface-theme="terminal"][data-theme-variant="red-alert"] {
+  --accent: #ff737a;
+  --accent-rgb: 255, 115, 122;
+  --spotify-accent: var(--accent);
+  --bg: #080102;
+  --panel: #100405;
+  --panel-2: #20090c;
+  --panel-strong: var(--panel-2);
+  --ink: #ffd5d8;
+  --muted: #c18b92;
+  --border: #65252d;
+  --shell-bg: rgba(10, 1, 3, 0.96);
+  --admin-bg: rgba(10, 1, 3, 0.98);
+  --overlay-bg: rgba(10, 1, 3, 0.98);
+  --body-background:
+    repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.025) 0 1px, transparent 1px 4px),
+    var(--bg);
+  --body-background-size: auto;
+  --scrollbar-size: 20px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: var(--bg);
+  --scrollbar-track-border: var(--accent);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background:
+    repeating-linear-gradient(90deg, var(--accent) 0 4px, rgba(var(--accent-rgb), 0.62) 4px 7px);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--warning);
+  --scrollbar-thumb-border: 3px solid var(--bg);
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 0 0 0 2px var(--accent);
+  --scrollbar-thumb-min: 44px;
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] .system-bar,
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] .app-menu-bar,
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] .desktop-window-bar,
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] footer {
+  background: var(--panel);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, var(--accent) 0 10px, transparent 10px 12px);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] .root-panel {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.05) 4px),
+    rgba(10, 1, 3, 0.94);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="red-alert"] body.error-page.has-youtube-shortbit {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(var(--accent-rgb), 0.09) 4px, transparent 6px),
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.14), transparent 48%),
+    radial-gradient(circle at center, var(--panel-2) 0, var(--bg) 72%);
+  background-position: 0 0, center, center;
+  background-size: auto, 100% 100%, 100% 100%;
+}

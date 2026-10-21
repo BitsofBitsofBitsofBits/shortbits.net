@@ -189,11 +189,22 @@ is a personal project and largely a learning exercise for me.
   `layouts/<id>.js` and is only downloaded while that theme is active;
   `layouts/runtime.js` mounts and unmounts layout chrome
 - A shared COLOR MODE preference (Theme default, Dark, or Light) on the online
-  app menu, Settings, `/boot`, and `/professional`. Every theme has a dark and a
-  light palette. Theme default keeps each theme's native look; Windows 95
-  defaults to classic light and offers a charcoal dark mode
+  app menu, Settings, `/boot`, and `/professional`. Most themes have a dark and
+  a light palette. Theme default keeps each theme's native look; Windows 95
+  defaults to classic light and offers a charcoal dark mode. Aurora, Midnight
+  OLED, MineBits, Terminal, Matrix, and Amber CRT are dark-only, so COLOR MODE shows
+  "DARK ONLY" while they are active
+- A VARIANT picker beside COLOR MODE for themes with alternate styles:
+  Windows XP (Luna Blue, Olive Green, Silver, Royale/Media Center, Royale Noir,
+  Zune, Embedded), MineBits biomes and mobs (Overworld, Cherry Grove, Jungle,
+  Desert, Snowy Taiga, Ocean Monument, Deep Dark, Nether, The End, Creeper),
+  Aurora colors (Borealis, Australis, Solar Storm, Glacier, Amethyst),
+  Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert), and
+  Midnight OLED accents (Classic, Cyan, Crimson, Violet, Amber, Monochrome).
+  Each theme remembers its own variant; styles live in `layouts/<id>.css`
 - A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
-  `theme dark`, `theme light`, and `theme auto` commands do the same
+  `theme dark`, `theme light`, `theme auto`, and `theme variant <name>`
+  commands do the same
 - Seasonal themes (Winter, Spooky, Christmas, New Year) appear automatically
   in season. To preview them all, run `BITS_THEME_DEBUG.enable()` in the
   browser console (it reloads the page); `BITS_THEME_DEBUG.disable()` turns

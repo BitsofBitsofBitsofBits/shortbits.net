@@ -1,0 +1,472 @@
+﻿/* Minebits biome variants. The default Overworld remains defined by styles.css. */
+
+:root[data-interface-theme="minebits"][data-theme-variant="cherry-grove"] {
+  --accent: #ff9fc5;
+  --accent-rgb: 255, 159, 197;
+  --spotify-accent: #ff9fc5;
+  --bg: #301d2a;
+  --panel: #49303e;
+  --panel-2: #684456;
+  --panel-strong: #382632;
+  --ink: #fff0f6;
+  --muted: #e5c5d3;
+  --warning: #ffd37a;
+  --border: #211720;
+  --shell-bg: #422d3b;
+  --admin-bg: #33222e;
+  --overlay-bg: #382632;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #76506c;
+  --mb-top: #a95879;
+  --mb-wood: #684253;
+  --mb-stone: #493542;
+  --mb-deep: #302531;
+  --mb-titlebar: #874363;
+  --mb-icon-top: #f29abb;
+  --mb-icon-bottom: #684253;
+  --mb-button-hover: #59404e;
+  --mb-accent-deep: #bd6488;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(20, 11, 18, 0.18) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(20, 11, 18, 0.18) 31px 32px),
+    linear-gradient(180deg, #76506c 0 18%, #a95879 18% 21%, #684253 21% 60%, #493542 60% 84%, #302531 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #302531;
+  --scrollbar-track-border: #1d151c;
+  --scrollbar-thumb-color: #bd7893;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #c984a0 0 6px, #9d5b78 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #ffb4d0 0 6px, #d7789e 6px 12px);
+  --scrollbar-thumb-active: #ff9fc5;
+  --scrollbar-thumb-border: 3px solid #211720;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.16), inset -2px -2px rgba(0,0,0,.38);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="jungle"] {
+  --accent: #a5e35e;
+  --accent-rgb: 165, 227, 94;
+  --spotify-accent: #a5e35e;
+  --bg: #19291b;
+  --panel: #304532;
+  --panel-2: #59432b;
+  --panel-strong: #223327;
+  --ink: #eff8d9;
+  --muted: #c7d8ae;
+  --warning: #f3cb66;
+  --border: #111b13;
+  --shell-bg: #2d4030;
+  --admin-bg: #203126;
+  --overlay-bg: #25372a;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #315d51;
+  --mb-top: #4b783c;
+  --mb-wood: #59432b;
+  --mb-stone: #35443a;
+  --mb-deep: #202d27;
+  --mb-titlebar: #426b35;
+  --mb-icon-top: #91d84f;
+  --mb-icon-bottom: #684328;
+  --mb-button-hover: #40533a;
+  --mb-accent-deep: #659a37;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(7, 18, 12, 0.2) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(7, 18, 12, 0.2) 31px 32px),
+    linear-gradient(180deg, #315d51 0 18%, #4b783c 18% 21%, #59432b 21% 60%, #35443a 60% 84%, #202d27 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #202d27;
+  --scrollbar-track-border: #101810;
+  --scrollbar-thumb-color: #63844a;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #789d55 0 6px, #55773a 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #a5e35e 0 6px, #78b642 6px 12px);
+  --scrollbar-thumb-active: #b9ee78;
+  --scrollbar-thumb-border: 3px solid #111b13;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.14), inset -2px -2px rgba(0,0,0,.4);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="desert"] {
+  --accent: #f0bd62;
+  --accent-rgb: 240, 189, 98;
+  --spotify-accent: #f0bd62;
+  --bg: #38291d;
+  --panel: #56402b;
+  --panel-2: #795638;
+  --panel-strong: #403020;
+  --ink: #fff0d2;
+  --muted: #e1c59a;
+  --warning: #ffdb80;
+  --border: #241a13;
+  --shell-bg: #4e3928;
+  --admin-bg: #3b2c20;
+  --overlay-bg: #443323;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #bd8050;
+  --mb-top: #d2a45f;
+  --mb-wood: #9f633f;
+  --mb-stone: #705139;
+  --mb-deep: #493524;
+  --mb-titlebar: #9c663e;
+  --mb-icon-top: #e2b761;
+  --mb-icon-bottom: #9f633f;
+  --mb-button-hover: #684b31;
+  --mb-accent-deep: #b88035;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(31, 20, 12, 0.18) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(31, 20, 12, 0.18) 31px 32px),
+    linear-gradient(180deg, #bd8050 0 18%, #d2a45f 18% 21%, #9f633f 21% 60%, #705139 60% 84%, #493524 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #493524;
+  --scrollbar-track-border: #241a13;
+  --scrollbar-thumb-color: #aa7848;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #c28e55 0 6px, #93633b 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #efc36e 0 6px, #c78e45 6px 12px);
+  --scrollbar-thumb-active: #f0bd62;
+  --scrollbar-thumb-border: 3px solid #241a13;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.16), inset -2px -2px rgba(0,0,0,.38);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="snowy-taiga"] {
+  --accent: #a8dcff;
+  --accent-rgb: 168, 220, 255;
+  --spotify-accent: #a8dcff;
+  --bg: #202d36;
+  --panel: #374752;
+  --panel-2: #52616b;
+  --panel-strong: #2a3741;
+  --ink: #f1f8ff;
+  --muted: #c7d8e5;
+  --warning: #ffda87;
+  --border: #141c23;
+  --shell-bg: #34434e;
+  --admin-bg: #273640;
+  --overlay-bg: #2d3b45;
+  --icon-filter: brightness(0) invert(0.98);
+  --mb-sky: #547994;
+  --mb-top: #dcebf1;
+  --mb-wood: #59493b;
+  --mb-stone: #627581;
+  --mb-deep: #34414a;
+  --mb-titlebar: #45677d;
+  --mb-icon-top: #dcebf1;
+  --mb-icon-bottom: #59493b;
+  --mb-button-hover: #41535e;
+  --mb-accent-deep: #6591ad;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(11, 20, 28, 0.18) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(11, 20, 28, 0.18) 31px 32px),
+    linear-gradient(180deg, #547994 0 18%, #dcebf1 18% 21%, #59493b 21% 60%, #627581 60% 84%, #34414a 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #34414a;
+  --scrollbar-track-border: #141c23;
+  --scrollbar-thumb-color: #718b9a;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #8ba8b8 0 6px, #607987 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #c5e9ff 0 6px, #78b6d8 6px 12px);
+  --scrollbar-thumb-active: #a8dcff;
+  --scrollbar-thumb-border: 3px solid #141c23;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.18), inset -2px -2px rgba(0,0,0,.38);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="ocean-monument"] {
+  --accent: #76e4cb;
+  --accent-rgb: 118, 228, 203;
+  --spotify-accent: #76e4cb;
+  --bg: #102c30;
+  --panel: #254448;
+  --panel-2: #346461;
+  --panel-strong: #1b373b;
+  --ink: #e7fffa;
+  --muted: #b5ddd6;
+  --warning: #ffd477;
+  --border: #091c20;
+  --shell-bg: #214044;
+  --admin-bg: #183438;
+  --overlay-bg: #1d3a3e;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.1);
+  --mb-sky: #103e4c;
+  --mb-top: #4a9283;
+  --mb-wood: #27605c;
+  --mb-stone: #315b5a;
+  --mb-deep: #16393d;
+  --mb-titlebar: #347b72;
+  --mb-icon-top: #90e2cc;
+  --mb-icon-bottom: #27605c;
+  --mb-button-hover: #315b59;
+  --mb-accent-deep: #398f80;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(3, 17, 21, 0.2) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(3, 17, 21, 0.2) 31px 32px),
+    linear-gradient(180deg, #103e4c 0 18%, #4a9283 18% 21%, #27605c 21% 60%, #315b5a 60% 84%, #16393d 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #16393d;
+  --scrollbar-track-border: #091c20;
+  --scrollbar-thumb-color: #4e8d82;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #69ad9d 0 6px, #39786f 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #9bffe7 0 6px, #4ec6ad 6px 12px);
+  --scrollbar-thumb-active: #76e4cb;
+  --scrollbar-thumb-border: 3px solid #091c20;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.16), inset -2px -2px rgba(0,0,0,.38);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="deep-dark"] {
+  --accent: #55e6dc;
+  --accent-rgb: 85, 230, 220;
+  --spotify-accent: #55e6dc;
+  --bg: #080e12;
+  --panel: #172126;
+  --panel-2: #253237;
+  --panel-strong: #0e171c;
+  --ink: #e7ffff;
+  --muted: #a8c9cb;
+  --warning: #f4d36d;
+  --border: #04090c;
+  --shell-bg: #141e23;
+  --admin-bg: #0c151a;
+  --overlay-bg: #111c21;
+  --icon-filter: brightness(0) invert(0.95) sepia(0.08);
+  --mb-sky: #101921;
+  --mb-top: #1d3337;
+  --mb-wood: #242a2b;
+  --mb-stone: #1b292e;
+  --mb-deep: #0b1217;
+  --mb-titlebar: #214247;
+  --mb-icon-top: #35bdb5;
+  --mb-icon-bottom: #202b2e;
+  --mb-button-hover: #26383d;
+  --mb-accent-deep: #218e8b;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(0, 0, 0, 0.3) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(0, 0, 0, 0.3) 31px 32px),
+    linear-gradient(180deg, #101921 0 18%, #1d3337 18% 21%, #242a2b 21% 60%, #1b292e 60% 84%, #0b1217 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #0b1217;
+  --scrollbar-track-border: #030709;
+  --scrollbar-thumb-color: #285453;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #34736f 0 6px, #214744 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #59f1e7 0 6px, #2fb8b0 6px 12px);
+  --scrollbar-thumb-active: #55e6dc;
+  --scrollbar-thumb-border: 3px solid #04090c;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.12), inset -2px -2px rgba(0,0,0,.5);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="nether"] {
+  --accent: #ff8150;
+  --accent-rgb: 255, 129, 80;
+  --spotify-accent: #ff8150;
+  --bg: #321410;
+  --panel: #4a241d;
+  --panel-2: #713325;
+  --panel-strong: #3a1a16;
+  --ink: #fff0dc;
+  --muted: #e7c0a6;
+  --warning: #ffd05c;
+  --border: #21100d;
+  --shell-bg: #43221c;
+  --admin-bg: #341a16;
+  --overlay-bg: #3c1d18;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #481d1a;
+  --mb-top: #a63e27;
+  --mb-wood: #713325;
+  --mb-stone: #4a2924;
+  --mb-deep: #2a1715;
+  --mb-titlebar: #8d3025;
+  --mb-icon-top: #ff7440;
+  --mb-icon-bottom: #743522;
+  --mb-button-hover: #612a21;
+  --mb-accent-deep: #c5492c;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(18, 5, 4, 0.24) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(18, 5, 4, 0.24) 31px 32px),
+    linear-gradient(180deg, #481d1a 0 18%, #a63e27 18% 21%, #713325 21% 60%, #4a2924 60% 84%, #2a1715 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #2a1715;
+  --scrollbar-track-border: #160b09;
+  --scrollbar-thumb-color: #994c34;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #bd6040 0 6px, #863727 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #ff9a5b 0 6px, #d05230 6px 12px);
+  --scrollbar-thumb-active: #ff8150;
+  --scrollbar-thumb-border: 3px solid #21100d;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.14), inset -2px -2px rgba(0,0,0,.42);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="the-end"] {
+  --accent: #d6ca72;
+  --accent-rgb: 214, 202, 114;
+  --spotify-accent: #d6ca72;
+  --bg: #17131e;
+  --panel: #302a37;
+  --panel-2: #4b3b55;
+  --panel-strong: #211b28;
+  --ink: #fff8d9;
+  --muted: #d4c8ce;
+  --warning: #f0d974;
+  --border: #0e0b13;
+  --shell-bg: #2b2532;
+  --admin-bg: #201a27;
+  --overlay-bg: #26202d;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #21172b;
+  --mb-top: #c7bd7a;
+  --mb-wood: #513e5b;
+  --mb-stone: #393341;
+  --mb-deep: #1b1722;
+  --mb-titlebar: #674878;
+  --mb-icon-top: #d2c77e;
+  --mb-icon-bottom: #61466f;
+  --mb-button-hover: #403547;
+  --mb-accent-deep: #938647;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(6, 4, 9, 0.28) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(6, 4, 9, 0.28) 31px 32px),
+    linear-gradient(180deg, #21172b 0 18%, #c7bd7a 18% 21%, #513e5b 21% 60%, #393341 60% 84%, #1b1722 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #1b1722;
+  --scrollbar-track-border: #0e0b13;
+  --scrollbar-thumb-color: #756b60;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #9b8f68 0 6px, #67596b 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #e2d77e 0 6px, #9574a6 6px 12px);
+  --scrollbar-thumb-active: #d6ca72;
+  --scrollbar-thumb-border: 3px solid #0e0b13;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.16), inset -2px -2px rgba(0,0,0,.4);
+}
+
+:root[data-interface-theme="minebits"][data-theme-variant="creeper"] {
+  --accent: #8bd64a;
+  --accent-rgb: 139, 214, 74;
+  --spotify-accent: #8bd64a;
+  --bg: #192617;
+  --panel: #30402a;
+  --panel-2: #4d4a2b;
+  --panel-strong: #222e1e;
+  --ink: #f2ffdf;
+  --muted: #cbd9b7;
+  --warning: #f0d36b;
+  --border: #10180e;
+  --shell-bg: #2d3b27;
+  --admin-bg: #202c1b;
+  --overlay-bg: #263421;
+  --icon-filter: brightness(0) invert(0.96) sepia(0.12);
+  --mb-sky: #355333;
+  --mb-top: #5d923d;
+  --mb-wood: #51402a;
+  --mb-stone: #3a4332;
+  --mb-deep: #263022;
+  --mb-titlebar: #426c32;
+  --mb-icon-top: #7fc83e;
+  --mb-icon-bottom: #4b3e2a;
+  --mb-button-hover: #3d5331;
+  --mb-accent-deep: #619637;
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(8, 15, 7, 0.2) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(8, 15, 7, 0.2) 31px 32px),
+    linear-gradient(180deg, #355333 0 18%, #5d923d 18% 21%, #51402a 21% 60%, #3a4332 60% 84%, #263022 84%);
+  --body-background-size: 32px 32px, 32px 32px, 100% 100%;
+  --scrollbar-size: 18px;
+  --scrollbar-firefox-width: auto;
+  --scrollbar-track: #263022;
+  --scrollbar-track-border: #10180e;
+  --scrollbar-thumb-color: #658547;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #7ea84d 0 6px, #527237 6px 12px);
+  --scrollbar-thumb-hover: repeating-linear-gradient(135deg, #a5e961 0 6px, #75b93f 6px 12px);
+  --scrollbar-thumb-active: #8bd64a;
+  --scrollbar-thumb-border: 3px solid #10180e;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 2px 2px rgba(255,255,255,.14), inset -2px -2px rgba(0,0,0,.42);
+}
+
+/* Keep the existing square-cut Minebits construction, but map its hardcoded blocks to each biome. */
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .shell,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .desktop-window,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .system-window,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .fake-desktop-app {
+  border-color: var(--border);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .system-bar,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .desktop-window-bar,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .fake-desktop-app > header {
+  border-bottom-color: var(--border);
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 16px, rgba(0,0,0,.08) 16px 32px),
+    var(--mb-titlebar);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) #admin-blog-window-title {
+  color: var(--ink);
+  text-shadow: 1px 1px #000;
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) button,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) input,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) textarea,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) select {
+  border-color: var(--border);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) button:hover,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) button:focus-visible {
+  border-color: var(--accent);
+  background-color: var(--mb-button-hover);
+  outline-color: rgba(var(--accent-rgb), .38);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .link-card,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .spotify-widget,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .now-playing,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) footer {
+  border-color: var(--border);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .link-icon,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .fake-desktop-icon {
+  border-color: var(--border);
+  background: linear-gradient(180deg, var(--mb-icon-top) 0 28%, var(--mb-icon-bottom) 28% 100%);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .fake-desktop-icons button:hover,
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .fake-desktop-icons button:focus-visible {
+  border-color: rgba(var(--accent-rgb), .72);
+  background: rgba(var(--accent-rgb), .16);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .status-dot {
+  box-shadow: 0 0 0 2px var(--border), 0 0 0 4px rgba(var(--accent-rgb), .24);
+}
+
+html[data-interface-theme="minebits"]:not([data-theme-variant="overworld"]) .endless-boot-progress span {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 12px, rgba(0,0,0,.35) 12px 15px),
+    linear-gradient(180deg, var(--accent) 0 48%, var(--mb-accent-deep) 48%);
+  box-shadow: 2px 2px 0 rgba(0,0,0,.42);
+}

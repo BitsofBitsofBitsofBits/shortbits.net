@@ -1338,6 +1338,7 @@
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
     window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(schemeSelect);
+    window.BITS_THEME_PREFERENCE?.bindVariantSelect?.(document.querySelector("#endless-boot-variant"));
     randomThemeButton?.addEventListener("click", () => {
       const themeId = window.BITS_THEME_PREFERENCE?.pickRandom();
       if (themeId) {
@@ -2268,7 +2269,7 @@
     const [command = "", ...argumentsList] = rawCommand.trim().toLowerCase().split(/\s+/);
     const argument = argumentsList.join(" ");
     const responses = {
-      help: "COMMANDS: STATUS, STATS, SENSORS, LSHW, LSPCI, DMESG, UPTIME, WHOAMI, PS, NETSTAT, SMART, FORTUNE, HISTORY, MAN <COMMAND>, COPY <LOG|HARDWARE|DIAGNOSTICS>, DOWNLOAD LOG, INCIDENTS, ACHIEVEMENTS, CRASH <COLOR>, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME|RANDOM|DARK|LIGHT|AUTO>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
+      help: "COMMANDS: STATUS, STATS, SENSORS, LSHW, LSPCI, DMESG, UPTIME, WHOAMI, PS, NETSTAT, SMART, FORTUNE, HISTORY, MAN <COMMAND>, COPY <LOG|HARDWARE|DIAGNOSTICS>, DOWNLOAD LOG, INCIDENTS, ACHIEVEMENTS, CRASH <COLOR>, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME|RANDOM|DARK|LIGHT|AUTO|VARIANT [NAME]>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
       status: `CYCLE ${cycle} // PHASE ${currentPhaseIndex + 1}/${bootPhases.length} // ${count} MESSAGES // ${processedBits} BITS // ${ignoredErrors} ERRORS IGNORED // ${paused ? "PAUSED" : "RUNNING"}`,
       stats: `TOTAL BOOTS ${stats.totalBoots} // MESSAGES SEEN ${stats.messagesSeen} // LONGEST UPTIME ${formatDuration(stats.longestUptime)} // INCIDENTS IGNORED ${stats.incidentsIgnored}`,
       diagnose: `DIAGNOSTIC COMPLETE: CPU ${Math.round(telemetry.cpu)}% // TEMP ${Math.round(telemetry.temperature)}C // FAN ${Math.round(telemetry.fan)} RPM // 0 ERRORS, 3 CONCERNS.`,
@@ -2372,9 +2373,29 @@
         applyTheme(randomTheme.id);
         return `THEME RANDOMIZED TO ${randomTheme.name.toUpperCase()}.`;
       }
+      const activeThemeId = document.documentElement.dataset.interfaceTheme;
       if (["dark", "light", "auto"].includes(argument) && window.BITS_THEME_PREFERENCE) {
         window.BITS_THEME_PREFERENCE.setColorScheme(argument);
-        return `COLOR MODE SET TO ${argument.toUpperCase()}.`;
+        const locked = window.BITS_THEME_PREFERENCE.getLockedScheme?.(activeThemeId);
+        return locked
+          ? `COLOR MODE SAVED AS ${argument.toUpperCase()}. THIS THEME IS ${locked.toUpperCase()} ONLY.`
+          : `COLOR MODE SET TO ${argument.toUpperCase()}.`;
+      }
+      if (argumentsList[0] === "variant" && window.BITS_THEME_PREFERENCE?.setVariant) {
+        const activeTheme = themes.find((theme) => theme.id === activeThemeId);
+        const variants = activeTheme?.variants ?? [];
+        if (!variants.length) {
+          return "THIS THEME HAS NO VARIANTS.";
+        }
+        const requested = argumentsList.slice(1).join(" ").toLowerCase();
+        const variant = variants.find((entry) => (
+          entry.id === requested || entry.name.toLowerCase() === requested
+        ));
+        if (!variant) {
+          return `VARIANTS: ${variants.map((entry) => entry.id).join(", ")}`;
+        }
+        window.BITS_THEME_PREFERENCE.setVariant(activeThemeId, variant.id);
+        return `VARIANT SET TO ${variant.name}.`;
       }
       const requestedTheme = themes.find((theme) => (
         theme.id === argument || theme.name.toLowerCase() === argument

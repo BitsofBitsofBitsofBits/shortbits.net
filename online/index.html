@@ -28,7 +28,7 @@
     <link rel="canonical" href="https://www.shortbits.net/online/">
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
-    <script src="/theme-init.js?v=theme-14"></script>
+    <script src="/theme-init.js?v=theme-15"></script>
     <script src="/boot.js?v=boot-2"></script>
     <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
     <link rel="stylesheet" href="/styles.css?v=upgrade-125">
@@ -42,10 +42,10 @@
     <script src="/notifications.js?v=notifications-2" defer></script>
     <script src="/theme-effects.js?v=theme-effects-3" defer></script>
     <script src="/screensaver.js?v=screensaver-1" defer></script>
-    <script src="/script.js?v=upgrade-64" defer></script>
+    <script src="/script.js?v=upgrade-65" defer></script>
     <script src="/windows.js?v=windows-11" defer></script>
     <script src="/arcade.js?v=arcade-9" defer></script>
-    <script src="/settings.js?v=settings-7" defer></script>
+    <script src="/settings.js?v=settings-8" defer></script>
     <script src="/death-screens.js?v=death-screens-2" defer></script>
     <script src="/career-format.js?v=career-2" defer></script>
     <script src="/content.js?v=content-12" defer></script>
@@ -436,6 +436,10 @@
             <label class="app-menu-select">
               <span>COLOR MODE</span>
               <select id="interface-scheme-select" aria-label="Color mode"></select>
+            </label>
+            <label class="app-menu-select" hidden>
+              <span>VARIANT</span>
+              <select id="interface-variant-select" aria-label="Theme variant"></select>
             </label>
             <button id="interface-theme-random" type="button">RANDOM THEME</button>
             <span class="app-menu-separator" aria-hidden="true"></span>
@@ -1011,6 +1015,10 @@
             <label>
               <span>COLOR MODE</span>
               <select id="settings-scheme"></select>
+            </label>
+            <label hidden>
+              <span>VARIANT</span>
+              <select id="settings-variant"></select>
             </label>
             <button id="settings-theme-random" type="button">RANDOM THEME</button>
           </fieldset>

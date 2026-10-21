@@ -1,14 +1,57 @@
 const baseInterfaceThemes = [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
-  { id: "aurora", name: "AURORA", darkColor: "#071018", lightColor: "#edf7f5" },
+  {
+    id: "aurora",
+    name: "AURORA",
+    darkColor: "#071018",
+    lightColor: "#071018",
+    schemes: ["dark"],
+    stylesheet: true,
+    variants: [
+      { id: "borealis", name: "BOREALIS" },
+      { id: "australis", name: "AUSTRALIS", darkColor: "#140a1c" },
+      { id: "solar-storm", name: "SOLAR STORM", darkColor: "#1a0808" },
+      { id: "glacier", name: "GLACIER", darkColor: "#06121c" },
+      { id: "amethyst", name: "AMETHYST", darkColor: "#0f0a1f" },
+    ],
+  },
   { id: "cozy-blossom", name: "COZY BLOSSOM", darkColor: "#1c1218", lightColor: "#fff4f1" },
   { id: "mica", name: "MICA", darkColor: "#202124", lightColor: "#eef3f8" },
   { id: "fluent", name: "FLUENT", darkColor: "#101722", lightColor: "#f3f8ff" },
-  { id: "midnight-oled", name: "MIDNIGHT OLED", darkColor: "#000000", lightColor: "#f7f7f7" },
+  {
+    id: "midnight-oled",
+    name: "MIDNIGHT OLED",
+    darkColor: "#000000",
+    lightColor: "#000000",
+    schemes: ["dark"],
+    stylesheet: true,
+    variants: [
+      { id: "classic", name: "CLASSIC" },
+      { id: "cyan", name: "CYAN" },
+      { id: "crimson", name: "CRIMSON" },
+      { id: "violet", name: "VIOLET" },
+      { id: "amber", name: "AMBER" },
+      { id: "mono", name: "MONOCHROME" },
+    ],
+  },
   { id: "macos", name: "MACOS", darkColor: "#18181a", lightColor: "#f5f5f7" },
-  { id: "terminal", name: "TERMINAL", darkColor: "#000500", lightColor: "#e8f4e8" },
+  {
+    id: "terminal",
+    name: "TERMINAL",
+    darkColor: "#000500",
+    lightColor: "#000500",
+    schemes: ["dark"],
+    stylesheet: true,
+    variants: [
+      { id: "green", name: "GREEN PHOSPHOR" },
+      { id: "white", name: "WHITE PHOSPHOR", darkColor: "#050505" },
+      { id: "cyan", name: "CYAN", darkColor: "#00080a" },
+      { id: "ibm-blue", name: "IBM BLUE", darkColor: "#00051a" },
+      { id: "red-alert", name: "RED ALERT", darkColor: "#0a0000" },
+    ],
+  },
   { id: "vaporwave", name: "VAPORWAVE", darkColor: "#160d2b", lightColor: "#fff0fb" },
-  { id: "amber-crt", name: "AMBER CRT", darkColor: "#100900", lightColor: "#fff4d6" },
+  { id: "amber-crt", name: "AMBER CRT", darkColor: "#100900", lightColor: "#100900", schemes: ["dark"] },
   { id: "y2k-silver", name: "Y2K SILVER", darkColor: "#252a33", lightColor: "#e8edf4" },
   { id: "cyberpunk", name: "CYBERPUNK", darkColor: "#080712", lightColor: "#f3f000" },
   { id: "dos-blue", name: "DOS BLUE", darkColor: "#0000aa", lightColor: "#d7d7d7" },
@@ -25,7 +68,26 @@ const baseInterfaceThemes = [
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
   { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#f7f4ff" },
   { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#cfe8fb" },
-  { id: "minebits", name: "MINEBITS", darkColor: "#332719", lightColor: "#dbe8c5" },
+  {
+    id: "minebits",
+    name: "MINEBITS",
+    darkColor: "#332719",
+    lightColor: "#332719",
+    schemes: ["dark"],
+    stylesheet: true,
+    variants: [
+      { id: "overworld", name: "OVERWORLD" },
+      { id: "cherry-grove", name: "CHERRY GROVE", darkColor: "#3a2430" },
+      { id: "jungle", name: "JUNGLE", darkColor: "#1c2a14" },
+      { id: "desert", name: "DESERT", darkColor: "#4a3a22" },
+      { id: "snowy-taiga", name: "SNOWY TAIGA", darkColor: "#26323a" },
+      { id: "ocean-monument", name: "OCEAN MONUMENT", darkColor: "#0d2a2e" },
+      { id: "deep-dark", name: "DEEP DARK", darkColor: "#05080c" },
+      { id: "nether", name: "NETHER", darkColor: "#2a0c0c" },
+      { id: "the-end", name: "THE END", darkColor: "#120d1c" },
+      { id: "creeper", name: "CREEPER", darkColor: "#13240f" },
+    ],
+  },
   { id: "catppuccin", name: "CATPPUCCIN", darkColor: "#1e1e2e", lightColor: "#eff1f5" },
   { id: "gruvbox", name: "GRUVBOX", darkColor: "#282828", lightColor: "#fbf1c7" },
   { id: "tokyo-night", name: "TOKYO NIGHT", darkColor: "#1a1b26", lightColor: "#e1e2e7" },
@@ -34,7 +96,7 @@ const baseInterfaceThemes = [
   { id: "high-contrast", name: "HIGH CONTRAST", darkColor: "#000000", lightColor: "#ffffff" },
   { id: "ocean", name: "DEEP OCEAN", darkColor: "#03141f", lightColor: "#e6f6f8" },
   { id: "coffee", name: "COFFEE SHOP", darkColor: "#1f1510", lightColor: "#f6efe4" },
-  { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#e9f7ec" },
+  { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#000a02", schemes: ["dark"] },
   { id: "sunset", name: "SUNSET", darkColor: "#1d0f24", lightColor: "#fff1e6" },
   {
     id: "windows-xp",
@@ -43,6 +105,15 @@ const baseInterfaceThemes = [
     lightColor: "#245edb",
     nativeScheme: "light",
     stylesheet: true,
+    variants: [
+      { id: "luna-blue", name: "LUNA BLUE" },
+      { id: "olive-green", name: "OLIVE GREEN", lightColor: "#8ba169" },
+      { id: "silver", name: "SILVER", lightColor: "#b6b6c8" },
+      { id: "royale", name: "ROYALE (MEDIA CENTER)", lightColor: "#2c4f9e" },
+      { id: "royale-noir", name: "ROYALE NOIR", lightColor: "#1b1b1b" },
+      { id: "zune", name: "ZUNE", lightColor: "#2b2b2b" },
+      { id: "embedded", name: "EMBEDDED", lightColor: "#3d6aa8" },
+    ],
   },
   {
     id: "windows-10",
@@ -88,8 +159,9 @@ const baseInterfaceThemes = [
     experimental: true,
   },
 ];
-const layoutAssetVersion = "layouts-1";
+const layoutAssetVersion = "layouts-2";
 const lastStandardThemeKey = "bits-last-standard-theme";
+const themeVariantKey = "bits-theme-variants";
 
 const colorSchemeKey = "bits-color-scheme";
 const colorSchemeOptions = [
@@ -269,7 +341,50 @@ function getColorSchemePreference() {
   return stored === "dark" || stored === "light" ? stored : "auto";
 }
 
+function getLockedScheme(theme) {
+  return theme?.schemes?.length === 1 ? theme.schemes[0] : "";
+}
+
+function readVariantMap() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(themeVariantKey) ?? "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function getThemeVariant(theme) {
+  if (!theme?.variants?.length) {
+    return null;
+  }
+  const storedId = readVariantMap()[theme.id];
+  return theme.variants.find((variant) => variant.id === storedId) ?? theme.variants[0];
+}
+
+function setThemeVariant(themeId, variantId) {
+  const theme = window.BITS_INTERFACE_THEMES.find((entry) => entry.id === themeId);
+  if (!theme?.variants?.some((variant) => variant.id === variantId)) {
+    return null;
+  }
+  const map = readVariantMap();
+  if (variantId === theme.variants[0].id) {
+    delete map[theme.id];
+  } else {
+    map[theme.id] = variantId;
+  }
+  localStorage.setItem(themeVariantKey, JSON.stringify(map));
+  if (document.documentElement.dataset.interfaceTheme === theme.id) {
+    applyThemeToDocument(theme.id);
+  }
+  return getThemeVariant(theme);
+}
+
 function resolveColorScheme(theme) {
+  const locked = getLockedScheme(theme);
+  if (locked) {
+    return locked;
+  }
   const preference = getColorSchemePreference();
   if (preference !== "auto") {
     return preference;
@@ -285,13 +400,21 @@ function applyThemeToDocument(themeId) {
   root.dataset.colorScheme = scheme;
   root.dataset.interfaceTheme = theme.id;
   root.classList.toggle("is-rgb-mode", theme.id === "rgb");
+  const variant = getThemeVariant(theme);
+  if (variant) {
+    root.dataset.themeVariant = variant.id;
+  } else {
+    delete root.dataset.themeVariant;
+  }
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
-    themeColorMeta.content = scheme === "light" ? theme.lightColor : theme.darkColor;
+    themeColorMeta.content = scheme === "light"
+      ? variant?.lightColor ?? theme.lightColor
+      : variant?.darkColor ?? theme.darkColor;
   }
   syncThemeAssets(theme);
   window.dispatchEvent(new CustomEvent("bits:theme-applied", {
-    detail: { theme, scheme },
+    detail: { theme, scheme, variant },
   }));
   return theme;
 }
@@ -323,8 +446,31 @@ function bindColorSchemeSelect(select, formatLabel = (label) => label) {
     option.textContent = formatLabel(label);
     return option;
   }));
-  select.value = getColorSchemePreference();
+  const lockedOption = document.createElement("option");
+  lockedOption.value = "locked";
+  const syncLock = () => {
+    const theme = getThemeById(document.documentElement.dataset.interfaceTheme);
+    const locked = getLockedScheme(theme);
+    if (locked) {
+      lockedOption.textContent = formatLabel(`${locked.toUpperCase()} ONLY`);
+      if (!lockedOption.isConnected) {
+        select.append(lockedOption);
+      }
+      select.value = "locked";
+      select.disabled = true;
+      select.title = `${theme.name} is designed for ${locked} mode only`;
+    } else {
+      lockedOption.remove();
+      select.disabled = false;
+      select.removeAttribute("title");
+      select.value = getColorSchemePreference();
+    }
+  };
+  syncLock();
   select.addEventListener("change", () => {
+    if (select.value === "locked") {
+      return;
+    }
     setColorSchemePreference(select.value);
     window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
       detail: {
@@ -333,12 +479,53 @@ function bindColorSchemeSelect(select, formatLabel = (label) => label) {
       },
     }));
   });
-  window.addEventListener("bits:theme-applied", () => {
-    select.value = getColorSchemePreference();
-  });
+  window.addEventListener("bits:theme-applied", syncLock);
   window.addEventListener("storage", (event) => {
     if (event.key === colorSchemeKey) {
       setColorSchemePreference(getColorSchemePreference());
+    }
+  });
+}
+
+function bindVariantSelect(select, formatLabel = (label) => label, container = select?.closest("label")) {
+  if (!select) {
+    return;
+  }
+  let renderedThemeId = null;
+  const sync = () => {
+    const theme = getThemeById(document.documentElement.dataset.interfaceTheme);
+    const variants = theme?.variants ?? [];
+    if (container) {
+      container.hidden = variants.length === 0;
+    }
+    if (renderedThemeId !== theme?.id) {
+      renderedThemeId = theme?.id ?? null;
+      select.replaceChildren(...variants.map((variant) => {
+        const option = document.createElement("option");
+        option.value = variant.id;
+        option.textContent = formatLabel(variant.name);
+        return option;
+      }));
+    }
+    const variant = getThemeVariant(theme);
+    if (variant) {
+      select.value = variant.id;
+    }
+  };
+  sync();
+  select.addEventListener("change", () => {
+    const themeId = document.documentElement.dataset.interfaceTheme;
+    const variant = setThemeVariant(themeId, select.value);
+    if (variant) {
+      window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+        detail: { label: "VARIANT", value: variant.name },
+      }));
+    }
+  });
+  window.addEventListener("bits:theme-applied", sync);
+  window.addEventListener("storage", (event) => {
+    if (event.key === themeVariantKey) {
+      applyThemeToDocument(document.documentElement.dataset.interfaceTheme);
     }
   });
 }
@@ -460,6 +647,10 @@ window.BITS_THEME_PREFERENCE = {
   getColorScheme: getColorSchemePreference,
   setColorScheme: setColorSchemePreference,
   bindColorSchemeSelect,
+  bindVariantSelect,
+  getVariant: (themeId) => getThemeVariant(getThemeById(themeId)),
+  setVariant: setThemeVariant,
+  getLockedScheme: (themeId) => getLockedScheme(getThemeById(themeId)),
   pickRandom: pickRandomThemeId,
 };
 

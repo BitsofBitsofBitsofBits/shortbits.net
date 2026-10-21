@@ -1,0 +1,144 @@
+﻿:root[data-interface-theme="midnight-oled"][data-theme-variant="cyan"] {
+  --accent: #35d9ff;
+  --accent-rgb: 53, 217, 255;
+  --spotify-accent: var(--accent);
+  --border: rgba(53, 217, 255, 0.28);
+  --muted: #79cbe0;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #000;
+  --scrollbar-track-border: rgba(var(--accent-rgb), 0.2);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 1px solid #000;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 8px rgba(var(--accent-rgb), 0.72);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="cyan"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="cyan"] .shell,
+html[data-interface-theme="midnight-oled"][data-theme-variant="cyan"] .desktop-window {
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+:root[data-interface-theme="midnight-oled"][data-theme-variant="crimson"] {
+  --accent: #ff5578;
+  --accent-rgb: 255, 85, 120;
+  --spotify-accent: var(--accent);
+  --border: rgba(255, 85, 120, 0.28);
+  --muted: #e79aaa;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #000;
+  --scrollbar-track-border: rgba(var(--accent-rgb), 0.2);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 1px solid #000;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 8px rgba(var(--accent-rgb), 0.72);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="crimson"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="crimson"] .shell,
+html[data-interface-theme="midnight-oled"][data-theme-variant="crimson"] .desktop-window {
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+:root[data-interface-theme="midnight-oled"][data-theme-variant="violet"] {
+  --accent: #be8cff;
+  --accent-rgb: 190, 140, 255;
+  --spotify-accent: var(--accent);
+  --border: rgba(190, 140, 255, 0.28);
+  --muted: #c7b0e8;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #000;
+  --scrollbar-track-border: rgba(var(--accent-rgb), 0.2);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 1px solid #000;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 8px rgba(var(--accent-rgb), 0.72);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="violet"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="violet"] .shell,
+html[data-interface-theme="midnight-oled"][data-theme-variant="violet"] .desktop-window {
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+:root[data-interface-theme="midnight-oled"][data-theme-variant="amber"] {
+  --accent: #ffc857;
+  --accent-rgb: 255, 200, 87;
+  --spotify-accent: var(--accent);
+  --border: rgba(255, 200, 87, 0.28);
+  --muted: #dfc88e;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #000;
+  --scrollbar-track-border: rgba(var(--accent-rgb), 0.2);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 1px solid #000;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 8px rgba(var(--accent-rgb), 0.72);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="amber"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="amber"] .shell,
+html[data-interface-theme="midnight-oled"][data-theme-variant="amber"] .desktop-window {
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+
+:root[data-interface-theme="midnight-oled"][data-theme-variant="mono"] {
+  --accent: #f1f1f1;
+  --accent-rgb: 241, 241, 241;
+  --spotify-accent: var(--accent);
+  --border: #393939;
+  --muted: #a0a0a0;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #000;
+  --scrollbar-track-border: rgba(var(--accent-rgb), 0.2);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+  --scrollbar-thumb-border: 1px solid #000;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: 0 0 8px rgba(var(--accent-rgb), 0.72);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="mono"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
+}
+
+html[data-interface-theme="midnight-oled"][data-theme-variant="mono"] .shell,
+html[data-interface-theme="midnight-oled"][data-theme-variant="mono"] .desktop-window {
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}

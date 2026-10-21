@@ -1,5 +1,19 @@
 ﻿:root[data-interface-theme="windows-xp"] {
   color-scheme: light;
+  --xp-title-gradient: linear-gradient(180deg,#5aa7f5 0%,#2678df 9%,#0865cb 46%,#0a58bf 47%,#236de0 100%);
+  --xp-title-short-gradient: linear-gradient(180deg,#5aa7f5,#0865cb 55%,#236de0); --xp-title-border: #064da7; --xp-title-text-color: #fff; --xp-title-text-shadow: 0 1px 1px rgba(0,30,88,.7);
+  --xp-control-gradient: linear-gradient(180deg,#82baff,#307ce2 48%,#1760ca 52%,#4a91ed); --xp-control-hover-gradient: linear-gradient(180deg,#a7d4ff,#5598f1 48%,#2677db 52%,#77b5ff); --xp-control-text-color: #fff;
+  --xp-taskbar-gradient: linear-gradient(180deg,#3b8dec 0%,#176ad1 18%,#0754b8 100%); --xp-taskbar-border: #2364b1; --xp-taskbar-button-gradient: linear-gradient(180deg,#5da5f2,#2574d0);
+  --xp-profile-button-gradient: linear-gradient(180deg,#6eb4f7,#2677d5 50%,#1156b6); --xp-profile-button-hover-gradient: linear-gradient(180deg,#91c9ff,#428ce3 50%,#1e69c7); --xp-profile-button-border: #0a4d9d;
+  --xp-desktop-background: radial-gradient(ellipse 68% 39% at 18% 108%,#65ae36 0 58%,transparent 59%),radial-gradient(ellipse 72% 43% at 83% 112%,#4f9c2b 0 58%,transparent 59%),linear-gradient(180deg,#62b8f6 0%,#a4dcfb 48%,#b8e3f7 59%,#77bb3d 59.2%,#4c992b 74%,#82bb45 100%);
+  --xp-selection: #316ac5; --xp-heading-color: #064faf;
+  --xp-boot-background: linear-gradient(180deg,#62b8f6 0%,#a4dcfb 50%,#78b939 50.2%,#4b9829 100%);
+  --xp-taskbar-highlight: #8cc4ff;
+  --xp-taskbar-button-border: #1c549d;
+  --xp-start-gradient: linear-gradient(180deg,#74d34c,#38a72f 48%,#218224 52%,#47b336);
+  --xp-start-hover-gradient: linear-gradient(180deg,#9be574,#50c23f 48%,#2e9b28 52%,#6acb4e);
+  --xp-start-border: #22621e;
+  --xp-start-text-shadow: 0 1px #1c5d18;
   --xp-sky: #4f9ee8;
   --xp-blue: #0054e3;
   --xp-deep-blue: #003bb5;
@@ -11,6 +25,7 @@
   --xp-muted: #40546c;
   --xp-green: #3cae36;
   --accent: #075bd8;
+  --accent-hover: #c04b00;
   --accent-rgb: 7, 91, 216;
   --accent-soft: rgba(7, 91, 216, 0.12);
   --danger: #a53328;
@@ -55,6 +70,20 @@
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] {
   color-scheme: dark;
+  --xp-title-gradient: linear-gradient(180deg,#45566c 0%,#2b3748 48%,#1f2a39 50%,#303d50 100%); --xp-title-short-gradient: linear-gradient(180deg,#45566c,#2b3748 55%,#303d50);
+  --xp-title-border: #52677f; --xp-title-text-color: #f4f6f8; --xp-title-text-shadow: 0 1px 1px rgba(0,0,0,.45);
+  --xp-control-gradient: linear-gradient(180deg,#82baff,#307ce2 48%,#1760ca 52%,#4a91ed); --xp-control-hover-gradient: linear-gradient(180deg,#a7d4ff,#5598f1 48%,#2677db 52%,#77b5ff); --xp-control-text-color: #fff;
+  --xp-taskbar-gradient: linear-gradient(180deg,#3b8dec 0%,#176ad1 18%,#0754b8 100%); --xp-taskbar-border: #2364b1; --xp-taskbar-button-gradient: linear-gradient(180deg,#414b58,#303741 52%,#252b33);
+  --xp-profile-button-gradient: linear-gradient(180deg,#414b58,#303741 52%,#252b33); --xp-profile-button-hover-gradient: linear-gradient(180deg,#72869c,#4d6178 50%,#35465b); --xp-profile-button-border: #52677f;
+  --xp-desktop-background: radial-gradient(ellipse 68% 39% at 18% 108%,#203923 0 58%,transparent 59%),radial-gradient(ellipse 72% 43% at 83% 112%,#152b1d 0 58%,transparent 59%),linear-gradient(180deg,#111a28 0%,#253b56 54%,#1c2b35 59%,#203825 59.2%,#152a1c 76%,#293a24 100%);
+  --xp-selection: #456fae; --xp-heading-color: #a9ceff;
+  --xp-taskbar-button-border: #647487;
+  --xp-taskbar-highlight: #8cc4ff;
+  --xp-taskbar-button-border: #647487;
+  --xp-start-gradient: linear-gradient(180deg,#74d34c,#38a72f 48%,#218224 52%,#47b336);
+  --xp-start-hover-gradient: linear-gradient(180deg,#9be574,#50c23f 48%,#2e9b28 52%,#6acb4e);
+  --xp-start-border: #22621e;
+  --xp-start-text-shadow: 0 1px #1c5d18;
   --xp-sky: #293b55;
   --xp-blue: #202c3d;
   --xp-deep-blue: #111a27;
@@ -66,6 +95,7 @@
   --xp-muted: #c2cad4;
   --xp-green: #398d48;
   --accent: #8abfff;
+  --accent-hover: #c04b00;
   --accent-rgb: 138, 191, 255;
   --accent-soft: rgba(138, 191, 255, 0.18);
   --danger: #ff8d82;
@@ -108,7 +138,7 @@
 
 :root[data-interface-theme="windows-xp"] ::selection {
   color: #fff;
-  background: #316ac5;
+  background: var(--xp-selection);
 }
 
 :root[data-interface-theme="windows-xp"] :focus-visible {
@@ -163,7 +193,7 @@
 }
 
 :root[data-interface-theme="windows-xp"] a:hover {
-  color: #c04b00;
+  color: var(--accent-hover);
 }
 
 :root[data-interface-theme="windows-xp"] .shell,
@@ -189,8 +219,8 @@
 :root[data-interface-theme="windows-xp"] .chooser-bar,
 :root[data-interface-theme="windows-xp"] .profile-panel-bar {
   color: #fff;
-  background: linear-gradient(180deg, #5aa7f5 0%, #2678df 9%, #0865cb 46%, #0a58bf 47%, #236de0 100%);
-  text-shadow: 0 1px 1px rgba(0,30,88,.7);
+  background: var(--xp-title-gradient);
+  text-shadow: var(--xp-title-text-shadow);
 }
 
 :root[data-interface-theme="windows-xp"] .system-bar,
@@ -198,7 +228,7 @@
 :root[data-interface-theme="windows-xp"] .fake-desktop-app > header,
 :root[data-interface-theme="windows-xp"] #admin-blog-window > .desktop-window-bar,
 :root[data-interface-theme="windows-xp"] .chooser-bar {
-  border-bottom: 1px solid #064da7;
+  border-bottom: 1px solid var(--xp-title-border);
   border-radius: 8px 8px 0 0;
 }
 
@@ -239,7 +269,7 @@
   border: 1px solid #e9f4ff;
   border-radius: 4px;
   color: white;
-  background: linear-gradient(180deg, #82baff, #307ce2 48%, #1760ca 52%, #4a91ed);
+  background: var(--xp-control-gradient);
   box-shadow: inset 1px 1px rgba(255,255,255,.75), inset -1px -1px rgba(0,38,110,.32), 0 1px 2px rgba(0,0,0,.3);
   font-weight: 700;
   text-shadow: 0 1px rgba(0,31,91,.8);
@@ -249,7 +279,7 @@
 :root[data-interface-theme="windows-xp"] .desktop-window-controls button:hover,
 :root[data-interface-theme="windows-xp"] .desktop-window-controls button:focus-visible {
   color: #fff;
-  background: linear-gradient(180deg, #a7d4ff, #5598f1 48%, #2677db 52%, #77b5ff);
+  background: var(--xp-control-hover-gradient);
 }
 
 :root[data-interface-theme="windows-xp"] .desktop-window-controls [data-window-close],
@@ -386,7 +416,7 @@
 :root[data-interface-theme="windows-xp"] .blog-markdown h4,
 :root[data-interface-theme="windows-xp"] .profile-kicker,
 :root[data-interface-theme="windows-xp"] .profile-card-index {
-  color: #064faf;
+  color: var(--xp-heading-color);
 }
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-boot,
@@ -398,7 +428,7 @@
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown h4,
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-kicker,
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-card-index {
-  color: #a9ceff;
+  color: var(--accent);
 }
 
 :root[data-interface-theme="windows-xp"] .chooser-options a {
@@ -471,15 +501,15 @@
 
 :root[data-interface-theme="windows-xp"] .profile-button {
   color: #fff;
-  background: linear-gradient(180deg, #6eb4f7, #2677d5 50%, #1156b6);
-  border: 1px solid #0a4d9d;
+  background: var(--xp-profile-button-gradient);
+  border: 1px solid var(--xp-profile-button-border);
   border-radius: 5px;
   box-shadow: inset 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(0,0,0,.2);
 }
 
 :root[data-interface-theme="windows-xp"] .profile-button:hover {
   color: #fff;
-  background: linear-gradient(180deg, #91c9ff, #428ce3 50%, #1e69c7);
+  background: var(--xp-profile-button-hover-gradient);
 }
 
 :root[data-interface-theme="windows-xp"] .profile-text-link,
@@ -489,11 +519,11 @@
 }
 
 :root[data-interface-theme="windows-xp"] .fake-desktop {
-  background: radial-gradient(ellipse 68% 39% at 18% 108%, #65ae36 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #4f9c2b 0 58%, transparent 59%), linear-gradient(180deg, #62b8f6 0%, #a4dcfb 48%, #b8e3f7 59%, #77bb3d 59.2%, #4c992b 74%, #82bb45 100%);
+  background: var(--xp-desktop-background);
 }
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-desktop {
-  background: radial-gradient(ellipse 68% 39% at 18% 108%, #203923 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #152b1d 0 58%, transparent 59%), linear-gradient(180deg, #111a28 0%, #253b56 54%, #1c2b35 59%, #203825 59.2%, #152a1c 76%, #293a24 100%);
+  background: var(--xp-desktop-background);
 }
 
 :root[data-interface-theme="windows-xp"] .fake-desktop-icons button {
@@ -522,36 +552,36 @@
 :root[data-interface-theme="windows-xp"] .fake-taskbar {
   min-height: 48px;
   padding: 4px 8px;
-  border-top: 1px solid #2364b1;
-  background: linear-gradient(180deg, #3b8dec 0%, #176ad1 18%, #0754b8 100%);
-  box-shadow: 0 -1px #8cc4ff, 0 -5px 16px rgba(0,0,0,.25);
+  border-top: 1px solid var(--xp-taskbar-border);
+  background: var(--xp-taskbar-gradient);
+  box-shadow: 0 -1px var(--xp-taskbar-highlight), 0 -5px 16px rgba(0,0,0,.25);
 }
 
 :root[data-interface-theme="windows-xp"] .fake-taskbar button {
-  border-color: #1c549d;
+  border-color: var(--xp-taskbar-button-border);
   color: #fff;
-  background: linear-gradient(180deg, #5da5f2, #2574d0);
+  background: var(--xp-taskbar-button-gradient);
   box-shadow: inset 1px 1px rgba(255,255,255,.4), 0 1px 2px rgba(0,0,0,.35);
   text-shadow: 0 1px #123866;
 }
 
 :root[data-interface-theme="windows-xp"] .fake-start-menu summary {
   min-width: 108px;
-  border-color: #22621e;
+  border-color: var(--xp-start-border);
   border-radius: 12px 5px 5px 12px;
   color: #fff;
-  background: linear-gradient(180deg, #74d34c, #38a72f 48%, #218224 52%, #47b336);
+  background: var(--xp-start-gradient);
   box-shadow: inset 1px 1px rgba(255,255,255,.55), 1px 0 5px rgba(0,0,0,.35);
   font-size: .9rem;
   font-style: italic;
   font-weight: 800;
-  text-shadow: 0 1px #1c5d18;
+  text-shadow: var(--xp-start-text-shadow);
 }
 
 :root[data-interface-theme="windows-xp"] .fake-start-menu[open] summary,
 :root[data-interface-theme="windows-xp"] .fake-start-menu summary:hover,
 :root[data-interface-theme="windows-xp"] .fake-start-menu summary:focus-visible {
-  background: linear-gradient(180deg, #9be574, #50c23f 48%, #2e9b28 52%, #6acb4e);
+  background: var(--xp-start-hover-gradient);
 }
 
 :root[data-interface-theme="windows-xp"] .fake-start-menu strong {
@@ -568,17 +598,17 @@
   padding: 8px 14px;
   border-radius: 8px 8px 0 0;
   color: #fff;
-  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+  background: var(--xp-title-short-gradient);
   font-weight: 700;
   content: "BITS OS // RECOVERY CENTER";
 }
 
 :root[data-interface-theme="windows-xp"] .error-code {
-  color: #075bd8;
+  color: var(--accent);
 }
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .error-code {
-  color: #a9ceff;
+  color: var(--accent);
 }
 
 :root[data-interface-theme="windows-xp"] .endless-boot-page {
@@ -596,7 +626,7 @@
   border: 1px solid #7f9db9;
   border-radius: 6px 6px 0 0;
   color: #fff;
-  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+  background: var(--xp-title-short-gradient);
 }
 
 :root[data-interface-theme="windows-xp"] .endless-boot-header h1,
@@ -624,7 +654,7 @@
 :root[data-interface-theme="windows-xp"] .endless-boot-transmission > span,
 :root[data-interface-theme="windows-xp"] .endless-boot-post strong,
 :root[data-interface-theme="windows-xp"] .endless-boot-header h1 {
-  color: #075bd8;
+  color: var(--accent);
 }
 
 :root[data-interface-theme="windows-xp"] .endless-boot-progress {
@@ -668,8 +698,8 @@
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-panel-bar,
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .endless-boot-header {
   color: #f4f6f8;
-  background: linear-gradient(180deg, #45566c 0%, #2b3748 48%, #1f2a39 50%, #303d50 100%);
-  border-color: #52677f;
+  background: var(--xp-title-gradient);
+  border-color: var(--xp-title-border);
 }
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .system-bar > p,
@@ -736,7 +766,7 @@
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .error-window::before {
   color: #fff;
-  background: linear-gradient(180deg, #45566c, #2b3748 55%, #303d50);
+  background: var(--xp-title-short-gradient);
 }
 
 :root[data-interface-theme="windows-xp"] ::-webkit-scrollbar {
@@ -834,13 +864,13 @@
   display: block;
   margin: calc(0px - clamp(22px, 5vw, 52px)) calc(0px - clamp(22px, 5vw, 52px)) 24px;
   padding: 9px 16px;
-  border-bottom: 1px solid #064da7;
+  border-bottom: 1px solid var(--xp-title-border);
   border-radius: 8px 8px 0 0;
   color: #fff;
-  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+  background: var(--xp-title-short-gradient);
   font-size: .78rem;
   font-weight: 700;
-  text-shadow: 0 1px 1px rgba(0,30,88,.7);
+  text-shadow: var(--xp-title-text-shadow);
 }
 
 :root[data-interface-theme="windows-xp"] .blog-shell::before {
@@ -897,6 +927,307 @@
 
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-shell::before,
 :root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-layout::before {
-  border-color: #52677f;
-  background: linear-gradient(180deg, #45566c 0%, #2b3748 48%, #1f2a39 50%, #303d50 100%);
+  border-color: var(--xp-title-border);
+  background: var(--xp-title-gradient);
+}
+
+:root[data-interface-theme="windows-xp"][data-theme-variant="olive-green"] {
+ --accent:#496b2b;--accent-rgb:73,107,43;--accent-soft:rgba(73,107,43,.14);--spotify-accent:#496b2b;--xp-heading-color:#496b2b;--xp-selection:#718d4f;
+ --xp-title-gradient:linear-gradient(180deg,#b2c58b,#94ad6c 12%,#7e9b58 48%,#708b4c 50%,#90a964);--xp-title-short-gradient:linear-gradient(180deg,#b2c58b,#7e9b58 55%,#90a964);--xp-title-border:#657d46;--xp-title-text-shadow:0 1px 1px rgba(28,48,15,.68);
+ --xp-control-gradient:linear-gradient(180deg,#c2d3a0,#86a35d 48%,#718c4c 52%,#a5bd7d);--xp-control-hover-gradient:linear-gradient(180deg,#d4e2b6,#a0bd78 48%,#829e59 52%,#bdd397);--xp-taskbar-gradient:linear-gradient(180deg,#9db66e,#78984f 20%,#5d7c3c);--xp-taskbar-border:#597a3b;--xp-taskbar-button-gradient:linear-gradient(180deg,#afc985,#789950);
+ --xp-profile-button-gradient:linear-gradient(180deg,#b2c98d,#829f5e 50%,#647f43);--xp-profile-button-hover-gradient:linear-gradient(180deg,#c9dda8,#9cb979 50%,#769450);--xp-profile-button-border:#627d42;--body-background:var(--xp-desktop-background);--bg:#4c91d2;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="silver"] {
+ --xp-face:#e0dfe3;--panel:#e0dfe3;--panel-2:#f3f2f5;--panel-strong:#ecebf0;--shell-bg:#e0dfe3;--admin-bg:#e0dfe3;--overlay-bg:#e0dfe3;--xp-line:#9999aa;--border:#9999aa;--line:#9999aa;
+ --accent:#354a7c;--accent-rgb:53,74,124;--accent-soft:rgba(53,74,124,.14);--spotify-accent:#354a7c;--xp-heading-color:#354a7c;--xp-selection:#747e9d;
+ --xp-title-gradient:linear-gradient(180deg,#eeeef3,#d9d9e3 12%,#b7b7c9 48%,#a5a5ba 50%,#c4c3d6);--xp-title-short-gradient:linear-gradient(180deg,#eeeef3,#b7b7c9 55%,#c4c3d6);--xp-title-border:#9292a8;--xp-title-text-color:#263046;--xp-title-text-shadow:0 1px rgba(255,255,255,.78);--xp-control-text-color:#263046;
+ --xp-control-gradient:linear-gradient(180deg,#fff,#d8d8e2 48%,#b5b5c4 52%,#e6e6ed);--xp-control-hover-gradient:linear-gradient(180deg,#fff,#e6e6ef 48%,#c3c3d3 52%,#f1f0f6);--xp-taskbar-gradient:linear-gradient(180deg,#c4c3d6,#aaaabd 24%,#9091aa);--xp-taskbar-border:#85869f;--xp-taskbar-button-gradient:linear-gradient(180deg,#dad9e5,#a2a2b8);
+ --xp-profile-button-gradient:linear-gradient(180deg,#f5f4f8,#c6c5d3 50%,#a5a5b8);--xp-profile-button-hover-gradient:linear-gradient(180deg,#fff,#d8d7e3 50%,#b7b6c8);--xp-profile-button-border:#89899d;--body-background:var(--xp-desktop-background);--bg:#568ebc;
+ --xp-desktop-background:radial-gradient(ellipse 68% 39% at 18% 108%,#91a45c 0 58%,transparent 59%),radial-gradient(ellipse 72% 43% at 83% 112%,#778d4c 0 58%,transparent 59%),linear-gradient(180deg,#58a8e8 0%,#a9d8f2 48%,#bce0ee 59%,#a4bb69 59.2%,#748f47 74%,#aabd70 100%);
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale"] {
+ --accent:#2753a4;--accent-rgb:39,83,164;--accent-soft:rgba(39,83,164,.14);--spotify-accent:#2753a4;--xp-heading-color:#244f9b;--xp-selection:#315eae;
+ --xp-title-gradient:linear-gradient(180deg,#6f9ee8,#4778ca 8%,#315cae 46%,#254a9a 48%,#6593df);--xp-title-short-gradient:linear-gradient(180deg,#6f9ee8,#315cae 55%,#6593df);--xp-title-border:#244888;--xp-title-text-shadow:0 1px 1px rgba(5,25,74,.75);
+ --xp-control-gradient:linear-gradient(180deg,#a4c7fa,#5483d1 48%,#315eae 52%,#82adee);--xp-control-hover-gradient:linear-gradient(180deg,#c8e0ff,#79a6ed 48%,#4776c5 52%,#a5ccff);--xp-taskbar-gradient:linear-gradient(180deg,#4a81d7,#2759ae 18%,#183e88);--xp-taskbar-border:#183d83;--xp-taskbar-button-gradient:linear-gradient(180deg,#6b9be7,#3565bb);
+ --xp-profile-button-gradient:linear-gradient(180deg,#7fa9ed,#386ac0 50%,#224c9c);--xp-profile-button-hover-gradient:linear-gradient(180deg,#a4c7ff,#5486d9 50%,#2d5eb0);--xp-profile-button-border:#214b98;--body-background:var(--xp-desktop-background);--bg:#244982;
+ --xp-desktop-background:radial-gradient(ellipse 68% 39% at 18% 108%,#385d9a 0 58%,transparent 59%),radial-gradient(ellipse 72% 43% at 83% 112%,#284e88 0 58%,transparent 59%),linear-gradient(180deg,#1e4d93 0%,#71a9e5 45%,#b4d7ee 59%,#5e8e52 59.2%,#315a3c 76%,#67834e 100%);
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale-noir"] {
+ --accent:#547a67;--accent-rgb:84,122,103;--accent-soft:rgba(84,122,103,.16);--spotify-accent:#547a67;--xp-heading-color:#547a67;--xp-selection:#466354;
+ --xp-title-gradient:linear-gradient(180deg,#62686d,#34393e 10%,#191c1f 47%,#101214 50%,#363a3e);--xp-title-short-gradient:linear-gradient(180deg,#62686d,#191c1f 55%,#363a3e);--xp-title-border:#202428;--xp-title-text-shadow:0 1px 2px rgba(0,0,0,.8);
+ --xp-control-gradient:linear-gradient(180deg,#92979a,#50565a 48%,#292e31 52%,#6e7477);--xp-control-hover-gradient:linear-gradient(180deg,#b0b5b7,#72797d 48%,#3c4246 52%,#91979a);--xp-taskbar-gradient:linear-gradient(180deg,#41464a,#222629 20%,#111416);--xp-taskbar-border:#171a1c;--xp-taskbar-button-gradient:linear-gradient(180deg,#5a6064,#2c3134);
+ --xp-profile-button-gradient:linear-gradient(180deg,#73797d,#41474b 50%,#252a2d);--xp-profile-button-hover-gradient:linear-gradient(180deg,#92999d,#5b6266 50%,#343a3e);--xp-profile-button-border:#353b3f;--body-background:var(--xp-desktop-background);--bg:#151a1d;
+ --xp-desktop-background:radial-gradient(ellipse 70% 50% at 18% 108%,#18352d 0 57%,transparent 58%),radial-gradient(ellipse 72% 48% at 83% 112%,#10231f 0 58%,transparent 59%),linear-gradient(160deg,#202a31 0%,#10161b 48%,#26302e 70%,#0b1013 100%);
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="zune"] {
+ --accent:#b85c17;--accent-rgb:184,92,23;--accent-soft:rgba(184,92,23,.15);--spotify-accent:#f07820;--xp-heading-color:#a34d12;--xp-selection:#a65016;
+ --xp-title-gradient:linear-gradient(180deg,#55585a,#292b2d 10%,#151617 48%,#0d0e0f 50%,#252729);--xp-title-short-gradient:linear-gradient(180deg,#55585a,#151617 55%,#252729);--xp-title-border:#1a1b1c;--xp-title-text-shadow:0 0 7px rgba(255,112,24,.45),0 1px 2px rgba(0,0,0,.8);
+ --xp-control-gradient:linear-gradient(180deg,#747779,#444749 48%,#252728 52%,#5d6062);--xp-control-hover-gradient:linear-gradient(180deg,#929597,#5d6163 48%,#36393b 52%,#777b7d);--xp-taskbar-gradient:linear-gradient(180deg,#282a2b,#131516 22%,#080909);--xp-taskbar-border:#111213;--xp-taskbar-button-gradient:linear-gradient(180deg,#494c4e,#252829);
+ --xp-profile-button-gradient:linear-gradient(180deg,#777a7c,#45484a 50%,#282a2b);--xp-profile-button-hover-gradient:linear-gradient(180deg,#999c9e,#5c6062 50%,#373a3b);--xp-profile-button-border:#303234;--body-background:var(--xp-desktop-background);--bg:#17191a;
+ --xp-desktop-background:radial-gradient(ellipse 64% 42% at 78% 104%,#783d18 0 56%,transparent 57%),radial-gradient(ellipse 62% 44% at 10% 110%,#382317 0 58%,transparent 59%),linear-gradient(160deg,#34383a 0%,#191b1d 50%,#28211c 72%,#111314 100%);
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="embedded"] {
+ --accent:#315d83;--accent-rgb:49,93,131;--accent-soft:rgba(49,93,131,.14);--spotify-accent:#315d83;--xp-heading-color:#315d83;--xp-selection:#426d91;
+ --xp-title-gradient:linear-gradient(180deg,#8aa9c3,#6d8ca8 18%,#53738f 52%,#466884);--xp-title-short-gradient:linear-gradient(180deg,#8aa9c3,#53738f 58%,#466884);--xp-title-border:#3e5f7b;--xp-title-text-shadow:0 1px 1px rgba(17,42,63,.65);
+ --xp-control-gradient:linear-gradient(180deg,#c1d0dc,#8ea7bc 50%,#6c879e);--xp-control-hover-gradient:linear-gradient(180deg,#d9e3eb,#a9bfd0 50%,#829db4);--xp-taskbar-gradient:linear-gradient(180deg,#64839f,#4c6c88 24%,#3c5a74);--xp-taskbar-border:#3a5975;--xp-taskbar-button-gradient:linear-gradient(180deg,#8ca9c0,#607f9b);
+ --xp-profile-button-gradient:linear-gradient(180deg,#9cb5c9,#6b8ba6 50%,#4b6b85);--xp-profile-button-hover-gradient:linear-gradient(180deg,#b9ccda,#87a5bd 50%,#5c7d98);--xp-profile-button-border:#486783;--body-background:var(--xp-desktop-background);--bg:#4b7797;
+ --xp-desktop-background:radial-gradient(ellipse 70% 46% at 20% 112%,#537d57 0 58%,transparent 59%),radial-gradient(ellipse 72% 42% at 85% 112%,#3f6948 0 58%,transparent 59%),linear-gradient(180deg,#568bb8 0%,#9bc5df 50%,#b4d2e3 61%,#71905b 61.2%,#426742 100%);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="olive-green"] {
+  --accent:#a8c87e;
+  --accent-rgb:168,200,126;
+  --spotify-accent:#a8c87e;
+  --xp-heading-color:#b5d48b;
+  --xp-selection:#667e4a;
+  --xp-title-gradient:linear-gradient(180deg,#788b59,#4b5938 48%,#35412b 50%,#5b6b43);
+  --xp-title-short-gradient:linear-gradient(180deg,#788b59,#4b5938 55%,#5b6b43);
+  --xp-title-border:#596b42;
+  --xp-taskbar-gradient:linear-gradient(180deg,#53653e,#38482f 22%,#273525);
+  --xp-taskbar-border:#405435;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#687c4e,#445637);
+  --body-background:linear-gradient(160deg,#18242b,#202b27 60%,#263624);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="silver"] {
+  --xp-face:#292a31;
+  --panel:#292a31;
+  --panel-2:#33343d;
+  --panel-strong:#30313a;
+  --shell-bg:#292a31;
+  --admin-bg:#292a31;
+  --overlay-bg:#292a31;
+  --accent:#b8b9d1;
+  --accent-rgb:184,185,209;
+  --spotify-accent:#b8b9d1;
+  --xp-heading-color:#c7c9e2;
+  --xp-selection:#555b78;
+  --xp-title-gradient:linear-gradient(180deg,#818293,#575969 48%,#424352 50%,#666779);
+  --xp-title-short-gradient:linear-gradient(180deg,#818293,#575969 55%,#666779);
+  --xp-title-border:#666879;
+  --xp-title-text-color:#fff;
+  --xp-control-text-color:#fff;
+  --xp-taskbar-gradient:linear-gradient(180deg,#666779,#484957 22%,#33343e);
+  --xp-taskbar-border:#545563;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#77798a,#4b4d5c);
+  --body-background:linear-gradient(160deg,#171a21,#24252d 60%,#292a31);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale"] {
+  --accent:#8fb6ff;
+  --accent-rgb:143,182,255;
+  --spotify-accent:#8fb6ff;
+  --xp-heading-color:#9bc0ff;
+  --xp-selection:#31568e;
+  --xp-title-gradient:linear-gradient(180deg,#4268a9,#294879 48%,#1d355e 50%,#35598f);
+  --xp-title-short-gradient:linear-gradient(180deg,#4268a9,#294879 55%,#35598f);
+  --xp-title-border:#315183;
+  --xp-taskbar-gradient:linear-gradient(180deg,#2d4f82,#203b67 22%,#172b4c);
+  --xp-taskbar-border:#284873;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#3b6097,#273f69);
+  --body-background:linear-gradient(160deg,#111a2a,#1b2b42 60%,#1b302a);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale-noir"] {
+  --accent:#9bc7aa;
+  --accent-rgb:155,199,170;
+  --spotify-accent:#9bc7aa;
+  --xp-heading-color:#a8d0b4;
+  --xp-selection:#3e5c4a;
+  --xp-title-gradient:linear-gradient(180deg,#555b60,#2b3034 48%,#16191b 50%,#383e40);
+  --xp-title-short-gradient:linear-gradient(180deg,#555b60,#2b3034 55%,#383e40);
+  --xp-title-border:#32383b;
+  --xp-taskbar-gradient:linear-gradient(180deg,#33393c,#202528 22%,#111516);
+  --xp-taskbar-border:#282e31;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#454c4f,#272d30);
+  --body-background:linear-gradient(160deg,#111517,#202629 60%,#111516);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="zune"] {
+  --accent:#ff9a4c;
+  --accent-rgb:255,154,76;
+  --spotify-accent:#ff9a4c;
+  --xp-heading-color:#ffad68;
+  --xp-selection:#844c2b;
+  --xp-title-gradient:linear-gradient(180deg,#55585a,#292b2d 48%,#121314 50%,#292b2d);
+  --xp-title-short-gradient:linear-gradient(180deg,#55585a,#292b2d 55%,#292b2d);
+  --xp-title-border:#303234;
+  --xp-title-text-shadow:0 0 8px rgba(255,132,50,.55),0 1px 2px rgba(0,0,0,.8);
+  --xp-taskbar-gradient:linear-gradient(180deg,#292c2e,#17191b 22%,#090a0b);
+  --xp-taskbar-border:#222426;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#414547,#222526);
+  --body-background:linear-gradient(160deg,#111416,#242222 58%,#171514);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="embedded"] {
+  --accent:#91b7d5;
+  --accent-rgb:145,183,213;
+  --spotify-accent:#91b7d5;
+  --xp-heading-color:#9ec1dc;
+  --xp-selection:#3d607d;
+  --xp-title-gradient:linear-gradient(180deg,#556e83,#3c5368 50%,#2d4357);
+  --xp-title-short-gradient:linear-gradient(180deg,#556e83,#3c5368 58%,#2d4357);
+  --xp-title-border:#354d62;
+  --xp-taskbar-gradient:linear-gradient(180deg,#435b70,#30485c 24%,#243a4d);
+  --xp-taskbar-border:#344d62;
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#526d83,#364d61);
+  --body-background:linear-gradient(160deg,#15202b,#202d36 60%,#1f3028);
+  --bg:#10151d;
+}
+:root[data-interface-theme="windows-xp"] .system-bar > p,:root[data-interface-theme="windows-xp"] .desktop-window-bar > p,:root[data-interface-theme="windows-xp"] .system-status {
+  color:var(--xp-title-text-color);
+}
+:root[data-interface-theme="windows-xp"] .fake-desktop {
+  background:var(--xp-desktop-background);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-desktop {
+  background:var(--xp-desktop-background);
+}
+:root[data-interface-theme="windows-xp"] .endless-boot-page {background:var(--xp-boot-background);}
+:root[data-interface-theme="windows-xp"][data-theme-variant]:not([data-theme-variant="luna-blue"]) .endless-boot-page {background:var(--xp-desktop-background);}
+:root[data-interface-theme="windows-xp"][data-theme-variant="olive-green"] {
+  --accent-hover:#354f1f;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="silver"] {
+  --accent-hover:#202c49;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale"] {
+  --accent-hover:#183b7d;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale-noir"] {
+  --accent-hover:#a1c9af;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="zune"] {
+  --accent-hover:#e8721d;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="embedded"] {
+  --accent-hover:#244966;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="olive-green"] {
+  --accent-hover:#d4e9a8;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="silver"] {
+  --accent-hover:#e0e1f2;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale"] {
+  --accent-hover:#c5d9ff;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale-noir"] {
+  --accent-hover:#c4e2ce;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="zune"] {
+  --accent-hover:#ffc18f;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="embedded"] {
+  --accent-hover:#c2d9e9;
+}
+:root[data-interface-theme="windows-xp"] .system-bar,:root[data-interface-theme="windows-xp"] .desktop-window-bar,:root[data-interface-theme="windows-xp"] .fake-desktop-app>header,:root[data-interface-theme="windows-xp"] #admin-blog-window>.desktop-window-bar,:root[data-interface-theme="windows-xp"] .chooser-bar,:root[data-interface-theme="windows-xp"] .profile-panel-bar,:root[data-interface-theme="windows-xp"] .endless-boot-header,:root[data-interface-theme="windows-xp"] .blog-shell::before,:root[data-interface-theme="windows-xp"] .profile-layout::before,:root[data-interface-theme="windows-xp"] .error-window::before {
+  color:var(--xp-title-text-color);
+}
+:root[data-interface-theme="windows-xp"] .endless-boot-header h1,:root[data-interface-theme="windows-xp"] .endless-boot-header .system-kicker { color:var(--xp-title-text-color); text-shadow:var(--xp-title-text-shadow); }
+:root[data-interface-theme="windows-xp"][data-theme-variant="zune"] {
+  --xp-start-gradient:linear-gradient(180deg,#ffbd70,#ed7a21 48%,#bd4e0e 52%,#f28a32);
+  --xp-start-hover-gradient:linear-gradient(180deg,#ffda9f,#ff9a44 48%,#d86013 52%,#ffb15f);
+  --xp-start-border:#9d420d;
+  --xp-start-text-shadow:0 1px #7a3107;
+  --xp-taskbar-highlight:#f07820;
+  --xp-taskbar-button-border:#4b3424;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale-noir"] {
+  --xp-start-gradient:linear-gradient(180deg,#95aa70,#5d7549 48%,#455c39 52%,#75875d);
+  --xp-start-hover-gradient:linear-gradient(180deg,#b1c38e,#748d58 48%,#546e41 52%,#92a878);
+  --xp-start-border:#44563a;
+  --xp-start-text-shadow:0 1px #293520;
+  --xp-taskbar-highlight:#74877b;
+  --xp-taskbar-button-border:#343a3d;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="olive-green"] {
+  --xp-taskbar-highlight:#b5d18e;
+  --xp-taskbar-button-border:#627c43;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="silver"] {
+  --xp-taskbar-highlight:#e4e3ed;
+  --xp-taskbar-button-border:#77788f;
+  --xp-start-gradient:linear-gradient(180deg,#91b56f,#56883f 48%,#3c6d33 52%,#70a453);
+  --xp-start-hover-gradient:linear-gradient(180deg,#aed18b,#6ea955 48%,#4b823a 52%,#87bd66);
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="royale"] {
+  --xp-taskbar-highlight:#9ebff2;
+  --xp-taskbar-button-border:#244a8b;
+}
+:root[data-interface-theme="windows-xp"][data-theme-variant="embedded"] {
+  --xp-taskbar-highlight:#a9c4d7;
+  --xp-taskbar-button-border:#47647e;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="olive-green"] {
+  --xp-taskbar-highlight:#879a69;
+  --xp-taskbar-button-border:#4b5e3a;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="silver"] {
+  --xp-taskbar-highlight:#88899c;
+  --xp-taskbar-button-border:#575968;
+  --xp-start-gradient:linear-gradient(180deg,#688650,#455d39 48%,#34482e 52%,#587447);
+  --xp-start-hover-gradient:linear-gradient(180deg,#82a167,#59754a 48%,#415b35 52%,#6d8d59);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale"] {
+  --xp-taskbar-highlight:#597caf;
+  --xp-taskbar-button-border:#294b7c;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale-noir"] {
+  --xp-taskbar-highlight:#505e55;
+  --xp-taskbar-button-border:#353d39;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="zune"] {
+  --xp-taskbar-highlight:#8b4a22;
+  --xp-taskbar-button-border:#493223;
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="embedded"] {--xp-taskbar-highlight:#617e95;--xp-taskbar-button-border:#344e63;}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant] .fake-taskbar button:not(.window-button):not(.close-button):not(.fake-start-menu summary):not(.desktop-window-controls button) {
+  background-image:var(--xp-taskbar-button-gradient);
+  border-color:var(--xp-taskbar-button-border);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="olive-green"] {
+  --xp-desktop-background:linear-gradient(160deg,#18242b,#202b27 60%,#263624);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="silver"] {
+  --xp-desktop-background:linear-gradient(160deg,#171a21,#24252d 60%,#292a31);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale"] {
+  --xp-desktop-background:linear-gradient(160deg,#111a2a,#1b2b42 60%,#1b302a);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale-noir"] {
+  --xp-desktop-background:linear-gradient(160deg,#111517,#202629 60%,#111516);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="zune"] {
+  --xp-desktop-background:linear-gradient(160deg,#111416,#242222 58%,#171514);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="embedded"] {--xp-desktop-background:linear-gradient(160deg,#15202b,#202d36 60%,#1f3028);}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="olive-green"] {
+  --xp-control-gradient:linear-gradient(180deg,#829667,#5b7047 48%,#435637 52%,#6c8053);
+  --xp-control-hover-gradient:linear-gradient(180deg,#9caf7c,#728a59 48%,#536b43 52%,#839a68);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#687c4e,#445637);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="silver"] {
+  --xp-control-gradient:linear-gradient(180deg,#888a9a,#5d5f70 48%,#414352 52%,#707284);
+  --xp-control-hover-gradient:linear-gradient(180deg,#a3a5b2,#747686 48%,#505262 52%,#898b9b);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#77798a,#4b4d5c);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale"] {
+  --xp-control-gradient:linear-gradient(180deg,#6384bd,#3b5d97 48%,#294678 52%,#5275ac);
+  --xp-control-hover-gradient:linear-gradient(180deg,#809bca,#4c6eaa 48%,#35568d 52%,#6989bb);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#3b6097,#273f69);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="royale-noir"] {
+  --xp-control-gradient:linear-gradient(180deg,#72787c,#4a5054 48%,#303538 52%,#5d6367);
+  --xp-control-hover-gradient:linear-gradient(180deg,#8e9498,#5f666a 48%,#3d4347 52%,#767d81);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#454c4f,#272d30);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="zune"] {
+  --xp-control-gradient:linear-gradient(180deg,#6d7072,#424547 48%,#252728 52%,#55585a);
+  --xp-control-hover-gradient:linear-gradient(180deg,#85898b,#55595b 48%,#303335 52%,#696d6f);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#414547,#222526);
+}
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-theme-variant="embedded"] {
+  --xp-control-gradient:linear-gradient(180deg,#70869a,#4d6478 50%,#374d60);
+  --xp-control-hover-gradient:linear-gradient(180deg,#899eb0,#60778a 50%,#425a6d);
+  --xp-taskbar-button-gradient:linear-gradient(180deg,#526d83,#364d61);
 }
