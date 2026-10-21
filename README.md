@@ -309,7 +309,9 @@ transmits or stores a visitor identifier.
   token is set, and skips it on localhost or when Global Privacy Control or
   Do Not Track is enabled.
 - `turnstileSiteKey`: the public Cloudflare Turnstile site key. When set, the
-  contact form renders a Turnstile challenge. Store the matching secret as the
+  contact form renders a Turnstile challenge in a themed frame; the widget
+  uses Cloudflare's light or dark skin to match the active site theme and
+  re-renders when the theme flips between them. Store the matching secret as the
   `TURNSTILE_SECRET_KEY` Supabase secret so `contact-message` enforces it.
 
 The contact form posts to the `contact-message` Edge Function, which inserts

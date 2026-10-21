@@ -3456,8 +3456,95 @@ h1 .dim {
 }
 
 .contact-turnstile {
-  min-height: 65px;
+  display: grid;
+  gap: 8px;
   margin: 4px 0 12px;
+  padding: 10px 12px 9px;
+  border: 1px dashed var(--border);
+  border-left: 2px solid var(--muted);
+  border-radius: var(--control-radius);
+  background: rgba(var(--accent-rgb), 0.05);
+  transition: border-color 160ms ease;
+}
+
+html[data-interface-theme="windows-95"] .contact-turnstile {
+  border: 2px groove #fff;
+  background: transparent;
+}
+
+html[data-interface-theme="windows-95"] .contact-turnstile-label,
+html[data-interface-theme="windows-95"] .contact-turnstile-status {
+  color: #000;
+  letter-spacing: 0;
+}
+
+.contact-turnstile[data-state="verified"] {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  border-left-color: var(--accent);
+}
+
+.contact-turnstile[data-state="error"] {
+  border-left-color: var(--danger, #ff6d7a);
+}
+
+.contact-turnstile-label,
+.contact-turnstile-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.contact-turnstile-widget {
+  min-height: 65px;
+  overflow: hidden;
+  border-radius: var(--control-radius);
+}
+
+.contact-turnstile[data-state="verified"] .contact-turnstile-status {
+  color: var(--accent);
+}
+
+.contact-turnstile[data-state="error"] .contact-turnstile-status {
+  color: var(--danger, #ff6d7a);
+}
+
+.contact-turnstile[data-state="pending"] .contact-turnstile-status::after {
+  content: "_";
+  animation: contact-turnstile-blink 1s steps(1) infinite;
+}
+
+@keyframes contact-turnstile-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-turnstile[data-state="pending"] .contact-turnstile-status::after {
+    animation: none;
+  }
+}
+
+html[data-motion="reduced"] .contact-turnstile[data-state="pending"] .contact-turnstile-status::after {
+  animation: none;
+}
+
+.professional-page .contact-turnstile {
+  border-style: solid;
+  border-left-width: 1px;
+  border-color: var(--border);
+  background: transparent;
+}
+
+.professional-page .contact-turnstile-label,
+.professional-page .contact-turnstile-status {
+  font-size: 0.7rem;
+  letter-spacing: 0;
+}
+
+.professional-page .contact-turnstile[data-state="pending"] .contact-turnstile-status::after {
+  content: none;
 }
 
 .contact-actions {
