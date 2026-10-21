@@ -196,8 +196,9 @@ is a personal project and largely a learning exercise for me.
   a light palette. Theme default keeps each theme's native look; Windows 95
   defaults to classic light and offers a charcoal dark mode. Aurora, Midnight
   OLED, MineBits, Terminal, Matrix, Amber CRT, Spotify, and the console/firmware
-  themes are dark-only; Aqua and Mac OS 9 are light-only, so COLOR MODE shows
-  "DARK ONLY" or "LIGHT ONLY" while they are active
+  themes are dark-only; Aqua and Mac OS 9 are light-only, so COLOR MODE is
+  hidden while they are active (VARIANT likewise hides for themes without
+  variants)
 - A classic text-mode crash screen on the Windows 3.1, 95, XP, and Aero Glass
   themes: every death screen switches to a 9x "fatal exception" box or an NT
   STOP-error wall of text in that screen's color, with a troubleshooting link

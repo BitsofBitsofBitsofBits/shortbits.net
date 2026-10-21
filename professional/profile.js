@@ -46,11 +46,11 @@
   const schemeSelect = document.querySelector("#profile-scheme-select");
   const randomButton = document.querySelector("#profile-theme-random");
   if (window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect && schemeSelect) {
+    schemeSelect.closest("label").hidden = false;
     window.BITS_THEME_PREFERENCE.bindColorSchemeSelect(
       schemeSelect,
       (label) => label.charAt(0) + label.slice(1).toLowerCase(),
     );
-    schemeSelect.closest("label").hidden = false;
     window.BITS_THEME_PREFERENCE.bindVariantSelect?.(
       document.querySelector("#profile-variant-select"),
       (label) => label.split(" ").map((word) => (word.startsWith("(") ? word.charAt(0) + word.charAt(1) + word.slice(2).toLowerCase() : word.charAt(0) + word.slice(1).toLowerCase())).join(" "),

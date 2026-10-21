@@ -674,7 +674,15 @@ function pickRandomThemeId() {
   return candidates[Math.floor(Math.random() * candidates.length)].id;
 }
 
-function bindColorSchemeSelect(select, formatLabel = (label) => label) {
+function setPickerVisibility(container, visible) {
+  if (!container) {
+    return;
+  }
+  container.hidden = !visible;
+  container.style.display = visible ? "" : "none";
+}
+
+function bindColorSchemeSelect(select, formatLabel = (label) => label, container = select?.closest("label")) {
   if (!select) {
     return;
   }
@@ -689,6 +697,7 @@ function bindColorSchemeSelect(select, formatLabel = (label) => label) {
   const syncLock = () => {
     const theme = getThemeById(document.documentElement.dataset.interfaceTheme);
     const locked = getLockedScheme(theme);
+    setPickerVisibility(container, !locked);
     if (locked) {
       lockedOption.textContent = formatLabel(`${locked.toUpperCase()} ONLY`);
       if (!lockedOption.isConnected) {
@@ -733,9 +742,7 @@ function bindVariantSelect(select, formatLabel = (label) => label, container = s
   const sync = () => {
     const theme = getThemeById(document.documentElement.dataset.interfaceTheme);
     const variants = theme?.variants ?? [];
-    if (container) {
-      container.hidden = variants.length === 0;
-    }
+    setPickerVisibility(container, variants.length > 0);
     if (renderedThemeId !== theme?.id) {
       renderedThemeId = theme?.id ?? null;
       select.replaceChildren(...variants.map((variant) => {
