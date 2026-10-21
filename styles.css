@@ -3456,10 +3456,13 @@ h1 .dim {
 }
 
 .contact-turnstile {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
   margin: 4px 0 12px;
-  padding: 10px 12px 9px;
+  padding: 8px 12px;
   border: 1px dashed var(--border);
   border-left: 2px solid var(--muted);
   border-radius: var(--control-radius);
@@ -3496,9 +3499,18 @@ html[data-interface-theme="windows-95"] .contact-turnstile-status {
 }
 
 .contact-turnstile-widget {
+  flex: 1 0 100%;
   min-height: 65px;
+  margin-top: 4px;
   overflow: hidden;
   border-radius: var(--control-radius);
+}
+
+/* Not display:none, so the background check keeps running inside the iframe. */
+.contact-turnstile-widget.is-collapsed {
+  height: 0;
+  min-height: 0;
+  margin: 0;
 }
 
 .contact-turnstile[data-state="verified"] .contact-turnstile-status {

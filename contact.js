@@ -59,19 +59,26 @@ function getTurnstileScheme() {
 const turnstileStatusCopy = professionalContact
   ? {
       pending: "Verifying you're human...",
+      interactive: "Please confirm you're human below.",
       verified: "Verified",
       expired: "Verification expired. Checking again...",
       error: "Verification couldn't load. Refresh the page to try again.",
     }
   : {
       pending: "SCANNING_FOR_HUMANS...",
+      interactive: "MANUAL CHECK REQUIRED // CONFIRM BELOW",
       verified: "HUMAN CONFIRMED // CHANNEL OPEN",
       expired: "TOKEN EXPIRED // RESCANNING...",
       error: "VERIFICATION OFFLINE // REFRESH TO RETRY",
     };
 
+// The Cloudflare box stays collapsed unless it needs a click or has an error.
 function setTurnstileState(state) {
   turnstileFrame.dataset.state = state;
+  turnstileFrame.querySelector(".contact-turnstile-widget").classList.toggle(
+    "is-collapsed",
+    state !== "interactive" && state !== "error",
+  );
   turnstileFrame.querySelector(".contact-turnstile-status").textContent = turnstileStatusCopy[state];
 }
 
@@ -87,8 +94,10 @@ function renderTurnstile() {
     sitekey: getTurnstileSiteKey(),
     theme: turnstileScheme,
     size: "flexible",
+    appearance: "interaction-only",
     action: "contact",
     callback: () => setTurnstileState("verified"),
+    "before-interactive-callback": () => setTurnstileState("interactive"),
     "expired-callback": () => setTurnstileState("expired"),
     "error-callback": () => setTurnstileState("error"),
   });
@@ -105,11 +114,11 @@ function loadTurnstile() {
   label.className = "contact-turnstile-label";
   label.textContent = professionalContact ? "Verification" : "// HUMAN_CHECK.SYS";
   const slot = document.createElement("div");
-  slot.className = "contact-turnstile-widget";
+  slot.className = "contact-turnstile-widget is-collapsed";
   const status = document.createElement("p");
   status.className = "contact-turnstile-status";
   status.setAttribute("aria-live", "polite");
-  turnstileFrame.append(label, slot, status);
+  turnstileFrame.append(label, status, slot);
   contactForm.querySelector(".contact-actions")?.before(turnstileFrame);
 
   window.bitsTurnstileReady = () => {
