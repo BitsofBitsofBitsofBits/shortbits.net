@@ -11044,7 +11044,9 @@ ul.resume-entry-technologies li {
   letter-spacing: 0.06em;
 }
 
-.hardware-specs {
+.hardware-machine .hardware-specs {
+  grid-template-columns: 1fr;
+  gap: 0;
   margin-top: 10px;
 }
 
