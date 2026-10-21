@@ -92,6 +92,15 @@ jobs:
           --no-verify-jwt
           --use-api
 
+      # The hardware agent authenticates with its own device token, not a Supabase JWT.
+      - name: Deploy hardware sync Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy hardware-sync
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
       - name: Apply database migrations
         if: steps.credentials.outputs.ready == 'true'
         shell: bash

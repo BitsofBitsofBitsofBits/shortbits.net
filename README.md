@@ -89,7 +89,20 @@ is a personal project and largely a learning exercise for me.
   by machine. Admin's `IMPORT_FROM_PC` panel provides a read-only PowerShell
   scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
   numbers or computer name) that copies JSON to the clipboard for pasting
-  back into the editor before saving
+  back into the editor before saving. Machines are collapsible, and the
+  collapsed state is remembered per browser
+- Optional live hardware agents: Admin's `LIVE_AGENTS` panel issues a
+  per-machine device token (only its SHA-256 hash is stored, revocable at any
+  time) and a PowerShell installer. The installer saves the token
+  DPAPI-encrypted under `%LOCALAPPDATA%\BitsHardwareAgent` and registers a
+  per-user logon task that needs no admin rights. The agent posts CPU, GPU,
+  and RAM load plus boot time every minute, and re-syncs specs every six hours,
+  to the `hardware-sync` Edge Function (`x-device-token` header; at most one
+  report per 20 seconds and one spec sync per five minutes per device). Synced
+  rows are matched by component and name, so unticking a row in Admin keeps it
+  hidden, and manually entered rows are kept. HARDWARE.SYS polls
+  `site_hardware_status` every 30 seconds while open and shows a machine as
+  LIVE when it reported within the last three minutes
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
   Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
   Null Tac Toe, endless wave-based Packet Breaker, and Flappy Bit, plus local

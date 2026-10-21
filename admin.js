@@ -63,10 +63,19 @@ const hardwareImportMachine = document.querySelector("#hardware-import-machine")
 const hardwareImportJson = document.querySelector("#hardware-import-json");
 const hardwareImportReplace = document.querySelector("#hardware-import-replace");
 const hardwareImportApply = document.querySelector("#hardware-import-apply");
+const hardwareDevices = document.querySelector("#hardware-devices");
+const hardwareDeviceMachine = document.querySelector("#hardware-device-machine");
+const hardwareDeviceCreate = document.querySelector("#hardware-device-create");
+const hardwareDeviceTokenOutput = document.querySelector("#hardware-device-token-output");
+const hardwareDeviceToken = document.querySelector("#hardware-device-token");
+const hardwareDeviceTokenCopy = document.querySelector("#hardware-device-token-copy");
+const hardwareAgentInstaller = document.querySelector("#hardware-agent-installer");
+const hardwareAgentInstallerCopy = document.querySelector("#hardware-agent-installer-copy");
+const hardwareAgentUninstall = document.querySelector("#hardware-agent-uninstall");
+const hardwareDeviceStatus = document.querySelector("#hardware-device-status");
 // Windows PowerShell 5.1 compatible; collects no serial numbers or computer name.
-const hardwareScanScript = [
-  "& {",
-  "$ErrorActionPreference = 'SilentlyContinue'",
+const hardwareScanFunction = [
+  "function Get-BitsHardware {",
   "$rows = New-Object System.Collections.ArrayList",
   "function Add-Row($component, $name, $detail) {",
   "  $name = ([string]$name).Trim()",
@@ -101,12 +110,222 @@ const hardwareScanScript = [
   "$os = Get-CimInstance Win32_OperatingSystem",
   "$release = (Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion').DisplayVersion",
   "if ($os) { Add-Row 'OS' $os.Caption ((@($release, ('build ' + $os.BuildNumber)) | Where-Object { $_ }) -join ' / ') }",
+  "return $rows.ToArray()",
+  "}",
+];
+const hardwareStatusFunction = [
+  "function Get-BitsStatus {",
+  "$os = Get-CimInstance Win32_OperatingSystem",
+  "$cpu = (Get-CimInstance Win32_PerfFormattedData_Counters_ProcessorInformation -Filter \"Name='_Total'\").PercentProcessorUtility",
+  "if ($null -eq $cpu) { $cpu = (Get-CimInstance Win32_Processor | Measure-Object LoadPercentage -Average).Average }",
+  "$gpu = $null",
+  "$engines = @(Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine)",
+  "if ($engines.Count) {",
+  "  # Per adapter and engine type, as Task Manager reports it.",
+  "  $gpu = ($engines | Group-Object { [regex]::Match($_.Name, 'luid_\\w+?_phys').Value + [regex]::Match($_.Name, 'engtype_.*$').Value } | ForEach-Object { ($_.Group | Measure-Object UtilizationPercentage -Sum).Sum } | Measure-Object -Maximum).Maximum",
+  "  $gpu = [math]::Min(100, [int]$gpu)",
+  "}",
+  "$status = [ordered]@{ booted_at = $os.LastBootUpTime.ToUniversalTime().ToString('o') }",
+  "if ($null -ne $cpu) { $status.cpu_percent = [math]::Min(100, [int]$cpu) }",
+  "if ($null -ne $gpu) { $status.gpu_percent = $gpu }",
+  "$status.memory_total_mb = [int]($os.TotalVisibleMemorySize / 1024)",
+  "$status.memory_used_mb = [int](($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / 1024)",
+  "return $status",
+  "}",
+];
+const hardwareScanScript = [
+  "& {",
+  "$ErrorActionPreference = 'SilentlyContinue'",
+  ...hardwareScanFunction,
+  "$rows = Get-BitsHardware",
   "$json = ConvertTo-Json -InputObject @($rows) -Depth 3",
   "$json | Set-Clipboard",
   "$json",
-  "Write-Host ('Copied ' + $rows.Count + ' hardware rows to the clipboard.') -ForegroundColor Green",
+  "Write-Host ('Copied ' + @($rows).Count + ' hardware rows to the clipboard.') -ForegroundColor Green",
   "}",
 ].join("\n");
+const hardwareAgentTaskName = "BitsHardwareAgent";
+const hardwareAgentUninstallScript = [
+  `Unregister-ScheduledTask -TaskName '${hardwareAgentTaskName}' -Confirm:$false -ErrorAction SilentlyContinue`,
+  `Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*\\${hardwareAgentTaskName}\\agent.ps1*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }`,
+  `Remove-Item (Join-Path $env:LOCALAPPDATA '${hardwareAgentTaskName}') -Recurse -Force -ErrorAction SilentlyContinue`,
+  "Write-Host 'Hardware agent removed.' -ForegroundColor Green",
+].join("\n");
+
+function getHardwareSyncEndpoint() {
+  return `${window.SUPABASE_CONFIG.url.replace(/\/$/, "")}/functions/v1/hardware-sync`;
+}
+
+// The agent reports live status every minute and full specs at start and every
+// six hours. Its device token is stored DPAPI-encrypted for the current user.
+function buildHardwareAgentScript() {
+  return [
+    "$ErrorActionPreference = 'SilentlyContinue'",
+    `$endpoint = '${getHardwareSyncEndpoint()}'`,
+    "$dir = Split-Path -Parent $MyInvocation.MyCommand.Path",
+    "$log = Join-Path $dir 'agent.log'",
+    "$secure = Get-Content (Join-Path $dir 'token.dat') | ConvertTo-SecureString",
+    "$token = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))",
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
+    ...hardwareScanFunction,
+    ...hardwareStatusFunction,
+    "$nextSpecs = [datetime]::MinValue",
+    "while ($true) {",
+    "  $report = [ordered]@{ status = Get-BitsStatus }",
+    "  $sendSpecs = (Get-Date) -ge $nextSpecs",
+    "  if ($sendSpecs) { $report.components = @(Get-BitsHardware) }",
+    "  $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $report -Depth 4 -Compress))",
+    "  try {",
+    "    $result = Invoke-RestMethod -Method Post -Uri $endpoint -Headers @{ 'x-device-token' = $token } -ContentType 'application/json; charset=utf-8' -Body $bytes -TimeoutSec 30",
+    "    if ($sendSpecs) { if ($result.specs) { $nextSpecs = (Get-Date).AddHours(6) } else { $nextSpecs = (Get-Date).AddMinutes(6) } }",
+    "    Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' OK ' + (ConvertTo-Json -InputObject $result -Compress))",
+    "  } catch {",
+    "    $code = 0",
+    "    if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }",
+    "    Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' ERROR ' + $code + ' ' + $_.Exception.Message)",
+    "    if ($code -eq 401) { exit 1 }",
+    "  }",
+    "  Start-Sleep -Seconds 60",
+    "}",
+  ].join("\n");
+}
+
+function buildHardwareAgentInstaller() {
+  return [
+    "& {",
+    "$ErrorActionPreference = 'Stop'",
+    `$dir = Join-Path $env:LOCALAPPDATA '${hardwareAgentTaskName}'`,
+    "$secure = Read-Host -AsSecureString 'Paste the device token from Admin'",
+    "if ($secure.Length -eq 0) { throw 'No device token entered.' }",
+    "New-Item -ItemType Directory -Force -Path $dir | Out-Null",
+    "$secure | ConvertFrom-SecureString | Set-Content -Path (Join-Path $dir 'token.dat')",
+    "$agent = @'",
+    buildHardwareAgentScript(),
+    "'@",
+    "Set-Content -Path (Join-Path $dir 'agent.ps1') -Value $agent -Encoding UTF8",
+    "$argument = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"' + (Join-Path $dir 'agent.ps1') + '\"'",
+    "$action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argument",
+    "$trigger = New-ScheduledTaskTrigger -AtLogOn -User ($env:USERDOMAIN + '\\' + $env:USERNAME)",
+    "$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 5)",
+    `Register-ScheduledTask -TaskName '${hardwareAgentTaskName}' -Action $action -Trigger $trigger -Settings $settings -Description 'Reports hardware specs and live status to shortbits.net' -Force | Out-Null`,
+    `Stop-ScheduledTask -TaskName '${hardwareAgentTaskName}'`,
+    `Start-ScheduledTask -TaskName '${hardwareAgentTaskName}'`,
+    "Write-Host ('Hardware agent installed. Status log: ' + (Join-Path $dir 'agent.log')) -ForegroundColor Green",
+    "}",
+  ].join("\n");
+}
+
+function createHardwareDeviceToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const base64 = btoa(String.fromCharCode(...bytes));
+  return `sbhw_${base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}`;
+}
+
+async function sha256Hex(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function copyAdminText(text, fallbackField) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    fallbackField.select();
+    document.execCommand("copy");
+  }
+}
+
+function formatHardwareSeen(value) {
+  if (!value) {
+    return "never reported";
+  }
+  const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+  const state = seconds < 180 ? "ONLINE" : "OFFLINE";
+  if (seconds < 120) {
+    return `${state} // seen ${seconds}s ago`;
+  }
+  return `${state} // last seen ${new Date(value).toLocaleString()}`;
+}
+
+async function loadHardwareDevices() {
+  const { data, error } = await adminClient
+    .from("site_hardware_devices")
+    .select("id, machine, created_at, last_seen_at, last_specs_at")
+    .order("machine", { ascending: true });
+
+  if (error) {
+    console.error("Unable to load hardware agents:", error);
+    setAdminStatus(hardwareDeviceStatus, `Hardware agents failed to load: ${error.message}`, "error");
+    return false;
+  }
+
+  hardwareDevices.replaceChildren(...data.map((device) => {
+    const item = document.createElement("li");
+    const copy = document.createElement("span");
+    const name = document.createElement("strong");
+    const meta = document.createElement("small");
+    const revoke = document.createElement("button");
+    name.textContent = device.machine;
+    meta.textContent = formatHardwareSeen(device.last_seen_at);
+    copy.append(name, meta);
+    revoke.type = "button";
+    revoke.className = "repeatable-entry-remove";
+    revoke.textContent = "REVOKE";
+    revoke.setAttribute("aria-label", `Revoke hardware agent token for ${device.machine}`);
+    revoke.addEventListener("click", async () => {
+      if (!window.confirm(`Revoke the agent token for ${device.machine}? Its live status disappears and the agent stops syncing. Synced spec rows stay.`)) {
+        return;
+      }
+      const { error: deleteError } = await adminClient
+        .from("site_hardware_devices")
+        .delete()
+        .eq("id", device.id);
+      if (deleteError) {
+        setAdminStatus(hardwareDeviceStatus, `Revoke failed: ${deleteError.message}`, "error");
+        return;
+      }
+      clearPublicContentCache();
+      await loadHardwareDevices();
+      setAdminStatus(hardwareDeviceStatus, `Token for ${device.machine} revoked.`, "success");
+    });
+    item.append(copy, revoke);
+    return item;
+  }));
+  hardwareDevices.hidden = data.length === 0;
+  return true;
+}
+
+async function createHardwareDevice() {
+  const machine = hardwareDeviceMachine.value.trim().slice(0, 60);
+  if (!machine) {
+    setAdminStatus(hardwareDeviceStatus, "Name the machine first.", "error");
+    hardwareDeviceMachine.focus();
+    return;
+  }
+  hardwareDeviceCreate.disabled = true;
+  const token = createHardwareDeviceToken();
+  const { error } = await adminClient
+    .from("site_hardware_devices")
+    .insert({ machine, token_hash: await sha256Hex(token) });
+  hardwareDeviceCreate.disabled = false;
+
+  if (error) {
+    const message = error.code === "23505"
+      ? `${machine} already has an agent token. Revoke it first to issue a new one.`
+      : `Token creation failed: ${error.message}`;
+    setAdminStatus(hardwareDeviceStatus, message, "error");
+    return;
+  }
+  hardwareDeviceToken.value = token;
+  hardwareDeviceTokenOutput.hidden = false;
+  hardwareDeviceToken.select();
+  await loadHardwareDevices();
+  setAdminStatus(
+    hardwareDeviceStatus,
+    `Token created for ${machine}. Copy it now, then run the installer on that machine.`,
+    "success",
+  );
+}
 const blogPostForm = document.querySelector("#blog-post-form");
 const blogPostSave = document.querySelector("#blog-post-save");
 const blogPostDelete = document.querySelector("#blog-post-delete");
@@ -327,6 +546,9 @@ function createRepeatableEntry(editor, entry = {}) {
     fieldset.dataset.position = String(entry.position);
   }
   legend.textContent = entry.position ? `ENTRY ${entry.position}` : "NEW ENTRY";
+  if (entry.source_key) {
+    legend.textContent += " // AGENT";
+  }
   fieldset.append(legend);
   editor.fields.forEach((field) => {
     fieldset.append(createAdminField(
@@ -940,7 +1162,7 @@ async function loadHardware() {
   setAdminStatus(hardwareAdminStatus, "Loading hardware...");
   const { data, error } = await adminClient
     .from("site_hardware")
-    .select("position, machine, component, name, detail, enabled")
+    .select("position, machine, component, name, detail, enabled, source_key")
     .order("position", { ascending: true });
 
   if (error) {
@@ -1532,6 +1754,7 @@ async function showInbox() {
     loadChangelogContent(),
     loadFavoriteGames(),
     loadHardware(),
+    loadHardwareDevices(),
     loadBlogPosts(),
     loadShortLinks(),
   ]);
@@ -1542,6 +1765,8 @@ function showLogin() {
   inboxView.hidden = true;
   loginView.hidden = false;
   loginForm.reset();
+  hardwareDeviceToken.value = "";
+  hardwareDeviceTokenOutput.hidden = true;
 }
 
 let adminClient;
@@ -2369,6 +2594,22 @@ if (adminClient) {
     );
   });
   hardwareImportApply.addEventListener("click", importHardwareScan);
+
+  hardwareAgentInstaller.value = buildHardwareAgentInstaller();
+  hardwareAgentUninstall.value = hardwareAgentUninstallScript;
+  hardwareDeviceCreate.addEventListener("click", createHardwareDevice);
+  hardwareDeviceTokenCopy.addEventListener("click", async () => {
+    await copyAdminText(hardwareDeviceToken.value, hardwareDeviceToken);
+    setAdminStatus(hardwareDeviceStatus, "Device token copied.", "success");
+  });
+  hardwareAgentInstallerCopy.addEventListener("click", async () => {
+    await copyAdminText(hardwareAgentInstaller.value, hardwareAgentInstaller);
+    setAdminStatus(
+      hardwareDeviceStatus,
+      "Installer copied. Paste it into PowerShell on the machine, then paste the token when prompted.",
+      "success",
+    );
+  });
 
   hardwareForm.addEventListener("submit", async (event) => {
     event.preventDefault();

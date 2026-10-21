@@ -3324,6 +3324,38 @@ h1 .dim {
   white-space: pre;
 }
 
+.hardware-devices {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hardware-devices[hidden] {
+  display: none;
+}
+
+.hardware-devices li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+
+.hardware-devices strong,
+.hardware-devices small {
+  display: block;
+}
+
+.hardware-devices small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
 .repeatable-entry-actions {
   margin-top: auto;
 }
@@ -11030,11 +11062,140 @@ ul.resume-entry-technologies li {
 
 .hardware-machine {
   min-width: 0;
-  padding: 16px 18px 10px;
+  padding: 0 18px;
   border: 1px solid var(--border);
   background:
     linear-gradient(135deg, var(--accent-soft), transparent 58%),
     var(--panel);
+}
+
+.hardware-machines {
+  align-items: start;
+}
+
+.hardware-machine > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -18px;
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.hardware-machine > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hardware-machine > summary::before {
+  content: "[+]";
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+.hardware-machine[open] > summary::before {
+  content: "[-]";
+}
+
+.hardware-machine > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.hardware-machine[open] {
+  padding-bottom: 10px;
+}
+
+.hardware-part-count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.hardware-live-badge {
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+}
+
+.hardware-live-badge[data-state="online"] {
+  color: var(--accent);
+}
+
+.hardware-live-badge[data-state="online"]::before {
+  content: "\25CF ";
+  animation: hardware-live-pulse 1.6s ease-in-out infinite;
+}
+
+.hardware-live-badge[data-state="offline"] {
+  color: var(--muted);
+}
+
+.hardware-live-badge[hidden],
+.hardware-live[hidden],
+.hardware-meter[hidden] {
+  display: none;
+}
+
+@keyframes hardware-live-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hardware-live-badge[data-state="online"]::before {
+    animation: none;
+  }
+}
+
+.hardware-live {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 4px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+}
+
+.hardware-meter {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.hardware-meter strong {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.hardware-meter-track {
+  height: 6px;
+  border: 1px solid var(--border);
+}
+
+.hardware-meter-fill {
+  display: block;
+  width: var(--meter-value, 0%);
+  height: 100%;
+  background: var(--accent);
+  transition: width 400ms ease;
+}
+
+.hardware-live-uptime {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.hardware-live.is-offline {
+  border-style: dotted;
 }
 
 .hardware-machine h3 {

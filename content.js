@@ -385,10 +385,125 @@ function renderFavoriteGames(games) {
   gamesEmpty.textContent = "Favorite games are awaiting operator input.";
 }
 
-function renderHardware(items) {
+const hardwareCollapsedKey = "bits-hardware-collapsed";
+const hardwareStatusPollMs = 30_000;
+const hardwareOnlineWindowMs = 3 * 60_000;
+const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0 };
+
+function readCollapsedHardware() {
+  try {
+    const value = JSON.parse(localStorage.getItem(hardwareCollapsedKey) ?? "[]");
+    return new Set(Array.isArray(value) ? value : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCollapsedHardware(machine, collapsed) {
+  const machines = readCollapsedHardware();
+  if (collapsed) {
+    machines.add(machine);
+  } else {
+    machines.delete(machine);
+  }
+  localStorage.setItem(hardwareCollapsedKey, JSON.stringify([...machines]));
+}
+
+function formatHardwareUptime(bootedAt) {
+  const totalMinutes = Math.max(0, Math.floor((Date.now() - new Date(bootedAt).getTime()) / 60_000));
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  return `${days ? `${days}d ` : ""}${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+}
+
+function createHardwareMeter(label) {
+  const meter = document.createElement("div");
+  const name = document.createElement("span");
+  const track = document.createElement("span");
+  const fill = document.createElement("span");
+  const value = document.createElement("strong");
+  meter.className = "hardware-meter";
+  meter.dataset.meter = label;
+  name.textContent = label;
+  track.className = "hardware-meter-track";
+  track.setAttribute("aria-hidden", "true");
+  fill.className = "hardware-meter-fill";
+  track.append(fill);
+  meter.append(name, track, value);
+  return meter;
+}
+
+function setHardwareMeter(meter, percent, text) {
+  meter.hidden = percent === null || percent === undefined;
+  if (meter.hidden) {
+    return;
+  }
+  meter.querySelector(".hardware-meter-fill").style.setProperty("--meter-value", `${percent}%`);
+  meter.querySelector("strong").textContent = text ?? `${percent}%`;
+}
+
+function createHardwareCard(machine, components, collapsed) {
+  const card = document.createElement("details");
+  const summary = document.createElement("summary");
+  const heading = document.createElement("h3");
+  const badge = document.createElement("span");
+  const count = document.createElement("span");
+  const live = document.createElement("div");
+  const uptime = document.createElement("p");
+  card.className = "hardware-machine";
+  card.dataset.machine = machine;
+  card.open = !collapsed;
+  heading.textContent = machine;
+  badge.className = "hardware-live-badge";
+  badge.hidden = true;
+  count.className = "hardware-part-count";
+  count.textContent = components.length
+    ? `${components.length} PART${components.length === 1 ? "" : "S"}`
+    : "";
+  summary.append(heading, badge, count);
+  live.className = "hardware-live";
+  live.hidden = true;
+  uptime.className = "hardware-live-uptime";
+  live.append(
+    createHardwareMeter("CPU"),
+    createHardwareMeter("GPU"),
+    createHardwareMeter("RAM"),
+    uptime,
+  );
+  card.append(summary, live);
+
+  if (components.length) {
+    const list = document.createElement("dl");
+    list.className = "desktop-window-stats hardware-specs";
+    components.forEach((component) => {
+      const row = document.createElement("div");
+      const term = document.createElement("dt");
+      const value = document.createElement("dd");
+      const name = document.createElement("span");
+      term.textContent = component.component;
+      name.textContent = component.name;
+      value.append(name);
+      if (component.detail) {
+        const detail = document.createElement("small");
+        detail.textContent = component.detail;
+        value.append(detail);
+      }
+      row.append(term, value);
+      list.append(row);
+    });
+    card.append(list);
+  }
+  card.addEventListener("toggle", () => {
+    saveCollapsedHardware(machine, !card.open);
+  });
+  return card;
+}
+
+function renderHardwareCards() {
   const machines = new Map();
   let latestUpdate = "";
-  items.forEach((item) => {
+  hardwareState.items.forEach((item) => {
     if (!machines.has(item.machine)) {
       machines.set(item.machine, []);
     }
@@ -397,42 +512,97 @@ function renderHardware(items) {
       latestUpdate = item.updated_at;
     }
   });
+  hardwareState.statuses.forEach((status) => {
+    if (!machines.has(status.machine)) {
+      machines.set(status.machine, []);
+    }
+  });
 
-  hardwareMachines.replaceChildren(
-    ...[...machines].map(([machine, components]) => {
-      const section = document.createElement("section");
-      const heading = document.createElement("h3");
-      const list = document.createElement("dl");
-      section.className = "hardware-machine";
-      heading.textContent = machine;
-      list.className = "desktop-window-stats hardware-specs";
-      components.forEach((component) => {
-        const row = document.createElement("div");
-        const term = document.createElement("dt");
-        const value = document.createElement("dd");
-        const name = document.createElement("span");
-        term.textContent = component.component;
-        name.textContent = component.name;
-        value.append(name);
-        if (component.detail) {
-          const detail = document.createElement("small");
-          detail.textContent = component.detail;
-          value.append(detail);
-        }
-        row.append(term, value);
-        list.append(row);
-      });
-      section.append(heading, list);
-      return section;
-    }),
-  );
-  hardwareMachines.hidden = items.length === 0;
-  hardwareEmpty.hidden = items.length > 0;
+  const cardsKey = JSON.stringify([...machines]);
+  if (cardsKey !== hardwareState.cardsKey) {
+    hardwareState.cardsKey = cardsKey;
+    const collapsed = readCollapsedHardware();
+    hardwareMachines.replaceChildren(
+      ...[...machines].map(([machine, components]) => (
+        createHardwareCard(machine, components, collapsed.has(machine))
+      )),
+    );
+  }
+  hardwareMachines.hidden = machines.size === 0;
+  hardwareEmpty.hidden = machines.size > 0;
   hardwareEmpty.textContent = "Hardware inventory is awaiting operator input.";
   hardwareUpdated.hidden = !latestUpdate;
   hardwareUpdated.textContent = latestUpdate
     ? `LAST SCAN: ${formatContentDate(latestUpdate, true)}`
     : "";
+  updateHardwareStatus();
+}
+
+function updateHardwareStatus() {
+  const statuses = new Map(hardwareState.statuses.map((status) => [status.machine, status]));
+  hardwareMachines.querySelectorAll(".hardware-machine").forEach((card) => {
+    const status = statuses.get(card.dataset.machine);
+    const badge = card.querySelector(".hardware-live-badge");
+    const live = card.querySelector(".hardware-live");
+    badge.hidden = !status;
+    if (!status) {
+      live.hidden = true;
+      return;
+    }
+    const online = Date.now() - new Date(status.updated_at).getTime() < hardwareOnlineWindowMs;
+    badge.dataset.state = online ? "online" : "offline";
+    badge.textContent = online ? "LIVE" : "OFFLINE";
+    live.hidden = false;
+    live.classList.toggle("is-offline", !online);
+    const meters = live.querySelectorAll(".hardware-meter");
+    const memoryPercent = status.memory_total_mb
+      ? Math.round((status.memory_used_mb / status.memory_total_mb) * 100)
+      : null;
+    setHardwareMeter(meters[0], online ? status.cpu_percent : null);
+    setHardwareMeter(meters[1], online ? status.gpu_percent : null);
+    setHardwareMeter(
+      meters[2],
+      online ? memoryPercent : null,
+      memoryPercent === null
+        ? ""
+        : `${(status.memory_used_mb / 1024).toFixed(1)} / ${Math.round(status.memory_total_mb / 1024)} GB`,
+    );
+    live.querySelector(".hardware-live-uptime").textContent = online
+      ? (status.booted_at ? `UPTIME ${formatHardwareUptime(status.booted_at)}` : "")
+      : `LAST SEEN ${formatContentDate(status.updated_at, true)}`;
+  });
+}
+
+async function refreshHardwareStatus() {
+  if (document.hidden) {
+    return;
+  }
+  try {
+    hardwareState.statuses = await fetchPublicContentTable(
+      "site_hardware_status?select=machine,cpu_percent,gpu_percent,memory_used_mb,memory_total_mb,booted_at,updated_at&order=machine.asc",
+    );
+    renderHardwareCards();
+  } catch (error) {
+    console.warn("Unable to load live hardware status:", error);
+  }
+}
+
+function startHardwareStatus() {
+  if (hardwareState.timer) {
+    return;
+  }
+  refreshHardwareStatus();
+  hardwareState.timer = window.setInterval(refreshHardwareStatus, hardwareStatusPollMs);
+}
+
+function stopHardwareStatus() {
+  window.clearInterval(hardwareState.timer);
+  hardwareState.timer = 0;
+}
+
+function renderHardware(items) {
+  hardwareState.items = items;
+  renderHardwareCards();
 }
 
 async function loadPublicContent() {
@@ -473,7 +643,20 @@ window.addEventListener("desktop-window:opened", (event) => {
   if (publicContentWindowIds.has(event.detail.windowId)) {
     loadPublicContent().catch(() => {});
   }
+  if (event.detail.windowId === "hardware-window") {
+    startHardwareStatus();
+  }
 });
+
+window.addEventListener("desktop-window:closed", (event) => {
+  if (event.detail.windowId === "hardware-window") {
+    stopHardwareStatus();
+  }
+});
+
+if (!document.getElementById("hardware-window").hidden) {
+  startHardwareStatus();
+}
 
 if (
   [...publicContentWindowIds].some(
