@@ -39,10 +39,21 @@ is a personal project and largely a learning exercise for me.
   Education entries (school, credential, period, and optional bullet details)
   are edited in the same Admin form, stored in `site_resume_education`, and
   shown in both `CAREER.SYS` and the professional Education section.
+  Certifications (name, issuer, issue date, credential ID, and an HTTPS
+  verification link) use the same pattern through
+  `site_resume_certifications`. `career-data.js` shares one cached loader
+  between the professional page and its printable résumé.
+- A print-ready résumé at `/professional/resume/` built from the same Admin
+  data. Its **Download PDF** button opens the browser's print dialog with
+  Letter-sized print styles, so choosing "Save as PDF" produces a clean résumé.
+  It is also the default `RESUME.PDF` target when no external résumé URL is set.
 - Theme-driven, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard
-- Private contact form backed by Supabase
+- Private contact form backed by a Supabase Edge Function
+  (`contact-message`) with a honeypot, length and link limits, hashed
+  per-visitor and global rate limits, and optional Cloudflare Turnstile
+  verification
 - Persistent local achievements and a large collection of Easter eggs,
   including Blue, Red, Black, and Insider Green death screens with a
   four-color completion achievement, plus an automatically recovering
@@ -246,6 +257,22 @@ Supabase functions. The browser counts a daily session once with
 `sessionStorage`, honors Global Privacy Control and Do Not Track, and never
 transmits or stores a visitor identifier.
 
+`site-config.js` holds optional public third-party identifiers:
+
+- `cloudflareAnalyticsToken`: the Cloudflare Web Analytics site token.
+  `cf-analytics.js` loads the cookieless beacon on public pages only when the
+  token is set, and skips it on localhost or when Global Privacy Control or
+  Do Not Track is enabled.
+- `turnstileSiteKey`: the public Cloudflare Turnstile site key. When set, the
+  contact form renders a Turnstile challenge. Store the matching secret as the
+  `TURNSTILE_SECRET_KEY` Supabase secret so `contact-message` enforces it.
+
+The contact form posts to the `contact-message` Edge Function, which inserts
+messages with the service role after its spam checks. The
+`20261021030000_protect_contact_messages.sql` migration then revokes direct
+anonymous inserts into `messages`. Until the function is deployed, the browser
+falls back to the previous direct insert.
+
 ## Deployment
 
 The production site is served as static files from `/srv/bitsofbits/`.
@@ -264,6 +291,22 @@ secrets for the `production` environment:
 Set the optional `DEPLOY_PORT` environment variable when SSH does not use port
 22.
 
+Database and Edge Function changes ship from the same workflow. Add these
+`production` environment secrets to enable the `supabase` job:
+
+- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token
+- `SUPABASE_DB_PASSWORD`: the project's database password
+- `TURNSTILE_SECRET_KEY` (optional): synced to the Edge Function secrets
+
+The job deploys `contact-message` and then runs `supabase db push`. When the
+required secrets are missing it logs a warning and skips, and the static
+deploy still runs if the job fails.
+
+After each deploy, the `lighthouse` job audits the chooser, `/online/`,
+`/professional/`, and `/professional/resume/` on mobile and desktop. It writes
+a score table to the run summary, logs failing audits, and uploads the JSON
+reports as an artifact. It never blocks a deploy.
+
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static
 site files. It does not delete other files from the production directory.
@@ -274,7 +317,9 @@ that internal error handling for `/404.html`.
 
 After deploying the static files, the workflow downloads
 `/etc/caddy/Caddyfile`, updates its quoted Content Security Policy with the
-approved YouTube, Vimeo, and Spotify `frame-src` values, validates the candidate
+approved YouTube, Vimeo, Spotify, and Cloudflare Turnstile `frame-src` values
+plus the Cloudflare Web Analytics and Turnstile script and connect origins,
+validates the candidate
 configuration, installs it, and reloads Caddy. A failed reload restores the
 original Caddyfile automatically. The deployment user therefore needs narrowly
 scoped passwordless `sudo` access to `caddy validate`,

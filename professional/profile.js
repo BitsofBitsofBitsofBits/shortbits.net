@@ -43,63 +43,36 @@
   const availability = document.querySelector("#profile-availability");
   const availabilityRow = document.querySelector("#profile-availability-row");
   const educationList = document.querySelector("#profile-education");
-  const sharedCacheKey = "bits-public-content-v4";
-  const sharedCacheDurationMs = 300_000;
+  const certificationList = document.querySelector("#profile-certifications");
 
-  if (!timeline || !window.CareerFormat) {
+  if (!timeline || !window.CareerFormat || !window.CareerData) {
     return;
   }
 
-  function readSharedCache() {
-    try {
-      const cached = JSON.parse(localStorage.getItem(sharedCacheKey) ?? "null");
-      if (
-        cached
-        && typeof cached.cachedAt === "number"
-        && Date.now() - cached.cachedAt < sharedCacheDurationMs
-        && cached.payload
-      ) {
-        return {
-          profile: cached.payload.resumeProfile,
-          entries: cached.payload.resumeEntries ?? [],
-          education: cached.payload.resumeEducation ?? [],
-        };
-      }
-    } catch {
-      // Ignore malformed cache data and fetch fresh content instead.
+  function createCertificationEntry(entry) {
+    const item = document.createElement("li");
+    const meta = document.createElement("p");
+    const name = document.createElement("h4");
+    meta.className = "profile-kicker";
+    meta.textContent = `${entry.issuer} · ${entry.issued}`;
+    name.textContent = entry.name;
+    item.append(meta, name);
+    if (entry.credential_id) {
+      const id = document.createElement("p");
+      id.className = "profile-certification-id";
+      id.textContent = `Credential ID ${entry.credential_id}`;
+      item.append(id);
     }
-    return null;
-  }
-
-  async function fetchTable(query) {
-    const { url, anonKey } = window.SUPABASE_CONFIG ?? {};
-    if (!url || !anonKey) {
-      throw new Error("Supabase configuration is missing.");
+    if (window.CareerData.isSafeUrl(entry.credential_url)) {
+      const link = document.createElement("a");
+      link.className = "profile-text-link";
+      link.href = entry.credential_url;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = "Verify credential ↗";
+      item.append(link);
     }
-    const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${query}`, {
-      headers: { apikey: anonKey },
-    });
-    if (!response.ok) {
-      throw new Error(`Career request failed with HTTP ${response.status}.`);
-    }
-    return response.json();
-  }
-
-  async function loadCareer() {
-    const cached = readSharedCache();
-    if (cached) {
-      return cached;
-    }
-    const [profiles, entries, education] = await Promise.all([
-      fetchTable("site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary"),
-      fetchTable("site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc"),
-      fetchTable("site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc")
-        .catch((error) => {
-          console.warn("Unable to load education:", error);
-          return [];
-        }),
-    ]);
-    return { profile: profiles[0] ?? null, entries, education };
+    return item;
   }
 
   function createEducationEntry(entry) {
@@ -167,12 +140,15 @@
     return item;
   }
 
-  function render({ profile, entries, education }) {
+  function render({ profile, entries, education, certifications }) {
     if (!profile) {
       return;
     }
     if (educationList && Array.isArray(education) && education.length > 0) {
       educationList.replaceChildren(...education.map(createEducationEntry));
+    }
+    if (certificationList && Array.isArray(certifications) && certifications.length > 0) {
+      certificationList.replaceChildren(...certifications.map(createCertificationEntry));
     }
     if (profile.location) {
       location.textContent = profile.location;
@@ -197,7 +173,7 @@
     }
   }
 
-  loadCareer()
+  window.CareerData.load()
     .then(render)
     .catch((error) => {
       console.warn("Unable to load career history:", error);

@@ -14,6 +14,7 @@ const htmlFiles = [
   "blog/post.html",
   "online/index.html",
   "professional/index.html",
+  "professional/resume/index.html",
 ];
 const missingAssets = [];
 

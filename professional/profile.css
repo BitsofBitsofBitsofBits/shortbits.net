@@ -474,6 +474,50 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
   background: var(--border);
 }
 
+.profile-subheading {
+  margin: 48px 0 20px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.profile-certifications {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-certifications > li {
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  background: var(--bg);
+  break-inside: avoid;
+}
+
+.profile-certifications .profile-kicker {
+  margin: 0 0 8px;
+}
+
+.profile-certifications h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.profile-certification-id {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+html[data-interface-theme="windows-95"] .profile-certifications > li {
+  background: var(--panel);
+}
+
 .profile-skills article {
   padding: 24px;
   background: var(--bg);
@@ -691,6 +735,7 @@ html .professional-page .contact-form :is(input, textarea) {
 
   .profile-overview,
   .profile-skills article,
+  .profile-certifications > li,
   .profile-projects > article {
     background: transparent;
     break-inside: avoid;

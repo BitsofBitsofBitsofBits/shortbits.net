@@ -40,9 +40,73 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  deploy:
+  supabase:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: arjwrycitgobvlodmkeo
+    steps:
+      - name: Check Supabase credentials
+        id: credentials
+        shell: bash
+        run: |
+          if [ -n "$SUPABASE_ACCESS_TOKEN" ] && [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SUPABASE_ACCESS_TOKEN or SUPABASE_DB_PASSWORD is not set; skipping database migrations and Edge Function deploys."
+          fi
+
+      - name: Check out repository
+        if: steps.credentials.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        if: steps.credentials.outputs.ready == 'true'
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Sync Edge Function secrets
+        if: steps.credentials.outputs.ready == 'true'
+        shell: bash
+        env:
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+        run: |
+          if [ -n "$TURNSTILE_SECRET_KEY" ]; then
+            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" TURNSTILE_SECRET_KEY="$TURNSTILE_SECRET_KEY"
+          else
+            echo "TURNSTILE_SECRET_KEY is not set; the contact function will skip the Turnstile check."
+          fi
+
+      # The function must exist before the migration revokes direct inserts into messages.
+      - name: Deploy contact Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy contact-message
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
+      - name: Apply database migrations
+        if: steps.credentials.outputs.ready == 'true'
+        shell: bash
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+          supabase db push --linked --password "$SUPABASE_DB_PASSWORD"
+
+  deploy:
+    # Front-end features degrade gracefully, so the site still ships if the Supabase job fails.
+    if: >-
+      always()
+      && needs.validate.result == 'success'
+      && github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
+    needs: [validate, supabase]
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -137,3 +201,42 @@ jobs:
               exit 1; \
             fi; \
             rm -f /tmp/Caddyfile.original /tmp/Caddyfile.candidate"
+
+  lighthouse:
+    if: always() && needs.deploy.result == 'success'
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Audit live pages
+        shell: bash
+        run: |
+          mkdir -p lighthouse-reports
+          for page in "" "online/" "professional/" "professional/resume/"; do
+            name="$(echo "${page:-chooser}" | tr '/' '-' | sed 's/-$//')"
+            for preset in mobile desktop; do
+              flags=""
+              if [ "$preset" = "desktop" ]; then flags="--preset=desktop"; fi
+              npx --yes lighthouse@12 "https://www.shortbits.net/${page}" $flags \
+                --only-categories=performance,accessibility,best-practices,seo \
+                --chrome-flags="--headless=new --no-sandbox" \
+                --output=json --output-path="lighthouse-reports/${name}-${preset}.json" \
+                --quiet || echo "::warning::Lighthouse failed for /${page} (${preset})"
+            done
+          done
+          node scripts/lighthouse-summary.mjs lighthouse-reports
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: lighthouse-reports
+          retention-days: 14

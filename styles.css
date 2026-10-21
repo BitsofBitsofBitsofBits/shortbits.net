@@ -3392,6 +3392,11 @@ h1 .dim {
   left: -10000px;
 }
 
+.contact-turnstile {
+  min-height: 65px;
+  margin: 4px 0 12px;
+}
+
 .contact-actions {
   display: flex;
   justify-content: space-between;
@@ -10851,6 +10856,17 @@ html[data-boot-degradation="3"] .endless-boot-machine {
 
 .resume-section-heading[hidden] {
   display: none;
+}
+
+.resume-certification-meta {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+}
+
+.resume-certification-meta a {
+  color: var(--accent);
 }
 
 .resume-entry-bullets {
