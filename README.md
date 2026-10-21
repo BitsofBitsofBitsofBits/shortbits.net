@@ -293,7 +293,7 @@ Set the optional `DEPLOY_PORT` environment variable when SSH does not use port
 22.
 
 Database and Edge Function changes ship from the same workflow. Add these
-`production` environment secrets to enable the `supabase` job:
+`Supabase` environment secrets to enable the `supabase` job:
 
 - `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token
 - `SUPABASE_DB_PASSWORD`: the project's database password
