@@ -4927,6 +4927,42 @@ html[data-interface-theme="minebits"] #admin-blog-window-title {
   letter-spacing: -0.05em;
 }
 
+.admin-suite-brand {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.admin-waffle {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 3px;
+  flex: none;
+  padding: 9px;
+  border: 1px solid var(--border);
+}
+
+.admin-waffle i {
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+}
+
+.admin-suite-name {
+  color: var(--accent);
+}
+
+.admin-breadcrumb::after {
+  content: " > DASHBOARD";
+  color: var(--muted);
+}
+
+.admin-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 .admin-header a {
   display: inline-flex;
   align-items: center;

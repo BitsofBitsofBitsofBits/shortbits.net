@@ -1942,9 +1942,17 @@ async function loadShortLinks() {
   return true;
 }
 
+function updateAdminGreeting() {
+  const hour = new Date().getHours();
+  document.querySelector("#admin-greeting").textContent = hour < 5
+    ? "Burning the midnight oil"
+    : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+}
+
 async function showInbox() {
   loginView.hidden = true;
   inboxView.hidden = false;
+  updateAdminGreeting();
   await Promise.all([
     loadMessages(),
     loadAdminGuestbook(),
