@@ -130,7 +130,11 @@ function createResumeEntry(entry) {
   const period = document.createElement("p");
   role.textContent = entry.role;
   organization.textContent = entry.organization;
-  period.textContent = entry.period;
+  if (window.CareerFormat) {
+    window.CareerFormat.buildPeriod(period, entry.period);
+  } else {
+    period.textContent = entry.period;
+  }
   titleGroup.append(role, organization);
   header.append(titleGroup, period);
   item.append(header);

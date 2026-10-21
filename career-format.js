@@ -71,7 +71,31 @@
     return list;
   }
 
+  const durationPattern = /^(.*?)\s*(?:[·•|]\s*)?((?:\d+\s*(?:yrs?|years?|mos?|months?)\s*)+)$/i;
+
+  function buildPeriod(element, value) {
+    const text = (value ?? "").trim();
+    const [range, duration] = text.includes("·")
+      ? text.split(/\s*·\s*/, 2)
+      : (() => {
+          const match = text.match(durationPattern);
+          return match && match[1] ? [match[1], match[2].trim()] : [text, ""];
+        })();
+    const rangeLine = document.createElement("span");
+    rangeLine.className = "career-period-range";
+    rangeLine.textContent = range;
+    element.replaceChildren(rangeLine);
+    if (duration) {
+      const durationLine = document.createElement("span");
+      durationLine.className = "career-period-duration";
+      durationLine.textContent = duration;
+      element.append(durationLine);
+    }
+    return element;
+  }
+
   window.CareerFormat = Object.freeze({
+    buildPeriod,
     buildSummary,
     buildTechnologyList,
     splitTechnologies,

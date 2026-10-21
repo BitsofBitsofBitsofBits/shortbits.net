@@ -72,7 +72,7 @@
     number.setAttribute("aria-hidden", "true");
     number.textContent = `${String(index + 1).padStart(2, "0")} /`;
     period.className = "profile-kicker";
-    period.textContent = entry.period;
+    window.CareerFormat.buildPeriod(period, entry.period);
     meta.append(number, period);
 
     role.textContent = entry.role;

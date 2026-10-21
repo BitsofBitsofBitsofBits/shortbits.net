@@ -10816,6 +10816,21 @@ html[data-boot-degradation="3"] .endless-boot-machine {
   letter-spacing: 0.06em;
 }
 
+.career-period-range,
+.career-period-duration {
+  display: block;
+  white-space: nowrap;
+}
+
+.career-period-duration {
+  color: var(--muted);
+}
+
+.resume-entry-list header p {
+  flex-shrink: 0;
+  text-align: right;
+}
+
 .resume-entry-bullets {
   display: grid;
   gap: 6px;
@@ -13227,6 +13242,10 @@ html.is-root-mode .name-field {
   .resume-entry-list header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .resume-entry-list header p {
+    text-align: left;
   }
 
   .changelog-entry-list > li {
