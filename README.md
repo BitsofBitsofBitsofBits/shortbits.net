@@ -91,7 +91,9 @@ is a personal project and largely a learning exercise for me.
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 - An Admin-managed `HARDWARE.SYS` window listing real machine specs grouped
-  by machine. Admin's **Import from a PC** flyout provides a read-only PowerShell
+  by machine. Admin edits each machine as its own card with a component list
+  (add, remove, show or hide parts; rename or remove the whole machine).
+  Admin's **Import from a PC** flyout provides a read-only PowerShell
   scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
   numbers or computer name) that copies JSON to the clipboard for pasting
   back into the editor before saving. Machines are collapsible, and the

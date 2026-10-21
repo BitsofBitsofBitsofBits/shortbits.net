@@ -1481,6 +1481,225 @@ body.admin-center.ac-panel-open {
   }
 }
 
+/* Hardware editor: one card per machine with a component list */
+.ac-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-center .hw-machines {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-center .hw-machine {
+  border: 1px solid var(--ac-stroke);
+  border-radius: 8px;
+  background: var(--ac-surface);
+  box-shadow: var(--ac-shadow-4);
+}
+
+.admin-center .hw-machine-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.admin-center .hw-machine-body:not([hidden]) {
+  border-top: 1px solid var(--ac-stroke);
+}
+
+.admin-center .admin-form .hw-machine-toggle {
+  position: relative;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.admin-center .admin-form .hw-machine-toggle:hover {
+  background: var(--ac-surface-hover);
+}
+
+.admin-center .hw-machine-toggle::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.admin-center .hw-machine-toggle[aria-expanded="false"]::before {
+  transform: translateX(-2px) rotate(-45deg);
+}
+
+.admin-center .admin-form .hw-machine-name {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.admin-center .admin-form .hw-machine-name input {
+  width: 100%;
+  border-color: transparent;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.admin-center .admin-form .hw-machine-name input:hover,
+.admin-center .admin-form .hw-machine-name input:focus {
+  border-color: var(--ac-stroke-strong);
+  border-bottom-color: var(--ac-input-underline);
+}
+
+.admin-center .admin-form .hw-machine-name input[readonly] {
+  border-color: transparent;
+  background: transparent;
+  cursor: default;
+}
+
+.admin-center .hw-machine-meta {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ac-muted);
+  font-size: 13px;
+}
+
+.admin-center .hw-machine-actions,
+.admin-center .hw-row-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.admin-center .hw-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: var(--ac-brand-fg);
+  background: var(--ac-brand-subtle);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-center .hw-badge[hidden] {
+  display: none;
+}
+
+.admin-center .hw-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-center .hw-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.7fr) minmax(160px, 1.6fr) minmax(140px, 1.4fr) 76px 150px;
+  gap: 8px 12px;
+  align-items: end;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ac-stroke);
+}
+
+.admin-center .hw-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-center .hw-row:hover {
+  background: var(--ac-surface-2);
+}
+
+.admin-center .admin-form .hw-cell {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.admin-center .admin-form .hw-cell > span {
+  color: var(--ac-muted);
+}
+
+.admin-center .admin-form .hw-cell input:not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-center .admin-form .hw-cell-enabled {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  height: 32px;
+  font-size: 14px;
+}
+
+.admin-center .hw-row-tools {
+  justify-content: flex-end;
+  height: 32px;
+  margin-left: 0;
+}
+
+.admin-center .hw-row.is-hidden .hw-cell:not(.hw-cell-enabled) input {
+  color: var(--ac-muted);
+  background: var(--ac-surface-2);
+  text-decoration: line-through;
+}
+
+.admin-center .hw-machine-empty {
+  margin: 0;
+  padding: 16px 12px;
+  color: var(--ac-muted);
+  font-size: 13px;
+}
+
+/* Column captions repeat on every row, so only the first row shows them on wide screens. */
+@media (min-width: 761px) {
+  .admin-center .hw-row:not(:first-child) .hw-cell > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-center .hw-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .admin-center .hw-cell-component,
+  .admin-center .hw-cell-name,
+  .admin-center .hw-cell-detail {
+    grid-column: 1 / -1;
+  }
+
+  .admin-center .hw-row-tools {
+    justify-content: flex-end;
+  }
+
+  .admin-center .hw-machine-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ac-panel,
   .ac-panel-scrim,

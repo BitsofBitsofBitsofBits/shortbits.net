@@ -9,14 +9,14 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/admin-appearance.js?v=admin-appearance-1"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-119">
-    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-2">
+    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-3">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/markdown.js?v=markdown-2" defer></script>
     <script src="/shortbits.js?v=shortbits-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/admin-shell.js?v=admin-shell-1" defer></script>
-    <script src="/admin.js?v=admin-27" defer></script>
+    <script src="/admin.js?v=admin-28" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -291,7 +291,7 @@
             <div class="repeatable-admin-actions">
               <button id="hardware-import-copy" type="button">COPY_SCAN_SCRIPT</button>
             </div>
-            <label><span>MACHINE NAME</span><input id="hardware-import-machine" maxlength="60" value="Desktop"></label>
+            <label><span>MACHINE NAME</span><input id="hardware-import-machine" maxlength="60" value="Desktop" list="hardware-machine-names"></label>
             <label><span>PASTE SCAN RESULT (JSON)</span><textarea id="hardware-import-json" rows="6" spellcheck="false"></textarea></label>
             <label class="admin-checkbox"><input id="hardware-import-replace" type="checkbox" checked><span>REPLACE EXISTING ROWS FOR THIS MACHINE</span></label>
             <div class="repeatable-admin-actions">
@@ -308,7 +308,7 @@
                 <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every 3 seconds while someone is viewing HARDWARE.SYS (every 15 seconds otherwise), and re-syncs specs every six hours. Re-run the installer to upgrade it; press Enter at the prompt to keep the saved token. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync.</li>
               </ol>
               <ul id="hardware-devices" class="hardware-devices"></ul>
-              <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" value="Desktop"></label>
+              <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" value="Desktop" list="hardware-machine-names"></label>
               <div class="repeatable-admin-actions">
                 <button id="hardware-device-create" type="button">CREATE_DEVICE_TOKEN</button>
               </div>
@@ -329,12 +329,14 @@
           <form id="hardware-form" class="admin-form content-admin-form">
             <p class="blog-markdown-help">
               Publishes to HARDWARE.SYS on <a href="/online/?window=hardware" target="_blank" rel="noreferrer">/online/</a>.
-              Rows with the same machine name are grouped together, in the order shown here.
+              Each machine has its own component list. Add, edit, or remove parts, untick <strong>Shown</strong> to hide one, then save.
             </p>
             <div class="repeatable-admin-actions">
-              <button id="hardware-entry-add" type="button">+ ADD_COMPONENT</button>
+              <button id="hardware-entry-add" type="button">+ Add machine</button>
             </div>
-            <div id="hardware-slots" class="curated-admin-grid"></div>
+            <div id="hardware-slots" class="hw-machines"></div>
+            <datalist id="hardware-machine-names"></datalist>
+            <datalist id="hardware-component-types"><option value="CPU"><option value="GPU"><option value="RAM"><option value="Motherboard"><option value="Storage"><option value="PSU"><option value="Case"><option value="Cooling"><option value="Display"><option value="Network"><option value="OS"><option value="Keyboard"><option value="Mouse"><option value="Audio"><option value="Other"></datalist>
             <p id="hardware-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="hardware-submit" type="submit">&gt; SAVE_HARDWARE</button>
           </form>

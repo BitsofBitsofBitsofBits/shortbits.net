@@ -491,6 +491,8 @@ async function loadHardwareDevices() {
     return item;
   }));
   hardwareDevices.hidden = data.length === 0;
+  hardwareAgentMachines = new Set(data.map((device) => device.machine));
+  refreshHardwareMachineCards();
   return true;
 }
 
@@ -679,6 +681,8 @@ const repeatableEditors = {
     addButton: hardwareEntryAdd,
     status: hardwareAdminStatus,
     itemName: "hardware item",
+    // Rendered by the machine-grouped hardware editor instead of generic cards.
+    custom: true,
     fields: [
       { key: "machine", label: "MACHINE (E.G. DESKTOP)", maxLength: 60 },
       { key: "component", label: "COMPONENT (E.G. CPU)", maxLength: 40 },
@@ -860,6 +864,9 @@ async function syncRepeatableEntries(editor, entries, updatedAt) {
 }
 
 Object.values(repeatableEditors).forEach((editor) => {
+  if (editor.custom) {
+    return;
+  }
   editor.addButton.addEventListener("click", () => {
     const entry = createRepeatableEntry(editor);
     editor.container.append(entry);
@@ -1488,7 +1495,7 @@ async function loadHardware() {
     return false;
   }
 
-  renderRepeatableEntries(repeatableEditors.hardware, data);
+  renderHardwareEditor(data);
   setAdminStatus(
     hardwareAdminStatus,
     `${data.length} hardware entr${data.length === 1 ? "y" : "ies"} loaded.`,
@@ -1523,6 +1530,329 @@ function parseHardwareScan(text) {
     .filter((item) => item.component && item.name);
 }
 
+let hardwareAgentMachines = new Set();
+let hardwareMachineId = 0;
+
+function normalizeHardwareMachine(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function getHardwareMachineCards() {
+  return Array.from(hardwareSlots.querySelectorAll(".hw-machine"));
+}
+
+function findHardwareMachineCard(name) {
+  const key = normalizeHardwareMachine(name);
+  return getHardwareMachineCards().find((card) => (
+    normalizeHardwareMachine(card.querySelector("[data-hw-machine-name]").value) === key
+  ));
+}
+
+function updateHardwareMachineNames() {
+  const list = document.querySelector("#hardware-machine-names");
+  if (!list) {
+    return;
+  }
+  const names = new Set(getHardwareMachineCards()
+    .map((card) => card.querySelector("[data-hw-machine-name]").value.trim())
+    .filter(Boolean));
+  hardwareAgentMachines.forEach((name) => names.add(name));
+  list.replaceChildren(...[...names].sort().map((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    return option;
+  }));
+}
+
+function updateHardwareMachineCard(card) {
+  const rows = card.querySelectorAll(".hw-row");
+  const nameInput = card.querySelector("[data-hw-machine-name]");
+  const name = nameInput.value.trim() || "Untitled machine";
+  const linked = hardwareAgentMachines.has(nameInput.value.trim());
+  card.querySelector(".hw-machine-count").textContent =
+    `${rows.length} component${rows.length === 1 ? "" : "s"}`;
+  card.querySelector(".hw-machine-empty").hidden = rows.length > 0;
+  card.querySelector(".hw-machine-agent").hidden = !linked;
+  nameInput.readOnly = linked;
+  nameInput.title = linked
+    ? "Linked to a live agent. Rename it by revoking the token and creating a new one."
+    : "";
+  card.querySelector(".hw-machine-toggle").setAttribute("aria-label", `Show or hide ${name} components`);
+  card.querySelector(".hw-machine-add").setAttribute("aria-label", `Add a component to ${name}`);
+  card.querySelector(".hw-machine-remove").setAttribute("aria-label", `Remove ${name} and all its components`);
+  rows.forEach((row) => {
+    const component = row.querySelector('[data-entry-field="component"]').value.trim() || "component";
+    row.querySelector(".hw-row-remove").setAttribute("aria-label", `Remove ${component} from ${name}`);
+  });
+}
+
+function refreshHardwareMachineCards() {
+  getHardwareMachineCards().forEach(updateHardwareMachineCard);
+  updateHardwareMachineNames();
+}
+
+function createHardwareRowField(key, label, value, options = {}) {
+  const wrap = document.createElement("label");
+  const caption = document.createElement("span");
+  const input = document.createElement("input");
+  wrap.className = `hw-cell hw-cell-${key}`;
+  caption.textContent = label;
+  input.dataset.entryField = key;
+  input.value = value ?? "";
+  input.maxLength = options.maxLength;
+  if (options.list) {
+    input.setAttribute("list", options.list);
+  }
+  if (options.placeholder && !options.existing) {
+    input.placeholder = options.placeholder;
+  }
+  wrap.append(caption, input);
+  return wrap;
+}
+
+function createHardwareRow(entry = {}) {
+  const row = document.createElement("li");
+  row.className = "hw-row";
+  if (entry.position) {
+    row.dataset.position = String(entry.position);
+  }
+  const existing = Boolean(entry.position);
+  row.append(
+    createHardwareRowField("component", "Component", entry.component, {
+      maxLength: 40, list: "hardware-component-types", placeholder: "CPU", existing,
+    }),
+    createHardwareRowField("name", "Name", entry.name, {
+      maxLength: 160, placeholder: "AMD Ryzen 7 7800X3D", existing,
+    }),
+    createHardwareRowField("detail", "Detail (optional)", entry.detail, {
+      maxLength: 300, placeholder: "8 cores / 16 threads", existing,
+    }),
+  );
+
+  const shown = document.createElement("label");
+  const checkbox = document.createElement("input");
+  const shownCopy = document.createElement("span");
+  shown.className = "hw-cell hw-cell-enabled admin-checkbox";
+  checkbox.type = "checkbox";
+  checkbox.dataset.entryField = "enabled";
+  checkbox.checked = entry.position ? entry.enabled === true : entry.enabled !== false;
+  shownCopy.textContent = "Shown";
+  shown.append(checkbox, shownCopy);
+  const syncShown = () => row.classList.toggle("is-hidden", !checkbox.checked);
+  checkbox.addEventListener("change", syncShown);
+  syncShown();
+
+  const tools = document.createElement("div");
+  tools.className = "hw-row-tools";
+  if (entry.source_key) {
+    const badge = document.createElement("span");
+    badge.className = "hw-badge";
+    badge.textContent = "Agent";
+    badge.title = "Synced by the live agent. Deleted rows come back on the next sync; untick Shown to hide it instead.";
+    tools.append(badge);
+  }
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "hw-row-remove repeatable-entry-remove";
+  remove.textContent = "Remove";
+  remove.addEventListener("click", () => {
+    const card = row.closest(".hw-machine");
+    const next = row.nextElementSibling ?? row.previousElementSibling;
+    if (entry.position) {
+      repeatableEditors.hardware.deletedPositions.add(entry.position);
+    }
+    row.remove();
+    updateHardwareMachineCard(card);
+    (next?.querySelector("input") ?? card.querySelector(".hw-machine-add")).focus();
+    setAdminStatus(hardwareAdminStatus, "Component removed. Save to publish this change.");
+  });
+  tools.append(remove);
+  row.append(shown, tools);
+  row.addEventListener("input", () => updateHardwareMachineCard(row.closest(".hw-machine")));
+  return row;
+}
+
+function addHardwareRow(card, entry = {}) {
+  const row = createHardwareRow(entry);
+  card.querySelector(".hw-rows").append(row);
+  setHardwareMachineExpanded(card, true);
+  updateHardwareMachineCard(card);
+  return row;
+}
+
+function setHardwareMachineExpanded(card, expanded) {
+  card.querySelector(".hw-machine-toggle").setAttribute("aria-expanded", String(expanded));
+  card.querySelector(".hw-machine-body").hidden = !expanded;
+}
+
+function createHardwareMachineCard(name = "") {
+  const card = document.createElement("section");
+  const id = `hw-machine-${hardwareMachineId += 1}`;
+  card.className = "hw-machine";
+
+  const header = document.createElement("div");
+  header.className = "hw-machine-header";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "hw-machine-toggle";
+  toggle.setAttribute("aria-controls", `${id}-body`);
+  toggle.addEventListener("click", () => {
+    setHardwareMachineExpanded(card, toggle.getAttribute("aria-expanded") !== "true");
+  });
+
+  const nameLabel = document.createElement("label");
+  const nameCaption = document.createElement("span");
+  const nameInput = document.createElement("input");
+  nameLabel.className = "hw-machine-name";
+  nameCaption.className = "ac-visually-hidden";
+  nameCaption.textContent = "Machine name";
+  nameInput.dataset.hwMachineName = "";
+  nameInput.maxLength = 60;
+  nameInput.placeholder = "Machine name (e.g. Desktop)";
+  nameInput.value = name;
+  nameInput.addEventListener("input", () => {
+    updateHardwareMachineCard(card);
+    updateHardwareMachineNames();
+  });
+  nameLabel.append(nameCaption, nameInput);
+
+  const meta = document.createElement("span");
+  meta.className = "hw-machine-meta";
+  const count = document.createElement("span");
+  count.className = "hw-machine-count";
+  const agent = document.createElement("span");
+  agent.className = "hw-badge hw-machine-agent";
+  agent.textContent = "Live agent";
+  agent.hidden = true;
+  meta.append(count, agent);
+
+  const actions = document.createElement("div");
+  actions.className = "hw-machine-actions";
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "hw-machine-add";
+  add.textContent = "+ Add component";
+  add.addEventListener("click", () => {
+    addHardwareRow(card).querySelector("input").focus();
+    setAdminStatus(hardwareAdminStatus, "Component added. Fill it in, then save.");
+  });
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "hw-machine-remove repeatable-entry-remove";
+  remove.textContent = "Remove machine";
+  remove.addEventListener("click", () => {
+    const label = nameInput.value.trim() || "this machine";
+    const rows = card.querySelectorAll(".hw-row");
+    const agentNote = hardwareAgentMachines.has(nameInput.value.trim())
+      ? " It has a live agent, so synced parts come back on the next sync unless you revoke its token."
+      : "";
+    if (rows.length && !window.confirm(`Remove ${label} and its ${rows.length} component${rows.length === 1 ? "" : "s"}?${agentNote}`)) {
+      return;
+    }
+    rows.forEach((row) => {
+      if (row.dataset.position) {
+        repeatableEditors.hardware.deletedPositions.add(Number(row.dataset.position));
+      }
+    });
+    card.remove();
+    updateHardwareMachineNames();
+    hardwareEntryAdd.focus();
+    setAdminStatus(hardwareAdminStatus, `${label} removed. Save to publish this change.`);
+  });
+  actions.append(add, remove);
+  header.append(toggle, nameLabel, meta, actions);
+
+  const body = document.createElement("div");
+  body.className = "hw-machine-body";
+  body.id = `${id}-body`;
+  const list = document.createElement("ul");
+  list.className = "hw-rows";
+  list.setAttribute("aria-label", "Components");
+  const empty = document.createElement("p");
+  empty.className = "hw-machine-empty";
+  empty.textContent = "No components yet. Add one, or import a scan for this machine.";
+  body.append(list, empty);
+
+  card.append(header, body);
+  setHardwareMachineExpanded(card, true);
+  updateHardwareMachineCard(card);
+  return card;
+}
+
+function renderHardwareEditor(entries) {
+  const editor = repeatableEditors.hardware;
+  editor.deletedPositions.clear();
+  editor.maxPosition = entries.reduce((maximum, entry) => Math.max(maximum, entry.position), 0);
+  hardwareSlots.replaceChildren();
+  const cards = new Map();
+  entries.forEach((entry) => {
+    const key = normalizeHardwareMachine(entry.machine);
+    if (!cards.has(key)) {
+      const card = createHardwareMachineCard(entry.machine ?? "");
+      cards.set(key, card);
+      hardwareSlots.append(card);
+    }
+    cards.get(key).querySelector(".hw-rows").append(createHardwareRow(entry));
+  });
+  refreshHardwareMachineCards();
+}
+
+function collectHardwareEntries() {
+  return getHardwareMachineCards().flatMap((card) => {
+    const machine = card.querySelector("[data-hw-machine-name]").value.trim();
+    return Array.from(card.querySelectorAll(".hw-row"), (row) => {
+      const value = (key) => row.querySelector(`[data-entry-field="${key}"]`).value.trim();
+      return {
+        position: row.dataset.position ? Number(row.dataset.position) : null,
+        machine,
+        component: value("component"),
+        name: value("name"),
+        detail: value("detail"),
+        enabled: row.querySelector('[data-entry-field="enabled"]').checked,
+      };
+    });
+  });
+}
+
+function validateHardwareEditor() {
+  const seen = new Set();
+  for (const card of getHardwareMachineCards()) {
+    const nameInput = card.querySelector("[data-hw-machine-name]");
+    const key = normalizeHardwareMachine(nameInput.value);
+    if (!card.querySelector(".hw-row")) {
+      continue;
+    }
+    if (!key) {
+      return { message: "Every machine with components needs a name.", field: nameInput };
+    }
+    if (seen.has(key)) {
+      return { message: `Two machines are named "${nameInput.value.trim()}". Rename one or move its components.`, field: nameInput };
+    }
+    seen.add(key);
+    for (const row of card.querySelectorAll(".hw-row")) {
+      if (!row.querySelector('[data-entry-field="enabled"]').checked) {
+        continue;
+      }
+      const missing = ["component", "name"]
+        .map((field) => row.querySelector(`[data-entry-field="${field}"]`))
+        .find((input) => !input.value.trim());
+      if (missing) {
+        setHardwareMachineExpanded(card, true);
+        return { message: `Every shown component on ${nameInput.value.trim()} needs a component type and a name.`, field: missing };
+      }
+    }
+  }
+  return null;
+}
+
+function addHardwareMachine() {
+  const card = createHardwareMachineCard("");
+  hardwareSlots.append(card);
+  addHardwareRow(card);
+  card.querySelector("[data-hw-machine-name]").focus();
+  setAdminStatus(hardwareAdminStatus, "Machine added. Name it, list its components, then save.");
+}
+
 function importHardwareScan() {
   const editor = repeatableEditors.hardware;
   const machine = hardwareImportMachine.value.trim().slice(0, 60);
@@ -1548,28 +1878,23 @@ function importHardwareScan() {
     return;
   }
 
+  let card = findHardwareMachineCard(machine);
+  if (!card) {
+    card = createHardwareMachineCard(machine);
+    hardwareSlots.append(card);
+  }
   let replaced = 0;
   if (hardwareImportReplace.checked) {
-    editor.container.querySelectorAll("fieldset").forEach((fieldset) => {
-      const machineField = fieldset.querySelector('[data-entry-field="machine"]');
-      if (machineField.value.trim().toLowerCase() !== machine.toLowerCase()) {
-        return;
+    card.querySelectorAll(".hw-row").forEach((row) => {
+      if (row.dataset.position) {
+        editor.deletedPositions.add(Number(row.dataset.position));
       }
-      if (fieldset.dataset.position) {
-        editor.deletedPositions.add(Number(fieldset.dataset.position));
-      }
-      fieldset.remove();
+      row.remove();
       replaced += 1;
     });
   }
-
-  items.forEach((item) => {
-    editor.container.append(createRepeatableEntry(editor, {
-      machine,
-      ...item,
-      enabled: true,
-    }));
-  });
+  items.forEach((item) => addHardwareRow(card, { ...item, enabled: true }));
+  updateHardwareMachineNames();
   hardwareImportJson.value = "";
   setAdminStatus(
     hardwareAdminStatus,
@@ -2944,6 +3269,7 @@ if (adminClient) {
     );
   });
   hardwareImportApply.addEventListener("click", importHardwareScan);
+  hardwareEntryAdd.addEventListener("click", addHardwareMachine);
 
   hardwareAgentInstaller.value = buildHardwareAgentInstaller();
   hardwareAgentUninstall.value = hardwareAgentUninstallScript;
@@ -2963,18 +3289,13 @@ if (adminClient) {
 
   hardwareForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const entries = collectRepeatableEntries(repeatableEditors.hardware);
-    const invalidEntry = entries.find((entry) => (
-      entry.enabled && (!entry.machine || !entry.component || !entry.name)
-    ));
-    if (invalidEntry) {
-      setAdminStatus(
-        hardwareAdminStatus,
-        "Every enabled hardware row needs a machine, component, and name.",
-        "error",
-      );
+    const invalid = validateHardwareEditor();
+    if (invalid) {
+      setAdminStatus(hardwareAdminStatus, invalid.message, "error");
+      invalid.field.focus();
       return;
     }
+    const entries = collectHardwareEntries();
 
     hardwareSubmit.disabled = true;
     hardwareSubmit.textContent = "> SAVING...";
