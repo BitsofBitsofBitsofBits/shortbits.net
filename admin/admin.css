@@ -1575,11 +1575,22 @@ body.admin-center.ac-panel-open {
 }
 
 .admin-center .hw-machine-actions,
-.admin-center .hw-row-tools {
+.admin-center .hw-row-tools,
+.admin-center .hardware-device-actions {
   display: flex;
   gap: 8px;
   align-items: center;
   margin-left: auto;
+}
+
+.admin-center .hardware-import-hint {
+  margin: -4px 0 0;
+  color: var(--ac-muted);
+  font-size: 13px;
+}
+
+.admin-center .hardware-import-hint:empty {
+  display: none;
 }
 
 .admin-center .hw-badge {

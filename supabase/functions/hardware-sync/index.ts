@@ -128,11 +128,24 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/rpc/hardware_agent_report`, {
+    const rpcUrl = `${url.replace(/\/$/, "")}/rest/v1/rpc`;
+    const tokenHash = await sha256Hex(token);
+    const machineName = readText(body.machine_name, 60);
+    if (machineName && body.components !== undefined) {
+      const claim = await fetch(`${rpcUrl}/hardware_agent_claim_name`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ p_token_hash: tokenHash, p_machine: machineName }),
+      });
+      if (!claim.ok) {
+        console.error("Hardware name claim failed:", claim.status, await claim.text());
+      }
+    }
+    const response = await fetch(`${rpcUrl}/hardware_agent_report`, {
       method: "POST",
       headers,
       body: JSON.stringify({
-        p_token_hash: await sha256Hex(token),
+        p_token_hash: tokenHash,
         p_status: readStatus(body.status),
         p_components: readComponents(body.components),
       }),

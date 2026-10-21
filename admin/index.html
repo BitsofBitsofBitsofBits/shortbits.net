@@ -9,14 +9,14 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/admin-appearance.js?v=admin-appearance-1"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-120">
-    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-3">
+    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/markdown.js?v=markdown-2" defer></script>
     <script src="/shortbits.js?v=shortbits-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/admin-shell.js?v=admin-shell-1" defer></script>
-    <script src="/admin.js?v=admin-28" defer></script>
+    <script src="/admin.js?v=admin-29" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -284,14 +284,15 @@
             <ol class="hardware-import-steps">
               <li>Pick the platform and copy the scan script. On Windows, paste it into <strong>PowerShell</strong>. On Linux or Unraid, paste it into a terminal (Unraid: the <strong>&gt;_</strong> terminal icon, or SSH as root).</li>
               <li>It reads CPU, GPU, RAM, motherboard, storage, and OS (plus displays on Windows and network cards on Linux). Windows copies the result to your clipboard; Linux prints one JSON line to copy. Nothing is uploaded.</li>
-              <li>Name the machine below, paste the result, and import. Review the rows, then save.</li>
+              <li>Paste the result and import. Windows scans name the machine from its model, or from the device name when the model is generic (custom builds); change the name first if you like. Review the rows, then save.</li>
             </ol>
             <label><span>PLATFORM</span><select id="hardware-import-platform"><option value="windows">WINDOWS (POWERSHELL)</option><option value="linux">LINUX / UNRAID (BASH)</option></select></label>
             <textarea id="hardware-import-script" class="hardware-import-script" rows="8" readonly aria-label="PowerShell hardware scan script"></textarea>
             <div class="repeatable-admin-actions">
               <button id="hardware-import-copy" type="button">COPY_SCAN_SCRIPT</button>
             </div>
-            <label><span>MACHINE NAME</span><input id="hardware-import-machine" maxlength="60" value="Desktop" list="hardware-machine-names"></label>
+            <label><span>MACHINE NAME</span><input id="hardware-import-machine" maxlength="60" placeholder="Filled from the scan" list="hardware-machine-names" aria-describedby="hardware-import-machine-hint"></label>
+            <p id="hardware-import-machine-hint" class="hardware-import-hint" aria-live="polite"></p>
             <label><span>PASTE SCAN RESULT (JSON)</span><textarea id="hardware-import-json" rows="6" spellcheck="false"></textarea></label>
             <label class="admin-checkbox"><input id="hardware-import-replace" type="checkbox" checked><span>REPLACE EXISTING ROWS FOR THIS MACHINE</span></label>
             <div class="repeatable-admin-actions">
@@ -303,12 +304,12 @@
             <summary>LIVE_AGENTS</summary>
             <div class="admin-form hardware-import-body">
               <ol class="hardware-import-steps">
-                <li>Enter the machine name and create a device token. The token is shown <strong>once</strong>; only its hash is stored.</li>
+                <li>Create a device token. Leave the name blank and the agent names the machine from its model (or device name) on its first sync, or type a name to set it yourself. The token is shown <strong>once</strong>; only its hash is stored.</li>
                 <li>Copy the installer, paste it into PowerShell on that machine (no admin rights needed), and paste the token when prompted.</li>
-                <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every 3 seconds while someone is viewing HARDWARE.SYS (every 15 seconds otherwise), and re-syncs specs every six hours. Re-run the installer to upgrade it; press Enter at the prompt to keep the saved token. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync.</li>
+                <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every 3 seconds while someone is viewing HARDWARE.SYS (every 15 seconds otherwise), and re-syncs specs every six hours. Re-run the installer to upgrade it; press Enter at the prompt to keep the saved token. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync. Use <strong>RENAME</strong> here or in the editor to rename a machine; the agent keeps syncing under the new name.</li>
               </ol>
               <ul id="hardware-devices" class="hardware-devices"></ul>
-              <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" value="Desktop" list="hardware-machine-names"></label>
+              <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" placeholder="Auto: system model or device name" list="hardware-machine-names"></label>
               <div class="repeatable-admin-actions">
                 <button id="hardware-device-create" type="button">CREATE_DEVICE_TOKEN</button>
               </div>

@@ -95,8 +95,11 @@ is a personal project and largely a learning exercise for me.
   (add, remove, show or hide parts; rename or remove the whole machine).
   Admin's **Import from a PC** flyout provides a read-only PowerShell
   scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
-  numbers or computer name) that copies JSON to the clipboard for pasting
-  back into the editor before saving. Machines are collapsible, and the
+  numbers) that copies JSON to the clipboard for pasting back into the editor
+  before saving. The scan names the machine from its system model, falling
+  back to the Windows device name when the model is a generic placeholder or
+  just the motherboard (custom builds), so imports don't overwrite another
+  machine; the name is pre-filled and can be changed before or after import. Machines are collapsible, and the
   collapsed state is remembered per browser
 - Optional live hardware agents: Admin's **Live agents** flyout issues a
   per-machine device token (only its SHA-256 hash is stored, revocable at any
@@ -115,7 +118,12 @@ is a personal project and largely a learning exercise for me.
   `site_hardware_status` every 3 seconds while open and visible, ticks uptime
   every second, and shows a machine as LIVE when it reported within the last
   minute. Re-running the installer upgrades the agent and can keep the saved
-  token
+  token. Leaving the token's machine name blank creates a pending device that
+  the agent names on its first spec sync (same model / device-name rule,
+  through the service-role-only hardware_agent_claim_name RPC, which reuses
+  a matching scanned machine and suffixes clashes with other agents). Agent
+  machines can be renamed from **Live agents** or the editor; the device row,
+  its live status, and its rows move together and the agent keeps syncing
 - Linux / Unraid machines (e.g. a NAS) use **Import from a PC** with the
   `LINUX / UNRAID (BASH)` platform: a one-shot bash scan (run as root for RAM
   module details) that prints CPU, RAM, motherboard, GPUs, network cards with

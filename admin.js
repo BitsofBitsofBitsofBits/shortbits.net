@@ -60,6 +60,7 @@ const hardwareEntryAdd = document.querySelector("#hardware-entry-add");
 const hardwareImportScript = document.querySelector("#hardware-import-script");
 const hardwareImportCopy = document.querySelector("#hardware-import-copy");
 const hardwareImportMachine = document.querySelector("#hardware-import-machine");
+const hardwareImportMachineHint = document.querySelector("#hardware-import-machine-hint");
 const hardwareImportJson = document.querySelector("#hardware-import-json");
 const hardwareImportReplace = document.querySelector("#hardware-import-replace");
 const hardwareImportApply = document.querySelector("#hardware-import-apply");
@@ -73,7 +74,21 @@ const hardwareAgentInstaller = document.querySelector("#hardware-agent-installer
 const hardwareAgentInstallerCopy = document.querySelector("#hardware-agent-installer-copy");
 const hardwareAgentUninstall = document.querySelector("#hardware-agent-uninstall");
 const hardwareDeviceStatus = document.querySelector("#hardware-device-status");
-// Windows PowerShell 5.1 compatible; collects no serial numbers or computer name.
+// Windows PowerShell 5.1 compatible; collects no serial numbers.
+// Machine names use the system model, or the device name when the model is a
+// placeholder or just the motherboard name (custom builds).
+const hardwareMachineNameFunction = [
+  "function Get-BitsMachineName {",
+  "$cs = Get-CimInstance Win32_ComputerSystem",
+  "$product = Get-CimInstance Win32_ComputerSystemProduct",
+  "$board = Get-CimInstance Win32_BaseBoard | Select-Object -First 1",
+  "$model = ([string]$cs.Model).Trim()",
+  "if ([string]$cs.Manufacturer -match 'LENOVO' -and ([string]$product.Version).Trim()) { $model = ([string]$product.Version).Trim() }",
+  String.raw`$generic = '^(System Product Name|System Name|System Version|To Be Filled By O\.?E\.?M\.?|Default string|Not Applicable|N/A|None|Undefined|Unknown|OEM|Standard PC.*|Virtual Machine|All Series|Type1ProductConfigId|INVALID|[0-9x\. ]*|MS-[0-9A-Z]{4})$'`,
+  "if (-not $model -or $model -match $generic -or ($board -and $model -eq ([string]$board.Product).Trim())) { $model = [Environment]::MachineName }",
+  "return $model.Substring(0, [math]::Min(60, $model.Length))",
+  "}",
+];
 const hardwareScanFunction = [
   "function Get-BitsHardware {",
   "$rows = New-Object System.Collections.ArrayList",
@@ -136,12 +151,13 @@ const hardwareStatusFunction = [
 const hardwareScanScript = [
   "& {",
   "$ErrorActionPreference = 'SilentlyContinue'",
+  ...hardwareMachineNameFunction,
   ...hardwareScanFunction,
-  "$rows = Get-BitsHardware",
-  "$json = ConvertTo-Json -InputObject @($rows) -Depth 3",
+  "$report = [ordered]@{ machine = Get-BitsMachineName; components = @(Get-BitsHardware) }",
+  "$json = ConvertTo-Json -InputObject $report -Depth 4",
   "$json | Set-Clipboard",
   "$json",
-  "Write-Host ('Copied ' + @($rows).Count + ' hardware rows to the clipboard.') -ForegroundColor Green",
+  "Write-Host ('Copied ' + $report.components.Count + ' hardware rows for ' + $report.machine + ' to the clipboard.') -ForegroundColor Green",
   "}",
 ].join("\n");
 // Bash for Linux / Unraid; run as root for RAM details. Prints JSON only.
@@ -342,6 +358,7 @@ function buildHardwareAgentScript() {
     "$secure = Get-Content (Join-Path $dir 'token.dat') | ConvertTo-SecureString",
     "$token = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))",
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
+    ...hardwareMachineNameFunction,
     ...hardwareScanFunction,
     ...hardwareStatusFunction,
     "function Write-AgentLog($text) { Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' ' + $text) }",
@@ -352,7 +369,7 @@ function buildHardwareAgentScript() {
     "  $status = Get-BitsStatus",
     "  try {",
     "    if ($started -ge $nextSpecs) {",
-    "      $report = [ordered]@{ status = $status; components = @(Get-BitsHardware) }",
+    "      $report = [ordered]@{ machine_name = Get-BitsMachineName; status = $status; components = @(Get-BitsHardware) }",
     "      $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $report -Depth 4 -Compress))",
     "      $result = Invoke-RestMethod -Method Post -Uri $endpoint -Headers @{ 'x-device-token' = $token } -ContentType 'application/json; charset=utf-8' -Body $bytes -TimeoutSec 30",
     "      if ($result.specs) { $nextSpecs = (Get-Date).AddHours(6) } else { $nextSpecs = (Get-Date).AddMinutes(6) }",
@@ -449,7 +466,7 @@ function formatHardwareSeen(value) {
 async function loadHardwareDevices() {
   const { data, error } = await adminClient
     .from("site_hardware_devices")
-    .select("id, machine, created_at, last_seen_at, last_specs_at")
+    .select("id, machine, name_pending, created_at, last_seen_at, last_specs_at")
     .order("machine", { ascending: true });
 
   if (error) {
@@ -465,12 +482,44 @@ async function loadHardwareDevices() {
     const meta = document.createElement("small");
     const revoke = document.createElement("button");
     name.textContent = device.machine;
-    meta.textContent = formatHardwareSeen(device.last_seen_at);
+    meta.textContent = device.name_pending
+      ? "Names itself on first sync"
+      : formatHardwareSeen(device.last_seen_at);
     copy.append(name, meta);
     revoke.type = "button";
     revoke.className = "repeatable-entry-remove";
     revoke.textContent = "REVOKE";
     revoke.setAttribute("aria-label", `Revoke hardware agent token for ${device.machine}`);
+    const rename = document.createElement("button");
+    rename.type = "button";
+    rename.textContent = "RENAME";
+    rename.setAttribute("aria-label", `Rename ${device.machine}`);
+    rename.addEventListener("click", async () => {
+      const next = window.prompt(`Rename ${device.machine} to:`, device.machine)?.trim().slice(0, 60);
+      if (!next || next === device.machine) {
+        return;
+      }
+      const conflict = [...hardwareAgentMachines].find((machine) => (
+        machine !== device.machine && normalizeHardwareMachine(machine) === normalizeHardwareMachine(next)
+      ));
+      if (conflict) {
+        setAdminStatus(hardwareDeviceStatus, `${conflict} already has an agent. Pick another name.`, "error");
+        return;
+      }
+      setAdminStatus(hardwareDeviceStatus, `Renaming ${device.machine}...`);
+      const renameError = await renameHardwareMachine(device.machine, next, { device: true, rows: true });
+      if (renameError) {
+        setAdminStatus(hardwareDeviceStatus, `Rename failed: ${renameError.message}`, "error");
+        return;
+      }
+      clearPublicContentCache();
+      await loadHardwareDevices();
+      await loadHardware();
+      setAdminStatus(hardwareDeviceStatus, `${device.machine} renamed to ${next}. The agent keeps syncing under the new name.`, "success");
+    });
+    const actions = document.createElement("span");
+    actions.className = "hardware-device-actions";
+    actions.append(rename, revoke);
     revoke.addEventListener("click", async () => {
       if (!window.confirm(`Revoke the agent token for ${device.machine}? Its live status disappears and the agent stops syncing. Synced spec rows stay.`)) {
         return;
@@ -487,7 +536,7 @@ async function loadHardwareDevices() {
       await loadHardwareDevices();
       setAdminStatus(hardwareDeviceStatus, `Token for ${device.machine} revoked.`, "success");
     });
-    item.append(copy, revoke);
+    item.append(copy, actions);
     return item;
   }));
   hardwareDevices.hidden = data.length === 0;
@@ -496,18 +545,44 @@ async function loadHardwareDevices() {
   return true;
 }
 
-async function createHardwareDevice() {
-  const machine = hardwareDeviceMachine.value.trim().slice(0, 60);
-  if (!machine) {
-    setAdminStatus(hardwareDeviceStatus, "Name the machine first.", "error");
-    hardwareDeviceMachine.focus();
-    return;
+// Renames the agent's device row (which cascades to its live status) and/or the published rows.
+async function renameHardwareMachine(from, to, { device = false, rows = false } = {}) {
+  if (device) {
+    const { error } = await adminClient
+      .from("site_hardware_devices")
+      .update({ machine: to, name_pending: false })
+      .eq("machine", from);
+    if (error) {
+      return error.code === "23505" ? new Error(`${to} already has an agent.`) : error;
+    }
   }
+  if (rows) {
+    const { error } = await adminClient
+      .from("site_hardware")
+      .update({ machine: to, updated_at: new Date().toISOString() })
+      .eq("machine", from);
+    if (error) {
+      return error;
+    }
+  }
+  return null;
+}
+
+function createHardwareDeviceSuffix() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(2)), (byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
+async function createHardwareDevice() {
+  const typed = hardwareDeviceMachine.value.trim().slice(0, 60);
+  // Without a name, the agent names the device on its first report.
+  const machine = typed || `New device ${createHardwareDeviceSuffix()}`;
   hardwareDeviceCreate.disabled = true;
   const token = createHardwareDeviceToken();
   const { error } = await adminClient
     .from("site_hardware_devices")
-    .insert({ machine, token_hash: await sha256Hex(token) });
+    .insert({ machine, name_pending: !typed, token_hash: await sha256Hex(token) });
   hardwareDeviceCreate.disabled = false;
 
   if (error) {
@@ -517,13 +592,16 @@ async function createHardwareDevice() {
     setAdminStatus(hardwareDeviceStatus, message, "error");
     return;
   }
+  hardwareDeviceMachine.value = "";
   hardwareDeviceToken.value = token;
   hardwareDeviceTokenOutput.hidden = false;
   hardwareDeviceToken.select();
   await loadHardwareDevices();
   setAdminStatus(
     hardwareDeviceStatus,
-    `Token created for ${machine}. Copy it now, then run the installer on that machine.`,
+    typed
+      ? `Token created for ${machine}. Copy it now, then run the installer on that machine.`
+      : "Token created. Copy it now, then run the installer; the machine names itself on its first sync.",
     "success",
   );
 }
@@ -1510,9 +1588,10 @@ function parseHardwareScan(text) {
     parsed = JSON.parse(text);
   } catch (error) {
     // Terminal copies often include the prompt or the script's closing message.
-    const start = text.indexOf("[");
-    const end = text.lastIndexOf("]");
-    if (start < 0 || end <= start) {
+    const starts = [text.indexOf("{"), text.indexOf("[")].filter((index) => index >= 0);
+    const start = Math.min(...starts);
+    const end = text.lastIndexOf(text[start] === "{" ? "}" : "]");
+    if (!starts.length || end <= start) {
       throw error;
     }
     parsed = JSON.parse(text.slice(start, end + 1));
@@ -1520,7 +1599,10 @@ function parseHardwareScan(text) {
   const items = Array.isArray(parsed)
     ? parsed
     : Array.isArray(parsed?.components) ? parsed.components : [parsed];
-  return items
+  const machine = !Array.isArray(parsed) && typeof parsed?.machine === "string"
+    ? parsed.machine.trim().slice(0, 60)
+    : "";
+  const components = items
     .filter((item) => item && typeof item === "object")
     .map((item) => ({
       component: String(item.component ?? "").trim().slice(0, 40),
@@ -1528,6 +1610,25 @@ function parseHardwareScan(text) {
       detail: String(item.detail ?? "").trim().slice(0, 300),
     }))
     .filter((item) => item.component && item.name);
+  return { machine, components };
+}
+
+// Fill the machine name from a pasted scan unless the admin typed their own.
+function syncHardwareImportMachine() {
+  let machine = "";
+  try {
+    machine = parseHardwareScan(hardwareImportJson.value).machine;
+  } catch {
+    machine = "";
+  }
+  if (machine && (!hardwareImportMachine.value.trim() || hardwareImportMachine.dataset.autofilled === "true")) {
+    hardwareImportMachine.value = machine;
+    hardwareImportMachine.dataset.autofilled = "true";
+  }
+  const name = hardwareImportMachine.value.trim();
+  hardwareImportMachineHint.textContent = name && findHardwareMachineCard(name)
+    ? `${name} already exists. Importing updates that machine; change the name to add a separate one.`
+    : "";
 }
 
 let hardwareAgentMachines = new Set();
@@ -1568,15 +1669,16 @@ function updateHardwareMachineCard(card) {
   const rows = card.querySelectorAll(".hw-row");
   const nameInput = card.querySelector("[data-hw-machine-name]");
   const name = nameInput.value.trim() || "Untitled machine";
-  const linked = hardwareAgentMachines.has(nameInput.value.trim());
+  const original = card.dataset.originalName ?? "";
+  const linked = hardwareAgentMachines.has(original || nameInput.value.trim());
   card.querySelector(".hw-machine-count").textContent =
     `${rows.length} component${rows.length === 1 ? "" : "s"}`;
   card.querySelector(".hw-machine-empty").hidden = rows.length > 0;
   card.querySelector(".hw-machine-agent").hidden = !linked;
-  nameInput.readOnly = linked;
   nameInput.title = linked
-    ? "Linked to a live agent. Rename it by revoking the token and creating a new one."
+    ? "Linked to a live agent. Renaming here also renames the agent when you save."
     : "";
+  card.querySelector(".hw-machine-rename").setAttribute("aria-label", `Rename ${name}`);
   card.querySelector(".hw-machine-toggle").setAttribute("aria-label", `Show or hide ${name} components`);
   card.querySelector(".hw-machine-add").setAttribute("aria-label", `Add a component to ${name}`);
   card.querySelector(".hw-machine-remove").setAttribute("aria-label", `Remove ${name} and all its components`);
@@ -1736,6 +1838,15 @@ function createHardwareMachineCard(name = "") {
     addHardwareRow(card).querySelector("input").focus();
     setAdminStatus(hardwareAdminStatus, "Component added. Fill it in, then save.");
   });
+  const rename = document.createElement("button");
+  rename.type = "button";
+  rename.className = "hw-machine-rename";
+  rename.textContent = "Rename";
+  rename.addEventListener("click", () => {
+    nameInput.focus();
+    nameInput.select();
+    setAdminStatus(hardwareAdminStatus, "Type the new machine name, then save.");
+  });
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "hw-machine-remove repeatable-entry-remove";
@@ -1743,7 +1854,7 @@ function createHardwareMachineCard(name = "") {
   remove.addEventListener("click", () => {
     const label = nameInput.value.trim() || "this machine";
     const rows = card.querySelectorAll(".hw-row");
-    const agentNote = hardwareAgentMachines.has(nameInput.value.trim())
+    const agentNote = hardwareAgentMachines.has(card.dataset.originalName || nameInput.value.trim())
       ? " It has a live agent, so synced parts come back on the next sync unless you revoke its token."
       : "";
     if (rows.length && !window.confirm(`Remove ${label} and its ${rows.length} component${rows.length === 1 ? "" : "s"}?${agentNote}`)) {
@@ -1759,7 +1870,7 @@ function createHardwareMachineCard(name = "") {
     hardwareEntryAdd.focus();
     setAdminStatus(hardwareAdminStatus, `${label} removed. Save to publish this change.`);
   });
-  actions.append(add, remove);
+  actions.append(add, rename, remove);
   header.append(toggle, nameLabel, meta, actions);
 
   const body = document.createElement("div");
@@ -1789,6 +1900,7 @@ function renderHardwareEditor(entries) {
     const key = normalizeHardwareMachine(entry.machine);
     if (!cards.has(key)) {
       const card = createHardwareMachineCard(entry.machine ?? "");
+      card.dataset.originalName = entry.machine ?? "";
       cards.set(key, card);
       hardwareSlots.append(card);
     }
@@ -1829,6 +1941,15 @@ function validateHardwareEditor() {
       return { message: `Two machines are named "${nameInput.value.trim()}". Rename one or move its components.`, field: nameInput };
     }
     seen.add(key);
+    const original = card.dataset.originalName ?? "";
+    if (hardwareAgentMachines.has(original) && nameInput.value.trim() !== original) {
+      const conflict = [...hardwareAgentMachines].find((machine) => (
+        machine !== original && normalizeHardwareMachine(machine) === key
+      ));
+      if (conflict) {
+        return { message: `${conflict} already has its own live agent. Pick another name for ${original}.`, field: nameInput };
+      }
+    }
     for (const row of card.querySelectorAll(".hw-row")) {
       if (!row.querySelector('[data-entry-field="enabled"]').checked) {
         continue;
@@ -1855,16 +1976,9 @@ function addHardwareMachine() {
 
 function importHardwareScan() {
   const editor = repeatableEditors.hardware;
-  const machine = hardwareImportMachine.value.trim().slice(0, 60);
-  if (!machine) {
-    setAdminStatus(hardwareAdminStatus, "Name the machine before importing.", "error");
-    hardwareImportMachine.focus();
-    return;
-  }
-
-  let items;
+  let scan;
   try {
-    items = parseHardwareScan(hardwareImportJson.value);
+    scan = parseHardwareScan(hardwareImportJson.value);
   } catch {
     setAdminStatus(
       hardwareAdminStatus,
@@ -1873,8 +1987,15 @@ function importHardwareScan() {
     );
     return;
   }
+  const items = scan.components;
   if (items.length === 0) {
     setAdminStatus(hardwareAdminStatus, "The scan result has no components.", "error");
+    return;
+  }
+  const machine = (hardwareImportMachine.value.trim() || scan.machine).slice(0, 60);
+  if (!machine) {
+    setAdminStatus(hardwareAdminStatus, "Name the machine before importing.", "error");
+    hardwareImportMachine.focus();
     return;
   }
 
@@ -1896,6 +2017,10 @@ function importHardwareScan() {
   items.forEach((item) => addHardwareRow(card, { ...item, enabled: true }));
   updateHardwareMachineNames();
   hardwareImportJson.value = "";
+  hardwareImportMachine.value = "";
+  hardwareImportMachine.dataset.autofilled = "false";
+  hardwareImportMachineHint.textContent = "";
+  card.scrollIntoView({ block: "nearest" });
   setAdminStatus(
     hardwareAdminStatus,
     `Imported ${items.length} component${items.length === 1 ? "" : "s"} for ${machine}${replaced ? `, replacing ${replaced}` : ""}. Review, then save to publish.`,
@@ -3269,6 +3394,11 @@ if (adminClient) {
     );
   });
   hardwareImportApply.addEventListener("click", importHardwareScan);
+  hardwareImportJson.addEventListener("input", syncHardwareImportMachine);
+  hardwareImportMachine.addEventListener("input", () => {
+    hardwareImportMachine.dataset.autofilled = "false";
+    syncHardwareImportMachine();
+  });
   hardwareEntryAdd.addEventListener("click", addHardwareMachine);
 
   hardwareAgentInstaller.value = buildHardwareAgentInstaller();
@@ -3296,10 +3426,26 @@ if (adminClient) {
       return;
     }
     const entries = collectHardwareEntries();
+    const agentRenames = getHardwareMachineCards()
+      .map((card) => ({
+        from: card.dataset.originalName ?? "",
+        to: card.querySelector("[data-hw-machine-name]").value.trim(),
+      }))
+      .filter(({ from, to }) => hardwareAgentMachines.has(from) && to && to !== from);
 
     hardwareSubmit.disabled = true;
     hardwareSubmit.textContent = "> SAVING...";
     setAdminStatus(hardwareAdminStatus, "Writing hardware...");
+    // Rename agent devices first so their next sync lands on the new name.
+    for (const { from, to } of agentRenames) {
+      const renameError = await renameHardwareMachine(from, to, { device: true });
+      if (renameError) {
+        hardwareSubmit.disabled = false;
+        hardwareSubmit.textContent = "> SAVE_HARDWARE";
+        setAdminStatus(hardwareAdminStatus, `Renaming ${from} failed: ${renameError.message}`, "error");
+        return;
+      }
+    }
     const failedUpdate = await syncRepeatableEntries(
       repeatableEditors.hardware,
       entries,
@@ -3307,6 +3453,9 @@ if (adminClient) {
     );
     hardwareSubmit.disabled = false;
     hardwareSubmit.textContent = "> SAVE_HARDWARE";
+    if (agentRenames.length) {
+      await loadHardwareDevices();
+    }
 
     if (failedUpdate) {
       console.error("Unable to save hardware:", failedUpdate.error);
