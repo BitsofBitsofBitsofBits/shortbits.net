@@ -386,9 +386,10 @@ function renderFavoriteGames(games) {
 }
 
 const hardwareCollapsedKey = "bits-hardware-collapsed";
-const hardwareStatusPollMs = 30_000;
-const hardwareOnlineWindowMs = 3 * 60_000;
-const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0, ticker: 0 };
+const hardwareStatusPollMs = 3_000;
+const hardwareWatchPingMs = 20_000;
+const hardwareOnlineWindowMs = 60_000;
+const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0, ticker: 0, watchedAt: 0 };
 
 function readCollapsedHardware() {
   try {
@@ -586,10 +587,25 @@ function updateHardwareStatus() {
   });
 }
 
+// Tells live agents someone is watching so they report every few seconds.
+function pingHardwareWatch() {
+  if (Date.now() - hardwareState.watchedAt < hardwareWatchPingMs) {
+    return;
+  }
+  hardwareState.watchedAt = Date.now();
+  const { url, anonKey } = window.SUPABASE_CONFIG;
+  fetch(`${url.replace(/\/$/, "")}/rest/v1/rpc/hardware_watch`, {
+    method: "POST",
+    headers: { apikey: anonKey, "Content-Type": "application/json" },
+    body: "{}",
+  }).catch(() => {});
+}
+
 async function refreshHardwareStatus() {
   if (document.hidden) {
     return;
   }
+  pingHardwareWatch();
   try {
     hardwareState.statuses = await fetchPublicContentTable(
       "site_hardware_status?select=machine,cpu_percent,gpu_percent,memory_used_mb,memory_total_mb,booted_at,updated_at&order=machine.asc",

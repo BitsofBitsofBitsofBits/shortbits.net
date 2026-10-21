@@ -16,7 +16,7 @@
     <script src="/admin-windows.js?v=admin-windows-10" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="/windows.js?v=windows-11" defer></script>
-    <script src="/admin.js?v=admin-22" defer></script>
+    <script src="/admin.js?v=admin-23" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -287,7 +287,7 @@
               <ol class="hardware-import-steps">
                 <li>Enter the machine name and create a device token. The token is shown <strong>once</strong>; only its hash is stored.</li>
                 <li>Copy the installer, paste it into PowerShell on that machine (no admin rights needed), and paste the token when prompted.</li>
-                <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every minute, and re-syncs specs every six hours. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync.</li>
+                <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every 3 seconds while someone is viewing HARDWARE.SYS (every 15 seconds otherwise), and re-syncs specs every six hours. Re-run the installer to upgrade it; press Enter at the prompt to keep the saved token. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync.</li>
               </ol>
               <ul id="hardware-devices" class="hardware-devices"></ul>
               <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" value="Desktop"></label>

@@ -96,13 +96,19 @@ is a personal project and largely a learning exercise for me.
   time) and a PowerShell installer. The installer saves the token
   DPAPI-encrypted under `%LOCALAPPDATA%\BitsHardwareAgent` and registers a
   per-user logon task that needs no admin rights. The agent posts CPU, GPU,
-  and RAM load plus boot time every minute, and re-syncs specs every six hours,
-  to the `hardware-sync` Edge Function (`x-device-token` header; at most one
-  report per 20 seconds and one spec sync per five minutes per device). Synced
+  and RAM load plus boot time as lightweight pulses to the
+  `hardware_agent_pulse` RPC (token hashed server-side, at most one pulse per
+  2 seconds): every 3 seconds while anyone has HARDWARE.SYS open (viewers
+  call the throttled `hardware_watch` RPC), otherwise every 15 seconds. Specs
+  are re-synced at start and every six hours through the `hardware-sync` Edge
+  Function (`x-device-token` header; at most one report per 20 seconds and one
+  spec sync per five minutes per device). Synced
   rows are matched by component and name, so unticking a row in Admin keeps it
   hidden, and manually entered rows are kept. HARDWARE.SYS polls
-  `site_hardware_status` every 30 seconds while open and shows a machine as
-  LIVE when it reported within the last three minutes
+  `site_hardware_status` every 3 seconds while open and visible, ticks uptime
+  every second, and shows a machine as LIVE when it reported within the last
+  minute. Re-running the installer upgrades the agent and can keep the saved
+  token
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
   Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
   Null Tac Toe, endless wave-based Packet Breaker, and Flappy Bit, plus local

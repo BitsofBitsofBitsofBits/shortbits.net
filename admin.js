@@ -156,12 +156,17 @@ function getHardwareSyncEndpoint() {
   return `${window.SUPABASE_CONFIG.url.replace(/\/$/, "")}/functions/v1/hardware-sync`;
 }
 
-// The agent reports live status every minute and full specs at start and every
-// six hours. Its device token is stored DPAPI-encrypted for the current user.
+// The agent posts lightweight status pulses straight to PostgREST: every 3 seconds
+// while someone has HARDWARE.SYS open, otherwise every 15 seconds. Full specs go
+// through the hardware-sync Edge Function at start and every six hours. Its
+// device token is stored DPAPI-encrypted for the current user.
 function buildHardwareAgentScript() {
+  const baseUrl = window.SUPABASE_CONFIG.url.replace(/\/$/, "");
   return [
     "$ErrorActionPreference = 'SilentlyContinue'",
     `$endpoint = '${getHardwareSyncEndpoint()}'`,
+    `$pulseUri = '${baseUrl}/rest/v1/rpc/hardware_agent_pulse'`,
+    `$apiKey = '${window.SUPABASE_CONFIG.anonKey}'`,
     "$dir = Split-Path -Parent $MyInvocation.MyCommand.Path",
     "$log = Join-Path $dir 'agent.log'",
     "$secure = Get-Content (Join-Path $dir 'token.dat') | ConvertTo-SecureString",
@@ -169,36 +174,53 @@ function buildHardwareAgentScript() {
     "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
     ...hardwareScanFunction,
     ...hardwareStatusFunction,
+    "function Write-AgentLog($text) { Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' ' + $text) }",
     "$nextSpecs = [datetime]::MinValue",
+    "$watched = $false",
     "while ($true) {",
-    "  $report = [ordered]@{ status = Get-BitsStatus }",
-    "  $sendSpecs = (Get-Date) -ge $nextSpecs",
-    "  if ($sendSpecs) { $report.components = @(Get-BitsHardware) }",
-    "  $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $report -Depth 4 -Compress))",
+    "  $started = Get-Date",
+    "  $status = Get-BitsStatus",
     "  try {",
-    "    $result = Invoke-RestMethod -Method Post -Uri $endpoint -Headers @{ 'x-device-token' = $token } -ContentType 'application/json; charset=utf-8' -Body $bytes -TimeoutSec 30",
-    "    if ($sendSpecs) { if ($result.specs) { $nextSpecs = (Get-Date).AddHours(6) } else { $nextSpecs = (Get-Date).AddMinutes(6) } }",
-    "    Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' OK ' + (ConvertTo-Json -InputObject $result -Compress))",
+    "    if ($started -ge $nextSpecs) {",
+    "      $report = [ordered]@{ status = $status; components = @(Get-BitsHardware) }",
+    "      $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $report -Depth 4 -Compress))",
+    "      $result = Invoke-RestMethod -Method Post -Uri $endpoint -Headers @{ 'x-device-token' = $token } -ContentType 'application/json; charset=utf-8' -Body $bytes -TimeoutSec 30",
+    "      if ($result.specs) { $nextSpecs = (Get-Date).AddHours(6) } else { $nextSpecs = (Get-Date).AddMinutes(6) }",
+    "    } else {",
+    "      $pulse = [ordered]@{ p_token = $token; p_status = $status }",
+    "      $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $pulse -Depth 4 -Compress))",
+    "      $result = Invoke-RestMethod -Method Post -Uri $pulseUri -Headers @{ apikey = $apiKey } -ContentType 'application/json; charset=utf-8' -Body $bytes -TimeoutSec 15",
+    "      if ($result.error -eq 'invalid_token') { Write-AgentLog 'ERROR Device token was revoked.'; exit 1 }",
+    "      $watched = [bool]$result.watched",
+    "    }",
+    "    Write-AgentLog ('OK ' + (ConvertTo-Json -InputObject $result -Compress))",
     "  } catch {",
     "    $code = 0",
     "    if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }",
-    "    Set-Content -Path $log -Value ((Get-Date).ToString('s') + ' ERROR ' + $code + ' ' + $_.Exception.Message)",
+    "    Write-AgentLog ('ERROR ' + $code + ' ' + $_.Exception.Message)",
     "    if ($code -eq 401) { exit 1 }",
+    "    $watched = $false",
     "  }",
-    "  Start-Sleep -Seconds 60",
+    "  $interval = 15",
+    "  if ($watched) { $interval = 3 }",
+    "  $wait = $interval - ((Get-Date) - $started).TotalSeconds",
+    "  Start-Sleep -Milliseconds ([int]([math]::Max(0.5, $wait) * 1000))",
     "}",
   ].join("\n");
 }
-
 function buildHardwareAgentInstaller() {
   return [
     "& {",
     "$ErrorActionPreference = 'Stop'",
     `$dir = Join-Path $env:LOCALAPPDATA '${hardwareAgentTaskName}'`,
-    "$secure = Read-Host -AsSecureString 'Paste the device token from Admin'",
-    "if ($secure.Length -eq 0) { throw 'No device token entered.' }",
+    "$tokenFile = Join-Path $dir 'token.dat'",
+    "$hasToken = Test-Path $tokenFile",
+    "$prompt = 'Paste the device token from Admin'",
+    "if ($hasToken) { $prompt += ' (or press Enter to keep the saved token)' }",
+    "$secure = Read-Host -AsSecureString $prompt",
+    "if ($secure.Length -eq 0 -and -not $hasToken) { throw 'No device token entered.' }",
     "New-Item -ItemType Directory -Force -Path $dir | Out-Null",
-    "$secure | ConvertFrom-SecureString | Set-Content -Path (Join-Path $dir 'token.dat')",
+    "if ($secure.Length -gt 0) { $secure | ConvertFrom-SecureString | Set-Content -Path $tokenFile }",
     "$agent = @'",
     buildHardwareAgentScript(),
     "'@",
