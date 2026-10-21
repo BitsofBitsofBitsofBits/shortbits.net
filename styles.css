@@ -1828,6 +1828,47 @@ html.is-performance-lite .theme-atmosphere .theme-particle {
   text-shadow: 0 0 10px rgba(var(--bit-color-rgb), 0.85);
 }
 
+/* Windows 95: pixel-ish bits with a hard shadow, falling at a choppy, low frame rate. */
+html[data-interface-theme="windows-95"] .falling-bit:not(.is-forbidden) {
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  font-size: round(var(--bit-size), 4px);
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #000;
+  -webkit-font-smoothing: none;
+  animation: fall-bit-win95 calc(var(--bit-speed) * 1.4) steps(70, end) forwards;
+}
+
+html[data-interface-theme="windows-95"] .falling-bit.is-forbidden {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 0;
+  color: #000;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #000, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  font-family: "Courier New", Courier, monospace;
+  text-shadow: none;
+}
+
+html[data-interface-theme="windows-95"] .falling-bit.is-forbidden:hover,
+html[data-interface-theme="windows-95"] .falling-bit.is-forbidden:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -5px;
+}
+
+@keyframes fall-bit-win95 {
+  0% {
+    opacity: calc(var(--bit-opacity) * 1.6);
+    transform: translateY(-5vh);
+  }
+
+  100% {
+    opacity: calc(var(--bit-opacity) * 1.6);
+    transform: translateY(110vh);
+  }
+}
+
 .noise,
 .scanlines {
   position: fixed;
