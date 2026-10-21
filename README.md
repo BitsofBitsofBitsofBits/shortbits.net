@@ -12,6 +12,12 @@ is a personal project and largely a learning exercise for me.
 ## Features
 
 - Responsive LinkTree-style social and project links
+- A recruiter-facing `/professional/` profile with career highlights, skills,
+  selected independent projects, LinkedIn/GitHub links, and the shared private
+  contact form. It inherits the saved theme without loading games, simulated
+  desktop windows, boot screens, or Easter eggs. Profile copy lives in
+  `professional/index.html`, based on the existing career profile and LinkedIn;
+  update it when professional details change.
 - Theme-driven, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard

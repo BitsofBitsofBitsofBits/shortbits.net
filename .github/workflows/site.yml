@@ -96,6 +96,7 @@ jobs:
             useless.html \
             blog \
             boot \
+            professional \
             images \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"
 

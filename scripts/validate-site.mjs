@@ -12,6 +12,7 @@ const htmlFiles = [
   "boot/index.html",
   "blog/index.html",
   "blog/post.html",
+  "professional/index.html",
 ];
 const missingAssets = [];
 
