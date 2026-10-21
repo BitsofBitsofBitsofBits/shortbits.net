@@ -1,4 +1,4 @@
-﻿:root[data-interface-theme="browser"] {
+:root[data-interface-theme="browser"] {
   --bg: #fff;
   --panel: #f8f9fa;
   --panel-2: #f1f3f4;
@@ -132,7 +132,7 @@
 :root[data-interface-theme="browser"] .browser-bookmarks a:hover { color: var(--ink); background: var(--browser-field); }
 :root[data-interface-theme="browser"] .shell { width: min(1180px, calc(100% - 64px)); max-width: none; margin: 26px auto; border: 0; border-radius: 0; box-shadow: none; backdrop-filter: none; }
 :root[data-interface-theme="browser"] .system-bar { min-height: 36px; padding-left: 0; background: transparent; border-bottom: 0; font-size: 11px; }
-:root[data-interface-theme="browser"] #app-menu-bar { gap: 12px; min-height: 46px; padding: 8px 0; background: var(--bg); font: 12px/1.5 var(--font-family); letter-spacing: .02em; }
+
 :root[data-interface-theme="browser"] .app-menu summary { padding: 5px 10px; border-radius: 5px; }
 :root[data-interface-theme="browser"] .app-menu-popup { border-radius: 9px; background: var(--overlay-bg); box-shadow: 0 5px 22px #0002; }
 :root[data-interface-theme="browser"] .desktop-window { translate: 0 max(0px, calc(var(--browser-frame-height) + 8px - var(--browser-window-top, 0px))); max-height: max(120px, calc(100dvh - max(var(--browser-window-top, 0px), calc(var(--browser-frame-height) + 8px)) - 8px)); border: 1px solid var(--border); border-radius: 12px; background: var(--overlay-bg); box-shadow: 0 12px 55px #0004; animation: none; }
@@ -215,3 +215,218 @@
 
 
 
+
+/* Favorites bar: hosts the site's FILE / EDIT / VIEW menu bar */
+:root[data-interface-theme="browser"] .browser-bookmarks { min-width: 0; }
+:root[data-interface-theme="browser"] .browser-bar-label,
+:root[data-interface-theme="browser"] .browser-address-label,
+:root[data-interface-theme="browser"] .browser-go { display: none; }
+:root[data-interface-theme="browser"] .browser-bookmarks .app-menu-bar { flex: 0 0 auto; gap: 2px; min-height: 26px; padding: 0; border: 0; color: var(--ink); background: transparent; font: 600 11px/1.4 var(--font-family); letter-spacing: .03em; }
+:root[data-interface-theme="browser"] .browser-bookmarks .app-menu summary { padding: 4px 10px; border-radius: 14px; color: var(--ink); }
+:root[data-interface-theme="browser"] .browser-bookmarks .app-menu summary:hover,
+:root[data-interface-theme="browser"] .browser-bookmarks .app-menu[open] summary { background: var(--browser-field); }
+:root[data-interface-theme="browser"] .browser-bookmarks .app-menu-popup { top: calc(100% + 6px); font-weight: 400; letter-spacing: .02em; text-align: left; }
+:root[data-interface-theme="browser"] .browser-bar-separator { flex: 0 0 1px; align-self: stretch; margin: 6px 6px 4px; background: var(--border); }
+:root[data-interface-theme="browser"] .browser-bookmark { white-space: nowrap; }
+
+/* Firefox */
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] {
+  --accent: #0061e0; --accent-rgb: 0, 97, 224; --accent-soft: #deeafc;
+  --browser-strip: #f0f0f4; --browser-toolbar: #f9f9fb; --browser-field: #fff;
+  --font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="firefox"][data-color-scheme="dark"] {
+  --bg: #1c1b22; --panel: #2b2a33; --panel-2: #42414d; --border: #52525e;
+  --accent: #00ddff; --accent-rgb: 0, 221, 255; --accent-soft: #003a47;
+  --browser-strip: #1c1b22; --browser-toolbar: #2b2a33; --browser-field: #1c1b22;
+  --shell-bg: #1c1b22; --body-background: #1c1b22; --admin-bg: #2b2a33; --overlay-bg: #2b2a33;
+}
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-tabs { align-items: center; gap: 4px; padding: 4px 8px; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-tab { height: 32px; border-radius: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-tab-active { background: var(--browser-toolbar); box-shadow: 0 0 4px #0003; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-new-tab { border-radius: 4px; margin: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-icon { border-radius: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-omnibox { border: 1px solid var(--border); border-radius: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-bookmarks a,
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-bookmarks .app-menu summary { border-radius: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="firefox"] .browser-caption { color: #ff7139; font-weight: 700; }
+
+/* Microsoft Edge (Chromium) */
+:root[data-interface-theme="browser"][data-theme-variant="edge"] {
+  --accent: #0067c0; --accent-rgb: 0, 103, 192; --accent-soft: #e0edf9;
+  --browser-strip: #f3f3f3; --browser-toolbar: #fff; --browser-field: #f7f7f7;
+  --font-family: "Segoe UI Variable Text", "Segoe UI", Arial, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="edge"][data-color-scheme="dark"] {
+  --bg: #1f1f1f; --panel: #2b2b2b; --panel-2: #383838; --border: #4a4a4a;
+  --accent: #4cc2ff; --accent-rgb: 76, 194, 255; --accent-soft: #10334a;
+  --browser-strip: #1c1c1c; --browser-toolbar: #2b2b2b; --browser-field: #1f1f1f;
+  --shell-bg: #1f1f1f; --body-background: #1f1f1f; --admin-bg: #2b2b2b; --overlay-bg: #2b2b2b;
+}
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-tab { border-radius: 8px 8px 0 0; }
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-omnibox { border: 1px solid var(--border); border-radius: 16px; background: var(--browser-field); }
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-icon { border-radius: 6px; }
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-bookmarks a,
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-bookmarks .app-menu summary { border-radius: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="edge"] .browser-caption { background: linear-gradient(90deg, #0c59a4, #2bb3e5, #50e6a0); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; }
+
+/* Microsoft Edge Legacy (EdgeHTML, 2015) */
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] {
+  --accent: #0063b1; --accent-rgb: 0, 99, 177; --accent-soft: #dcebf7;
+  --browser-strip: #e6e6e6; --browser-toolbar: #f2f2f2; --browser-field: #fff;
+  --control-radius: 0px; --window-radius: 0px;
+  --font-family: "Segoe UI", Arial, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"][data-color-scheme="dark"] {
+  --bg: #1e1e1e; --panel: #2b2b2b; --panel-2: #3b3b3b; --border: #555;
+  --accent: #4ba0e8; --accent-rgb: 75, 160, 232; --accent-soft: #173a57;
+  --browser-strip: #2b2b2b; --browser-toolbar: #3b3b3b; --browser-field: #1e1e1e;
+  --shell-bg: #1e1e1e; --body-background: #1e1e1e; --admin-bg: #2b2b2b; --overlay-bg: #2b2b2b;
+}
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-tabs { gap: 0; padding: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] :is(.browser-tab, .browser-new-tab, .browser-icon, .browser-omnibox, .browser-profile, .browser-menu-body, .browser-bookmarks a, .browser-bookmarks .app-menu summary) { border-radius: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-tab { height: 40px; font-weight: 300; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-new-tab { width: 40px; height: 40px; margin: 0; font-weight: 200; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-omnibox { margin: 0 10px; border: 1px solid transparent; border-bottom-color: var(--accent); }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-icon { font-weight: 200; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .browser-caption { color: var(--accent); font-weight: 600; }
+:root[data-interface-theme="browser"][data-theme-variant="edge-legacy"] .desktop-window { border-radius: 0; }
+
+/* Internet Explorer 6 (Windows XP) */
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] {
+  --accent: #0a246a; --accent-rgb: 10, 36, 106; --accent-soft: #dbe6fb;
+  --browser-strip: linear-gradient(180deg, #0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #0019cf);
+  --browser-toolbar: #ece9d8; --browser-field: #fff;
+  --control-radius: 0px;
+  --font-family: Tahoma, "Segoe UI", Verdana, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"][data-color-scheme="dark"] { --accent: #9cc3ff; --accent-rgb: 156, 195, 255; --accent-soft: #1d2f55; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-frame { color: #000; font-family: Tahoma, Verdana, sans-serif; font-size: 11px; border-bottom-color: #aca899; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-tabs { align-items: center; height: 40px; padding: 0 6px; border-radius: 8px 8px 0 0; background: var(--browser-strip); }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] :is(a.browser-tab, .browser-new-tab, .browser-tab-spinner) { display: none; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-tab-active { flex: 1; width: auto; height: auto; padding: 0 4px; background: transparent; color: #fff; font: 700 13px/1 "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-caption { display: flex; gap: 2px; margin: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-caption::before { content: "_  □"; display: grid; place-items: center; width: 50px; height: 21px; border: 1px solid #fff; border-radius: 3px; color: #fff; background: linear-gradient(180deg, #3c8cf3, #1658d6); font: 700 11px/1 Tahoma, sans-serif; letter-spacing: 0; white-space: pre; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-caption::after { content: "✕"; display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid #fff; border-radius: 3px; color: #fff; background: linear-gradient(180deg, #e9785c, #c4381a); font: 700 11px/1 Tahoma, sans-serif; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-toolbar { gap: 3px; border-bottom: 1px solid #d4d0c8; background: var(--browser-toolbar); }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-icon { border-radius: 3px; color: #1b7a16; font-weight: 700; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-icon:hover { border: 1px solid #c1d2ee; background: #e8eef9; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-address-label { display: block; margin-left: 6px; color: #444; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-omnibox { height: 24px; margin: 0 4px; border: 1px solid #7f9db9; border-radius: 0; background: #fff; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-lock { width: 22px; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-lock::before { top: 5px; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-address-display { left: 22px; color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-address-display strong { color: #000; font-weight: 400; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-address { color: transparent; caret-color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-address:focus { color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-go { position: absolute; right: -44px; display: flex; align-items: center; gap: 3px; height: 22px; padding: 0 4px; border: 0; color: #000; background: transparent; font: 11px Tahoma, sans-serif; cursor: pointer; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-go::before { content: "➜"; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 3px; color: #fff; background: linear-gradient(135deg, #64c656, #1a8a12); font-size: 10px; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-extras { margin-left: 44px; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-profile { border-radius: 2px; color: #fff; background: #0a246a; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-menu-body { border-color: #aca899; border-radius: 0; background: #fff; box-shadow: 2px 2px 3px #0005; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-menu-body a { color: #000; border-radius: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-menu-body a:hover { color: #fff; background: #316ac5; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-bookmarks { background: var(--browser-toolbar); }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-bar-label { display: block; color: #444; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] :is(.browser-bookmarks a, .browser-bookmarks .app-menu summary) { border: 1px solid transparent; border-radius: 0; color: #000; font: 11px Tahoma, sans-serif; letter-spacing: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] :is(.browser-bookmarks a, .browser-bookmarks .app-menu summary):hover,
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-bookmarks .app-menu[open] summary { color: #fff; background: #316ac5; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-bar-separator { margin: 4px; background: #aca899; box-shadow: 1px 0 #fff; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-loading { background: linear-gradient(90deg, #2fb22f 0 10px, transparent 10px 12px) 0 0 / 12px 100% repeat-x; height: 3px; }
+:root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .desktop-window { border-radius: 8px 8px 0 0; }
+
+/* Safari */
+:root[data-interface-theme="browser"][data-theme-variant="safari"] {
+  --accent: #0066cc; --accent-rgb: 0, 102, 204; --accent-soft: #e1eefc;
+  --browser-strip: #ececee; --browser-toolbar: #f5f5f7; --browser-field: #e3e3e8;
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="safari"][data-color-scheme="dark"] {
+  --bg: #1e1e1e; --panel: #2a2a2c; --panel-2: #3a3a3c; --border: #4a4a4e;
+  --accent: #0a84ff; --accent-rgb: 10, 132, 255; --accent-soft: #10335c;
+  --browser-strip: #232325; --browser-toolbar: #2a2a2c; --browser-field: #3a3a3c;
+  --shell-bg: #1e1e1e; --body-background: #1e1e1e; --admin-bg: #2a2a2c; --overlay-bg: #2a2a2c;
+}
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-frame { font-family: var(--font-family); }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-tabs { align-items: center; gap: 2px; padding: 4px 12px 4px 84px; position: relative; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-tabs::before { content: ""; position: absolute; left: 16px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 #febc2e, 40px 0 #28c840; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-tab { flex: 1; justify-content: center; width: auto; height: 28px; border-radius: 7px; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-tab-active { background: var(--browser-field); }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] a.browser-tab::before { content: none; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-new-tab { width: 28px; height: 28px; margin: 0; border-radius: 7px; font-size: 19px; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-icon { border-radius: 7px; color: var(--muted); }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-omnibox { flex: 0 1 560px; margin: 0 auto; border-radius: 9px; text-align: center; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-address-display { right: 34px; text-align: center; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-address-display span { display: none; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-address { text-align: center; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-profile { border-radius: 7px; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] :is(.browser-bookmarks a, .browser-bookmarks .app-menu summary) { border-radius: 6px; }
+:root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-loading { height: 3px; background: var(--accent); }
+
+/* Opera GX */
+:root[data-interface-theme="browser"][data-theme-variant="opera"] {
+  --bg: #120f1a; --panel: #1b1626; --panel-2: #261f35; --panel-strong: #261f35; --ink: #f2eefa; --muted: #b8afc9; --border: #3a2f4f;
+  --accent: #fa1e4e; --accent-rgb: 250, 30, 78; --accent-soft: #3a0f1d; --warning: #ffcc4d;
+  --shell-bg: #120f1a; --admin-bg: #1b1626; --overlay-bg: #1b1626; --body-background: radial-gradient(circle at 80% 0%, #2a0f22, #120f1a 55%);
+  --icon-filter: brightness(0) invert(1);
+  --scrollbar-track: #120f1a; --scrollbar-thumb-color: #fa1e4e; --scrollbar-thumb-background: #fa1e4e; --scrollbar-thumb-hover: #ff5a7e;
+  --browser-strip: #0b0910; --browser-toolbar: #1b1626; --browser-field: #0d0a14;
+  --control-radius: 2px;
+  color-scheme: dark;
+}
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-frame { border-bottom: 1px solid var(--accent); box-shadow: 0 1px 12px #fa1e4e44; }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-tab { border-radius: 0; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-tab-active { background: var(--browser-toolbar); box-shadow: inset 0 2px var(--accent); }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] a.browser-tab::before { color: var(--accent); }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] :is(.browser-icon, .browser-new-tab, .browser-profile, .browser-bookmarks a, .browser-bookmarks .app-menu summary) { border-radius: 2px; }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-omnibox { border: 1px solid var(--border); border-radius: 2px; }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-caption { color: var(--accent); font-weight: 800; letter-spacing: .25em; text-shadow: 0 0 8px #fa1e4e88; }
+:root[data-interface-theme="browser"][data-theme-variant="opera"] .browser-profile { color: #fff; background: var(--accent); }
+
+/* Netscape Navigator */
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] {
+  --accent: #000080; --accent-rgb: 0, 0, 128; --accent-soft: #d6d6f0;
+  --browser-strip: linear-gradient(90deg, #000080, #1084d0); --browser-toolbar: #c0c0c0; --browser-field: #fff;
+  --control-radius: 0px;
+  --font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif;
+}
+:root[data-interface-theme="browser"][data-theme-variant="netscape"][data-color-scheme="dark"] { --accent: #9fb4ff; --accent-rgb: 159, 180, 255; --accent-soft: #23285a; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-frame { color: #000; font: 11px/1.3 "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif; border-bottom: 2px solid #808080; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-tabs { align-items: center; height: 40px; padding: 0 4px; background: var(--browser-strip); }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] :is(a.browser-tab, .browser-new-tab, .browser-tab-spinner) { display: none; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-tab-active { flex: 1; width: auto; height: auto; padding: 0 4px; border-radius: 0; background: transparent; color: #fff; font-weight: 700; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-caption { display: grid; place-items: center; width: 34px; height: 34px; margin: 0; border: 2px outset #c0c0c0; color: #fff; background: radial-gradient(circle at 70% 25%, #fff 0 1px, transparent 2px), linear-gradient(160deg, #3f4ea8, #0b1250); font: 700 22px/1 Georgia, serif; letter-spacing: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-toolbar { gap: 2px; background: var(--browser-toolbar); border-top: 1px solid #fff; border-bottom: 1px solid #808080; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] :is(.browser-icon, .browser-profile) { width: 32px; height: 32px; border: 2px outset #e0e0e0; border-radius: 0; color: #000; background: #c0c0c0; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] :is(.browser-icon, .browser-profile):active { border-style: inset; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-address-label { display: block; margin: 0 4px 0 8px; font-weight: 700; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-omnibox { height: 24px; margin: 0 4px; border: 2px inset #e0e0e0; border-radius: 0; background: #fff; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-lock { width: 22px; color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-lock::before { top: 4px; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-address-display { left: 22px; color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-address-display strong { color: #000; font-weight: 400; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-address { caret-color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-address:focus { color: #000; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-menu-body { border: 2px outset #e0e0e0; border-radius: 0; background: #c0c0c0; box-shadow: none; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-menu-body a { color: #000; border-radius: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-menu-body a:hover { color: #fff; background: #000080; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-bookmarks { background: var(--browser-toolbar); border-top: 1px solid #fff; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-bar-label { display: block; padding: 0 6px 0 2px; border-right: 1px solid #808080; box-shadow: 1px 0 #fff; font-weight: 700; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] :is(.browser-bookmarks a, .browser-bookmarks .app-menu summary) { border: 1px solid transparent; border-radius: 0; color: #000; font: 11px "MS Sans Serif", Tahoma, sans-serif; letter-spacing: 0; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] :is(.browser-bookmarks a, .browser-bookmarks .app-menu summary):hover,
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-bookmarks .app-menu[open] summary { border-color: #fff #808080 #808080 #fff; color: #000; background: #c0c0c0; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .browser-bar-separator { margin: 4px; background: #808080; box-shadow: 1px 0 #fff; }
+:root[data-interface-theme="browser"][data-theme-variant="netscape"] .desktop-window { border-radius: 0; }
+
+@media (max-width: 1100px) {
+  :root[data-interface-theme="browser"] .browser-frame-has-menu .browser-bookmark:nth-last-child(-n + 3) { display: none; }
+}
+@media (max-width: 760px) {
+  :root[data-interface-theme="browser"]:has(.browser-frame-has-menu) { --browser-frame-height: 88px; }
+  :root[data-interface-theme="browser"] .browser-frame-has-menu .browser-bookmarks { display: flex; height: 34px; padding: 0 7px 4px; }
+  :root[data-interface-theme="browser"] .browser-frame-has-menu :is(.browser-bookmark, .browser-bar-label, .browser-bar-separator) { display: none; }
+  :root[data-interface-theme="browser"] .browser-bookmarks .app-menu-bar { flex: 1; justify-content: space-between; }
+  :root[data-interface-theme="browser"] :is(.browser-address-label, .browser-go) { display: none; }
+  :root[data-interface-theme="browser"][data-theme-variant="internet-explorer"] .browser-extras { margin-left: 0; }
+  :root[data-interface-theme="browser"][data-theme-variant="safari"] .browser-omnibox { flex: 1; }
+}

@@ -359,6 +359,16 @@ const baseInterfaceThemes = [
     lightColor: "#dee1e6",
     nativeScheme: "light",
     experimental: true,
+    variants: [
+      { id: "chrome", name: "CHROME" },
+      { id: "firefox", name: "FIREFOX", darkColor: "#1c1b22", lightColor: "#f0f0f4" },
+      { id: "edge", name: "EDGE", darkColor: "#202020", lightColor: "#f7f7f7" },
+      { id: "edge-legacy", name: "EDGE LEGACY (2015)", darkColor: "#2b2b2b", lightColor: "#e6e6e6" },
+      { id: "internet-explorer", name: "INTERNET EXPLORER 6", darkColor: "#0a246a", lightColor: "#ece9d8" },
+      { id: "safari", name: "SAFARI", darkColor: "#2a2a2c", lightColor: "#f5f5f7" },
+      { id: "opera", name: "OPERA GX", darkColor: "#120f1a", lightColor: "#120f1a" },
+      { id: "netscape", name: "NETSCAPE NAVIGATOR", darkColor: "#808080", lightColor: "#c0c0c0" },
+    ],
   },
   {
     id: "windows-8",
@@ -397,7 +407,7 @@ const baseInterfaceThemes = [
     experimental: true,
   },
 ];
-const layoutAssetVersion = "layouts-3";
+const layoutAssetVersion = "layouts-4";
 const lastStandardThemeKey = "bits-last-standard-theme";
 const themeVariantKey = "bits-theme-variants";
 

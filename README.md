@@ -215,7 +215,10 @@ is a personal project and largely a learning exercise for me.
   (3.1, 2.x, 1.0, Hotdog Stand, Arizona, Ocean, Plasma), Legacy BIOS (Award,
   Phoenix, AMI), UEFI vendors, Atari (2600, 7800, ST GEM, Pong), Commodore
   machines, Winamp skins, iPod finishes, Ubuntu/GNOME/KDE desktops,
-  PlayStation and Xbox dashboards, Windows 8 accents, and more.
+  PlayStation and Xbox dashboards, Windows 8 accents, and Browser
+  spoofs (Chrome, Firefox, Edge, Edge Legacy, Internet Explorer 6, Safari,
+  Opera GX, Netscape Navigator). The Browser layout also moves the BITS OS
+  FILE / EDIT / VIEW menu bar into its favorites/bookmarks bar.
   Each theme remembers its own variant; styles live in `layouts/<id>.css`
 - A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
   `theme dark`, `theme light`, `theme auto`, and `theme variant <name>`

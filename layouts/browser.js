@@ -4,6 +4,8 @@
   let frame;
   let titleObserver;
   let windowObserver;
+  let menuHome = null;
+  let applyVariant = () => {};
   const windowOffsets = new Map();
   let cleanups = [];
   const sections = [
@@ -12,6 +14,16 @@
     ['Blog', '/blog/'],
     ['Boot', '/boot/'],
   ];
+  const variantChrome = {
+    chrome: { caption: 'CHROME', bar: 'Bookmarks bar', menu: '⋮', reload: '⟳', title: '' },
+    firefox: { caption: 'FIREFOX', bar: 'Bookmarks Toolbar', menu: '≡', reload: '↻', title: '' },
+    edge: { caption: 'EDGE', bar: 'Favorites bar', menu: '⋯', reload: '↻', title: '' },
+    'edge-legacy': { caption: 'EDGE', bar: 'Favorites bar', menu: '⋯', reload: '↻', title: '' },
+    'internet-explorer': { caption: '', bar: 'Links', menu: '⚙', reload: '↻', address: 'Address', go: 'Go', title: ' - Microsoft Internet Explorer' },
+    safari: { caption: '', bar: 'Favorites', menu: '⋯', reload: '↻', title: '' },
+    opera: { caption: 'OPERA GX', bar: 'Bookmarks bar', menu: '≡', reload: '↻', title: '' },
+    netscape: { caption: 'N', bar: 'Personal Toolbar', menu: '≡', reload: '↻', address: 'Location:', title: ' - Netscape' },
+  };
 
   function element(tag, className, text) {
     const node = document.createElement(tag);
@@ -63,13 +75,18 @@
     newTab.title = 'New tab — choose a profile';
     newTab.setAttribute('aria-label', 'New tab — choose a profile');
     strip.append(newTab, element('span', 'browser-caption', 'BROWSER'));
+    const caption = strip.lastChild;
 
     const toolbar = element('div', 'browser-toolbar');
+    const reload = button('Reload page', '⟳', () => location.reload());
     toolbar.append(
       button('Back', '←', () => history.back()),
       button('Forward', '→', () => history.forward()),
-      button('Reload page', '⟳', () => location.reload())
+      reload
     );
+    const addressLabel = element('span', 'browser-address-label');
+    addressLabel.setAttribute('aria-hidden', 'true');
+    toolbar.append(addressLabel);
     const form = element('form', 'browser-omnibox');
     form.setAttribute('role', 'search');
     const lock = element('span', 'browser-lock', '▣');
@@ -116,6 +133,10 @@
       }
     });
     form.append(lock, address, display);
+    const go = element('button', 'browser-go');
+    go.type = 'submit';
+    go.setAttribute('aria-label', 'Go to address');
+    form.append(go);
     toolbar.append(form);
     const extras = element('div', 'browser-extras');
     extras.append(
@@ -136,10 +157,33 @@
     toolbar.append(extras, menu);
     const bookmarks = element('nav', 'browser-bookmarks');
     bookmarks.setAttribute('aria-label', 'Bookmarks');
-    sections.forEach(([label, href]) => bookmarks.append(link('◇  ' + label, href)));
+    const barLabel = element('span', 'browser-bar-label');
+    barLabel.setAttribute('aria-hidden', 'true');
+    bookmarks.append(barLabel);
+    // The site's own menu bar (FILE / EDIT / VIEW…) lives in the favorites bar while this layout is active.
+    const appMenuBar = document.querySelector('#app-menu-bar');
+    if (appMenuBar) {
+      menuHome = { node: appMenuBar, parent: appMenuBar.parentNode, next: appMenuBar.nextSibling };
+      bookmarks.append(appMenuBar, element('span', 'browser-bar-separator'));
+      frame.classList.add('browser-frame-has-menu');
+    }
+    sections.forEach(([label, href]) => bookmarks.append(link('◇  ' + label, href, 'browser-bookmark')));
     [['Site menu', '/online/#app-menu-bar'], ['Experience', '/professional/#experience'], ['Projects', '/professional/#projects']].forEach(([label, href]) => {
-      bookmarks.append(link(label, href));
+      if (appMenuBar && label === 'Site menu') return;
+      bookmarks.append(link(label, href, 'browser-bookmark'));
     });
+    applyVariant = () => {
+      const chrome = variantChrome[document.documentElement.dataset.themeVariant] ?? variantChrome.chrome;
+      caption.textContent = chrome.caption;
+      summary.textContent = chrome.menu;
+      reload.textContent = chrome.reload;
+      barLabel.textContent = chrome.bar;
+      bookmarks.setAttribute('aria-label', chrome.bar);
+      addressLabel.textContent = chrome.address ?? '';
+      go.textContent = chrome.go ?? '';
+      title.textContent = document.title + chrome.title;
+    };
+    applyVariant();
     frame.append(strip, toolbar, bookmarks);
     if (ctx.page === 'boot') frame.append(element('div', 'browser-loading'));
     ctx.body.prepend(frame);
@@ -158,7 +202,7 @@
       syncWindowOffset(node);
       windowObserver.observe(node, { attributes: true, attributeFilter: ['style'] });
     });
-    titleObserver = new MutationObserver(() => { title.textContent = document.title; });
+    titleObserver = new MutationObserver(() => applyVariant());
     titleObserver.observe(document.querySelector('title') || document.head, { childList: true, subtree: true, characterData: true });
 
     if (ctx.page === 'chooser') {
@@ -183,7 +227,17 @@
 
   window.BITS_LAYOUTS.register('browser', {
     mount,
+    update() {
+      applyVariant();
+    },
     unmount() {
+      if (menuHome) {
+        const { node, parent, next } = menuHome;
+        if (next && next.parentNode === parent) parent.insertBefore(node, next);
+        else parent.append(node);
+        menuHome = null;
+      }
+      applyVariant = () => {};
       windowObserver?.disconnect();
       windowObserver = null;
       windowOffsets.forEach((value, node) => {
