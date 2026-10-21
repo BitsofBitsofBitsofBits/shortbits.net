@@ -4949,6 +4949,7 @@ html[data-interface-theme="minebits"] #admin-blog-window-title {
 }
 
 .admin-suite-name {
+  margin-right: 0.35em;
   color: var(--accent);
 }
 
