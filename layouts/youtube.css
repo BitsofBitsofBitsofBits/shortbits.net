@@ -1,0 +1,286 @@
+﻿:root[data-interface-theme="youtube"] {
+  color-scheme: dark;
+  --bg: #0f0f0f; --panel: #181818; --panel-2: #272727; --panel-strong: #212121;
+  --ink: #f1f1f1; --muted: #b0b0b0; --accent: #ff6b6b; --accent-rgb: 255, 107, 107;
+  --accent-soft: #352020; --warning: #ffda79; --border: #3f3f3f; --line: #3f3f3f;
+  --shadow: none; --shell-bg: #0f0f0f; --admin-bg: #181818; --overlay-bg: #212121;
+  --noise-opacity: 0; --scanline-opacity: 0; --name-field-opacity: 0;
+  --icon-filter: brightness(0) invert(1); --spotify-accent: #ff6b6b;
+  --body-background: #0f0f0f; --body-background-size: auto;
+  --font-family: Roboto, Arial, Helvetica, sans-serif;
+  --control-radius: 8px; --shell-radius: 0; --window-radius: 12px; --material-blur: 0px;
+  --scrollbar-size: 10px; --scrollbar-track: var(--bg); --scrollbar-track-border: transparent;
+  --scrollbar-thumb-color: #777; --scrollbar-thumb-background: #777;
+  --scrollbar-thumb-hover: #aaa; --scrollbar-thumb-active: #aaa;
+  --scrollbar-thumb-border: 2px solid var(--bg); --scrollbar-thumb-radius: 8px;
+  --scrollbar-track-radius: 0; --scrollbar-thumb-shadow: none;
+  --yt-red: #f03; --yt-blue: #8ab4f8; --yt-guide-width: 224px;
+}
+:root[data-interface-theme="youtube"][data-color-scheme="light"] {
+  color-scheme: light;
+  --bg: #fff; --panel: #f8f8f8; --panel-2: #f0f0f0; --panel-strong: #f2f2f2;
+  --ink: #0f0f0f; --muted: #606060; --accent: #b50020; --accent-rgb: 181, 0, 32;
+  --accent-soft: #ffedef; --warning: #805600; --border: #d8d8d8; --line: #d8d8d8;
+  --shell-bg: #fff; --admin-bg: #fff; --overlay-bg: #fff; --body-background: #fff;
+  --icon-filter: brightness(0); --spotify-accent: #b50020; --yt-blue: #065fd4;
+}
+:root[data-interface-theme="youtube"] body { display: block; min-height: 100vh; padding: 80px 28px 56px calc(var(--yt-guide-width) + 28px); margin: 0; color: var(--ink); background: var(--bg); font-family: var(--font-family); font-size: 14px; line-height: 1.5; letter-spacing: normal; }
+:root[data-interface-theme="youtube"] body.yt-guide-collapsed { --yt-guide-width: 76px; }
+:root[data-interface-theme="youtube"] :is(button, input, textarea, select) { font-family: var(--font-family); }
+:root[data-interface-theme="youtube"] :is(a, button, input, textarea, select, summary):focus-visible { outline: 2px solid var(--yt-blue); outline-offset: 3px; }
+:root[data-interface-theme="youtube"] :is(h1, h2, h3, strong) { letter-spacing: normal; }
+:root[data-interface-theme="youtube"] :is(section, article, [id]) { scroll-margin-top: 90px; }
+:root[data-interface-theme="youtube"] :is(.noise, .scanlines, .falling-bit, .atmosphere-layer) { display: none; }
+:root[data-interface-theme="youtube"] .yt-masthead { position: fixed; inset: 0 0 auto; z-index: 300; display: flex; align-items: center; gap: 16px; height: 60px; padding: 0 28px 0 18px; color: var(--ink); background: var(--bg); }
+:root[data-interface-theme="youtube"] .yt-masthead::before { position: absolute; inset: 0 auto auto 0; width: 27%; height: 2px; background: var(--yt-red); content: ""; }
+:root[data-interface-theme="youtube"] :is(.yt-icon-button, .yt-mic, .yt-account) { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border: 0; border-radius: 50%; color: var(--ink); background: transparent; text-decoration: none; cursor: pointer; }
+:root[data-interface-theme="youtube"] :is(.yt-icon-button:hover, .yt-mic, .yt-create) { background: var(--panel-2); }
+:root[data-interface-theme="youtube"] [data-layout-chrome] svg { width: 23px; height: 23px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+:root[data-interface-theme="youtube"] .yt-brand { display: flex; align-items: center; gap: 5px; flex-shrink: 0; color: var(--ink); text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-brand strong { font-size: 23px; letter-spacing: -1.3px; font-stretch: condensed; }
+:root[data-interface-theme="youtube"] .yt-brand sup { align-self: flex-start; margin-top: 6px; color: var(--muted); font-size: 9px; }
+:root[data-interface-theme="youtube"] .yt-brand-play { position: relative; width: 33px; height: 23px; border-radius: 7px; background: var(--yt-red); }
+:root[data-interface-theme="youtube"] .yt-brand-play::after { position: absolute; top: 6px; left: 13px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 9px solid #fff; content: ""; }
+:root[data-interface-theme="youtube"] .yt-search { display: flex; align-items: center; width: min(42vw, 620px); height: 40px; margin-left: auto; overflow: hidden; border: 1px solid var(--border); border-radius: 24px; color: var(--muted); font-size: 16px; }
+:root[data-interface-theme="youtube"] .yt-search-placeholder { flex: 1; padding-left: 20px; }
+:root[data-interface-theme="youtube"] .yt-search-end { display: grid; width: 64px; height: 100%; place-items: center; border-left: 1px solid var(--border); color: var(--ink); background: var(--panel-2); }
+:root[data-interface-theme="youtube"] .yt-mic { cursor: default; }
+:root[data-interface-theme="youtube"] .yt-tools { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+:root[data-interface-theme="youtube"] .yt-create { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 24px; color: var(--ink); font-weight: 600; text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-account { width: 34px; height: 34px; color: #fff; background: #8554aa; font-size: 18px; }
+:root[data-interface-theme="youtube"] .yt-guide { position: fixed; z-index: 290; top: 64px; bottom: 0; left: 0; width: var(--yt-guide-width); padding: 10px 12px; overflow-y: auto; background: var(--bg); }
+:root[data-interface-theme="youtube"] .yt-guide a { display: flex; align-items: center; gap: 22px; min-height: 42px; padding: 10px 12px; border-radius: 10px; color: var(--ink); font-size: 14px; text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-guide a:is(:hover, [aria-current="page"]) { background: var(--panel-2); }
+:root[data-interface-theme="youtube"] .yt-guide a[aria-current="page"] { font-weight: 700; }
+:root[data-interface-theme="youtube"] .yt-guide hr { margin: 16px 0; border: 0; border-top: 1px solid var(--border); }
+:root[data-interface-theme="youtube"] .yt-guide-label { margin: 12px; font-size: 15px; font-weight: 600; }
+:root[data-interface-theme="youtube"] .yt-guide-note { padding: 18px 12px; color: var(--muted); white-space: pre-line; font-size: 11px; line-height: 1.8; }
+:root[data-interface-theme="youtube"] .yt-guide-collapsed .yt-guide { padding-inline: 4px; }
+:root[data-interface-theme="youtube"] .yt-guide-collapsed .yt-guide a:has(svg) { flex-direction: column; gap: 5px; padding: 16px 2px; font-size: 10px; }
+:root[data-interface-theme="youtube"] .yt-guide-collapsed .yt-guide :is(hr, p, a:not(:has(svg))) { display: none; }
+:root[data-interface-theme="youtube"] :is(#interface-shell, .profile-layout, .blog-shell, .chooser, .endless-boot-console, .error-window) { width: 100%; max-width: 1500px; margin: 0 auto; border: 0; border-radius: 0; background: var(--bg); box-shadow: none; backdrop-filter: none; }
+:root[data-interface-theme="youtube"] .yt-chips { display: flex; gap: 12px; align-items: center; padding: 0 0 22px; overflow-x: auto; scrollbar-width: none; }
+:root[data-interface-theme="youtube"] .yt-chips a { flex-shrink: 0; padding: 6px 12px; border-radius: 8px; color: var(--ink); background: var(--panel-2); font-size: 14px; font-weight: 600; text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-chips a.yt-chip-selected { color: var(--bg); background: var(--ink); }
+:root[data-interface-theme="youtube"] .yt-recommendations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 22px 0 30px; }
+:root[data-interface-theme="youtube"] .yt-video { min-width: 0; color: var(--ink); text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-thumbnail { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; width: 100%; aspect-ratio: 16 / 9; padding: 7%; overflow: hidden; border-radius: 12px; color: #fff; background: radial-gradient(ellipse at 90% 10%, #b94f37, transparent 60%), linear-gradient(135deg, #3c1025, #170e21); text-align: left; }
+:root[data-interface-theme="youtube"] .yt-thumbnail::before { position: absolute; width: 60%; aspect-ratio: 1; right: -10%; bottom: -48%; border: 28px solid #ffffff16; border-radius: 50%; content: ""; }
+:root[data-interface-theme="youtube"] .yt-thumbnail.yt-art-1 { background: radial-gradient(ellipse at 90% 10%, #078186, transparent 60%), linear-gradient(135deg, #07333c, #101c43); }
+:root[data-interface-theme="youtube"] .yt-thumbnail.yt-art-2 { background: radial-gradient(ellipse at 90% 10%, #7745bc, transparent 60%), linear-gradient(135deg, #292050, #15131f); }
+:root[data-interface-theme="youtube"] .yt-thumbnail.yt-art-3 { background: radial-gradient(ellipse at 90% 10%, #926e16, transparent 60%), linear-gradient(135deg, #453a0c, #2b171a); }
+:root[data-interface-theme="youtube"] .yt-thumbnail strong { position: relative; z-index: 1; max-width: 85%; color: #fff; font-size: clamp(19px, 2.1vw, 34px); font-weight: 800; line-height: 1.12; letter-spacing: -1px; overflow-wrap: anywhere; }
+:root[data-interface-theme="youtube"] .yt-thumb-eyebrow { margin-bottom: 12px; color: #fff; font-size: 9px; font-weight: 700; letter-spacing: 2px; }
+:root[data-interface-theme="youtube"] .yt-thumb-play { position: absolute; right: 7%; bottom: 20%; color: #ffffffa8; font-size: 32px; }
+:root[data-interface-theme="youtube"] .yt-duration { position: absolute; right: 8px; bottom: 8px; padding: 1px 4px; border-radius: 4px; color: #fff; background: #000b; font-size: 11px; font-weight: 700; }
+:root[data-interface-theme="youtube"] .yt-video-info { display: flex; align-items: flex-start; gap: 12px; padding: 12px 2px; }
+:root[data-interface-theme="youtube"] .yt-channel-avatar { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; color: #fff; background: #8554aa; font-size: 19px; }
+:root[data-interface-theme="youtube"] .yt-video-copy { flex: 1; min-width: 0; }
+:root[data-interface-theme="youtube"] .yt-video-title { display: block; margin-bottom: 5px; color: var(--ink); font-size: 15px; font-weight: 600; line-height: 1.4; }
+:root[data-interface-theme="youtube"] .yt-video-meta { display: block; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+:root[data-interface-theme="youtube"] .yt-more { color: var(--ink); font-size: 23px; line-height: 1; }
+:root[data-interface-theme="youtube"] #interface-shell { overflow: visible; }
+:root[data-interface-theme="youtube"] #interface-shell > .system-bar { min-height: 30px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 10px 10px 0 0; background: var(--panel); }
+:root[data-interface-theme="youtube"] #interface-shell > .app-menu-bar { padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--panel); }
+:root[data-interface-theme="youtube"] .app-menu summary { padding: 7px 11px; font-size: 11px; }
+:root[data-interface-theme="youtube"] .app-menu-popup { z-index: 310; border-radius: 10px; background: var(--panel-strong); box-shadow: 0 8px 24px #0005; }
+:root[data-interface-theme="youtube"] #interface-shell > .profile { grid-template-columns: 100px minmax(0, 1fr); gap: 24px; padding: 24px 0; border-block: 1px solid var(--border); }
+:root[data-interface-theme="youtube"] #interface-shell .avatar { width: 88px; height: 88px; border-radius: 50%; }
+:root[data-interface-theme="youtube"] .identity h1 { font-family: var(--font-family); font-size: clamp(25px, 3vw, 38px); letter-spacing: -1px; }
+:root[data-interface-theme="youtube"] :is(.eyebrow, .system-kicker, .profile-kicker) { color: var(--muted); font-size: 11px; letter-spacing: 1px; }
+:root[data-interface-theme="youtube"] #interface-shell > :is(.featured-section, .link-section, .content-files-section, .contact-section) { padding: 30px 0; border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="youtube"] .section-label { margin-bottom: 18px; }
+:root[data-interface-theme="youtube"] .section-label h2 { color: var(--ink); font-size: 17px; letter-spacing: 0; }
+:root[data-interface-theme="youtube"] .section-label > span { color: var(--muted); font-size: 10px; }
+:root[data-interface-theme="youtube"] .featured-project { padding: 24px; border: 0; border-radius: 12px; background: var(--panel-2); }
+:root[data-interface-theme="youtube"] :is(.mini-window-launch, .featured-project-actions a, .project-tags li, .link-card) { border-radius: 8px; }
+:root[data-interface-theme="youtube"] :is(.link-card, .content-file-grid button, .profile-projects article) { background: transparent; box-shadow: none; }
+:root[data-interface-theme="youtube"] .link-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+:root[data-interface-theme="youtube"] .link-card { border-color: var(--border); }
+:root[data-interface-theme="youtube"] .content-file-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 18px; }
+:root[data-interface-theme="youtube"] .content-file-grid > button { display: flex; flex-direction: column; align-items: stretch; gap: 7px; padding: 0 0 12px; border: 0; color: var(--ink); }
+:root[data-interface-theme="youtube"] .content-file-grid > button:hover { background: transparent; }
+:root[data-interface-theme="youtube"] .content-file-grid > button > strong { padding: 4px 8px 0; color: var(--ink); font-size: 14px; font-weight: 600; letter-spacing: normal; }
+:root[data-interface-theme="youtube"] .content-file-grid > button > span { padding-inline: 8px; color: var(--muted); font-size: 12px; }
+:root[data-interface-theme="youtube"] .yt-card-channel { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; font-weight: 400; }
+:root[data-interface-theme="youtube"] #spotify-widget { position: relative; margin: 24px 0 0; padding: 42px 18px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+:root[data-interface-theme="youtube"] .yt-now-playing { position: absolute; top: 12px; left: 18px; color: var(--ink); font-size: 12px; font-weight: 600; }
+:root[data-interface-theme="youtube"] .spotify-progress { background-color: var(--yt-red); }
+:root[data-interface-theme="youtube"] .desktop-window { border: 1px solid var(--border); border-radius: 12px; color: var(--ink); background: var(--panel-strong); box-shadow: 0 16px 60px #0008; }
+:root[data-interface-theme="youtube"] .desktop-window-bar { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--ink); background: var(--panel-strong); font-family: var(--font-family); }
+:root[data-interface-theme="youtube"] .desktop-window-content { background: var(--panel-strong); }
+:root[data-interface-theme="youtube"] .desktop-window-bar h2 { font-size: 14px; letter-spacing: 0; }
+:root[data-interface-theme="youtube"] :is(.contact-form input, .contact-form textarea, .contact-form select) { border-radius: 6px; background: var(--panel); }
+:root[data-interface-theme="youtube"] :is(.contact-form button[type="submit"], .profile-button) { border: 0; border-radius: 20px; color: var(--bg); background: var(--ink); }
+:root[data-interface-theme="youtube"] .profile-header { flex-wrap: wrap; padding: 8px 0 18px; border: 0; }
+:root[data-interface-theme="youtube"] .profile-brand { gap: 10px; font-size: 12px; }
+:root[data-interface-theme="youtube"] .profile-monogram { width: 34px; height: 34px; border-radius: 50%; font-size: 10px; }
+:root[data-interface-theme="youtube"] .profile-brand small { font-size: 9px; }
+:root[data-interface-theme="youtube"] .profile-header-tools { gap: 12px; }
+:root[data-interface-theme="youtube"] .profile-header nav { gap: 14px; font-size: 12px; }
+:root[data-interface-theme="youtube"] .yt-channel-banner { display: flex; flex-direction: column; justify-content: center; gap: 8px; min-height: 188px; padding: 28px 7%; border-radius: 16px; color: #fff; background: radial-gradient(ellipse at 80% 10%, #bd3858, transparent 55%), linear-gradient(115deg, #211c35, #412941); }
+:root[data-interface-theme="youtube"] .yt-channel-banner small { font-size: 10px; letter-spacing: 3px; }
+:root[data-interface-theme="youtube"] .yt-channel-banner strong { font-size: clamp(26px, 3.5vw, 48px); font-weight: 800; letter-spacing: -2px; line-height: 1.15; }
+:root[data-interface-theme="youtube"] .yt-channel-banner > span { color: #f5dce7; font-size: 11px; letter-spacing: 2px; }
+:root[data-interface-theme="youtube"] .yt-channel-heading { display: flex; align-items: center; gap: 24px; padding: 25px 0; }
+:root[data-interface-theme="youtube"] .yt-avatar-large { width: 130px; height: 130px; font-size: 70px; }
+:root[data-interface-theme="youtube"] .yt-channel-heading h2 { margin: 0 0 4px; color: var(--ink); font-size: 34px; font-weight: 700; line-height: 1.3; }
+:root[data-interface-theme="youtube"] .yt-channel-description { margin: 7px 0 12px; color: var(--muted); font-size: 13px; }
+:root[data-interface-theme="youtube"] .yt-subscribe { display: inline-block; padding: 8px 16px; border-radius: 24px; color: var(--bg); background: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-channel-tabs { display: flex; gap: 26px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="youtube"] .yt-channel-tabs a { flex-shrink: 0; padding: 12px 0; color: var(--muted); font-size: 15px; font-weight: 600; text-decoration: none; }
+:root[data-interface-theme="youtube"] .yt-channel-tabs a:first-child { border-bottom: 3px solid var(--ink); color: var(--ink); }
+:root[data-interface-theme="youtube"] .profile-hero { gap: 28px; padding: 32px 0; }
+:root[data-interface-theme="youtube"] .professional-page h1 { font-size: clamp(26px, 3vw, 38px); line-height: 1.2; }
+:root[data-interface-theme="youtube"] .profile-overview { border-radius: 12px; background: var(--panel-2); box-shadow: none; }
+:root[data-interface-theme="youtube"] .profile-section { padding: 32px 0; }
+:root[data-interface-theme="youtube"] :is(.profile-experience article, .profile-projects article, .profile-skill-grid article) { padding: 22px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+:root[data-interface-theme="youtube"] .profile-tags li { border-radius: 7px; }
+:root[data-interface-theme="youtube"] .blog-header { padding: 20px 0 28px; border: 0; }
+:root[data-interface-theme="youtube"] .blog-header h1 { color: var(--ink); font-size: 36px; letter-spacing: -1px; }
+:root[data-interface-theme="youtube"] .blog-post-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 18px; }
+:root[data-interface-theme="youtube"] .blog-post-list > article { min-width: 0; padding: 0; border: 0; background: transparent; }
+:root[data-interface-theme="youtube"] .blog-post-list > article h3 { margin: 12px 0 6px; font-size: 17px; }
+:root[data-interface-theme="youtube"] .blog-post-list > article h3 a { color: var(--ink); text-decoration: none; }
+:root[data-interface-theme="youtube"] .blog-post-list > article > p { color: var(--muted); font-size: 13px; }
+:root[data-interface-theme="youtube"] .blog-post-list .yt-thumbnail strong { font-size: 27px; }
+:root[data-interface-theme="youtube"] .blog-breadcrumbs { margin: 8px 0 20px; }
+:root[data-interface-theme="youtube"] .yt-watch-player { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; width: 100%; aspect-ratio: 16 / 9; max-height: 580px; border-radius: 14px; color: #fff; background: radial-gradient(ellipse at 50% 40%, #322537, #080808 70%); box-shadow: inset 0 -4px var(--yt-red); }
+:root[data-interface-theme="youtube"] .yt-watch-symbol { display: grid; width: 70px; height: 50px; place-items: center; border-radius: 14px; background: var(--yt-red); font-size: 29px; }
+:root[data-interface-theme="youtube"] .yt-watch-player strong { font-size: 26px; }
+:root[data-interface-theme="youtube"] .yt-watch-player > span:last-child { padding: 0 15px; color: #ccc; font-size: 12px; text-align: center; }
+:root[data-interface-theme="youtube"] .blog-article { margin-top: 24px; padding: 24px; border: 0; border-radius: 12px; background: var(--panel-2); }
+:root[data-interface-theme="youtube"] .blog-article h1 { color: var(--ink); font-size: 28px; }
+:root[data-interface-theme="youtube"] .blog-markdown { color: var(--ink); font-size: 15px; line-height: 1.8; }
+:root[data-interface-theme="youtube"] .chooser { padding: 0; }
+:root[data-interface-theme="youtube"] .chooser-terminal { overflow: visible; border: 0; background: transparent; box-shadow: none; }
+:root[data-interface-theme="youtube"] .chooser-bar { padding: 12px 0; border: 0; background: transparent; color: var(--muted); }
+:root[data-interface-theme="youtube"] .chooser-body { padding: 25px 0; }
+:root[data-interface-theme="youtube"] .chooser h1 { color: var(--ink); font-size: 34px; letter-spacing: -1px; }
+:root[data-interface-theme="youtube"] .chooser-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding-top: 20px; }
+:root[data-interface-theme="youtube"] .chooser-options a { display: flex; flex-direction: column; align-items: stretch; gap: 10px; padding: 0 0 18px; border: 0; color: var(--ink); background: transparent; }
+:root[data-interface-theme="youtube"] .chooser-options a:hover { background: var(--panel); }
+:root[data-interface-theme="youtube"] .chooser-key { padding-inline: 8px; color: var(--muted); font-size: 11px; }
+:root[data-interface-theme="youtube"] .chooser-copy { padding-inline: 8px; }
+:root[data-interface-theme="youtube"] .chooser-copy strong { color: var(--ink); font-size: 18px; }
+:root[data-interface-theme="youtube"] .chooser-copy > span { color: var(--muted); font-size: 14px; }
+:root[data-interface-theme="youtube"] .chooser-path { padding-inline: 8px; color: var(--yt-blue); }
+:root[data-interface-theme="youtube"] .chooser-options .yt-thumbnail strong { font-size: clamp(24px, 3vw, 44px); }
+:root[data-interface-theme="youtube"] .endless-boot-console { min-height: calc(100vh - 150px); height: auto; padding: 0; overflow: visible; }
+:root[data-interface-theme="youtube"] .yt-premiere { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 22px; border-radius: 12px 12px 0 0; color: #fff; background: #181818; }
+:root[data-interface-theme="youtube"] .yt-premiere strong { font-size: 24px; }
+:root[data-interface-theme="youtube"] .yt-premiere > span:last-child { flex-basis: 100%; color: #ccc; font-size: 13px; }
+:root[data-interface-theme="youtube"] .yt-live-badge { padding: 3px 7px; border-radius: 4px; color: #fff; background: #bd0026; font-size: 11px; font-weight: 700; }
+:root[data-interface-theme="youtube"] .endless-boot-header { padding: 20px; border: 1px solid var(--border); background: var(--panel); }
+:root[data-interface-theme="youtube"] .endless-boot-header h1 { color: var(--ink); font-size: clamp(20px, 3vw, 30px); }
+:root[data-interface-theme="youtube"] :is(.endless-boot-transmission, .endless-boot-status, .endless-boot-machine, .endless-boot-controls, .endless-boot-footer) { padding: 14px 20px; background: var(--panel); }
+:root[data-interface-theme="youtube"] .endless-boot-log { height: 360px; padding: 20px; border: 1px solid var(--border); border-radius: 0 0 12px 12px; background: var(--panel); font-family: Roboto, Arial, sans-serif; font-size: 13px; }
+:root[data-interface-theme="youtube"] .endless-boot-progress > span { background: var(--yt-red); }
+:root[data-interface-theme="youtube"] .error-window { max-width: 800px; padding: 65px 20px; text-align: center; }
+:root[data-interface-theme="youtube"] .yt-error-glyph { display: inline-grid; width: 130px; height: 94px; margin-bottom: 28px; place-items: center; border: 5px solid var(--muted); border-radius: 15px; color: var(--muted); font-size: 50px; font-weight: 600; }
+:root[data-interface-theme="youtube"] .yt-error-message h2 { color: var(--ink); font-size: 24px; font-weight: 500; }
+:root[data-interface-theme="youtube"] .yt-error-message p { margin: 14px 0 35px; color: var(--muted); }
+:root[data-interface-theme="youtube"] .error-code { color: var(--muted); font-size: 36px; line-height: 1.2; }
+:root[data-interface-theme="youtube"] .error-window h1 { font-size: 20px; }
+:root[data-interface-theme="youtube"] .error-actions { justify-content: center; }
+:root[data-interface-theme="youtube"] .error-actions a { color: var(--yt-blue); }
+:root[data-interface-theme="youtube"] .bits-layout-notice { right: 18px; bottom: 14px; left: auto; max-width: min(600px, calc(100vw - 28px)); border: 1px solid var(--border); border-radius: 10px; color: var(--ink); background: var(--panel-strong); font-family: var(--font-family); box-shadow: 0 4px 18px #0004; }
+:root[data-interface-theme="youtube"] .bits-layout-notice strong { color: var(--accent); font-size: 10px; }
+:root[data-interface-theme="youtube"] .bits-layout-notice button { border-radius: 20px; color: var(--ink); background: var(--panel-2); }
+:root[data-interface-theme="youtube"][data-contrast="high"] { --muted: var(--ink); --border: var(--ink); --line: var(--ink); }
+:root[data-interface-theme="youtube"][data-motion="reduced"] *, :root[data-interface-theme="youtube"][data-motion="reduced"] *::before, :root[data-interface-theme="youtube"][data-motion="reduced"] *::after { animation: none; transition: none; scroll-behavior: auto; }
+@media (max-width: 1100px) {
+  :root[data-interface-theme="youtube"] { --yt-guide-width: 76px; }
+  :root[data-interface-theme="youtube"] .yt-guide { padding-inline: 4px; }
+  :root[data-interface-theme="youtube"] .yt-guide a:has(svg) { flex-direction: column; gap: 5px; padding: 16px 2px; font-size: 10px; }
+  :root[data-interface-theme="youtube"] .yt-guide :is(hr, p, a:not(:has(svg))) { display: none; }
+  :root[data-interface-theme="youtube"] .yt-guide-collapsed { --yt-guide-width: 0px; }
+  :root[data-interface-theme="youtube"] .yt-guide-collapsed .yt-guide { display: none; }
+  :root[data-interface-theme="youtube"] .yt-tools { gap: 5px; }
+  :root[data-interface-theme="youtube"] .link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-interface-theme="youtube"] .profile-header-tools { flex-basis: 100%; }
+}
+@media (max-width: 700px) {
+  :root[data-interface-theme="youtube"] body { padding: 76px 14px 104px; }
+  :root[data-interface-theme="youtube"] .yt-masthead { height: 60px; gap: 8px; padding: 0 12px; }
+  :root[data-interface-theme="youtube"] .yt-masthead > .yt-icon-button { width: 30px; }
+  :root[data-interface-theme="youtube"] .yt-brand strong { font-size: 21px; }
+  :root[data-interface-theme="youtube"] .yt-brand sup { display: none; }
+  :root[data-interface-theme="youtube"] .yt-search { flex: 1; min-width: 30px; max-width: 40px; height: 36px; margin-left: auto; border: 0; }
+  :root[data-interface-theme="youtube"] .yt-search-placeholder { display: none; }
+  :root[data-interface-theme="youtube"] .yt-search-end { width: 36px; border: 0; border-radius: 50%; background: transparent; }
+  :root[data-interface-theme="youtube"] .yt-mic { display: none; }
+  :root[data-interface-theme="youtube"] .yt-tools { margin-left: 0; gap: 4px; }
+  :root[data-interface-theme="youtube"] .yt-create { padding: 7px; background: transparent; }
+  :root[data-interface-theme="youtube"] .yt-create span { display: none; }
+  :root[data-interface-theme="youtube"] .yt-tools > .yt-icon-button { width: 34px; }
+  :root[data-interface-theme="youtube"] .yt-guide { inset: auto 0 0; display: flex; justify-content: space-around; width: 100%; height: 64px; padding: 3px 6px; border-top: 1px solid var(--border); }
+  :root[data-interface-theme="youtube"] .yt-guide a:has(svg) { flex: 1; gap: 2px; padding: 5px 2px; border-radius: 8px; font-size: 10px; }
+  :root[data-interface-theme="youtube"] .yt-guide-collapsed .yt-guide { display: none; }
+  :root[data-interface-theme="youtube"] .yt-chips { gap: 8px; padding-bottom: 16px; }
+  :root[data-interface-theme="youtube"] .yt-chips a { font-size: 12px; }
+  :root[data-interface-theme="youtube"] .yt-recommendations { grid-template-columns: 1fr; gap: 20px; padding-block: 20px; }
+  :root[data-interface-theme="youtube"] .yt-thumbnail strong { font-size: 30px; }
+  :root[data-interface-theme="youtube"] .yt-thumb-eyebrow { font-size: 10px; }
+  :root[data-interface-theme="youtube"] .content-file-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+  :root[data-interface-theme="youtube"] .content-file-grid .yt-thumbnail strong { font-size: 17px; letter-spacing: -.5px; }
+  :root[data-interface-theme="youtube"] .content-file-grid .yt-thumb-eyebrow { font-size: 7px; letter-spacing: 1px; }
+  :root[data-interface-theme="youtube"] .content-file-grid .yt-thumb-play { font-size: 20px; }
+  :root[data-interface-theme="youtube"] .link-grid { grid-template-columns: 1fr; }
+  :root[data-interface-theme="youtube"] #interface-shell > .profile { grid-template-columns: 64px minmax(0, 1fr); gap: 14px; }
+  :root[data-interface-theme="youtube"] #interface-shell .avatar { width: 60px; height: 60px; }
+  :root[data-interface-theme="youtube"] .identity h1 { font-size: 25px; }
+  :root[data-interface-theme="youtube"] .featured-project { flex-direction: column; gap: 15px; padding: 18px; }
+  :root[data-interface-theme="youtube"] .section-label { flex-wrap: wrap; }
+  :root[data-interface-theme="youtube"] .yt-channel-banner { min-height: 140px; padding: 22px; }
+  :root[data-interface-theme="youtube"] .yt-channel-banner > span { font-size: 8px; letter-spacing: 1px; }
+  :root[data-interface-theme="youtube"] .yt-channel-heading { gap: 14px; align-items: flex-start; }
+  :root[data-interface-theme="youtube"] .yt-avatar-large { width: 72px; height: 72px; font-size: 40px; }
+  :root[data-interface-theme="youtube"] .yt-channel-heading h2 { font-size: 25px; }
+  :root[data-interface-theme="youtube"] .yt-channel-description { font-size: 12px; }
+  :root[data-interface-theme="youtube"] .yt-channel-tabs { gap: 22px; }
+  :root[data-interface-theme="youtube"] .yt-channel-tabs a { font-size: 13px; }
+  :root[data-interface-theme="youtube"] .profile-header nav { gap: 12px; }
+  :root[data-interface-theme="youtube"] .profile-hero { grid-template-columns: 1fr; }
+  :root[data-interface-theme="youtube"] :is(.profile-experience, .profile-projects, .profile-skill-grid) { grid-template-columns: 1fr; }
+  :root[data-interface-theme="youtube"] .profile-section-heading { flex-wrap: wrap; }
+  :root[data-interface-theme="youtube"] .blog-header { flex-wrap: wrap; gap: 12px; }
+  :root[data-interface-theme="youtube"] .blog-post-list { grid-template-columns: 1fr; }
+  :root[data-interface-theme="youtube"] .blog-article { padding: 18px; }
+  :root[data-interface-theme="youtube"] .chooser-options { grid-template-columns: 1fr; }
+  :root[data-interface-theme="youtube"] .chooser-body { padding-top: 12px; }
+  :root[data-interface-theme="youtube"] .chooser h1 { font-size: 29px; }
+  :root[data-interface-theme="youtube"] .yt-premiere { padding: 18px; }
+  :root[data-interface-theme="youtube"] .yt-premiere strong { font-size: 20px; }
+  :root[data-interface-theme="youtube"] .endless-boot-header { flex-wrap: wrap; padding: 16px; }
+  :root[data-interface-theme="youtube"] .endless-boot-log { padding: 12px; font-size: 12px; }
+  :root[data-interface-theme="youtube"] .error-window { padding: 35px 4px; }
+  :root[data-interface-theme="youtube"] .bits-layout-notice { bottom: 74px; padding: 10px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="youtube"] *, :root[data-interface-theme="youtube"] *::before, :root[data-interface-theme="youtube"] *::after { animation: none; transition: none; scroll-behavior: auto; }
+}
+@media print {
+  :root[data-interface-theme="youtube"] body.professional-page { display: block; padding: 0; color: #000; background: #fff; }
+  :root[data-interface-theme="youtube"] .professional-page .profile-layout { width: 100%; max-width: none; }
+  :root[data-interface-theme="youtube"] .professional-page :is(.profile-hero, .profile-section) { padding: 12px 0; }
+  :root[data-interface-theme="youtube"] .professional-page :is(.profile-experience article, .profile-projects article, .profile-skill-grid article, .profile-overview) { color: #000; background: #fff; border-color: #aaa; box-shadow: none; }
+}
+:root[data-interface-theme="youtube"] .bits-layout-notice { transform: none; width: max-content; }
+:root[data-interface-theme="youtube"] .bits-layout-notice strong { color: #fff; background: #bd0026; }
+:root[data-interface-theme="youtube"] .professional-page h1 { text-transform: none; }
+@media (max-width: 700px) {
+  :root[data-interface-theme="youtube"] .bits-layout-notice { right: 14px; left: 14px; width: auto; max-width: none; gap: 7px; }
+}
+:root[data-interface-theme="youtube"] .chooser { display: block; min-height: 0; }
+:root[data-interface-theme="youtube"] .chooser-terminal { width: 100%; }
+:root[data-interface-theme="youtube"] .blog-shell { padding: 0; }
+:root[data-interface-theme="youtube"] .error-window h1 { text-align: center; }
+:root[data-interface-theme="youtube"] .yt-card-channel { display: flex; align-items: center; gap: 8px; }
+:root[data-interface-theme="youtube"] .yt-card-channel::before { display: inline-grid; flex-shrink: 0; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: #fff; background: #8554aa; content: "C"; font-size: 14px; }
+:root[data-interface-theme="youtube"] .endless-boot-log li[data-state="warning"] { color: var(--warning); }
+:root[data-interface-theme="youtube"] .endless-boot-log li[data-state="error"] { color: var(--accent); }
+:root[data-interface-theme="youtube"] .endless-boot-log li[data-state="rainbow"] .endless-boot-log-entry > span { color: var(--ink); background: none; }
+:root[data-interface-theme="youtube"] .yt-masthead { z-index: 20; }
+:root[data-interface-theme="youtube"] .yt-guide { z-index: 5; }
+:root[data-interface-theme="youtube"] .professional-page h1 > span { display: block; }

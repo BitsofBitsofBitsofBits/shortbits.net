@@ -1262,12 +1262,13 @@ function applyInterfaceTheme(theme, persist = true) {
   updateBrowserThemeColor();
 }
 
-interfaceThemeSelect.replaceChildren(...interfaceThemes.map((theme) => {
-  const option = document.createElement("option");
-  option.value = theme.id;
-  option.textContent = theme.name;
-  return option;
-}));
+interfaceThemeSelect.replaceChildren(...(window.BITS_THEME_PREFERENCE?.buildOptions()
+  ?? interfaceThemes.map((theme) => {
+    const option = document.createElement("option");
+    option.value = theme.id;
+    option.textContent = theme.name;
+    return option;
+  })));
 interfaceThemeSelect.value = interfaceThemes[interfaceThemeIndex].id;
 interfaceThemeSelect.addEventListener("change", () => {
   const selectedIndex = interfaceThemes.findIndex(
@@ -1367,7 +1368,57 @@ function setFakeDesktopVisible(visible) {
     closePlayingDeadProcess();
     closeFakeDesktopApps();
   }
+  syncDesktopThemeFallback();
 }
+
+let desktopFallbackThemeId = "";
+let isApplyingDesktopFallback = false;
+
+function syncDesktopThemeFallback() {
+  const preference = window.BITS_THEME_PREFERENCE;
+  if (!preference?.getTheme || isApplyingDesktopFallback) {
+    return;
+  }
+  const desktopVisible = !fakeDesktop.hidden;
+  const activeTheme = preference.getTheme(document.documentElement.dataset.interfaceTheme);
+  isApplyingDesktopFallback = true;
+  try {
+    if (desktopVisible && activeTheme?.experimental && !activeTheme.desktopCapable) {
+      const fallbackTheme = preference.getTheme(preference.getLastStandard())
+        ?? interfaceThemes[0];
+      desktopFallbackThemeId = activeTheme.id;
+      preference.apply(fallbackTheme.id);
+      setRgbMode(fallbackTheme.id === "rgb");
+      window.BITS_NOTIFICATIONS?.notify({
+        title: "EXPERIMENTAL THEME PAUSED",
+        message: `${activeTheme.name} doesn't fit the BITS OS desktop, so ${fallbackTheme.name} is shown here. It comes back when you leave the desktop.`,
+        type: "info",
+      });
+      return;
+    }
+    if (!desktopVisible && desktopFallbackThemeId) {
+      const restoreThemeId = desktopFallbackThemeId;
+      desktopFallbackThemeId = "";
+      if (preference.resolve() === restoreThemeId) {
+        preference.apply(restoreThemeId);
+        setRgbMode(false);
+        window.BITS_NOTIFICATIONS?.notify({
+          title: "EXPERIMENTAL THEME RESTORED",
+          message: `${preference.getTheme(restoreThemeId)?.name ?? "The experimental"} layout is back.`,
+          type: "info",
+        });
+      }
+    }
+  } finally {
+    isApplyingDesktopFallback = false;
+  }
+}
+
+window.addEventListener("bits:theme-applied", () => {
+  if (!fakeDesktop.hidden) {
+    window.setTimeout(syncDesktopThemeFallback, 0);
+  }
+});
 
 const basePlayingDeadMessages = [
   "The process is extremely committed to the bit.",

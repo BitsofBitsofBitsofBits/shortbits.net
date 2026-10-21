@@ -171,6 +171,7 @@ jobs:
             useless.html \
             blog \
             boot \
+            layouts \
             online \
             professional \
             images \

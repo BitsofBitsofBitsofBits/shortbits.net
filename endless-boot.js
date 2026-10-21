@@ -1328,12 +1328,13 @@
 
   function initializeThemePicker() {
     const themes = window.BITS_INTERFACE_THEMES ?? [];
-    themeSelect.replaceChildren(...themes.map((theme) => {
-      const option = document.createElement("option");
-      option.value = theme.id;
-      option.textContent = theme.name;
-      return option;
-    }));
+    themeSelect.replaceChildren(...(window.BITS_THEME_PREFERENCE?.buildOptions()
+      ?? themes.map((theme) => {
+        const option = document.createElement("option");
+        option.value = theme.id;
+        option.textContent = theme.name;
+        return option;
+      })));
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
     window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(schemeSelect);

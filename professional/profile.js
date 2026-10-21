@@ -5,17 +5,20 @@
     return;
   }
 
-  themeSelect.replaceChildren(...themes.map((theme) => {
-    const option = document.createElement("option");
-    option.value = theme.id;
-    option.textContent = theme.name
-      .toLowerCase()
-      .replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
-      .replace(/\b(Rgb|Oled|Crt|Dos|Y2k|Macos)\b/g, (word) => (
-        word === "Macos" ? "macOS" : word.toUpperCase()
-      ));
-    return option;
-  }));
+  const formatThemeName = (name) => name
+    .toLowerCase()
+    .replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+    .replace(/\b(Rgb|Oled|Crt|Dos|Y2k|Macos|Xp)\b/g, (word) => (
+      word === "Macos" ? "macOS" : word.toUpperCase()
+    ))
+    .replace(/\bYoutube\b/, "YouTube");
+  themeSelect.replaceChildren(...(window.BITS_THEME_PREFERENCE?.buildOptions(formatThemeName)
+    ?? themes.map((theme) => {
+      const option = document.createElement("option");
+      option.value = theme.id;
+      option.textContent = formatThemeName(theme.name);
+      return option;
+    })));
   themeSelect.value = document.documentElement.dataset.interfaceTheme ?? themes[0].id;
   themeSelect.closest("label").hidden = false;
 

@@ -171,13 +171,23 @@ is a personal project and largely a learning exercise for me.
   reduced-motion, forced-colors, and performance preferences
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
-- Thirty-one persistent full-interface themes, each with its own fixed accent,
+- Thirty-two persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
-  Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Solarized,
-  Nord, Dracula, Candy Pop, RGB, Aero Glass, Catppuccin, Gruvbox, Tokyo Night,
-  Monokai, Game Bit, High Contrast, Deep Ocean, Coffee Shop, Matrix, Sunset,
-  and the original voxel-inspired MineBits.
+  Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Windows XP
+  (Luna), Solarized, Nord, Dracula, Candy Pop, RGB, Aero Glass, Catppuccin,
+  Gruvbox, Tokyo Night, Monokai, Game Bit, High Contrast, Deep Ocean, Coffee
+  Shop, Matrix, Sunset, and the original voxel-inspired MineBits.
+- Experimental layout themes that restyle the whole interface rather than just
+  its colors: Windows 10, Windows 11, Termius, YouTube (BitsTube), Bits 365,
+  Google, and Browser. They are grouped under EXPERIMENTAL LAYOUTS in every
+  theme picker, show a dismissible experimental notice with a one-click way
+  back to the last standard theme, and are skipped by RANDOM THEME. Windows 10
+  and 11 also restyle the BITS OS desktop; the others temporarily switch the
+  desktop to the last standard theme (with a notification) and come back when
+  the desktop is closed. Each layout lives in `layouts/<id>.css` and
+  `layouts/<id>.js` and is only downloaded while that theme is active;
+  `layouts/runtime.js` mounts and unmounts layout chrome
 - A shared COLOR MODE preference (Theme default, Dark, or Light) on the online
   app menu, Settings, `/boot`, and `/professional`. Every theme has a dark and a
   light palette. Theme default keeps each theme's native look; Windows 95

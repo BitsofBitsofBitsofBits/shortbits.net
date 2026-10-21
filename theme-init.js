@@ -36,7 +36,61 @@ const baseInterfaceThemes = [
   { id: "coffee", name: "COFFEE SHOP", darkColor: "#1f1510", lightColor: "#f6efe4" },
   { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#e9f7ec" },
   { id: "sunset", name: "SUNSET", darkColor: "#1d0f24", lightColor: "#fff1e6" },
+  {
+    id: "windows-xp",
+    name: "WINDOWS XP",
+    darkColor: "#0b1f4a",
+    lightColor: "#245edb",
+    nativeScheme: "light",
+    stylesheet: true,
+  },
+  {
+    id: "windows-10",
+    name: "WINDOWS 10",
+    darkColor: "#1f1f1f",
+    lightColor: "#f2f2f2",
+    experimental: true,
+    desktopCapable: true,
+  },
+  {
+    id: "windows-11",
+    name: "WINDOWS 11",
+    darkColor: "#202020",
+    lightColor: "#f3f3f3",
+    nativeScheme: "light",
+    experimental: true,
+    desktopCapable: true,
+  },
+  { id: "termius", name: "TERMIUS", darkColor: "#141729", lightColor: "#eef0f7", experimental: true },
+  { id: "youtube", name: "YOUTUBE", darkColor: "#0f0f0f", lightColor: "#ffffff", experimental: true },
+  {
+    id: "m365",
+    name: "BITS 365",
+    darkColor: "#1b1a19",
+    lightColor: "#faf9f8",
+    nativeScheme: "light",
+    experimental: true,
+  },
+  {
+    id: "google",
+    name: "GOOGLE",
+    darkColor: "#202124",
+    lightColor: "#ffffff",
+    nativeScheme: "light",
+    experimental: true,
+  },
+  {
+    id: "browser",
+    name: "BROWSER",
+    darkColor: "#202124",
+    lightColor: "#dee1e6",
+    nativeScheme: "light",
+    experimental: true,
+  },
 ];
+const layoutAssetVersion = "layouts-1";
+const lastStandardThemeKey = "bits-last-standard-theme";
+
 const colorSchemeKey = "bits-color-scheme";
 const colorSchemeOptions = [
   { value: "auto", label: "THEME DEFAULT" },
@@ -145,6 +199,9 @@ function selectInterfaceTheme(themeId) {
   if (!theme) {
     return;
   }
+  if (!theme.experimental) {
+    localStorage.setItem(lastStandardThemeKey, theme.id);
+  }
 
   if (theme.seasonal && (themeDebugEnabled || seasonalThemeState.active)) {
     const choiceScope = themeDebugEnabled ? "debug" : seasonalThemeState.id;
@@ -232,6 +289,7 @@ function applyThemeToDocument(themeId) {
   if (themeColorMeta) {
     themeColorMeta.content = scheme === "light" ? theme.lightColor : theme.darkColor;
   }
+  syncThemeAssets(theme);
   window.dispatchEvent(new CustomEvent("bits:theme-applied", {
     detail: { theme, scheme },
   }));
@@ -250,7 +308,7 @@ function setColorSchemePreference(preference) {
 function pickRandomThemeId() {
   const currentThemeId = document.documentElement.dataset.interfaceTheme;
   const candidates = window.BITS_INTERFACE_THEMES.filter(
-    (theme) => theme.id !== currentThemeId,
+    (theme) => theme.id !== currentThemeId && !theme.experimental,
   );
   return candidates[Math.floor(Math.random() * candidates.length)].id;
 }
@@ -285,9 +343,115 @@ function bindColorSchemeSelect(select, formatLabel = (label) => label) {
   });
 }
 
+function getThemeById(themeId) {
+  return window.BITS_INTERFACE_THEMES.find((theme) => theme.id === themeId) ?? null;
+}
+
+function getLastStandardThemeId() {
+  const storedId = localStorage.getItem(lastStandardThemeKey);
+  const storedTheme = getThemeById(storedId);
+  return storedTheme && !storedTheme.experimental ? storedTheme.id : "default";
+}
+
+function buildThemeOptions(formatLabel = (label) => label) {
+  const createOption = (theme) => {
+    const option = document.createElement("option");
+    option.value = theme.id;
+    option.textContent = formatLabel(theme.name, theme);
+    return option;
+  };
+  const standard = window.BITS_INTERFACE_THEMES.filter((theme) => !theme.experimental);
+  const experimental = window.BITS_INTERFACE_THEMES.filter((theme) => theme.experimental);
+  const nodes = standard.map(createOption);
+  if (experimental.length) {
+    const group = document.createElement("optgroup");
+    group.label = formatLabel("EXPERIMENTAL LAYOUTS");
+    group.append(...experimental.map(createOption));
+    nodes.push(group);
+  }
+  return nodes;
+}
+
+function getPageId() {
+  const path = window.location?.pathname ?? "/";
+  if (path === "/" || path === "/index.html") {
+    return "chooser";
+  }
+  if (path.startsWith("/online")) {
+    return "online";
+  }
+  if (path.startsWith("/professional/resume")) {
+    return "resume";
+  }
+  if (path.startsWith("/professional")) {
+    return "professional";
+  }
+  if (path.startsWith("/blog")) {
+    return path.includes("post") ? "post" : "blog";
+  }
+  if (path.startsWith("/boot")) {
+    return "boot";
+  }
+  return "error";
+}
+
+function syncThemeAssets(theme) {
+  const root = document.documentElement;
+  const head = document.head;
+  if (!head) {
+    return;
+  }
+  if (theme.experimental) {
+    root.dataset.layoutTheme = theme.id;
+  } else {
+    delete root.dataset.layoutTheme;
+  }
+  const stylesheetHref = theme.experimental || theme.stylesheet
+    ? `/layouts/${theme.id}.css?v=${layoutAssetVersion}`
+    : "";
+  let stylesheet = document.getElementById("bits-theme-stylesheet");
+  if (!stylesheetHref) {
+    stylesheet?.remove();
+  } else if (!stylesheet || stylesheet.getAttribute("href") !== stylesheetHref) {
+    const nextStylesheet = document.createElement("link");
+    nextStylesheet.rel = "stylesheet";
+    nextStylesheet.href = stylesheetHref;
+    nextStylesheet.id = "bits-theme-stylesheet";
+    if (stylesheet) {
+      stylesheet.replaceWith(nextStylesheet);
+    } else {
+      head.append(nextStylesheet);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        const current = document.getElementById("bits-theme-stylesheet");
+        if (current && current !== head.lastElementChild) {
+          const laterStylesheets = [...head.querySelectorAll('link[rel="stylesheet"], style')];
+          if (laterStylesheets.at(-1) !== current) {
+            head.append(current);
+          }
+        }
+      }, { once: true });
+    }
+  }
+  if (theme.experimental && !document.getElementById("bits-layout-runtime")) {
+    const runtime = document.createElement("script");
+    runtime.src = `/layouts/runtime.js?v=${layoutAssetVersion}`;
+    runtime.id = "bits-layout-runtime";
+    runtime.defer = true;
+    head.append(runtime);
+  }
+}
+
+document.documentElement.dataset.page = getPageId();
+
 window.BITS_THEME_PREFERENCE = {
   dismissalKey: seasonalDismissalKey,
   choiceKey: seasonalChoiceKey,
+  layoutAssetVersion,
+  getTheme: getThemeById,
+  getLastStandard: getLastStandardThemeId,
+  buildOptions: buildThemeOptions,
   colorSchemeKey,
   colorSchemeOptions,
   select: selectInterfaceTheme,

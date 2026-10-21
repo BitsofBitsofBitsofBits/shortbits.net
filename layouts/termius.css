@@ -1,0 +1,188 @@
+﻿:root[data-interface-theme="termius"] {
+  --bg: #111522;
+  --panel: #171c2d;
+  --panel-2: #20263b;
+  --ink: #d5def5;
+  --muted: #a1aecb;
+  --accent: #8de3be;
+  --accent-rgb: 141, 227, 190;
+  --accent-soft: #203d39;
+  --warning: #f4ce83;
+  --line: #3b4761;
+  --border: #3b4761;
+  --shell-bg: #171c2d;
+  --admin-bg: #171c2d;
+  --overlay-bg: #171c2d;
+  --body-background: #111522;
+  --body-background-size: auto;
+  --font-family: "Cascadia Mono", Consolas, "JetBrains Mono", monospace;
+  --control-radius: 3px;
+  --shell-radius: 4px;
+  --window-radius: 4px;
+  --material-blur: 0px;
+  --shadow: none;
+  --name-field-opacity: 0;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --icon-filter: none;
+  --spotify-accent: #8de3be;
+  --scrollbar-thumb-background: #637294;
+  --scrollbar-track-background: #111522;
+  --scrollbar-thumb-radius: 0;
+  --scrollbar-track-radius: 0;
+  --termius-sidebar: #191e32;
+  --termius-active: #2e3655;
+  color-scheme: dark;
+}
+:root[data-interface-theme="termius"][data-color-scheme="light"] {
+  --bg: #f6f1e2;
+  --panel: #fffbed;
+  --panel-2: #ece8d9;
+  --ink: #293c48;
+  --muted: #56656b;
+  --accent: #00694f;
+  --accent-rgb: 0, 105, 79;
+  --accent-soft: #deebe0;
+  --warning: #815600;
+  --line: #9dada8;
+  --border: #9dada8;
+  --shell-bg: #fffbed;
+  --admin-bg: #fffbed;
+  --overlay-bg: #fffbed;
+  --body-background: #f6f1e2;
+  --icon-filter: none;
+  --spotify-accent: #00694f;
+  --scrollbar-thumb-background: #6a7c7e;
+  --scrollbar-track-background: #f6f1e2;
+  --termius-sidebar: #e9e6da;
+  --termius-active: #d4dfd7;
+  color-scheme: light;
+}
+:root[data-interface-theme="termius"] body {
+  margin: 0;
+  padding: 78px 28px 60px 252px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 1.65;
+  animation: none;
+}
+:root[data-interface-theme="termius"] :is(button, input, select, textarea, h1, h2, h3, pre, code) { font-family: var(--font-family); }
+:root[data-interface-theme="termius"] :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+:root[data-interface-theme="termius"] [id] { scroll-margin-top: 90px; }
+:root[data-interface-theme="termius"] :is(.termius-sidebar, .termius-topbar, .termius-status) { box-sizing: border-box; position: fixed; z-index: 20; font-size: 12px; }
+:root[data-interface-theme="termius"] .termius-sidebar { inset: 0 auto 30px 0; width: 224px; padding: 22px 12px; border-right: 1px solid var(--border); background: var(--termius-sidebar); overflow-y: auto; }
+:root[data-interface-theme="termius"] .termius-brand { padding: 0 12px 12px; color: var(--ink); font-weight: 700; font-size: 21px; letter-spacing: .07em; }
+:root[data-interface-theme="termius"] .termius-workspace { padding: 0 12px 22px; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="termius"] .termius-sidebar nav { margin: 24px 0; }
+:root[data-interface-theme="termius"] .termius-sidebar h2 { padding: 0 12px; margin: 0 0 12px; font-size: 13px; color: var(--ink); font-weight: 600; }
+:root[data-interface-theme="termius"] .termius-group { padding: 0 12px; font-size: 10px; color: var(--muted); letter-spacing: .08em; }
+:root[data-interface-theme="termius"] .termius-sidebar a { display: block; padding: 9px 12px; text-decoration: none; color: var(--muted); border: 1px solid transparent; border-radius: 4px; }
+:root[data-interface-theme="termius"] .termius-sidebar a:hover { color: var(--ink); background: var(--panel-2); }
+:root[data-interface-theme="termius"] .termius-sidebar a[aria-current] { color: var(--accent); background: var(--termius-active); border-color: var(--border); }
+:root[data-interface-theme="termius"] .termius-sidebar-foot { padding: 18px 12px; color: var(--accent); border-top: 1px solid var(--border); white-space: pre-line; font-size: 10px; }
+:root[data-interface-theme="termius"] .termius-topbar { inset: 0 0 auto 224px; height: 54px; display: flex; align-items: stretch; justify-content: space-between; background: var(--termius-sidebar); border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="termius"] .termius-tabs { display: flex; min-width: 0; overflow-x: auto; }
+:root[data-interface-theme="termius"] .termius-tabs a { padding: 17px 20px; white-space: nowrap; text-decoration: none; color: var(--muted); border-right: 1px solid var(--border); }
+:root[data-interface-theme="termius"] .termius-tabs a[aria-current] { color: var(--accent); background: var(--panel); box-shadow: inset 0 -2px var(--accent); }
+:root[data-interface-theme="termius"] .termius-connection { padding: 17px; white-space: nowrap; color: var(--muted); }
+:root[data-interface-theme="termius"] .termius-status { z-index: 70; inset: auto 0 0; height: 30px; display: flex; align-items: center; gap: 20px; padding: 0 16px; background: var(--termius-active); border-top: 1px solid var(--border); color: var(--ink); }
+:root[data-interface-theme="termius"] .termius-status-sessions { display: flex; gap: 20px; overflow: auto; white-space: nowrap; }
+:root[data-interface-theme="termius"] .termius-status a { color: var(--ink); text-decoration: none; }
+:root[data-interface-theme="termius"] .termius-status a[aria-current] { color: var(--accent); font-weight: 700; }
+:root[data-interface-theme="termius"] .termius-status-meta { margin-left: auto; color: var(--muted); white-space: nowrap; }
+:root[data-interface-theme="termius"] .termius-clock { margin-left: auto; }
+:root[data-interface-theme="termius"] :is(.shell, .blog-shell, .error-window, .endless-boot-console, .chooser-terminal, .profile-layout) { width: 100%; max-width: 1200px; min-width: 0; margin: 0 auto; border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 12px 36px #0002; background: var(--panel); backdrop-filter: none; }
+:root[data-interface-theme="termius"] .termius-greeting { padding: 22px 28px; border-bottom: 1px solid var(--border); background: var(--panel); }
+:root[data-interface-theme="termius"] .termius-session-info { margin: 0 0 20px; color: var(--muted); font-size: 11px; }
+:root[data-interface-theme="termius"] .termius-ascii { width: max-content; max-width: 100%; margin: 0 0 22px; color: var(--accent); font-size: 12px; line-height: 1.25; font-weight: 700; overflow: auto; }
+:root[data-interface-theme="termius"] .termius-prompt { display: flex; flex-wrap: wrap; align-items: baseline; margin: 0; color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }
+:root[data-interface-theme="termius"] .termius-user { color: var(--accent); font-weight: 700; }
+:root[data-interface-theme="termius"] .termius-cursor { margin-left: 7px; color: var(--accent); animation: termius-cursor 1.15s steps(1) infinite; }
+@keyframes termius-cursor { 50% { opacity: 0; } }
+:root[data-interface-theme="termius"] :is(.termius-man-header, .termius-file-info) { margin: 24px 0 0; color: var(--muted); font-size: 11px; white-space: pre-wrap; }
+:root[data-interface-theme="termius"] .termius-hint { color: var(--accent); }
+:root[data-interface-theme="termius"] .termius-error { color: var(--warning); overflow-wrap: anywhere; }
+:root[data-interface-theme="termius"] :is(.system-bar, .desktop-window-bar, .chooser-bar, .profile-panel-bar, .endless-boot-header) { background: var(--panel-2); color: var(--muted); border-bottom: 1px solid var(--border); border-radius: 0; text-shadow: none; }
+:root[data-interface-theme="termius"] .system-bar { padding: 10px 24px; }
+:root[data-interface-theme="termius"] .app-menu-bar { background: var(--panel); border-bottom: 1px solid var(--border); }
+:root[data-interface-theme="termius"] :is(.hero, .featured-section, .link-section, .content-files-section, .contact-section, .now-playing, .shell > footer) { margin: 22px 26px; }
+:root[data-interface-theme="termius"] .hero { padding: 24px 0; }
+:root[data-interface-theme="termius"] :is(.hero h1, .profile-hero h1, .blog-header h1, .chooser h1) { font-size: clamp(24px, 3vw, 40px); letter-spacing: -.045em; line-height: 1.25; text-shadow: none; }
+:root[data-interface-theme="termius"] :is(.section-label h2, .profile-section h2) { font-size: 18px; color: var(--accent); }
+:root[data-interface-theme="termius"] .section-label { border-bottom: 1px dashed var(--border); }
+:root[data-interface-theme="termius"] :is(.featured-card, .link-card, .content-file-card, .spotify-widget, .now-playing, .profile-overview, .profile-skills article, .blog-post-list article) { background: var(--panel); border: 1px solid var(--border); border-radius: 2px; box-shadow: none; }
+:root[data-interface-theme="termius"] :is(.featured-card, .link-card, .blog-post-list article):hover { border-color: var(--accent); background: var(--panel-2); }
+:root[data-interface-theme="termius"] :is(button, input, textarea, select, .profile-button) { border-radius: 2px; }
+:root[data-interface-theme="termius"] :is(input, textarea, select) { background-color: var(--bg); color: var(--ink); }
+:root[data-interface-theme="termius"] .desktop-window { background: var(--panel); color: var(--ink); border: 1px solid var(--accent); border-radius: 3px; box-shadow: 10px 12px 0 #0003; backdrop-filter: none; }
+:root[data-interface-theme="termius"] .desktop-window-bar p::before { content: '┌─ '; color: var(--accent); }
+:root[data-interface-theme="termius"] .desktop-window-content { background: var(--panel); }
+:root[data-interface-theme="termius"] .profile-layout { padding: 0 28px; }
+:root[data-interface-theme="termius"] .profile-header { padding: 20px 0; gap: 16px; flex-wrap: wrap; }
+:root[data-interface-theme="termius"] .profile-header-tools { gap: 14px; }
+:root[data-interface-theme="termius"] .profile-header nav { gap: 16px; }
+:root[data-interface-theme="termius"] .profile-hero { padding: 32px 0; gap: 28px; }
+:root[data-interface-theme="termius"] .profile-section { padding: 32px 0; border-top: 1px dashed var(--border); }
+:root[data-interface-theme="termius"] .profile-kicker::before { content: '# '; }
+:root[data-interface-theme="termius"] .profile-intro { font-size: 17px; }
+:root[data-interface-theme="termius"] .profile-button { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+:root[data-interface-theme="termius"] .blog-shell { padding: 28px; }
+:root[data-interface-theme="termius"] .blog-shell .termius-greeting { padding: 0 0 24px; margin-bottom: 28px; }
+:root[data-interface-theme="termius"] .blog-markdown { line-height: 1.85; }
+:root[data-interface-theme="termius"] .blog-markdown :is(pre, blockquote) { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0; }
+:root[data-interface-theme="termius"] .blog-article h1 { font-size: clamp(24px, 3vw, 38px); }
+:root[data-interface-theme="termius"] .chooser { min-height: calc(100dvh - 140px); padding: 0; }
+:root[data-interface-theme="termius"] .chooser-terminal { max-width: 850px; animation: none; }
+:root[data-interface-theme="termius"] .chooser-body { padding: 26px; }
+:root[data-interface-theme="termius"] .chooser-body .termius-greeting { padding: 0 0 24px; margin-bottom: 24px; }
+:root[data-interface-theme="termius"] .chooser-options a { background: var(--bg); border-radius: 2px; }
+:root[data-interface-theme="termius"] .chooser-key { padding: 10px; background: var(--panel-2); }
+:root[data-interface-theme="termius"] .error-page { display: block; min-height: 100dvh; }
+:root[data-interface-theme="termius"] .error-window { padding: 30px; }
+:root[data-interface-theme="termius"] .error-window .termius-greeting { padding: 0 0 24px; }
+:root[data-interface-theme="termius"] .error-code { color: var(--warning); text-shadow: none; font-size: clamp(60px, 10vw, 120px); }
+:root[data-interface-theme="termius"] .endless-boot-page { display: block; height: auto; min-height: 100dvh; overflow-y: auto; }
+:root[data-interface-theme="termius"] .endless-boot-console { height: auto; max-height: none; padding: 20px; }
+:root[data-interface-theme="termius"] .endless-boot-console .termius-greeting { padding: 0 0 20px; }
+:root[data-interface-theme="termius"] .endless-boot-log { background: var(--bg); border: 1px solid var(--border); }
+:root[data-interface-theme="termius"] .bits-layout-notice { transform: none; bottom: 42px; right: 14px; left: auto; max-width: min(620px, calc(100vw - 28px)); border: 1px solid var(--border); border-radius: 3px; background: var(--panel-2); color: var(--ink); font-family: var(--font-family); font-size: 11px; box-shadow: 0 5px 20px #0003; }
+:root[data-interface-theme="termius"] .bits-layout-notice strong { color: var(--warning); background: var(--bg); }
+:root[data-interface-theme="termius"][data-contrast="high"] { --muted: var(--ink); --border: var(--ink); --line: var(--ink); }
+@media (max-width: 1050px) {
+  :root[data-interface-theme="termius"] .profile-hero { grid-template-columns: 1fr; }
+  :root[data-interface-theme="termius"] .termius-connection { display: none; }
+}
+@media (max-width: 700px) {
+  :root[data-interface-theme="termius"] body { padding: 130px 12px 60px; }
+  :root[data-interface-theme="termius"] .termius-sidebar { inset: 0 0 auto; width: 100%; height: 68px; padding: 0 12px; display: flex; align-items: center; gap: 14px; border-right: 0; border-bottom: 1px solid var(--border); overflow: auto; }
+  :root[data-interface-theme="termius"] .termius-brand { padding: 0; font-size: 16px; white-space: nowrap; }
+  :root[data-interface-theme="termius"] .termius-sidebar .termius-hosts { display: flex; margin: 0; }
+  :root[data-interface-theme="termius"] .termius-hosts a { white-space: nowrap; padding: 8px; }
+  :root[data-interface-theme="termius"] :is(.termius-workspace, .termius-hosts h2, .termius-group, .termius-snippets, .termius-forwarding, .termius-sidebar-foot) { display: none; }
+  :root[data-interface-theme="termius"] .termius-topbar { top: 68px; left: 0; height: 45px; }
+  :root[data-interface-theme="termius"] .termius-tabs a { padding: 12px; font-size: 11px; }
+  :root[data-interface-theme="termius"] .termius-status { gap: 10px; padding: 0 8px; font-size: 10px; }
+  :root[data-interface-theme="termius"] .termius-status-sessions { gap: 12px; }
+  :root[data-interface-theme="termius"] .termius-status-meta { display: none; }
+  :root[data-interface-theme="termius"] .termius-greeting { padding: 18px 16px; }
+  :root[data-interface-theme="termius"] .termius-ascii { font-size: 10px; }
+  :root[data-interface-theme="termius"] .termius-prompt { font-size: 12px; }
+  :root[data-interface-theme="termius"] :is(.hero, .featured-section, .link-section, .content-files-section, .contact-section, .now-playing, .shell > footer) { margin-left: 16px; margin-right: 16px; }
+  :root[data-interface-theme="termius"] :is(.profile-layout, .blog-shell, .error-window, .chooser-body) { padding: 16px; }
+  :root[data-interface-theme="termius"] .profile-header nav { gap: 12px; }
+  :root[data-interface-theme="termius"] .profile-brand { gap: 10px; }
+  :root[data-interface-theme="termius"] .chooser-options a { padding: 12px; gap: 10px; grid-template-columns: auto minmax(0, 1fr); }
+  :root[data-interface-theme="termius"] .chooser-path { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="termius"] .termius-cursor { animation: none; }
+}
+:root[data-interface-theme="termius"][data-motion="reduced"] .termius-cursor { animation: none; }
+@media print {
+  :root[data-interface-theme="termius"] body { padding: 0; background: #fff; color: #000; }
+  :root[data-interface-theme="termius"] .profile-layout { max-width: none; border: 0; padding: 0; box-shadow: none; background: #fff; }
+}
+
+

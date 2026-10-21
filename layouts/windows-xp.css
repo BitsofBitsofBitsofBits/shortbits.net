@@ -1,0 +1,902 @@
+﻿:root[data-interface-theme="windows-xp"] {
+  color-scheme: light;
+  --xp-sky: #4f9ee8;
+  --xp-blue: #0054e3;
+  --xp-deep-blue: #003bb5;
+  --xp-highlight: #7fc9ff;
+  --xp-face: #ece9d8;
+  --xp-field: #fff;
+  --xp-line: #8b9eb4;
+  --xp-ink: #18283b;
+  --xp-muted: #40546c;
+  --xp-green: #3cae36;
+  --accent: #075bd8;
+  --accent-rgb: 7, 91, 216;
+  --accent-soft: rgba(7, 91, 216, 0.12);
+  --danger: #a53328;
+  --warning: #805400;
+  --success: #287b32;
+  --bg: #4c91d2;
+  --panel: #ece9d8;
+  --panel-2: #f8f6ec;
+  --panel-strong: #f4f1e6;
+  --ink: #18283b;
+  --muted: #40546c;
+  --border: #8b9eb4;
+  --line: #8b9eb4;
+  --shadow: 0 16px 38px rgba(16, 47, 88, 0.3);
+  --shell-bg: #ece9d8;
+  --admin-bg: #ece9d8;
+  --overlay-bg: #ece9d8;
+  --body-background: radial-gradient(ellipse 68% 39% at 18% 108%, #65ae36 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #4f9c2b 0 58%, transparent 59%), linear-gradient(180deg, #62b8f6 0%, #9fd8fc 48%, #b7e3fa 62%, #70b73a 62.2%, #579f2e 100%);
+  --body-background-size: cover;
+  --control-radius: 4px;
+  --font-family: Tahoma, "Trebuchet MS", Arial, sans-serif;
+  --material-blur: 0px;
+  --shell-radius: 9px;
+  --window-radius: 9px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: none;
+  --spotify-accent: #075bd8;
+  --scrollbar-size: 16px;
+  --scrollbar-track: #f5f3eb;
+  --scrollbar-track-border: #a4a092;
+  --scrollbar-thumb-color: #c8d8e8;
+  --scrollbar-thumb-background: linear-gradient(90deg, #f7fbff 0%, #dce8f3 42%, #bdd1e4 100%);
+  --scrollbar-thumb-hover: #b8d6f4;
+  --scrollbar-thumb-active: #93b9df;
+  --scrollbar-thumb-border: 1px solid #8198b0;
+  --scrollbar-thumb-radius: 8px;
+  --scrollbar-track-radius: 0;
+  --scrollbar-thumb-shadow: inset 1px 1px #fff, inset -1px -1px #a3b7ca;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] {
+  color-scheme: dark;
+  --xp-sky: #293b55;
+  --xp-blue: #202c3d;
+  --xp-deep-blue: #111a27;
+  --xp-highlight: #586b82;
+  --xp-face: #292c32;
+  --xp-field: #191c22;
+  --xp-line: #4b515b;
+  --xp-ink: #f0f2f5;
+  --xp-muted: #c2cad4;
+  --xp-green: #398d48;
+  --accent: #8abfff;
+  --accent-rgb: 138, 191, 255;
+  --accent-soft: rgba(138, 191, 255, 0.18);
+  --danger: #ff8d82;
+  --warning: #ffd166;
+  --success: #83d394;
+  --bg: #10151d;
+  --panel: #292c32;
+  --panel-2: #333841;
+  --panel-strong: #30343b;
+  --ink: #f0f2f5;
+  --muted: #c2cad4;
+  --border: #59616d;
+  --line: #59616d;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.58);
+  --shell-bg: #292c32;
+  --admin-bg: #292c32;
+  --overlay-bg: #292c32;
+  --body-background: radial-gradient(ellipse 68% 39% at 18% 108%, #273e29 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #1c3222 0 58%, transparent 59%), linear-gradient(180deg, #171e2a 0%, #202a38 58%, #27392e 58.2%, #1a2d21 100%);
+  --body-background-size: cover;
+  --icon-filter: brightness(0) invert(1);
+  --scrollbar-track: #1e2229;
+  --scrollbar-track-border: #080a0d;
+  --scrollbar-thumb-color: #414b58;
+  --scrollbar-thumb-background: linear-gradient(90deg, #4b5664, #313a46);
+  --scrollbar-thumb-hover: #576779;
+  --scrollbar-thumb-active: #687d94;
+  --scrollbar-thumb-border: 1px solid #171b21;
+  --scrollbar-thumb-shadow: inset 1px 1px #718092, inset -1px -1px #171b21;
+}
+
+:root[data-interface-theme="windows-xp"] body {
+  color: var(--ink);
+  background: var(--body-background);
+  background-attachment: fixed;
+  font-family: Tahoma, "Trebuchet MS", Arial, sans-serif;
+  letter-spacing: normal;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-interface-theme="windows-xp"] ::selection {
+  color: #fff;
+  background: #316ac5;
+}
+
+:root[data-interface-theme="windows-xp"] :focus-visible {
+  outline: 2px solid #ffb900;
+  outline-offset: 2px;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] :focus-visible {
+  outline-color: #ffd166;
+}
+
+:root[data-interface-theme="windows-xp"] button,
+:root[data-interface-theme="windows-xp"] input,
+:root[data-interface-theme="windows-xp"] select,
+:root[data-interface-theme="windows-xp"] textarea,
+:root[data-interface-theme="windows-xp"] .footer-select-control {
+  border-radius: 4px;
+  font-family: Tahoma, "Trebuchet MS", Arial, sans-serif;
+}
+
+:root[data-interface-theme="windows-xp"] button,
+:root[data-interface-theme="windows-xp"] input,
+:root[data-interface-theme="windows-xp"] select,
+:root[data-interface-theme="windows-xp"] textarea {
+  border-color: #7f9db9;
+  color: var(--ink);
+  background-color: var(--xp-field);
+}
+
+:root[data-interface-theme="windows-xp"] button {
+  background-image: linear-gradient(180deg, #fff 0%, #f2f7fc 48%, #dce8f5 100%);
+  box-shadow: inset 1px 1px rgba(255,255,255,.95), inset -1px -1px rgba(87,119,153,.28), 0 1px 2px rgba(22,49,79,.15);
+}
+
+:root[data-interface-theme="windows-xp"] button:hover,
+:root[data-interface-theme="windows-xp"] button:focus-visible,
+:root[data-interface-theme="windows-xp"] input:hover,
+:root[data-interface-theme="windows-xp"] select:hover,
+:root[data-interface-theme="windows-xp"] textarea:hover {
+  border-color: #3c7fb1;
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb),.18), 0 0 9px rgba(var(--accent-rgb),.28), inset 1px 1px #fff;
+}
+
+:root[data-interface-theme="windows-xp"] button:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #c7d9ed, #eef5fb);
+  box-shadow: inset 1px 1px 3px rgba(35,67,101,.35);
+}
+
+:root[data-interface-theme="windows-xp"] a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+:root[data-interface-theme="windows-xp"] a:hover {
+  color: #c04b00;
+}
+
+:root[data-interface-theme="windows-xp"] .shell,
+:root[data-interface-theme="windows-xp"] .desktop-window,
+:root[data-interface-theme="windows-xp"] .system-window,
+:root[data-interface-theme="windows-xp"] .fake-desktop-app,
+:root[data-interface-theme="windows-xp"] .blog-shell,
+:root[data-interface-theme="windows-xp"] .chooser-terminal,
+:root[data-interface-theme="windows-xp"] .profile-layout,
+:root[data-interface-theme="windows-xp"] .error-window,
+:root[data-interface-theme="windows-xp"] .endless-boot-console {
+  border: 1px solid #617d9b;
+  border-radius: 9px;
+  color: var(--ink);
+  background-color: var(--xp-face);
+  box-shadow: inset 1px 1px #fff, 2px 2px rgba(25,48,73,.5), var(--shadow);
+}
+
+:root[data-interface-theme="windows-xp"] .system-bar,
+:root[data-interface-theme="windows-xp"] .desktop-window-bar,
+:root[data-interface-theme="windows-xp"] .fake-desktop-app > header,
+:root[data-interface-theme="windows-xp"] #admin-blog-window > .desktop-window-bar,
+:root[data-interface-theme="windows-xp"] .chooser-bar,
+:root[data-interface-theme="windows-xp"] .profile-panel-bar {
+  color: #fff;
+  background: linear-gradient(180deg, #5aa7f5 0%, #2678df 9%, #0865cb 46%, #0a58bf 47%, #236de0 100%);
+  text-shadow: 0 1px 1px rgba(0,30,88,.7);
+}
+
+:root[data-interface-theme="windows-xp"] .system-bar,
+:root[data-interface-theme="windows-xp"] .desktop-window-bar,
+:root[data-interface-theme="windows-xp"] .fake-desktop-app > header,
+:root[data-interface-theme="windows-xp"] #admin-blog-window > .desktop-window-bar,
+:root[data-interface-theme="windows-xp"] .chooser-bar {
+  border-bottom: 1px solid #064da7;
+  border-radius: 8px 8px 0 0;
+}
+
+:root[data-interface-theme="windows-xp"] .system-bar {
+  min-height: 46px;
+  padding-left: 8px;
+}
+
+:root[data-interface-theme="windows-xp"] .system-bar > p {
+  color: #fff;
+  font-weight: 700;
+}
+
+:root[data-interface-theme="windows-xp"] .system-status,
+:root[data-interface-theme="windows-xp"] .system-status:hover,
+:root[data-interface-theme="windows-xp"] .system-status:focus-visible {
+  color: #fff;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:root[data-interface-theme="windows-xp"] .status-dot {
+  background: #55d74e;
+  box-shadow: 0 0 0 1px #14521b;
+}
+
+:root[data-interface-theme="windows-xp"] .window-controls {
+  gap: 3px;
+  padding: 4px 5px;
+}
+
+:root[data-interface-theme="windows-xp"] .window-button,
+:root[data-interface-theme="windows-xp"] .desktop-window-controls button {
+  min-width: 28px;
+  width: 30px;
+  min-height: 25px;
+  border: 1px solid #e9f4ff;
+  border-radius: 4px;
+  color: white;
+  background: linear-gradient(180deg, #82baff, #307ce2 48%, #1760ca 52%, #4a91ed);
+  box-shadow: inset 1px 1px rgba(255,255,255,.75), inset -1px -1px rgba(0,38,110,.32), 0 1px 2px rgba(0,0,0,.3);
+  font-weight: 700;
+  text-shadow: 0 1px rgba(0,31,91,.8);
+}
+
+:root[data-interface-theme="windows-xp"] .window-button:hover,
+:root[data-interface-theme="windows-xp"] .desktop-window-controls button:hover,
+:root[data-interface-theme="windows-xp"] .desktop-window-controls button:focus-visible {
+  color: #fff;
+  background: linear-gradient(180deg, #a7d4ff, #5598f1 48%, #2677db 52%, #77b5ff);
+}
+
+:root[data-interface-theme="windows-xp"] .desktop-window-controls [data-window-close],
+:root[data-interface-theme="windows-xp"] .close-button {
+  border-color: #ffe1be;
+  color: #fff;
+  background: linear-gradient(180deg, #ffb777, #f45a27 48%, #dc3212 52%, #f16e30);
+}
+
+:root[data-interface-theme="windows-xp"] .desktop-window-controls [data-window-close]:hover,
+:root[data-interface-theme="windows-xp"] .desktop-window-controls [data-window-close]:focus-visible,
+:root[data-interface-theme="windows-xp"] .close-button:hover,
+:root[data-interface-theme="windows-xp"] .close-button:focus-visible {
+  background: linear-gradient(180deg, #ffd0a1, #ff7840 48%, #e94318 52%, #ff9054);
+}
+
+:root[data-interface-theme="windows-xp"] .app-menu-bar {
+  color: var(--ink);
+  background: linear-gradient(180deg, #faf9f4, #e6e3d7);
+  border-bottom: 1px solid #b6b2a6;
+}
+
+:root[data-interface-theme="windows-xp"] .app-menu summary:hover,
+:root[data-interface-theme="windows-xp"] .app-menu summary:focus-visible,
+:root[data-interface-theme="windows-xp"] .app-menu[open] summary {
+  color: #163d74;
+  background: #dcecff;
+  box-shadow: inset 0 0 0 1px #9cc8ef;
+}
+
+:root[data-interface-theme="windows-xp"] .app-menu-popup,
+:root[data-interface-theme="windows-xp"] .fake-start-menu > div {
+  border: 1px solid #829db8;
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--xp-face);
+  box-shadow: 3px 4px 10px rgba(0,0,0,.32);
+}
+
+:root[data-interface-theme="windows-xp"] .app-menu-popup button,
+:root[data-interface-theme="windows-xp"] .app-menu-popup a {
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-interface-theme="windows-xp"] .app-menu-popup button:hover,
+:root[data-interface-theme="windows-xp"] .app-menu-popup button:focus-visible,
+:root[data-interface-theme="windows-xp"] .app-menu-popup a:hover,
+:root[data-interface-theme="windows-xp"] .app-menu-popup a:focus-visible {
+  color: #102f55;
+  background: #cfe5fb;
+  box-shadow: inset 0 0 0 1px #a2c6e8;
+}
+
+:root[data-interface-theme="windows-xp"] .shell,
+:root[data-interface-theme="windows-xp"] .desktop-window,
+:root[data-interface-theme="windows-xp"] .system-window,
+:root[data-interface-theme="windows-xp"] .fake-desktop-app {
+  overflow: hidden;
+}
+
+:root[data-interface-theme="windows-xp"] .desktop-window-bar {
+  min-height: 38px;
+}
+
+:root[data-interface-theme="windows-xp"] .desktop-window-bar > p {
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+:root[data-interface-theme="windows-xp"] .desktop-window-content,
+:root[data-interface-theme="windows-xp"] .shell-content,
+:root[data-interface-theme="windows-xp"] .system-window > div {
+  color: var(--ink);
+  background-color: var(--xp-face);
+}
+
+:root[data-interface-theme="windows-xp"] .section-label,
+:root[data-interface-theme="windows-xp"] .profile-section-heading,
+:root[data-interface-theme="windows-xp"] .profile-overview,
+:root[data-interface-theme="windows-xp"] .profile-skills article,
+:root[data-interface-theme="windows-xp"] .profile-projects article,
+:root[data-interface-theme="windows-xp"] .blog-post-list article,
+:root[data-interface-theme="windows-xp"] .blog-markdown pre,
+:root[data-interface-theme="windows-xp"] .profile-card,
+:root[data-interface-theme="windows-xp"] .link-card,
+:root[data-interface-theme="windows-xp"] .system-panel,
+:root[data-interface-theme="windows-xp"] .panel,
+:root[data-interface-theme="windows-xp"] .fake-playing-dead,
+:root[data-interface-theme="windows-xp"] .fake-action-center {
+  border: 1px solid var(--xp-line);
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--panel-2);
+  box-shadow: inset 1px 1px #fff, 0 1px 2px rgba(30,53,78,.12);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-panel-bar {
+  padding: 8px 12px;
+  border-radius: 5px 5px 0 0;
+  font-weight: 700;
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-page,
+:root[data-interface-theme="windows-xp"] .blog-page,
+:root[data-interface-theme="windows-xp"] .professional-page,
+:root[data-interface-theme="windows-xp"] .error-page {
+  color: var(--ink);
+  background: var(--body-background);
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-terminal,
+:root[data-interface-theme="windows-xp"] .blog-shell,
+:root[data-interface-theme="windows-xp"] .error-window {
+  background: var(--xp-face);
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-bar {
+  padding: 10px 16px;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-boot,
+:root[data-interface-theme="windows-xp"] .chooser-copy strong,
+:root[data-interface-theme="windows-xp"] .blog-header h1,
+:root[data-interface-theme="windows-xp"] .blog-post-list h3 a,
+:root[data-interface-theme="windows-xp"] .blog-markdown h2,
+:root[data-interface-theme="windows-xp"] .blog-markdown h3,
+:root[data-interface-theme="windows-xp"] .blog-markdown h4,
+:root[data-interface-theme="windows-xp"] .profile-kicker,
+:root[data-interface-theme="windows-xp"] .profile-card-index {
+  color: #064faf;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-boot,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-copy strong,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-header h1,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-post-list h3 a,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown h2,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown h3,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown h4,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-kicker,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-card-index {
+  color: #a9ceff;
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-options a {
+  border: 1px solid var(--xp-line);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #fff, #f0f5fa);
+  box-shadow: inset 1px 1px #fff, 0 1px 3px rgba(30,53,78,.14);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-options a {
+  background: linear-gradient(180deg, #363c45, #292e35);
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-options a:hover,
+:root[data-interface-theme="windows-xp"] .chooser-options a:focus-visible {
+  border-color: #6ca6df;
+  background: #dceeff;
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb),.2), 0 0 12px rgba(var(--accent-rgb),.24);
+  transform: translateY(-1px);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-options a:hover,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-options a:focus-visible {
+  background: #354a61;
+}
+
+:root[data-interface-theme="windows-xp"] .chooser-hint,
+:root[data-interface-theme="windows-xp"] .chooser-intro,
+:root[data-interface-theme="windows-xp"] .chooser-copy span,
+:root[data-interface-theme="windows-xp"] .blog-header p:last-child,
+:root[data-interface-theme="windows-xp"] .blog-post-list article > p:not(.blog-post-card-meta),
+:root[data-interface-theme="windows-xp"] .blog-article-excerpt,
+:root[data-interface-theme="windows-xp"] .blog-markdown,
+:root[data-interface-theme="windows-xp"] .blog-markdown pre code,
+:root[data-interface-theme="windows-xp"] .profile-layout,
+:root[data-interface-theme="windows-xp"] .profile-layout p,
+:root[data-interface-theme="windows-xp"] .profile-layout dd {
+  color: var(--ink);
+}
+
+:root[data-interface-theme="windows-xp"] .blog-header h1,
+:root[data-interface-theme="windows-xp"] .blog-markdown a,
+:root[data-interface-theme="windows-xp"] .blog-article-meta,
+:root[data-interface-theme="windows-xp"] .blog-post-card-meta {
+  color: var(--accent);
+}
+
+:root[data-interface-theme="windows-xp"] .blog-post-list article,
+:root[data-interface-theme="windows-xp"] .blog-markdown pre {
+  background: var(--xp-field);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-layout {
+  padding-inline: clamp(16px, 4vw, 34px);
+  border: 1px solid #7187a0;
+  border-radius: 9px;
+  background: var(--xp-face);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-header,
+:root[data-interface-theme="windows-xp"] .profile-footer {
+  border-color: var(--xp-line);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-overview,
+:root[data-interface-theme="windows-xp"] .profile-skills article,
+:root[data-interface-theme="windows-xp"] .profile-projects article {
+  background: var(--panel-2);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-button {
+  color: #fff;
+  background: linear-gradient(180deg, #6eb4f7, #2677d5 50%, #1156b6);
+  border: 1px solid #0a4d9d;
+  border-radius: 5px;
+  box-shadow: inset 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(0,0,0,.2);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-button:hover {
+  color: #fff;
+  background: linear-gradient(180deg, #91c9ff, #428ce3 50%, #1e69c7);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-text-link,
+:root[data-interface-theme="windows-xp"] .profile-socials a,
+:root[data-interface-theme="windows-xp"] .profile-footer a {
+  color: var(--accent);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop {
+  background: radial-gradient(ellipse 68% 39% at 18% 108%, #65ae36 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #4f9c2b 0 58%, transparent 59%), linear-gradient(180deg, #62b8f6 0%, #a4dcfb 48%, #b8e3f7 59%, #77bb3d 59.2%, #4c992b 74%, #82bb45 100%);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-desktop {
+  background: radial-gradient(ellipse 68% 39% at 18% 108%, #203923 0 58%, transparent 59%), radial-gradient(ellipse 72% 43% at 83% 112%, #152b1d 0 58%, transparent 59%), linear-gradient(180deg, #111a28 0%, #253b56 54%, #1c2b35 59%, #203825 59.2%, #152a1c 76%, #293a24 100%);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop-icons button {
+  color: #fff;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: 1px 1px 2px #102c4a, -1px -1px 2px #102c4a;
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop-icons button:hover,
+:root[data-interface-theme="windows-xp"] .fake-desktop-icons button:focus-visible {
+  color: #fff;
+  border: 1px dotted rgba(255,255,255,.9);
+  background: rgba(21,89,166,.48);
+  box-shadow: none;
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop-icon {
+  border-color: rgba(255,255,255,.8);
+  border-radius: 4px;
+  background: linear-gradient(145deg, #b9e4ff, #317fc8 58%, #1d4f95);
+  box-shadow: 1px 2px 3px rgba(0,0,0,.4);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-taskbar {
+  min-height: 48px;
+  padding: 4px 8px;
+  border-top: 1px solid #2364b1;
+  background: linear-gradient(180deg, #3b8dec 0%, #176ad1 18%, #0754b8 100%);
+  box-shadow: 0 -1px #8cc4ff, 0 -5px 16px rgba(0,0,0,.25);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-taskbar button {
+  border-color: #1c549d;
+  color: #fff;
+  background: linear-gradient(180deg, #5da5f2, #2574d0);
+  box-shadow: inset 1px 1px rgba(255,255,255,.4), 0 1px 2px rgba(0,0,0,.35);
+  text-shadow: 0 1px #123866;
+}
+
+:root[data-interface-theme="windows-xp"] .fake-start-menu summary {
+  min-width: 108px;
+  border-color: #22621e;
+  border-radius: 12px 5px 5px 12px;
+  color: #fff;
+  background: linear-gradient(180deg, #74d34c, #38a72f 48%, #218224 52%, #47b336);
+  box-shadow: inset 1px 1px rgba(255,255,255,.55), 1px 0 5px rgba(0,0,0,.35);
+  font-size: .9rem;
+  font-style: italic;
+  font-weight: 800;
+  text-shadow: 0 1px #1c5d18;
+}
+
+:root[data-interface-theme="windows-xp"] .fake-start-menu[open] summary,
+:root[data-interface-theme="windows-xp"] .fake-start-menu summary:hover,
+:root[data-interface-theme="windows-xp"] .fake-start-menu summary:focus-visible {
+  background: linear-gradient(180deg, #9be574, #50c23f 48%, #2e9b28 52%, #6acb4e);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-start-menu strong {
+  color: var(--accent);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop-clock {
+  color: #fff;
+}
+
+:root[data-interface-theme="windows-xp"] .error-window::before {
+  display: block;
+  margin: -32px -32px 24px;
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  color: #fff;
+  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+  font-weight: 700;
+  content: "BITS OS // RECOVERY CENTER";
+}
+
+:root[data-interface-theme="windows-xp"] .error-code {
+  color: #075bd8;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .error-code {
+  color: #a9ceff;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-page {
+  background: linear-gradient(180deg, #62b8f6 0%, #a4dcfb 50%, #78b939 50.2%, #4b9829 100%);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-console {
+  display: grid;
+  padding: clamp(16px, 3vw, 42px);
+  background: var(--xp-face);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-header {
+  padding: 12px 14px;
+  border: 1px solid #7f9db9;
+  border-radius: 6px 6px 0 0;
+  color: #fff;
+  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-header h1,
+:root[data-interface-theme="windows-xp"] .endless-boot-header .system-kicker {
+  color: #fff;
+  text-shadow: none;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-indicators {
+  color: #fff;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-terminal {
+  border: 1px solid #8295a9;
+  background: var(--xp-field);
+  color: var(--ink);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-log {
+  color: var(--ink);
+  mask-image: none;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-log-entry > span::before,
+:root[data-interface-theme="windows-xp"] .endless-boot-transmission > span,
+:root[data-interface-theme="windows-xp"] .endless-boot-post strong,
+:root[data-interface-theme="windows-xp"] .endless-boot-header h1 {
+  color: #075bd8;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-progress {
+  height: 22px;
+  padding: 3px;
+  border: 1px solid #7b8c9f;
+  border-radius: 3px;
+  background: #f8f7f0;
+  box-shadow: inset 1px 1px #c8c6bb;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-progress span {
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #43b63e 0 14px, transparent 14px 17px), linear-gradient(180deg, #8be66d, #2a9b2c);
+  box-shadow: inset 1px 1px rgba(255,255,255,.55);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-footer p,
+:root[data-interface-theme="windows-xp"] .endless-boot-status,
+:root[data-interface-theme="windows-xp"] .endless-boot-machine,
+:root[data-interface-theme="windows-xp"] .endless-boot-transmission p,
+:root[data-interface-theme="windows-xp"] .endless-boot-machine strong {
+  color: var(--ink);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-settings-panel,
+:root[data-interface-theme="windows-xp"] .endless-boot-command,
+:root[data-interface-theme="windows-xp"] .endless-boot-event {
+  border: 1px solid #7f9db9;
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--xp-face);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .system-bar,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .desktop-window-bar,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-desktop-app > header,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] #admin-blog-window > .desktop-window-bar,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-bar,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-panel-bar,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .endless-boot-header {
+  color: #f4f6f8;
+  background: linear-gradient(180deg, #45566c 0%, #2b3748 48%, #1f2a39 50%, #303d50 100%);
+  border-color: #52677f;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .system-bar > p,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .desktop-window-bar > p {
+  color: #fff;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-bar {
+  color: var(--ink);
+  background: linear-gradient(180deg, #373d46, #292e35);
+  border-color: #191d23;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-popup,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-start-menu > div,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .section-label,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-overview,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-skills article,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-projects article,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-post-list article,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown pre,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .system-panel,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .panel,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-playing-dead,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .fake-action-center {
+  color: var(--ink);
+  background: var(--panel-2);
+  border-color: var(--border);
+  box-shadow: inset 1px 1px rgba(255,255,255,.08), 0 2px 5px rgba(0,0,0,.3);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .chooser-options a:hover,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-popup button:hover,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-popup button:focus-visible,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-popup a:hover,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .app-menu-popup a:focus-visible {
+  color: #fff;
+  background: #354a61;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] button,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] input,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] select,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] textarea {
+  border-color: #647487;
+  color: var(--ink);
+  background-color: #20252d;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] button:not(.window-button):not(.close-button):not(.fake-start-menu summary):not(.desktop-window-controls button) {
+  background-image: linear-gradient(180deg, #414b58, #303741 52%, #252b33);
+  box-shadow: inset 1px 1px rgba(255,255,255,.09), inset -1px -1px rgba(0,0,0,.3);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .desktop-window-content,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .shell-content,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .system-window > div,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-post-list article,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-markdown pre,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .endless-boot-terminal {
+  color: var(--ink);
+  background-color: var(--xp-field);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .error-window::before {
+  color: #fff;
+  background: linear-gradient(180deg, #45566c, #2b3748 55%, #303d50);
+}
+
+:root[data-interface-theme="windows-xp"] ::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+:root[data-interface-theme="windows-xp"] ::-webkit-scrollbar-track {
+  border: 1px solid var(--scrollbar-track-border);
+  background: var(--scrollbar-track);
+}
+
+:root[data-interface-theme="windows-xp"] ::-webkit-scrollbar-thumb {
+  border: var(--scrollbar-thumb-border);
+  border-radius: var(--scrollbar-thumb-radius);
+  background: var(--scrollbar-thumb-background);
+  box-shadow: var(--scrollbar-thumb-shadow);
+}
+
+:root[data-interface-theme="windows-xp"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+:root[data-interface-theme="windows-xp"] * {
+  scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+:root[data-interface-theme="windows-xp"][data-contrast="high"] {
+  --xp-line: #46566a;
+  --muted: #26374d;
+  --border: #46566a;
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"][data-contrast="high"] {
+  --xp-line: #d3deeb;
+  --muted: #f0f2f5;
+  --border: #c1cddd;
+}
+
+:root[data-interface-theme="windows-xp"][data-motion="reduced"] *,
+:root[data-interface-theme="windows-xp"][data-effects="off"] * {
+  animation-duration: .001ms;
+  animation-iteration-count: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-interface-theme="windows-xp"] *,
+  :root[data-interface-theme="windows-xp"] *::before,
+  :root[data-interface-theme="windows-xp"] *::after {
+    scroll-behavior: auto;
+    animation-duration: .001ms;
+    animation-iteration-count: 1;
+    transition-duration: .001ms;
+  }
+}
+
+@media print {
+  :root[data-interface-theme="windows-xp"] .profile-layout {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+}
+
+@media (max-width: 640px) {
+  :root[data-interface-theme="windows-xp"] .profile-layout {
+    width: calc(100% - 20px);
+    padding-inline: 14px;
+  }
+
+  :root[data-interface-theme="windows-xp"] .system-bar > p {
+    max-width: 36vw;
+  }
+
+  :root[data-interface-theme="windows-xp"] .fake-taskbar {
+    gap: 4px;
+    padding-inline: 5px;
+  }
+
+  :root[data-interface-theme="windows-xp"] .fake-start-menu summary {
+    min-width: 72px;
+    padding-inline: 8px;
+  }
+}
+
+
+
+
+
+
+:root[data-interface-theme="windows-xp"] .blog-shell::before,
+:root[data-interface-theme="windows-xp"] .profile-layout::before {
+  display: block;
+  margin: calc(0px - clamp(22px, 5vw, 52px)) calc(0px - clamp(22px, 5vw, 52px)) 24px;
+  padding: 9px 16px;
+  border-bottom: 1px solid #064da7;
+  border-radius: 8px 8px 0 0;
+  color: #fff;
+  background: linear-gradient(180deg, #5aa7f5, #0865cb 55%, #236de0);
+  font-size: .78rem;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0,30,88,.7);
+}
+
+:root[data-interface-theme="windows-xp"] .blog-shell::before {
+  content: "BITS BLOG.EXE  //  ARCHIVE";
+}
+
+:root[data-interface-theme="windows-xp"] .blog-post-page .blog-shell::before {
+  content: "BITS BLOG.EXE  //  READER";
+}
+
+:root[data-interface-theme="windows-xp"] .profile-layout::before {
+  margin: 0 calc(0px - clamp(16px, 4vw, 34px)) 18px;
+  content: "BITS CONTROL PANEL  //  PROFILE.SYS";
+}
+
+:root[data-interface-theme="windows-xp"] .profile-section {
+  margin: 22px 0;
+  padding: 18px clamp(14px, 2vw, 24px);
+  border: 1px solid var(--xp-line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  box-shadow: inset 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(30,53,78,.12);
+}
+
+:root[data-interface-theme="windows-xp"] .profile-section-heading {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--xp-line);
+}
+
+:root[data-interface-theme="windows-xp"] .fake-desktop-icons .fake-desktop-icon {
+  color: #fff;
+  text-shadow: 0 1px 2px #15395f;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-header h1 {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,30,88,.65);
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-indicators button {
+  border-color: transparent;
+  color: #fff;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+:root[data-interface-theme="windows-xp"] .endless-boot-indicators button:hover,
+:root[data-interface-theme="windows-xp"] .endless-boot-indicators button:focus-visible {
+  color: #fff;
+  background: rgba(255,255,255,.16);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+}
+
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .blog-shell::before,
+:root[data-interface-theme="windows-xp"][data-color-scheme="dark"] .profile-layout::before {
+  border-color: #52677f;
+  background: linear-gradient(180deg, #45566c 0%, #2b3748 48%, #1f2a39 50%, #303d50 100%);
+}

@@ -71,13 +71,17 @@ async function copyText(text) {
   }
 }
 
-addSelectOptions(
-  settingsTheme,
-  window.BITS_INTERFACE_THEMES.map((theme) => ({
-    label: theme.name,
-    value: theme.id,
-  })),
-);
+if (window.BITS_THEME_PREFERENCE?.buildOptions) {
+  settingsTheme.append(...window.BITS_THEME_PREFERENCE.buildOptions());
+} else {
+  addSelectOptions(
+    settingsTheme,
+    window.BITS_INTERFACE_THEMES.map((theme) => ({
+      label: theme.name,
+      value: theme.id,
+    })),
+  );
+}
 settingsMotion.value = document.documentElement.dataset.motion;
 settingsLargeText.checked = document.documentElement.dataset.textsize === "large";
 settingsHighContrast.checked = document.documentElement.dataset.contrast === "high";
