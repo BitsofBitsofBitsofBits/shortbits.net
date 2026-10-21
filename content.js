@@ -654,6 +654,12 @@ window.addEventListener("desktop-window:closed", (event) => {
   }
 });
 
+document.addEventListener("visibilitychange", () => {
+  if (hardwareState.timer && !document.hidden) {
+    refreshHardwareStatus();
+  }
+});
+
 if (!document.getElementById("hardware-window").hidden) {
   startHardwareStatus();
 }
