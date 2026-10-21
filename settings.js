@@ -116,6 +116,12 @@ settingsEffects.addEventListener("change", () => {
 });
 
 toolbarTheme.addEventListener("change", syncAppearanceControls);
+window.addEventListener("bits:theme-applied", syncAppearanceControls);
+window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(document.querySelector("#settings-scheme"));
+document.querySelector("#settings-theme-random")?.addEventListener("click", () => {
+  document.querySelector("#interface-theme-random")?.click();
+  setSettingsStatus("Random interface theme applied.");
+});
 
 settingsCopyLink.addEventListener("click", async () => {
   try {

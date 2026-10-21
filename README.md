@@ -171,12 +171,23 @@ is a personal project and largely a learning exercise for me.
   reduced-motion, forced-colors, and performance preferences
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
-- Twenty-one persistent full-interface themes, each with its own fixed accent,
+- Thirty-one persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
   Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Solarized,
-  Nord, Dracula, Candy Pop, RGB, Aero Glass, and the original voxel-inspired
-  MineBits.
+  Nord, Dracula, Candy Pop, RGB, Aero Glass, Catppuccin, Gruvbox, Tokyo Night,
+  Monokai, Game Bit, High Contrast, Deep Ocean, Coffee Shop, Matrix, Sunset,
+  and the original voxel-inspired MineBits.
+- A shared COLOR MODE preference (Theme default, Dark, or Light) on the online
+  app menu, Settings, `/boot`, and `/professional`. Every theme has a dark and a
+  light palette. Theme default keeps each theme's native look; Windows 95
+  defaults to classic light and offers a charcoal dark mode
+- A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
+  `theme dark`, `theme light`, and `theme auto` commands do the same
+- Seasonal themes (Winter, Spooky, Christmas, New Year) appear automatically
+  in season. To preview them all, run `BITS_THEME_DEBUG.enable()` in the
+  browser console (it reloads the page); `BITS_THEME_DEBUG.disable()` turns
+  the preview off
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions

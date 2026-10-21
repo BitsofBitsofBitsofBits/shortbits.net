@@ -19,20 +19,42 @@
   themeSelect.value = document.documentElement.dataset.interfaceTheme ?? themes[0].id;
   themeSelect.closest("label").hidden = false;
 
-  themeSelect.addEventListener("change", () => {
-    const theme = themes.find((entry) => entry.id === themeSelect.value);
+  const applyTheme = (themeId) => {
+    const theme = themes.find((entry) => entry.id === themeId);
     if (!theme) {
       return;
     }
-    document.documentElement.dataset.interfaceTheme = theme.id;
-    document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
-    document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
+    if (window.BITS_THEME_PREFERENCE?.apply) {
+      window.BITS_THEME_PREFERENCE.apply(theme.id);
+    } else {
+      document.documentElement.dataset.interfaceTheme = theme.id;
+      document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
+    }
+    themeSelect.value = theme.id;
     if (window.BITS_THEME_PREFERENCE) {
       window.BITS_THEME_PREFERENCE.select(theme.id);
     } else {
       localStorage.setItem("bits-interface-theme", theme.id);
     }
-  });
+  };
+
+  themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+
+  const schemeSelect = document.querySelector("#profile-scheme-select");
+  const randomButton = document.querySelector("#profile-theme-random");
+  if (window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect && schemeSelect) {
+    window.BITS_THEME_PREFERENCE.bindColorSchemeSelect(
+      schemeSelect,
+      (label) => label.charAt(0) + label.slice(1).toLowerCase(),
+    );
+    schemeSelect.closest("label").hidden = false;
+  }
+  if (window.BITS_THEME_PREFERENCE?.pickRandom && randomButton) {
+    randomButton.hidden = false;
+    randomButton.addEventListener("click", () => {
+      applyTheme(window.BITS_THEME_PREFERENCE.pickRandom());
+    });
+  }
 })();
 
 (() => {

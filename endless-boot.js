@@ -8,6 +8,8 @@
   const percentOutput = document.querySelector("#endless-boot-percent");
   const messageOutput = document.querySelector("#endless-boot-message");
   const themeSelect = document.querySelector("#endless-boot-theme");
+  const schemeSelect = document.querySelector("#endless-boot-scheme");
+  const randomThemeButton = document.querySelector("#endless-boot-theme-random");
   const settingsPanel = document.querySelector("#endless-boot-settings-panel");
   const settingsToggle = document.querySelector("#endless-boot-settings-toggle");
   const speedSelect = document.querySelector("#endless-boot-speed");
@@ -393,6 +395,75 @@
     ],
   ];
   const themeBootMessages = {
+    catppuccin: [
+      "BREWING PASTEL PALETTE ................ MOCHA, EXTRA FOAM",
+      "PETTING THE CAT ....................... PURRING",
+      "SOFTENING ALL CORNERS ................. VERY ROUND",
+      "CHECKING FLAVOUR ...................... LATTE OR MOCHA",
+    ],
+    coffee: [
+      "GRINDING BOOT BEANS ................... MEDIUM ROAST",
+      "PREHEATING CPU ........................ ESPRESSO TEMPERATURE",
+      "STEAMING MILK BUFFER .................. MICROFOAM",
+      "SPELLING NAME ON CUP .................. CALEB? KAYLUB?",
+      "REFILLING USER ........................ CAFFEINE 98%",
+    ],
+    "game-bit": [
+      "BLOWING ON CARTRIDGE .................. WORKS NOW",
+      "LOADING 4 SHADES OF GREEN ............. ALL OF THEM",
+      "INSERTING AA BATTERIES ................ 4 OF 4",
+      "CHECKING LINK CABLE ................... NO FRIENDS NEARBY",
+      "SAVING TO SRAM ........................ DO NOT TURN OFF",
+    ],
+    gruvbox: [
+      "WARMING RETRO PALETTE ................. COZY",
+      "SEPIA-TONING STARTUP LOG .............. VINTAGE",
+      "LOADING DOTFILES ...................... 3,412 LINES",
+      "QUITTING VIM .......................... STILL TRYING",
+      "ADJUSTING CONTRAST .................... SOFT HARD MEDIUM",
+    ],
+    "high-contrast": [
+      "MAXIMIZING CONTRAST RATIO ............. 21:1",
+      "REMOVING SUBTLE GRADIENTS ............. NOT SUBTLE NOW",
+      "OUTLINING EVERYTHING .................. VERY VISIBLE",
+      "CHECKING READABILITY .................. FROM ACROSS ROOM",
+      "DISABLING DECORATIVE NOISE ............ SILENCED",
+    ],
+    matrix: [
+      "FOLLOWING WHITE RABBIT ................ RABBIT 404",
+      "DECODING DIGITAL RAIN ................. BLONDE, BRUNETTE",
+      "CHOOSING PILL ......................... RED (DEFAULT)",
+      "BENDING SPOON ......................... THERE IS NO SPOON",
+      "DODGING BULLET TIME ................... SLOWLY",
+    ],
+    monokai: [
+      "HIGHLIGHTING SYNTAX ................... VERY PINK",
+      "OPENING SUBLIME BUFFER ................ UNREGISTERED",
+      "COLOURING STRINGS YELLOW .............. AS TRADITION",
+      "CLOSING 47 UNSAVED TABS ............... CANCELLED",
+      "LINTING STARTUP CODE .................. 0 ERRORS, 99 WARNINGS",
+    ],
+    ocean: [
+      "PRESSURIZING HULL ..................... 1 ATM, ALLEGEDLY",
+      "PINGING SONAR ......................... PING... PING...",
+      "COUNTING FISH ......................... GAVE UP AT 12",
+      "DESCENDING TO MIDNIGHT ZONE ........... BIOLUMINESCENT",
+      "CHECKING UNDERSEA CABLE ............... SHARK NEARBY",
+    ],
+    sunset: [
+      "LOWERING SUN .......................... 4 DEGREES LEFT",
+      "SATURATING SKY ........................ GOLDEN HOUR",
+      "TAKING SCENIC SCREENSHOT .............. NO FILTER",
+      "FADING TO DUSK ........................ GRADUALLY",
+      "WAITING FOR GREEN FLASH ............... MISSED IT",
+    ],
+    "tokyo-night": [
+      "LIGHTING NEON SIGNAGE ................. FLICKERING",
+      "CATCHING LAST TRAIN ................... 23:58",
+      "RENDERING CITY LIGHTS ................. 4K RAINY",
+      "QUEUEING LOFI PLAYLIST ................ BEATS TO BOOT TO",
+      "SYNCING NIGHT SHIFT ................... STILL AWAKE",
+    ],
     "aero-glass": [
       "COMPOSITING GLASS FRAME .............. SHINY ENOUGH",
       "BUFFERING WINDOW REFLECTIONS ......... CLOUDY",
@@ -1239,9 +1310,12 @@
     if (!theme) {
       return;
     }
-    document.documentElement.dataset.interfaceTheme = theme.id;
-    document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
-    document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
+    if (window.BITS_THEME_PREFERENCE?.apply) {
+      window.BITS_THEME_PREFERENCE.apply(theme.id);
+    } else {
+      document.documentElement.dataset.interfaceTheme = theme.id;
+      document.documentElement.classList.toggle("is-rgb-mode", theme.id === "rgb");
+    }
     themeSelect.value = theme.id;
     if (persist) {
       if (window.BITS_THEME_PREFERENCE) {
@@ -1262,6 +1336,13 @@
     }));
     applyTheme(document.documentElement.dataset.interfaceTheme, false);
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+    window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(schemeSelect);
+    randomThemeButton?.addEventListener("click", () => {
+      const themeId = window.BITS_THEME_PREFERENCE?.pickRandom();
+      if (themeId) {
+        applyTheme(themeId);
+      }
+    });
     speedSelect.addEventListener("change", () => {
       speed = speedTimingProfiles[speedSelect.value] ? speedSelect.value : "normal";
       savePreferences();
@@ -2186,7 +2267,7 @@
     const [command = "", ...argumentsList] = rawCommand.trim().toLowerCase().split(/\s+/);
     const argument = argumentsList.join(" ");
     const responses = {
-      help: "COMMANDS: STATUS, STATS, SENSORS, LSHW, LSPCI, DMESG, UPTIME, WHOAMI, PS, NETSTAT, SMART, FORTUNE, HISTORY, MAN <COMMAND>, COPY <LOG|HARDWARE|DIAGNOSTICS>, DOWNLOAD LOG, INCIDENTS, ACHIEVEMENTS, CRASH <COLOR>, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
+      help: "COMMANDS: STATUS, STATS, SENSORS, LSHW, LSPCI, DMESG, UPTIME, WHOAMI, PS, NETSTAT, SMART, FORTUNE, HISTORY, MAN <COMMAND>, COPY <LOG|HARDWARE|DIAGNOSTICS>, DOWNLOAD LOG, INCIDENTS, ACHIEVEMENTS, CRASH <COLOR>, HARDWARE, FULLSCREEN, CLEAR, REBOOT, THEME <NAME|RANDOM|DARK|LIGHT|AUTO>, INCIDENT, PANIC, BSOD, BIOS, RECOVERY, MORE BITS [COUNT], PAUSE, RESUME, SPEED <MODE>, DENSITY <MODE>",
       status: `CYCLE ${cycle} // PHASE ${currentPhaseIndex + 1}/${bootPhases.length} // ${count} MESSAGES // ${processedBits} BITS // ${ignoredErrors} ERRORS IGNORED // ${paused ? "PAUSED" : "RUNNING"}`,
       stats: `TOTAL BOOTS ${stats.totalBoots} // MESSAGES SEEN ${stats.messagesSeen} // LONGEST UPTIME ${formatDuration(stats.longestUptime)} // INCIDENTS IGNORED ${stats.incidentsIgnored}`,
       diagnose: `DIAGNOSTIC COMPLETE: CPU ${Math.round(telemetry.cpu)}% // TEMP ${Math.round(telemetry.temperature)}C // FAN ${Math.round(telemetry.fan)} RPM // 0 ERRORS, 3 CONCERNS.`,
@@ -2284,6 +2365,16 @@
     }
     if (command === "theme") {
       const themes = window.BITS_INTERFACE_THEMES ?? [];
+      if (argument === "random" && window.BITS_THEME_PREFERENCE?.pickRandom) {
+        const randomThemeId = window.BITS_THEME_PREFERENCE.pickRandom();
+        const randomTheme = themes.find((theme) => theme.id === randomThemeId);
+        applyTheme(randomTheme.id);
+        return `THEME RANDOMIZED TO ${randomTheme.name.toUpperCase()}.`;
+      }
+      if (["dark", "light", "auto"].includes(argument) && window.BITS_THEME_PREFERENCE) {
+        window.BITS_THEME_PREFERENCE.setColorScheme(argument);
+        return `COLOR MODE SET TO ${argument.toUpperCase()}.`;
+      }
       const requestedTheme = themes.find((theme) => (
         theme.id === argument || theme.name.toLowerCase() === argument
       ));

@@ -113,6 +113,16 @@ const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
   { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
   { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#0d3358" },
   { id: "minebits", name: "MINEBITS", darkColor: "#332719", lightColor: "#dbe8c5" },
+  { id: "catppuccin", name: "CATPPUCCIN", darkColor: "#1e1e2e", lightColor: "#eff1f5" },
+  { id: "gruvbox", name: "GRUVBOX", darkColor: "#282828", lightColor: "#fbf1c7" },
+  { id: "tokyo-night", name: "TOKYO NIGHT", darkColor: "#1a1b26", lightColor: "#e1e2e7" },
+  { id: "monokai", name: "MONOKAI", darkColor: "#272822", lightColor: "#fafaf5" },
+  { id: "game-bit", name: "GAME BIT", darkColor: "#0f380f", lightColor: "#9bbc0f" },
+  { id: "high-contrast", name: "HIGH CONTRAST", darkColor: "#000000", lightColor: "#ffffff" },
+  { id: "ocean", name: "DEEP OCEAN", darkColor: "#03141f", lightColor: "#e6f6f8" },
+  { id: "coffee", name: "COFFEE SHOP", darkColor: "#1f1510", lightColor: "#f6efe4" },
+  { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#e9f7ec" },
+  { id: "sunset", name: "SUNSET", darkColor: "#1d0f24", lightColor: "#fff1e6" },
 ];
 
 if (!window.BITS_INTERFACE_THEMES) {
@@ -1223,14 +1233,21 @@ function setRgbMode(enabled) {
 
 function updateBrowserThemeColor() {
   const theme = interfaceThemes[interfaceThemeIndex];
-  document.querySelector('meta[name="theme-color"]').content = theme.darkColor;
+  const isLight = document.documentElement.dataset.colorScheme === "light";
+  document.querySelector('meta[name="theme-color"]').content = isLight
+    ? theme.lightColor
+    : theme.darkColor;
 }
 
 function applyInterfaceTheme(theme, persist = true) {
   document.documentElement.style.removeProperty("--accent");
   document.documentElement.style.removeProperty("--accent-rgb");
-  document.documentElement.dataset.colorScheme = "dark";
-  document.documentElement.dataset.interfaceTheme = theme.id;
+  if (window.BITS_THEME_PREFERENCE?.apply) {
+    window.BITS_THEME_PREFERENCE.apply(theme.id);
+  } else {
+    document.documentElement.dataset.colorScheme = "dark";
+    document.documentElement.dataset.interfaceTheme = theme.id;
+  }
   setRgbMode(theme.id === "rgb");
   interfaceThemeSelect.value = theme.id;
   if (persist) {
@@ -1241,7 +1258,6 @@ function applyInterfaceTheme(theme, persist = true) {
     }
   }
   localStorage.removeItem("bits-accent");
-  localStorage.removeItem("bits-color-scheme");
   localStorage.removeItem("bits-rgb-mode");
   updateBrowserThemeColor();
 }
@@ -1277,6 +1293,14 @@ interfaceThemeSelect.addEventListener("change", () => {
       value: interfaceThemes[interfaceThemeIndex].name,
     },
   }));
+});
+const interfaceSchemeSelect = document.querySelector("#interface-scheme-select");
+window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(interfaceSchemeSelect);
+document.querySelector("#interface-theme-random")?.addEventListener("click", () => {
+  const themeId = window.BITS_THEME_PREFERENCE?.pickRandom()
+    ?? interfaceThemes[Math.floor(Math.random() * interfaceThemes.length)].id;
+  interfaceThemeSelect.value = themeId;
+  interfaceThemeSelect.dispatchEvent(new Event("change", { bubbles: true }));
 });
 window.addEventListener("storage", (event) => {
   const themePreferenceKeys = [

@@ -643,18 +643,34 @@
 
 :root[data-interface-theme="windows-95"] {
   color-scheme: light;
+  --w95-face: #c0c0c0;
+  --w95-panel: #d4d0c8;
+  --w95-field: #fff;
+  --w95-hi: #fff;
+  --w95-light: #dfdfdf;
+  --w95-shadow: #808080;
+  --w95-dark: #000;
+  --w95-pressed: #a0a0a0;
+  --w95-text: #000;
+  --w95-disabled: #808080;
+  --w95-accent-text: #000080;
+  --w95-muted: #3d3d3d;
+  --w95-warning: #800000;
+  --w95-error: #c00000;
+  --w95-desktop: #008080;
   --accent: #000080;
   --accent-rgb: 0, 0, 128;
   --bg: #004c4c;
-  --panel: #d4d0c8;
-  --panel-2: #d4d0c8;
+  --panel: var(--w95-panel);
+  --panel-2: var(--w95-panel);
   --ink: #101010;
-  --muted: #3d3d3d;
+  --muted: var(--w95-muted);
   --border: #5f5f5f;
-  --shell-bg: #d4d0c8;
-  --admin-bg: #d4d0c8;
-  --overlay-bg: #d4d0c8;
-  --body-background: #004c4c;
+  --shadow: 0 0 42px rgba(var(--accent-rgb), 0.08);
+  --shell-bg: var(--w95-panel);
+  --admin-bg: var(--w95-panel);
+  --overlay-bg: var(--w95-panel);
+  --body-background: var(--bg);
   --body-background-size: auto;
   --control-radius: 0;
   --font-family: "MS Sans Serif", Tahoma, "Segoe UI", sans-serif;
@@ -667,21 +683,41 @@
   --icon-filter: none;
   --spotify-accent: var(--accent);
   --scrollbar-size: 16px;
-  --scrollbar-track: #d4d0c8;
-  --scrollbar-track-border: #808080;
-  --scrollbar-thumb-color: #c0c0c0;
-  --scrollbar-thumb-background: #c0c0c0;
-  --scrollbar-thumb-hover: #d4d0c8;
-  --scrollbar-thumb-active: #a0a0a0;
-  --scrollbar-thumb-border: 2px solid #808080;
+  --scrollbar-track: var(--w95-panel);
+  --scrollbar-track-border: var(--w95-shadow);
+  --scrollbar-thumb-color: var(--w95-face);
+  --scrollbar-thumb-background: var(--w95-face);
+  --scrollbar-thumb-hover: var(--w95-panel);
+  --scrollbar-thumb-active: var(--w95-pressed);
+  --scrollbar-thumb-border: 2px solid var(--w95-shadow);
   --scrollbar-thumb-radius: 0;
   --scrollbar-track-radius: 0;
-  --scrollbar-thumb-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  --scrollbar-thumb-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
-:root[data-interface-theme="windows-95"][data-color-scheme="light"] {
-  --bg: #008080;
-  --body-background: #008080;
+/* Windows 95 dark mode: the same bevels re-cut in charcoal, as if the shell shipped a night theme. */
+:root[data-interface-theme="windows-95"][data-color-scheme="dark"] {
+  color-scheme: dark;
+  --w95-face: #3c3c3c;
+  --w95-panel: #303030;
+  --w95-field: #1b1b1b;
+  --w95-hi: #6b6b6b;
+  --w95-light: #4b4b4b;
+  --w95-shadow: #161616;
+  --w95-dark: #000;
+  --w95-pressed: #262626;
+  --w95-text: #ececec;
+  --w95-disabled: #8c8c8c;
+  --w95-accent-text: #9cc0ff;
+  --w95-muted: #bdbdbd;
+  --w95-warning: #ff9b8f;
+  --w95-error: #ff7070;
+  --w95-desktop: #004040;
+  --accent: #9cc0ff;
+  --accent-rgb: 156, 192, 255;
+  --bg: #002b2b;
+  --ink: #ececec;
+  --border: #5a5a5a;
 }
 
 :root[data-interface-theme="solarized"] {
@@ -955,6 +991,724 @@
   --window-radius: 0;
 }
 
+/* ---- Added themes: each ships a dark block plus a light block (tied to the COLOR MODE picker). ---- */
+
+:root[data-interface-theme="catppuccin"] {
+  --accent: #cba6f7;
+  --accent-rgb: 203, 166, 247;
+  --bg: #1e1e2e;
+  --panel: rgba(36, 36, 54, 0.94);
+  --panel-2: rgba(49, 50, 68, 0.96);
+  --ink: #cdd6f4;
+  --muted: #a6adc8;
+  --warning: #f9e2af;
+  --border: #45475a;
+  --shell-bg: rgba(24, 24, 37, 0.92);
+  --admin-bg: rgba(24, 24, 37, 0.97);
+  --overlay-bg: rgba(30, 30, 46, 0.98);
+  --body-background:
+    radial-gradient(circle at 12% 0%, rgba(203, 166, 247, 0.16), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(245, 194, 231, 0.12), transparent 42%),
+    #1e1e2e;
+  --body-background-size: auto;
+  --control-radius: 8px;
+  --font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  --material-blur: 10px;
+  --shell-radius: 14px;
+  --window-radius: 12px;
+  --noise-opacity: 0.02;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #cba6f7, #f5c2e7);
+  --scrollbar-thumb-radius: 999px;
+  --scrollbar-track-radius: 999px;
+}
+
+:root[data-interface-theme="catppuccin"][data-color-scheme="light"] {
+  --accent: #8839ef;
+  --accent-rgb: 136, 57, 239;
+  --bg: #eff1f5;
+  --panel: rgba(255, 255, 255, 0.94);
+  --panel-2: #e6e9ef;
+  --ink: #4c4f69;
+  --muted: #6c6f85;
+  --warning: #df8e1d;
+  --border: #ccd0da;
+  --shell-bg: rgba(239, 241, 245, 0.94);
+  --admin-bg: rgba(239, 241, 245, 0.98);
+  --overlay-bg: rgba(230, 233, 239, 0.98);
+  --body-background:
+    radial-gradient(circle at 12% 0%, rgba(136, 57, 239, 0.1), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(234, 118, 203, 0.1), transparent 42%),
+    #eff1f5;
+  --scrollbar-thumb-background: linear-gradient(180deg, #8839ef, #ea76cb);
+}
+
+:root[data-interface-theme="gruvbox"] {
+  --accent: #fabd2f;
+  --accent-rgb: 250, 189, 47;
+  --bg: #282828;
+  --panel: #32302f;
+  --panel-2: #3c3836;
+  --ink: #ebdbb2;
+  --muted: #bdae93;
+  --warning: #fe8019;
+  --border: #665c54;
+  --shell-bg: rgba(40, 40, 40, 0.95);
+  --admin-bg: rgba(40, 40, 40, 0.98);
+  --overlay-bg: rgba(50, 48, 47, 0.98);
+  --body-background:
+    linear-gradient(160deg, rgba(254, 128, 25, 0.1), transparent 40%),
+    linear-gradient(340deg, rgba(184, 187, 38, 0.08), transparent 45%),
+    #282828;
+  --body-background-size: auto;
+  --control-radius: 2px;
+  --font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  --material-blur: 4px;
+  --shell-radius: 4px;
+  --window-radius: 3px;
+  --noise-opacity: 0.035;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #fabd2f, #fe8019);
+}
+
+:root[data-interface-theme="gruvbox"][data-color-scheme="light"] {
+  --accent: #af3a03;
+  --accent-rgb: 175, 58, 3;
+  --bg: #fbf1c7;
+  --panel: #f9f5d7;
+  --panel-2: #ebdbb2;
+  --ink: #3c3836;
+  --muted: #665c54;
+  --warning: #b57614;
+  --border: #bdae93;
+  --shell-bg: rgba(249, 245, 215, 0.95);
+  --admin-bg: rgba(249, 245, 215, 0.98);
+  --overlay-bg: rgba(242, 229, 188, 0.98);
+  --body-background:
+    linear-gradient(160deg, rgba(214, 93, 14, 0.1), transparent 40%),
+    linear-gradient(340deg, rgba(121, 116, 14, 0.08), transparent 45%),
+    #fbf1c7;
+  --scrollbar-thumb-background: linear-gradient(180deg, #d65d0e, #af3a03);
+}
+
+:root[data-interface-theme="tokyo-night"] {
+  --accent: #7aa2f7;
+  --accent-rgb: 122, 162, 247;
+  --bg: #1a1b26;
+  --panel: rgba(31, 35, 53, 0.92);
+  --panel-2: rgba(36, 40, 59, 0.95);
+  --ink: #c0caf5;
+  --muted: #9aa5ce;
+  --warning: #e0af68;
+  --border: #3b4261;
+  --shell-bg: rgba(22, 22, 30, 0.9);
+  --admin-bg: rgba(22, 22, 30, 0.97);
+  --overlay-bg: rgba(26, 27, 38, 0.98);
+  --body-background:
+    radial-gradient(ellipse at 80% -10%, rgba(187, 154, 247, 0.22), transparent 45%),
+    radial-gradient(ellipse at 10% 110%, rgba(122, 162, 247, 0.18), transparent 50%),
+    linear-gradient(180deg, transparent 70%, rgba(247, 118, 142, 0.06)),
+    #1a1b26;
+  --body-background-size: auto;
+  --control-radius: 6px;
+  --font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  --material-blur: 12px;
+  --shell-radius: 10px;
+  --window-radius: 8px;
+  --noise-opacity: 0.025;
+  --scanline-opacity: 0;
+  --shadow: 0 0 42px rgba(187, 154, 247, 0.12);
+  --scrollbar-thumb-background: linear-gradient(180deg, #7aa2f7, #bb9af7);
+  --scrollbar-thumb-radius: 6px;
+  --scrollbar-track-radius: 6px;
+}
+
+:root[data-interface-theme="tokyo-night"][data-color-scheme="light"] {
+  --accent: #2e7de9;
+  --accent-rgb: 46, 125, 233;
+  --bg: #e1e2e7;
+  --panel: rgba(243, 244, 248, 0.95);
+  --panel-2: #d5d6db;
+  --ink: #3760bf;
+  --muted: #5c6697;
+  --warning: #8c6c3e;
+  --border: #a8aecb;
+  --shell-bg: rgba(233, 234, 239, 0.94);
+  --admin-bg: rgba(233, 234, 239, 0.98);
+  --overlay-bg: rgba(225, 226, 231, 0.98);
+  --shadow: 0 0 42px rgba(46, 125, 233, 0.1);
+  --body-background:
+    radial-gradient(ellipse at 80% -10%, rgba(152, 84, 241, 0.12), transparent 45%),
+    radial-gradient(ellipse at 10% 110%, rgba(46, 125, 233, 0.12), transparent 50%),
+    #e1e2e7;
+  --scrollbar-thumb-background: linear-gradient(180deg, #2e7de9, #9854f1);
+}
+
+:root[data-interface-theme="monokai"] {
+  --accent: #a6e22e;
+  --accent-rgb: 166, 226, 46;
+  --bg: #272822;
+  --panel: #2d2e27;
+  --panel-2: #3e3d32;
+  --ink: #f8f8f2;
+  --muted: #b8b39b;
+  --warning: #e6db74;
+  --border: #49483e;
+  --shell-bg: rgba(39, 40, 34, 0.96);
+  --admin-bg: rgba(39, 40, 34, 0.98);
+  --overlay-bg: rgba(45, 46, 39, 0.98);
+  --body-background:
+    linear-gradient(90deg, rgba(249, 38, 114, 0.08) 0 4px, transparent 4px),
+    linear-gradient(rgba(248, 248, 242, 0.025) 1px, transparent 1px),
+    #272822;
+  --body-background-size: auto, 100% 24px, auto;
+  --control-radius: 3px;
+  --font-family: Monaco, "Cascadia Code", Consolas, monospace;
+  --material-blur: 0px;
+  --shell-radius: 4px;
+  --window-radius: 4px;
+  --noise-opacity: 0.02;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #f92672, #fd971f 50%, #a6e22e);
+}
+
+:root[data-interface-theme="monokai"][data-color-scheme="light"] {
+  --accent: #c4185c;
+  --accent-rgb: 196, 24, 92;
+  --bg: #fafaf5;
+  --panel: #fff;
+  --panel-2: #efefe6;
+  --ink: #272822;
+  --muted: #6b6753;
+  --warning: #9a6a00;
+  --border: #cfcfc2;
+  --shell-bg: rgba(255, 255, 255, 0.96);
+  --admin-bg: rgba(255, 255, 255, 0.98);
+  --overlay-bg: rgba(245, 245, 238, 0.98);
+  --body-background:
+    linear-gradient(90deg, rgba(196, 24, 92, 0.1) 0 4px, transparent 4px),
+    linear-gradient(rgba(39, 40, 34, 0.035) 1px, transparent 1px),
+    #fafaf5;
+  --scrollbar-thumb-background: linear-gradient(180deg, #c4185c, #c76b00 50%, #4d8a0b);
+}
+
+:root[data-interface-theme="game-bit"] {
+  --accent: #c4dc6a;
+  --accent-rgb: 196, 220, 106;
+  --bg: #0f380f;
+  --panel: #1b471b;
+  --panel-2: #306230;
+  --ink: #c4dc6a;
+  --muted: #9bbc0f;
+  --warning: #e0f08a;
+  --border: #8bac0f;
+  --shell-bg: #163f16;
+  --admin-bg: #163f16;
+  --overlay-bg: #1b471b;
+  --body-background:
+    linear-gradient(rgba(15, 56, 15, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 56, 15, 0.55) 1px, transparent 1px),
+    #1d4d1d;
+  --body-background-size: 4px 4px, 4px 4px, auto;
+  --control-radius: 0;
+  --font-family: "Press Start 2P", "Lucida Console", "Courier New", monospace;
+  --material-blur: 0px;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0.04;
+  --shadow: 4px 4px 0 rgba(15, 56, 15, 0.8);
+  --scrollbar-thumb-background: #8bac0f;
+  --scrollbar-thumb-border: 3px solid var(--panel);
+}
+
+:root[data-interface-theme="game-bit"][data-color-scheme="light"] {
+  --accent: #306230;
+  --accent-rgb: 48, 98, 48;
+  --bg: #9bbc0f;
+  --panel: #a8c73a;
+  --panel-2: #8bac0f;
+  --ink: #0f380f;
+  --muted: #234d23;
+  --warning: #0f380f;
+  --border: #306230;
+  --shell-bg: #a8c73a;
+  --admin-bg: #a8c73a;
+  --overlay-bg: #9bbc0f;
+  --shadow: 4px 4px 0 rgba(15, 56, 15, 0.45);
+  --body-background:
+    linear-gradient(rgba(139, 172, 15, 0.7) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 172, 15, 0.7) 1px, transparent 1px),
+    #9bbc0f;
+  --scrollbar-thumb-background: #306230;
+}
+
+:root[data-interface-theme="high-contrast"] {
+  --accent: #ffff00;
+  --accent-rgb: 255, 255, 0;
+  --bg: #000;
+  --panel: #000;
+  --panel-2: #111;
+  --ink: #fff;
+  --muted: #f0f0f0;
+  --warning: #ffb000;
+  --border: #fff;
+  --shadow: none;
+  --shell-bg: #000;
+  --admin-bg: #000;
+  --overlay-bg: #000;
+  --body-background: #000;
+  --body-background-size: auto;
+  --control-radius: 0;
+  --font-family: "Segoe UI", Arial, system-ui, sans-serif;
+  --material-blur: 0px;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-track-border: var(--ink);
+}
+
+:root[data-interface-theme="high-contrast"][data-color-scheme="light"] {
+  --accent: #0000c8;
+  --accent-rgb: 0, 0, 200;
+  --bg: #fff;
+  --panel: #fff;
+  --panel-2: #f0f0f0;
+  --ink: #000;
+  --muted: #111;
+  --warning: #8a3b00;
+  --border: #000;
+  --shadow: none;
+  --shell-bg: #fff;
+  --admin-bg: #fff;
+  --overlay-bg: #fff;
+  --body-background: #fff;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+}
+
+:root[data-interface-theme="ocean"] {
+  --accent: #3fd8d0;
+  --accent-rgb: 63, 216, 208;
+  --bg: #03141f;
+  --panel: rgba(6, 32, 46, 0.9);
+  --panel-2: rgba(9, 45, 62, 0.93);
+  --ink: #e3f8fb;
+  --muted: #94bcc7;
+  --warning: #ffd479;
+  --border: rgba(64, 196, 214, 0.34);
+  --shell-bg: rgba(3, 24, 36, 0.88);
+  --admin-bg: rgba(3, 24, 36, 0.96);
+  --overlay-bg: rgba(5, 30, 44, 0.97);
+  --body-background:
+    radial-gradient(ellipse at 30% -10%, rgba(120, 230, 240, 0.2), transparent 40%),
+    radial-gradient(ellipse at 75% 0%, rgba(63, 216, 208, 0.12), transparent 35%),
+    linear-gradient(180deg, #073247 0%, #03141f 55%, #010a10 100%);
+  --body-background-size: auto;
+  --control-radius: 10px;
+  --font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  --material-blur: 14px;
+  --shell-radius: 16px;
+  --window-radius: 12px;
+  --noise-opacity: 0.025;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #7ee8f0, #1a8fa8);
+  --scrollbar-thumb-radius: 999px;
+  --scrollbar-track-radius: 999px;
+}
+
+:root[data-interface-theme="ocean"][data-color-scheme="light"] {
+  --accent: #00788a;
+  --accent-rgb: 0, 120, 138;
+  --bg: #e6f6f8;
+  --panel: rgba(247, 253, 253, 0.92);
+  --panel-2: #d8eff2;
+  --ink: #08303d;
+  --muted: #45666f;
+  --warning: #8a5a00;
+  --border: #9bcdd5;
+  --shell-bg: rgba(240, 250, 251, 0.9);
+  --admin-bg: rgba(240, 250, 251, 0.97);
+  --overlay-bg: rgba(232, 246, 248, 0.98);
+  --body-background:
+    radial-gradient(ellipse at 30% -10%, rgba(255, 255, 255, 0.9), transparent 45%),
+    linear-gradient(180deg, #d4f1f5 0%, #e6f6f8 50%, #c9e8ee 100%);
+  --scrollbar-thumb-background: linear-gradient(180deg, #2bb3c4, #00788a);
+}
+
+:root[data-interface-theme="coffee"] {
+  --accent: #e0a96d;
+  --accent-rgb: 224, 169, 109;
+  --bg: #1f1510;
+  --panel: rgba(42, 29, 22, 0.94);
+  --panel-2: rgba(58, 42, 32, 0.96);
+  --ink: #f3e6d6;
+  --muted: #c4ab93;
+  --warning: #f2c66d;
+  --border: #5c4433;
+  --shell-bg: rgba(35, 24, 18, 0.94);
+  --admin-bg: rgba(35, 24, 18, 0.98);
+  --overlay-bg: rgba(42, 29, 22, 0.98);
+  --body-background:
+    radial-gradient(circle at 85% 12%, rgba(224, 169, 109, 0.14), transparent 30%),
+    radial-gradient(circle at 10% 90%, rgba(140, 82, 45, 0.18), transparent 40%),
+    #1f1510;
+  --body-background-size: auto;
+  --control-radius: 8px;
+  --font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --material-blur: 6px;
+  --shell-radius: 12px;
+  --window-radius: 10px;
+  --noise-opacity: 0.05;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #e0a96d, #8c522d);
+  --scrollbar-thumb-radius: 999px;
+  --scrollbar-track-radius: 999px;
+}
+
+:root[data-interface-theme="coffee"][data-color-scheme="light"] {
+  --accent: #8a4f22;
+  --accent-rgb: 138, 79, 34;
+  --bg: #f6efe4;
+  --panel: rgba(255, 250, 243, 0.95);
+  --panel-2: #eadfcf;
+  --ink: #3b2a20;
+  --muted: #6f5848;
+  --warning: #8a5a00;
+  --border: #cbb59d;
+  --shell-bg: rgba(255, 250, 243, 0.94);
+  --admin-bg: rgba(255, 250, 243, 0.98);
+  --overlay-bg: rgba(246, 239, 228, 0.98);
+  --body-background:
+    radial-gradient(circle at 85% 12%, rgba(224, 169, 109, 0.22), transparent 30%),
+    radial-gradient(circle at 10% 90%, rgba(138, 79, 34, 0.1), transparent 40%),
+    #f6efe4;
+  --scrollbar-thumb-background: linear-gradient(180deg, #c27c3e, #8a4f22);
+}
+
+:root[data-interface-theme="matrix"] {
+  --accent: #00ff41;
+  --accent-rgb: 0, 255, 65;
+  --bg: #000a02;
+  --panel: rgba(0, 18, 5, 0.9);
+  --panel-2: rgba(0, 30, 8, 0.93);
+  --ink: #c8ffd4;
+  --muted: #6fdc8a;
+  --warning: #d8ff4a;
+  --border: rgba(0, 255, 65, 0.32);
+  --shell-bg: rgba(0, 10, 2, 0.88);
+  --admin-bg: rgba(0, 10, 2, 0.96);
+  --overlay-bg: rgba(0, 14, 3, 0.97);
+  --shadow: 0 0 42px rgba(0, 255, 65, 0.1);
+  --body-background:
+    repeating-linear-gradient(90deg, rgba(0, 255, 65, 0.05) 0 1px, transparent 1px 23px),
+    linear-gradient(180deg, rgba(0, 255, 65, 0.1), transparent 30%),
+    #000a02;
+  --body-background-size: auto;
+  --control-radius: 0;
+  --font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+  --material-blur: 6px;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --noise-opacity: 0.03;
+  --scanline-opacity: 0.06;
+  --scrollbar-thumb-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+:root[data-interface-theme="matrix"][data-color-scheme="light"] {
+  --accent: #008f2a;
+  --accent-rgb: 0, 143, 42;
+  --bg: #e9f7ec;
+  --panel: rgba(246, 253, 247, 0.94);
+  --panel-2: #d8efdd;
+  --ink: #06331a;
+  --muted: #2f6040;
+  --warning: #6a6a00;
+  --border: #93c9a2;
+  --shell-bg: rgba(246, 253, 247, 0.93);
+  --admin-bg: rgba(246, 253, 247, 0.98);
+  --overlay-bg: rgba(233, 247, 236, 0.98);
+  --shadow: 0 0 42px rgba(0, 143, 42, 0.08);
+  --body-background:
+    repeating-linear-gradient(90deg, rgba(0, 143, 42, 0.06) 0 1px, transparent 1px 23px),
+    #e9f7ec;
+  --scanline-opacity: 0.02;
+  --scrollbar-thumb-shadow: none;
+}
+
+:root[data-interface-theme="sunset"] {
+  --accent: #ffa36c;
+  --accent-rgb: 255, 163, 108;
+  --bg: #1d0f24;
+  --panel: rgba(43, 20, 48, 0.9);
+  --panel-2: rgba(62, 27, 60, 0.93);
+  --ink: #fff1e6;
+  --muted: #e6bdb3;
+  --warning: #ffd36e;
+  --border: rgba(255, 140, 105, 0.38);
+  --shell-bg: rgba(33, 15, 38, 0.88);
+  --admin-bg: rgba(33, 15, 38, 0.96);
+  --overlay-bg: rgba(40, 18, 44, 0.97);
+  --body-background:
+    radial-gradient(ellipse at 50% 108%, rgba(255, 163, 108, 0.42), transparent 45%),
+    linear-gradient(180deg, #1d0f24 0%, #351338 48%, #682140 80%, #9c3a3a 100%);
+  --body-background-size: auto;
+  --control-radius: 10px;
+  --font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  --material-blur: 12px;
+  --shell-radius: 14px;
+  --window-radius: 12px;
+  --noise-opacity: 0.03;
+  --scanline-opacity: 0;
+  --scrollbar-thumb-background: linear-gradient(180deg, #ffa36c, #ff5f8f);
+  --scrollbar-thumb-radius: 999px;
+  --scrollbar-track-radius: 999px;
+}
+
+:root[data-interface-theme="sunset"][data-color-scheme="light"] {
+  --accent: #c4441c;
+  --accent-rgb: 196, 68, 28;
+  --bg: #fff1e6;
+  --panel: rgba(255, 250, 245, 0.92);
+  --panel-2: #ffe3d1;
+  --ink: #3a1630;
+  --muted: #74465a;
+  --warning: #8a4a00;
+  --border: #f0b79c;
+  --shell-bg: rgba(255, 248, 242, 0.9);
+  --admin-bg: rgba(255, 248, 242, 0.97);
+  --overlay-bg: rgba(255, 241, 230, 0.98);
+  --body-background:
+    radial-gradient(ellipse at 50% 108%, rgba(255, 140, 90, 0.35), transparent 50%),
+    linear-gradient(180deg, #ffe0cc 0%, #fff1e6 45%, #ffd9e2 100%);
+  --scrollbar-thumb-background: linear-gradient(180deg, #e8703a, #c4441c);
+}
+
+/* Light modes of the original themes use deeper accents so links and buttons stay readable on pale panels. */
+:root[data-interface-theme="aurora"][data-color-scheme="light"] {
+  --accent: #0f8a7c;
+  --accent-rgb: 15, 138, 124;
+}
+
+:root[data-interface-theme="cozy-blossom"][data-color-scheme="light"] {
+  --accent: #c2416b;
+  --accent-rgb: 194, 65, 107;
+}
+
+:root[data-interface-theme="mica"][data-color-scheme="light"] {
+  --accent: #0a5fc2;
+  --accent-rgb: 10, 95, 194;
+}
+
+:root[data-interface-theme="fluent"][data-color-scheme="light"] {
+  --accent: #0067c0;
+  --accent-rgb: 0, 103, 192;
+}
+
+:root[data-interface-theme="midnight-oled"][data-color-scheme="light"] {
+  --accent: #111111;
+  --accent-rgb: 17, 17, 17;
+}
+
+:root[data-interface-theme="macos"][data-color-scheme="light"] {
+  --accent: #0066cc;
+  --accent-rgb: 0, 102, 204;
+}
+
+:root[data-interface-theme="terminal"][data-color-scheme="light"] {
+  --accent: #0a7a35;
+  --accent-rgb: 10, 122, 53;
+}
+
+:root[data-interface-theme="vaporwave"][data-color-scheme="light"] {
+  --accent: #b0179a;
+  --accent-rgb: 176, 23, 154;
+}
+
+:root[data-interface-theme="amber-crt"][data-color-scheme="light"] {
+  --accent: #9a5a00;
+  --accent-rgb: 154, 90, 0;
+}
+
+:root[data-interface-theme="y2k-silver"][data-color-scheme="light"] {
+  --accent: #2c5f9e;
+  --accent-rgb: 44, 95, 158;
+}
+
+:root[data-interface-theme="cyberpunk"][data-color-scheme="light"] {
+  --accent: #b0006e;
+  --accent-rgb: 176, 0, 110;
+}
+
+:root[data-interface-theme="dos-blue"][data-color-scheme="light"] {
+  --accent: #000080;
+  --accent-rgb: 0, 0, 128;
+}
+
+:root[data-interface-theme="solarized"][data-color-scheme="light"] {
+  --accent: #1d6fa8;
+  --accent-rgb: 29, 111, 168;
+}
+
+:root[data-interface-theme="nord"][data-color-scheme="light"] {
+  --accent: #4c6f99;
+  --accent-rgb: 76, 111, 153;
+}
+
+:root[data-interface-theme="dracula"][data-color-scheme="light"] {
+  --accent: #7c4dcc;
+  --accent-rgb: 124, 77, 204;
+}
+
+:root[data-interface-theme="candy-pop"][data-color-scheme="light"] {
+  --accent: #c42a7a;
+  --accent-rgb: 196, 42, 122;
+}
+
+/* Light modes for themes that previously only shipped dark. */
+:root[data-interface-theme="rgb"][data-color-scheme="light"] {
+  --bg: #f7f4ff;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-2: rgba(241, 236, 255, 0.95);
+  --ink: #1d1530;
+  --muted: #5d5275;
+  --border: rgba(var(--accent-rgb), 0.45);
+  --shell-bg: rgba(255, 255, 255, 0.9);
+  --admin-bg: rgba(255, 255, 255, 0.96);
+  --overlay-bg: rgba(250, 248, 255, 0.98);
+  --body-background:
+    radial-gradient(circle at 15% 10%, rgba(255, 109, 122, 0.16), transparent 35%),
+    radial-gradient(circle at 85% 20%, rgba(90, 160, 255, 0.16), transparent 35%),
+    radial-gradient(circle at 50% 100%, rgba(80, 220, 140, 0.14), transparent 40%),
+    #f7f4ff;
+}
+
+:root[data-interface-theme="aero-glass"][data-color-scheme="light"] {
+  --bg: #cfe8fb;
+  --panel: rgba(255, 255, 255, 0.62);
+  --panel-2: rgba(240, 249, 255, 0.72);
+  --ink: #0b2a45;
+  --muted: #35556f;
+  --border: rgba(255, 255, 255, 0.85);
+  --shell-bg: rgba(255, 255, 255, 0.55);
+  --admin-bg: rgba(255, 255, 255, 0.8);
+  --overlay-bg: rgba(240, 249, 255, 0.92);
+  --accent: #0a6cc2;
+  --accent-rgb: 10, 108, 194;
+  --body-background:
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.9), transparent 45%),
+    radial-gradient(ellipse at 90% 100%, rgba(120, 220, 160, 0.35), transparent 45%),
+    linear-gradient(160deg, #9fd3fa 0%, #cfe8fb 50%, #a8e0c8 100%);
+}
+
+:root[data-interface-theme="minebits"][data-color-scheme="light"] {
+  --accent: #3f7a1f;
+  --accent-rgb: 63, 122, 31;
+  --bg: #b8dcf0;
+  --panel: #c6c6c6;
+  --panel-2: #b7a080;
+  --panel-strong: #a8a8a8;
+  --ink: #1f1a10;
+  --muted: #3e3628;
+  --warning: #8a5a00;
+  --border: #555;
+  --shadow: 8px 8px 0 rgba(40, 40, 40, 0.35);
+  --shell-bg: #c6c6c6;
+  --admin-bg: #cdcdcd;
+  --overlay-bg: #cfcfcf;
+  --icon-filter: brightness(0) sepia(0.2);
+  --body-background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(40, 30, 20, 0.12) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(40, 30, 20, 0.12) 31px 32px),
+    linear-gradient(
+      180deg,
+      #8fcdf0 0 22%,
+      #7fc44c 22% 25%,
+      #8a6a45 25% 62%,
+      #8d8d8d 62% 86%,
+      #6d6d6d 86%
+    );
+}
+
+/* Seasonal themes get matching daylight variants. */
+:root[data-interface-theme="winter"][data-color-scheme="light"] {
+  --accent: #0b7fa8;
+  --accent-rgb: 11, 127, 168;
+  --bg: #eaf7ff;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-2: rgba(226, 243, 252, 0.94);
+  --ink: #0c2a3a;
+  --muted: #4a6878;
+  --border: rgba(80, 160, 200, 0.4);
+  --shell-bg: rgba(255, 255, 255, 0.86);
+  --admin-bg: rgba(255, 255, 255, 0.96);
+  --overlay-bg: rgba(240, 249, 255, 0.97);
+  --body-background:
+    radial-gradient(circle at 15% 8%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
+    linear-gradient(180deg, #d5eefb 0%, #eaf7ff 60%, #ffffff 100%);
+}
+
+:root[data-interface-theme="spooky"][data-color-scheme="light"] {
+  --accent: #b34700;
+  --accent-rgb: 179, 71, 0;
+  --bg: #fff0dc;
+  --panel: rgba(255, 249, 240, 0.94);
+  --panel-2: rgba(255, 232, 204, 0.96);
+  --ink: #2a1530;
+  --muted: #6a4a5a;
+  --border: rgba(179, 71, 0, 0.35);
+  --shell-bg: rgba(255, 247, 236, 0.92);
+  --admin-bg: rgba(255, 247, 236, 0.97);
+  --overlay-bg: rgba(255, 240, 220, 0.98);
+  --body-background:
+    radial-gradient(circle at 85% 10%, rgba(255, 166, 0, 0.25), transparent 30%),
+    radial-gradient(circle at 10% 95%, rgba(120, 60, 160, 0.12), transparent 40%),
+    #fff0dc;
+}
+
+:root[data-interface-theme="christmas"][data-color-scheme="light"] {
+  --accent: #b3122e;
+  --accent-rgb: 179, 18, 46;
+  --bg: #fff7e8;
+  --panel: rgba(255, 252, 245, 0.95);
+  --panel-2: rgba(240, 248, 238, 0.96);
+  --ink: #12301f;
+  --muted: #4a5f50;
+  --border: rgba(30, 110, 60, 0.35);
+  --shell-bg: rgba(255, 252, 245, 0.93);
+  --admin-bg: rgba(255, 252, 245, 0.98);
+  --overlay-bg: rgba(255, 247, 232, 0.98);
+  --body-background:
+    radial-gradient(circle at 15% 10%, rgba(179, 18, 46, 0.1), transparent 30%),
+    radial-gradient(circle at 85% 90%, rgba(30, 110, 60, 0.12), transparent 35%),
+    #fff7e8;
+}
+
+:root[data-interface-theme="new-year"][data-color-scheme="light"] {
+  --accent: #9a6b00;
+  --accent-rgb: 154, 107, 0;
+  --bg: #fff8dc;
+  --panel: rgba(255, 253, 244, 0.95);
+  --panel-2: rgba(250, 240, 205, 0.96);
+  --ink: #1c1a33;
+  --muted: #5a5670;
+  --border: rgba(154, 107, 0, 0.35);
+  --shell-bg: rgba(255, 253, 244, 0.93);
+  --admin-bg: rgba(255, 253, 244, 0.98);
+  --overlay-bg: rgba(255, 248, 220, 0.98);
+  --body-background:
+    radial-gradient(circle at 20% 15%, rgba(255, 210, 90, 0.3), transparent 25%),
+    radial-gradient(circle at 80% 25%, rgba(140, 120, 255, 0.14), transparent 30%),
+    #fff8dc;
+}
+
 :root {
   --scrollbar-size: 12px;
   --scrollbar-firefox-width: thin;
@@ -1153,16 +1907,16 @@
 :root[data-interface-theme="windows-95"] {
   --scrollbar-size: 17px;
   --scrollbar-firefox-width: auto;
-  --scrollbar-track: #c0c0c0;
-  --scrollbar-track-border: #000;
-  --scrollbar-thumb-color: #808080;
-  --scrollbar-thumb-background: #c0c0c0;
-  --scrollbar-thumb-hover: #d4d0c8;
-  --scrollbar-thumb-active: #fff;
-  --scrollbar-thumb-border: 2px solid #808080;
+  --scrollbar-track: var(--w95-face);
+  --scrollbar-track-border: var(--w95-dark);
+  --scrollbar-thumb-color: var(--w95-shadow);
+  --scrollbar-thumb-background: var(--w95-face);
+  --scrollbar-thumb-hover: var(--w95-panel);
+  --scrollbar-thumb-active: var(--w95-hi);
+  --scrollbar-thumb-border: 2px solid var(--w95-shadow);
   --scrollbar-thumb-radius: 0;
   --scrollbar-track-radius: 0;
-  --scrollbar-thumb-shadow: inset -2px -2px #000, inset 2px 2px #fff;
+  --scrollbar-thumb-shadow: inset -2px -2px var(--w95-dark), inset 2px 2px var(--w95-hi);
   --scrollbar-thumb-min: 40px;
 }
 
@@ -1844,16 +2598,16 @@ html[data-interface-theme="windows-95"] .falling-bit.is-forbidden {
   height: 36px;
   border: 0;
   border-radius: 0;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi), inset -2px -2px var(--w95-shadow), inset 2px 2px var(--w95-light);
   font-family: "Courier New", Courier, monospace;
   text-shadow: none;
 }
 
 html[data-interface-theme="windows-95"] .falling-bit.is-forbidden:hover,
 html[data-interface-theme="windows-95"] .falling-bit.is-forbidden:focus-visible {
-  outline: 1px dotted #000;
+  outline: 1px dotted var(--w95-dark);
   outline-offset: -5px;
 }
 
@@ -3512,13 +4266,13 @@ h1 .dim {
 }
 
 html[data-interface-theme="windows-95"] .contact-turnstile {
-  border: 2px groove #fff;
+  border: 2px groove var(--w95-hi);
   background: transparent;
 }
 
 html[data-interface-theme="windows-95"] .contact-turnstile-label,
 html[data-interface-theme="windows-95"] .contact-turnstile-status {
-  color: #000;
+  color: var(--w95-text);
   letter-spacing: 0;
 }
 
@@ -4933,23 +5687,23 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 html[data-interface-theme="windows-95"] .blog-page {
- color: #000;
- background: #008080;
+ color: var(--w95-text);
+ background: var(--w95-desktop);
 }
 
 html[data-interface-theme="windows-95"] .blog-shell {
- border: 2px solid #808080;
- color: #000;
- background: #c0c0c0;
- box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+ border: 2px solid var(--w95-shadow);
+ color: var(--w95-text);
+ background: var(--w95-face);
+ box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .blog-post-list article,
 html[data-interface-theme="windows-95"] .blog-markdown pre {
- border: 2px solid #808080;
- color: #000;
- background: #fff;
- box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+ border: 2px solid var(--w95-shadow);
+ color: var(--w95-text);
+ background: var(--w95-field);
+ box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .blog-header p:last-child,
@@ -4957,7 +5711,7 @@ html[data-interface-theme="windows-95"] .blog-post-list article > p:not(.blog-po
 html[data-interface-theme="windows-95"] .blog-article-excerpt,
 html[data-interface-theme="windows-95"] .blog-markdown,
 html[data-interface-theme="windows-95"] .blog-markdown pre code {
- color: #000;
+ color: var(--w95-text);
 }
 
 html[data-interface-theme="windows-95"] .blog-header h1,
@@ -4970,19 +5724,19 @@ html[data-interface-theme="windows-95"] .blog-markdown h5,
 html[data-interface-theme="windows-95"] .blog-markdown h6,
 html[data-interface-theme="windows-95"] .blog-post-card-meta,
 html[data-interface-theme="windows-95"] .blog-article-meta {
- color: #000080;
+ color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .skip-link {
- border-color: #fff;
+ border-color: var(--w95-hi);
  color: #fff;
  background: #000080;
 }
 
 html[data-interface-theme="windows-95"] .blog-text-color-rainbow {
- color: #000080;
+ color: var(--w95-accent-text);
  background: none;
- -webkit-text-fill-color: #000080;
+ -webkit-text-fill-color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] #admin-blog-window > .desktop-window-bar {
@@ -4995,13 +5749,13 @@ html[data-interface-theme="windows-95"] #admin-blog-window-title {
 }
 
 html[data-interface-theme="windows-95"] .blog-admin-preview {
- color: #000;
- background: #fff;
+ color: var(--w95-text);
+ background: var(--w95-field);
 }
 
 html[data-interface-theme="windows-95"] #blog-preview-heading,
 html[data-interface-theme="windows-95"] .blog-admin-preview p {
- color: #000;
+ color: var(--w95-text);
 }
 
 html[data-interface-theme="minebits"] #admin-blog-window-title {
@@ -9191,6 +9945,49 @@ html[data-interface-theme="minebits"] .endless-boot-progress span {
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.42);
 }
 
+html[data-interface-theme="catppuccin"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #cba6f7, #f5c2e7 50%, #89b4fa);
+}
+
+html[data-interface-theme="gruvbox"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #fe8019, #fabd2f 50%, #b8bb26);
+}
+
+html[data-interface-theme="tokyo-night"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #7aa2f7, #bb9af7 60%, #f7768e);
+}
+
+html[data-interface-theme="monokai"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #f92672, #fd971f 33%, #e6db74 55%, #a6e22e 78%, #66d9ef);
+}
+
+html[data-interface-theme="game-bit"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 8px);
+  box-shadow: none;
+}
+
+html[data-interface-theme="high-contrast"] .endless-boot-progress span {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+html[data-interface-theme="ocean"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #1a8fa8, #3fd8d0 60%, #b8f5ef);
+}
+
+html[data-interface-theme="coffee"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #5a3420, #8c522d 40%, #e0a96d 85%, #f3e6d6);
+}
+
+html[data-interface-theme="matrix"] .endless-boot-progress span {
+  background: repeating-linear-gradient(90deg, #00ff41 0 3px, #008f2a 3px 5px);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.55);
+}
+
+html[data-interface-theme="sunset"] .endless-boot-progress span {
+  background: linear-gradient(90deg, #6a2c70, #ff5f8f 45%, #ffa36c 80%, #ffd36e);
+}
+
 html[data-interface-theme="winter"] .endless-boot-progress span {
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0 5px, transparent 5px 10px),
@@ -12289,27 +13086,27 @@ html[data-interface-theme="windows-95"] .shell,
 html[data-interface-theme="windows-95"] .desktop-window,
 html[data-interface-theme="windows-95"] .system-window,
 html[data-interface-theme="windows-95"] .fake-desktop-app {
-  border: 2px solid #808080;
+  border: 2px solid var(--w95-shadow);
   box-shadow:
-    inset -2px -2px #000,
-    inset 2px 2px #fff,
+    inset -2px -2px var(--w95-dark),
+    inset 2px 2px var(--w95-hi),
     5px 5px 0 rgba(0, 0, 0, 0.46);
 }
 
 html[data-interface-theme="windows-95"] button,
 html[data-interface-theme="windows-95"] input,
 html[data-interface-theme="windows-95"] select {
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] input,
 html[data-interface-theme="windows-95"] textarea,
 html[data-interface-theme="windows-95"] select {
-  color: #000;
-  background: #fff;
+  color: var(--w95-text);
+  background: var(--w95-field);
 }
 
 html[data-interface-theme="windows-95"] button:hover,
@@ -12329,7 +13126,7 @@ html[data-interface-theme="windows-95"] .system-bar {
   grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 40px;
   padding-left: 5px;
-  border-bottom: 2px solid #808080;
+  border-bottom: 2px solid var(--w95-shadow);
 }
 
 html[data-interface-theme="windows-95"] .system-bar > p {
@@ -12360,8 +13157,8 @@ html[data-interface-theme="windows-95"] .system-status:focus-visible {
 
 html[data-interface-theme="windows-95"] #achievements-button,
 html[data-interface-theme="windows-95"] #settings-button {
-  color: #000;
-  background: #c0c0c0;
+  color: var(--w95-text);
+  background: var(--w95-face);
 }
 
 html[data-interface-theme="windows-95"] .status-dot {
@@ -12371,9 +13168,9 @@ html[data-interface-theme="windows-95"] .status-dot {
 }
 
 html[data-interface-theme="windows-95"] .app-menu-bar {
-  border-bottom: 2px solid #808080;
-  color: #000;
-  background: #d4d0c8;
+  border-bottom: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-panel);
   font-family: "Pixel UI", "Courier New", monospace;
 }
 
@@ -12386,11 +13183,11 @@ html[data-interface-theme="windows-95"] .app-menu[open] summary {
 }
 
 html[data-interface-theme="windows-95"] .app-menu-popup {
-  border: 2px solid #808080;
+  border: 2px solid var(--w95-shadow);
   border-radius: 0;
-  color: #000;
-  background: #d4d0c8;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff, 4px 4px rgba(0, 0, 0, 0.28);
+  color: var(--w95-text);
+  background: var(--w95-panel);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi), 4px 4px rgba(0, 0, 0, 0.28);
   backdrop-filter: none;
 }
 
@@ -12398,7 +13195,7 @@ html[data-interface-theme="windows-95"] .app-menu-popup button,
 html[data-interface-theme="windows-95"] .app-menu-popup a {
   border: 0;
   border-radius: 0;
-  color: #000;
+  color: var(--w95-text);
   background: transparent;
   box-shadow: none;
 }
@@ -12413,12 +13210,12 @@ html[data-interface-theme="windows-95"] .app-menu-popup a:focus-visible {
 }
 
 html[data-interface-theme="windows-95"] .app-menu-select {
-  color: #000;
+  color: var(--w95-text);
 }
 
 html[data-interface-theme="windows-95"] .app-menu-separator {
-  background: #808080;
-  box-shadow: 0 1px #fff;
+  background: var(--w95-shadow);
+  box-shadow: 0 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .window-controls {
@@ -12429,17 +13226,17 @@ html[data-interface-theme="windows-95"] .window-controls {
 html[data-interface-theme="windows-95"] .window-button {
   width: 36px;
   min-height: 30px;
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .window-button:hover,
 html[data-interface-theme="windows-95"] .window-button:focus-visible {
-  color: #000;
-  background: #d4d0c8;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  color: var(--w95-text);
+  background: var(--w95-panel);
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .close-button:hover,
@@ -12450,12 +13247,12 @@ html[data-interface-theme="windows-95"] .close-button:focus-visible {
 
 html[data-interface-theme="windows-95"] .link-icon,
 html[data-interface-theme="windows-95"] .link-arrow {
-  color: color-mix(in srgb, var(--card-accent) 58%, #000);
+  color: color-mix(in srgb, var(--card-accent) 58%, var(--w95-text));
 }
 
 html[data-interface-theme="windows-95"] .link-icon {
   border-color: color-mix(in srgb, var(--card-accent) 45%, #444);
-  background: color-mix(in srgb, var(--card-accent) 8%, #d4d0c8);
+  background: color-mix(in srgb, var(--card-accent) 8%, var(--w95-panel));
 }
 
 html[data-interface-theme="windows-95"] .fake-playing-dead > header strong,
@@ -12475,7 +13272,7 @@ html[data-interface-theme="windows-95"] .endless-boot-console {
 }
 
 html[data-interface-theme="windows-95"] .useless-tool-console {
-  background: #fff;
+  background: var(--w95-field);
 }
 
 html[data-interface-theme="windows-95"] .useless-warning strong {
@@ -12515,7 +13312,7 @@ html[data-interface-theme="windows-95"] .footer-select-control {
 html[data-interface-theme="windows-95"] button:active:not(:disabled),
 html[data-interface-theme="windows-95"] .error-actions a:active,
 html[data-interface-theme="windows-95"] .endless-boot-settings > a:active {
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
   transform: translate(1px, 1px);
 }
 
@@ -12534,7 +13331,7 @@ html[data-interface-theme="windows-95"] .error-actions a:hover,
 html[data-interface-theme="windows-95"] .error-actions a:focus-visible,
 html[data-interface-theme="windows-95"] .error-actions button:hover,
 html[data-interface-theme="windows-95"] .error-actions button:focus-visible {
-  border-color: #000;
+  border-color: var(--w95-dark);
   color: #fff;
   background: #000080;
   box-shadow: none;
@@ -12543,10 +13340,10 @@ html[data-interface-theme="windows-95"] .error-actions button:focus-visible {
 
 html[data-interface-theme="windows-95"] .error-actions a,
 html[data-interface-theme="windows-95"] .error-actions button {
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .link-card:hover :is(.link-title, .link-description, .link-arrow, .link-icon),
@@ -12573,12 +13370,12 @@ html[data-interface-theme="windows-95"] .useless-tool-grid button:focus-visible 
 
 html[data-interface-theme="windows-95"] .error-window,
 html[data-interface-theme="windows-95"] .admin-shell {
-  border: 2px solid #808080;
-  color: #000;
-  background: #d4d0c8;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-panel);
   box-shadow:
-    inset -2px -2px #000,
-    inset 2px 2px #fff,
+    inset -2px -2px var(--w95-dark),
+    inset 2px 2px var(--w95-hi),
     6px 6px 0 rgba(0, 0, 0, 0.42);
 }
 
@@ -12626,39 +13423,38 @@ html[data-interface-theme="windows-95"] .admin-header :is(h1, p, span) {
 
 html[data-interface-theme="windows-95"] .admin-header a {
   padding: 5px 8px;
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .admin-panel {
-  color: #000;
-  background: #d4d0c8;
+  color: var(--w95-text);
+  background: var(--w95-panel);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-page {
   padding: clamp(4px, 1.5vw, 12px);
-  background: #008080;
+  background: var(--w95-desktop);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-console {
-  --accent: #000080;
-  --accent-rgb: 0, 0, 128;
-  --border: #808080;
-  --ink: #000;
-  --muted: #3d3d3d;
-  --panel: #d4d0c8;
-  --warning: #800000;
+  --accent: var(--w95-accent-text);
+  --border: var(--w95-shadow);
+  --ink: var(--w95-text);
+  --muted: var(--w95-muted);
+  --panel: var(--w95-panel);
+  --warning: var(--w95-warning);
   width: 100%;
   height: 100%;
   padding: 4px;
-  border: 2px solid #808080;
-  color: #000;
-  background: #d4d0c8;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-panel);
   box-shadow:
-    inset -2px -2px #000,
-    inset 2px 2px #fff,
+    inset -2px -2px var(--w95-dark),
+    inset 2px 2px var(--w95-hi),
     5px 5px 0 rgba(0, 0, 0, 0.38);
 }
 
@@ -12693,58 +13489,58 @@ html[data-interface-theme="windows-95"] .endless-boot-indicators {
 html[data-interface-theme="windows-95"] .endless-boot-indicators i {
   width: 7px;
   height: 7px;
-  border: 1px solid #fff;
+  border: 1px solid var(--w95-hi);
   border-radius: 0;
   background: #00c000;
-  box-shadow: 1px 1px #000;
+  box-shadow: 1px 1px var(--w95-dark);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-transmission {
   margin: 5px 4px 0;
   padding: 7px 8px;
-  border: 2px solid #808080;
-  color: #000;
-  background: #fff;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-field);
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-transmission > span {
-  color: #000080;
+  color: var(--w95-accent-text);
   font-weight: 700;
   letter-spacing: 0;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-transmission p {
-  color: #000;
+  color: var(--w95-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-status {
   margin: 0 4px;
   padding: 7px 4px;
-  border-bottom: 1px solid #808080;
-  color: #3d3d3d;
+  border-bottom: 1px solid var(--w95-shadow);
+  color: var(--w95-muted);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-status strong {
-  color: #000080;
+  color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-machine {
   margin: 0 4px;
   padding-inline: 4px;
-  border-color: #808080;
-  color: #3d3d3d;
+  border-color: var(--w95-shadow);
+  color: var(--w95-muted);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-machine strong {
-  color: #000080;
+  color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-post {
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-machine [data-meter] i {
@@ -12752,30 +13548,30 @@ html[data-interface-theme="windows-95"] .endless-boot-machine [data-meter] i {
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-terminal {
-  background: #fff;
+  background: var(--w95-field);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-log {
   margin: 4px;
   padding: 7px 8px;
-  border: 2px solid #808080;
-  color: #000;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
   background: transparent;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
   mask-image: none;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-log li::before {
-  color: #000080;
+  color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="warning"] {
-  color: #800000;
+  color: var(--w95-warning);
   font-weight: 700;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-log li[data-state="error"] {
-  color: #c00000;
+  color: var(--w95-error);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer {
@@ -12793,9 +13589,9 @@ html[data-interface-theme="windows-95"] .endless-boot-progress {
   height: 14px;
   padding: 2px;
   box-sizing: border-box;
-  border: 2px solid #808080;
-  background: #fff;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  border: 2px solid var(--w95-shadow);
+  background: var(--w95-field);
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-progress span {
@@ -12812,7 +13608,7 @@ html[data-interface-theme="windows-95"] .endless-boot-footer p {
   padding-top: 0;
   padding-right: 96px;
   box-sizing: border-box;
-  color: #3d3d3d;
+  color: var(--w95-muted);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-footer p > span {
@@ -12824,7 +13620,7 @@ html[data-interface-theme="windows-95"] .endless-boot-footer p > span {
 
 html[data-interface-theme="windows-95"] .endless-boot-footer b {
   flex: none;
-  color: #000080;
+  color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-settings {
@@ -12835,11 +13631,11 @@ html[data-interface-theme="windows-95"] .endless-boot-settings {
 html[data-interface-theme="windows-95"] .endless-boot-settings > a,
 html[data-interface-theme="windows-95"] .endless-boot-settings > button {
   height: 28px;
-  border: 2px solid #808080;
+  border: 2px solid var(--w95-shadow);
   border-radius: 0;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
   opacity: 1;
 }
 
@@ -12852,54 +13648,54 @@ html[data-interface-theme="windows-95"] .endless-boot-settings > a:focus-visible
 html[data-interface-theme="windows-95"] .endless-boot-settings > button:hover,
 html[data-interface-theme="windows-95"] .endless-boot-settings > button:focus-visible,
 html[data-interface-theme="windows-95"] .endless-boot-settings > button[aria-expanded="true"] {
-  border-color: #808080;
+  border-color: var(--w95-shadow);
   color: #fff;
   background: #000080;
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-settings-panel {
-  border: 2px solid #808080;
+  border: 2px solid var(--w95-shadow);
   border-radius: 0;
-  color: #000;
-  background: #d4d0c8;
+  color: var(--w95-text);
+  background: var(--w95-panel);
   box-shadow:
-    inset -1px -1px #000,
-    inset 1px 1px #fff,
+    inset -1px -1px var(--w95-dark),
+    inset 1px 1px var(--w95-hi),
     4px 4px 0 rgba(0, 0, 0, 0.38);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-settings-panel p,
 html[data-interface-theme="windows-95"] .endless-boot-settings-panel label {
-  color: #000;
+  color: var(--w95-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-settings-panel select {
-  border: 2px solid #808080;
-  color: #000;
-  background: #fff;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-field);
+  box-shadow: inset 1px 1px var(--w95-dark), inset -1px -1px var(--w95-hi);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-hardware {
-  border: 2px solid #808080;
-  color: #000;
-  background: #d4d0c8;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-panel);
   box-shadow:
-    inset -1px -1px #000,
-    inset 1px 1px #fff,
+    inset -1px -1px var(--w95-dark),
+    inset 1px 1px var(--w95-hi),
     0 0 0 100vmax rgba(0, 0, 0, 0.66);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-hardware h2,
 html[data-interface-theme="windows-95"] .endless-boot-hardware dd {
-  color: #000080;
+  color: var(--w95-accent-text);
 }
 
 html[data-interface-theme="windows-95"] .endless-boot-hardware header button {
-  border: 2px solid #808080;
-  color: #000;
-  background: #c0c0c0;
-  box-shadow: inset -1px -1px #000, inset 1px 1px #fff;
+  border: 2px solid var(--w95-shadow);
+  color: var(--w95-text);
+  background: var(--w95-face);
+  box-shadow: inset -1px -1px var(--w95-dark), inset 1px 1px var(--w95-hi);
 }
 
 @media (max-height: 560px) {
@@ -13940,6 +14736,27 @@ html[data-effects="off"] .scanlines {
 
 html[data-contrast="high"] .theme-atmosphere {
   display: none !important;
+}
+
+html[data-interface-theme="high-contrast"] .theme-atmosphere {
+  display: none !important;
+}
+
+html[data-interface-theme="high-contrast"] .shell,
+html[data-interface-theme="high-contrast"] .desktop-window,
+html[data-interface-theme="high-contrast"] .system-window,
+html[data-interface-theme="high-contrast"] .achievements-window {
+  backdrop-filter: none;
+  box-shadow: 0 0 0 2px var(--border);
+}
+
+html[data-interface-theme="high-contrast"] a:not([class]) {
+  text-decoration: underline;
+}
+
+html[data-interface-theme="high-contrast"] :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 html.is-performance-lite .theme-atmosphere {

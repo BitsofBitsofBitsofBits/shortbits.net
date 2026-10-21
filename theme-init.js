@@ -12,14 +12,36 @@ const baseInterfaceThemes = [
   { id: "y2k-silver", name: "Y2K SILVER", darkColor: "#252a33", lightColor: "#e8edf4" },
   { id: "cyberpunk", name: "CYBERPUNK", darkColor: "#080712", lightColor: "#f3f000" },
   { id: "dos-blue", name: "DOS BLUE", darkColor: "#0000aa", lightColor: "#d7d7d7" },
-  { id: "windows-95", name: "WINDOWS 95", darkColor: "#004c4c", lightColor: "#008080" },
+  {
+    id: "windows-95",
+    name: "WINDOWS 95",
+    darkColor: "#002b2b",
+    lightColor: "#004c4c",
+    nativeScheme: "light",
+  },
   { id: "solarized", name: "SOLARIZED", darkColor: "#002b36", lightColor: "#fdf6e3" },
   { id: "nord", name: "NORD", darkColor: "#2e3440", lightColor: "#eceff4" },
   { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
-  { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#090713" },
-  { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#0d3358" },
+  { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#f7f4ff" },
+  { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#cfe8fb" },
   { id: "minebits", name: "MINEBITS", darkColor: "#332719", lightColor: "#dbe8c5" },
+  { id: "catppuccin", name: "CATPPUCCIN", darkColor: "#1e1e2e", lightColor: "#eff1f5" },
+  { id: "gruvbox", name: "GRUVBOX", darkColor: "#282828", lightColor: "#fbf1c7" },
+  { id: "tokyo-night", name: "TOKYO NIGHT", darkColor: "#1a1b26", lightColor: "#e1e2e7" },
+  { id: "monokai", name: "MONOKAI", darkColor: "#272822", lightColor: "#fafaf5" },
+  { id: "game-bit", name: "GAME BIT", darkColor: "#0f380f", lightColor: "#9bbc0f" },
+  { id: "high-contrast", name: "HIGH CONTRAST", darkColor: "#000000", lightColor: "#ffffff" },
+  { id: "ocean", name: "DEEP OCEAN", darkColor: "#03141f", lightColor: "#e6f6f8" },
+  { id: "coffee", name: "COFFEE SHOP", darkColor: "#1f1510", lightColor: "#f6efe4" },
+  { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#e9f7ec" },
+  { id: "sunset", name: "SUNSET", darkColor: "#1d0f24", lightColor: "#fff1e6" },
+];
+const colorSchemeKey = "bits-color-scheme";
+const colorSchemeOptions = [
+  { value: "auto", label: "THEME DEFAULT" },
+  { value: "dark", label: "DARK" },
+  { value: "light", label: "LIGHT" },
 ];
 
 const seasonalInterfaceThemes = {
@@ -185,11 +207,96 @@ window.BITS_THEME_DEBUG = Object.freeze({
   isEnabled: () => localStorage.getItem(themeDebugKey) === "enabled",
 });
 
+function getColorSchemePreference() {
+  const stored = localStorage.getItem(colorSchemeKey);
+  return stored === "dark" || stored === "light" ? stored : "auto";
+}
+
+function resolveColorScheme(theme) {
+  const preference = getColorSchemePreference();
+  if (preference !== "auto") {
+    return preference;
+  }
+  return theme?.nativeScheme === "light" ? "light" : "dark";
+}
+
+function applyThemeToDocument(themeId) {
+  const theme = window.BITS_INTERFACE_THEMES.find((entry) => entry.id === themeId)
+    ?? window.BITS_INTERFACE_THEMES[0];
+  const scheme = resolveColorScheme(theme);
+  const root = document.documentElement;
+  root.dataset.colorScheme = scheme;
+  root.dataset.interfaceTheme = theme.id;
+  root.classList.toggle("is-rgb-mode", theme.id === "rgb");
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.content = scheme === "light" ? theme.lightColor : theme.darkColor;
+  }
+  window.dispatchEvent(new CustomEvent("bits:theme-applied", {
+    detail: { theme, scheme },
+  }));
+  return theme;
+}
+
+function setColorSchemePreference(preference) {
+  if (preference === "dark" || preference === "light") {
+    localStorage.setItem(colorSchemeKey, preference);
+  } else {
+    localStorage.removeItem(colorSchemeKey);
+  }
+  return applyThemeToDocument(document.documentElement.dataset.interfaceTheme);
+}
+
+function pickRandomThemeId() {
+  const currentThemeId = document.documentElement.dataset.interfaceTheme;
+  const candidates = window.BITS_INTERFACE_THEMES.filter(
+    (theme) => theme.id !== currentThemeId,
+  );
+  return candidates[Math.floor(Math.random() * candidates.length)].id;
+}
+
+function bindColorSchemeSelect(select, formatLabel = (label) => label) {
+  if (!select) {
+    return;
+  }
+  select.replaceChildren(...colorSchemeOptions.map(({ value, label }) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = formatLabel(label);
+    return option;
+  }));
+  select.value = getColorSchemePreference();
+  select.addEventListener("change", () => {
+    setColorSchemePreference(select.value);
+    window.dispatchEvent(new CustomEvent("bits:appearance-changed", {
+      detail: {
+        label: "COLOR MODE",
+        value: colorSchemeOptions.find((option) => option.value === select.value)?.label,
+      },
+    }));
+  });
+  window.addEventListener("bits:theme-applied", () => {
+    select.value = getColorSchemePreference();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key === colorSchemeKey) {
+      setColorSchemePreference(getColorSchemePreference());
+    }
+  });
+}
+
 window.BITS_THEME_PREFERENCE = {
   dismissalKey: seasonalDismissalKey,
   choiceKey: seasonalChoiceKey,
+  colorSchemeKey,
+  colorSchemeOptions,
   select: selectInterfaceTheme,
   resolve: resolveInterfaceTheme,
+  apply: applyThemeToDocument,
+  getColorScheme: getColorSchemePreference,
+  setColorScheme: setColorSchemePreference,
+  bindColorSchemeSelect,
+  pickRandom: pickRandomThemeId,
 };
 
 if (typeof window.setTimeout === "function" && window.location?.reload) {
@@ -205,12 +312,7 @@ if (typeof window.setTimeout === "function" && window.location?.reload) {
   window.setTimeout(() => window.location.reload(), nextDay.getTime() - now.getTime());
 }
 
-document.documentElement.dataset.colorScheme = "dark";
-document.documentElement.dataset.interfaceTheme = initialInterfaceTheme.id;
-document.documentElement.classList.toggle(
-  "is-rgb-mode",
-  initialInterfaceTheme.id === "rgb",
-);
+applyThemeToDocument(initialInterfaceTheme.id);
 document.documentElement.dataset.motion =
   localStorage.getItem("bits-motion") === "reduced" ? "reduced" : "system";
 document.documentElement.dataset.textsize =
@@ -227,6 +329,4 @@ if (
   localStorage.setItem("bits-interface-theme", savedInterfaceTheme.id);
 }
 localStorage.removeItem("bits-accent");
-localStorage.removeItem("bits-color-scheme");
 localStorage.removeItem("bits-rgb-mode");
-document.querySelector('meta[name="theme-color"]').content = initialInterfaceTheme.darkColor;
