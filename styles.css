@@ -10842,6 +10842,17 @@ html[data-boot-degradation="3"] .endless-boot-machine {
   text-align: right;
 }
 
+.resume-section-heading {
+  margin: 22px 0 10px;
+  color: var(--muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+}
+
+.resume-section-heading[hidden] {
+  display: none;
+}
+
 .resume-entry-bullets {
   display: grid;
   gap: 6px;

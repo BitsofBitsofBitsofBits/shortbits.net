@@ -42,7 +42,8 @@
   const location = document.querySelector("#profile-location");
   const availability = document.querySelector("#profile-availability");
   const availabilityRow = document.querySelector("#profile-availability-row");
-  const sharedCacheKey = "bits-public-content-v3";
+  const educationList = document.querySelector("#profile-education");
+  const sharedCacheKey = "bits-public-content-v4";
   const sharedCacheDurationMs = 300_000;
 
   if (!timeline || !window.CareerFormat) {
@@ -61,6 +62,7 @@
         return {
           profile: cached.payload.resumeProfile,
           entries: cached.payload.resumeEntries ?? [],
+          education: cached.payload.resumeEducation ?? [],
         };
       }
     } catch {
@@ -88,11 +90,42 @@
     if (cached) {
       return cached;
     }
-    const [profiles, entries] = await Promise.all([
+    const [profiles, entries, education] = await Promise.all([
       fetchTable("site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary"),
       fetchTable("site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc"),
+      fetchTable("site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc")
+        .catch((error) => {
+          console.warn("Unable to load education:", error);
+          return [];
+        }),
     ]);
-    return { profile: profiles[0] ?? null, entries };
+    return { profile: profiles[0] ?? null, entries, education };
+  }
+
+  function createEducationEntry(entry) {
+    const item = document.createElement("li");
+    const meta = document.createElement("div");
+    const period = document.createElement("p");
+    const body = document.createElement("article");
+    const credential = document.createElement("h3");
+    const school = document.createElement("p");
+
+    meta.className = "profile-timeline-meta";
+    period.className = "profile-kicker";
+    window.CareerFormat.buildPeriod(period, entry.period);
+    meta.append(period);
+
+    credential.textContent = entry.credential;
+    school.className = "profile-subtitle";
+    school.textContent = entry.school;
+    body.append(credential, school);
+    if (entry.details) {
+      body.append(window.CareerFormat.buildSummary(entry.details, {
+        list: "profile-timeline-bullets",
+      }));
+    }
+    item.append(meta, body);
+    return item;
   }
 
   function createEntry(entry, index) {
@@ -134,9 +167,12 @@
     return item;
   }
 
-  function render({ profile, entries }) {
+  function render({ profile, entries, education }) {
     if (!profile) {
       return;
+    }
+    if (educationList && Array.isArray(education) && education.length > 0) {
+      educationList.replaceChildren(...education.map(createEducationEntry));
     }
     if (profile.location) {
       location.textContent = profile.location;

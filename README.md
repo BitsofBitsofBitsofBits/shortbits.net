@@ -36,6 +36,9 @@ is a personal project and largely a learning exercise for me.
   are only a fallback when Supabase is unreachable. Summary lines starting with
   `•` or `-` render as bullets, and technologies (comma- or double-space-
   separated) render as tags via `career-format.js`.
+  Education entries (school, credential, period, and optional bullet details)
+  are edited in the same Admin form, stored in `site_resume_education`, and
+  shown in both `CAREER.SYS` and the professional Education section.
 - Theme-driven, high-contrast, and reduced-motion display profiles
 - Spotify now-playing integration through a Supabase Edge Function
 - Cached Discord presence, custom status, and activity through Lanyard

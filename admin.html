@@ -8,7 +8,7 @@
     <title>BitsofBitsofBits // PRIVATE INBOX</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <script src="theme-init.js?v=theme-12"></script>
-    <link rel="stylesheet" href="styles.css?v=upgrade-112">
+    <link rel="stylesheet" href="styles.css?v=upgrade-113">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="supabase-config.js" defer></script>
     <script src="markdown.js?v=markdown-2" defer></script>
@@ -16,7 +16,7 @@
     <script src="admin-windows.js?v=admin-windows-9" defer></script>
     <script src="seasonal-messages.js?v=seasonal-3" defer></script>
     <script src="windows.js?v=windows-11" defer></script>
-    <script src="admin.js?v=admin-18" defer></script>
+    <script src="admin.js?v=admin-19" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -177,6 +177,7 @@
               Publishes to CAREER.SYS on the main page and the experience timeline on
               <a href="/professional/#experience" target="_blank" rel="noreferrer">/professional/</a>.
               Start summary lines with &bull; or - for bullet points; separate technologies with commas.
+              Education details accept the same bullet format, e.g. honors and activities.
             </p>
             <div class="content-admin-profile-grid">
               <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
@@ -190,6 +191,10 @@
               <button id="resume-entry-add" type="button">+ ADD_EXPERIENCE</button>
             </div>
             <div id="resume-entry-slots" class="curated-admin-grid"></div>
+            <div class="repeatable-admin-actions">
+              <button id="resume-education-add" type="button">+ ADD_EDUCATION</button>
+            </div>
+            <div id="resume-education-slots" class="curated-admin-grid"></div>
             <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
           </form>

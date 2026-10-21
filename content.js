@@ -9,6 +9,8 @@ const resumeLocationRow = document.querySelector("#resume-location-row");
 const resumeUpdated = document.querySelector("#resume-updated");
 const resumeDownload = document.querySelector("#resume-download");
 const resumeEntries = document.querySelector("#resume-entries");
+const resumeEducationHeading = document.querySelector("#resume-education-heading");
+const resumeEducation = document.querySelector("#resume-education");
 const nowEmpty = document.querySelector("#now-empty");
 const nowContent = document.querySelector("#now-content");
 const nowHeadline = document.querySelector("#now-headline");
@@ -25,7 +27,7 @@ const publicContentWindowIds = new Set([
   "changelog-window",
   "games-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v3";
+const publicContentCacheKey = "bits-public-content-v4";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -89,7 +91,7 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, nowProfiles, changelogItems, gameItems] =
+  const [resumeProfiles, resumeItems, educationItems, nowProfiles, changelogItems, gameItems] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
@@ -97,6 +99,12 @@ async function requestPublicContent() {
       fetchPublicContentTable(
         "site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc",
       ),
+      fetchPublicContentTable(
+        "site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc",
+      ).catch((error) => {
+        console.warn("Unable to load education:", error);
+        return [];
+      }),
       fetchPublicContentTable(
         "site_now?select=headline,summary,building,learning,playing,reading,updated_at&enabled=eq.true&id=eq.primary",
       ),
@@ -110,6 +118,7 @@ async function requestPublicContent() {
   const payload = {
     resumeProfile: resumeProfiles[0] ?? null,
     resumeEntries: resumeItems,
+    resumeEducation: educationItems,
     nowProfile: nowProfiles[0] ?? null,
     changelogEntries: changelogItems,
     favoriteGames: gameItems,
@@ -167,7 +176,38 @@ function createResumeEntry(entry) {
   return item;
 }
 
-function renderResume(profile, entries) {
+function createEducationEntry(entry) {
+  const item = document.createElement("li");
+  const header = document.createElement("header");
+  const titleGroup = document.createElement("div");
+  const credential = document.createElement("h3");
+  const school = document.createElement("p");
+  const period = document.createElement("p");
+  credential.textContent = entry.credential;
+  school.textContent = entry.school;
+  if (window.CareerFormat) {
+    window.CareerFormat.buildPeriod(period, entry.period);
+  } else {
+    period.textContent = entry.period;
+  }
+  titleGroup.append(credential, school);
+  header.append(titleGroup, period);
+  item.append(header);
+  if (entry.details) {
+    if (window.CareerFormat) {
+      item.append(window.CareerFormat.buildSummary(entry.details, {
+        list: "resume-entry-bullets",
+      }));
+    } else {
+      const details = document.createElement("p");
+      details.textContent = entry.details;
+      item.append(details);
+    }
+  }
+  return item;
+}
+
+function renderResume(profile, entries, education = []) {
   if (!profile) {
     resumeEmpty.textContent = "Résumé data is awaiting operator input.";
     resumeEmpty.hidden = false;
@@ -192,6 +232,11 @@ function renderResume(profile, entries) {
     ...entries.map(createResumeEntry),
   );
   resumeEntries.hidden = entries.length === 0;
+  if (resumeEducation) {
+    resumeEducation.replaceChildren(...education.map(createEducationEntry));
+    resumeEducation.hidden = education.length === 0;
+    resumeEducationHeading.hidden = education.length === 0;
+  }
   resumeEmpty.hidden = true;
   resumeContent.hidden = false;
 }
@@ -292,7 +337,11 @@ async function loadPublicContent() {
     gamesEmpty.textContent = "Synchronizing favorite games...";
     publicContentRequest = requestPublicContent()
       .then((content) => {
-        renderResume(content.resumeProfile, content.resumeEntries);
+        renderResume(
+          content.resumeProfile,
+          content.resumeEntries,
+          content.resumeEducation ?? [],
+        );
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);
         renderFavoriteGames(content.favoriteGames);

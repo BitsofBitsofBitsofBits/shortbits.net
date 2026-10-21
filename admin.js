@@ -35,6 +35,8 @@ const resumeSubmit = document.querySelector("#resume-submit");
 const resumeAdminStatus = document.querySelector("#resume-admin-status");
 const resumeEntrySlots = document.querySelector("#resume-entry-slots");
 const resumeEntryAdd = document.querySelector("#resume-entry-add");
+const resumeEducationSlots = document.querySelector("#resume-education-slots");
+const resumeEducationAdd = document.querySelector("#resume-education-add");
 const nowForm = document.querySelector("#now-form");
 const nowSubmit = document.querySelector("#now-submit");
 const nowAdminStatus = document.querySelector("#now-admin-status");
@@ -140,6 +142,19 @@ const repeatableEditors = {
       { key: "period", label: "PERIOD", maxLength: 100 },
       { key: "summary", label: "SUMMARY", maxLength: 1000, multiline: true },
       { key: "technologies", label: "TECHNOLOGIES", maxLength: 300 },
+    ],
+  },
+  education: {
+    table: "site_resume_education",
+    container: resumeEducationSlots,
+    addButton: resumeEducationAdd,
+    status: resumeAdminStatus,
+    itemName: "education",
+    fields: [
+      { key: "school", label: "SCHOOL", maxLength: 120 },
+      { key: "credential", label: "DEGREE / CREDENTIAL", maxLength: 160 },
+      { key: "period", label: "PERIOD", maxLength: 100 },
+      { key: "details", label: "DETAILS (OPTIONAL)", maxLength: 600, multiline: true },
     ],
   },
   changelog: {
@@ -358,6 +373,7 @@ function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v1");
   localStorage.removeItem("bits-public-content-v2");
   localStorage.removeItem("bits-public-content-v3");
+  localStorage.removeItem("bits-public-content-v4");
 }
 
 function createMessageElement(message) {
@@ -729,6 +745,25 @@ async function loadResumeContent() {
   resumeForm.elements.enabled.checked = profileResult.data.enabled === true;
 
   renderRepeatableEntries(repeatableEditors.resume, entriesResult.data);
+
+  const educationEditor = repeatableEditors.education;
+  const educationResult = await adminClient
+    .from("site_resume_education")
+    .select("position, school, credential, period, details, enabled")
+    .order("position", { ascending: true });
+  educationEditor.unavailable = Boolean(educationResult.error);
+  educationEditor.addButton.disabled = educationEditor.unavailable;
+  if (educationResult.error) {
+    console.error("Unable to load education:", educationResult.error);
+    renderRepeatableEntries(educationEditor, []);
+    setAdminStatus(
+      resumeAdminStatus,
+      `Résumé data loaded, but education is unavailable: ${educationResult.error.message}`,
+      "error",
+    );
+    return true;
+  }
+  renderRepeatableEntries(educationEditor, educationResult.data);
   setAdminStatus(resumeAdminStatus, "Résumé data loaded.", "success");
   return true;
 }
@@ -1884,9 +1919,13 @@ if (adminClient) {
     );
     profile.enabled = formData.has("enabled");
     const entries = collectRepeatableEntries(repeatableEditors.resume);
+    const educationEntries = collectRepeatableEntries(repeatableEditors.education);
     const invalidEntry = entries.find((entry) => (
       entry.enabled
       && (!entry.role || !entry.organization || !entry.period || !entry.summary)
+    ));
+    const invalidEducation = educationEntries.find((entry) => (
+      entry.enabled && (!entry.school || !entry.credential || !entry.period)
     ));
 
     if (profile.enabled && (!profile.headline || !profile.summary)) {
@@ -1905,6 +1944,14 @@ if (adminClient) {
       setAdminStatus(
         resumeAdminStatus,
         "Every enabled résumé entry needs a role, organization, period, and summary.",
+        "error",
+      );
+      return;
+    }
+    if (invalidEducation) {
+      setAdminStatus(
+        resumeAdminStatus,
+        "Every enabled education entry needs a school, credential, and period.",
         "error",
       );
       return;
@@ -1928,6 +1975,9 @@ if (adminClient) {
         })
         .eq("id", "primary"),
       syncRepeatableEntries(repeatableEditors.resume, entries, updatedAt),
+      repeatableEditors.education.unavailable
+        ? null
+        : syncRepeatableEntries(repeatableEditors.education, educationEntries, updatedAt),
     ]);
     const failedUpdate = results.find((result) => result?.error);
     resumeSubmit.disabled = false;
