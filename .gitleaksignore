@@ -1,0 +1,5 @@
+# Reviewed false positives: public identifiers that are intentionally committed.
+# Discord user ID (public account identifier, not a token)
+8d7098c597fd5a22473f53b0eb4a6dc92f28575e:supabase/functions/discord-presence/index.ts:discord-client-id:6
+# Supabase publishable browser key (designed to be public; access is enforced by row-level security)
+659217a8d24fcb947a8d197c98d3bcf0234d3f22:supabase-config.js:generic-api-key:3
