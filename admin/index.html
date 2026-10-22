@@ -8,7 +8,7 @@
     <title>Bits 365 admin center // BitsofBitsofBits</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/admin-appearance.js?v=admin-appearance-1"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-127">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-128">
     <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-4">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
@@ -308,6 +308,7 @@
                 <li>Copy the installer, paste it into PowerShell on that machine (no admin rights needed), and paste the token when prompted.</li>
                 <li>The agent runs at logon, posts live CPU, GPU, RAM, and uptime every 3 seconds while someone is viewing HARDWARE.SYS (every 15 seconds otherwise), and re-syncs specs every six hours. Re-run the installer to upgrade it; press Enter at the prompt to keep the saved token. Its rows are marked <strong>// AGENT</strong>. Untick a row to hide it; deleted rows come back on the next sync. Use <strong>RENAME</strong> here or in the editor to rename a machine; the agent keeps syncing under the new name.</li>
               </ol>
+              <p class="blog-markdown-help">Unraid NAS: create a separate device token with an explicit public-safe name (for example NAS). Do not use the Windows installer. Follow the <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net/blob/main/agents/unraid/README.md" target="_blank" rel="noopener noreferrer">Unraid Docker collector setup</a>. Add only reviewed hardware model descriptions in the inventory below; the collector never imports hostnames or serial numbers.</p>
               <ul id="hardware-devices" class="hardware-devices"></ul>
               <label><span>MACHINE NAME</span><input id="hardware-device-machine" maxlength="60" placeholder="Auto: system model or device name" list="hardware-machine-names"></label>
               <div class="repeatable-admin-actions">

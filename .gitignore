@@ -6,4 +6,5 @@ Thumbs.db
 .vscode/
 node_modules/
 supabase/.temp/
+agents/unraid/config.json
 bitsofbits-achievements.json

@@ -17,6 +17,18 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -34,6 +46,17 @@ jobs:
 
       - name: Validate site assets
         run: node scripts/validate-site.mjs
+
+      - name: Test Unraid collector
+        run: node --test agents/unraid/collector.test.mjs
+
+      - name: Test NAS ingestion and desktop compatibility
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d postgres -f agents/unraid/database.test.sql
+
+      - name: Build Unraid collector image
+        run: docker build --tag shortbits-unraid:test agents/unraid
 
       - name: Scan committed content for secrets
         uses: gitleaks/gitleaks-action@v2

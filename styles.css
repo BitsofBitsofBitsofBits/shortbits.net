@@ -12170,6 +12170,52 @@ ul.resume-entry-technologies li {
   border-style: dotted;
 }
 
+.hardware-nas[hidden] {
+  display: none;
+}
+
+.hardware-nas {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  color: var(--ink);
+  font-size: .68rem;
+  overflow-wrap: anywhere;
+}
+
+.hardware-nas p {
+  margin: 0;
+}
+
+.hardware-nas-summary {
+  color: var(--accent);
+}
+
+.hardware-nas-note {
+  color: var(--muted);
+  font-size: .6rem;
+}
+
+.hardware-nas-drives {
+  display: grid;
+  gap: 5px;
+  margin: 4px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hardware-nas-drives li {
+  display: grid;
+  grid-template-columns: 65px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.hardware-nas-drives [data-state="error"] {
+  color: var(--danger);
+}
+
 .hardware-machine h3 {
   margin: 0;
   color: var(--ink);

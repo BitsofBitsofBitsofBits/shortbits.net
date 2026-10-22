@@ -247,6 +247,22 @@ by visitors and open tabs.
 
 ## Local development
 
+### Unraid NAS live monitoring
+
+The optional [Unraid Docker collector](agents/unraid/README.md) sends filtered
+CPU/RAM/uptime, array capacity/state, DATA-drive readings, and selected-interface
+network rates into HARDWARE.SYS. It uses a separate existing Admin-issued device
+token and a local read-only Unraid API key, with verified outbound HTTPS and no
+public NAS endpoint. Credentials and raw identifying API fields stay local.
+Reviewed hardware model descriptions can be added manually in Admin. Public
+uptime/activity remains inferable; read the privacy and coverage limitations
+before enabling it. The Docker setup includes a no-publish compatibility check.
+
+Collector tests: `node --test agents/unraid/collector.test.mjs`. CI additionally
+tests the NAS migration against PostgreSQL and builds the non-root Docker image.
+
+### Static site
+
 The public site is dependency-free. Serve the directory with any static server:
 
 ```powershell

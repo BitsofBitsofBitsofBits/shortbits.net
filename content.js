@@ -421,9 +421,7 @@ function formatHardwareUptime(bootedAt) {
 }
 
 function tickHardwareUptime() {
-  hardwareMachines.querySelectorAll(".hardware-live-uptime[data-booted-at]").forEach((uptime) => {
-    uptime.textContent = `UPTIME ${formatHardwareUptime(uptime.dataset.bootedAt)}`;
-  });
+  updateHardwareStatus();
 }
 
 function createHardwareMeter(label) {
@@ -460,6 +458,7 @@ function createHardwareCard(machine, components, collapsed) {
   const count = document.createElement("span");
   const live = document.createElement("div");
   const uptime = document.createElement("p");
+  const nas = document.createElement("section");
   card.className = "hardware-machine";
   card.dataset.machine = machine;
   card.open = !collapsed;
@@ -474,11 +473,15 @@ function createHardwareCard(machine, components, collapsed) {
   live.className = "hardware-live";
   live.hidden = true;
   uptime.className = "hardware-live-uptime";
+  nas.className = "hardware-nas";
+  nas.setAttribute("aria-label", "NAS storage, network, and drive readings");
+  nas.hidden = true;
   live.append(
     createHardwareMeter("CPU"),
     createHardwareMeter("GPU"),
     createHardwareMeter("RAM"),
     uptime,
+    nas,
   );
   card.append(summary, live);
 
@@ -507,6 +510,61 @@ function createHardwareCard(machine, components, collapsed) {
     saveCollapsedHardware(machine, !card.open);
   });
   return card;
+}
+
+function formatHardwareBytes(bytes) {
+  if (bytes >= 1024 ** 4) return `${(bytes / 1024 ** 4).toFixed(2)} TiB`;
+  if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(1)} GiB`;
+  if (bytes >= 1024 ** 2) return `${(bytes / 1024 ** 2).toFixed(1)} MiB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
+  return `${Math.round(bytes)} B`;
+}
+
+function updateHardwareNas(container, metrics, online) {
+  container.hidden = !metrics;
+  if (!metrics) {
+    delete container.dataset.readingKey;
+    container.replaceChildren();
+    return;
+  }
+  const fresh = online && Date.now() - new Date(metrics.sampled_at).getTime() < hardwareOnlineWindowMs;
+  const key = JSON.stringify([metrics, fresh]);
+  if (container.dataset.readingKey === key) return;
+  container.dataset.readingKey = key;
+  const summary = document.createElement("p");
+  summary.className = "hardware-nas-summary";
+  if (!fresh) {
+    summary.textContent = "NAS READINGS STALE / UNAVAILABLE";
+    container.replaceChildren(summary);
+    return;
+  }
+  summary.textContent = `ARRAY ${metrics.array_state}`;
+  const storage = document.createElement("p");
+  storage.textContent = `STORAGE ${formatHardwareBytes(metrics.storage_used_bytes)} / ${formatHardwareBytes(metrics.storage_total_bytes)} used`;
+  const free = document.createElement("p");
+  free.textContent = `${formatHardwareBytes(metrics.storage_free_bytes)} free`;
+  const network = document.createElement("p");
+  const rate = (value) => value === null ? "measuring" : `${formatHardwareBytes(value)}/s`;
+  network.textContent = `NETWORK RX ${rate(metrics.network_rx_bytes_sec)} / TX ${rate(metrics.network_tx_bytes_sec)}`;
+  const note = document.createElement("p");
+  note.className = "hardware-nas-note";
+  note.textContent = "Selected LAN interface; not Internet bandwidth. Drive status and I/O errors are not a full SMART health assessment.";
+  const drives = document.createElement("ul");
+  drives.className = "hardware-nas-drives";
+  metrics.drives.forEach((drive, index) => {
+    const row = document.createElement("li");
+    row.dataset.state = drive.status === "error" || drive.errors > 0 ? "error" : drive.status;
+    const name = document.createElement("strong");
+    const reading = document.createElement("span");
+    name.textContent = `Drive ${index + 1}`;
+    const temperature = drive.temperature_c === null ? "temperature unavailable" : `${drive.temperature_c}\u00b0C`;
+    const spinning = drive.spinning === false ? "sleeping" : drive.spinning === true ? "spinning" : "spin state unknown";
+    const errors = drive.errors === null ? "I/O errors unavailable" : `${drive.errors} I/O errors`;
+    reading.textContent = `${drive.status.toUpperCase()} / ${spinning} / ${temperature} / ${errors}`;
+    row.append(name, reading);
+    drives.append(row);
+  });
+  container.replaceChildren(summary, storage, free, network, drives, note);
 }
 
 function renderHardwareCards() {
@@ -556,6 +614,7 @@ function updateHardwareStatus() {
     badge.hidden = !status;
     if (!status) {
       live.hidden = true;
+      updateHardwareNas(live.querySelector(".hardware-nas"), null, false);
       return;
     }
     const online = Date.now() - new Date(status.updated_at).getTime() < hardwareOnlineWindowMs;
@@ -564,7 +623,7 @@ function updateHardwareStatus() {
     live.hidden = false;
     live.classList.toggle("is-offline", !online);
     const meters = live.querySelectorAll(".hardware-meter");
-    const memoryPercent = status.memory_total_mb
+    const memoryPercent = status.memory_total_mb && status.memory_used_mb !== null
       ? Math.round((status.memory_used_mb / status.memory_total_mb) * 100)
       : null;
     setHardwareMeter(meters[0], online ? status.cpu_percent : null);
@@ -584,6 +643,7 @@ function updateHardwareStatus() {
       delete uptime.dataset.bootedAt;
       uptime.textContent = online ? "" : `LAST SEEN ${formatContentDate(status.updated_at, true)}`;
     }
+    updateHardwareNas(live.querySelector(".hardware-nas"), status.nas_metrics, online);
   });
 }
 
@@ -608,7 +668,7 @@ async function refreshHardwareStatus() {
   pingHardwareWatch();
   try {
     hardwareState.statuses = await fetchPublicContentTable(
-      "site_hardware_status?select=machine,cpu_percent,gpu_percent,memory_used_mb,memory_total_mb,booted_at,updated_at&order=machine.asc",
+      "site_hardware_status?select=*&order=machine.asc",
     );
     renderHardwareCards();
   } catch (error) {
