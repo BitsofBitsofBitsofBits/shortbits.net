@@ -868,17 +868,18 @@ function buildThemeOptions(formatLabel = (label) => label) {
     !theme.experimental && !(themeDebugEnabled && theme.seasonal)
   ));
   const experimental = window.BITS_INTERFACE_THEMES.filter((theme) => theme.experimental);
-  const nodes = standard.map(createOption);
-  if (special.length) {
+  const nodes = [];
+  for (const [label, themes] of [
+    ["STANDARD THEMES", standard],
+    ["SPECIAL THEMES", special],
+    ["EXPERIMENTAL LAYOUTS", experimental],
+  ]) {
+    if (!themes.length) {
+      continue;
+    }
     const group = document.createElement("optgroup");
-    group.label = formatLabel("SPECIAL THEMES");
-    group.append(...special.map(createOption));
-    nodes.push(group);
-  }
-  if (experimental.length) {
-    const group = document.createElement("optgroup");
-    group.label = formatLabel("EXPERIMENTAL LAYOUTS");
-    group.append(...experimental.map(createOption));
+    group.label = formatLabel(label);
+    group.append(...themes.map(createOption));
     nodes.push(group);
   }
   return nodes;

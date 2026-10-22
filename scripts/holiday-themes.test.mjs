@@ -135,7 +135,7 @@ test("debug pickers group all seasonal themes once under Special Themes", () => 
     [...group.children].map((option) => option.value).sort(),
     Object.keys(debug.catalog).sort(),
   );
-  assert.ok(nodes.filter((node) => node.tagName === "option").every((node) => !debug.catalog[node.value]));
+  assert.ok(nodes.find((node) => node.label === "STANDARD THEMES").children.every((node) => !debug.catalog[node.value]));
   const options = nodes.flatMap((node) => node.tagName === "optgroup" ? [...node.children] : [node]);
   assert.equal(options.length, debug.available.length);
   assert.equal(new Set(options.map((option) => option.value)).size, options.length);
@@ -146,7 +146,7 @@ test("group labels honor the picker formatter", () => {
   const debug = themesOn(2026, 8, 10, { "bits-theme-debug": "enabled" });
   const groups = debug.buildOptions((label) => label.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase()))
     .filter((node) => node.tagName === "optgroup");
-  assert.deepEqual([...groups].map((group) => group.label), ["Special Themes", "Experimental Layouts"]);
+  assert.deepEqual([...groups].map((group) => group.label), ["Standard Themes", "Special Themes", "Experimental Layouts"]);
 });
 
 test("normal seasonal availability remains unchanged without debug grouping", () => {
@@ -155,9 +155,28 @@ test("normal seasonal availability remains unchanged without debug grouping", ()
     const nodes = normal.buildOptions();
     assert.ok(!nodes.some((node) => node.label === "SPECIAL THEMES"));
     assert.deepEqual(
-      [...nodes].filter((node) => node.tagName === "option" && normal.catalog[node.value]).map((node) => node.value).sort(),
+      [...nodes.find((node) => node.label === "STANDARD THEMES").children]
+        .filter((node) => normal.catalog[node.value]).map((node) => node.value).sort(),
       [...expected].sort(),
     );
+  }
+});
+
+test("standard and experimental themes each appear once in their own group", () => {
+  for (const preferences of [{}, { "bits-theme-debug": "enabled" }]) {
+    const result = themesOn(2026, 8, 10, preferences);
+    const nodes = result.buildOptions();
+    assert.ok(nodes.every((node) => node.tagName === "optgroup" && node.children.length > 0));
+    for (const [label, experimental] of [["STANDARD THEMES", false], ["EXPERIMENTAL LAYOUTS", true]]) {
+      assert.deepEqual(
+        [...nodes.find((node) => node.label === label).children].map((node) => node.value),
+        [...result.available].filter((theme) => !theme.seasonal && Boolean(theme.experimental) === experimental)
+          .map((theme) => theme.id),
+      );
+    }
+    const ids = nodes.flatMap((node) => [...node.children].map((option) => option.value));
+    assert.equal(ids.length, result.available.length);
+    assert.equal(new Set(ids).size, ids.length);
   }
 });
 

@@ -252,8 +252,9 @@ is a personal project and largely a learning exercise for me.
   To preview them all, run `BITS_THEME_DEBUG.enable()` in the
   browser console (it reloads the page); `BITS_THEME_DEBUG.disable()` turns
   the preview off. Debug mode groups all holiday/seasonal themes under
-  **Special Themes** in the shared theme pickers, separate from standard
-  themes and Experimental Layouts. Normal seasonal availability is unchanged.
+  **Special Themes** in the shared theme pickers, separate from
+  **Standard Themes** and **Experimental Layouts**. Standard themes are
+  grouped in both normal and debug mode. Normal seasonal availability is unchanged.
   Seasonal picker choices and dismissals retain the existing
   per-season behavior. Run `node --test scripts/holiday-themes.test.mjs` to
   check calendar boundaries, overlaps, previews, and particle controls.
