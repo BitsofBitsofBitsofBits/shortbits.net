@@ -15,10 +15,13 @@
   --admin-bg: rgba(245, 249, 255, .98);
   --overlay-bg: rgba(250, 252, 255, .96);
   --shadow: 0 12px 35px rgba(27, 56, 91, .2), 0 2px 5px rgba(30, 61, 97, .12);
-  --control-radius: 999px;
+  --control-radius: 8px;
   --shell-radius: 12px;
   --window-radius: 10px;
   --material-blur: 16px;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
   --font-family: "Lucida Grande", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --body-background:
     radial-gradient(ellipse 48% 46% at 79% 67%, transparent 0 38%, rgba(255,255,255,.36) 38.3% 39%, transparent 39.4% 47%, rgba(255,255,255,.23) 47.4% 48%, transparent 48.4%),
@@ -230,18 +233,21 @@ html[data-interface-theme="aqua"] :is(.section-label, .profile-section-heading, 
   box-shadow: inset 0 1px rgba(255,255,255,.75), 0 2px 5px rgba(39,66,96,.08);
 }
 
-html[data-interface-theme="aqua"] :is(button, input, select, textarea, .footer-select-control) {
+html[data-interface-theme="aqua"] button {
   border-radius: 999px;
+}
+
+html[data-interface-theme="aqua"] :is(button, input, select, textarea, .footer-select-control) {
   font-family: var(--font-family);
 }
 
 html[data-interface-theme="aqua"] button {
   border: 1px solid #5591c9;
-  color: #fff;
+  color: #12365b;
   background-color: #2588e9;
   background-image: linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.35) 17%, transparent 49%, rgba(2,67,144,.1) 50%), linear-gradient(180deg, #70c5ff 0%, #3298ef 47%, #1678df 52%, #0864c8 100%);
   box-shadow: inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(0,60,133,.32), 0 1px 3px rgba(29,66,104,.22);
-  text-shadow: 0 1px 1px rgba(0,48,107,.65);
+  text-shadow: 0 1px rgba(255,255,255,.65);
 }
 
 html[data-interface-theme="aqua"] button:hover,
@@ -252,10 +258,69 @@ html[data-interface-theme="aqua"] button:focus-visible {
 }
 
 html[data-interface-theme="aqua"] :is(input, select, textarea, .footer-select-control) {
-  border-color: #a9bcd0;
+  border-radius: 8px;
+  border-color: #9cabbc;
   color: var(--ink);
   background-color: #fff;
-  box-shadow: inset 0 1px 2px rgba(32,59,87,.12), 0 1px rgba(255,255,255,.8);
+  box-shadow: inset 0 1px 3px rgba(32,59,87,.08), 0 1px rgba(255,255,255,.8);
+}
+
+html[data-interface-theme="aqua"] :is(.contact-form, .guestbook-form, .settings-group) {
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.8), transparent 160px), var(--panel-2);
+  box-shadow: inset 0 1px rgba(255,255,255,.95), 0 4px 14px rgba(35,62,91,.07);
+}
+
+html[data-interface-theme="aqua"] :is(.contact-form, .guestbook-form, .admin-form) :is(input:not([type="checkbox"]):not([type="radio"]), textarea),
+html[data-interface-theme="aqua"] .settings-group select {
+  min-height: 42px;
+  height: auto;
+  padding: 10px 14px;
+  font-size: .85rem;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+html[data-interface-theme="aqua"] .settings-group select {
+  padding-right: 32px;
+}
+
+html[data-interface-theme="aqua"] .settings-group label:not(.settings-check) {
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+}
+
+html[data-interface-theme="aqua"] :is(.settings-group, .settings-actions) button {
+  min-height: 36px;
+  padding: 8px 16px;
+  font-size: .75rem;
+}
+
+html[data-interface-theme="aqua"] :is(.contact-form, .guestbook-form, .admin-form) textarea {
+  min-height: 144px;
+}
+
+html[data-interface-theme="aqua"] :is(input, select, textarea):focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid rgba(var(--accent-rgb), .65);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .12);
+}
+
+html[data-interface-theme="aqua"] :is(.contact-form, .guestbook-form, .settings-group) label {
+  color: var(--ink);
+  letter-spacing: .025em;
+}
+
+html[data-interface-theme="aqua"] .contact-turnstile {
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), .06);
+}
+
+html[data-interface-theme="aqua"] :is(.contact-form, .guestbook-form) ::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 html[data-interface-theme="aqua"] .app-menu-bar {
@@ -304,8 +369,9 @@ html[data-interface-theme="aqua"] .endless-boot-progress span {
 
 html[data-interface-theme="aqua"][data-theme-variant="graphite"] :is(button:not(.window-button):not(.desktop-window-controls button)) {
   border-color: #8994a1;
+  color: #202a34;
   background-image: linear-gradient(180deg, rgba(255,255,255,.93) 0%, rgba(255,255,255,.35) 18%, transparent 49%, rgba(0,0,0,.07) 50%), linear-gradient(180deg, #c6cbd1, #a6adb6 47%, #858e99 52%, #717a85);
-  text-shadow: 0 1px rgba(0,0,0,.4);
+  text-shadow: 0 1px rgba(255,255,255,.65);
 }
 
 html[data-interface-theme="aqua"][data-theme-variant="brushed-metal"] :is(.system-bar, .desktop-window-bar, .fake-desktop-app > header, .profile-panel-bar, .chooser-bar) {
@@ -341,6 +407,13 @@ html[data-interface-theme="aqua"][data-effects="off"] *::after {
     animation-duration: .001ms;
     animation-iteration-count: 1;
     transition-duration: .001ms;
+  }
+
+  @media (max-width: 600px) {
+    html[data-interface-theme="aqua"] .settings-group label:not(.settings-check) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
+    }
   }
 }
 html[data-interface-theme="aqua"] .close-button { order: 1; }

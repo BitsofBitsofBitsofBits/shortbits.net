@@ -199,6 +199,10 @@ is a personal project and largely a learning exercise for me.
   themes are dark-only; Aqua and Mac OS 9 are light-only, so COLOR MODE is
   hidden while they are active (VARIANT likewise hides for themes without
   variants)
+- Rounded themes use restrained corners for cards and text fields rather than
+  button-sized pill radii on large panels. Aqua and Spotify also have dedicated
+  form surfaces, more comfortable field padding, and clear keyboard-focus
+  rings; Aqua keeps its glossy buttons without terminal noise or scanlines.
 - A classic text-mode crash screen on the Windows 3.1, 95, XP, and Aero Glass
   themes: every death screen switches to a 9x "fatal exception" box or an NT
   STOP-error wall of text in that screen's color, with a troubleshooting link

@@ -19,9 +19,9 @@
   --shell-bg: #121212;
   --admin-bg: #121212;
   --overlay-bg: #181818;
-  --body-background: linear-gradient(180deg, #252525 0, #181818 290px, #121212 560px, #000 100%);
+  --body-background: radial-gradient(ellipse at 25% 0, rgba(30,215,96,.1), transparent 48%), linear-gradient(180deg, #191e1b 0, #101211 480px, #080808 100%);
   --body-background-size: cover;
-  --control-radius: 999px;
+  --control-radius: 8px;
   --shell-radius: 12px;
   --window-radius: 12px;
   --font-family: "Circular Std", Gotham, Montserrat, Helvetica, Arial, sans-serif;
@@ -125,7 +125,97 @@
 :root[data-interface-theme="spotify"] a:hover { color: #1fdf64; }
 :root[data-interface-theme="spotify"] .bits-layout-notice { border-color: #383838; border-radius: 10px; color: #fff; background: #181818; }
 
+:root[data-interface-theme="spotify"] :is(.contact-form, .guestbook-form, .settings-group) {
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid #383838;
+  border-radius: 12px;
+  background: #181818;
+  box-shadow: 0 8px 24px rgba(0,0,0,.16);
+}
+
+:root[data-interface-theme="spotify"] :is(.contact-form, .guestbook-form, .settings-group) label {
+  color: #e6e6e6;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+
+:root[data-interface-theme="spotify"] :is(.contact-form, .guestbook-form, .admin-form) :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select),
+:root[data-interface-theme="spotify"] .settings-group select {
+  min-height: 44px;
+  height: auto;
+  padding: 11px 14px;
+  border: 1px solid #727272;
+  border-radius: 8px;
+  color: #fff;
+  background-color: #242424;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
+  font-size: .875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+:root[data-interface-theme="spotify"] :is(.admin-form, .settings-group) select {
+  padding-right: 32px;
+}
+
+:root[data-interface-theme="spotify"] .settings-group label:not(.settings-check) {
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+}
+
+:root[data-interface-theme="spotify"] :is(.settings-group, .settings-actions) button {
+  min-height: 40px;
+  padding: 10px 16px;
+  font-size: .75rem;
+}
+
+:root[data-interface-theme="spotify"] :is(.contact-form, .guestbook-form, .admin-form) textarea {
+  min-height: 144px;
+}
+
+:root[data-interface-theme="spotify"] :is(input, textarea, select):hover {
+  border-color: #b3b3b3;
+}
+
+:root[data-interface-theme="spotify"] :is(input, textarea, select):focus-visible {
+  border-color: #fff;
+  outline: 2px solid #1ed760;
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+:root[data-interface-theme="spotify"] :is(.contact-form, .guestbook-form) ::placeholder {
+  color: #b3b3b3;
+  opacity: 1;
+}
+
+:root[data-interface-theme="spotify"] .contact-turnstile {
+  border-radius: 8px;
+  background: #202020;
+}
+
+:root[data-interface-theme="spotify"] .contact-form button[type="submit"] {
+  min-height: 44px;
+  padding: 11px 24px;
+  border-color: transparent;
+  color: #07150c;
+  background: #1ed760;
+}
+
+:root[data-interface-theme="spotify"] .contact-form button[type="submit"]:hover {
+  color: #07150c;
+  background: #3be477;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root[data-interface-theme="spotify"] *, :root[data-interface-theme="spotify"] *::before, :root[data-interface-theme="spotify"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 600px) {
+  :root[data-interface-theme="spotify"] .settings-group label:not(.settings-check) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
 }
 :root[data-interface-theme="spotify"][data-motion="reduced"] *, :root[data-interface-theme="spotify"][data-motion="reduced"] *::before, :root[data-interface-theme="spotify"][data-motion="reduced"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

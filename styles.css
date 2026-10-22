@@ -12905,11 +12905,28 @@ html.is-chaos-mode .falling-bit {
 html:not([data-interface-theme="default"]) .featured-project,
 html:not([data-interface-theme="default"]) .link-card,
 html:not([data-interface-theme="default"]) .spotify-widget,
-html:not([data-interface-theme="default"]) .contact-form input,
-html:not([data-interface-theme="default"]) .contact-form textarea,
 html:not([data-interface-theme="default"]) .desktop-spotify-content,
 html:not([data-interface-theme="default"]) .spotify-history-section {
-  border-radius: var(--control-radius);
+  border-radius: min(var(--control-radius), 14px);
+}
+
+html:not([data-interface-theme="default"]) :is(.contact-form, .guestbook-form, .guestbook-list li, .settings-group) {
+  border-radius: min(var(--control-radius), 14px);
+}
+
+html:not([data-interface-theme="default"]) :is(
+  .contact-form input,
+  .contact-form textarea,
+  .admin-form input:not([type="checkbox"]):not([type="radio"]),
+  .admin-form select,
+  .admin-form textarea,
+  .guestbook-form input,
+  .guestbook-form textarea,
+  .settings-group select,
+  .contact-turnstile,
+  .contact-turnstile-widget
+) {
+  border-radius: min(var(--control-radius), 8px);
 }
 
 html[data-interface-theme="aurora"] .shell,
