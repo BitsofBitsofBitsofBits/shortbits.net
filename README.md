@@ -251,7 +251,10 @@ is a personal project and largely a learning exercise for me.
   Switching themes replaces the particles without accumulating effects.
   To preview them all, run `BITS_THEME_DEBUG.enable()` in the
   browser console (it reloads the page); `BITS_THEME_DEBUG.disable()` turns
-  the preview off. Seasonal picker choices and dismissals retain the existing
+  the preview off. Debug mode groups all holiday/seasonal themes under
+  **Special Themes** in the shared theme pickers, separate from standard
+  themes and Experimental Layouts. Normal seasonal availability is unchanged.
+  Seasonal picker choices and dismissals retain the existing
   per-season behavior. Run `node --test scripts/holiday-themes.test.mjs` to
   check calendar boundaries, overlaps, previews, and particle controls.
 - Valentine's Day, St. Patrick's Day, Easter, Earth Day, Independence Day,

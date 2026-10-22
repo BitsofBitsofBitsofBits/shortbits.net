@@ -861,9 +861,20 @@ function buildThemeOptions(formatLabel = (label) => label) {
     option.textContent = formatLabel(theme.name, theme);
     return option;
   };
-  const standard = window.BITS_INTERFACE_THEMES.filter((theme) => !theme.experimental);
+  const special = themeDebugEnabled
+    ? window.BITS_INTERFACE_THEMES.filter((theme) => theme.seasonal)
+    : [];
+  const standard = window.BITS_INTERFACE_THEMES.filter((theme) => (
+    !theme.experimental && !(themeDebugEnabled && theme.seasonal)
+  ));
   const experimental = window.BITS_INTERFACE_THEMES.filter((theme) => theme.experimental);
   const nodes = standard.map(createOption);
+  if (special.length) {
+    const group = document.createElement("optgroup");
+    group.label = formatLabel("SPECIAL THEMES");
+    group.append(...special.map(createOption));
+    nodes.push(group);
+  }
   if (experimental.length) {
     const group = document.createElement("optgroup");
     group.label = formatLabel("EXPERIMENTAL LAYOUTS");

@@ -6,6 +6,7 @@ import vm from "node:vm";
 const themeSource = readFileSync(new URL("../theme-init.js", import.meta.url), "utf8");
 const calendarSource = readFileSync(new URL("../seasonal-calendar.js", import.meta.url), "utf8");
 const preferenceSource = themeSource.slice(0, themeSource.indexOf("function getColorSchemePreference()"));
+const optionsSource = themeSource.slice(themeSource.indexOf("function buildThemeOptions("), themeSource.indexOf("function getPageId("));
 const effectsSource = readFileSync(new URL("../theme-effects.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
@@ -15,6 +16,11 @@ function themesOn(year, month, day, preferences = {}) {
   const stored = new Map(Object.entries(preferences));
   const context = {
     window: { location: { reload() {} } },
+    document: {
+      createElement(tagName) {
+        return { tagName, children: [], append(...children) { this.children.push(...children); } };
+      },
+    },
     localStorage: {
       getItem: (key) => stored.get(key) ?? null,
       setItem: (key, value) => stored.set(key, value),
@@ -24,11 +30,11 @@ function themesOn(year, month, day, preferences = {}) {
       constructor(...args) { super(...(args.length ? args : [date.getTime()])); }
     },
   };
-  vm.runInNewContext(`${calendarSource}\n${preferenceSource}
+  vm.runInNewContext(`${calendarSource}\n${preferenceSource}\n${optionsSource}
     globalThis.api = {
       state: seasonalThemeState, initial: initialInterfaceTheme.id,
       catalog: seasonalInterfaceThemes, select: selectInterfaceTheme,
-      resolve: resolveInterfaceTheme
+      resolve: resolveInterfaceTheme, buildOptions: buildThemeOptions
     };`, context);
   return { ...context.api, available: context.window.BITS_INTERFACE_THEMES, stored };
 }
@@ -117,6 +123,42 @@ test("debug preview exposes all holiday themes outside their dates", () => {
   debug.select("independence-day");
   assert.equal(debug.resolve(), "independence-day");
   assert.equal(debug.stored.get("bits-seasonal-theme-choice"), "debug:independence-day");
+});
+
+test("debug pickers group all seasonal themes once under Special Themes", () => {
+  const debug = themesOn(2026, 8, 10, { "bits-theme-debug": "enabled" });
+  const nodes = debug.buildOptions();
+  const group = nodes.find((node) => node.label === "SPECIAL THEMES");
+  assert.ok(group);
+  assert.equal(group.tagName, "optgroup");
+  assert.deepEqual(
+    [...group.children].map((option) => option.value).sort(),
+    Object.keys(debug.catalog).sort(),
+  );
+  assert.ok(nodes.filter((node) => node.tagName === "option").every((node) => !debug.catalog[node.value]));
+  const options = nodes.flatMap((node) => node.tagName === "optgroup" ? [...node.children] : [node]);
+  assert.equal(options.length, debug.available.length);
+  assert.equal(new Set(options.map((option) => option.value)).size, options.length);
+  assert.ok(nodes.some((node) => node.label === "EXPERIMENTAL LAYOUTS"));
+});
+
+test("group labels honor the picker formatter", () => {
+  const debug = themesOn(2026, 8, 10, { "bits-theme-debug": "enabled" });
+  const groups = debug.buildOptions((label) => label.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase()))
+    .filter((node) => node.tagName === "optgroup");
+  assert.deepEqual([...groups].map((group) => group.label), ["Special Themes", "Experimental Layouts"]);
+});
+
+test("normal seasonal availability remains unchanged without debug grouping", () => {
+  for (const [month, day, expected] of [[8, 10, []], [2, 14, ["winter", "valentines"]]]) {
+    const normal = themesOn(2026, month, day);
+    const nodes = normal.buildOptions();
+    assert.ok(!nodes.some((node) => node.label === "SPECIAL THEMES"));
+    assert.deepEqual(
+      [...nodes].filter((node) => node.tagName === "option" && normal.catalog[node.value]).map((node) => node.value).sort(),
+      [...expected].sort(),
+    );
+  }
 });
 
 function atmosphere(options = {}) {
