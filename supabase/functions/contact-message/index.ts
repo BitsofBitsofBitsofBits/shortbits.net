@@ -133,6 +133,63 @@ function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+type EmailStatus = "accepted" | "failed" | "not_configured" | "not_requested";
+
+async function sendContactEmails(name: string, email: string, message: string) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  const from = Deno.env.get("CONTACT_EMAIL_FROM");
+  const to = Deno.env.get("CONTACT_EMAIL_TO");
+  if (!apiKey || !from || !to) {
+    console.error("Contact email is not configured: RESEND_API_KEY, CONTACT_EMAIL_FROM, and CONTACT_EMAIL_TO are required.");
+    return {
+      notification: "not_configured",
+      confirmation: email ? "not_configured" : "not_requested",
+    };
+  }
+
+  async function send(kind: string, payload: Record<string, unknown>): Promise<EmailStatus> {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from, ...payload }),
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!response.ok) {
+        console.error(`Contact ${kind} email rejected by Resend: HTTP ${response.status}.`);
+        return "failed";
+      }
+      const result = await response.json();
+      if (typeof result?.id !== "string" || !result.id) {
+        console.error(`Contact ${kind} email response did not include a Resend message ID.`);
+        return "failed";
+      }
+      console.info(`Contact ${kind} email accepted by Resend: ${result.id}`);
+      return "accepted";
+    } catch (error) {
+      console.error(`Contact ${kind} email request failed:`, error);
+      return "failed";
+    }
+  }
+
+  const [notification, confirmation] = await Promise.all([
+    send("notification", {
+      to: [to],
+      ...(email ? { reply_to: email } : {}),
+      subject: "New shortbits.net contact message",
+      text: `Name: ${name}\nEmail: ${email || "Not provided"}\n\n${message}`,
+    }),
+    // Do not forward visitor-controlled content to an unverified recipient.
+    email ? send("confirmation", {
+      to: [email],
+      reply_to: to,
+      subject: "Your message to shortbits.net was received",
+      text: "Thanks for getting in touch! Your message has been saved and is available for Caleb to review.\n\nIf you need to follow up, reply to this email.\n\nIf you did not submit a message at shortbits.net, you can ignore this email.",
+    }) : Promise.resolve<EmailStatus>("not_requested"),
+  ]);
+  return { notification, confirmation };
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders(request) });
@@ -192,7 +249,8 @@ Deno.serve(async (request) => {
       console.error("Message insert failed:", insert.status, await insert.text());
       return jsonResponse(request, { error: "Message service is unavailable." }, 502);
     }
-    return jsonResponse(request, { ok: true });
+    const emailDelivery = await sendContactEmails(name, email, message);
+    return jsonResponse(request, { ok: true, emailDelivery });
   } catch (error) {
     console.error("Contact submission failed:", error);
     return jsonResponse(request, { error: "Message service is unavailable." }, 502);

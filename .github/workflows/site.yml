@@ -50,6 +50,9 @@ jobs:
       - name: Test Unraid collector
         run: node --test agents/unraid/collector.test.mjs
 
+      - name: Test contact email delivery
+        run: node --test supabase/functions/contact-message/contact.test.mjs
+
       - name: Test NAS ingestion and desktop compatibility
         env:
           PGPASSWORD: postgres
@@ -99,11 +102,22 @@ jobs:
         shell: bash
         env:
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
+          CONTACT_EMAIL_TO: ${{ secrets.CONTACT_EMAIL_TO }}
         run: |
           if [ -n "$TURNSTILE_SECRET_KEY" ]; then
             supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" TURNSTILE_SECRET_KEY="$TURNSTILE_SECRET_KEY"
           else
             echo "TURNSTILE_SECRET_KEY is not set; the contact function will skip the Turnstile check."
+          fi
+          if [ -n "$RESEND_API_KEY" ] && [ -n "$CONTACT_EMAIL_FROM" ] && [ -n "$CONTACT_EMAIL_TO" ]; then
+            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+              RESEND_API_KEY="$RESEND_API_KEY" \
+              CONTACT_EMAIL_FROM="$CONTACT_EMAIL_FROM" \
+              CONTACT_EMAIL_TO="$CONTACT_EMAIL_TO"
+          else
+            echo "::warning::Resend secrets are incomplete; existing Supabase email secrets are unchanged. Configure all three secrets to enable contact emails."
           fi
 
       # The function must exist before the migration revokes direct inserts into messages.

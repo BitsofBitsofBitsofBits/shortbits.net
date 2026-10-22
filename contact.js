@@ -167,7 +167,7 @@ async function sendContactMessage(payload) {
   });
   if (response.status !== 404) {
     const result = await response.json().catch(() => ({}));
-    return { ok: response.ok, status: response.status, error: result.error };
+    return { ok: response.ok, status: response.status, error: result.error, emailDelivery: result.emailDelivery };
   }
 
   // The Edge Function has not been deployed yet; use the original direct insert.
@@ -184,7 +184,12 @@ async function sendContactMessage(payload) {
       message: payload.message,
     }),
   });
-  return { ok: legacy.ok, status: legacy.status, error: null };
+  return {
+    ok: legacy.ok,
+    status: legacy.status,
+    error: null,
+    emailDelivery: { notification: "not_configured", confirmation: payload.email ? "not_configured" : "not_requested" },
+  };
 }
 
 contactForm.addEventListener("submit", async (event) => {
@@ -244,7 +249,18 @@ contactForm.addEventListener("submit", async (event) => {
   }
 
   contactForm.reset();
-  setContactStatus(contactCopy.success, "success");
+  const delivery = result.emailDelivery;
+  const emailUnavailable = delivery && [delivery.notification, delivery.confirmation]
+    .some((status) => status === "failed" || status === "not_configured");
+  if (emailUnavailable) {
+    console.warn("Contact message saved, but email delivery was unavailable:", delivery);
+    setContactStatus(`${contactCopy.success} Email delivery is currently unavailable; no need to resend your message.`, "success");
+  } else {
+    setContactStatus(
+      `${contactCopy.success}${delivery?.confirmation === "accepted" ? " A confirmation email is on its way." : ""}`,
+      "success",
+    );
+  }
 });
 
 document.addEventListener("DOMContentLoaded", loadTurnstile);
