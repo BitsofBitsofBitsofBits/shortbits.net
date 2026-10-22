@@ -12125,8 +12125,7 @@ ul.resume-entry-technologies li {
 }
 
 .hardware-nas {
-  display: grid;
-  gap: 6px;
+  display: block;
   margin-top: 8px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
@@ -12141,6 +12140,31 @@ ul.resume-entry-technologies li {
 
 .hardware-nas-summary {
   color: var(--accent);
+  cursor: pointer;
+  list-style: none;
+}
+
+.hardware-nas-summary::-webkit-details-marker {
+  display: none;
+}
+
+.hardware-nas-summary::before {
+  content: "[+] ";
+}
+
+.hardware-nas[open] > .hardware-nas-summary::before {
+  content: "[-] ";
+}
+
+.hardware-nas-summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.hardware-nas-readings {
+  display: grid;
+  gap: 6px;
+  padding-top: 6px;
 }
 
 .hardware-nas-note {

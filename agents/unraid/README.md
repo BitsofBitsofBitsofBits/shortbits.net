@@ -142,6 +142,9 @@ Expect `REPORT_OK`. Open HARDWARE.SYS: your named NAS should show LIVE plus the
 new metrics. Reports run every 15 seconds idle / 5 seconds while watched. Public
 pages poll every 3 seconds; this is near-live monitoring, not instantaneous.
 First network sample, restart, or counter reset shows "measuring".
+Click the array status heading to collapse or expand storage, network, and drive
+readings independently of the device card. This preference is remembered per
+device in your browser; the array state or stale warning stays visible.
 
 Verify RX/TX during a known file transfer. Verify sleeping temperatures stay
 unavailable. Stop the container and confirm the display becomes OFFLINE with

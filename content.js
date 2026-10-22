@@ -445,23 +445,23 @@ const hardwareJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
     ]));
 const hardwareChatter = Object.values(hardwareJokes).flat();
 
-function readCollapsedHardware() {
+function readCollapsedHardware(key = hardwareCollapsedKey) {
   try {
-    const value = JSON.parse(localStorage.getItem(hardwareCollapsedKey) ?? "[]");
+    const value = JSON.parse(localStorage.getItem(key) ?? "[]");
     return new Set(Array.isArray(value) ? value : []);
   } catch {
     return new Set();
   }
 }
 
-function saveCollapsedHardware(machine, collapsed) {
-  const machines = readCollapsedHardware();
+function saveCollapsedHardware(machine, collapsed, key = hardwareCollapsedKey) {
+  const machines = readCollapsedHardware(key);
   if (collapsed) {
     machines.add(machine);
   } else {
     machines.delete(machine);
   }
-  localStorage.setItem(hardwareCollapsedKey, JSON.stringify([...machines]));
+  localStorage.setItem(key, JSON.stringify([...machines]));
 }
 
 function formatHardwareUptime(bootedAt) {
@@ -512,7 +512,9 @@ function createHardwareCard(machine, components, collapsed) {
   const count = document.createElement("span");
   const live = document.createElement("div");
   const uptime = document.createElement("p");
-  const nas = document.createElement("section");
+  const nas = document.createElement("details");
+  const nasSummary = document.createElement("summary");
+  const nasReadings = document.createElement("div");
   const chatter = document.createElement("p");
   card.className = "hardware-machine";
   card.dataset.machine = machine;
@@ -530,6 +532,14 @@ function createHardwareCard(machine, components, collapsed) {
   uptime.className = "hardware-live-uptime";
   nas.className = "hardware-nas";
   nas.setAttribute("aria-label", "NAS storage, network, and drive readings");
+  nas.open = !readCollapsedHardware("bits-hardware-nas-collapsed").has(machine);
+  nasSummary.className = "hardware-nas-summary";
+  nasSummary.textContent = "ARRAY STATUS";
+  nasReadings.className = "hardware-nas-readings";
+  nas.append(nasSummary, nasReadings);
+  nas.addEventListener("toggle", () => {
+    saveCollapsedHardware(machine, !nas.open, "bits-hardware-nas-collapsed");
+  });
   nas.hidden = true;
   chatter.className = "hardware-live-chatter";
   chatter.hidden = true;
@@ -579,21 +589,22 @@ function formatHardwareBytes(bytes) {
 }
 
 function updateHardwareNas(container, metrics, online) {
+  const summary = container.querySelector("summary");
+  const readings = container.querySelector(".hardware-nas-readings");
   container.hidden = !metrics;
   if (!metrics) {
     delete container.dataset.readingKey;
-    container.replaceChildren();
+    summary.textContent = "ARRAY STATUS";
+    readings.replaceChildren();
     return;
   }
   const fresh = online && Date.now() - new Date(metrics.sampled_at).getTime() < hardwareOnlineWindowMs;
   const key = JSON.stringify([metrics, fresh]);
   if (container.dataset.readingKey === key) return;
   container.dataset.readingKey = key;
-  const summary = document.createElement("p");
-  summary.className = "hardware-nas-summary";
   if (!fresh) {
     summary.textContent = "NAS READINGS STALE / UNAVAILABLE";
-    container.replaceChildren(summary);
+    readings.replaceChildren();
     return;
   }
   summary.textContent = `ARRAY ${metrics.array_state}`;
@@ -622,7 +633,7 @@ function updateHardwareNas(container, metrics, online) {
     row.append(name, reading);
     drives.append(row);
   });
-  container.replaceChildren(summary, storage, free, network, drives, note);
+  readings.replaceChildren(storage, free, network, drives, note);
 }
 
 function renderHardwareCards() {
