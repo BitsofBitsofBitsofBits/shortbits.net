@@ -48,7 +48,7 @@ jobs:
         run: node scripts/validate-site.mjs
 
       - name: Test seasonal themes and effects
-        run: node --test scripts/holiday-themes.test.mjs
+        run: node --test scripts/holiday-themes.test.mjs scripts/seasonal-messages.test.mjs
 
       - name: Test Unraid collector
         run: node --test agents/unraid/collector.test.mjs

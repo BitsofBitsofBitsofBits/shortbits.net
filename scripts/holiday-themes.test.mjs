@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const themeSource = readFileSync(new URL("../theme-init.js", import.meta.url), "utf8");
+const calendarSource = readFileSync(new URL("../seasonal-calendar.js", import.meta.url), "utf8");
 const preferenceSource = themeSource.slice(0, themeSource.indexOf("function getColorSchemePreference()"));
 const effectsSource = readFileSync(new URL("../theme-effects.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
@@ -23,7 +24,7 @@ function themesOn(year, month, day, preferences = {}) {
       constructor(...args) { super(...(args.length ? args : [date.getTime()])); }
     },
   };
-  vm.runInNewContext(`${preferenceSource}
+  vm.runInNewContext(`${calendarSource}\n${preferenceSource}
     globalThis.api = {
       state: seasonalThemeState, initial: initialInterfaceTheme.id,
       catalog: seasonalInterfaceThemes, select: selectInterfaceTheme,

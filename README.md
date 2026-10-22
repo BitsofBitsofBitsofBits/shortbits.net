@@ -254,6 +254,19 @@ is a personal project and largely a learning exercise for me.
   the preview off. Seasonal picker choices and dismissals retain the existing
   per-season behavior. Run `node --test scripts/holiday-themes.test.mjs` to
   check calendar boundaries, overlaps, previews, and particle controls.
+- Valentine's Day, St. Patrick's Day, Easter, Earth Day, Independence Day,
+  and Thanksgiving also add seasonal messages without replacing the normal
+  pool: each has 16 messages at weight 18 and six activities at weight 12.
+  Against the current regular pools, that gives a single holiday about 35%
+  of the weighted message pool and 50% of activities before repeat avoidance.
+  Boot messages, live-agent hardware chatter, shutdown text, and desktop
+  jokes also get holiday additions through the existing seasonal consumers.
+  Existing New Year, Halloween, and Christmas exclusivity is unchanged.
+  Dates use the visitor's local calendar, not the selected visual theme;
+  overlapping additive holidays combine. `seasonal-calendar.js` shares
+  Gregorian Easter calculation between visual themes and message profiles.
+  Run `node --test scripts/holiday-themes.test.mjs scripts/seasonal-messages.test.mjs`
+  to validate schedules, complete pool retention, and weighted shares.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
