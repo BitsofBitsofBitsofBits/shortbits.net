@@ -117,7 +117,10 @@ is a personal project and largely a learning exercise for me.
   hidden, and manually entered rows are kept. HARDWARE.SYS polls
   `site_hardware_status` every 3 seconds while open and visible, ticks uptime
   every second, and shows a machine as LIVE when it reported within the last
-  minute. Re-running the installer upgrades the agent and can keep the saved
+  minute. Hardware jokes (including seasonal variants) rotate as agent chatter
+  beneath online agents' live stats; offline agents do not show chatter.
+  System Monitor shows desktop status and fictional process statuses, not
+  simulated hardware readings. Re-running the installer upgrades the agent and can keep the saved
   token. Leaving the token's machine name blank creates a pending device that
   the agent names on its first spec sync (same model / device-name rule,
   through the service-role-only hardware_agent_claim_name RPC, which reuses

@@ -390,6 +390,53 @@ const hardwareStatusPollMs = 3_000;
 const hardwareWatchPingMs = 20_000;
 const hardwareOnlineWindowMs = 60_000;
 const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0, ticker: 0, watchedAt: 0 };
+const baseHardwareJokes = {
+  cpu: [
+    "Calculating how many Bits fit in another Bit.",
+    "Briefly considering doing actual work.",
+    "Compiling opinions into machine code.",
+    "One core is dedicated entirely to overthinking.",
+  ],
+  gpu: [
+    "Rendering one extremely important gradient.",
+    "Adding bloom to something nobody can see.",
+    "Drawing triangles as fast as legally permitted.",
+    "Preparing another frame for the void.",
+  ],
+  network: [
+    "Packets are taking the scenic route.",
+    "Downloading additional download indicators.",
+    "Negotiating with a router named Linksys.",
+    "Uploading confidence at dial-up speed.",
+  ],
+  ram: [
+    "Remembering several tabs you forgot existed.",
+    "Holding a thought until the process responds.",
+    "Caching one suspiciously large personality.",
+    "Memory leak insists it is a water feature.",
+  ],
+  storage: [
+    "Most space is reserved for screenshots named final_final.",
+    "Defragmenting a folder full of untitled documents.",
+    "The recycle bin is emotionally attached.",
+    "Archiving side projects that are definitely almost done.",
+  ],
+  thermal: [
+    "Warm, but not emotionally available.",
+    "Fans are whispering encouraging words.",
+    "Temperature classified as laptop-adjacent.",
+    "Applying thermal paste conceptually.",
+  ],
+};
+// Keep the seasonal profile's existing key so seasonal messages move with the jokes.
+const seasonalHardwareJokes = window.BITS_SEASONAL_PROFILE?.monitorJokes ?? {};
+const hardwareJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
+  ? seasonalHardwareJokes
+  : Object.fromEntries(Object.entries(baseHardwareJokes).map(([metric, jokes]) => [
+      metric,
+      [...jokes, ...(seasonalHardwareJokes[metric] ?? [])],
+    ]));
+const hardwareChatter = Object.values(hardwareJokes).flat();
 
 function readCollapsedHardware() {
   try {
@@ -459,6 +506,7 @@ function createHardwareCard(machine, components, collapsed) {
   const live = document.createElement("div");
   const uptime = document.createElement("p");
   const nas = document.createElement("section");
+  const chatter = document.createElement("p");
   card.className = "hardware-machine";
   card.dataset.machine = machine;
   card.open = !collapsed;
@@ -476,12 +524,15 @@ function createHardwareCard(machine, components, collapsed) {
   nas.className = "hardware-nas";
   nas.setAttribute("aria-label", "NAS storage, network, and drive readings");
   nas.hidden = true;
+  chatter.className = "hardware-live-chatter";
+  chatter.hidden = true;
   live.append(
     createHardwareMeter("CPU"),
     createHardwareMeter("GPU"),
     createHardwareMeter("RAM"),
     uptime,
     nas,
+    chatter,
   );
   card.append(summary, live);
 
@@ -611,6 +662,8 @@ function updateHardwareStatus() {
     const status = statuses.get(card.dataset.machine);
     const badge = card.querySelector(".hardware-live-badge");
     const live = card.querySelector(".hardware-live");
+    const chatter = live.querySelector(".hardware-live-chatter");
+    chatter.hidden = true;
     badge.hidden = !status;
     if (!status) {
       live.hidden = true;
@@ -644,6 +697,10 @@ function updateHardwareStatus() {
       uptime.textContent = online ? "" : `LAST SEEN ${formatContentDate(status.updated_at, true)}`;
     }
     updateHardwareNas(live.querySelector(".hardware-nas"), status.nas_metrics, online);
+    if (online && hardwareChatter.length) {
+      chatter.hidden = false;
+      chatter.textContent = `AGENT CHATTER // ${hardwareChatter[Math.floor(Date.now() / 6000) % hardwareChatter.length]}`;
+    }
   });
 }
 
