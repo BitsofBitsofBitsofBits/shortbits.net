@@ -16,6 +16,12 @@ const themeParticleCounts = {
   spooky: 18,
   christmas: 28,
   "new-year": 36,
+  valentines: 18,
+  "st-patricks": 18,
+  easter: 20,
+  "earth-day": 16,
+  "independence-day": 64,
+  thanksgiving: 18,
 };
 
 function hasReducedAtmosphereMotion() {
@@ -42,6 +48,17 @@ function createThemeParticle(theme, index, count) {
   particle.style.setProperty("--particle-index", String(index));
   particle.style.setProperty("--particle-count", String(count));
   particle.dataset.theme = theme;
+  if (theme === "independence-day") {
+    const burst = Math.floor(index / 16);
+    const angle = (index % 16) * Math.PI / 8;
+    const radius = 12 + (index % 3) * 3;
+    particle.textContent = String(index % 2);
+    particle.style.setProperty("--particle-x", `${[18, 76, 42, 64][burst]}%`);
+    particle.style.setProperty("--particle-y", `${[28, 20, 52, 40][burst]}%`);
+    particle.style.setProperty("--particle-delay", `${-burst * 2}s`);
+    particle.style.setProperty("--firework-dx", `${(Math.cos(angle) * radius).toFixed(2)}vmin`);
+    particle.style.setProperty("--firework-dy", `${(Math.sin(angle) * radius).toFixed(2)}vmin`);
+  }
   return particle;
 }
 

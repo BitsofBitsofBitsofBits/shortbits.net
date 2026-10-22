@@ -434,9 +434,31 @@ const seasonalInterfaceThemes = {
   spooky: { id: "spooky", name: "SPOOKY", darkColor: "#140b18", lightColor: "#fff0dc", seasonal: true },
   christmas: { id: "christmas", name: "CHRISTMAS", darkColor: "#07150f", lightColor: "#fff7e8", seasonal: true },
   "new-year": { id: "new-year", name: "NEW YEAR", darkColor: "#080a18", lightColor: "#fff8dc", seasonal: true },
+  valentines: { id: "valentines", name: "VALENTINE'S DAY", darkColor: "#210e1a", lightColor: "#fff3ee", seasonal: true },
+  "st-patricks": { id: "st-patricks", name: "ST. PATRICK'S DAY", darkColor: "#071c14", lightColor: "#f5f8e9", seasonal: true },
+  easter: { id: "easter", name: "EASTER", darkColor: "#19162c", lightColor: "#fbf5ff", seasonal: true },
+  "earth-day": { id: "earth-day", name: "EARTH DAY", darkColor: "#071c21", lightColor: "#eef8ee", seasonal: true },
+  "independence-day": { id: "independence-day", name: "INDEPENDENCE DAY", darkColor: "#0b1530", lightColor: "#f5f7ff", seasonal: true },
+  thanksgiving: { id: "thanksgiving", name: "THANKSGIVING", darkColor: "#24150e", lightColor: "#fff5e7", seasonal: true },
 };
 const themeDebugKey = "bits-theme-debug";
 const themeDebugEnabled = localStorage.getItem(themeDebugKey) === "enabled";
+
+function isEasterSunday(date) {
+  const year = date.getFullYear();
+  // Gregorian computus, including the century and late-April corrections.
+  const cycle = year % 19;
+  const century = Math.floor(year / 100);
+  const yearInCentury = year % 100;
+  const solarCorrection = Math.floor(century / 4);
+  const lunarCorrection = Math.floor((century - Math.floor((century + 8) / 25) + 1) / 3);
+  const epact = (19 * cycle + century - solarCorrection - lunarCorrection + 15) % 30;
+  const weekdayCorrection = (32 + 2 * (century % 4) + 2 * Math.floor(yearInCentury / 4) - epact - yearInCentury % 4) % 7;
+  const correction = Math.floor((cycle + 11 * epact + 22 * weekdayCorrection) / 451);
+  const monthDay = epact + weekdayCorrection - 7 * correction + 114;
+  return date.getMonth() === Math.floor(monthDay / 31) - 1
+    && date.getDate() === monthDay % 31 + 1;
+}
 
 function getSeasonalThemeState(date = new Date()) {
   const month = date.getMonth();
@@ -459,16 +481,26 @@ function getSeasonalThemeState(date = new Date()) {
   if (isNewYear) {
     availableThemeIds.push("new-year");
   }
+  if (month === 1 && day === 14) {
+    availableThemeIds.push("valentines");
+  }
+  if (month === 2 && day === 17) {
+    availableThemeIds.push("st-patricks");
+  }
+  if (month === 3 && day === 22) {
+    availableThemeIds.push("earth-day");
+  }
+  if ((month === 2 || month === 3) && isEasterSunday(date)) {
+    availableThemeIds.push("easter");
+  }
+  if (month === 6 && day === 4) {
+    availableThemeIds.push("independence-day");
+  }
+  if (month === 10 && date.getDay() === 4 && day >= 22 && day <= 28) {
+    availableThemeIds.push("thanksgiving");
+  }
 
-  const automaticThemeId = isNewYear
-    ? "new-year"
-    : isChristmas
-      ? "christmas"
-      : isSpooky
-        ? "spooky"
-        : isWinter
-          ? "winter"
-          : "";
+  const automaticThemeId = availableThemeIds.at(-1) || "";
 
   return {
     active: Boolean(automaticThemeId),

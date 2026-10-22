@@ -169,6 +169,79 @@
   --shadow: 0 0 54px rgba(248, 216, 120, 0.16);
 }
 
+:root:is(
+  [data-interface-theme="valentines"],
+  [data-interface-theme="st-patricks"],
+  [data-interface-theme="easter"],
+  [data-interface-theme="earth-day"],
+  [data-interface-theme="independence-day"],
+  [data-interface-theme="thanksgiving"]
+) {
+  --panel: color-mix(in srgb, var(--bg) 92%, var(--accent));
+  --panel-2: color-mix(in srgb, var(--bg) 84%, var(--accent));
+  --ink: #fff5ee;
+  --muted: color-mix(in srgb, var(--ink) 65%, var(--bg));
+  --border: rgba(var(--accent-rgb), 0.35);
+  --shell-bg: color-mix(in srgb, var(--bg) 94%, transparent);
+  --admin-bg: color-mix(in srgb, var(--bg) 98%, transparent);
+  --overlay-bg: var(--bg);
+  --body-background:
+    radial-gradient(ellipse at 12% 5%, rgba(var(--accent-rgb), 0.17), transparent 42%),
+    radial-gradient(ellipse at 90% 85%, color-mix(in srgb, var(--warning) 12%, transparent), transparent 40%),
+    var(--bg);
+  --body-background-size: auto;
+  --shadow: 0 0 42px rgba(var(--accent-rgb), 0.12);
+  --noise-opacity: 0.02;
+  --scanline-opacity: 0;
+  --control-radius: 8px;
+  --shell-radius: 14px;
+  --window-radius: 10px;
+}
+
+:root[data-interface-theme="valentines"] {
+  --accent: #ff8aa8;
+  --accent-rgb: 255, 138, 168;
+  --warning: #ffc8a5;
+  --bg: #210e1a;
+}
+
+:root[data-interface-theme="st-patricks"] {
+  --accent: #6ee7a0;
+  --accent-rgb: 110, 231, 160;
+  --warning: #f5d36e;
+  --bg: #071c14;
+}
+
+:root[data-interface-theme="easter"] {
+  --accent: #c9b0ff;
+  --accent-rgb: 201, 176, 255;
+  --warning: #f6e79e;
+  --bg: #19162c;
+}
+
+:root[data-interface-theme="earth-day"] {
+  --accent: #66d6a1;
+  --accent-rgb: 102, 214, 161;
+  --warning: #82c7ff;
+  --bg: #071c21;
+}
+
+:root[data-interface-theme="independence-day"] {
+  --accent: #9bbdff;
+  --accent-rgb: 155, 189, 255;
+  --warning: #ff8792;
+  --bg: #0b1530;
+  --shell-bg: rgba(11, 21, 48, 0.72);
+  --material-blur: 0px;
+}
+
+:root[data-interface-theme="thanksgiving"] {
+  --accent: #ffad69;
+  --accent-rgb: 255, 173, 105;
+  --warning: #f2cf77;
+  --bg: #24150e;
+}
+
 :root[data-interface-theme="aurora"] {
   --accent: #68e1d2;
   --accent-rgb: 104, 225, 210;
@@ -1709,6 +1782,66 @@
     #fff8dc;
 }
 
+:root:is(
+  [data-interface-theme="valentines"],
+  [data-interface-theme="st-patricks"],
+  [data-interface-theme="easter"],
+  [data-interface-theme="earth-day"],
+  [data-interface-theme="independence-day"],
+  [data-interface-theme="thanksgiving"]
+)[data-color-scheme="light"] {
+  --panel: color-mix(in srgb, var(--bg) 55%, white);
+  --panel-2: color-mix(in srgb, var(--bg) 94%, var(--accent));
+  --ink: #282638;
+  --muted: #625e69;
+  --shell-bg: var(--panel);
+  --admin-bg: var(--panel);
+  --overlay-bg: var(--bg);
+}
+
+:root[data-interface-theme="valentines"][data-color-scheme="light"] {
+  --accent: #b51f4c;
+  --accent-rgb: 181, 31, 76;
+  --warning: #a33a28;
+  --bg: #fff3ee;
+}
+
+:root[data-interface-theme="st-patricks"][data-color-scheme="light"] {
+  --accent: #14633a;
+  --accent-rgb: 20, 99, 58;
+  --warning: #856000;
+  --bg: #f5f8e9;
+}
+
+:root[data-interface-theme="easter"][data-color-scheme="light"] {
+  --accent: #7040a5;
+  --accent-rgb: 112, 64, 165;
+  --warning: #477157;
+  --bg: #fbf5ff;
+}
+
+:root[data-interface-theme="earth-day"][data-color-scheme="light"] {
+  --accent: #16643e;
+  --accent-rgb: 22, 100, 62;
+  --warning: #175fa0;
+  --bg: #eef8ee;
+}
+
+:root[data-interface-theme="independence-day"][data-color-scheme="light"] {
+  --accent: #164da8;
+  --accent-rgb: 22, 77, 168;
+  --warning: #b3233b;
+  --bg: #f5f7ff;
+  --shell-bg: rgba(245, 247, 255, 0.72);
+}
+
+:root[data-interface-theme="thanksgiving"][data-color-scheme="light"] {
+  --accent: #a04414;
+  --accent-rgb: 160, 68, 20;
+  --warning: #795400;
+  --bg: #fff5e7;
+}
+
 :root {
   --scrollbar-size: 12px;
   --scrollbar-firefox-width: thin;
@@ -2431,6 +2564,72 @@ textarea {
   box-shadow: 0 0 12px rgba(169, 231, 255, 0.56);
 }
 
+.theme-atmosphere:is([data-theme="valentines"], [data-theme="easter"], [data-theme="thanksgiving"]) .theme-particle {
+  border-radius: 70% 20% 70% 30%;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: atmosphere-petal-fall var(--particle-duration) linear infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="valentines"] .theme-particle:nth-child(even) {
+  background: #ee526b;
+}
+
+.theme-atmosphere[data-theme="easter"] .theme-particle {
+  border-radius: 50% 50% 45% 45%;
+  height: calc(var(--particle-size) * 1.4);
+}
+
+.theme-atmosphere[data-theme="easter"] .theme-particle:nth-child(3n + 1) {
+  background: #9de6c3;
+}
+
+.theme-atmosphere[data-theme="easter"] .theme-particle:nth-child(3n + 2) {
+  background: #f6e79e;
+}
+
+.theme-atmosphere[data-theme="thanksgiving"] .theme-particle:nth-child(even) {
+  background: var(--warning);
+}
+
+.theme-atmosphere:is([data-theme="st-patricks"], [data-theme="earth-day"]) .theme-particle {
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.35;
+  animation: atmosphere-node-pulse var(--particle-duration) ease-in-out infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere:is([data-theme="st-patricks"], [data-theme="earth-day"]) .theme-particle:nth-child(even) {
+  background: var(--warning);
+}
+
+.theme-atmosphere[data-theme="independence-day"] .theme-particle {
+  width: auto;
+  height: auto;
+  color: #9bbdff;
+  font: 700 clamp(10px, 1.1vw, 16px)/1 var(--font-family);
+  text-shadow: 0 0 6px currentColor;
+  opacity: 0;
+  animation: atmosphere-bit-firework 8s ease-out infinite;
+  animation-delay: var(--particle-delay);
+}
+
+.theme-atmosphere[data-theme="independence-day"] .theme-particle:nth-child(3n + 1) {
+  color: #ff727e;
+}
+
+.theme-atmosphere[data-theme="independence-day"] .theme-particle:nth-child(3n + 2) {
+  color: #fff5ee;
+}
+
+.theme-atmosphere[data-theme="independence-day"][data-motion="reduced"] .theme-particle,
+html.is-performance-lite .theme-atmosphere[data-theme="independence-day"] .theme-particle {
+  opacity: 0.2;
+  transform: translate(var(--firework-dx), var(--firework-dy));
+}
+
 .theme-atmosphere[data-motion="reduced"]::before,
 .theme-atmosphere[data-motion="reduced"]::after,
 .theme-atmosphere[data-motion="reduced"] .theme-particle,
@@ -2438,6 +2637,14 @@ html.is-performance-lite .theme-atmosphere::before,
 html.is-performance-lite .theme-atmosphere::after,
 html.is-performance-lite .theme-atmosphere .theme-particle {
   animation: none !important;
+}
+
+@keyframes atmosphere-bit-firework {
+  0%, 8% { opacity: 0; transform: translate(0, 38vh) scale(0.4); }
+  18% { opacity: 0.35; transform: translate(0, 0) scale(0.5); }
+  24% { opacity: 0.65; transform: translate(0, 0) scale(0.6); }
+  60% { opacity: 0.45; transform: translate(var(--firework-dx), var(--firework-dy)); }
+  85%, 100% { opacity: 0; transform: translate(var(--firework-dx), calc(var(--firework-dy) + 9vh)); }
 }
 
 @keyframes atmosphere-circuit-shift {

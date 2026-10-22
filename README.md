@@ -235,10 +235,25 @@ is a personal project and largely a learning exercise for me.
 - A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
   `theme dark`, `theme light`, `theme auto`, and `theme variant <name>`
   commands do the same
-- Seasonal themes (Winter, Spooky, Christmas, New Year) appear automatically
-  in season. To preview them all, run `BITS_THEME_DEBUG.enable()` in the
+- Seasonal themes appear automatically on each visitor's local calendar:
+  Winter (December through February), Spooky (October 28-November 1),
+  Christmas (December 23-26), New Year (December 31-January 1),
+  Valentine's Day (February 14; rose/red/cream), St. Patrick's Day
+  (March 17; emerald/gold/cream), Easter (Gregorian Easter Sunday;
+  lavender/mint/yellow), Earth Day (April 22; forest green/ocean blue),
+  US Independence Day (July 4; red/white/blue), and US Thanksgiving
+  (fourth Thursday in November; orange/brown/gold). All have dark and light
+  palettes. A holiday takes priority over Winter, but overlapping themes stay
+  selectable; Easter takes priority if it falls on Earth Day.
+  Independence Day adds four staggered binary-Bits firework bursts to the
+  personal site's background atmosphere. They become static with reduced
+  motion and disappear with effects off, high contrast, or forced colors.
+  Switching themes replaces the particles without accumulating effects.
+  To preview them all, run `BITS_THEME_DEBUG.enable()` in the
   browser console (it reloads the page); `BITS_THEME_DEBUG.disable()` turns
-  the preview off
+  the preview off. Seasonal picker choices and dismissals retain the existing
+  per-season behavior. Run `node --test scripts/holiday-themes.test.mjs` to
+  check calendar boundaries, overlaps, previews, and particle controls.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
