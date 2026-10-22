@@ -968,6 +968,7 @@ function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v4");
   localStorage.removeItem("bits-public-content-v5");
   localStorage.removeItem("bits-public-content-v6");
+  localStorage.removeItem("bits-public-content-v7");
 }
 
 async function setMessageRead(message, read) {
@@ -1558,10 +1559,16 @@ async function loadFavoriteGames() {
 
 async function loadHardware() {
   setAdminStatus(hardwareAdminStatus, "Loading hardware...");
-  const { data, error } = await adminClient
+  const results = await Promise.all([
+    adminClient
     .from("site_hardware")
     .select("position, machine, component, name, detail, enabled, source_key")
-    .order("position", { ascending: true });
+    .order("position", { ascending: true }),
+    adminClient.from("site_hardware_machine_order").select("machine, position"),
+    adminClient.from("site_hardware_devices").select("machine"),
+  ]);
+  const { data } = results[0];
+  const error = results.find((result) => result.error)?.error;
 
   if (error) {
     console.error("Unable to load hardware:", error);
@@ -1573,7 +1580,8 @@ async function loadHardware() {
     return false;
   }
 
-  renderHardwareEditor(data);
+  hardwareAgentMachines = new Set(results[2].data.map(({ machine }) => machine));
+  renderHardwareEditor(data, results[1].data, results[2].data);
   setAdminStatus(
     hardwareAdminStatus,
     `${data.length} hardware entr${data.length === 1 ? "y" : "ies"} loaded.`,
@@ -1682,6 +1690,8 @@ function updateHardwareMachineCard(card) {
   card.querySelector(".hw-machine-toggle").setAttribute("aria-label", `Show or hide ${name} components`);
   card.querySelector(".hw-machine-add").setAttribute("aria-label", `Add a component to ${name}`);
   card.querySelector(".hw-machine-remove").setAttribute("aria-label", `Remove ${name} and all its components`);
+  card.querySelector(".hw-machine-up").setAttribute("aria-label", `Move ${name} up`);
+  card.querySelector(".hw-machine-down").setAttribute("aria-label", `Move ${name} down`);
   rows.forEach((row) => {
     const component = row.querySelector('[data-entry-field="component"]').value.trim() || "component";
     row.querySelector(".hw-row-remove").setAttribute("aria-label", `Remove ${component} from ${name}`);
@@ -1689,7 +1699,12 @@ function updateHardwareMachineCard(card) {
 }
 
 function refreshHardwareMachineCards() {
-  getHardwareMachineCards().forEach(updateHardwareMachineCard);
+  const cards = getHardwareMachineCards();
+  cards.forEach((card, index) => {
+    updateHardwareMachineCard(card);
+    card.querySelector(".hw-machine-up").disabled = index === 0;
+    card.querySelector(".hw-machine-down").disabled = index === cards.length - 1;
+  });
   updateHardwareMachineNames();
 }
 
@@ -1866,11 +1881,32 @@ function createHardwareMachineCard(name = "") {
       }
     });
     card.remove();
-    updateHardwareMachineNames();
+    refreshHardwareMachineCards();
     hardwareEntryAdd.focus();
     setAdminStatus(hardwareAdminStatus, `${label} removed. Save to publish this change.`);
   });
-  actions.append(add, rename, remove);
+  const moveButtons = ["up", "down"].map((direction) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `hw-machine-${direction}`;
+    button.textContent = direction === "up" ? "Move up" : "Move down";
+    button.addEventListener("click", () => {
+      const sibling = direction === "up" ? card.previousElementSibling : card.nextElementSibling;
+      if (!sibling) {
+        return;
+      }
+      if (direction === "up") {
+        hardwareSlots.insertBefore(card, sibling);
+      } else {
+        hardwareSlots.insertBefore(sibling, card);
+      }
+      refreshHardwareMachineCards();
+      (button.disabled ? card.querySelector(`.hw-machine-${direction === "up" ? "down" : "up"}`) : button).focus();
+      setAdminStatus(hardwareAdminStatus, "Machine order changed. Save to publish this order.");
+    });
+    return button;
+  });
+  actions.append(...moveButtons, add, rename, remove);
   header.append(toggle, nameLabel, meta, actions);
 
   const body = document.createElement("div");
@@ -1890,7 +1926,7 @@ function createHardwareMachineCard(name = "") {
   return card;
 }
 
-function renderHardwareEditor(entries) {
+function renderHardwareEditor(entries, order = [], devices = []) {
   const editor = repeatableEditors.hardware;
   editor.deletedPositions.clear();
   editor.maxPosition = entries.reduce((maximum, entry) => Math.max(maximum, entry.position), 0);
@@ -1906,6 +1942,19 @@ function renderHardwareEditor(entries) {
     }
     cards.get(key).querySelector(".hw-rows").append(createHardwareRow(entry));
   });
+  devices.forEach(({ machine }) => {
+    const key = normalizeHardwareMachine(machine);
+    if (!cards.has(key)) {
+      const card = createHardwareMachineCard(machine);
+      card.dataset.originalName = machine;
+      cards.set(key, card);
+      hardwareSlots.append(card);
+    }
+  });
+  const positions = new Map(order.map(({ machine, position }) => [machine, position]));
+  hardwareSlots.append(...getHardwareMachineCards().sort((a, b) => (
+    (positions.get(a.dataset.originalName) ?? Infinity) - (positions.get(b.dataset.originalName) ?? Infinity)
+  )));
   refreshHardwareMachineCards();
 }
 
@@ -1931,7 +1980,7 @@ function validateHardwareEditor() {
   for (const card of getHardwareMachineCards()) {
     const nameInput = card.querySelector("[data-hw-machine-name]");
     const key = normalizeHardwareMachine(nameInput.value);
-    if (!card.querySelector(".hw-row")) {
+    if (!card.querySelector(".hw-row") && !hardwareAgentMachines.has(card.dataset.originalName)) {
       continue;
     }
     if (!key) {
@@ -1970,6 +2019,7 @@ function addHardwareMachine() {
   const card = createHardwareMachineCard("");
   hardwareSlots.append(card);
   addHardwareRow(card);
+  refreshHardwareMachineCards();
   card.querySelector("[data-hw-machine-name]").focus();
   setAdminStatus(hardwareAdminStatus, "Machine added. Name it, list its components, then save.");
 }
@@ -2015,7 +2065,7 @@ function importHardwareScan() {
     });
   }
   items.forEach((item) => addHardwareRow(card, { ...item, enabled: true }));
-  updateHardwareMachineNames();
+  refreshHardwareMachineCards();
   hardwareImportJson.value = "";
   hardwareImportMachine.value = "";
   hardwareImportMachine.dataset.autofilled = "false";
@@ -3426,6 +3476,10 @@ if (adminClient) {
       return;
     }
     const entries = collectHardwareEntries();
+    const machineOrder = getHardwareMachineCards()
+      .map((card) => card.querySelector("[data-hw-machine-name]").value.trim())
+      .filter(Boolean)
+      .map((machine, index) => ({ machine, position: index + 1 }));
     const agentRenames = getHardwareMachineCards()
       .map((card) => ({
         from: card.dataset.originalName ?? "",
@@ -3465,6 +3519,16 @@ if (adminClient) {
         "error",
       );
       return;
+    }
+    if (machineOrder.length) {
+      const { error } = await adminClient.from("site_hardware_machine_order")
+        .upsert(machineOrder, { onConflict: "machine" });
+      if (error) {
+        console.error("Unable to save machine order:", error);
+        clearPublicContentCache();
+        setAdminStatus(hardwareAdminStatus, `Components saved, but machine order failed: ${error.message}. Retry saving.`, "error");
+        return;
+      }
     }
     if (!await loadHardware()) {
       return;

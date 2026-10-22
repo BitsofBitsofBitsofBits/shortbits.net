@@ -10,6 +10,7 @@ create table public.site_hardware (
 \ir ../../supabase/migrations/20261021050000_create_hardware_agent.sql
 \ir ../../supabase/migrations/20261021060000_hardware_live_pulse.sql
 \ir ../../supabase/migrations/20261022010000_hardware_nas_pulse.sql
+\ir ../../supabase/migrations/20261022020000_hardware_machine_order.sql
 
 create function pg_temp.assert_true(value boolean, message text) returns void
 language plpgsql as $$
@@ -95,3 +96,26 @@ select pg_temp.assert_true(
    from public.site_hardware_status where machine = 'Desktop test'), 'Desktop zero readings remain valid');
 select pg_temp.assert_true(
   not has_table_privilege('anon', 'public.site_hardware_status', 'UPDATE'), 'Anonymous table writes remain forbidden');
+
+set role authenticated;
+insert into public.site_hardware_machine_order (machine, position)
+values ('Desktop test', 2), ('Live-only NAS', 1);
+insert into public.site_hardware_machine_order (machine, position)
+values ('Desktop test', 1), ('Live-only NAS', 2)
+on conflict (machine) do update set position = excluded.position;
+reset role;
+select pg_temp.assert_true(
+  (select array_agg(machine order by position) = array['Desktop test', 'Live-only NAS']
+   from public.site_hardware_machine_order), 'Admin can persist and replace order without component rows');
+update public.site_hardware_devices set machine = 'Renamed desktop' where machine = 'Desktop test';
+select pg_temp.assert_true(
+  (select position = 1 from public.site_hardware_machine_order where machine = 'Renamed desktop')
+  and not exists(select 1 from public.site_hardware_machine_order where machine = 'Desktop test'),
+  'Live-device renames preserve order');
+set role anon;
+select machine, position from public.site_hardware_machine_order order by position;
+reset role;
+select pg_temp.assert_true(
+  not has_table_privilege('anon', 'public.site_hardware_machine_order', 'INSERT')
+  and not has_table_privilege('anon', 'public.site_hardware_machine_order', 'UPDATE'),
+  'Visitors can read but not change machine order');

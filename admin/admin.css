@@ -1583,6 +1583,10 @@ body.admin-center.ac-panel-open {
   margin-left: auto;
 }
 
+.admin-center .hw-machine-actions {
+  flex-wrap: wrap;
+}
+
 .admin-center .hardware-import-hint {
   margin: -4px 0 0;
   color: var(--ac-muted);

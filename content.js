@@ -33,7 +33,7 @@ const publicContentWindowIds = new Set([
   "games-window",
   "hardware-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v6";
+const publicContentCacheKey = "bits-public-content-v7";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -97,7 +97,7 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems, hardwareItems] =
+  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems, hardwareItems, hardwareOrder] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
@@ -132,6 +132,12 @@ async function requestPublicContent() {
         console.warn("Unable to load hardware:", error);
         return [];
       }),
+      fetchPublicContentTable(
+        "site_hardware_machine_order?select=machine,position&order=position.asc,machine.asc",
+      ).catch((error) => {
+        console.warn("Unable to load hardware machine order:", error);
+        return [];
+      }),
     ]);
   const payload = {
     resumeProfile: resumeProfiles[0] ?? null,
@@ -142,6 +148,7 @@ async function requestPublicContent() {
     changelogEntries: changelogItems,
     favoriteGames: gameItems,
     hardware: hardwareItems,
+    hardwareOrder,
   };
   localStorage.setItem(publicContentCacheKey, JSON.stringify({
     cachedAt: Date.now(),
@@ -389,7 +396,7 @@ const hardwareCollapsedKey = "bits-hardware-collapsed";
 const hardwareStatusPollMs = 3_000;
 const hardwareWatchPingMs = 20_000;
 const hardwareOnlineWindowMs = 60_000;
-const hardwareState = { items: [], statuses: [], cardsKey: "", timer: 0, ticker: 0, watchedAt: 0 };
+const hardwareState = { items: [], statuses: [], order: [], cardsKey: "", timer: 0, ticker: 0, watchedAt: 0 };
 const baseHardwareJokes = {
   cpu: [
     "Calculating how many Bits fit in another Bit.",
@@ -636,12 +643,16 @@ function renderHardwareCards() {
     }
   });
 
-  const cardsKey = JSON.stringify([...machines]);
+  const positions = new Map(hardwareState.order.map(({ machine, position }) => [machine, position]));
+  const orderedMachines = [...machines].sort(([a], [b]) => (
+    (positions.get(a) ?? Infinity) - (positions.get(b) ?? Infinity)
+  ));
+  const cardsKey = JSON.stringify(orderedMachines);
   if (cardsKey !== hardwareState.cardsKey) {
     hardwareState.cardsKey = cardsKey;
     const collapsed = readCollapsedHardware();
     hardwareMachines.replaceChildren(
-      ...[...machines].map(([machine, components]) => (
+      ...orderedMachines.map(([machine, components]) => (
         createHardwareCard(machine, components, collapsed.has(machine))
       )),
     );
@@ -749,8 +760,9 @@ function stopHardwareStatus() {
   hardwareState.ticker = 0;
 }
 
-function renderHardware(items) {
+function renderHardware(items, order = []) {
   hardwareState.items = items;
+  hardwareState.order = order;
   renderHardwareCards();
 }
 
@@ -772,7 +784,7 @@ async function loadPublicContent() {
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);
         renderFavoriteGames(content.favoriteGames);
-        renderHardware(content.hardware ?? []);
+        renderHardware(content.hardware ?? [], content.hardwareOrder ?? []);
       })
       .catch((error) => {
         console.error("Unable to load public content:", error);
