@@ -74,7 +74,18 @@ const baseInterfaceThemes = [
   { id: "nord", name: "NORD", darkColor: "#2e3440", lightColor: "#eceff4" },
   { id: "dracula", name: "DRACULA", darkColor: "#282a36", lightColor: "#f8f8f2" },
   { id: "candy-pop", name: "CANDY POP", darkColor: "#25152d", lightColor: "#fff4fb" },
-  { id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#f7f4ff" },
+  {
+    id: "rgb", name: "RGB", darkColor: "#090713", lightColor: "#f7f4ff",
+    variants: [
+      { id: "rainbow", name: "RAINBOW" },
+      { id: "synthwave", name: "SYNTHWAVE", palette: ["#ff6bd6", "#db70ff", "#aa80ff", "#819cff", "#65dfff", "#aa80ff", "#db70ff"] },
+      { id: "ice-blue", name: "ICE BLUE", palette: ["#65dfff", "#72caff", "#80b2ff", "#929aff", "#80b2ff", "#72caff", "#b2f4ff"] },
+      { id: "firestorm", name: "FIRESTORM", palette: ["#ff7070", "#ff8565", "#ffa15e", "#ffc267", "#ffda80", "#ffa15e", "#ff8565"] },
+      { id: "toxic-green", name: "TOXIC GREEN", palette: ["#66ff9a", "#8dff70", "#baff66", "#d6ff80", "#baff66", "#8dff70", "#66ffd0"] },
+      { id: "cotton-candy", name: "COTTON CANDY", palette: ["#ff9cdd", "#efacff", "#cfb4ff", "#a5d4ff", "#9cf2f5", "#cfb4ff", "#efacff"] },
+      { id: "arctic-white", name: "ARCTIC WHITE", palette: ["#f2f8ff", "#dfedff", "#c4e4ff", "#b0f0ff", "#d3f8ff", "#e5eeff", "#f7f7ff"] },
+    ],
+  },
   { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#cfe8fb" },
   {
     id: "minebits",
@@ -654,6 +665,38 @@ function applyThemeToDocument(themeId) {
   } else {
     delete root.dataset.themeVariant;
   }
+  for (let index = 0; index < 7; index += 1) {
+    const color = variant?.palette?.[index];
+    const channels = color ? color.slice(1).match(/.{2}/g).map((channel) => Number.parseInt(channel, 16)) : null;
+    ["red", "green", "blue"].forEach((channel, channelIndex) => {
+      const property = `--rgb-palette-${index}-${channel}`;
+      if (channels) {
+        root.style.setProperty(property, channels[channelIndex]);
+      } else {
+        root.style.removeProperty(property);
+      }
+      if (index === 0) {
+        if (channels) {
+          root.style.setProperty(`--rgb-accent-${channel}`, channels[channelIndex]);
+        } else {
+          root.style.removeProperty(`--rgb-accent-${channel}`);
+        }
+      }
+    });
+  }
+  if (variant?.palette) {
+    root.style.setProperty("--rgb-edge-colors", [...variant.palette, variant.palette[0]].join(", "));
+  } else {
+    root.style.removeProperty("--rgb-edge-colors");
+  }
+  [0, 2, 4].forEach((paletteIndex, index) => {
+    const property = `--rgb-glow-${index}`;
+    if (variant?.palette) {
+      root.style.setProperty(property, `${variant.palette[paletteIndex]}29`);
+    } else {
+      root.style.removeProperty(property);
+    }
+  });
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
     themeColorMeta.content = scheme === "light"

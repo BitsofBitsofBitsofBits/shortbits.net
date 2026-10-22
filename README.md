@@ -209,6 +209,9 @@ is a personal project and largely a learning exercise for me.
   Desert, Snowy Taiga, Ocean Monument, Deep Dark, Nether, The End, Creeper),
   Aurora colors (Borealis, Australis, Solar Storm, Glacier, Amethyst),
   Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert),
+  RGB lighting (Rainbow, Synthwave, Ice Blue, Firestorm, Toxic Green, Cotton
+  Candy, Arctic White), with animated color-matched borders, accents, glow,
+  scrollbars, and falling bits; reduced-motion preferences still apply,
   Midnight OLED accents (Classic, Cyan, Crimson, Violet, Amber, Monochrome),
   DOS Blue (Classic, Norton Commander, Turbo Pascal, QBasic, Amber, Green,
   Hercules), Game Bit (DMG, Pocket, Color, Advance, Advance SP), Windows 3.1

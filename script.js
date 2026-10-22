@@ -1204,7 +1204,9 @@ function hexToRgbString(hexColor) {
 }
 
 function getRgbPalette() {
-  return rainbowColors.dark;
+  const theme = interfaceThemes.find((entry) => entry.id === "rgb");
+  const variant = theme?.variants?.find((entry) => entry.id === document.documentElement.dataset.themeVariant);
+  return variant?.palette ?? rainbowColors.dark;
 }
 
 function applyRgbBitColor(bit) {
@@ -1416,6 +1418,9 @@ function syncDesktopThemeFallback() {
 }
 
 window.addEventListener("bits:theme-applied", () => {
+  if (document.documentElement.dataset.interfaceTheme === "rgb") {
+    setRgbMode(true);
+  }
   if (!fakeDesktop.hidden) {
     window.setTimeout(syncDesktopThemeFallback, 0);
   }

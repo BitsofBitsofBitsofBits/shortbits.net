@@ -1583,9 +1583,9 @@
   --admin-bg: rgba(255, 255, 255, 0.96);
   --overlay-bg: rgba(250, 248, 255, 0.98);
   --body-background:
-    radial-gradient(circle at 15% 10%, rgba(255, 109, 122, 0.16), transparent 35%),
-    radial-gradient(circle at 85% 20%, rgba(90, 160, 255, 0.16), transparent 35%),
-    radial-gradient(circle at 50% 100%, rgba(80, 220, 140, 0.14), transparent 40%),
+    radial-gradient(circle at 15% 10%, var(--rgb-glow-0, rgba(255, 109, 122, 0.16)), transparent 35%),
+    radial-gradient(circle at 85% 20%, var(--rgb-glow-1, rgba(90, 160, 255, 0.16)), transparent 35%),
+    radial-gradient(circle at 50% 100%, var(--rgb-glow-2, rgba(80, 220, 140, 0.14)), transparent 40%),
     #f7f4ff;
 }
 
@@ -13997,14 +13997,14 @@ html.is-rgb-mode .shell {
     linear-gradient(var(--shell-bg), var(--shell-bg)) padding-box,
     conic-gradient(
       from var(--rgb-edge-angle),
-      #ff6d7a,
+      var(--rgb-edge-colors, #ff6d7a,
       #ff9b62,
       #ffcc66,
       #66ff9a,
       #63d8ff,
       #7aa7ff,
       #b99aff,
-      #ff6d7a
+      #ff6d7a)
     ) border-box;
   animation: rgb-edge-cycle 7s linear infinite;
 }
@@ -14016,14 +14016,14 @@ html.is-rgb-mode .desktop-window {
     linear-gradient(var(--overlay-bg), var(--overlay-bg)) padding-box,
     conic-gradient(
       from var(--rgb-edge-angle),
-      #ff6d7a,
+      var(--rgb-edge-colors, #ff6d7a,
       #ff9b62,
       #ffcc66,
       #66ff9a,
       #63d8ff,
       #7aa7ff,
       #b99aff,
-      #ff6d7a
+      #ff6d7a)
     ) border-box;
   animation:
     desktop-window-open 180ms steps(3),
@@ -14241,39 +14241,39 @@ html.is-root-mode .name-field {
 
 @keyframes rgb-accent-color-cycle {
   0%, 100% {
-    --rgb-accent-red: 255;
-    --rgb-accent-green: 109;
-    --rgb-accent-blue: 122;
+    --rgb-accent-red: var(--rgb-palette-0-red, 255);
+    --rgb-accent-green: var(--rgb-palette-0-green, 109);
+    --rgb-accent-blue: var(--rgb-palette-0-blue, 122);
   }
   14% {
-    --rgb-accent-red: 255;
-    --rgb-accent-green: 155;
-    --rgb-accent-blue: 98;
+    --rgb-accent-red: var(--rgb-palette-1-red, 255);
+    --rgb-accent-green: var(--rgb-palette-1-green, 155);
+    --rgb-accent-blue: var(--rgb-palette-1-blue, 98);
   }
   28% {
-    --rgb-accent-red: 255;
-    --rgb-accent-green: 204;
-    --rgb-accent-blue: 102;
+    --rgb-accent-red: var(--rgb-palette-2-red, 255);
+    --rgb-accent-green: var(--rgb-palette-2-green, 204);
+    --rgb-accent-blue: var(--rgb-palette-2-blue, 102);
   }
   42% {
-    --rgb-accent-red: 102;
-    --rgb-accent-green: 255;
-    --rgb-accent-blue: 154;
+    --rgb-accent-red: var(--rgb-palette-3-red, 102);
+    --rgb-accent-green: var(--rgb-palette-3-green, 255);
+    --rgb-accent-blue: var(--rgb-palette-3-blue, 154);
   }
   57% {
-    --rgb-accent-red: 99;
-    --rgb-accent-green: 216;
-    --rgb-accent-blue: 255;
+    --rgb-accent-red: var(--rgb-palette-4-red, 99);
+    --rgb-accent-green: var(--rgb-palette-4-green, 216);
+    --rgb-accent-blue: var(--rgb-palette-4-blue, 255);
   }
   71% {
-    --rgb-accent-red: 122;
-    --rgb-accent-green: 167;
-    --rgb-accent-blue: 255;
+    --rgb-accent-red: var(--rgb-palette-5-red, 122);
+    --rgb-accent-green: var(--rgb-palette-5-green, 167);
+    --rgb-accent-blue: var(--rgb-palette-5-blue, 255);
   }
   85% {
-    --rgb-accent-red: 185;
-    --rgb-accent-green: 154;
-    --rgb-accent-blue: 255;
+    --rgb-accent-red: var(--rgb-palette-6-red, 185);
+    --rgb-accent-green: var(--rgb-palette-6-green, 154);
+    --rgb-accent-blue: var(--rgb-palette-6-blue, 255);
   }
 }
 
