@@ -221,6 +221,20 @@
   background: linear-gradient(90deg,#e33b2f 0 17%,#f68b25 17% 34%,#f4d037 34% 51%,#6cbf43 51% 68%,#3595ce 68% 84%,#7851a1 84%);
 }
 
+/* Keep the stripe out of the title bar's grid cells. */
+:root[data-interface-theme="atari"]:is([data-theme-variant="2600"], [data-theme-variant="2600-jr"]) .system-bar {
+  position: relative;
+}
+
+:root[data-interface-theme="atari"]:is([data-theme-variant="2600"], [data-theme-variant="2600-jr"]) .system-bar::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
 :root[data-interface-theme="atari"][data-theme-variant="2600-jr"] :is(.system-bar,.desktop-window-bar,.fake-desktop-app > header,.blog-header,.profile-panel-bar) {
   background: linear-gradient(180deg,#d9dadd,#777b80 48%,#35383d 50%,#17191c);
   color: #fff;

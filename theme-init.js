@@ -418,7 +418,7 @@ const baseInterfaceThemes = [
     experimental: true,
   },
 ];
-const layoutAssetVersion = "layouts-5";
+const layoutAssetVersion = "layouts-6";
 const lastStandardThemeKey = "bits-last-standard-theme";
 const themeVariantKey = "bits-theme-variants";
 
