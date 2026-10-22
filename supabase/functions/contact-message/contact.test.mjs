@@ -29,7 +29,11 @@ function setup(options = {}) {
     fetch: async (url, init = {}) => {
       const body = init.body && typeof init.body === "string" ? JSON.parse(init.body) : null;
       calls.push({ url, init, body });
-      if (url.includes("siteverify")) return Response.json({ success: options.verified !== false });
+      if (url.includes("siteverify")) {
+        if (options.siteverifyError) throw options.siteverifyError;
+        return options.siteverifyResponse?.()
+          ?? Response.json({ success: options.verified !== false });
+      }
       if (url.includes("contact_rate_limits?select")) {
         return new Response("[]", { headers: { "content-range": `0-0/${options.rateCount ?? 0}` } });
       }
@@ -164,6 +168,76 @@ test("failed Turnstile prevents storage and email", async () => {
   assert.equal((await app.submit({ ...message, turnstileToken: "test-token" })).status, 403);
   assert.equal(app.emails().length, 0);
   assert.ok(!app.calls.some((call) => call.url.endsWith("/messages")));
+});
+
+for (const [code, status] of [
+  ["invalid-input-secret", 503],
+  ["missing-input-secret", 503],
+  ["invalid-input-response", 403],
+  ["timeout-or-duplicate", 403],
+  ["internal-error", 503],
+]) {
+  test(`Siteverify rejection is diagnostic and fail-closed: ${code}`, async () => {
+    const app = setup({
+      env: { TURNSTILE_SECRET_KEY: "private-test-secret" },
+      siteverifyResponse: () => Response.json({
+        success: false, "error-codes": [code], secret: "never-log-this",
+      }),
+    });
+    const response = await app.submit({ ...message, turnstileToken: "private-test-token" });
+    assert.equal(response.status, status);
+    assert.ok((await response.json()).error.includes(code));
+    assert.ok(app.logs.some((entry) => entry.includes(`Siteverify rejected: ${code}`)));
+    assert.ok(!app.logs.join(" ").match(/private-test-secret|private-test-token|never-log-this/));
+    assert.equal(app.emails().length, 0);
+    assert.ok(!app.calls.some((call) => call.url.endsWith("/messages")));
+  });
+}
+
+test("Siteverify sends the configured secret and token, and logs successful validation", async () => {
+  const app = setup({ env: { TURNSTILE_SECRET_KEY: "private-test-secret" } });
+  assert.equal((await app.submit({ ...message, turnstileToken: "private-test-token" })).status, 200);
+  const request = app.calls.find((call) => call.url.includes("siteverify"));
+  assert.equal(request.init.body.get("secret"), "private-test-secret");
+  assert.equal(request.init.body.get("response"), "private-test-token");
+  assert.ok(request.init.signal instanceof AbortSignal);
+  assert.ok(app.logs.includes("Contact Siteverify accepted."));
+});
+
+test("missing tokens are diagnosed without calling Siteverify, storing, or emailing", async () => {
+  const app = setup({ env: { TURNSTILE_SECRET_KEY: "private-test-secret" } });
+  const response = await app.submit();
+  assert.equal(response.status, 403);
+  assert.ok((await response.json()).error.includes("missing-input-response"));
+  assert.equal(app.calls.length, 0);
+});
+
+for (const options of [
+  { siteverifyResponse: () => new Response(null, { status: 502 }) },
+  { siteverifyResponse: () => new Response("not JSON") },
+  { siteverifyError: new DOMException("Timed out", "TimeoutError") },
+]) {
+  test("Siteverify outages fail closed with an explicit service error", async () => {
+    const app = setup({ env: { TURNSTILE_SECRET_KEY: "private-test-secret" }, ...options });
+    const response = await app.submit({ ...message, turnstileToken: "private-test-token" });
+    assert.equal(response.status, 503);
+    assert.ok((await response.json()).error.includes("siteverify-unavailable"));
+    assert.ok(app.logs.some((entry) => entry.includes("Siteverify request failed")));
+    assert.equal(app.emails().length, 0);
+    assert.ok(!app.calls.some((call) => call.url.endsWith("/messages")));
+  });
+}
+
+test("unexpected Siteverify diagnostics cannot leak provider response fields", async () => {
+  const app = setup({
+    env: { TURNSTILE_SECRET_KEY: "private-test-secret" },
+    siteverifyResponse: () => Response.json({
+      success: false, "error-codes": ["private-test-token", { unexpected: true }],
+    }),
+  });
+  const response = await app.submit({ ...message, turnstileToken: "private-test-token" });
+  assert.ok((await response.json()).error.includes("unknown-error"));
+  assert.ok(!app.logs.join(" ").includes("private-test-token"));
 });
 
 test("preflight and unsupported methods never send email", async () => {

@@ -392,6 +392,15 @@ transmits or stores a visitor identifier.
   a click (or fails) and collapses again after success; it uses Cloudflare's
   light or dark skin to match the active site theme. Store the matching secret as the
   `TURNSTILE_SECRET_KEY` Supabase secret so `contact-message` enforces it.
+  If the browser verifies but submission is rejected, the form and Edge
+  Function logs now include Cloudflare's standard Siteverify error codes.
+  `invalid-input-secret` indicates a server configuration issue;
+  `invalid-input-response` or `timeout-or-duplicate` requires a fresh check.
+  Siteverify network/HTTP/invalid-JSON failures return a service error and never
+  allow storage or email. Logs exclude tokens, secrets, IPs, and raw responses.
+  Match the secret to the public widget key in `site-config.js`; if GitHub's
+  Supabase environment also defines the secret, update it there so deployment
+  does not overwrite a dashboard-only correction.
 
 The contact form posts to the `contact-message` Edge Function, which inserts
 messages with the service role after its spam checks. The

@@ -107,13 +107,16 @@ async function recordAttempt(visitorHash: string): Promise<void> {
   });
 }
 
-async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+type VerificationResult = { ok: true } | { ok: false; status: 403 | 503; error: string };
+
+async function verifyTurnstile(token: string, ip: string): Promise<VerificationResult> {
   const secret = Deno.env.get("TURNSTILE_SECRET_KEY");
   if (!secret) {
-    return true;
+    return { ok: true };
   }
   if (!token) {
-    return false;
+    console.error("Contact Siteverify rejected: missing-input-response (no token submitted).");
+    return { ok: false, status: 403, error: "Verification token is missing. Refresh the page and try again. (missing-input-response)" };
   }
   const form = new FormData();
   form.append("secret", secret);
@@ -121,12 +124,41 @@ async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
   if (ip !== "unknown") {
     form.append("remoteip", ip);
   }
-  const response = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    { method: "POST", body: form },
-  );
-  const result = await response.json().catch(() => null);
-  return result?.success === true;
+  try {
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      { method: "POST", body: form, signal: AbortSignal.timeout(8_000) },
+    );
+    if (!response.ok) {
+      console.error(`Contact Siteverify request failed: HTTP ${response.status}.`);
+      return { ok: false, status: 503, error: "Verification service is unavailable. Please try again shortly. (siteverify-unavailable)" };
+    }
+    const result = await response.json();
+    if (result?.success === true) {
+      console.info("Contact Siteverify accepted.");
+      return { ok: true };
+    }
+    const knownCodes = new Set([
+      "missing-input-secret", "invalid-input-secret", "missing-input-response",
+      "invalid-input-response", "bad-request", "timeout-or-duplicate", "internal-error",
+    ]);
+    // Only log known diagnostic codes, never the secret, token, IP, or response body.
+    const codes = Array.isArray(result?.["error-codes"])
+      ? result["error-codes"].filter((code: unknown) => typeof code === "string" && knownCodes.has(code))
+      : [];
+    const diagnostic = codes.length ? [...new Set(codes)].join(", ") : "unknown-error";
+    console.error(`Contact Siteverify rejected: ${diagnostic}.`);
+    if (codes.includes("missing-input-secret") || codes.includes("invalid-input-secret")) {
+      return { ok: false, status: 503, error: `Verification service is misconfigured. Please contact the site owner. (${diagnostic})` };
+    }
+    if (codes.includes("internal-error")) {
+      return { ok: false, status: 503, error: `Verification service is unavailable. Please try again shortly. (${diagnostic})` };
+    }
+    return { ok: false, status: 403, error: `Verification failed. Please complete a fresh check and try again. (${diagnostic})` };
+  } catch (error) {
+    console.error("Contact Siteverify request failed:", error instanceof Error ? error.name : "UnknownError");
+    return { ok: false, status: 503, error: "Verification service is unavailable. Please try again shortly. (siteverify-unavailable)" };
+  }
 }
 
 function readString(value: unknown): string {
@@ -225,8 +257,9 @@ Deno.serve(async (request) => {
 
   const ip = getClientIp(request);
   try {
-    if (!await verifyTurnstile(turnstileToken, ip)) {
-      return jsonResponse(request, { error: "Verification failed. Please complete the check and try again." }, 403);
+    const verification = await verifyTurnstile(turnstileToken, ip);
+    if (!verification.ok) {
+      return jsonResponse(request, { error: verification.error }, verification.status);
     }
 
     const visitorHash = await hashVisitor(ip);
