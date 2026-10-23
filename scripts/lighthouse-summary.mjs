@@ -4,7 +4,9 @@ import { checkPerformanceBudget, requiredReports } from "./performance-budgets.m
 
 // Prints category scores and failing audits from Lighthouse JSON reports in a directory.
 const reportDir = process.argv[2] ?? "lighthouse-reports";
-const files = (await readdir(reportDir)).filter((file) => file.endsWith(".json")).sort();
+const files = (await readdir(reportDir)).filter((file) => (
+  file.endsWith(".json") && !/\.(?:trace|devtoolslog)\.json$/.test(file)
+)).sort();
 const summary = [];
 const failures = [];
 const enforce = process.argv.includes("--enforce");

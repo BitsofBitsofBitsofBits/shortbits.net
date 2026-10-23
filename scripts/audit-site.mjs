@@ -34,6 +34,7 @@ try {
       await run([
         cli, `${server.origin}${path}`,
         ...(preset === "desktop" ? ["--preset=desktop"] : []),
+        ...(name === "online" && preset === "mobile" ? ["--save-assets"] : []),
         "--only-categories=performance,accessibility,best-practices,seo",
         "--chrome-flags=--headless=new --no-sandbox",
         "--output=json", `--output-path=${join(output, `${name}-${preset}.json`)}`, "--quiet",

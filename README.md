@@ -623,3 +623,6 @@ with `--root`. On Windows with Edge installed, set
 for Lighthouse. Browser smoke uses mocked live services and never sends
 messages, publishes content, or modifies production data; real third-party
 integrations still require deployment-time verification.
+
+The mobile online-page audit also retains its Lighthouse trace and DevTools
+network log in the report artifact to diagnose runner-specific blocking tasks.
