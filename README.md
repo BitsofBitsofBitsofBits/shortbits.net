@@ -707,8 +707,12 @@ mobile and desktop widths, run
 This offline check waits for experimental layout assets and uses reduced motion
 to avoid differences caused by adaptive frame-rate detection.
 
-The mobile online-page audit also retains its Lighthouse trace and DevTools
-network log in the report artifact to diagnose runner-specific blocking tasks.
+The local mobile online-page audit and all production mobile audits retain their
+Lighthouse traces and DevTools network logs in the report artifact to diagnose
+runner-specific blocking tasks.
 Validation pins Ubuntu 24.04 and uses the runner's preinstalled Chrome for
 browser checks. Failed performance budgets also log a sampled startup CPU
 profile; this diagnostic does not change or bypass the performance gate.
+To profile the deployed page directly and retain raw CPU samples, run
+`node scripts/profile-startup.mjs --url https://www.shortbits.net/online/ --output startup.cpuprofile`.
+Omit `--url` and use `--root <build-directory>` to profile a staged build instead.

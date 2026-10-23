@@ -1,11 +1,17 @@
 import { resolve } from "node:path";
+import { writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
 
 const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
 if (rootIndex >= 0 && !args[rootIndex + 1]) throw new Error("--root requires a directory.");
-const server = await startSiteServer(resolve(rootIndex < 0 ? ".site-build" : args[rootIndex + 1]));
+const urlIndex = args.indexOf("--url");
+if (urlIndex >= 0 && !args[urlIndex + 1]) throw new Error("--url requires an absolute URL.");
+const outputIndex = args.indexOf("--output");
+if (outputIndex >= 0 && !args[outputIndex + 1]) throw new Error("--output requires a file.");
+const server = urlIndex < 0 ? await startSiteServer(resolve(rootIndex < 0 ? ".site-build" : args[rootIndex + 1])) : null;
+const target = new URL(urlIndex < 0 ? `${server.origin}/online/` : args[urlIndex + 1]);
 let browser;
 try {
   browser = await chromium.launch({
@@ -18,10 +24,11 @@ try {
   await client.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await client.send("Profiler.enable");
   await client.send("Profiler.start");
-  const response = await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
+  const response = await page.goto(target.href, { waitUntil: "networkidle" });
   if (!response?.ok()) throw new Error("Unable to load the staged online page for profiling.");
   await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
   const { profile } = await client.send("Profiler.stop");
+  if (outputIndex >= 0) await writeFile(resolve(args[outputIndex + 1]), JSON.stringify(profile));
   const self = new Map();
   const totals = new Map();
   const parents = new Map();
@@ -36,7 +43,7 @@ try {
     }
   });
   const summary = profile.nodes
-    .filter((node) => node.callFrame.url.startsWith(server.origin))
+    .filter((node) => node.callFrame.url.startsWith(target.origin))
     .map((node) => ({
       file: new URL(node.callFrame.url).pathname,
       function: node.callFrame.functionName || "(top level)",
@@ -49,5 +56,5 @@ try {
   console.log(JSON.stringify({ browser: await browser.version(), cpuSlowdown: 4, startup: summary }, null, 2));
 } finally {
   if (browser) await browser.close();
-  await server.close();
+  if (server) await server.close();
 }

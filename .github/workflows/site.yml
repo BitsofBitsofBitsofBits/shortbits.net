@@ -324,6 +324,7 @@ jobs:
             for preset in mobile desktop; do
               flags=""
               if [ "$preset" = "desktop" ]; then flags="--preset=desktop"; fi
+              if [ "$preset" = "mobile" ]; then flags="--save-assets"; fi
               npx --no-install lighthouse "https://www.shortbits.net/${page}" $flags \
                 --only-categories=performance,accessibility,best-practices,seo \
                 --chrome-flags="--headless=new --no-sandbox" \
