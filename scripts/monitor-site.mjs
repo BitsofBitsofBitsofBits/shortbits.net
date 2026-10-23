@@ -135,16 +135,13 @@ export function browserSiteFetch(page, origin, fetchImpl = fetch) {
   return async (url, options) => {
     if (new URL(url).origin !== new URL(origin).origin) return fetchImpl(url, options);
     options.signal.throwIfAborted();
-    const headers = Object.fromEntries(Object.entries(options.headers).filter(
-      ([name]) => !["origin", "cache-control"].includes(name.toLowerCase()),
-    ));
-    const result = await page.evaluate(async ({ url, method, headers }) => {
-      const response = await fetch(url, {
-        method, headers, cache: "no-store", signal: AbortSignal.timeout(15000),
-      });
-      return { status: response.status, headers: [...response.headers], body: await response.text() };
-    }, { url, method: options.method || "GET", headers });
-    return new Response([204, 205, 304].includes(result.status) ? null : result.body, result);
+    if (options.method && options.method !== "GET") throw new Error("Site browser probes only support GET.");
+    const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15000 });
+    if (!response) throw new Error("Browser navigation did not return a response.");
+    const status = response.status();
+    return new Response([204, 205, 304].includes(status) ? null : await response.text(), {
+      status, headers: await response.allHeaders(),
+    });
   };
 }
 
@@ -156,15 +153,14 @@ export async function monitorWithBrowser(options = {}) {
   });
   try {
     const context = await browser.newContext({ serviceWorkers: "block" });
-    // A real browser establishes the site's normal session without forging a
-    // browser user-agent or disabling the site's bot protection.
+    // Navigate normally: background fetches can receive different bot-protection
+    // treatment from the document requests real visitors and Lighthouse use.
     await context.route("**/*", (route) => {
       const request = route.request();
       return new URL(request.url()).origin === new URL(origin).origin
         && ["GET", "OPTIONS"].includes(request.method()) ? route.continue() : route.abort();
     });
     const page = await context.newPage();
-    await page.goto(`${origin}/?choose`, { waitUntil: "domcontentloaded", timeout: 30000 });
     return await monitorSite({ ...options, fetchImpl: browserSiteFetch(page, origin, options.fetchImpl) });
   } finally {
     await browser.close();

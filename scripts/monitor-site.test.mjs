@@ -98,9 +98,13 @@ test("reports never retain JSON parse payloads or live integration data", async 
 test("browser transport preserves failures and leaves integration probes on direct HTTP", async () => {
   const calls = [];
   const page = {
-    evaluate: async (_callback, options) => {
-      calls.push(options);
-      return { status: 403, headers: [["Content-Type", "text/html"]], body: "Forbidden" };
+    goto: async (url, options) => {
+      calls.push({ url, options });
+      return {
+        status: () => 403,
+        allHeaders: async () => ({ "Content-Type": "text/html" }),
+        text: async () => "Forbidden",
+      };
     },
   };
   let integrationCalls = 0;
@@ -113,11 +117,12 @@ test("browser transport preserves failures and leaves integration probes on dire
   const response = await fetchImpl(`${site}/online/`, options);
   assert.equal(response.status, 403);
   assert.equal(await response.text(), "Forbidden");
-  assert.deepEqual(calls[0].headers, {});
-  assert.equal(calls[0].method, "GET");
+  assert.equal(calls[0].url, `${site}/online/`);
+  assert.equal(calls[0].options.waitUntil, "domcontentloaded");
   await fetchImpl(`${config.url}/functions/v1/spotify-now-playing`, { ...options, headers: { apikey: config.anonKey } });
   assert.equal(integrationCalls, 1);
   const aborted = AbortSignal.abort();
   await assert.rejects(fetchImpl(`${site}/online/`, { ...options, signal: aborted }));
   assert.equal(calls.length, 1);
+  await assert.rejects(fetchImpl(`${site}/online/`, { ...options, method: "POST" }), /only support GET/);
 });

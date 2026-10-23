@@ -540,8 +540,8 @@ failures), and the contact endpoint's OPTIONS preflight.
 
 Checks retry once for transient failures and have a bounded overall request
 deadline. The workflow uses the pinned runner's real Chrome browser for
-same-origin site requests, since the site's bot protection can reject bare
-HTTP clients on hosted runners. It does not spoof a browser user-agent or
+same-origin site navigations, since the site's bot protection can reject bare
+HTTP clients and background fetches on hosted runners. It does not spoof a browser user-agent or
 weaken Cloudflare/CSP settings. Browser requests are restricted to same-origin
 GET/OPTIONS; public integration probes use direct HTTP with the configured CORS
 origin. Checks never submit contact messages, solve Turnstile, send test emails,
