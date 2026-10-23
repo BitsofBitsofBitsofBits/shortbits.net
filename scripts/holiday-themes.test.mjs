@@ -30,7 +30,8 @@ function themesOn(year, month, day, preferences = {}) {
       constructor(...args) { super(...(args.length ? args : [date.getTime()])); }
     },
   };
-  vm.runInNewContext(`${calendarSource}\n${preferenceSource}\n${optionsSource}
+  vm.runInNewContext(`String.prototype.localeCompare = () => { throw new Error("Theme startup must not initialize locale collation."); };
+    ${calendarSource}\n${preferenceSource}\n${optionsSource}
     globalThis.api = {
       state: seasonalThemeState, initial: initialInterfaceTheme.id,
       catalog: seasonalInterfaceThemes, select: selectInterfaceTheme,
@@ -38,6 +39,19 @@ function themesOn(year, month, day, preferences = {}) {
     };`, context);
   return { ...context.api, available: context.window.BITS_INTERFACE_THEMES, stored };
 }
+
+test("fixed uppercase ASCII theme names keep the same alphabetical order without locale initialization", () => {
+  const { available } = themesOn(2026, 10, 22, { "bits-theme-debug": "enabled" });
+  const names = Array.from(available, (theme) => theme.name);
+  for (const name of names) {
+    assert.match(name, /^[\x20-\x7e]+$/);
+    assert.equal(name, name.toUpperCase());
+  }
+  assert.ok(names.length >= 65, "Include experimental and seasonal themes");
+  for (const locale of ["en", "de", "fr", "ja", "sv", "tr"]) {
+    assert.deepEqual(names, [...names].sort((first, second) => first.localeCompare(second, locale)), locale);
+  }
+});
 
 for (const [year, month, day, theme] of [
   [2026, 2, 14, "valentines"],

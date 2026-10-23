@@ -703,6 +703,8 @@ refreshes the clock immediately.
 The online build tooltip uses an unambiguous UTC timestamp without initializing
 locale/date formatting during startup; malformed timestamps are reported rather
 than displayed as a successful deployment label.
+The fixed uppercase ASCII theme catalog is sorted without locale initialization.
+Tests verify identical alphabetical ordering across the complete catalog.
 
 To compare source and optimized online styles across the theme catalog at
 mobile and desktop widths, run
