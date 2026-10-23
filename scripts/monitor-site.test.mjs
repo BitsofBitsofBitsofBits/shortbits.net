@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monitorSite, reportMarkdown } from "./monitor-site.mjs";
+import { monitorSite, reportMarkdown, browserSiteFetch } from "./monitor-site.mjs";
 
 const site = "https://www.shortbits.net";
 const config = { url: "https://example.supabase.co", anonKey: "sb_publishable_test" };
@@ -93,4 +93,31 @@ test("reports never retain JSON parse payloads or live integration data", async 
   assert.doesNotMatch(JSON.stringify(report), /private activity payload/);
   assert.match(reportMarkdown(report), /Response is not valid JSON/);
   assert.match(reportMarkdown(report), /no contact message was sent/);
+});
+
+test("browser transport preserves failures and leaves integration probes on direct HTTP", async () => {
+  const calls = [];
+  const page = {
+    evaluate: async (_callback, options) => {
+      calls.push(options);
+      return { status: 403, headers: [["Content-Type", "text/html"]], body: "Forbidden" };
+    },
+  };
+  let integrationCalls = 0;
+  const fetchImpl = browserSiteFetch(page, site, (url, options) => {
+    integrationCalls += 1;
+    assert.equal(options.headers.apikey, config.anonKey);
+    return healthy(url, options);
+  });
+  const options = { headers: { Origin: site, "Cache-Control": "no-cache" }, signal: AbortSignal.timeout(1000) };
+  const response = await fetchImpl(`${site}/online/`, options);
+  assert.equal(response.status, 403);
+  assert.equal(await response.text(), "Forbidden");
+  assert.deepEqual(calls[0].headers, {});
+  assert.equal(calls[0].method, "GET");
+  await fetchImpl(`${config.url}/functions/v1/spotify-now-playing`, { ...options, headers: { apikey: config.anonKey } });
+  assert.equal(integrationCalls, 1);
+  const aborted = AbortSignal.abort();
+  await assert.rejects(fetchImpl(`${site}/online/`, { ...options, signal: aborted }));
+  assert.equal(calls.length, 1);
 });

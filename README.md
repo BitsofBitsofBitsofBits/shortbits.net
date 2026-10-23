@@ -539,7 +539,12 @@ articles, Spotify and Discord HTTP responses (including stale-data and CORS
 failures), and the contact endpoint's OPTIONS preflight.
 
 Checks retry once for transient failures and have a bounded overall request
-deadline. They never submit contact messages, solve Turnstile, send test emails,
+deadline. The workflow uses the pinned runner's real Chrome browser for
+same-origin site requests, since the site's bot protection can reject bare
+HTTP clients on hosted runners. It does not spoof a browser user-agent or
+weaken Cloudflare/CSP settings. Browser requests are restricted to same-origin
+GET/OPTIONS; public integration probes use direct HTTP with the configured CORS
+origin. Checks never submit contact messages, solve Turnstile, send test emails,
 authenticate as an admin, or modify published content. They do not prove email
 delivery or browser/WebSocket functionality; browser smoke and performance
 checks remain separate.
@@ -553,7 +558,10 @@ integration response bodies, activity details, or credentials) are retained for
 14 days.
 
 To run the same read-only production probes locally:
-`node scripts/monitor-site.mjs --output <report.json>`.
+`node scripts/monitor-site.mjs --output <report.json> --browser`.
+Set `BITS_BROWSER_CHANNEL=chrome` (or `msedge` on Windows) to use an installed
+browser, or install Playwright Chromium. Omitting `--browser` uses direct HTTP
+for all probes and can expose bot-protection differences.
 
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static

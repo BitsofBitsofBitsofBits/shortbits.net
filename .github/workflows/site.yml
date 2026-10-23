@@ -297,7 +297,7 @@ jobs:
   lighthouse:
     if: always() && needs.deploy.result == 'success'
     needs: deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -306,6 +306,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Install pinned audit tools
+        run: npm ci --ignore-scripts
 
       - name: Audit live pages
         shell: bash
@@ -316,7 +319,7 @@ jobs:
             for preset in mobile desktop; do
               flags=""
               if [ "$preset" = "desktop" ]; then flags="--preset=desktop"; fi
-              npx --yes lighthouse@13.5.0 "https://www.shortbits.net/${page}" $flags \
+              npx --no-install lighthouse "https://www.shortbits.net/${page}" $flags \
                 --only-categories=performance,accessibility,best-practices,seo \
                 --chrome-flags="--headless=new --no-sandbox" \
                 --output=json --output-path="lighthouse-reports/${name}-${preset}.json" \

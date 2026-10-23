@@ -32,11 +32,15 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install browser monitoring tools
+        run: npm ci --ignore-scripts
+
       - name: Check public pages and integrations
         id: health
         env:
           SITE_EXPECTED_COMMIT: ${{ inputs.expected-commit }}
-        run: node scripts/monitor-site.mjs --output health-report.json
+          BITS_BROWSER_CHANNEL: chrome
+        run: node scripts/monitor-site.mjs --output health-report.json --browser
 
       - name: Publish health summary
         if: always()

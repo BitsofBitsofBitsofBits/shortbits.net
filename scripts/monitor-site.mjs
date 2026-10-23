@@ -131,14 +131,55 @@ export function reportMarkdown(report) {
   ].join("\n");
 }
 
+export function browserSiteFetch(page, origin, fetchImpl = fetch) {
+  return async (url, options) => {
+    if (new URL(url).origin !== new URL(origin).origin) return fetchImpl(url, options);
+    options.signal.throwIfAborted();
+    const headers = Object.fromEntries(Object.entries(options.headers).filter(
+      ([name]) => !["origin", "cache-control"].includes(name.toLowerCase()),
+    ));
+    const result = await page.evaluate(async ({ url, method, headers }) => {
+      const response = await fetch(url, {
+        method, headers, cache: "no-store", signal: AbortSignal.timeout(15000),
+      });
+      return { status: response.status, headers: [...response.headers], body: await response.text() };
+    }, { url, method: options.method || "GET", headers });
+    return new Response([204, 205, 304].includes(result.status) ? null : result.body, result);
+  };
+}
+
+export async function monitorWithBrowser(options = {}) {
+  const { chromium } = await import("playwright");
+  const origin = options.origin || "https://www.shortbits.net";
+  const browser = await chromium.launch({
+    ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}),
+  });
+  try {
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    // A real browser establishes the site's normal session without forging a
+    // browser user-agent or disabling the site's bot protection.
+    await context.route("**/*", (route) => {
+      const request = route.request();
+      return new URL(request.url()).origin === new URL(origin).origin
+        && ["GET", "OPTIONS"].includes(request.method()) ? route.continue() : route.abort();
+    });
+    const page = await context.newPage();
+    await page.goto(`${origin}/?choose`, { waitUntil: "domcontentloaded", timeout: 30000 });
+    return await monitorSite({ ...options, fetchImpl: browserSiteFetch(page, origin, options.fetchImpl) });
+  } finally {
+    await browser.close();
+  }
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const args = process.argv.slice(2);
-  if (args.length !== 2 || args[0] !== "--output" || !args[1]) throw new Error("Usage: node scripts/monitor-site.mjs --output report.json");
+  const args = process.argv.slice(2).filter((argument) => argument !== "--browser");
+  if (args.length !== 2 || args[0] !== "--output" || !args[1]) throw new Error("Usage: node scripts/monitor-site.mjs --output report.json [--browser]");
   const output = resolve(args[1]);
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   // Use the same checked-in public configuration as the deployed clients.
   const config = await publicConfig(root);
-  const report = await monitorSite({ config, expectedCommit: process.env.SITE_EXPECTED_COMMIT || "" });
+  const run = process.argv.includes("--browser") ? monitorWithBrowser : monitorSite;
+  const report = await run({ config, expectedCommit: process.env.SITE_EXPECTED_COMMIT || "" });
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(report, null, 2)}\n`);
   await writeFile(`${output}.md`, reportMarkdown(report));
