@@ -119,6 +119,45 @@ try {
     const pdf = await page.pdf({ format: "Letter" });
     assert.ok(pdf.length > 1000, "Printable résumé must produce a nonempty PDF");
     await page.emulateMedia({ media: "screen" });
+    await page.route(/\/admin\.js(?:\?|$)/, (route) => route.fulfill({
+      contentType: "text/javascript", body: "/* Admin writes disabled in the offline publishing-status test. */",
+    }));
+    await page.goto(`${server.origin}/admin/#/blog`, { waitUntil: "networkidle" });
+    const savedPosts = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"));
+    await page.evaluate(async (posts) => {
+      document.querySelector("#login-view").hidden = true;
+      document.querySelector("#inbox-view").hidden = false;
+      window.dispatchEvent(new CustomEvent("admin:authenticated"));
+      await window.BITS_PUBLISHING_UI.update(posts);
+    }, savedPosts);
+    await page.locator('#blog-deployment-status[data-state="success"]').waitFor();
+    const pendingPosts = savedPosts.filter((post) => post.slug !== "safe-markdown").map((post) => (
+      post.slug === "first-lab-notes" ? { ...post, title: `${post.title} updated` } : post
+    ));
+    pendingPosts.push({ ...savedPosts[0], slug: "new-browser-post" });
+    await page.evaluate((posts) => window.BITS_PUBLISHING_UI.update(posts), pendingPosts);
+    assert.match(await page.locator("#blog-deployment-status").textContent(), /1 new, 1 changed, 1 removed/);
+    assert.match(await page.locator("#blog-deployment-details").textContent(), /Still public until deployment removes them: safe-markdown/);
+    assert.match(await page.locator("#blog-deployment-details").textContent(), /scheduled post/);
+    await page.addScriptTag({ path: axePath });
+    const publishingViolations = await page.evaluate(async () => (
+      await axe.run(document.querySelector("#blog-editor"), {
+        runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] },
+      })
+    ).violations.map((violation) => violation.id));
+    assert.deepEqual(publishingViolations, [], "Publishing status accessibility");
+    await page.route("**/blog/content-manifest.json?*", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
+    await page.evaluate((posts) => window.BITS_PUBLISHING_UI.update(posts), savedPosts);
+    assert.equal(await page.locator("#blog-deployment-status").getAttribute("data-state"), "error");
+    assert.equal(await page.locator("#blog-deployment-refresh").isDisabled(), false);
+    await page.unroute("**/blog/content-manifest.json?*");
+    await page.evaluate((posts) => window.BITS_PUBLISHING_UI.update(posts), savedPosts);
+    assert.equal(await page.locator("#blog-deployment-status").getAttribute("data-state"), "success");
+    await page.evaluate(() => window.BITS_PUBLISHING_UI.clear());
+    assert.equal(await page.locator("#blog-deployment-refresh").isDisabled(), true);
+    assert.equal(await page.locator("#blog-deployment-details li").count(), 0);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), "Publishing status must not overflow");
+    console.log(`PASS ${width}px read-only publishing status: synchronized, pending, scheduled, error/retry, and sign-out reset`);
     const runtimeScript = /\/script\.js(?:\?|$)/;
     await page.route(runtimeScript, (route) => route.abort("failed"));
     await page.goto(`${server.origin}/online/`, { waitUntil: "domcontentloaded" });

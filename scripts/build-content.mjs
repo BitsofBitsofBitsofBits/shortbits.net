@@ -2,6 +2,9 @@ import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import vm from "node:vm";
+import publishing from "../publishing-status.js";
+
+export const normalizePosts = publishing.normalizePosts;
 
 const defaultRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const siteUrl = "https://www.shortbits.net";
@@ -107,29 +110,6 @@ export async function fetchPosts(config, { fetchImpl = fetch, now = new Date() }
     posts.push(...page);
   }
   return normalizePosts(posts, now);
-}
-
-export function normalizePosts(posts, now = new Date()) {
-  if (!Array.isArray(posts)) throw new Error("Content build: published-post response was not an array.");
-  const slugs = new Set();
-  return posts.filter((post) => {
-    if (!post || typeof post !== "object" || typeof post.published !== "boolean") {
-      throw new Error("Content build: invalid post publication state.");
-    }
-    if (!post.published) return false;
-    if (!Number.isFinite(Date.parse(post.published_at))) throw new Error("Content build: invalid publication date.");
-    return Date.parse(post.published_at) <= now.getTime();
-  }).map((post) => {
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug) || post.slug.length > 100 || slugs.has(post.slug)) {
-      throw new Error("Content build: invalid or duplicate post slug.");
-    }
-    for (const key of ["title", "excerpt", "body_markdown"]) {
-      if (typeof post[key] !== "string" || !post[key].trim()) throw new Error(`Content build: invalid post ${key}.`);
-    }
-    if (!Number.isFinite(Date.parse(post.published_at))) throw new Error("Content build: invalid publication date.");
-    slugs.add(post.slug);
-    return post;
-  }).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at) || a.slug.localeCompare(b.slug));
 }
 
 const dateLabel = (value) => new Date(value).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
@@ -239,6 +219,7 @@ export async function buildContent({ root = defaultRoot, input, env = process.en
     : await fetchPosts(await publicConfig(root, env), { fetchImpl, now });
   const renderer = markdownRenderer(await readFile(join(root, "markdown.js"), "utf8"));
   const articles = posts.map((post) => [post.slug, renderArticle(post, renderer)]);
+  const manifest = await publishing.snapshot(posts, now);
   const archiveFile = join(root, "blog", "index.html");
   const archive = await readFile(archiveFile, "utf8");
   if (!archive.includes("<!-- GENERATED_POSTS_START -->") || !archive.includes("<!-- GENERATED_POSTS_END -->")) {
@@ -258,6 +239,7 @@ export async function buildContent({ root = defaultRoot, input, env = process.en
   }
   await writeFile(archiveFile, updatedArchive);
   await writeFile(join(root, "blog", "feed.xml"), renderFeed(posts));
+  await writeFile(join(root, "blog", "content-manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   await writeFile(sitemapFile, sitemap);
   console.log(`Built ${posts.length} static blog article(s), archive, RSS feed, and sitemap.`);
   return posts.length;

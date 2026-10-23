@@ -1,0 +1,90 @@
+name: Monitor public site
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      expected-commit:
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: public-site-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check public pages and integrations
+        id: health
+        env:
+          SITE_EXPECTED_COMMIT: ${{ inputs.expected-commit }}
+        run: node scripts/monitor-site.mjs --output health-report.json
+
+      - name: Publish health summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f health-report.json.md ]; then
+            cat health-report.json.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Health monitor could not produce a report. Inspect the workflow logs." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Update outage issue or close it on recovery
+        if: always() && steps.health.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEALTH_OUTCOME: ${{ steps.health.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='<!-- shortbits-site-monitor -->'
+          issue="$(gh issue list --state open --app github-actions --search 'Site monitor in:title' --limit 100 --json number,body --jq '.[] | select(.body | contains("<!-- shortbits-site-monitor -->")) | .number' | head -n 1)"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          if [ "$HEALTH_OUTCOME" = "success" ]; then
+            if [ -n "$issue" ]; then
+              gh issue close "$issue" --comment "Public health checks have recovered. Verified by ${run_url}."
+            fi
+          else
+            printf '%s\n\nPublic health checks failed. Latest run: %s\n\n' "$marker" "$run_url" > /tmp/site-monitor-issue.md
+            if [ -f health-report.json.md ]; then
+              cat health-report.json.md >> /tmp/site-monitor-issue.md
+            else
+              printf '%s\n' 'No report was produced; inspect the linked workflow logs.' >> /tmp/site-monitor-issue.md
+            fi
+            if [ -n "$issue" ]; then
+              gh issue edit "$issue" --body-file /tmp/site-monitor-issue.md
+            else
+              gh issue create --title "[Site monitor] Public health checks failing" --body-file /tmp/site-monitor-issue.md
+            fi
+          fi
+
+      - name: Retain sanitized health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-site-health
+          path: |
+            health-report.json
+            health-report.json.md
+          if-no-files-found: warn
+          retention-days: 14

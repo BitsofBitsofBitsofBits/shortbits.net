@@ -113,6 +113,10 @@ test("build writes persistent outputs, removes stale articles, and never overwri
     const archive = await readFile(join(output, "blog", "index.html"), "utf8");
     const sitemap = await readFile(join(output, "sitemap.xml"), "utf8");
     const feed = await readFile(join(output, "blog", "feed.xml"), "utf8");
+    const manifest = JSON.parse(await readFile(join(output, "blog", "content-manifest.json"), "utf8"));
+    assert.equal(manifest.generatedAt, now.toISOString());
+    assert.deepEqual(manifest.posts.map((post) => post.slug), ["first-lab-notes", "safe-markdown"]);
+    assert.doesNotMatch(JSON.stringify(manifest), /private-draft|future-post|body_markdown/);
     await buildContent({ root: output, input: fixturePath, now });
     assert.equal(await readFile(join(output, "blog", "index.html"), "utf8"), archive);
     assert.equal(await readFile(join(output, "sitemap.xml"), "utf8"), sitemap);

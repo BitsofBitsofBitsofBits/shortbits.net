@@ -4,6 +4,7 @@ import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { build, transform } from "esbuild";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export async function filesUnder(directory) {
@@ -53,6 +54,54 @@ export async function compressAssets(directory) {
   }
 }
 
+export async function optimizeStyles(directory) {
+  const onlinePath = join(directory, "online", "index.html");
+  const onlineHtml = await readFile(onlinePath, "utf8");
+  const stylesheetPattern = /<link rel="stylesheet" href="([^"]+)">/g;
+  const onlineSheets = [...onlineHtml.matchAll(stylesheetPattern)];
+  if (!onlineSheets.length) throw new Error("The online page has no stylesheets to optimize.");
+  const imports = onlineSheets.map(([, href]) => {
+    if (!href.startsWith("/") || href.startsWith("//")) {
+      throw new Error(`Expected a local online stylesheet, received ${href}.`);
+    }
+    return `@import ${JSON.stringify(href.split("?")[0].slice(1))};`;
+  }).join("\n");
+  const bundled = await build({
+    stdin: { contents: imports, loader: "css", resolveDir: directory },
+    bundle: true,
+    minify: true,
+    write: false,
+    outfile: join(directory, "online", "site.css"),
+    target: ["chrome105", "firefox102", "safari15.6"],
+    logLevel: "silent",
+  });
+  if (bundled.outputFiles.length !== 1) throw new Error("Online CSS optimization produced unexpected assets.");
+  await writeFile(join(directory, "online", "site.css"), bundled.outputFiles[0].contents);
+  let first = true;
+  await writeFile(onlinePath, onlineHtml.replace(stylesheetPattern, () => {
+    if (!first) return "";
+    first = false;
+    return '<link rel="stylesheet" href="/online/site.css">';
+  }));
+
+  for (const file of (await filesUnder(directory)).filter((path) => path.endsWith(".css"))) {
+    const source = await readFile(file, "utf8");
+    const result = await transform(source, {
+      loader: "css", minify: true, target: ["chrome105", "firefox102", "safari15.6"],
+      sourcefile: file,
+    });
+    await writeFile(file, result.code);
+  }
+  const resumePath = join(directory, "professional", "resume", "index.html");
+  const resumeHtml = await readFile(resumePath, "utf8");
+  const resumeCss = await readFile(join(directory, "professional", "resume.css"), "utf8");
+  if (Buffer.byteLength(resumeCss) > 8192) throw new Error("Résumé CSS exceeds the 8 KiB inline budget.");
+  const resumeSheet = /<link rel="stylesheet" href="\/professional\/resume\.css(?:\?[^"]*)?">/;
+  if (!resumeSheet.test(resumeHtml)) throw new Error("Unable to locate the résumé stylesheet.");
+  await writeFile(resumePath, resumeHtml.replace(resumeSheet,
+    `<style data-resume-styles>${resumeCss.replace(/<\/style/gi, "<\\/style")}</style>`));
+}
+
 export async function buildSite(output, contentInput) {
   const destination = resolve(output);
   if (destination === root || root.startsWith(`${destination}\\`) || root.startsWith(`${destination}/`)) {
@@ -76,6 +125,7 @@ export async function buildSite(output, contentInput) {
   const generation = spawnSync(process.execPath, argumentsList, { stdio: "inherit" });
   if (generation.error) throw generation.error;
   if (generation.status !== 0) throw new Error(`Content generation failed (exit ${generation.status}).`);
+  await optimizeStyles(destination);
   const version = await versionAssets(destination);
   await compressAssets(destination);
   console.log(`Built static site at ${destination} with asset version ${version}.`);

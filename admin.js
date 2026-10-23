@@ -2490,24 +2490,30 @@ function createBlogPostButton(post) {
   return button;
 }
 
+let blogPostsLoadSequence = 0;
 async function loadBlogPosts(preferredId = "") {
+  const request = ++blogPostsLoadSequence;
   setAdminStatus(blogAdminStatus, "Loading blog posts...");
-  const { data, error } = await adminClient
-    .from("site_blog_posts")
-    .select(
-      "id, slug, title, excerpt, body_markdown, published, published_at, created_at, updated_at",
-    )
-    .order("updated_at", { ascending: false });
-
-  if (error) {
-    console.error("Unable to load blog posts:", error);
-    setAdminStatus(
-      blogAdminStatus,
-      `Blog posts failed to load: ${error.message}`,
-      "error",
-    );
-    return false;
+  window.BITS_PUBLISHING_UI.clear("Loading saved posts before comparing deployment status...");
+  const data = [];
+  for (;;) {
+    const { data: page, error } = await adminClient
+      .from("site_blog_posts")
+      .select("id, slug, title, excerpt, body_markdown, published, published_at, created_at, updated_at")
+      .order("updated_at", { ascending: false })
+      .order("id")
+      .range(data.length, data.length + 499);
+    if (request !== blogPostsLoadSequence) return false;
+    if (error) {
+      console.error("Unable to load blog posts:", error);
+      setAdminStatus(blogAdminStatus, `Blog posts failed to load: ${error.message}`, "error");
+      window.BITS_PUBLISHING_UI.clear(`Cannot compare deployment status: blog posts failed to load. ${error.message}`, "error", true);
+      return false;
+    }
+    data.push(...page);
+    if (page.length < 500) break;
   }
+  void window.BITS_PUBLISHING_UI.update(data);
 
   blogAdminList.replaceChildren(...data.map(createBlogPostButton));
   if (data.length === 0) {
@@ -2594,6 +2600,8 @@ async function showInbox() {
 }
 
 function showLogin() {
+  blogPostsLoadSequence += 1;
+  window.BITS_PUBLISHING_UI.clear();
   inboxView.hidden = true;
   loginView.hidden = false;
   loginForm.reset();
@@ -2616,6 +2624,7 @@ try {
 }
 
 if (adminClient) {
+  document.querySelector("#blog-deployment-refresh").addEventListener("click", () => loadBlogPosts());
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(loginForm);

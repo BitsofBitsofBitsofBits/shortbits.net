@@ -17,6 +17,8 @@
     <script src="/seasonal-calendar.js?v=calendar-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
     <script src="/admin-shell.js?v=admin-shell-1" defer></script>
+    <script src="/publishing-status.js?v=publishing-1" defer></script>
+    <script src="/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/admin.js?v=admin-30" defer></script>
     <script src="/admin-backup.js?v=backup-1" defer></script>
   </head>
@@ -368,6 +370,12 @@
             <span>MARKDOWN PUBLISHING CONSOLE</span>
           </div>
           <p class="admin-subtitle">Publishing saves to the live database; it does not trigger a site rebuild. New posts remain readable through the live blog archive and legacy post links. Run a deployment to generate or refresh static articles, search-engine metadata, the RSS feed, and sitemap. Scheduled posts enter those files only on a deployment after their publish time. Unpublishing or deleting a post hides it from live queries immediately, but its existing static page and feed entry remain public until the next deployment removes them.</p>
+          <div class="repeatable-admin-actions">
+            <button id="blog-deployment-refresh" type="button" disabled>Check deployment status</button>
+            <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net/actions/workflows/site.yml" target="_blank" rel="noopener noreferrer">Deployment workflow</a>
+          </div>
+          <p id="blog-deployment-status" class="form-status" role="status" aria-live="polite">Sign in to compare saved posts with the deployed site.</p>
+          <ul id="blog-deployment-details" class="admin-subtitle"></ul>
           <div class="blog-admin-layout">
             <aside class="blog-admin-posts" aria-labelledby="blog-admin-posts-heading">
               <div class="repeatable-admin-actions">

@@ -960,11 +960,17 @@ function applyTextFormat(element, format = {}) {
   });
 }
 
-const graphemeSegmenter = typeof Intl.Segmenter === "function"
-  ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
-  : null;
+let graphemeSegmenter;
 
 function splitVisibleCharacters(text) {
+  if (/^[\x00-\x7F]*$/.test(text)) {
+    return Array.from(text);
+  }
+  if (graphemeSegmenter === undefined) {
+    graphemeSegmenter = typeof Intl.Segmenter === "function"
+      ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+      : null;
+  }
   return graphemeSegmenter
     ? Array.from(graphemeSegmenter.segment(text), ({ segment }) => segment)
     : Array.from(text);
@@ -1366,6 +1372,9 @@ function recordControl(name) {
 
 function setFakeDesktopVisible(visible) {
   fakeDesktop.hidden = !visible;
+  if (visible) {
+    updateFakeDesktopClock();
+  }
   document.body.classList.toggle("has-fake-desktop", visible);
   if (!visible) {
     closePlayingDeadProcess();
@@ -1903,13 +1912,18 @@ function inspectFakeDesktopArg(source) {
   }
 }
 
+let fakeDesktopClockFormatter;
+
 function updateFakeDesktopClock() {
+  if (fakeDesktop.hidden || document.hidden) {
+    return;
+  }
   const now = new Date();
   fakeDesktopClock.dateTime = now.toISOString();
-  fakeDesktopClock.textContent = now.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
+  fakeDesktopClockFormatter ??= new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit", minute: "2-digit",
   });
+  fakeDesktopClock.textContent = fakeDesktopClockFormatter.format(now);
 }
 
 fakeDesktopRestore.addEventListener("click", restoreInterfaceFromDesktop);

@@ -528,6 +528,33 @@ and audit runtime errors fail the check. The pre-deployment check blocks
 deployment; a failing post-deployment check marks the workflow unsuccessful
 but does not automatically roll back the deployed site.
 
+### Public health monitoring
+
+`Monitor public site` runs after deployment and approximately every 30 minutes
+through GitHub Actions (scheduled runs can be delayed by GitHub). It also supports
+manual dispatch. The deployment check requires the live build to match the
+deployed commit. Public probes check the main pages and their linked CSS/JS,
+build metadata, the publishing snapshot, RSS consistency, up to three static
+articles, Spotify and Discord HTTP responses (including stale-data and CORS
+failures), and the contact endpoint's OPTIONS preflight.
+
+Checks retry once for transient failures and have a bounded overall request
+deadline. They never submit contact messages, solve Turnstile, send test emails,
+authenticate as an admin, or modify published content. They do not prove email
+delivery or browser/WebSocket functionality; browser smoke and performance
+checks remain separate.
+
+Failures open one `[Site monitor]` GitHub issue, update that issue while the
+outage continues, and close it with a recovery comment once checks pass.
+Subscribe to the issue or configure repository issue notifications to receive
+alerts; no external alert service is required. The workflow needs Issues enabled
+and `issues: write` permission. Health summaries and sanitized reports (not
+integration response bodies, activity details, or credentials) are retained for
+14 days.
+
+To run the same read-only production probes locally:
+`node scripts/monitor-site.mjs --output <report.json>`.
+
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static
 site files from `.site-build`. It mirrors only the generated
@@ -554,6 +581,17 @@ scoped passwordless `sudo` access to `caddy validate`,
 
 ### Publishing, discovery, and recovery
 
+- The Admin blog editor compares saved posts with `/blog/content-manifest.json`,
+  generated from the same public posts as static articles, RSS, and the sitemap.
+  It shows new/changed articles, articles still public until deployment removes
+  them, and future scheduled posts. **Check deployment status** reloads saved
+  database content and bypasses the snapshot cache; saves and deletions also
+  refresh the comparison. Unsaved edits are excluded. Scheduled posts require
+  another check and a deployment after their publication time. Missing or
+  invalid snapshots show an explicit unavailable state, never "in sync."
+  The public manifest contains only public slugs and SHA-256 fingerprints, not
+  drafts, future post content, or admin credentials. This status does not trigger
+  deployments; the editor links to the deployment workflow.
 - `/projects/` contains factual case studies for the home lab and this site.
   These describe implemented capabilities, not independently measured business
   outcomes.
@@ -614,6 +652,13 @@ URLs, and writes Brotli/gzip sidecars. Public Supabase configuration is read fro
 must be public credentials, never service-role secrets. Failed content fetches
 fail the build rather than deploying an empty archive.
 
+Styles are minified with esbuild only in the staged output; source stylesheets
+remain unchanged for authoring. The online page's four shared stylesheets are
+bundled in their original cascade order into one request. The printable
+resume's minified CSS is inlined (including print rules), with an 8 KiB build
+limit to prevent unbounded HTML growth. Both validation and deployment install
+the pinned build dependencies with `npm ci --ignore-scripts`.
+
 For an offline content build, use
 `node scripts/build-site.mjs --output <empty-directory> --input scripts/fixtures/blog-posts.json`.
 Pass that directory to validation, browser smoke, and `scripts/audit-site.mjs`
@@ -623,6 +668,12 @@ with `--root`. On Windows with Edge installed, set
 for Lighthouse. Browser smoke uses mocked live services and never sends
 messages, publishes content, or modifies production data; real third-party
 integrations still require deployment-time verification.
+
+To compare source and optimized online styles across the theme catalog at
+mobile and desktop widths, run
+`node scripts/style-optimization-browser.mjs --root <build-directory>`.
+This offline check waits for experimental layout assets and uses reduced motion
+to avoid differences caused by adaptive frame-rate detection.
 
 The mobile online-page audit also retains its Lighthouse trace and DevTools
 network log in the report artifact to diagnose runner-specific blocking tasks.

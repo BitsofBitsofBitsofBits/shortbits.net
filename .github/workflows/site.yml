@@ -194,6 +194,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install build tools
+        run: npm ci --ignore-scripts
+
       - name: Generate build metadata
         shell: bash
         run: |
@@ -280,6 +283,16 @@ jobs:
               exit 1; \
             fi; \
             rm -f /tmp/Caddyfile.original /tmp/Caddyfile.candidate"
+
+  health:
+    if: always() && needs.deploy.result == 'success'
+    needs: deploy
+    permissions:
+      contents: read
+      issues: write
+    uses: ./.github/workflows/monitor.yml
+    with:
+      expected-commit: ${{ github.sha }}
 
   lighthouse:
     if: always() && needs.deploy.result == 'success'

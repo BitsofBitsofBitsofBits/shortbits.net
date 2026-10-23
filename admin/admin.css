@@ -1035,6 +1035,10 @@ body.admin-center.ac-panel-open {
   display: none;
 }
 
+.admin-center .form-status[data-state="warning"] {
+  color: var(--ac-warning);
+}
+
 .admin-center .form-status[data-state="error"] {
   color: var(--ac-danger);
 }
