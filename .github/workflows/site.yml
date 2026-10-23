@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine
@@ -59,14 +59,20 @@ jobs:
       - name: Validate generated pages and assets
         run: node scripts/validate-site.mjs --root .site-build
 
-      - name: Install test browser
-        run: npx --no-install playwright install --with-deps chromium
-
       - name: Check browser behavior and accessibility
+        env:
+          BITS_BROWSER_CHANNEL: chrome
         run: npm run test:browser
 
       - name: Enforce pre-deployment performance budgets
+        id: performance
         run: npm run audit
+
+      - name: Profile a failing startup performance check
+        if: failure() && steps.performance.outcome == 'failure'
+        env:
+          BITS_BROWSER_CHANNEL: chrome
+        run: node scripts/profile-startup.mjs
 
       - name: Upload pre-deployment performance reports
         if: always()

@@ -626,3 +626,6 @@ integrations still require deployment-time verification.
 
 The mobile online-page audit also retains its Lighthouse trace and DevTools
 network log in the report artifact to diagnose runner-specific blocking tasks.
+Validation pins Ubuntu 24.04 and uses the runner's preinstalled Chrome for
+browser checks. Failed performance budgets also log a sampled startup CPU
+profile; this diagnostic does not change or bypass the performance gate.
