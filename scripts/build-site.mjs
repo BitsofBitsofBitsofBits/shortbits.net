@@ -28,7 +28,7 @@ export async function versionAssets(directory) {
   for (const file of files.filter((path) => /\.(?:html|css|js)$/.test(path))) {
     const source = await readFile(file, "utf8");
     const updated = source.replace(
-      /(?<=[="'`(])\/(?!\/)[^"'`\s<>?#]*?\.(?:css|js)(?:\?[^"'`\s<>#)]*)?/g,
+      /(?<=[="'`(])\/(?!\/)[^"'`\s<>?#]*?\.(?:css|js)(?=[?"'`#)\s]|$)(?:\?[^"'`\s<>#)]*)?/g,
       (url) => {
         const queryIndex = url.indexOf("?");
         const path = queryIndex < 0 ? url : url.slice(0, queryIndex);

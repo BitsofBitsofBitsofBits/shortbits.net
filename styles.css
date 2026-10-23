@@ -3954,7 +3954,8 @@ h1 .dim {
 }
 
 .command-line {
-  min-height: 21px;
+  height: 3.5em;
+  overflow: auto;
   color: var(--ink);
   font-size: 0.75rem;
 }
