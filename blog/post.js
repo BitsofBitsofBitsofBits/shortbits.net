@@ -50,7 +50,9 @@
       document.title = `${post.title} // BitsofBitsofBits`;
       const canonical = document.createElement("link");
       canonical.rel = "canonical";
-      canonical.href = `https://www.shortbits.net/blog/post.html?slug=${encodeURIComponent(post.slug)}`;
+      // Keep this live route for newly published posts and draft-aware legacy
+      // links; the crawlable deployment snapshot lives at the canonical URL.
+      canonical.href = `https://www.shortbits.net/blog/articles/${encodeURIComponent(post.slug)}/`;
       document.head.append(canonical);
       status.hidden = true;
       article.hidden = false;

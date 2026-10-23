@@ -5,6 +5,8 @@ Thumbs.db
 !.env.example
 .vscode/
 node_modules/
+.site-build/
+lighthouse-reports/
 supabase/.temp/
 agents/unraid/config.json
 bitsofbits-achievements.json

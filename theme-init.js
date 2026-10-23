@@ -681,38 +681,40 @@ function applyThemeToDocument(themeId) {
   } else {
     delete root.dataset.themeVariant;
   }
-  for (let index = 0; index < 7; index += 1) {
-    const color = variant?.palette?.[index];
-    const channels = color ? color.slice(1).match(/.{2}/g).map((channel) => Number.parseInt(channel, 16)) : null;
-    ["red", "green", "blue"].forEach((channel, channelIndex) => {
-      const property = `--rgb-palette-${index}-${channel}`;
-      if (channels) {
-        root.style.setProperty(property, channels[channelIndex]);
+  if (variant?.palette || root.style.getPropertyValue("--rgb-edge-colors")) {
+    for (let index = 0; index < 7; index += 1) {
+      const color = variant?.palette?.[index];
+      const channels = color ? color.slice(1).match(/.{2}/g).map((channel) => Number.parseInt(channel, 16)) : null;
+      ["red", "green", "blue"].forEach((channel, channelIndex) => {
+        const property = `--rgb-palette-${index}-${channel}`;
+        if (channels) {
+          root.style.setProperty(property, channels[channelIndex]);
+        } else {
+          root.style.removeProperty(property);
+        }
+        if (index === 0) {
+          if (channels) {
+            root.style.setProperty(`--rgb-accent-${channel}`, channels[channelIndex]);
+          } else {
+            root.style.removeProperty(`--rgb-accent-${channel}`);
+          }
+        }
+      });
+    }
+    if (variant?.palette) {
+      root.style.setProperty("--rgb-edge-colors", [...variant.palette, variant.palette[0]].join(", "));
+    } else {
+      root.style.removeProperty("--rgb-edge-colors");
+    }
+    [0, 2, 4].forEach((paletteIndex, index) => {
+      const property = `--rgb-glow-${index}`;
+      if (variant?.palette) {
+        root.style.setProperty(property, `${variant.palette[paletteIndex]}29`);
       } else {
         root.style.removeProperty(property);
       }
-      if (index === 0) {
-        if (channels) {
-          root.style.setProperty(`--rgb-accent-${channel}`, channels[channelIndex]);
-        } else {
-          root.style.removeProperty(`--rgb-accent-${channel}`);
-        }
-      }
     });
   }
-  if (variant?.palette) {
-    root.style.setProperty("--rgb-edge-colors", [...variant.palette, variant.palette[0]].join(", "));
-  } else {
-    root.style.removeProperty("--rgb-edge-colors");
-  }
-  [0, 2, 4].forEach((paletteIndex, index) => {
-    const property = `--rgb-glow-${index}`;
-    if (variant?.palette) {
-      root.style.setProperty(property, `${variant.palette[paletteIndex]}29`);
-    } else {
-      root.style.removeProperty(property);
-    }
-  });
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
     themeColorMeta.content = scheme === "light"
@@ -1002,6 +1004,23 @@ document.documentElement.dataset.contrast =
   localStorage.getItem("bits-contrast") === "high" ? "high" : "default";
 document.documentElement.dataset.effects =
   localStorage.getItem("bits-effects") === "off" ? "off" : "on";
+if (document.documentElement.dataset.page === "online") {
+  let runtimeLite = false;
+  try {
+    runtimeLite = sessionStorage.getItem("bits-runtime-performance-lite") === "true";
+  } catch {
+    // The initial viewport/hardware decision still works without session storage.
+  }
+  const device = typeof navigator === "undefined" ? {} : navigator;
+  const initialPerformanceLite = window.matchMedia("(max-width: 700px), (prefers-reduced-motion: reduce)").matches
+    || document.documentElement.dataset.motion === "reduced"
+    || (device.deviceMemory ?? 8) <= 4
+    || (device.hardwareConcurrency ?? 8) <= 4
+    || device.connection?.saveData === true
+    || runtimeLite;
+  document.documentElement.classList.toggle("is-performance-lite", initialPerformanceLite);
+  document.documentElement.dataset.performanceProfile = initialPerformanceLite ? "lite" : "full";
+}
 if (
   legacyRgbMode
   || !storedInterfaceThemeId

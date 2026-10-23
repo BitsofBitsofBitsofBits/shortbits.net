@@ -1,0 +1,12 @@
+.contact-turnstile-retry {
+  min-height: 44px;
+  margin-top: .6rem;
+  padding: .6rem .85rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  font: inherit;
+  cursor: pointer;
+}
+.contact-turnstile-retry:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.contact-turnstile-retry[hidden] { display: none; }

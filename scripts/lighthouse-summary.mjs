@@ -1,13 +1,22 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { checkPerformanceBudget, requiredReports } from "./performance-budgets.mjs";
 
 // Prints category scores and failing audits from Lighthouse JSON reports in a directory.
 const reportDir = process.argv[2] ?? "lighthouse-reports";
 const files = (await readdir(reportDir)).filter((file) => file.endsWith(".json")).sort();
 const summary = [];
+const failures = [];
+const enforce = process.argv.includes("--enforce");
+if (enforce) {
+  for (const name of requiredReports) {
+    if (!files.includes(`${name}.json`)) failures.push(`Missing required Lighthouse report: ${name}`);
+  }
+}
 
 for (const file of files) {
   const report = JSON.parse(await readFile(join(reportDir, file), "utf8"));
+  if (enforce) failures.push(...checkPerformanceBudget(report, file.replace(/\.json$/, "")));
   const scores = Object.fromEntries(
     Object.values(report.categories).map((category) => [
       category.id,
@@ -55,3 +64,4 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   const { appendFile } = await import("node:fs/promises");
   await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Lighthouse\n\n${table}\n`);
 }
+if (failures.length) throw new Error(`Performance budgets failed:\n${failures.join("\n")}`);

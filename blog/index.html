@@ -6,13 +6,14 @@
     <meta name="description" content="Posts and longer-form Bits from BitsofBitsofBits.">
     <meta name="theme-color" content="#020806">
     <link rel="canonical" href="https://www.shortbits.net/blog/">
+    <link rel="alternate" type="application/rss+xml" title="BLOG.LOG RSS" href="/blog/feed.xml">
     <title>BitsofBitsofBits // BLOG.LOG</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/seasonal-calendar.js?v=calendar-1"></script>
     <script src="/theme-init.js?v=theme-25"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-132">
     <script src="/supabase-config.js" defer></script>
-    <script src="/blog/blog.js?v=blog-1" defer></script>
+    <script src="/blog/blog.js?v=blog-2" defer></script>
     <script src="/site-config.js?v=site-config-3" defer></script>
     <script src="/cf-analytics.js?v=cf-analytics-2" defer></script>
   </head>
@@ -26,18 +27,22 @@
           <p class="system-kicker">PUBLIC_ARCHIVE // LONGER BITS</p>
           <h1>BLOG.LOG</h1>
           <p>Dispatches, project notes, and whatever escaped the terminal.</p>
+          <p><a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/projects/">Project case studies</a></p>
         </div>
         <a href="/online/">&larr; RETURN_HOME</a>
       </header>
       <section aria-labelledby="blog-posts-heading">
         <div class="section-label">
           <h2 id="blog-posts-heading">PUBLISHED_POSTS</h2>
-          <span id="blog-post-count">LOADING</span>
+          <span id="blog-post-count">0 POSTS</span>
         </div>
-        <p id="blog-status" class="blog-status" role="status" aria-live="polite">
-          Querying the archive...
-        </p>
-        <div id="blog-post-list" class="blog-post-list"></div>
+        <label for="blog-search">Search titles and excerpts</label>
+        <input id="blog-search" type="search" placeholder="Search posts" aria-controls="blog-post-list">
+        <!-- GENERATED_POSTS_START -->
+        <p id="blog-status" class="blog-status" role="status" aria-live="polite">No posts were published at the latest deployment.</p>
+        <div id="blog-post-list" class="blog-post-list" data-static-slugs="[]"></div>
+        <!-- GENERATED_POSTS_END -->
+        <noscript><p>This archive reflects the latest deployment. JavaScript can load newer published posts before the next rebuild.</p></noscript>
       </section>
     </main>
   </body>

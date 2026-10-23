@@ -1,8 +1,11 @@
 const bootSessionKey = "bits-boot-seen-v1";
-let shouldPlayBoot = true;
+const automaticBootAllowed = !window.matchMedia(
+  "(max-width: 720px), (pointer: coarse), (prefers-reduced-motion: reduce)",
+).matches && document.documentElement.dataset.motion !== "reduced";
+let shouldPlayBoot = automaticBootAllowed;
 
 try {
-  shouldPlayBoot = sessionStorage.getItem(bootSessionKey) !== "true";
+  shouldPlayBoot = automaticBootAllowed && sessionStorage.getItem(bootSessionKey) !== "true";
 } catch (error) {
   console.warn("Unable to read boot session state:", error);
 }
@@ -14,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const bootLog = document.querySelector("#boot-log");
   const bootProgressBar = document.querySelector("#boot-progress-bar");
   const bootSkip = document.querySelector("#boot-skip");
+  if (!bootScreen || !bootLog || !bootProgressBar || !bootSkip) {
+    document.documentElement.dataset.boot = "complete";
+    return;
+  }
   const bootBackgroundElements = Array.from(
     document.body.children,
   ).filter((element) => (
@@ -27,11 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "SYNC social_nodes .......... CONNECTED",
     "START presence.exe ......... READY",
   ];
-  const seasonalProfile = window.BITS_SEASONAL_PROFILE;
-  const seasonalBootSteps = seasonalProfile?.initialBootSteps ?? [];
-  const bootSteps = seasonalProfile?.mode === "exclusive"
-    ? seasonalBootSteps
-    : [...baseBootSteps, ...seasonalBootSteps];
   const timers = [];
   let finished = false;
 
@@ -70,6 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function playBoot() {
+    const seasonalProfile = window.BITS_SEASONAL_PROFILE;
+    const seasonalBootSteps = seasonalProfile?.initialBootSteps ?? [];
+    const bootSteps = seasonalProfile?.mode === "exclusive"
+      ? seasonalBootSteps
+      : [...baseBootSteps, ...seasonalBootSteps];
     timers.splice(0).forEach((timer) => window.clearTimeout(timer));
     finished = false;
     document.documentElement.dataset.boot = "pending";
@@ -96,17 +103,34 @@ document.addEventListener("DOMContentLoaded", () => {
         bootLog.append(item);
         bootProgressBar.style.width = `${Math.round(((index + 1) / bootSteps.length) * 100)}%`;
         if (index === bootSteps.length - 1) {
-          timers.push(window.setTimeout(finishBoot, 450));
+          timers.push(window.setTimeout(finishBoot, 150));
         }
-      }, index * 360));
+      }, index * Math.min(120, 750 / Math.max(bootSteps.length - 1, 1))));
     });
+    if (bootSteps.length === 0) {
+      finishBoot();
+    }
   }
 
   bootSkip.addEventListener("click", finishBoot);
   window.BITS_BOOT = { play: playBoot, skip: finishBoot };
 
   if (shouldPlayBoot) {
-    playBoot();
+    if (document.documentElement.dataset.runtime === "pending") {
+      bootScreen.hidden = false;
+      bootBackgroundElements.forEach((element) => {
+        element.inert = true;
+      });
+      bootSkip.focus();
+      window.addEventListener("keydown", handleBootKeydown, true);
+      window.addEventListener("bits:runtime-ready", () => {
+        if (!finished) {
+          playBoot();
+        }
+      }, { once: true });
+    } else {
+      playBoot();
+    }
   } else {
     finishBoot();
   }

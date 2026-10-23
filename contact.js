@@ -26,6 +26,11 @@ function getTurnstileSiteKey() {
 let turnstileWidgetId = null;
 let turnstileScheme = "";
 let turnstileFrame = null;
+let turnstileScript = null;
+let turnstileLoadTimer;
+let turnstileLoading = false;
+let turnstileObserver;
+let turnstileThemeObserver;
 
 function setContactStatus(message, state = "") {
   contactStatus.textContent = message;
@@ -62,14 +67,14 @@ const turnstileStatusCopy = professionalContact
       interactive: "Please confirm you're human below.",
       verified: "Verified",
       expired: "Verification expired. Checking again...",
-      error: "Verification couldn't load. Refresh the page to try again.",
+      error: "Verification couldn't load. Try verification again below.",
     }
   : {
       pending: "SCANNING_FOR_HUMANS...",
       interactive: "MANUAL CHECK REQUIRED // CONFIRM BELOW",
       verified: "HUMAN CONFIRMED // CHANNEL OPEN",
       expired: "TOKEN EXPIRED // RESCANNING...",
-      error: "VERIFICATION OFFLINE // REFRESH TO RETRY",
+      error: "VERIFICATION OFFLINE // RETRY BELOW",
     };
 
 // The Cloudflare box stays collapsed unless it needs a click or has an error.
@@ -80,6 +85,7 @@ function setTurnstileState(state) {
     state !== "interactive" && state !== "error",
   );
   turnstileFrame.querySelector(".contact-turnstile-status").textContent = turnstileStatusCopy[state];
+  turnstileFrame.querySelector(".contact-turnstile-retry").hidden = state !== "error";
 }
 
 function renderTurnstile() {
@@ -98,16 +104,20 @@ function renderTurnstile() {
     action: "contact",
     callback: () => setTurnstileState("verified"),
     "before-interactive-callback": () => setTurnstileState("interactive"),
-    "expired-callback": () => setTurnstileState("expired"),
+    "expired-callback": () => {
+      setTurnstileState("expired");
+      resetTurnstile();
+    },
     "error-callback": () => setTurnstileState("error"),
   });
 }
 
 function loadTurnstile() {
   const turnstileSiteKey = getTurnstileSiteKey();
-  if (!turnstileSiteKey) {
+  if (!turnstileSiteKey || turnstileLoading || turnstileFrame) {
     return;
   }
+  turnstileObserver?.disconnect();
   turnstileFrame = document.createElement("div");
   turnstileFrame.className = "contact-turnstile";
   const label = document.createElement("span");
@@ -118,30 +128,81 @@ function loadTurnstile() {
   const status = document.createElement("p");
   status.className = "contact-turnstile-status";
   status.setAttribute("aria-live", "polite");
-  turnstileFrame.append(label, status, slot);
+  const retry = document.createElement("button");
+  retry.type = "button";
+  retry.className = "contact-turnstile-retry";
+  retry.textContent = professionalContact ? "Retry verification" : "> RETRY_VERIFICATION";
+  retry.addEventListener("click", startTurnstile);
+  turnstileFrame.append(label, status, slot, retry);
   contactForm.querySelector(".contact-actions")?.before(turnstileFrame);
+  startTurnstile();
+}
 
+function startTurnstile() {
+  if (turnstileLoading) return;
+  setTurnstileState("pending");
+  if (window.turnstile) {
+    renderTurnstileSafely();
+    return;
+  }
+  turnstileLoading = true;
+  turnstileScript?.remove();
   window.bitsTurnstileReady = () => {
-    renderTurnstile();
+    window.clearTimeout(turnstileLoadTimer);
+    turnstileLoading = false;
+    renderTurnstileSafely();
     // Theme switches restyle the page; re-render only when light/dark flips.
+    if (turnstileThemeObserver) return;
     let pending = 0;
-    new MutationObserver(() => {
+    turnstileThemeObserver = new MutationObserver(() => {
       window.clearTimeout(pending);
       pending = window.setTimeout(() => {
         if (getTurnstileScheme() !== turnstileScheme) {
-          renderTurnstile();
+          renderTurnstileSafely();
         }
       }, 150);
-    }).observe(document.documentElement, {
+    });
+    turnstileThemeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-interface-theme", "data-color-scheme", "class", "style"],
     });
   };
   const script = document.createElement("script");
+  turnstileScript = script;
   script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=bitsTurnstileReady";
   script.async = true;
   script.defer = true;
+  const failed = () => {
+    if (turnstileScript !== script || !turnstileLoading) return;
+    window.clearTimeout(turnstileLoadTimer);
+    turnstileLoading = false;
+    console.error("Unable to load contact verification.");
+    setTurnstileState("error");
+  };
+  script.addEventListener("error", failed);
+  turnstileLoadTimer = window.setTimeout(failed, 20_000);
   document.head.append(script);
+}
+
+function renderTurnstileSafely() {
+  try {
+    renderTurnstile();
+  } catch (error) {
+    console.error("Unable to render contact verification:", error);
+    turnstileWidgetId = null;
+    setTurnstileState("error");
+  }
+}
+
+function prepareTurnstile() {
+  contactForm.addEventListener("focusin", loadTurnstile, { once: true });
+  if ("IntersectionObserver" in window) {
+    turnstileObserver = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadTurnstile();
+    }, { rootMargin: "300px" });
+    turnstileObserver.observe(contactForm);
+  }
+  if (contactForm.contains(document.activeElement)) loadTurnstile();
 }
 
 function getTurnstileToken() {
@@ -165,7 +226,7 @@ async function sendContactMessage(payload) {
     headers: { apikey: anonKey, "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (response.status !== 404) {
+  if (response.status !== 404 || getTurnstileSiteKey()) {
     const result = await response.json().catch(() => ({}));
     return { ok: response.ok, status: response.status, error: result.error, emailDelivery: result.emailDelivery };
   }
@@ -213,6 +274,7 @@ contactForm.addEventListener("submit", async (event) => {
 
   const turnstileToken = getTurnstileToken();
   if (getTurnstileSiteKey() && !turnstileToken) {
+    loadTurnstile();
     setContactStatus(contactCopy.verify, "error");
     return;
   }
@@ -263,5 +325,9 @@ contactForm.addEventListener("submit", async (event) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", loadTurnstile);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", prepareTurnstile, { once: true });
+} else {
+  prepareTurnstile();
+}
 contactSubmit.disabled = false;

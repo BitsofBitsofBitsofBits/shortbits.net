@@ -72,6 +72,7 @@
     { route: "arcade", sourceId: "arcade-editor", label: "Arcade", group: "community", icon: "trophy", description: "Configure leaderboards and moderate public scores.", keywords: "scores leaderboard games" },
     { route: "pronouns", sourceId: "pronoun-editor", label: "Pronouns", group: "community", icon: "person", description: "Edit the public identity reference.", keywords: "identity profile" },
     { route: "shortbits", sourceId: "short-links-editor", label: "ShortBits", group: "tools", icon: "link", description: "Create and manage tiny Bits of the internet.", keywords: "short links urls redirects" },
+    { route: "backups", sourceId: "backup-editor", label: "Content backups", group: "tools", icon: "upload", description: "Export editorial content and restore a saved backup.", keywords: "backup restore export import drafts recovery" },
   ];
   const modulesByRoute = new Map(modules.map((module) => [module.route, module]));
   const navItems = new Map();

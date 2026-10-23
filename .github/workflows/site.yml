@@ -44,17 +44,38 @@ jobs:
         shell: bash
         run: find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
 
+      - name: Install validation tools
+        run: npm ci --ignore-scripts
+
       - name: Validate site assets
         run: node scripts/validate-site.mjs
 
-      - name: Test seasonal themes and effects
-        run: node --test scripts/holiday-themes.test.mjs scripts/seasonal-messages.test.mjs
+      - name: Test site, publishing, backup transactions, and integrations
+        run: npm test
 
-      - name: Test Unraid collector
-        run: node --test agents/unraid/collector.test.mjs
+      - name: Build offline validation site
+        run: node scripts/build-site.mjs --input scripts/fixtures/blog-posts.json
 
-      - name: Test contact email delivery
-        run: node --test supabase/functions/contact-message/contact.test.mjs
+      - name: Validate generated pages and assets
+        run: node scripts/validate-site.mjs --root .site-build
+
+      - name: Install test browser
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Check browser behavior and accessibility
+        run: npm run test:browser
+
+      - name: Enforce pre-deployment performance budgets
+        run: npm run audit
+
+      - name: Upload pre-deployment performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-lighthouse-reports
+          path: lighthouse-reports
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Test NAS ingestion and desktop compatibility
         env:
@@ -162,6 +183,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Generate build metadata
         shell: bash
         run: |
@@ -184,6 +210,12 @@ jobs:
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      - name: Build published content and versioned assets
+        run: node scripts/build-site.mjs
+
+      - name: Validate production build
+        run: node scripts/validate-site.mjs --root .site-build
+
       - name: Deploy static site
         shell: bash
         env:
@@ -197,28 +229,17 @@ jobs:
             --compress \
             --chmod=D755,F644 \
             -e "ssh -p ${DEPLOY_PORT}" \
-            404.html \
-            admin.html \
-            admin \
-            bsod-classic.css \
-            build-info.json \
-            chooser.css \
-            index.html \
-            ./*.js \
-            robots.txt \
-            sitemap.xml \
-            source.html \
-            styles.css \
-            useless.html \
-            blog \
-            boot \
-            layouts \
-            online \
-            professional \
-            images \
+            .site-build/ \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/"
+          # This generated-only directory must mirror the published set so removed
+          # or unpublished posts do not leave stale public HTML behind.
+          rsync \
+            --archive --checksum --compress --delete --chmod=D755,F644 \
+            -e "ssh -p ${DEPLOY_PORT}" \
+            .site-build/blog/articles/ \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/blog/articles/"
 
-      - name: Allow approved ShortBit embeds
+      - name: Configure approved integrations and versioned asset caching
         shell: bash
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -258,7 +279,6 @@ jobs:
     if: always() && needs.deploy.result == 'success'
     needs: deploy
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -277,16 +297,17 @@ jobs:
             for preset in mobile desktop; do
               flags=""
               if [ "$preset" = "desktop" ]; then flags="--preset=desktop"; fi
-              npx --yes lighthouse@12 "https://www.shortbits.net/${page}" $flags \
+              npx --yes lighthouse@13.5.0 "https://www.shortbits.net/${page}" $flags \
                 --only-categories=performance,accessibility,best-practices,seo \
                 --chrome-flags="--headless=new --no-sandbox" \
                 --output=json --output-path="lighthouse-reports/${name}-${preset}.json" \
-                --quiet || echo "::warning::Lighthouse failed for /${page} (${preset})"
+                --quiet || echo "::error::Lighthouse failed for /${page} (${preset})"
             done
           done
-          node scripts/lighthouse-summary.mjs lighthouse-reports
+          node scripts/lighthouse-summary.mjs lighthouse-reports --enforce
 
       - name: Upload Lighthouse reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports

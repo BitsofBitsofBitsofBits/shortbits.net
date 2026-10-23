@@ -517,14 +517,23 @@ The job deploys `contact-message` and then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
 
-After each deploy, the `lighthouse` job audits the chooser, `/online/`,
+Before deployment, the workflow builds an offline fixture site and runs browser
+smoke checks, axe accessibility checks, and mobile/desktop Lighthouse budgets.
+After each deploy, the `lighthouse` job also audits the chooser, `/online/`,
 `/professional/`, and `/professional/resume/` on mobile and desktop. It writes
 a score table to the run summary, logs failing audits, and uploads the JSON
-reports as an artifact. It never blocks a deploy.
+reports as an artifact. Both audit runs require performance >= 90,
+accessibility and SEO = 100, LCP <= 2.5 seconds, and CLS <= 0.1. Missing reports
+and audit runtime errors fail the check. The pre-deployment check blocks
+deployment; a failing post-deployment check marks the workflow unsuccessful
+but does not automatically roll back the deployed site.
 
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static
-site files. It does not delete other files from the production directory.
+site files from `.site-build`. It mirrors only the generated
+`blog/articles/` directory with `rsync --delete`, so unpublished or removed
+articles do not leave public HTML behind. Other production directories are
+not deleted.
 
 The production Caddy server must route missing paths to the themed error page
 while retaining the HTTP 404 status. The active Caddy configuration supplies
@@ -533,10 +542,84 @@ that internal error handling for `/404.html`.
 After deploying the static files, the workflow downloads
 `/etc/caddy/Caddyfile`, updates its quoted Content Security Policy with the
 approved YouTube, Vimeo, Spotify, and Cloudflare Turnstile `frame-src` values
-plus the Cloudflare Web Analytics and Turnstile script and connect origins,
+plus the Cloudflare Web Analytics, Turnstile, and Lanyard WebSocket origins.
+It enables precompressed Brotli/gzip files and year-long immutable caching
+only for existing CSS/JS with a generated 16-hex asset version. It then
 validates the candidate
 configuration, installs it, and reloads Caddy. A failed reload restores the
 original Caddyfile automatically. The deployment user therefore needs narrowly
 scoped passwordless `sudo` access to `caddy validate`,
 `install /tmp/Caddyfile.* /etc/caddy/Caddyfile`, and
 `systemctl reload caddy`.
+
+### Publishing, discovery, and recovery
+
+- `/projects/` contains factual case studies for the home lab and this site.
+  These describe implemented capabilities, not independently measured business
+  outcomes.
+- **Find a Bit** is available in the online site's Tools menu or with
+  `Ctrl+K` / `Cmd+K`. Search windows, pages, settings, and the boot replay action;
+  desktop-only windows are omitted on mobile.
+- Online enhancements initialize after the first contentful paint. Early
+  controls queue with loading feedback; failed initialization shows an explicit
+  retry action instead of leaving apparently functional but inactive controls.
+- Deployment generates static blog articles, article-specific metadata,
+  `/blog/feed.xml`, archive cards, and sitemap entries from published Supabase
+  posts. Newly published posts use the live legacy reader until the next deploy.
+  Edits, scheduling, deletion, and unpublishing require another deploy to update
+  static copies and RSS. Do not treat unpublishing alone as immediate removal of
+  previously deployed public content.
+- The Admin center's **Content backups** page exports 13 editorial tables,
+  including drafts. Restore validates the complete schema and runs atomically
+  under existing authenticated permissions. A safety backup downloads first.
+  The backup migration must be deployed before these actions work.
+- Backups exclude private messages, guestbook entries, leaderboards, analytics,
+  short links, device credentials, live telemetry, and image binaries. Keep
+  backups private, retain separate Supabase database/Storage backups, and reload
+  the editor after restoring. Regenerate static content with a new deploy.
+- Contact verification loads near the form or on focus, with an inline retry
+  action when verification fails. Verification remains required when configured.
+  Discord/Spotify show timestamped last-known states when live updates fail.
+
+The Caddy updater accepts one unambiguous top-level shortbits.net site with a
+root, quoted CSP, and a simple file server. It rejects unsupported custom routing
+instead of silently rewriting it; adapt the server configuration deliberately
+if validation reports an unsupported layout. Never bypass `caddy validate`.
+
+Cloudflare JavaScript Detections can inject inline code that the site's strict
+CSP rejects. Disable that injection for these static pages in Cloudflare, or
+configure compatible nonce handling at the edge. Do not add `unsafe-inline` or
+static hashes for Cloudflare's changing injected code. This dashboard setting
+is separate from the repository and is not changed by deployment.
+
+### Upgrade validation and builds
+
+Use Node 22.19 or later, then:
+
+```powershell
+npm ci --ignore-scripts
+npm test
+npm run validate
+npm run build
+node scripts/validate-site.mjs --root .site-build
+npx playwright install chromium
+npm run test:browser
+npm run audit
+```
+
+`npm run build` requires an empty output directory, copies only public site
+assets, fetches published posts, generates static content, versions local CSS/JS
+URLs, and writes Brotli/gzip sidecars. Public Supabase configuration is read from
+`supabase-config.js`; optional `SUPABASE_URL` and `SUPABASE_ANON_KEY` overrides
+must be public credentials, never service-role secrets. Failed content fetches
+fail the build rather than deploying an empty archive.
+
+For an offline content build, use
+`node scripts/build-site.mjs --output <empty-directory> --input scripts/fixtures/blog-posts.json`.
+Pass that directory to validation, browser smoke, and `scripts/audit-site.mjs`
+with `--root`. On Windows with Edge installed, set
+`$env:BITS_BROWSER_CHANNEL = "msedge"` for browser smoke and
+`$env:CHROME_PATH = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"`
+for Lighthouse. Browser smoke uses mocked live services and never sends
+messages, publishes content, or modifies production data; real third-party
+integrations still require deployment-time verification.

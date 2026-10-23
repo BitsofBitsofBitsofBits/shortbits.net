@@ -29,6 +29,8 @@ let featuredPlaylistsLoadedAt = 0;
 let featuredPlaylistsRequestInFlight = null;
 let featuredTracksLoadedAt = 0;
 let featuredTracksRequestInFlight = null;
+let spotifyLastUpdatedAt = 0;
+let spotifyHasSnapshot = false;
 let playbackClock = {
   durationMs: 0,
   isPlaying: false,
@@ -44,6 +46,13 @@ function formatPlaybackTime(milliseconds) {
 }
 
 function updateSpotifyTimeline() {
+  if (
+    spotifyHasSnapshot
+    && spotifyWidget.dataset.state !== "stale"
+    && Date.now() - spotifyLastUpdatedAt > spotifyRefreshIntervalMs * 2
+  ) {
+    markSpotifyStale();
+  }
   const elapsedSinceSync = playbackClock.isPlaying
     ? performance.now() - playbackClock.synchronizedAt
     : 0;
@@ -58,6 +67,28 @@ function updateSpotifyTimeline() {
   spotifyCurrentTime.textContent = formatPlaybackTime(currentMs);
   spotifyDuration.textContent = formatPlaybackTime(playbackClock.durationMs);
   spotifyProgress.style.setProperty("--spotify-progress", `${progress}%`);
+}
+
+function markSpotifyStale() {
+  if (!spotifyHasSnapshot) return;
+  const progressMs = getSpotifyCurrentTimeMs();
+  playbackClock = {
+    ...playbackClock,
+    isPlaying: false,
+    progressMs,
+    synchronizedAt: performance.now(),
+  };
+  spotifyWidget.dataset.state = "stale";
+  spotifyState.textContent = `LAST KNOWN // ${new Date(spotifyLastUpdatedAt).toLocaleString()}`;
+}
+
+function recordSpotifySnapshot(playback) {
+  const cacheAge = Number(playback.cacheAgeMs);
+  const servedAt = Number(playback.servedAt);
+  spotifyLastUpdatedAt = (
+    Number.isFinite(servedAt) && servedAt > 0 ? Math.min(Date.now(), servedAt) : Date.now()
+  ) - (Number.isFinite(cacheAge) ? Math.max(0, cacheAge) : 0);
+  spotifyHasSnapshot = true;
 }
 
 function getSpotifyCurrentTimeMs() {
@@ -90,13 +121,16 @@ function setSpotifyIdle(message, detail = "Check back when the bits are louder."
 
 function renderSpotifyPlayback(playback) {
   const { item } = playback;
+  recordSpotifySnapshot(playback);
 
   if (!item) {
     setSpotifyIdle("Nothing is playing rn");
+    if (playback.cacheStatus === "stale") markSpotifyStale();
     return;
   }
 
   applySpotifyPlayback(playback, item);
+  if (playback.cacheStatus === "stale") markSpotifyStale();
 }
 
   function isValidHistoryTrack(track) {
@@ -481,10 +515,10 @@ function applySpotifyPlayback(playback, item) {
 
   playbackClock = {
     durationMs: item.durationMs,
-    isPlaying: playback.isPlaying,
+    isPlaying: playback.isPlaying && playback.cacheStatus !== "stale",
     progressMs: Math.min(
       item.durationMs,
-      playback.progressMs + (playback.isPlaying ? effectiveCacheAgeMs : 0),
+      playback.progressMs + (playback.isPlaying && playback.cacheStatus !== "stale" ? effectiveCacheAgeMs : 0),
     ),
     synchronizedAt: performance.now(),
   };
@@ -521,6 +555,7 @@ function renderLanyardSpotify(spotify) {
 function handleLanyardSpotify(event) {
   if (event.detail) {
     lastLanyardSpotifyUpdateAt = Date.now();
+    spotifyLastUpdatedAt = lastLanyardSpotifyUpdateAt;
     hasLanyardSpotifyPlayback = true;
     renderLanyardSpotify(event.detail);
     return;
@@ -543,6 +578,7 @@ function handleLanyardSpotify(event) {
 
 async function refreshSpotifyPlayback() {
   window.clearTimeout(spotifyRefreshTimer);
+  if (document.visibilityState !== "visible") return;
   const requestSequence = ++spotifyRequestSequence;
   let nextRefreshDelayMs = spotifyRefreshIntervalMs;
 
@@ -585,7 +621,9 @@ async function refreshSpotifyPlayback() {
       return;
     }
 
-    if (Date.now() - lastLanyardSpotifyUpdateAt >= lanyardOverrideWindowMs) {
+    const hasRecentLanyard = Date.now() - lastLanyardSpotifyUpdateAt < lanyardOverrideWindowMs;
+    if (!hasRecentLanyard) {
+      hasLanyardSpotifyPlayback = false;
       renderSpotifyPlayback(playback);
     }
     const retryAfterSeconds = Number(playback.retryAfterSeconds);
@@ -601,14 +639,6 @@ async function refreshSpotifyPlayback() {
       console.warn(
         `Spotify is cooling down; showing cached playback and retrying in ${Math.ceil(nextRefreshDelayMs / 1000)} seconds.`,
       );
-      if (playback.item) {
-        spotifyState.textContent = "SIGNAL THROTTLED";
-      } else {
-        setSpotifyIdle(
-          "Spotify is cooling down",
-          "I sent too many bits to it.",
-        );
-      }
     }
   } catch (error) {
     if (requestSequence !== spotifyRequestSequence) {
@@ -619,8 +649,8 @@ async function refreshSpotifyPlayback() {
       console.warn(
         `Spotify rate limit reached; retrying in ${Math.ceil(error.retryAfterMs / 1000)} seconds.`,
       );
-      if (hasSpotifyPlayback) {
-        spotifyState.textContent = "SIGNAL THROTTLED";
+      if (spotifyHasSnapshot) {
+        if (Date.now() - lastLanyardSpotifyUpdateAt >= lanyardOverrideWindowMs) markSpotifyStale();
       } else {
         setSpotifyIdle(
           "Spotify is cooling down",
@@ -629,10 +659,14 @@ async function refreshSpotifyPlayback() {
       }
     } else {
       console.error("Unable to load Spotify playback:", error);
-      setSpotifyIdle("Spotify signal temporarily lost");
+      if (spotifyHasSnapshot) {
+        if (Date.now() - lastLanyardSpotifyUpdateAt >= lanyardOverrideWindowMs) markSpotifyStale();
+      } else {
+        setSpotifyIdle("Spotify signal temporarily lost");
+      }
     }
   } finally {
-    if (requestSequence === spotifyRequestSequence) {
+    if (requestSequence === spotifyRequestSequence && document.visibilityState === "visible") {
       spotifyRefreshTimer = window.setTimeout(
         refreshSpotifyPlayback,
         nextRefreshDelayMs,
@@ -645,6 +679,10 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     updateSpotifyTimeline();
     refreshSpotifyPlayback();
+  } else {
+    window.clearTimeout(spotifyRefreshTimer);
+    spotifyRequestSequence += 1;
+    markSpotifyStale();
   }
 });
 
@@ -656,6 +694,13 @@ window.addEventListener("pageshow", (event) => {
 });
 
 window.addEventListener("lanyard:spotify", handleLanyardSpotify);
+window.addEventListener("lanyard:disconnected", () => {
+  if (hasLanyardSpotifyPlayback) {
+    lastLanyardSpotifyUpdateAt = 0;
+    hasLanyardSpotifyPlayback = false;
+    markSpotifyStale();
+  }
+});
 window.addEventListener("desktop-window:opened", (event) => {
   if (event.detail?.windowId === "spotify-window") {
     loadSpotifyHistory();

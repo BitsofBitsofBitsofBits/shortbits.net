@@ -34,32 +34,36 @@
     <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
     <link rel="stylesheet" href="/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/bsod-classic.css?v=bsod-classic-1">
-    <script src="/messages.js?v=messages-13" defer></script>
-    <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
-    <script src="/stop-codes.js?v=stop-codes-2" defer></script>
-    <script src="/arg.js?v=arg-3" defer></script>
-    <script src="/filesystem.js?v=filesystem-2" defer></script>
-    <script src="/supabase-config.js" defer></script>
-    <script src="/analytics.js?v=analytics-4" defer></script>
-    <script src="/notifications.js?v=notifications-2" defer></script>
-    <script src="/theme-effects.js?v=theme-effects-5" defer></script>
-    <script src="/screensaver.js?v=screensaver-1" defer></script>
-    <script src="/script.js?v=upgrade-66" defer></script>
-    <script src="/windows.js?v=windows-12" defer></script>
-    <script src="/arcade.js?v=arcade-9" defer></script>
-    <script src="/settings.js?v=settings-8" defer></script>
-    <script src="/death-screens.js?v=death-screens-2" defer></script>
-    <script src="/bsod-classic.js?v=bsod-classic-1" defer></script>
-    <script src="/career-format.js?v=career-2" defer></script>
-    <script src="/content.js?v=content-16" defer></script>
-    <script src="/about.js?v=about-3" defer></script>
-    <script src="/pronouns.js?v=pronouns-1" defer></script>
-    <script src="/discord.js?v=discord-3" defer></script>
-    <script src="/contact.js?v=contact-8" defer></script>
-    <script src="/guestbook.js?v=guestbook-1" defer></script>
-    <script src="/spotify.js?v=spotify-14" defer></script>
-    <script src="/site-config.js?v=site-config-3" defer></script>
-    <script src="/cf-analytics.js?v=cf-analytics-2" defer></script>
+    <link rel="stylesheet" href="/launcher.css?v=launcher-1">
+    <link rel="stylesheet" href="/contact-reliability.css?v=contact-1">
+    <script src="/messages.js?v=messages-13" type="application/x-bits-runtime"></script>
+    <script src="/seasonal-messages.js?v=seasonal-4" type="application/x-bits-runtime"></script>
+    <script src="/stop-codes.js?v=stop-codes-2" type="application/x-bits-runtime"></script>
+    <script src="/arg.js?v=arg-3" type="application/x-bits-runtime"></script>
+    <script src="/filesystem.js?v=filesystem-2" type="application/x-bits-runtime"></script>
+    <script src="/supabase-config.js" type="application/x-bits-runtime"></script>
+    <script src="/analytics.js?v=analytics-4" type="application/x-bits-runtime"></script>
+    <script src="/notifications.js?v=notifications-2" type="application/x-bits-runtime"></script>
+    <script src="/theme-effects.js?v=theme-effects-5" type="application/x-bits-runtime"></script>
+    <script src="/screensaver.js?v=screensaver-1" type="application/x-bits-runtime"></script>
+    <script src="/script.js?v=upgrade-66" type="application/x-bits-runtime"></script>
+    <script src="/windows.js?v=windows-12" type="application/x-bits-runtime"></script>
+    <script src="/launcher.js?v=launcher-1" type="application/x-bits-runtime"></script>
+    <script src="/arcade-loader.js?v=arcade-1" type="application/x-bits-runtime"></script>
+    <script src="/settings.js?v=settings-8" type="application/x-bits-runtime"></script>
+    <script src="/death-screens.js?v=death-screens-2" type="application/x-bits-runtime"></script>
+    <script src="/bsod-classic.js?v=bsod-classic-1" type="application/x-bits-runtime"></script>
+    <script src="/career-format.js?v=career-2" type="application/x-bits-runtime"></script>
+    <script src="/content.js?v=content-16" type="application/x-bits-runtime"></script>
+    <script src="/about.js?v=about-3" type="application/x-bits-runtime"></script>
+    <script src="/pronouns.js?v=pronouns-1" type="application/x-bits-runtime"></script>
+    <script src="/discord.js?v=discord-3" type="application/x-bits-runtime"></script>
+    <script src="/contact.js?v=contact-8" type="application/x-bits-runtime"></script>
+    <script src="/guestbook.js?v=guestbook-1" type="application/x-bits-runtime"></script>
+    <script src="/spotify.js?v=spotify-14" type="application/x-bits-runtime"></script>
+    <script src="/site-config.js?v=site-config-3" type="application/x-bits-runtime"></script>
+    <script src="/cf-analytics.js?v=cf-analytics-2" type="application/x-bits-runtime"></script>
+    <script src="/online-runtime.js?v=runtime-1" defer></script>
   </head>
   <body>
     <noscript>
@@ -464,6 +468,7 @@
         <details class="app-menu" name="application-menu">
           <summary>TOOLS</summary>
           <div class="app-menu-popup">
+            <button id="bits-launcher-open" type="button" aria-haspopup="dialog" aria-controls="bits-launcher">FIND A BIT (Ctrl+K)</button>
             <button class="arcade-desktop-launcher" type="button" data-window-target="arcade-window">BITS ARCADE</button>
             <button type="button" data-window-target="games-window">GAMES.EXE</button>
             <button type="button" data-window-target="stats-window">STATS.EXE</button>

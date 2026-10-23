@@ -135,22 +135,33 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
 }
 
 .profile-header-tools {
-  gap: 28px;
+  display: grid;
+  width: min(640px, 100%);
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) minmax(0, 1.2fr) auto;
+  gap: 16px 12px;
+}
+
+.profile-header-tools nav {
+  grid-column: 1 / -1;
 }
 
 .profile-theme-picker {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  min-width: 0;
+  align-items: start;
+  gap: 4px;
   color: var(--muted);
   font-size: 0.7rem;
 }
 
 .profile-theme-picker[hidden] {
-  display: none;
+  display: grid !important;
+  visibility: hidden;
 }
 
 .profile-theme-picker select {
+  width: 100%;
+  min-width: 0;
   min-height: 34px;
   padding: 4px 30px 4px 10px;
   border: 1px solid var(--border);
@@ -182,6 +193,7 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
 }
 
 .profile-theme-random {
+  align-self: end;
   min-height: 34px;
   padding: 4px 12px;
   border: 1px solid var(--border);
@@ -193,7 +205,8 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
 }
 
 .profile-theme-random[hidden] {
-  display: none;
+  display: block;
+  visibility: hidden;
 }
 
 .profile-theme-random:hover,
@@ -661,6 +674,10 @@ html .professional-page .contact-form :is(input, textarea) {
 }
 
 @media (max-width: 650px) {
+  .profile-header-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .profile-layout {
     width: calc(100% - 36px);
   }
@@ -748,11 +765,12 @@ html .professional-page .contact-form :is(input, textarea) {
 
   .profile-header nav,
   .profile-theme-picker,
+  .profile-theme-picker[hidden],
   .profile-theme-random,
   .profile-actions,
   .profile-contact,
   .profile-skip {
-    display: none;
+    display: none !important;
   }
 
   .profile-hero,

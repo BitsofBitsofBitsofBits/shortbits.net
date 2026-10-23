@@ -10,6 +10,15 @@ let lanyardReconnectTimer;
 let lanyardSocket;
 let lanyardSocketGeneration = 0;
 let lanyardUserId;
+let discordLastPresence;
+let discordLastUpdatedAt = 0;
+let discordRequestInFlight = false;
+
+function markDiscordStale() {
+  if (!discordLastPresence) return;
+  discordStatus.dataset.state = "stale";
+  discordStatus.textContent = `${String(discordLastPresence.status || "offline").toUpperCase()} // LAST KNOWN ${new Date(discordLastUpdatedAt).toLocaleString()}`;
+}
 
 function formatDiscordActivity(activity) {
   return [activity.name, activity.details, activity.state]
@@ -18,7 +27,11 @@ function formatDiscordActivity(activity) {
 }
 
 function renderDiscordPresence(presence) {
+  discordStatus.dataset.state = presence.stale ? "stale" : "fresh";
   if (!presence.enrolled) {
+    discordLastPresence = undefined;
+    lanyardUserId = undefined;
+    disconnectLanyardSocket();
     discordStatus.textContent = "SETUP REQUIRED";
     discordCustomStatus.textContent = "Join Lanyard to publish presence";
     discordActivity.textContent = "Unavailable";
@@ -30,6 +43,10 @@ function renderDiscordPresence(presence) {
   discordActivity.textContent = presence.activities?.length
     ? presence.activities.map(formatDiscordActivity).join(" | ")
     : "No public activity";
+  discordLastPresence = presence;
+  const age = Number(presence.cacheAgeMs);
+  discordLastUpdatedAt = Date.now() - (Number.isFinite(age) ? Math.max(0, age) : 0);
+  if (presence.stale || Date.now() - discordLastUpdatedAt > discordRefreshIntervalMs * 2) markDiscordStale();
 }
 
 function publishLanyardSpotify(presence) {
@@ -71,6 +88,8 @@ function disconnectLanyardSocket() {
     lanyardSocket.close();
     lanyardSocket = undefined;
   }
+  window.LANYARD_SPOTIFY = null;
+  window.dispatchEvent(new CustomEvent("lanyard:disconnected"));
 }
 
 function connectLanyardSocket(userId) {
@@ -139,6 +158,8 @@ function connectLanyardSocket(userId) {
     window.clearInterval(lanyardHeartbeatTimer);
     lanyardHeartbeatTimer = undefined;
     lanyardSocket = undefined;
+    window.LANYARD_SPOTIFY = null;
+    window.dispatchEvent(new CustomEvent("lanyard:disconnected"));
     if (document.visibilityState === "visible") {
       lanyardReconnectTimer = window.setTimeout(
         () => connectLanyardSocket(userId),
@@ -154,6 +175,7 @@ function connectLanyardSocket(userId) {
 
 async function refreshDiscordPresence() {
   window.clearTimeout(discordRefreshTimer);
+  if (discordRequestInFlight || document.visibilityState !== "visible") return;
   const projectUrl = window.SUPABASE_CONFIG?.url;
   const anonKey = window.SUPABASE_CONFIG?.anonKey;
 
@@ -162,6 +184,7 @@ async function refreshDiscordPresence() {
     return;
   }
 
+  discordRequestInFlight = true;
   try {
     const response = await fetch(`${projectUrl}/functions/v1/discord-presence`, {
       headers: anonKey ? { "apikey": anonKey } : {},
@@ -170,6 +193,9 @@ async function refreshDiscordPresence() {
     if (!response.ok) {
       throw new Error(presence.error || `Discord presence returned ${response.status}.`);
     }
+    if (typeof presence.enrolled !== "boolean") {
+      throw new Error("Discord presence response is malformed.");
+    }
     renderDiscordPresence(presence);
     if (presence.enrolled && typeof presence.userId === "string") {
       lanyardUserId = presence.userId;
@@ -177,14 +203,23 @@ async function refreshDiscordPresence() {
     }
   } catch (error) {
     console.error("Unable to load Discord presence:", error);
-    discordStatus.textContent = "SIGNAL UNAVAILABLE";
-    discordCustomStatus.textContent = "Presence could not be loaded";
-    discordActivity.textContent = "Unavailable";
+    if (discordLastPresence) {
+      markDiscordStale();
+    } else {
+      discordStatus.textContent = "SIGNAL UNAVAILABLE";
+      discordCustomStatus.textContent = "Presence could not be loaded";
+      discordActivity.textContent = "Unavailable";
+    }
   } finally {
-    discordRefreshTimer = window.setTimeout(
-      refreshDiscordPresence,
-      discordRefreshIntervalMs,
-    );
+    discordRequestInFlight = false;
+    if (document.visibilityState === "visible") {
+      discordRefreshTimer = window.setTimeout(
+        refreshDiscordPresence,
+        discordRefreshIntervalMs,
+      );
+    } else {
+      markDiscordStale();
+    }
   }
 }
 
@@ -195,6 +230,8 @@ document.addEventListener("visibilitychange", () => {
       connectLanyardSocket(lanyardUserId);
     }
   } else {
+    window.clearTimeout(discordRefreshTimer);
+    markDiscordStale();
     disconnectLanyardSocket();
   }
 });

@@ -1,0 +1,25 @@
+.bits-launcher {
+  box-sizing: border-box;
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: min(80vh, 42rem);
+  padding: 1.25rem;
+  overflow: auto;
+  color: var(--text, #e7ecef);
+  background: var(--panel, #101820);
+  border: 2px solid var(--accent, #71e89a);
+  font-family: inherit;
+}
+.bits-launcher::backdrop { background: rgb(0 0 0 / 75%); }
+.bits-launcher h2 { margin: 0 4rem 1rem 0; }
+.bits-launcher > button { position: absolute; right: 1rem; top: 1rem; }
+.bits-launcher label { display: block; margin-bottom: .5rem; }
+.bits-launcher input { box-sizing: border-box; width: 100%; min-height: 44px; padding: .65rem; color: inherit; background: transparent; border: 1px solid currentColor; font: inherit; }
+.bits-launcher-status { font-size: .85rem; }
+.bits-launcher ul { margin: 0; padding: 0; list-style: none; }
+.bits-launcher li + li { margin-top: .4rem; }
+.bits-launcher button { min-height: 44px; padding: .6rem; color: inherit; background: transparent; border: 1px solid currentColor; font: inherit; cursor: pointer; }
+.bits-launcher li button { width: 100%; text-align: left; }
+.bits-launcher :focus-visible { outline: 3px solid var(--accent, #71e89a); outline-offset: 3px; }
+@media (forced-colors: active) {
+  .bits-launcher { color: CanvasText; background: Canvas; border-color: CanvasText; }
+}

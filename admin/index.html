@@ -18,6 +18,7 @@
     <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
     <script src="/admin-shell.js?v=admin-shell-1" defer></script>
     <script src="/admin.js?v=admin-30" defer></script>
+    <script src="/admin-backup.js?v=backup-1" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -80,6 +81,21 @@
           </div>
           <div id="ac-quick-actions" class="ac-quick-actions" aria-label="Quick actions" role="group"></div>
           <div id="ac-home-cards" class="ac-card-grid"></div>
+        </section>
+
+        <section id="backup-editor" class="profile-editor" aria-labelledby="backup-editor-heading">
+          <h2 id="backup-editor-heading">Content backups</h2>
+          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, hardware specs/order, and featured music. Backups are private files, not encrypted.</p>
+          <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
+          <button id="backup-export" type="button">Download content backup</button>
+          <h3>Restore content</h3>
+          <p>Restoring replaces all included editorial content in one database transaction. A safety backup is downloaded first. Keep other admin sessions and hardware agents idle during restoration. After restoring, reload this page and deploy to regenerate static blog pages and RSS.</p>
+          <label for="backup-file">Backup JSON file</label>
+          <input id="backup-file" type="file" accept=".json,application/json">
+          <label for="backup-confirm">Type RESTORE to replace current content</label>
+          <input id="backup-confirm" type="text" autocomplete="off" spellcheck="false">
+          <button id="backup-restore" type="button" disabled>Restore content</button>
+          <p id="backup-status" class="form-status" role="status" aria-live="polite"></p>
         </section>
 
         <section id="message-editor" class="profile-editor" aria-labelledby="message-editor-heading">
@@ -351,6 +367,7 @@
             <h2 id="blog-editor-heading">BLOG.LOG</h2>
             <span>MARKDOWN PUBLISHING CONSOLE</span>
           </div>
+          <p class="admin-subtitle">Publishing saves to the live database; it does not trigger a site rebuild. New posts remain readable through the live blog archive and legacy post links. Run a deployment to generate or refresh static articles, search-engine metadata, the RSS feed, and sitemap. Scheduled posts enter those files only on a deployment after their publish time. Unpublishing or deleting a post hides it from live queries immediately, but its existing static page and feed entry remain public until the next deployment removes them.</p>
           <div class="blog-admin-layout">
             <aside class="blog-admin-posts" aria-labelledby="blog-admin-posts-heading">
               <div class="repeatable-admin-actions">

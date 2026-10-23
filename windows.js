@@ -519,7 +519,7 @@ window.addEventListener("popstate", applyDesktopWindowUrl);
 
 document.addEventListener("keydown", (event) => {
   const blockingInterface = document.querySelector(
-    ".system-overlay:not([hidden]), .death-screen:not([hidden]), #achievements-panel:not([hidden]), #shutdown-screen:not([hidden])",
+    ".system-overlay:not([hidden]), .death-screen:not([hidden]), #achievements-panel:not([hidden]), #shutdown-screen:not([hidden]), #bits-launcher[open]",
   );
   if (
     event.key === "Escape"

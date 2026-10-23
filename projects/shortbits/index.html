@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building shortbits.net // Caleb Masters</title>
+    <meta name="description" content="A source-grounded case study of shortbits.net: static HTML, CSS and JavaScript, Supabase content, private contact, and deployment-time blog publishing.">
+    <link rel="canonical" href="https://www.shortbits.net/projects/shortbits/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Building shortbits.net // Caleb Masters">
+    <meta property="og:description" content="A personal web platform combining distinct public experiences with Supabase-backed content and static publishing.">
+    <meta property="og:url" content="https://www.shortbits.net/projects/shortbits/">
+    <meta property="og:image" content="https://www.shortbits.net/images/social-preview-professional.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#020806">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <script src="/seasonal-calendar.js?v=calendar-1"></script>
+    <script src="/theme-init.js?v=theme-25"></script>
+    <link rel="stylesheet" href="/styles.css?v=upgrade-132">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"shortbits.net","description":"A personal web platform built with HTML, CSS, JavaScript, and Supabase.","url":"https://www.shortbits.net/projects/shortbits/","codeRepository":"https://github.com/BitsofBitsofBitsofBits/shortbits.net","creator":{"@type":"Person","name":"Caleb Masters","url":"https://www.shortbits.net/professional/"}}</script>
+    <script src="/site-config.js?v=site-config-3" defer></script>
+    <script src="/cf-analytics.js?v=cf-analytics-2" defer></script>
+  </head>
+  <body class="blog-page blog-post-page">
+    <a class="skip-link" href="#case-study">Skip to case study</a>
+    <main class="blog-shell">
+      <nav class="blog-breadcrumbs" aria-label="Breadcrumb"><a href="/professional/">PROFILE</a><span aria-hidden="true">/</span><a href="/projects/">PROJECTS</a></nav>
+      <article id="case-study" class="blog-article">
+        <header><p class="system-kicker">WEB DEVELOPMENT / PERSONAL PLATFORM</p><h1>Building shortbits.net</h1><p class="blog-article-excerpt">One repository, two public experiences, and an authenticated content workflow.</p></header>
+        <div class="blog-markdown">
+          <h2>Purpose and scope</h2>
+          <p>shortbits.net is my personal web platform and a learning project. The root chooser leads to a playful, terminal-themed <a href="/online/">internet presence</a> or a <a href="/professional/">professional profile</a>. The two experiences share site assets and saved accessibility preferences without requiring the professional profile to load the desktop games and Easter eggs.</p>
+          <h2>Implementation</h2>
+          <ul>
+            <li><strong>Frontend:</strong> HTML, CSS, and JavaScript, with root-relative shared assets and responsive layouts.</li>
+            <li><strong>Content:</strong> Supabase-backed profile information and blog posts, managed through an authenticated admin center.</li>
+            <li><strong>Private contact:</strong> a Supabase Edge Function with server-side validation, a honeypot, rate limits, and optional Turnstile verification.</li>
+            <li><strong>Delivery:</strong> GitHub Actions validation and deployment, with the source available in a public repository.</li>
+          </ul>
+          <h2>Publishing without a frontend framework</h2>
+          <p>The blog keeps Markdown in Supabase. At deployment, a Node script fetches published, due posts using public read permissions and generates individual HTML articles, an RSS feed, archive links, and sitemap entries. The build reuses the same Markdown renderer as the browser so formatting rules are shared.</p>
+          <p>The live archive can still show a newly published post through the legacy query-string reader before the next deployment. This is a deliberate trade-off: saving in the admin center does not automatically rebuild the site. Static pages, feed entries, and search metadata change at deployment; unpublishing also requires deployment to remove an existing static copy.</p>
+          <h2>Accessibility and content boundaries</h2>
+          <p>The site includes reduced-motion, increased-contrast, and larger-text preferences, semantic page landmarks, skip links, and an accessible Markdown preview. Blog Markdown is rendered as text and explicitly supported elements rather than inserted as arbitrary HTML. Supabase row-level policies separate public published posts from authenticated editing.</p>
+          <h2>Evidence and limits</h2>
+          <p>The <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer">public source repository</a> documents the implementation, schema migrations, and validation scripts. These are implementation details, not claims of measured traffic growth, conversion gains, performance improvements, or a formal accessibility certification.</p>
+        </div>
+      </article>
+      <footer><p><a href="/projects/homelab/">Home lab case study</a> &middot; <a href="/professional/#contact">Contact Caleb</a> &middot; <a href="/projects/">All projects</a></p></footer>
+    </main>
+  </body>
+</html>

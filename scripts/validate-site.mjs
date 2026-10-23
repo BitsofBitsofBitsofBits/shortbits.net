@@ -1,22 +1,21 @@
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const htmlFiles = [
-  "index.html",
-  "admin.html",
-  "admin/index.html",
-  "404.html",
-  "source.html",
-  "useless.html",
-  "boot/index.html",
-  "blog/index.html",
-  "blog/post.html",
-  "online/index.html",
-  "professional/index.html",
-  "professional/resume/index.html",
-];
+const rootIndex = process.argv.indexOf("--root");
+if (rootIndex >= 0 && !process.argv[rootIndex + 1]) throw new Error("--root requires a directory.");
+const root = resolve(rootIndex < 0
+  ? resolve(dirname(fileURLToPath(import.meta.url)), "..")
+  : process.argv[rootIndex + 1]);
+function discoverHtml(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name.startsWith(".") || entry.name === "node_modules") return [];
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) return discoverHtml(path);
+    return entry.isFile() && entry.name.endsWith(".html") ? [relative(root, path)] : [];
+  });
+}
+const htmlFiles = discoverHtml(root);
 const missingAssets = [];
 
 for (const htmlFile of htmlFiles) {
@@ -29,6 +28,8 @@ for (const htmlFile of htmlFiles) {
       || reference.startsWith("https://")
       || reference.startsWith("#")
       || reference.startsWith("mailto:")
+      || reference.startsWith("tel:")
+      || reference.startsWith("data:")
       || reference === "/"
     ) {
       continue;
@@ -37,7 +38,10 @@ for (const htmlFile of htmlFiles) {
     const assetPath = reference
       .replace(/^\/+/, "")
       .split(/[?#]/, 1)[0];
-    if (assetPath && !existsSync(resolve(root, assetPath))) {
+    const resolvedAsset = reference.startsWith("/")
+      ? resolve(root, assetPath)
+      : resolve(dirname(resolve(root, htmlFile)), assetPath);
+    if (assetPath && !existsSync(resolvedAsset)) {
       missingAssets.push(`${htmlFile}: ${reference}`);
     }
   }
