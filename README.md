@@ -568,6 +568,9 @@ For the workflow's SSH transport, configure `SITE_MONITOR_SSH_TARGET=user@host`,
 optional `SITE_MONITOR_SSH_PORT`, and your normal verified SSH key/known-hosts
 setup, then add `--ssh`. The deployment workflow and scheduled monitor share the
 production environment's SSH secrets; no new credential is published.
+The deployment caller explicitly passes only the four required SSH secrets to
+the reusable monitor; scheduled and manually dispatched runs use the existing
+repository/environment configuration directly.
 
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static

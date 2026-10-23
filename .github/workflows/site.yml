@@ -291,6 +291,11 @@ jobs:
       contents: read
       issues: write
     uses: ./.github/workflows/monitor.yml
+    secrets:
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
     with:
       expected-commit: ${{ github.sha }}
 

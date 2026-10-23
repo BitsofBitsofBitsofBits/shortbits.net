@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { monitorSite, reportMarkdown, sshSiteFetch } from "./monitor-site.mjs";
 
 const site = "https://www.shortbits.net";
@@ -136,6 +137,7 @@ test("SSH failures and malformed responses cannot leak host details or appear he
     target: "monitor@example.test",
     execute: async () => { throw new Error("Private SSH host and response details"); },
   });
+
   await assert.rejects(failed(`${site}/`, options), (error) => {
     assert.match(error.message, /SSH HTTPS probe failed/);
     assert.doesNotMatch(error.message, /Private/);
@@ -147,5 +149,15 @@ test("SSH failures and malformed responses cannot leak host details or appear he
   await assert.rejects(malformed(`${site}/`, options), /valid HTTP response headers/);
   for (const value of [{ target: "" }, { target: "user@host", port: "0" }, { target: "user@host", port: "65536" }]) {
     assert.throws(() => sshSiteFetch(value), /valid port/);
+  }
+});
+
+test("post-deployment monitoring explicitly forwards its required SSH secrets", async () => {
+  const caller = await readFile(new URL("../.github/workflows/site.yml", import.meta.url), "utf8");
+  const reusable = await readFile(new URL("../.github/workflows/monitor.yml", import.meta.url), "utf8");
+  const health = caller.split("\n  health:")[1].split("\n  lighthouse:")[0];
+  for (const name of ["DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "DEPLOY_USER", "DEPLOY_HOST"]) {
+    assert.ok(health.includes(`${name}: \${{ secrets.${name} }}`), `${name} must be forwarded by the caller`);
+    assert.match(reusable, new RegExp(`${name}:\\s+required: true`), `${name} must be required by the reusable workflow`);
   }
 });
