@@ -3663,10 +3663,12 @@ async function loadBuildMetadata() {
     ) {
       throw new Error("Build metadata is malformed.");
     }
+    const builtAt = new Date(metadata.builtAt);
+    if (Number.isNaN(builtAt.getTime())) throw new Error("Build timestamp is malformed.");
     const shortCommit = metadata.commit.slice(0, 7);
     buildLink.textContent = `BUILD ${shortCommit.toUpperCase()}`;
     buildLink.href = repositoryUrl;
-    buildLink.title = `Deployed ${new Date(metadata.builtAt).toLocaleString()}`;
+    buildLink.title = `Deployed ${builtAt.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC")}`;
     buildLink.dataset.commit = shortCommit.toUpperCase();
   } catch (error) {
     console.warn("Unable to load build metadata:", error);

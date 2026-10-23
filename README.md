@@ -700,6 +700,9 @@ The online About clock creates its timezone formatters only while its desktop
 window is visible, rather than doing expensive timezone initialization at startup
 or updating a hidden clock every second. Opening it or restoring visibility
 refreshes the clock immediately.
+The online build tooltip uses an unambiguous UTC timestamp without initializing
+locale/date formatting during startup; malformed timestamps are reported rather
+than displayed as a successful deployment label.
 
 To compare source and optimized online styles across the theme catalog at
 mobile and desktop widths, run

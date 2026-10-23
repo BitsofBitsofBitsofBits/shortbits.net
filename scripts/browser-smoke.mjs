@@ -91,6 +91,7 @@ try {
     }
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#build-link")?.dataset.commit);
+    assert.match(await page.locator("#build-link").getAttribute("title"), /^Deployed .* UTC$/);
     assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").some((entry) => /\/arcade\.js/.test(entry.name))), false, "Arcade must not load before it is opened");
     await page.keyboard.press("Control+k");
     await page.addScriptTag({ path: axePath });
