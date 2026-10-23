@@ -1,0 +1,19 @@
+{
+  "profile": {
+    "headline": "IT Support & Systems",
+    "summary": "Practical support and dependable systems.",
+    "location": "Carbondale, Kansas, US",
+    "updated_at": "2026-10-22T00:00:00Z"
+  },
+  "entries": [
+    {
+      "role": "IT Technician",
+      "organization": "Independent test fixture",
+      "period": "2024 - Present",
+      "summary": "Support and systems administration.",
+      "technologies": "PowerShell, Windows"
+    }
+  ],
+  "education": [],
+  "certifications": []
+}

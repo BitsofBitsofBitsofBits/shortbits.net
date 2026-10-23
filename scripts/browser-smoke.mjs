@@ -66,6 +66,10 @@ try {
       })).violations.map((violation) => ({ id: violation.id, nodes: violation.nodes.map((node) => node.target) })));
       assert.deepEqual(violations, [], `${width}px ${path}: accessibility violations`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), `${width}px ${path}: horizontal overflow`);
+      if (path === "/professional/resume/") {
+        assert.equal(await page.locator("#resume-status").textContent(), "Saved resume is current.");
+        assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
+      }
       if (path === "/professional/") {
         const shift = await page.evaluate(() => window.__testLayoutShift);
         assert.ok(shift <= 0.1, `${width}px professional CLS ${shift} exceeds 0.1`);
@@ -114,11 +118,59 @@ try {
     }
     await page.goto(`${server.origin}/online/?window=about`, { waitUntil: "networkidle" });
     await page.locator("#about-window").waitFor({ state: "visible" });
+    await page.waitForFunction(() => /\d/.test(document.querySelector("#operator-local-time").textContent));
+    assert.match(await page.locator("#operator-age").textContent(), /^\d+Y \d+D/);
     await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "networkidle" });
     await page.emulateMedia({ media: "print" });
     const pdf = await page.pdf({ format: "Letter" });
     assert.ok(pdf.length > 1000, "Printable résumé must produce a nonempty PDF");
     await page.emulateMedia({ media: "screen" });
+    await page.route("**/rest/v1/site_resume_profile?**", async (route) => {
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 1200));
+      await route.fulfill({
+        contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify([{
+          headline: "An explicitly updated headline", summary: "Updated after deployment.",
+          location: "Carbondale, Kansas, US", updated_at: "2026-10-23T00:00:00Z",
+        }]),
+      });
+    });
+    await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "domcontentloaded" });
+    assert.equal(await page.locator(".resume-sheet").evaluate((element) => element.classList.contains("is-loading")), false);
+    await page.locator("#resume-summary").waitFor({ state: "visible" });
+    assert.equal(await page.locator("#resume-summary").textContent(), "Practical support and dependable systems.");
+    await page.waitForFunction(() => !document.querySelector("#resume-refresh").disabled);
+    assert.equal(await page.locator("#resume-headline").textContent(), "IT Support & Systems");
+    assert.ok(await page.evaluate(() => window.__testLayoutShift <= 0.1), `${width}px resume update prompt CLS`);
+    await page.locator("#resume-refresh").click();
+    assert.equal(await page.locator("#resume-headline").textContent(), "An explicitly updated headline");
+    assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
+    await page.emulateMedia({ media: "print" });
+    assert.equal(await page.locator("#resume-summary").textContent(), "Updated after deployment.");
+    await page.emulateMedia({ media: "screen" });
+    await page.unroute("**/rest/v1/site_resume_profile?**");
+    await page.route("**/rest/v1/site_resume_education?**", (route) => route.fulfill({
+      status: 503, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: "{}",
+    }));
+    await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "networkidle" });
+    assert.match(await page.locator("#resume-status").textContent(), /incomplete/);
+    assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
+    assert.equal(await page.locator("#resume-summary").textContent(), "Practical support and dependable systems.");
+    await page.unroute("**/rest/v1/site_resume_education?**");
+    await page.route("**/rest/v1/site_resume_profile?**", (route) => route.abort());
+    await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "networkidle" });
+    assert.match(await page.locator("#resume-status").textContent(), /failed/);
+    assert.equal(await page.locator("#resume-summary").isVisible(), true);
+    assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
+    await page.unroute("**/rest/v1/site_resume_profile?**");
+    const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: 900 } });
+    const staticResume = await noScript.newPage();
+    await staticResume.goto(`${server.origin}/professional/resume/`);
+    assert.equal(await staticResume.locator("#resume-summary").isVisible(), true);
+    await staticResume.emulateMedia({ media: "print" });
+    assert.ok((await staticResume.pdf({ format: "Letter" })).length > 1000);
+    await noScript.close();
+    console.log(`PASS ${width}px immediate resume snapshot, explicit update, offline/partial data, no-JS and print`);
     await page.route(/\/admin\.js(?:\?|$)/, (route) => route.fulfill({
       contentType: "text/javascript", body: "/* Admin writes disabled in the offline publishing-status test. */",
     }));

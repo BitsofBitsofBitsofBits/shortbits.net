@@ -6,17 +6,9 @@ const personalityChecksum = document.querySelector("#personality-checksum");
 const operatorQueryButton = document.querySelector("#operator-query-button");
 const operatorQueryOutput = document.querySelector("#operator-query-output");
 
-const operatorTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: operatorTimeZone,
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
-  timeZoneName: "short",
-});
-const operatorYearFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: operatorTimeZone,
-  year: "numeric",
-});
+const operatorWindow = document.querySelector("#about-window");
+let operatorTimeFormatter;
+let operatorYearFormatter;
 
 const operatorFacts = [
   "Has opinions about semicolons, but they are still compiling.",
@@ -81,6 +73,19 @@ function updateOperatorAge(now) {
 }
 
 function updateOperatorClock() {
+  if (document.hidden || operatorWindow.hidden
+    || operatorWindow.classList.contains("is-minimized")) return;
+  operatorTimeFormatter ??= new Intl.DateTimeFormat("en-US", {
+    timeZone: operatorTimeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
+  operatorYearFormatter ??= new Intl.DateTimeFormat("en-US", {
+    timeZone: operatorTimeZone,
+    year: "numeric",
+  });
   const now = new Date();
   operatorLocalTime.textContent = operatorTimeFormatter.format(now);
   updateOperatorAge(now);
@@ -125,5 +130,7 @@ window.setInterval(updateOperatorClock, 1_000);
 window.addEventListener("desktop-window:opened", (event) => {
   if (event.detail?.windowId === "about-window") {
     randomizeOperatorState();
+    updateOperatorClock();
   }
 });
+document.addEventListener("visibilitychange", updateOperatorClock);

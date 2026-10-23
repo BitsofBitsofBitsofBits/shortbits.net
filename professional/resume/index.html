@@ -30,12 +30,14 @@
     <script src="/cf-analytics.js?v=cf-analytics-2" defer></script>
     <script src="/career-format.js?v=career-2" defer></script>
     <script src="/career-data.js?v=career-data-1" defer></script>
+    <script src="/resume-content.js?v=resume-content-1" defer></script>
     <script src="/professional/resume.js?v=resume-2" defer></script>
   </head>
   <body class="resume-page">
     <nav class="resume-toolbar" aria-label="Résumé actions">
       <a href="/professional/">&larr; Professional profile</a>
       <span id="resume-status" class="resume-status" role="status" aria-live="polite">Loading latest résumé data...</span>
+      <button id="resume-refresh" type="button" disabled>Update résumé</button>
       <button id="resume-print" type="button">Download PDF</button>
     </nav>
 

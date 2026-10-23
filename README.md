@@ -663,11 +663,19 @@ npm run audit
 ```
 
 `npm run build` requires an empty output directory, copies only public site
-assets, fetches published posts, generates static content, versions local CSS/JS
+assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS
 URLs, and writes Brotli/gzip sidecars. Public Supabase configuration is read from
 `supabase-config.js`; optional `SUPABASE_URL` and `SUPABASE_ANON_KEY` overrides
 must be public credentials, never service-role secrets. Failed content fetches
-fail the build rather than deploying an empty archive.
+fail the build rather than deploying an empty archive or an incomplete resume snapshot.
+
+The printable resume is rendered during deployment using the same DOM renderer
+as the browser, so its saved content is visible immediately, including without
+JavaScript or with slow/unavailable live data. Background checks bypass the
+five-minute shared cache. New data is applied only after clicking "Update resume";
+printing always uses the version currently visible. Failed or incomplete checks
+leave the saved version intact and display an explicit status. Email and phone
+links remain runtime-only and are not injected into the generated HTML.
 
 Styles are minified with esbuild only in the staged output; source stylesheets
 remain unchanged for authoring. The online page's four shared stylesheets are
@@ -678,6 +686,8 @@ the pinned build dependencies with `npm ci --ignore-scripts`.
 
 For an offline content build, use
 `node scripts/build-site.mjs --output <empty-directory> --input scripts/fixtures/blog-posts.json`.
+This also uses `scripts/fixtures/resume-data.json` for the career snapshot;
+override it with `--resume-input <fixture.json>` when testing other resume data.
 Pass that directory to validation, browser smoke, and `scripts/audit-site.mjs`
 with `--root`. On Windows with Edge installed, set
 `$env:BITS_BROWSER_CHANNEL = "msedge"` for browser smoke and
@@ -685,6 +695,11 @@ with `--root`. On Windows with Edge installed, set
 for Lighthouse. Browser smoke uses mocked live services and never sends
 messages, publishes content, or modifies production data; real third-party
 integrations still require deployment-time verification.
+
+The online About clock creates its timezone formatters only while its desktop
+window is visible, rather than doing expensive timezone initialization at startup
+or updating a hidden clock every second. Opening it or restoring visibility
+refreshes the clock immediately.
 
 To compare source and optimized online styles across the theme catalog at
 mobile and desktop widths, run

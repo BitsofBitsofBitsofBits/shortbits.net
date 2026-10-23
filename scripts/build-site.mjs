@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { build, transform } from "esbuild";
+import { buildResume } from "./build-resume.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export async function filesUnder(directory) {
@@ -102,7 +103,7 @@ export async function optimizeStyles(directory) {
     `<style data-resume-styles>${resumeCss.replace(/<\/style/gi, "<\\/style")}</style>`));
 }
 
-export async function buildSite(output, contentInput) {
+export async function buildSite(output, contentInput, resumeInput) {
   const destination = resolve(output);
   if (destination === root || root.startsWith(`${destination}\\`) || root.startsWith(`${destination}/`)) {
     throw new Error("Build output must not be the repository or one of its ancestors.");
@@ -125,6 +126,10 @@ export async function buildSite(output, contentInput) {
   const generation = spawnSync(process.execPath, argumentsList, { stdio: "inherit" });
   if (generation.error) throw generation.error;
   if (generation.status !== 0) throw new Error(`Content generation failed (exit ${generation.status}).`);
+  await buildResume({
+    root: destination,
+    input: resumeInput || (contentInput ? join(root, "scripts", "fixtures", "resume-data.json") : undefined),
+  });
   await optimizeStyles(destination);
   const version = await versionAssets(destination);
   await compressAssets(destination);
@@ -140,5 +145,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     if (!args[index + 1] || args[index + 1].startsWith("--")) throw new Error(`--${name} requires a value.`);
     return args[index + 1];
   };
-  await buildSite(option("output") || join(root, ".site-build"), option("input"));
+  await buildSite(option("output") || join(root, ".site-build"), option("input"), option("resume-input"));
 }
