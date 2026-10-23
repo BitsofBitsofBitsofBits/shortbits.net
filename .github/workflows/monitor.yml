@@ -22,6 +22,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-24.04
+    environment: production
     timeout-minutes: 12
     steps:
       - name: Check out repository
@@ -32,15 +33,32 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install browser monitoring tools
-        run: npm ci --ignore-scripts
+      - name: Configure existing deployment SSH access
+        shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Verify remote curl without modifying the host
+        env:
+          SSH_TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p "$SSH_PORT" -- "$SSH_TARGET" 'command -v curl >/dev/null && curl --version | head -n 1'
 
       - name: Check public pages and integrations
         id: health
         env:
           SITE_EXPECTED_COMMIT: ${{ inputs.expected-commit }}
-          BITS_BROWSER_CHANNEL: chrome
-        run: node scripts/monitor-site.mjs --output health-report.json --browser
+          SITE_MONITOR_SSH_TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          SITE_MONITOR_SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: node scripts/monitor-site.mjs --output health-report.json --ssh
 
       - name: Publish health summary
         if: always()
@@ -53,7 +71,7 @@ jobs:
           fi
 
       - name: Update outage issue or close it on recovery
-        if: always() && steps.health.outcome != 'skipped'
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

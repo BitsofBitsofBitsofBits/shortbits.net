@@ -539,12 +539,17 @@ articles, Spotify and Discord HTTP responses (including stale-data and CORS
 failures), and the contact endpoint's OPTIONS preflight.
 
 Checks retry once for transient failures and have a bounded overall request
-deadline. The workflow uses the pinned runner's real Chrome browser for
-same-origin site navigations, since the site's bot protection can reject bare
-HTTP clients and background fetches on hosted runners. It does not spoof a browser user-agent or
-weaken Cloudflare/CSP settings. Browser requests are restricted to same-origin
-GET/OPTIONS; public integration probes use direct HTTP with the configured CORS
-origin. Checks never submit contact messages, solve Turnstile, send test emails,
+deadline. Cloudflare Bot Fight Mode challenges hosted runners and does not
+support scoped Skip rules. The workflow therefore reuses the production
+environment's existing deployment SSH credentials and host-key verification to
+run read-only `curl` GET requests to the public HTTPS site from the existing
+server. Probe logic stays on the runner; the host needs only SSH and curl, and
+the workflow verifies curl without installing tools or persisting probe files.
+This checks public CDN URLs from the server's network, not from an independent
+external uptime provider; failure to reach the server over SSH also fails the
+checks. Cloudflare and CSP remain unchanged. Public integration probes run
+directly from GitHub with the configured CORS origin. Checks never submit
+contact messages, solve Turnstile, send test emails,
 authenticate as an admin, or modify published content. They do not prove email
 delivery or browser/WebSocket functionality; browser smoke and performance
 checks remain separate.
@@ -558,10 +563,11 @@ integration response bodies, activity details, or credentials) are retained for
 14 days.
 
 To run the same read-only production probes locally:
-`node scripts/monitor-site.mjs --output <report.json> --browser`.
-Set `BITS_BROWSER_CHANNEL=chrome` (or `msedge` on Windows) to use an installed
-browser, or install Playwright Chromium. Omitting `--browser` uses direct HTTP
-for all probes and can expose bot-protection differences.
+`node scripts/monitor-site.mjs --output <report.json>`.
+For the workflow's SSH transport, configure `SITE_MONITOR_SSH_TARGET=user@host`,
+optional `SITE_MONITOR_SSH_PORT`, and your normal verified SSH key/known-hosts
+setup, then add `--ssh`. The deployment workflow and scheduled monitor share the
+production environment's SSH secrets; no new credential is published.
 
 The workflow validates JavaScript and local asset references, scans for
 committed secrets, generates `build-info.json`, and uploads only public static

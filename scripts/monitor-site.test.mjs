@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { monitorSite, reportMarkdown, browserSiteFetch } from "./monitor-site.mjs";
+import { monitorSite, reportMarkdown, sshSiteFetch } from "./monitor-site.mjs";
 
 const site = "https://www.shortbits.net";
 const config = { url: "https://example.supabase.co", anonKey: "sb_publishable_test" };
@@ -95,34 +95,57 @@ test("reports never retain JSON parse payloads or live integration data", async 
   assert.match(reportMarkdown(report), /no contact message was sent/);
 });
 
-test("browser transport preserves failures and leaves integration probes on direct HTTP", async () => {
+test("SSH transport preserves final HTTP status, quotes commands, and keeps integrations on direct HTTP", async () => {
   const calls = [];
-  const page = {
-    goto: async (url, options) => {
-      calls.push({ url, options });
+  let integrationCalls = 0;
+  const fetchImpl = sshSiteFetch({
+    target: "monitor@example.test", port: "2222",
+    execute: async (file, args, options) => {
+      calls.push({ file, args, options });
       return {
-        status: () => 403,
-        allHeaders: async () => ({ "Content-Type": "text/html" }),
-        text: async () => "Forbidden",
+        stdout: "Forbidden",
+        stderr: "HTTP/1.1 200 Connection established\r\n\r\nHTTP/2 403\r\nContent-Type: text/html\r\nX-Test: value:with:colons\r\n\r\n",
       };
     },
-  };
-  let integrationCalls = 0;
-  const fetchImpl = browserSiteFetch(page, site, (url, options) => {
-    integrationCalls += 1;
-    assert.equal(options.headers.apikey, config.anonKey);
-    return healthy(url, options);
+    fetchImpl: (url, options) => {
+      integrationCalls += 1;
+      assert.equal(options.headers.apikey, config.anonKey);
+      return healthy(url, options);
+    },
   });
   const options = { headers: { Origin: site, "Cache-Control": "no-cache" }, signal: AbortSignal.timeout(1000) };
-  const response = await fetchImpl(`${site}/online/`, options);
+  const response = await fetchImpl(`${site}/online/?q=a'b`, options);
   assert.equal(response.status, 403);
   assert.equal(await response.text(), "Forbidden");
-  assert.equal(calls[0].url, `${site}/online/`);
-  assert.equal(calls[0].options.waitUntil, "domcontentloaded");
+  assert.equal(response.headers.get("x-test"), "value:with:colons");
+  assert.equal(calls[0].file, "ssh");
+  assert.ok(calls[0].args.includes("StrictHostKeyChecking=yes"));
+  assert.ok(calls[0].args.includes("2222"));
+  assert.ok(calls[0].args.at(-1).includes("a'\\''b"));
   await fetchImpl(`${config.url}/functions/v1/spotify-now-playing`, { ...options, headers: { apikey: config.anonKey } });
   assert.equal(integrationCalls, 1);
   const aborted = AbortSignal.abort();
   await assert.rejects(fetchImpl(`${site}/online/`, { ...options, signal: aborted }));
   assert.equal(calls.length, 1);
   await assert.rejects(fetchImpl(`${site}/online/`, { ...options, method: "POST" }), /only support GET/);
+});
+
+test("SSH failures and malformed responses cannot leak host details or appear healthy", async () => {
+  const options = { headers: {}, signal: AbortSignal.timeout(1000) };
+  const failed = sshSiteFetch({
+    target: "monitor@example.test",
+    execute: async () => { throw new Error("Private SSH host and response details"); },
+  });
+  await assert.rejects(failed(`${site}/`, options), (error) => {
+    assert.match(error.message, /SSH HTTPS probe failed/);
+    assert.doesNotMatch(error.message, /Private/);
+    return true;
+  });
+  const malformed = sshSiteFetch({
+    target: "monitor@example.test", execute: async () => ({ stdout: "body", stderr: "no headers" }),
+  });
+  await assert.rejects(malformed(`${site}/`, options), /valid HTTP response headers/);
+  for (const value of [{ target: "" }, { target: "user@host", port: "0" }, { target: "user@host", port: "65536" }]) {
+    assert.throws(() => sshSiteFetch(value), /valid port/);
+  }
 });

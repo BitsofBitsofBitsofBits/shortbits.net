@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { publicConfig } from "./build-content.mjs";
 import publishing from "../publishing-status.js";
 
@@ -131,51 +133,58 @@ export function reportMarkdown(report) {
   ].join("\n");
 }
 
-export function browserSiteFetch(page, origin, fetchImpl = fetch) {
+export function sshSiteFetch({ target, port = "22", origin = "https://www.shortbits.net", execute = promisify(execFile), fetchImpl = fetch }) {
+  if (!/^[^\s@]+@[^\s@]+$/.test(target || "") || !/^\d+$/.test(port)
+    || Number(port) < 1 || Number(port) > 65535) {
+    throw new Error("SSH monitoring requires a user@host target and a valid port.");
+  }
+  const quote = (value) => `'${String(value).replaceAll("'", "'\\''")}'`;
   return async (url, options) => {
     if (new URL(url).origin !== new URL(origin).origin) return fetchImpl(url, options);
     options.signal.throwIfAborted();
-    if (options.method && options.method !== "GET") throw new Error("Site browser probes only support GET.");
-    const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 15000 });
-    if (!response) throw new Error("Browser navigation did not return a response.");
-    const status = response.status();
-    return new Response([204, 205, 304].includes(status) ? null : await response.text(), {
-      status, headers: await response.allHeaders(),
-    });
+    if (options.method && options.method !== "GET") throw new Error("SSH site probes only support GET.");
+    const command = [
+      "curl", "--silent", "--show-error", "--compressed", "--max-time", "15",
+      "--proto", "=https", "--dump-header", "/dev/stderr",
+      ...Object.entries(options.headers).flatMap(([name, value]) => ["--header", `${name}: ${value}`]),
+      "--url", url,
+    ].map(quote).join(" ");
+    let output;
+    try {
+      output = await execute("ssh", [
+        "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=10",
+        "-p", String(port), "--", target, command,
+      ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, timeout: 20000, signal: options.signal });
+    } catch (error) {
+      // execFile errors include stdout/stderr; never put response bodies or SSH
+      // host details into a public outage report.
+      throw new Error("SSH HTTPS probe failed or timed out. Check the host's SSH access and curl installation.", { cause: error });
+    }
+    const blocks = output.stderr.split(/\r?\n\r?\n/).filter((block) => /^HTTP\/[\d.]+[ \t]+\d{3}/m.test(block));
+    const last = blocks.at(-1);
+    if (!last) throw new Error("SSH probe did not return valid HTTP response headers.");
+    const lines = last.slice(last.search(/^HTTP\//m)).split(/\r?\n/);
+    const status = Number(/^HTTP\/[\d.]+[ \t]+(\d{3})/.exec(lines.shift())[1]);
+    const headers = new Headers();
+    for (const line of lines) {
+      const colon = line.indexOf(":");
+      if (colon > 0) headers.append(line.slice(0, colon), line.slice(colon + 1).trim());
+    }
+    return new Response([204, 205, 304].includes(status) ? null : output.stdout, { status, headers });
   };
 }
 
-export async function monitorWithBrowser(options = {}) {
-  const { chromium } = await import("playwright");
-  const origin = options.origin || "https://www.shortbits.net";
-  const browser = await chromium.launch({
-    ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}),
-  });
-  try {
-    const context = await browser.newContext({ serviceWorkers: "block" });
-    // Navigate normally: background fetches can receive different bot-protection
-    // treatment from the document requests real visitors and Lighthouse use.
-    await context.route("**/*", (route) => {
-      const request = route.request();
-      return new URL(request.url()).origin === new URL(origin).origin
-        && ["GET", "OPTIONS"].includes(request.method()) ? route.continue() : route.abort();
-    });
-    const page = await context.newPage();
-    return await monitorSite({ ...options, fetchImpl: browserSiteFetch(page, origin, options.fetchImpl) });
-  } finally {
-    await browser.close();
-  }
-}
-
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const args = process.argv.slice(2).filter((argument) => argument !== "--browser");
-  if (args.length !== 2 || args[0] !== "--output" || !args[1]) throw new Error("Usage: node scripts/monitor-site.mjs --output report.json [--browser]");
+  const args = process.argv.slice(2).filter((argument) => argument !== "--ssh");
+  if (args.length !== 2 || args[0] !== "--output" || !args[1]) throw new Error("Usage: node scripts/monitor-site.mjs --output report.json [--ssh]");
   const output = resolve(args[1]);
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   // Use the same checked-in public configuration as the deployed clients.
   const config = await publicConfig(root);
-  const run = process.argv.includes("--browser") ? monitorWithBrowser : monitorSite;
-  const report = await run({ config, expectedCommit: process.env.SITE_EXPECTED_COMMIT || "" });
+  const fetchImpl = process.argv.includes("--ssh") ? sshSiteFetch({
+    target: process.env.SITE_MONITOR_SSH_TARGET, port: process.env.SITE_MONITOR_SSH_PORT || "22",
+  }) : fetch;
+  const report = await monitorSite({ config, expectedCommit: process.env.SITE_EXPECTED_COMMIT || "", fetchImpl });
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(report, null, 2)}\n`);
   await writeFile(`${output}.md`, reportMarkdown(report));
