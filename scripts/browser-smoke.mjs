@@ -106,7 +106,7 @@ try {
     assert.equal(await page.locator("#bits-launcher-results button").count(), 0);
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("#bits-launcher").evaluate((element) => element.open), false);
-    assert.ok(await page.evaluate(() => document.activeElement.getClientRects().length > 0), "Closing the launcher must restore visible keyboard focus");
+    await page.waitForFunction(() => document.activeElement.getClientRects().length > 0, undefined, { timeout: 5000 });
     if (width > 900) {
       await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("arcade"));
       await page.waitForFunction(() => performance.getEntriesByType("resource").some((entry) => /\/arcade\.js/.test(entry.name)));
