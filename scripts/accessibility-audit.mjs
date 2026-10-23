@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { mkdir, writeFile, appendFile } from "node:fs/promises";
+import { mkdir, writeFile, appendFile, readFile } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { join, resolve } from "node:path";
@@ -73,6 +73,38 @@ async function summarize() {
 }
 if (argumentsList.includes("--summarize")) {
   await summarize();
+  process.exit(0);
+}
+if (argumentsList.includes("--report")) {
+  const report = { generatedAt: new Date().toISOString(), runs: [], findings: [], metrics: [], supplemental: [] };
+  for (const name of ["desktop", "mobile", "reduced", "forced", "windows-desktop", "windows-mobile", "windows-reduced", "windows-forced"]) {
+    const summary = JSON.parse(await readFile(join(output, `summary-${name}.json`), "utf8"));
+    const manifest = JSON.parse(await readFile(join(output, `manifest-${name}.json`), "utf8"));
+    report.runs.push({ name, expected: manifest.cases, completed: summary.cases, errors: summary.errors,
+      appearanceErrors: summary.appearanceErrors.length, violationCases: summary.violationCases,
+      incompleteCases: summary.incompleteCases, rules: summary.ruleCounts,
+      pages: manifest.pages, excludedWindows: manifest.excludedWindows || [],
+      themes: manifest.themes.length, appearances: manifest.appearances });
+    for (const group of Object.values(summary.groups)) {
+      report.findings.push({ run: name, path: group.path, rule: group.rule, impact: group.impact, cases: group.cases,
+        themes: [...new Set(group.appearances.map(appearance => appearance.theme))], samples: group.samples.slice(0, 3) });
+    }
+    report.metrics.push({ run: name, overflow: summary.overflow, animations: summary.animations, hiddenFocus: summary.hiddenFocus });
+  }
+  for (const name of ["desktop", "mobile", "reduced", "forced"]) {
+    try {
+      report.supplemental.push({ profile: name, results: JSON.parse(await readFile(join(output, `supplemental-${name}.json`), "utf8")) });
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  const destination = resolve(option("report-file", "reports/accessibility-2026-10-22.json"));
+  await mkdir(resolve(destination, ".."), { recursive: true });
+  await writeFile(destination, JSON.stringify(report, null, 2));
+  console.log(JSON.stringify({ report: destination, runs: report.runs.map(({ errors, ...run }) => ({ ...run, errors: errors.length })),
+    animationEvidence: report.metrics.filter(metric => Object.keys(metric.animations).length).map(metric => ({ run: metric.run, pages: Object.keys(metric.animations) })),
+    hiddenFocusEvidence: report.metrics.filter(metric => Object.keys(metric.hiddenFocus).length).map(metric => ({ run: metric.run, pages: Object.keys(metric.hiddenFocus) })),
+    supplementalProfiles: report.supplemental.map(entry => entry.profile) }));
   process.exit(0);
 }
 const browser = await chromium.launch({ channel: "msedge", headless: true });
