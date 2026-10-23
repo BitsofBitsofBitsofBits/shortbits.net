@@ -103,6 +103,22 @@ export async function optimizeStyles(directory) {
     `<style data-resume-styles>${resumeCss.replace(/<\/style/gi, "<\\/style")}</style>`));
 }
 
+export async function optimizeStartup(directory) {
+  const file = join(directory, "online", "index.html");
+  const html = await readFile(file, "utf8");
+  const pattern = /<script src="\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/theme-init\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/boot\.js(?:\?[^"]*)?"><\/script>/;
+  if (!pattern.test(html)) throw new Error("Unable to locate the ordered online startup scripts.");
+  const sources = await Promise.all(["seasonal-calendar.js", "theme-init.js", "boot.js"]
+    .map((name) => readFile(join(directory, name), "utf8")));
+  // Keep classic-script globals visible to the deferred runtime; do not bundle into a module or IIFE.
+  const result = await transform(sources.join("\n;\n"), {
+    loader: "js", minify: true, treeShaking: false,
+    target: ["chrome105", "firefox102", "safari15.6"],
+  });
+  await writeFile(join(directory, "online", "startup.js"), result.code);
+  await writeFile(file, html.replace(pattern, '<script src="/online/startup.js"></script>'));
+}
+
 export async function buildSite(output, contentInput, resumeInput) {
   const destination = resolve(output);
   if (destination === root || root.startsWith(`${destination}\\`) || root.startsWith(`${destination}/`)) {
@@ -131,6 +147,7 @@ export async function buildSite(output, contentInput, resumeInput) {
     input: resumeInput || (contentInput ? join(root, "scripts", "fixtures", "resume-data.json") : undefined),
   });
   await optimizeStyles(destination);
+  await optimizeStartup(destination);
   const version = await versionAssets(destination);
   await compressAssets(destination);
   console.log(`Built static site at ${destination} with asset version ${version}.`);

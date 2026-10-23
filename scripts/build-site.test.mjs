@@ -4,7 +4,32 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { brotliDecompressSync, gunzipSync } from "node:zlib";
-import { versionAssets, compressAssets, optimizeStyles } from "./build-site.mjs";
+import vm from "node:vm";
+import { versionAssets, compressAssets, optimizeStyles, optimizeStartup } from "./build-site.mjs";
+
+test("minifies ordered startup scripts into one request without isolating shared classic globals", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "shortbits-startup-"));
+  try {
+    await mkdir(join(directory, "online"));
+    await writeFile(join(directory, "online", "index.html"),
+      '<script src="/seasonal-calendar.js?v=1"></script>\n<script src="/theme-init.js?v=2"></script>\n<script src="/boot.js?v=3"></script><script src="/online-runtime.js" defer></script>');
+    await writeFile(join(directory, "seasonal-calendar.js"), "const startupCalendarValue = 7;");
+    await writeFile(join(directory, "theme-init.js"), "function startupThemeValue() { return startupCalendarValue + 1; }");
+    await writeFile(join(directory, "boot.js"), "window.startupResult = startupThemeValue();");
+    await optimizeStartup(directory);
+    const html = await readFile(join(directory, "online", "index.html"), "utf8");
+    assert.match(html, /<script src="\/online\/startup.js"><\/script>/);
+    assert.match(html, /<script src="\/online-runtime.js" defer><\/script>/);
+    assert.doesNotMatch(html, /src="\/(?:seasonal-calendar|theme-init|boot)\.js/);
+    const context = vm.createContext({ window: {} });
+    vm.runInContext(await readFile(join(directory, "online", "startup.js"), "utf8"), context);
+    assert.equal(context.window.startupResult, 8);
+    assert.equal(vm.runInContext("startupThemeValue() + startupCalendarValue", context), 15);
+    await assert.rejects(optimizeStartup(directory), /Unable to locate/);
+  } finally {
+    await rm(directory, { recursive: true });
+  }
+});
 
 test("versions local static and dynamic asset URLs without modifying external resources", async () => {
   const directory = await mkdtemp(join(tmpdir(), "shortbits-assets-"));

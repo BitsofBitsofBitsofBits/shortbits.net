@@ -683,6 +683,9 @@ bundled in their original cascade order into one request. The printable
 resume's minified CSS is inlined (including print rules), with an 8 KiB build
 limit to prevent unbounded HTML growth. Both validation and deployment install
 the pinned build dependencies with `npm ci --ignore-scripts`.
+The online page's calendar, initial theme, and boot scripts are concatenated
+in their original order and minified into one blocking startup request.
+They remain classic scripts with shared globals, not isolated modules.
 
 For an offline content build, use
 `node scripts/build-site.mjs --output <empty-directory> --input scripts/fixtures/blog-posts.json`.
