@@ -100,7 +100,9 @@ is a personal project and largely a learning exercise for me.
   back to the Windows device name when the model is a generic placeholder or
   just the motherboard (custom builds), so imports don't overwrite another
   machine; the name is pre-filled and can be changed before or after import. Machines are collapsible, and the
-  collapsed state is remembered per browser. Admin's **Move up / Move down**
+  collapsed state is remembered per browser. Public cards pack into gaps below
+  shorter lists and reflow when resized, collapsed, or updated with live readings.
+  Admin's **Move up / Move down**
   controls and **Save hardware** persist the public device order, including
   live devices without component rows; new unordered devices appear afterward.
 - Optional live hardware agents: Admin's **Live agents** flyout issues a
@@ -659,6 +661,7 @@ npm run build
 node scripts/validate-site.mjs --root .site-build
 npx playwright install chromium
 npm run test:browser
+node scripts/hardware-layout-browser.mjs --root .site-build
 npm run audit
 ```
 

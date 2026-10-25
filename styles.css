@@ -12190,7 +12190,10 @@ ul.resume-entry-technologies li {
 .hardware-machines {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 12px;
+  grid-auto-rows: 1px;
+  grid-auto-flow: row dense;
+  gap: 0 12px;
+  align-items: start;
   margin-top: 18px;
 }
 
@@ -12200,15 +12203,12 @@ ul.resume-entry-technologies li {
 
 .hardware-machine {
   min-width: 0;
+  margin-bottom: 12px;
   padding: 0 18px;
   border: 1px solid var(--border);
   background:
     linear-gradient(135deg, var(--accent-soft), transparent 58%),
     var(--panel);
-}
-
-.hardware-machines {
-  align-items: start;
 }
 
 .hardware-machine > summary {

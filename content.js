@@ -397,6 +397,15 @@ const hardwareStatusPollMs = 3_000;
 const hardwareWatchPingMs = 20_000;
 const hardwareOnlineWindowMs = 60_000;
 const hardwareState = { items: [], statuses: [], order: [], cardsKey: "", timer: 0, ticker: 0, watchedAt: 0 };
+const hardwareCardResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach(({ target, borderBoxSize }) => {
+    const height = borderBoxSize[0]?.blockSize ?? target.offsetHeight;
+    if (!height) return;
+    const gap = parseFloat(getComputedStyle(target).marginBottom);
+    // Each grid row is one pixel; reserve the card's height and its bottom gap.
+    target.style.gridRowEnd = `span ${Math.ceil(height + gap)}`;
+  });
+});
 const baseHardwareJokes = {
   cpu: [
     "Calculating how many Bits fit in another Bit.",
@@ -662,11 +671,15 @@ function renderHardwareCards() {
   if (cardsKey !== hardwareState.cardsKey) {
     hardwareState.cardsKey = cardsKey;
     const collapsed = readCollapsedHardware();
+    hardwareCardResizeObserver.disconnect();
     hardwareMachines.replaceChildren(
       ...orderedMachines.map(([machine, components]) => (
         createHardwareCard(machine, components, collapsed.has(machine))
       )),
     );
+    hardwareMachines.querySelectorAll(".hardware-machine").forEach((card) => {
+      hardwareCardResizeObserver.observe(card, { box: "border-box" });
+    });
   }
   hardwareMachines.hidden = machines.size === 0;
   hardwareEmpty.hidden = machines.size > 0;
