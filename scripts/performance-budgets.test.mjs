@@ -19,6 +19,6 @@ test("rejects regressions, missing measurements, and audit failures", () => {
   value.audits["largest-contentful-paint"].numericValue = 2501;
   assert.equal(checkPerformanceBudget(value, "test").length, 3);
   value.runtimeError = { message: "Navigation failed" };
-  assert.equal(checkPerformanceBudget(value, "test").length, 4);
+  assert.equal(checkPerformanceBudget(value, "test").length, 1);
   assert.equal(checkPerformanceBudget({}, "test").length, 5);
 });

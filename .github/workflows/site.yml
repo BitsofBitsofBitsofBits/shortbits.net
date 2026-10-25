@@ -65,6 +65,7 @@ jobs:
         run: |
           npm run test:browser
           node scripts/creators-browser.mjs --root .site-build
+          node scripts/critical-css-browser.mjs --root .site-build
 
       - name: Enforce pre-deployment performance budgets
         id: performance
@@ -326,23 +327,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Audit live pages
-        shell: bash
-        run: |
-          mkdir -p lighthouse-reports
-          for page in "" "online/" "professional/" "professional/resume/"; do
-            name="$(echo "${page:-chooser}" | tr '/' '-' | sed 's/-$//')"
-            for preset in mobile desktop; do
-              flags=""
-              if [ "$preset" = "desktop" ]; then flags="--preset=desktop"; fi
-              if [ "$preset" = "mobile" ]; then flags="--save-assets"; fi
-              npx --no-install lighthouse "https://www.shortbits.net/${page}" $flags \
-                --only-categories=performance,accessibility,best-practices,seo \
-                --chrome-flags="--headless=new --no-sandbox" \
-                --output=json --output-path="lighthouse-reports/${name}-${preset}.json" \
-                --quiet || echo "::error::Lighthouse failed for /${page} (${preset})"
-            done
-          done
-          node scripts/lighthouse-summary.mjs lighthouse-reports --enforce
+        run: node scripts/audit-site.mjs --url https://www.shortbits.net --enforce
 
       - name: Upload Lighthouse reports
         if: always()

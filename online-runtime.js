@@ -106,6 +106,25 @@
   window.addEventListener?.("error", handleRuntimeError);
 
   function startRuntime() {
+    const stylesheet = document.querySelector?.("[data-online-styles]");
+    if (stylesheet && stylesheet.media !== "all") {
+      stylesheet.media = "all";
+      if (!stylesheet.sheet) {
+        timeout = window.setTimeout?.(() => {
+          recordFailure("Full stylesheet loading timed out");
+          finishRuntime();
+        }, 15000);
+        stylesheet.addEventListener("load", () => {
+          window.clearTimeout?.(timeout);
+          if (!settled) startRuntime();
+        }, { once: true });
+        stylesheet.addEventListener("error", () => {
+          recordFailure("Full stylesheet failed to load");
+          finishRuntime();
+        }, { once: true });
+        return;
+      }
+    }
     if (deferred.length === 0) {
       finishRuntime();
       return;

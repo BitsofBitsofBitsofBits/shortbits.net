@@ -685,8 +685,22 @@ npx playwright install chromium
 npm run test:browser
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
+node scripts/critical-css-browser.mjs --root .site-build
 npm run audit
 ```
+
+Local and post-deployment Lighthouse audits share `scripts/audit-site.mjs`.
+For live checks, run
+`node scripts/audit-site.mjs --url https://www.shortbits.net --enforce`.
+Each page/device audit gets at most three attempts, but only for the observed
+`NO_NAVSTART` trace-recording error or Chrome's `Target.getTargetInfo` missing-session
+crash. Each retry starts a fresh Lighthouse process and waits briefly. Low measured
+scores, page errors, and other failures are not retried. The existing performance
+(90), accessibility/SEO (100), LCP (2.5 seconds), and CLS (0.1) budgets remain enforced.
+Original reports and saved traces are retained under `lighthouse-reports/attempts/`;
+the summary uses only the final reports at the directory root. Missing scores are
+shown as `N/A`, and exhausted runner retries still fail the job. Pre-deployment
+budgets and the separate deployed-site health checks remain enabled.
 
 `npm run build` requires an empty output directory, copies only public site
 assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS
@@ -705,7 +719,13 @@ links remain runtime-only and are not injected into the generated HTML.
 
 Styles are minified with esbuild only in the staged output; source stylesheets
 remain unchanged for authoring. The online page's four shared stylesheets are
-bundled in their original cascade order into one request. The printable
+bundled in their original cascade order into one stylesheet. A smaller, generated
+subset for initially visible content and boot controls is inlined so first paint
+does not wait for desktop, game, and Admin rules. The full stylesheet downloads
+without blocking the initial render; interactive controls wait for it to load,
+with explicit failure/timeout reporting. A noscript stylesheet preserves the
+non-JavaScript view. Browser checks compare first-paint and fully loaded styles
+across standard themes and color schemes. The printable
 resume's minified CSS is inlined (including print rules), with an 8 KiB build
 limit to prevent unbounded HTML growth. Both validation and deployment install
 the pinned build dependencies with `npm ci --ignore-scripts`.

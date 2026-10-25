@@ -20,23 +20,24 @@ for (const file of files) {
   const report = JSON.parse(await readFile(join(reportDir, file), "utf8"));
   if (enforce) failures.push(...checkPerformanceBudget(report, file.replace(/\.json$/, "")));
   const scores = Object.fromEntries(
-    Object.values(report.categories).map((category) => [
+    Object.values(report.categories ?? {}).map((category) => [
       category.id,
-      Math.round((category.score ?? 0) * 100),
+      typeof category.score === "number" ? Math.round(category.score * 100) : "N/A",
     ]),
   );
-  summary.push(`| ${file.replace(/\.json$/, "")} | ${scores.performance} | ${scores.accessibility} | ${scores["best-practices"]} | ${scores.seo} |`);
+  summary.push(`| ${file.replace(/\.json$/, "")} | ${scores.performance ?? "N/A"} | ${scores.accessibility ?? "N/A"} | ${scores["best-practices"] ?? "N/A"} | ${scores.seo ?? "N/A"} |`);
 
   console.log(`\n=== ${file} ===`);
   console.log(JSON.stringify(scores));
+  if (report.runtimeError) console.log(`  AUDIT ERROR: ${report.runtimeError.message}`);
   const metrics = ["first-contentful-paint", "largest-contentful-paint", "total-blocking-time", "cumulative-layout-shift", "speed-index"];
   for (const id of metrics) {
-    const audit = report.audits[id];
+    const audit = report.audits?.[id];
     if (audit) {
-      console.log(`  ${id}: ${audit.displayValue ?? ""} (${Math.round((audit.score ?? 0) * 100)})`);
+      console.log(`  ${id}: ${audit.displayValue ?? "not measured"} (${typeof audit.score === "number" ? Math.round(audit.score * 100) : "N/A"})`);
     }
   }
-  const failing = Object.values(report.audits)
+  const failing = Object.values(report.audits ?? {})
     .filter((audit) => (
       audit.score !== null
       && audit.score < 0.9

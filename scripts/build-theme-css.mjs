@@ -12,6 +12,10 @@ export async function buildThemeCss() {
   const markup = (await Promise.all(compactPages.map((file) => (
     readFile(path.join(root, file), "utf8")
   )))).join("\n");
+  return filterCssForMarkup(source, markup);
+}
+
+export function filterCssForMarkup(source, markup) {
   const classes = new Set(["is-rgb-mode", "is-performance-lite", "is-page-hidden"]);
   const ids = new Set();
   for (const [, value] of markup.matchAll(/\bclass="([^"]*)"/g)) {

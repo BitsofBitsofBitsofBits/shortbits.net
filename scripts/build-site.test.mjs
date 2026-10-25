@@ -72,18 +72,24 @@ test("consolidates online styles in cascade order and inlines small résumé sty
   try {
     await mkdir(join(directory, "online"));
     await mkdir(join(directory, "professional", "resume"), { recursive: true });
-    await writeFile(join(directory, "base.css"), "body { color: red; }");
+    await writeFile(join(directory, "base.css"), "body { color: red; } .deferred-panel { padding: 10px; }");
     await writeFile(join(directory, "override.css"), "body { color: blue; } @media print { body { color: black; } }");
     await writeFile(join(directory, "online", "index.html"), '<link rel="stylesheet" href="/base.css?v=1"><link rel="stylesheet" href="/override.css?v=2"><h1>Bits</h1>');
     await writeFile(join(directory, "professional", "resume.css"), "body { color: green; } @media print { body { color: black; } }");
     await writeFile(join(directory, "professional", "resume", "index.html"), '<link rel="stylesheet" href="/professional/resume.css?v=1"><h1>Résumé</h1>');
     await optimizeStyles(directory);
     const online = await readFile(join(directory, "online", "index.html"), "utf8");
-    assert.equal((online.match(/rel="stylesheet"/g) || []).length, 1);
+    assert.equal((online.match(/rel="stylesheet"/g) || []).length, 2);
+    assert.match(online, /<style data-online-critical>/);
+    assert.match(online, /media="print" data-online-styles/);
+    assert.match(online, /<noscript><link rel="stylesheet" href="\/online\/site.css"><\/noscript>/);
+    const criticalCss = online.match(/<style data-online-critical>([\s\S]*?)<\/style>/)[1];
+    assert.doesNotMatch(criticalCss, /deferred-panel/);
     assert.ok(online.includes('href="/online/site.css"'));
     const css = await readFile(join(directory, "online", "site.css"), "utf8");
     assert.match(css, /color:#00f|color:blue/);
     assert.match(css, /@media print/);
+    assert.match(css, /deferred-panel/);
     const resume = await readFile(join(directory, "professional", "resume", "index.html"), "utf8");
     assert.ok(resume.includes("<style data-resume-styles>"));
     assert.ok(resume.includes("@media print"));

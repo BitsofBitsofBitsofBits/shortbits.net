@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { build, transform } from "esbuild";
 import { buildResume } from "./build-resume.mjs";
+import { parseHTML } from "linkedom";
+import { filterCssForMarkup } from "./build-theme-css.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export async function filesUnder(directory) {
@@ -78,11 +80,20 @@ export async function optimizeStyles(directory) {
   });
   if (bundled.outputFiles.length !== 1) throw new Error("Online CSS optimization produced unexpected assets.");
   await writeFile(join(directory, "online", "site.css"), bundled.outputFiles[0].contents);
+  const { document } = parseHTML(onlineHtml);
+  document.querySelectorAll("[hidden]").forEach((element) => {
+    if (element.id !== "boot-screen") element.remove();
+  });
+  const critical = await transform(filterCssForMarkup(bundled.outputFiles[0].text, document.toString()), {
+    loader: "css", minify: true, target: ["chrome105", "firefox102", "safari15.6"],
+  });
   let first = true;
   await writeFile(onlinePath, onlineHtml.replace(stylesheetPattern, () => {
     if (!first) return "";
     first = false;
-    return '<link rel="stylesheet" href="/online/site.css">';
+    return `<style data-online-critical>${critical.code.replace(/<\/style/gi, "<\\/style")}</style>`
+      + '<link rel="stylesheet" href="/online/site.css" media="print" data-online-styles>'
+      + '<noscript><link rel="stylesheet" href="/online/site.css"></noscript>';
   }));
 
   for (const file of (await filesUnder(directory)).filter((path) => path.endsWith(".css"))) {

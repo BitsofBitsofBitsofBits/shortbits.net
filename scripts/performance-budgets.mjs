@@ -6,7 +6,7 @@ export const requiredReports = [
 
 export function checkPerformanceBudget(report, name) {
   const failures = [];
-  if (report.runtimeError) failures.push(`${name}: Lighthouse runtime error: ${report.runtimeError.message}`);
+  if (report.runtimeError) return [`${name}: Lighthouse runtime error: ${report.runtimeError.message}`];
   for (const [category, minimum] of [["performance", 0.9], ["accessibility", 1], ["seo", 1]]) {
     const score = report.categories?.[category]?.score;
     if (typeof score !== "number" || score < minimum) {

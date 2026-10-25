@@ -255,6 +255,56 @@ for (const failure of ["fetch", "execution", "timeout"]) {
   });
 }
 
+for (const outcome of ["load", "error", "timeout"]) {
+  test(`online runtime waits for nonblocking full CSS and handles ${outcome}`, () => {
+    const frames = [], scripts = [], events = [];
+    let timeout;
+    const stylesheet = {
+      media: "print", sheet: null, listeners: {},
+      addEventListener(name, callback) { this.listeners[name] = callback; },
+    };
+    const root = { dataset: {} };
+    vm.runInNewContext(runtimeSource, {
+      document: {
+        documentElement: root,
+        querySelector: (selector) => selector === "[data-online-styles]" ? stylesheet : null,
+        querySelectorAll: () => [{ src: "https://example.test/script.js" }],
+        createElement: () => ({
+          listeners: {},
+          addEventListener(name, callback) { this.listeners[name] = callback; },
+        }),
+        head: { append: (script) => scripts.push(script) },
+      },
+      window: {
+        requestAnimationFrame: (callback) => frames.push(callback),
+        setTimeout: (callback) => { timeout = callback; },
+        clearTimeout() {},
+        dispatchEvent: (event) => events.push(event.type),
+      },
+      CustomEvent: class { constructor(type) { this.type = type; } },
+    });
+    frames.shift()();
+    frames.shift()();
+    assert.equal(stylesheet.media, "all");
+    assert.equal(scripts.length, 0);
+    if (outcome === "load") {
+      stylesheet.sheet = {};
+      stylesheet.listeners.load();
+      assert.equal(scripts.length, 1);
+      scripts[0].listeners.load();
+      assert.equal(root.dataset.runtime, "ready");
+    } else {
+      if (outcome === "error") stylesheet.listeners.error();
+      else timeout();
+      assert.equal(root.dataset.runtime, "error");
+      assert.equal(scripts.length, 0);
+      stylesheet.listeners.load();
+      assert.equal(scripts.length, 0, "late stylesheet loads must not resume a failed runtime");
+    }
+    assert.equal(events.length, 1);
+  });
+}
+
 test("paint-aware browsers do not fetch enhancement scripts before content is painted", () => {
   let notify;
   const appended = [];
