@@ -52,6 +52,11 @@ const gamesSubmit = document.querySelector("#games-submit");
 const gamesAdminStatus = document.querySelector("#games-admin-status");
 const gamesSlots = document.querySelector("#games-slots");
 const gamesEntryAdd = document.querySelector("#games-entry-add");
+const creatorsForm = document.querySelector("#creators-form");
+const creatorsSubmit = document.querySelector("#creators-submit");
+const creatorsAdminStatus = document.querySelector("#creators-admin-status");
+const creatorsSlots = document.querySelector("#creators-slots");
+const creatorsEntryAdd = document.querySelector("#creators-entry-add");
 const hardwareForm = document.querySelector("#hardware-form");
 const hardwareSubmit = document.querySelector("#hardware-submit");
 const hardwareAdminStatus = document.querySelector("#hardware-admin-status");
@@ -753,6 +758,21 @@ const repeatableEditors = {
       { key: "note", label: "NOTE", maxLength: 500, multiline: true },
     ],
   },
+  creators: {
+    table: "site_creators",
+    container: creatorsSlots,
+    addButton: creatorsEntryAdd,
+    status: creatorsAdminStatus,
+    itemName: "creator",
+    fields: [
+      { key: "title", label: "CREATOR NAME", maxLength: 120 },
+      { key: "platform", label: "PLATFORM (E.G. YOUTUBE, TWITCH)", maxLength: 80 },
+      { key: "channel_url", label: "CHANNEL / PROFILE URL (HTTPS)", type: "url", maxLength: 500 },
+      { key: "youtube_channel_id", label: "YOUTUBE CHANNEL ID (OPTIONAL, UC...)", maxLength: 24 },
+      { key: "note", label: "NOTE (OPTIONAL)", maxLength: 500, multiline: true },
+      { key: "sort_order", label: "DISPLAY ORDER (LOWER NUMBERS FIRST)", type: "number", defaultValue: "0" },
+    ],
+  },
   hardware: {
     table: "site_hardware",
     container: hardwareSlots,
@@ -838,7 +858,7 @@ function createRepeatableEntry(editor, entry = {}) {
       {
         ...field,
         fieldKey: field.key,
-        value: entry[field.key],
+        value: entry[field.key] ?? field.defaultValue,
       },
     ));
   });
@@ -911,7 +931,10 @@ async function syncRepeatableEntries(editor, entries, updatedAt) {
   let nextPosition = editor.maxPosition;
   const changes = entries.map((entry) => {
     const values = Object.fromEntries(
-      editor.fields.map((field) => [field.key, entry[field.key] || null]),
+      editor.fields.map((field) => [
+        field.key,
+        field.type === "number" ? Number(entry[field.key]) : entry[field.key] || null,
+      ]),
     );
     const payload = {
       ...values,
@@ -1554,6 +1577,24 @@ async function loadFavoriteGames() {
     `${data.length} favorite game entr${data.length === 1 ? "y" : "ies"} loaded.`,
     "success",
   );
+  return true;
+}
+
+async function loadCreators() {
+  setAdminStatus(creatorsAdminStatus, "Loading creators...");
+  const { data, error } = await adminClient
+    .from("site_creators")
+    .select("position, title, platform, channel_url, youtube_channel_id, note, sort_order, enabled")
+    .order("sort_order", { ascending: true })
+    .order("position", { ascending: true });
+  creatorsSubmit.disabled = Boolean(error);
+  if (error) {
+    console.error("Unable to load creators:", error);
+    setAdminStatus(creatorsAdminStatus, `Creators failed to load: ${error.message}`, "error");
+    return false;
+  }
+  renderRepeatableEntries(repeatableEditors.creators, data);
+  setAdminStatus(creatorsAdminStatus, `${data.length} creator(s) loaded.`, "success");
   return true;
 }
 
@@ -2591,6 +2632,7 @@ async function showInbox() {
     loadNowContent(),
     loadChangelogContent(),
     loadFavoriteGames(),
+    loadCreators(),
     loadHardware(),
     loadHardwareDevices(),
     loadBlogPosts(),
@@ -3418,6 +3460,49 @@ if (adminClient) {
     }
     clearPublicContentCache();
     setAdminStatus(gamesAdminStatus, "Favorite games updated.", "success");
+  });
+
+  creatorsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const entries = collectRepeatableEntries(repeatableEditors.creators);
+    const invalid = entries.some((entry) => {
+      if (entry.enabled && (!entry.title || !entry.platform || !entry.channel_url)) return true;
+      if (!/^\d+$/.test(entry.sort_order) || Number(entry.sort_order) > 2147483647) return true;
+      if (entry.youtube_channel_id && !/^UC[A-Za-z0-9_-]{22}$/.test(entry.youtube_channel_id)) return true;
+      if (entry.channel_url) {
+        try {
+          const url = new URL(entry.channel_url);
+          return url.protocol !== "https:" || Boolean(url.username || url.password);
+        } catch {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (invalid) {
+      setAdminStatus(creatorsAdminStatus,
+        "Enabled creators need a name, platform, and HTTPS URL without credentials. Display order must be a non-negative integer. YouTube IDs must be UC followed by 22 letters, numbers, underscores, or hyphens.",
+        "error");
+      return;
+    }
+    creatorsSubmit.disabled = true;
+    creatorsSubmit.textContent = "> SAVING...";
+    setAdminStatus(creatorsAdminStatus, "Saving creators...");
+    try {
+      const failedUpdate = await syncRepeatableEntries(
+        repeatableEditors.creators, entries, new Date().toISOString(),
+      );
+      if (failedUpdate) throw new Error(failedUpdate.error.message);
+      if (await loadCreators()) {
+        setAdminStatus(creatorsAdminStatus, "Creators updated. Public lists refresh within five minutes; latest uploads can be cached for ten minutes.", "success");
+      }
+    } catch (error) {
+      console.error("Unable to save creators:", error);
+      setAdminStatus(creatorsAdminStatus, `Creator update failed: ${error.message}`, "error");
+      creatorsSubmit.disabled = false;
+    } finally {
+      creatorsSubmit.textContent = "> SAVE_CREATORS";
+    }
   });
 
   const hardwareImportPlatform = document.querySelector("#hardware-import-platform");

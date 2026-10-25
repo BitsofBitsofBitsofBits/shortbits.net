@@ -8559,6 +8559,11 @@ body.is-black-screen-staging .binary-rain {
   --window-default-width: 880px;
 }
 
+#creators-window {
+  --window-default-height: 650px;
+  --window-default-width: 880px;
+}
+
 #hardware-window {
   --window-default-height: 640px;
   --window-default-width: 860px;
@@ -12185,6 +12190,59 @@ ul.resume-entry-technologies li {
   outline: none;
   color: var(--ink);
   background: var(--accent-soft);
+}
+
+.creator-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+  padding: 0;
+  margin: 18px 0 0;
+  list-style: none;
+}
+
+.creator-list[hidden] {
+  display: none;
+}
+
+.creator-list > li {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  overflow-wrap: anywhere;
+}
+
+.creator-list h3 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.creator-list a {
+  color: var(--accent);
+}
+
+.creator-list a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.creator-platform,
+.creator-latest time {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.creator-latest {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+}
+
+.creator-latest time {
+  display: block;
+  margin-top: 8px;
 }
 
 .hardware-machines {

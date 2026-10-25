@@ -1,6 +1,6 @@
 (() => {
   const tables = [
-    "pronoun_profiles", "site_blog_posts", "site_changelog", "site_favorite_games",
+    "pronoun_profiles", "site_blog_posts", "site_changelog", "site_creators", "site_favorite_games",
     "site_hardware", "site_hardware_machine_order", "site_now",
     "site_resume_certifications", "site_resume_education", "site_resume_entries",
     "site_resume_profile", "spotify_featured_playlists", "spotify_featured_tracks",

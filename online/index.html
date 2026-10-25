@@ -32,7 +32,7 @@
     <script src="/theme-init.js?v=theme-25"></script>
     <script src="/boot.js?v=boot-2"></script>
     <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-133">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-134">
     <link rel="stylesheet" href="/bsod-classic.css?v=bsod-classic-1">
     <link rel="stylesheet" href="/launcher.css?v=launcher-1">
     <link rel="stylesheet" href="/contact-reliability.css?v=contact-1">
@@ -42,7 +42,7 @@
     <script src="/arg.js?v=arg-3" type="application/x-bits-runtime"></script>
     <script src="/filesystem.js?v=filesystem-2" type="application/x-bits-runtime"></script>
     <script src="/supabase-config.js" type="application/x-bits-runtime"></script>
-    <script src="/analytics.js?v=analytics-4" type="application/x-bits-runtime"></script>
+    <script src="/analytics.js?v=analytics-5" type="application/x-bits-runtime"></script>
     <script src="/notifications.js?v=notifications-2" type="application/x-bits-runtime"></script>
     <script src="/theme-effects.js?v=theme-effects-5" type="application/x-bits-runtime"></script>
     <script src="/screensaver.js?v=screensaver-1" type="application/x-bits-runtime"></script>
@@ -55,6 +55,7 @@
     <script src="/bsod-classic.js?v=bsod-classic-1" type="application/x-bits-runtime"></script>
     <script src="/career-format.js?v=career-2" type="application/x-bits-runtime"></script>
     <script src="/content.js?v=content-17" type="application/x-bits-runtime"></script>
+    <script src="/creators.js?v=creators-1" type="application/x-bits-runtime"></script>
     <script src="/about.js?v=about-3" type="application/x-bits-runtime"></script>
     <script src="/pronouns.js?v=pronouns-1" type="application/x-bits-runtime"></script>
     <script src="/discord.js?v=discord-3" type="application/x-bits-runtime"></script>
@@ -108,6 +109,10 @@
         <button type="button" data-window-target="hardware-window">
           <span class="fake-desktop-icon" aria-hidden="true">#</span>
           <span>HARDWARE.SYS</span>
+        </button>
+        <button type="button" data-window-target="creators-window">
+          <span class="fake-desktop-icon" aria-hidden="true">&gt;</span>
+          <span>CREATOR.FEED</span>
         </button>
         <button class="arcade-desktop-launcher" type="button" data-window-target="arcade-window">
           <span class="fake-desktop-icon" aria-hidden="true">8B</span>
@@ -463,6 +468,7 @@
             </button>
             <button type="button" data-window-target="monitor-window">SYSTEM MONITOR</button>
             <button type="button" data-window-target="hardware-window">HARDWARE.SYS</button>
+            <button type="button" data-window-target="creators-window">CREATOR.FEED</button>
           </div>
         </details>
         <details class="app-menu" name="application-menu">
@@ -647,6 +653,10 @@
           <button type="button" data-window-target="games-window">
             <strong>GAMES.EXE</strong>
             <span>Browse favorite non-suspicious games</span>
+          </button>
+          <button type="button" data-window-target="creators-window">
+            <strong>CREATOR.FEED</strong>
+            <span>Creators I watch and their latest YouTube uploads</span>
           </button>
           <button type="button" data-window-target="hardware-window">
             <strong>HARDWARE.SYS</strong>
@@ -1396,6 +1406,34 @@
         <ol id="games-list" class="favorite-games-list" hidden></ol>
       </div>
       <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Favorite Games window"></button>
+    </section>
+
+    <section
+      id="creators-window"
+      class="desktop-window creators-window"
+      role="dialog"
+      aria-labelledby="creators-window-title"
+      data-window
+      data-window-x="190"
+      data-window-y="110"
+      hidden
+    >
+      <header class="desktop-window-bar" data-window-drag-handle>
+        <p id="creators-window-title">CREATOR.FEED</p>
+        <div class="desktop-window-controls">
+          <button type="button" data-window-minimize aria-label="Minimize Creator Feed window">_</button>
+          <button type="button" data-window-close aria-label="Close Creator Feed window">&times;</button>
+        </div>
+      </header>
+      <div class="desktop-window-content">
+        <p class="system-kicker">CURATED_CHANNELS // WORTH_WATCHING</p>
+        <h2>CREATORS I WATCH</h2>
+        <p class="content-window-summary">People making good things on the internet. Latest YouTube uploads can include Shorts and livestreams.</p>
+        <button id="creators-refresh" type="button">REFRESH FEED</button>
+        <p id="creators-status" class="form-status" role="status" aria-live="polite">Open the feed to load creators.</p>
+        <ol id="creators-list" class="creator-list" hidden></ol>
+      </div>
+      <button class="desktop-window-resize-handle" type="button" data-window-resize aria-label="Resize Creator Feed window"></button>
     </section>
 
     <section

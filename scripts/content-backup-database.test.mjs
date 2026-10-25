@@ -26,17 +26,23 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
       `);
     }
     await db.exec(await readFile(new URL("../supabase/migrations/20261022030000_content_backups.sql", import.meta.url), "utf8"));
+    await db.exec("create table site_analytics_windows_daily (window_slug text constraint site_analytics_windows_daily_window_slug_check check (window_slug = 'about'));");
+    await db.exec(await readFile(new URL("../supabase/migrations/20261025010000_create_creators.sql", import.meta.url), "utf8"));
     await db.exec("set role anon");
     await assert.rejects(db.query("select public.export_site_content()"), /permission denied/);
     await assert.rejects(db.query("select public.restore_site_content('{}'::jsonb)"), /permission denied/);
     await db.exec("set role authenticated");
+    await db.exec("insert into site_creators (position, title, platform, channel_url, enabled) values (1, 'Original creator', 'YouTube', 'https://www.youtube.com/@example', true)");
     const exported = (await db.query("select public.export_site_content() as backup")).rows[0].backup;
-    assert.equal(Object.keys(exported.tables).length, names.length);
+    assert.equal(Object.keys(exported.tables).length, names.length + 1);
+    assert.equal(exported.tables.site_creators[0].title, "Original creator");
     assert.ok(!("messages" in exported.tables));
     await db.exec("update public.site_blog_posts set body = 'changed'");
+    await db.exec("delete from site_creators");
     const result = (await db.query("select public.restore_site_content($1::jsonb) as result", [JSON.stringify(exported)])).rows[0].result;
-    assert.deepEqual(result, { rows: 13, tables: 13 });
+    assert.deepEqual(result, { rows: 14, tables: 14 });
     assert.equal((await db.query("select body from site_blog_posts")).rows[0].body, "original");
+    assert.equal((await db.query("select title from site_creators")).rows[0].title, "Original creator");
 
     const invalid = structuredClone(exported);
     invalid.tables.site_blog_posts[0].body = "must roll back";

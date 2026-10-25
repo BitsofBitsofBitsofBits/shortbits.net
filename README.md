@@ -86,6 +86,25 @@ is a personal project and largely a learning exercise for me.
   featured songs, and changelog entries without fixed slot limits
 - A public `GUESTBOOK.LOG` with immediate publishing and authenticated Admin
   deletion controls
+- A `CREATOR.FEED` card and shareable `/online/?window=creators` window for
+  creators worth watching on YouTube or any other platform. Admin -> Showcase ->
+  Creators manages names, platform labels, HTTPS channel/profile links, notes,
+  numeric display order (lower first), and enabled/hidden entries. Nothing is
+  preselected; add your own list in Admin.
+  An optional 24-character YouTube channel ID (`UC` followed by 22 characters,
+  not an `@handle`) enables a latest-upload link using YouTube's public Atom
+  feed. IDs can be found through a channel's About / Share channel options, or
+  advanced account settings for your own channel. Uploads may include Shorts
+  and livestreams; this is not a long-form-only feed.
+  Creator data and video requests run only when the window opens. Creator lists
+  refresh on reopen after five minutes or immediately with **Refresh feed**;
+  successful upload results are cached for up to ten minutes. Feed failures
+  display an explicit unavailable state without hiding channel links. No
+  YouTube API key, embedded player, or browser request to YouTube is needed.
+  Deploy `20261025010000_create_creators.sql` and the public `creator-videos`
+  Edge Function (`--no-verify-jwt`); the deployment workflow includes both.
+  The function uses Supabase's built-in URL/anon-key environment variables and
+  fetches feeds only for enabled, Admin-configured channel IDs.
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
@@ -627,10 +646,12 @@ scoped passwordless `sudo` access to `caddy validate`,
   Edits, scheduling, deletion, and unpublishing require another deploy to update
   static copies and RSS. Do not treat unpublishing alone as immediate removal of
   previously deployed public content.
-- The Admin center's **Content backups** page exports 13 editorial tables,
-  including drafts. Restore validates the complete schema and runs atomically
+- The Admin center's **Content backups** page exports 14 editorial tables,
+  including creators and drafts. Restore validates the complete schema and runs atomically
   under existing authenticated permissions. A safety backup downloads first.
-  The backup migration must be deployed before these actions work.
+  The backup and creator migrations must be deployed before these actions work.
+  Export a new backup after the creator migration; older 13-table backups do not
+  match the current schema and are rejected rather than silently clearing creators.
 - Backups exclude private messages, guestbook entries, leaderboards, analytics,
   short links, device credentials, live telemetry, and image binaries. Keep
   backups private, retain separate Supabase database/Storage backups, and reload
@@ -663,6 +684,7 @@ node scripts/validate-site.mjs --root .site-build
 npx playwright install chromium
 npm run test:browser
 node scripts/hardware-layout-browser.mjs --root .site-build
+node scripts/creators-browser.mjs --root .site-build
 npm run audit
 ```
 

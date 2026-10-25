@@ -62,7 +62,9 @@ jobs:
       - name: Check browser behavior and accessibility
         env:
           BITS_BROWSER_CHANNEL: chrome
-        run: npm run test:browser
+        run: |
+          npm run test:browser
+          node scripts/creators-browser.mjs --root .site-build
 
       - name: Enforce pre-deployment performance budgets
         id: performance
@@ -155,6 +157,14 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy contact-message
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
+      - name: Deploy creator videos Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy creator-videos
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api

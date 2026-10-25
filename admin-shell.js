@@ -66,6 +66,7 @@
     { route: "changelog", sourceId: "changelog-editor", label: "Changelog", group: "content", icon: "history", description: "Manage the public deployment history.", keywords: "releases updates" },
     { route: "blog", sourceId: "blog-editor", label: "Blog", group: "content", icon: "edit", description: "Write, preview, draft, and publish Markdown posts.", keywords: "posts markdown articles" },
     { route: "games", sourceId: "games-editor", label: "Games", group: "showcase", icon: "game", description: "Manage the public favorite-games library.", keywords: "library favorites" },
+    { route: "creators", sourceId: "creators-editor", label: "Creators", group: "showcase", icon: "person", description: "Curate CREATOR.FEED, channel links, and latest YouTube uploads.", keywords: "youtube twitch videos channels content creators" },
     { route: "hardware", sourceId: "hardware-editor", label: "Hardware", group: "showcase", icon: "chip", description: "Publish machine specs, import scans, and manage live agents.", keywords: "pc nas unraid specs agent devices" },
     { route: "playlists", sourceId: "playlist-editor", label: "Playlists", group: "showcase", icon: "list", description: "Manage featured Spotify playlists.", keywords: "spotify music" },
     { route: "songs", sourceId: "track-editor", label: "Songs", group: "showcase", icon: "music", description: "Manage featured Spotify songs.", keywords: "spotify tracks music" },

@@ -8,7 +8,7 @@
     <title>Bits 365 admin center // BitsofBitsofBits</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/admin-appearance.js?v=admin-appearance-1"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-133">
+    <link rel="stylesheet" href="/styles.css?v=upgrade-134">
     <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-5">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
@@ -16,11 +16,11 @@
     <script src="/shortbits.js?v=shortbits-1" defer></script>
     <script src="/seasonal-calendar.js?v=calendar-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
-    <script src="/admin-shell.js?v=admin-shell-1" defer></script>
+    <script src="/admin-shell.js?v=admin-shell-2" defer></script>
     <script src="/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin-publishing.js?v=publishing-1" defer></script>
-    <script src="/admin.js?v=admin-30" defer></script>
-    <script src="/admin-backup.js?v=backup-1" defer></script>
+    <script src="/admin.js?v=admin-31" defer></script>
+    <script src="/admin-backup.js?v=backup-2" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -87,7 +87,7 @@
 
         <section id="backup-editor" class="profile-editor" aria-labelledby="backup-editor-heading">
           <h2 id="backup-editor-heading">Content backups</h2>
-          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, hardware specs/order, and featured music. Backups are private files, not encrypted.</p>
+          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
           <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
           <button id="backup-export" type="button">Download content backup</button>
           <h3>Restore content</h3>
@@ -289,6 +289,23 @@
             <div id="games-slots" class="curated-admin-grid"></div>
             <p id="games-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="games-submit" type="submit">&gt; SAVE_GAMES</button>
+          </form>
+        </section>
+
+        <section id="creators-editor" class="profile-editor" aria-labelledby="creators-editor-heading">
+          <div class="section-label">
+            <h2 id="creators-editor-heading">CREATOR.FEED</h2>
+            <span>CREATORS WORTH WATCHING</span>
+          </div>
+          <p>Add creators from any platform. Enable entries to publish them. Lower display-order numbers appear first; ties follow entry order.</p>
+          <p>For latest YouTube uploads, enter the channel's UC... ID (24 characters), not its @handle. Find it in the channel's About / Share channel options or YouTube's advanced account settings for your own channel. Leave it blank for profile links only. Public feeds can include Shorts and livestreams and are cached for up to ten minutes.</p>
+          <form id="creators-form" class="admin-form content-admin-form">
+            <div class="repeatable-admin-actions">
+              <button id="creators-entry-add" type="button">+ ADD_CREATOR</button>
+            </div>
+            <div id="creators-slots" class="curated-admin-grid"></div>
+            <p id="creators-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="creators-submit" type="submit">&gt; SAVE_CREATORS</button>
           </form>
         </section>
 
@@ -623,6 +640,7 @@
           <li><a href="/blog/"><strong>Blog</strong><span>Published posts</span></a></li>
           <li><a href="/"><strong>Chooser</strong><span>Pick a site</span></a></li>
           <li><a href="/online/?window=hardware"><strong>Hardware</strong><span>HARDWARE.SYS</span></a></li>
+          <li><a href="/online/?window=creators"><strong>Creators</strong><span>CREATOR.FEED</span></a></li>
           <li><a href="/online/?window=arcade"><strong>Arcade</strong><span>ARCADE.EXE</span></a></li>
         </ul>
       </div>
