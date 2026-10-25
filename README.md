@@ -93,18 +93,29 @@ is a personal project and largely a learning exercise for me.
   preselected; add your own list in Admin.
   An optional 24-character YouTube channel ID (`UC` followed by 22 characters,
   not an `@handle`) enables a latest-upload link using YouTube's public Atom
-  feed. IDs can be found through a channel's About / Share channel options, or
-  advanced account settings for your own channel. Uploads may include Shorts
+  feed and an automatic channel photo from the public channel page. In Admin,
+  paste a channel URL or `@handle` into CHANNEL / PROFILE URL and click
+  **LOOK UP YOUTUBE CHANNEL**, then save. This authenticated lookup fills the
+  UC ID and a canonical channel URL; it never saves automatically. IDs can also
+  be copied from a channel's description / About -> Share channel -> Copy channel ID,
+  or YouTube's advanced account settings for your own channel. Uploads may include Shorts
   and livestreams; this is not a long-form-only feed.
   Creator data and video requests run only when the window opens. Creator lists
   refresh on reopen after five minutes or immediately with **Refresh feed**;
-  successful upload results are cached for up to ten minutes. Feed failures
-  display an explicit unavailable state without hiding channel links. No
-  YouTube API key, embedded player, or browser request to YouTube is needed.
+  successful upload/photo results are cached for up to ten minutes. Feed/photo
+  failures are reported independently without hiding channel links or successful
+  uploads. Photos use fixed 64px slots, lazy loading, and initials when unavailable;
+  other platforms also show initials. Only YouTube's image CDN hosts are allowed.
+  Channel-page metadata may stop working if YouTube blocks requests or changes its
+  markup. No YouTube API key or embedded player is needed; browsers request only
+  the channel image from Google's image CDN, without sending a referrer.
   Deploy `20261025010000_create_creators.sql` and the public `creator-videos`
   Edge Function (`--no-verify-jwt`); the deployment workflow includes both.
   The function uses Supabase's built-in URL/anon-key environment variables and
-  fetches feeds only for enabled, Admin-configured channel IDs.
+  fetches feeds/photos only for enabled, Admin-configured channel IDs on public
+  GET requests. POST lookups verify a signed-in, non-anonymous Supabase user
+  (matching the creator editor's authenticated-user policy), accept only YouTube
+  channel paths, disable redirects, and bound channel-metadata reads to 2 MB/10 seconds.
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,

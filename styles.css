@@ -12218,6 +12218,46 @@ ul.resume-entry-technologies li {
   font-size: 0.9rem;
 }
 
+.creator-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.creator-heading h3 {
+  min-width: 0;
+  margin: 0;
+}
+
+.creator-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.creator-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.creator-avatar img.is-loaded {
+  opacity: 1;
+}
+
 .creator-list a {
   color: var(--accent);
 }

@@ -32,12 +32,20 @@
 
   function createCreator(creator) {
     const item = document.createElement("li");
+    const heading = document.createElement("div");
+    const avatar = document.createElement("span");
+    avatar.className = "creator-avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.textContent = creator.title.trim().split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join("").toUpperCase();
+    if (creator.youtube_channel_id) avatar.dataset.avatarChannelId = creator.youtube_channel_id;
+    heading.className = "creator-heading";
     const title = document.createElement("h3");
     const platform = document.createElement("p");
     title.append(externalLink(creator.title, creator.channel_url));
     platform.className = "creator-platform";
     platform.textContent = creator.platform;
-    item.append(title, platform);
+    heading.append(avatar, title);
+    item.append(heading, platform);
     if (creator.note) {
       const note = document.createElement("p");
       note.textContent = creator.note;
@@ -54,6 +62,12 @@
     return item;
   }
 
+  function isChannelPhoto(value) {
+    if (!isHttpsUrl(value)) return false;
+    const url = new URL(value);
+    return !url.port && ["yt3.googleusercontent.com", "yt3.ggpht.com"].includes(url.hostname);
+  }
+
   async function loadLatest(url, anonKey) {
     const response = await fetch(`${url.replace(/\/$/, "")}/functions/v1/creator-videos`, {
       headers: { apikey: anonKey }, signal: AbortSignal.timeout(30_000),
@@ -63,6 +77,8 @@
     if (!Array.isArray(payload.videos) || payload.videos.some((entry) => (
       !entry || !/^UC[A-Za-z0-9_-]{22}$/.test(entry.channelId)
       || typeof entry.unavailable !== "boolean"
+      || typeof entry.photoUnavailable !== "boolean"
+      || (entry.avatarUrl !== null && !isChannelPhoto(entry.avatarUrl))
       || (entry.video !== null && (
         !entry.video || typeof entry.video.title !== "string"
         || !/^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}$/.test(entry.video.url)
@@ -71,6 +87,30 @@
     ))) throw new Error("Latest-video service returned invalid data.");
     const videos = new Map(payload.videos.map((entry) => [entry.channelId, entry]));
     let unavailable = false;
+    list.querySelectorAll("[data-avatar-channel-id]").forEach((container) => {
+      const entry = videos.get(container.dataset.avatarChannelId);
+      if (!entry || entry.photoUnavailable || !entry.avatarUrl) {
+        container.title = "YouTube channel photo unavailable.";
+        unavailable = true;
+        return;
+      }
+      const image = document.createElement("img");
+      image.alt = "";
+      image.width = 64;
+      image.height = 64;
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.referrerPolicy = "no-referrer";
+      image.addEventListener("load", () => image.classList.add("is-loaded"), { once: true });
+      image.addEventListener("error", () => {
+        image.remove();
+        console.warn(`Unable to display channel photo for ${entry.channelId}.`);
+        container.title = "YouTube channel photo unavailable.";
+        report("Creator list loaded. Some channel photos could not load; initials are shown instead.", "warning");
+      }, { once: true });
+      image.src = entry.avatarUrl;
+      container.append(image);
+    });
     list.querySelectorAll("[data-channel-id]").forEach((container) => {
       const entry = videos.get(container.dataset.channelId);
       if (!entry || entry.unavailable) {
@@ -122,15 +162,15 @@
         try {
           const unavailable = await loadLatest(url, anonKey);
           report(unavailable
-            ? "Creator list loaded. Some latest videos are unavailable; try Refresh later."
-            : "Creator list loaded. YouTube uploads may be cached for up to 10 minutes.",
+            ? "Creator list loaded. Some YouTube videos or photos are unavailable; try Refresh later."
+            : "Creator list loaded. YouTube uploads and photos may be cached for up to 10 minutes.",
           unavailable ? "warning" : "success");
         } catch (error) {
           console.warn("Unable to load latest creator videos:", error);
           list.querySelectorAll("[data-channel-id]").forEach((container) => {
             container.textContent = "Latest video unavailable. The channel link still works.";
           });
-          report("Creator list loaded, but latest videos are unavailable. Try Refresh later.", "warning");
+          report("Creator list loaded, but YouTube videos and photos are unavailable. Initials are shown instead. Try Refresh later.", "warning");
         }
       }
     } catch (error) {

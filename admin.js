@@ -862,6 +862,48 @@ function createRepeatableEntry(editor, entry = {}) {
       },
     ));
   });
+  if (editor === repeatableEditors.creators) {
+    const lookup = document.createElement("button");
+    const lookupStatus = document.createElement("p");
+    lookup.type = "button";
+    lookup.className = "creator-channel-lookup";
+    lookup.textContent = "LOOK UP YOUTUBE CHANNEL";
+    lookupStatus.className = "form-status";
+    lookupStatus.setAttribute("role", "status");
+    lookupStatus.setAttribute("aria-live", "polite");
+    lookup.addEventListener("click", async () => {
+      const channel = fieldset.querySelector('[data-entry-field="channel_url"]');
+      const id = fieldset.querySelector('[data-entry-field="youtube_channel_id"]');
+      const originalUrl = channel.value;
+      const originalId = id.value;
+      lookup.disabled = true;
+      setAdminStatus(lookupStatus, "Looking up YouTube channel...");
+      try {
+        const { data, error } = await adminClient.functions.invoke("creator-videos", {
+          body: { channelUrl: channel.value.trim() || id.value.trim() },
+        });
+        if (error) throw error;
+        if (!data || !/^UC[A-Za-z0-9_-]{22}$/.test(data.channelId)) {
+          throw new Error("YouTube did not return a valid channel ID.");
+        }
+        if (channel.value !== originalUrl || id.value !== originalId) {
+          setAdminStatus(lookupStatus, "Channel fields changed during lookup. Run the lookup again.", "warning");
+          return;
+        }
+        id.value = data.channelId;
+        channel.value = `https://www.youtube.com/channel/${data.channelId}`;
+        const platform = fieldset.querySelector('[data-entry-field="platform"]');
+        if (!platform.value.trim()) platform.value = "YouTube";
+        setAdminStatus(lookupStatus, "YouTube channel ID filled in. Save creators to publish uploads and the channel photo.", "success");
+      } catch (error) {
+        console.error("Unable to look up YouTube channel:", error);
+        setAdminStatus(lookupStatus, `Channel lookup failed: ${error.message} Check the channel URL or @handle, or enter the UC... ID manually.`, "error");
+      } finally {
+        lookup.disabled = false;
+      }
+    });
+    fieldset.append(lookup, lookupStatus);
+  }
   fieldset.append(createAdminCheckbox(
     "ENABLED",
     `${editor.itemName}_${entryKey}_enabled`,

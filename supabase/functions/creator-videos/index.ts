@@ -9,6 +9,8 @@ interface ChannelVideo {
   channelId: string;
   video: Video | null;
   unavailable: boolean;
+  avatarUrl: string | null;
+  photoUnavailable: boolean;
 }
 let cache: ChannelVideo[] | null = null;
 let cachedAt = 0;
@@ -18,8 +20,8 @@ function headers(request: Request, cacheable = false): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
   return {
     "Access-Control-Allow-Origin": allowedOrigins.has(origin) ? origin : "https://www.shortbits.net",
-    "Access-Control-Allow-Headers": "apikey, authorization, content-type",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "apikey, authorization, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Vary": "Origin",
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": cacheable ? "public, max-age=0, s-maxage=600" : "no-store",
@@ -63,6 +65,104 @@ function parseLatestVideo(xml: string): Video | null {
   return videos[0] ?? null;
 }
 
+function channelPath(input: string): string {
+  const value = input.trim();
+  const url = new URL(value.startsWith("@") || /^UC[A-Za-z0-9_-]{22}$/.test(value)
+    ? `https://www.youtube.com/${value.startsWith("@") ? value : `channel/${value}`}` : value);
+  const path = url.pathname.match(/^\/(@[^/]+|channel\/UC[A-Za-z0-9_-]{22}|c\/[^/]+|user\/[^/]+)(?:\/(?:featured|videos|shorts|streams|about))?\/?$/);
+  if (url.protocol !== "https:" || !["youtube.com", "www.youtube.com", "m.youtube.com"].includes(url.hostname)
+    || url.username || url.password || url.port || !path) {
+    throw new Error("Enter a YouTube channel URL, @handle, or UC channel ID.");
+  }
+  return `/${path[1]}`;
+}
+
+async function channelMetadata(path: string): Promise<{ channelId: string; avatarUrl: string | null; photoUnavailable: boolean }> {
+  const response = await fetch(`https://www.youtube.com${path}`, {
+    signal: AbortSignal.timeout(10_000), redirect: "error",
+  });
+  if (!response.ok) throw new Error(`YouTube channel returned HTTP ${response.status}.`);
+  if (!response.body) throw new Error("YouTube returned an empty channel page.");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let html = "";
+  let bytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        html += decoder.decode();
+        break;
+      }
+      bytes += value.byteLength;
+      if (bytes > 2_000_000) throw new Error("YouTube channel metadata exceeds the size limit.");
+      html += decoder.decode(value, { stream: true });
+      const hasChannel = /<meta\b(?=[^>]*\bproperty\s*=\s*["']og:url["'])[^>]*>/i.test(html)
+        || /<link\b(?=[^>]*\brel\s*=\s*["']canonical["'])[^>]*>/i.test(html);
+      const hasPhoto = /<meta\b(?=[^>]*\bproperty\s*=\s*["']og:image["'])[^>]*>/i.test(html);
+      if (hasChannel && hasPhoto) break;
+    }
+  } finally {
+    await reader.cancel();
+  }
+  const metadata = new Map<string, string>();
+  for (const tag of html.matchAll(/<(?:meta|link)\b[^>]*>/gi)) {
+    const attributes = new Map<string, string>();
+    for (const attribute of tag[0].matchAll(/([\w:-]+)\s*=\s*(["'])([\s\S]*?)\2/g)) {
+      attributes.set(attribute[1].toLowerCase(), xmlText(attribute[3]));
+    }
+    const key = attributes.get("property") ?? attributes.get("name") ?? attributes.get("rel");
+    const value = attributes.get("content") ?? attributes.get("href");
+    if (key && value) metadata.set(key, value);
+  }
+  const canonical = metadata.get("og:url") ?? metadata.get("canonical") ?? "";
+  const channelId = canonical.match(/^https:\/\/(?:www\.)?youtube\.com\/channel\/(UC[A-Za-z0-9_-]{22})\/?$/)?.[1];
+  if (!channelId) throw new Error("YouTube did not return a channel ID. Check the handle or channel URL.");
+  try {
+    const image = new URL(metadata.get("og:image") ?? "");
+    if (image.protocol !== "https:" || !["yt3.googleusercontent.com", "yt3.ggpht.com"].includes(image.hostname)
+      || image.username || image.password || image.port) {
+      throw new Error("YouTube did not return a supported channel photo.");
+    }
+    image.pathname = image.pathname.replace(/=s\d+(?=-|$)/, "=s160");
+    return { channelId, avatarUrl: image.href, photoUnavailable: false };
+  } catch (error) {
+    console.error(`Channel photo metadata unavailable for ${channelId}:`, error);
+    return { channelId, avatarUrl: null, photoUnavailable: true };
+  }
+}
+
+async function resolveChannel(request: Request): Promise<Response> {
+  const respond = (body: object, status: number) => Response.json(body, { status, headers: headers(request) });
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.startsWith("Bearer ")) return respond({ error: "Sign in to Admin to look up channels." }, 401);
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!url || !key) throw new Error("Creator lookup configuration is missing.");
+  const auth = await fetch(`${url}/auth/v1/user`, {
+    headers: { apikey: key, Authorization: authorization }, signal: AbortSignal.timeout(10_000),
+    redirect: "error",
+  });
+  if (auth.status >= 500) throw new Error(`Creator lookup authentication returned HTTP ${auth.status}.`);
+  if (!auth.ok) return respond({ error: "Your Admin session expired. Sign in again." }, 401);
+  const user = await auth.json();
+  if (!user || typeof user.id !== "string" || !user.id || user.is_anonymous === true) {
+    return respond({ error: "Sign in to Admin to look up channels." }, 401);
+  }
+  let path: string;
+  try {
+    const body = await request.json();
+    if (!body || typeof body.channelUrl !== "string" || body.channelUrl.length > 500) {
+      throw new Error("Enter a YouTube channel URL, @handle, or UC channel ID.");
+    }
+    path = channelPath(body.channelUrl);
+  } catch (error) {
+    return respond({ error: error instanceof Error ? error.message : "Invalid channel lookup request." }, 400);
+  }
+  const channel = await channelMetadata(path);
+  return respond(channel, 200);
+}
+
 async function loadVideos(): Promise<ChannelVideo[]> {
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_ANON_KEY");
@@ -84,18 +184,33 @@ async function loadVideos(): Promise<ChannelVideo[]> {
   const results: ChannelVideo[] = [];
   for (let index = 0; index < ids.length; index += 4) {
     results.push(...await Promise.all(ids.slice(index, index + 4).map(async (channelId) => {
-      try {
-        const feed = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
-          signal: AbortSignal.timeout(10_000), redirect: "error",
-        });
-        if (!feed.ok) throw new Error(`YouTube returned HTTP ${feed.status}.`);
-        const xml = await feed.text();
-        if (xml.length > 512_000) throw new Error("YouTube feed exceeds the size limit.");
-        return { channelId, video: parseLatestVideo(xml), unavailable: false };
-      } catch (error) {
-        console.error(`Latest video unavailable for ${channelId}:`, error);
-        return { channelId, video: null, unavailable: true };
-      }
+      const [upload, photo] = await Promise.all([
+        (async () => {
+          try {
+            const feed = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+              signal: AbortSignal.timeout(10_000), redirect: "error",
+            });
+            if (!feed.ok) throw new Error(`YouTube returned HTTP ${feed.status}.`);
+            const xml = await feed.text();
+            if (xml.length > 512_000) throw new Error("YouTube feed exceeds the size limit.");
+            return { video: parseLatestVideo(xml), unavailable: false };
+          } catch (error) {
+            console.error(`Latest video unavailable for ${channelId}:`, error);
+            return { video: null, unavailable: true };
+          }
+        })(),
+        (async () => {
+          try {
+            const metadata = await channelMetadata(`/channel/${channelId}`);
+            if (metadata.channelId !== channelId) throw new Error("YouTube returned a different channel.");
+            return { avatarUrl: metadata.avatarUrl, photoUnavailable: metadata.photoUnavailable };
+          } catch (error) {
+            console.error(`Channel photo unavailable for ${channelId}:`, error);
+            return { avatarUrl: null, photoUnavailable: true };
+          }
+        })(),
+      ]);
+      return { channelId, ...upload, ...photo };
     })));
   }
   return results;
@@ -103,21 +218,24 @@ async function loadVideos(): Promise<ChannelVideo[]> {
 
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: headers(request) });
-  if (request.method !== "GET") {
+  if (request.method !== "GET" && request.method !== "POST") {
     return Response.json({ error: "Method not allowed." }, { status: 405, headers: headers(request) });
   }
   try {
+    if (request.method === "POST") return await resolveChannel(request);
     if (!cache || Date.now() - cachedAt >= cacheTtlMs) {
       if (!inFlight) inFlight = loadVideos().finally(() => { inFlight = null; });
       const videos = await inFlight;
-      cache = videos.some((entry) => entry.unavailable) ? null : videos;
+      cache = videos.some((entry) => entry.unavailable || entry.photoUnavailable) ? null : videos;
       cachedAt = Date.now();
       return Response.json({ videos }, { headers: headers(request, cache !== null) });
     }
     return Response.json({ videos: cache }, { headers: headers(request, true) });
   } catch (error) {
     console.error("Creator video request failed:", error);
-    return Response.json({ error: "Latest videos are temporarily unavailable." }, {
+    return Response.json({ error: request.method === "POST"
+      ? "YouTube channel lookup is unavailable. Check the channel URL or try again later."
+      : "YouTube videos and photos are temporarily unavailable." }, {
       status: 502, headers: headers(request),
     });
   }

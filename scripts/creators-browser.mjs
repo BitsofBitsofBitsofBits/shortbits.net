@@ -8,6 +8,7 @@ const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
 const root = resolve(rootIndex < 0 ? "." : args[rootIndex + 1]);
 const channelId = `UC${"a".repeat(22)}`;
+const avatarUrl = "https://yt3.googleusercontent.com/example=s160-c";
 const fixtures = [
   { position: 1, title: "Example creator", platform: "YouTube", channel_url: "https://www.youtube.com/@example", note: "Tech and projects", youtube_channel_id: channelId },
   { position: 2, title: "Another creator", platform: "Twitch", channel_url: "https://www.twitch.tv/example", note: null, youtube_channel_id: null },
@@ -28,10 +29,22 @@ try {
     let listStatus = 200;
     let listRequests = 0;
     let videoRequests = 0;
+    let photoRequests = 0;
+    let photoUnavailable = false;
+    let uploadUnavailable = false;
+    let imageFailure = false;
     const errors = [];
     await context.addInitScript(() => sessionStorage.setItem("bits-boot-seen-v1", "true"));
     await context.route("**/*", (route) => {
       const url = new URL(route.request().url());
+      if (url.hostname === "yt3.googleusercontent.com") {
+        photoRequests++;
+        assert.equal(route.request().headers().referer, undefined);
+        return imageFailure ? route.abort() : route.fulfill({
+          contentType: "image/svg+xml",
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="blue"/></svg>',
+        });
+      }
       if (url.pathname.includes("/rest/v1/")) {
         const isCreators = url.pathname.endsWith("/site_creators");
         if (isCreators) {
@@ -51,8 +64,9 @@ try {
           status: videoStatus, contentType: "application/json",
           headers: { "Access-Control-Allow-Origin": "*" },
           body: JSON.stringify({ videos: [{
-            channelId, unavailable: false,
-            video: { title: "<script>not executable</script> & latest upload", url: "https://www.youtube.com/watch?v=abcdefghijk", publishedAt: "2026-10-25T00:00:00Z" },
+            channelId, unavailable: uploadUnavailable,
+            avatarUrl: photoUnavailable ? null : `${avatarUrl}${imageFailure ? "?test=failed-image" : ""}`, photoUnavailable,
+            video: uploadUnavailable ? null : { title: "<script>not executable</script> & latest upload", url: "https://www.youtube.com/watch?v=abcdefghijk", publishedAt: "2026-10-25T00:00:00Z" },
           }] }),
         });
       }
@@ -65,9 +79,13 @@ try {
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     assert.equal(listRequests, 0, "closed feed must not query creators");
     assert.equal(videoRequests, 0, "closed feed must not fetch videos");
+    assert.equal(photoRequests, 0, "closed feed must not request photos");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("creators"));
     await page.waitForFunction(() => document.querySelector("#creators-status").textContent.includes("10 minutes"));
     assert.equal(await page.locator("#creators-list > li").count(), 2);
+    await page.waitForFunction(() => document.querySelector(".creator-avatar img.is-loaded")?.naturalWidth === 64);
+    assert.equal(await page.locator(".creator-avatar img").getAttribute("src"), avatarUrl);
+    assert.equal(await page.locator(".creator-avatar").last().textContent(), "AC");
     assert.equal(await page.locator(".creator-latest a").getAttribute("href"), "https://www.youtube.com/watch?v=abcdefghijk");
     assert.equal(await page.locator(".creator-latest script").count(), 0);
     assert.equal(await page.locator("#creators-list > li").last().locator(".creator-latest").count(), 0);
@@ -84,6 +102,23 @@ try {
       nodes: violation.nodes.map((node) => ({ target: node.target, summary: node.failureSummary })),
     })));
     assert.deepEqual(violations, [], `${width}px creator accessibility`);
+    photoUnavailable = true;
+    await page.locator("#creators-refresh").click();
+    await page.waitForFunction(() => document.querySelector("#creators-status").dataset.state === "warning");
+    assert.equal(await page.locator(".creator-avatar").first().textContent(), "EC");
+    assert.equal(await page.locator(".creator-avatar img").count(), 0);
+    assert.equal(await page.locator(".creator-latest a").count(), 1, "missing photo must not remove the latest upload");
+    photoUnavailable = false;
+    imageFailure = true;
+    await page.locator("#creators-refresh").click();
+    await page.waitForFunction(() => document.querySelector("#creators-status").textContent.includes("could not load"));
+    assert.equal(await page.locator(".creator-avatar").first().textContent(), "EC");
+    imageFailure = false;
+    uploadUnavailable = true;
+    await page.locator("#creators-refresh").click();
+    await page.waitForFunction(() => document.querySelector(".creator-avatar img.is-loaded")?.naturalWidth === 64);
+    assert.ok((await page.locator(".creator-latest").textContent()).includes("Latest video unavailable"));
+    uploadUnavailable = false;
     videoStatus = 503;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("#creators-status").dataset.state === "warning");
@@ -107,7 +142,7 @@ try {
     assert.deepEqual(errors, []);
     await page.goto(`${server.origin}/online/?window=creators`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#creators-status").textContent.includes("10 minutes"));
-    console.log(`PASS ${width}px creator feed: lazy loading, channel/profile links, latest upload, accessibility, outages, retry, and deep links`);
+    console.log(`PASS ${width}px creator feed: lazy photos, initials, channel links, latest upload, accessibility, independent photo/video outages, retry, and deep links`);
     await context.close();
   }
 
@@ -121,6 +156,14 @@ try {
         window.__creatorRows = [{ position: 1, title: "Original", platform: "YouTube", channel_url: "https://www.youtube.com/@example", youtube_channel_id: null, note: null, sort_order: 0, enabled: true }];
         window.createSiteSupabaseClient = () => ({
           auth: { getSession: async () => ({ data: { session: null }, error: null }) },
+          functions: { invoke: async (name, options) => {
+            if (name !== "creator-videos") throw new Error("Unexpected function " + name);
+            window.__lookupInput = options.body.channelUrl;
+            if (window.__delayLookup) await new Promise(resolve => { window.__completeLookup = resolve; });
+            return window.__lookupFailure
+              ? { data: null, error: new Error("Channel lookup unavailable") }
+              : { data: { channelId: "${channelId}" }, error: null };
+          } },
           from(table) {
             let operation = "select", values, position;
             const query = {
@@ -156,6 +199,29 @@ try {
   await page.locator("#creators-entry-add").click();
   const newEntry = page.locator("#creators-slots fieldset").last();
   await newEntry.locator('[data-entry-field="title"]').fill("New creator");
+  const lookup = newEntry.getByRole("button", { name: "LOOK UP YOUTUBE CHANNEL" });
+  const lookupStatus = newEntry.locator('[role="status"]');
+  await newEntry.locator('[data-entry-field="channel_url"]').fill("@example");
+  await lookup.click();
+  await page.waitForFunction(() => document.querySelector("#creators-slots fieldset:last-child [role=status]").dataset.state === "success");
+  assert.equal(await page.evaluate(() => window.__lookupInput), "@example");
+  assert.equal(await newEntry.locator('[data-entry-field="youtube_channel_id"]').inputValue(), channelId);
+  assert.equal(await newEntry.locator('[data-entry-field="channel_url"]').inputValue(), `https://www.youtube.com/channel/${channelId}`);
+  assert.equal(await newEntry.locator('[data-entry-field="platform"]').inputValue(), "YouTube");
+  assert.equal(await page.evaluate(() => window.__creatorRows.length), 1, "lookup must not save the new entry");
+  await page.evaluate(() => { window.__lookupFailure = true; });
+  await lookup.click();
+  await page.waitForFunction(() => document.querySelector("#creators-slots fieldset:last-child [role=status]").dataset.state === "error");
+  assert.ok((await lookupStatus.textContent()).includes("Channel lookup failed"));
+  assert.equal(await newEntry.locator('[data-entry-field="youtube_channel_id"]').inputValue(), channelId);
+  await page.evaluate(() => { window.__lookupFailure = false; window.__delayLookup = true; });
+  await lookup.click();
+  await page.waitForFunction(() => typeof window.__completeLookup === "function");
+  await newEntry.locator('[data-entry-field="channel_url"]').fill("https://www.twitch.tv/changed");
+  await page.evaluate(() => window.__completeLookup());
+  await page.waitForFunction(() => document.querySelector("#creators-slots fieldset:last-child [role=status]").dataset.state === "warning");
+  assert.equal(await newEntry.locator('[data-entry-field="channel_url"]').inputValue(), "https://www.twitch.tv/changed");
+  await page.evaluate(() => { window.__delayLookup = false; });
   await newEntry.locator('[data-entry-field="platform"]').fill("Twitch");
   await newEntry.locator('[data-entry-field="channel_url"]').fill("https://www.twitch.tv/new");
   await newEntry.locator('[data-entry-field="sort_order"]').fill("10");
@@ -175,7 +241,7 @@ try {
   await page.locator("#creators-submit").click();
   await page.waitForFunction(() => window.__creatorRows.length === 1);
   assert.deepEqual(errors, []);
-  console.log("PASS Admin creator editor: navigation, add, validate, save numeric order, hide, and remove");
+  console.log("PASS Admin creator editor: channel lookup, failure and edit races, explicit saving, validation, numeric order, hide, and remove");
   await context.close();
 } finally {
   if (browser) await browser.close();
