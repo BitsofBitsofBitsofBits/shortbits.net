@@ -16,7 +16,6 @@ const arcadeGames = new Set([
   "minesweeper",
   "bitsweeper",
   "tetris",
-  "solitaire",
   "pong",
   "dodge",
   "cursor",
@@ -2374,7 +2373,6 @@ drawSnake();
 drawBitsweeper();
 tetrisBoard = createTetrisBoard();
 drawTetris();
-startSolitaire();
 drawPong();
 drawDodge();
 drawCursorChase();

@@ -137,9 +137,10 @@ is a personal project and largely a learning exercise for me.
   link speed, storage grouped by identical drive, and OS as one JSON line. It
   uploads nothing and has no live agent; paste the JSON into Admin and save
 - A desktop-only, full-window `ARCADE.EXE` with Snake.BIT, Minesweeper,
-  Bitsweeper, Bitris, Bititaire, Bit Pong, Packet Dodge, Cursor Chase,
+  Bitsweeper, Bitris, Bit Pong, Packet Dodge, Cursor Chase,
   Null Tac Toe, endless wave-based Packet Breaker, and Flappy Bit, plus local
-  bests, public rankings, and Admin moderation
+  bests, public rankings, and Admin moderation. Bititaire is temporarily
+  unavailable while being reworked; its implementation and saved scores are retained
 - A stateful `COBITS.EXE` parody assistant with quick actions, delayed replies,
   slash commands, conversational memory, multi-step interviews, diagnostics,
   and discoverable achievements

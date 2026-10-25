@@ -163,7 +163,11 @@ try {
     await page.evaluate(() => window.BITS_ARCADE.load());
     assert.equal(arcadeRequests, 1);
     assert.deepEqual(errors, []);
-    for (const game of ["snake", "minesweeper", "bitsweeper", "tetris", "solitaire", "pong", "dodge", "cursor", "null-tac-toe", "breaker", "flappy"]) {
+    assert.equal(await page.locator('[data-arcade-game="solitaire"]').count(), 0, "BITITAIRE must not be offered while being reworked");
+    await page.evaluate(() => selectGame("solitaire"));
+    assert.equal(await page.locator('[data-arcade-panel="solitaire"]').isHidden(), true, "BITITAIRE must not be selectable programmatically");
+    assert.equal(await page.locator("#solitaire-tableau").locator("button").count(), 0, "BITITAIRE must not initialize while unavailable");
+    for (const game of ["snake", "minesweeper", "bitsweeper", "tetris", "pong", "dodge", "cursor", "null-tac-toe", "breaker", "flappy"]) {
       await page.locator(`[data-arcade-game="${game}"]`).evaluate((element) => element.click());
       const panel = page.locator(`[data-arcade-panel="${game}"]`);
       const ancestry = await panel.evaluate((element) => {
@@ -177,7 +181,7 @@ try {
     }
     assert.deepEqual(errors, []);
     await page.close();
-    console.log(`${linked ? "Deep-linked" : "Initially closed"} arcade: lazy load once, all 11 game tabs work, mobile boot nonblocking`);
+    console.log(`${linked ? "Deep-linked" : "Initially closed"} arcade: lazy load once, all 10 available game tabs work, BITITAIRE unavailable, mobile boot nonblocking`);
   }
 } finally {
   await browser.close();
