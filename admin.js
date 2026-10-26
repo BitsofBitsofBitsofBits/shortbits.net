@@ -903,6 +903,53 @@ function createRepeatableEntry(editor, entry = {}) {
       }
     });
     fieldset.append(lookup, lookupStatus);
+    const twitchLookup = document.createElement("button");
+    const twitchStatus = document.createElement("p");
+    twitchLookup.type = "button";
+    twitchLookup.className = "creator-twitch-lookup";
+    twitchLookup.textContent = "LOOK UP TWITCH CHANNEL";
+    twitchStatus.className = "form-status";
+    twitchStatus.setAttribute("role", "status");
+    twitchStatus.setAttribute("aria-live", "polite");
+    twitchLookup.addEventListener("click", async () => {
+      const channel = fieldset.querySelector('[data-entry-field="channel_url"]');
+      const name = fieldset.querySelector('[data-entry-field="title"]');
+      const platform = fieldset.querySelector('[data-entry-field="platform"]');
+      const youtube = fieldset.querySelector('[data-entry-field="youtube_channel_id"]');
+      const fields = [channel, name, platform, youtube];
+      const original = fields.map(field => field.value);
+      twitchLookup.disabled = true;
+      setAdminStatus(twitchStatus, "Looking up Twitch channel...");
+      try {
+        const { data, error } = await adminClient.functions.invoke("creator-twitch", {
+          body: { channelUrl: channel.value.trim() },
+        });
+        if (error) throw error;
+        if (!data || typeof data.login !== "string" || !/^[a-z0-9_]{1,25}$/.test(data.login)
+          || data.channelUrl !== `https://www.twitch.tv/${data.login}` || typeof data.displayName !== "string") {
+          throw new Error("Twitch did not return a valid channel.");
+        }
+        if (fields.some((field, index) => field.value !== original[index])) {
+          setAdminStatus(twitchStatus, "Channel fields changed during lookup. Run the lookup again.", "warning");
+          return;
+        }
+        if (youtube.value && !window.confirm("Replace this creator's YouTube integration with Twitch? The YouTube channel ID will be cleared.")) {
+          setAdminStatus(twitchStatus, "Twitch lookup canceled. The existing channel fields were kept.", "warning");
+          return;
+        }
+        channel.value = data.channelUrl;
+        platform.value = "Twitch";
+        youtube.value = "";
+        if (!name.value.trim()) name.value = data.displayName.slice(0, name.maxLength);
+        setAdminStatus(twitchStatus, "Twitch channel found. Save creators to publish its photo, live status, and latest available past broadcast.", "success");
+      } catch (error) {
+        console.error("Unable to look up Twitch channel:", error);
+        setAdminStatus(twitchStatus, `Twitch lookup failed: ${error.message} Check the channel URL and server Twitch API credentials.`, "error");
+      } finally {
+        twitchLookup.disabled = false;
+      }
+    });
+    fieldset.append(twitchLookup, twitchStatus);
   }
   fieldset.append(createAdminCheckbox(
     "ENABLED",

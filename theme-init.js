@@ -86,7 +86,15 @@ const baseInterfaceThemes = [
       { id: "arctic-white", name: "ARCTIC WHITE", palette: ["#f2f8ff", "#dfedff", "#c4e4ff", "#b0f0ff", "#d3f8ff", "#e5eeff", "#f7f7ff"] },
     ],
   },
-  { id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#cfe8fb" },
+  {
+    id: "aero-glass", name: "AERO GLASS", darkColor: "#0d3358", lightColor: "#cfe8fb",
+    stylesheet: true,
+    variants: [
+      { id: "classic", name: "CLASSIC" },
+      { id: "windows-7", name: "WINDOWS 7", darkColor: "#0b3b70", lightColor: "#c6e4fa" },
+      { id: "vista", name: "VISTA", darkColor: "#101e21", lightColor: "#d8e7de" },
+    ],
+  },
   {
     id: "minebits",
     name: "MINEBITS",

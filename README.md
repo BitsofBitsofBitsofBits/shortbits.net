@@ -101,7 +101,10 @@ is a personal project and largely a learning exercise for me.
   feed and an automatic channel photo from the public channel page. In Admin,
   paste a channel URL or `@handle` into CHANNEL / PROFILE URL and click
   **LOOK UP YOUTUBE CHANNEL**, then save. This authenticated lookup fills the
-  UC ID and a canonical channel URL; it never saves automatically. IDs can also
+  UC ID and a canonical channel URL; it never saves automatically. Supported
+  links include `/@handle`, `/channel/UC...`, `/c/name`, `/user/name`, and older
+  top-level channel links such as `https://www.youtube.com/OzMediaOfficial`.
+  IDs can also
   be copied from a channel's description / About -> Share channel -> Copy channel ID,
   or YouTube's advanced account settings for your own channel. Uploads may include Shorts
   and livestreams; this is not a long-form-only feed.
@@ -110,7 +113,8 @@ is a personal project and largely a learning exercise for me.
   successful upload/photo results are cached for up to ten minutes. Feed/photo
   failures are reported independently without hiding channel links or successful
   uploads. Photos use fixed 64px slots, lazy loading, and initials when unavailable;
-  other platforms also show initials. Only YouTube's image CDN hosts are allowed.
+  platforms without an integration also show initials. YouTube photos are restricted
+  to YouTube's image CDN hosts.
   Channel-page metadata may stop working if YouTube blocks requests or changes its
   markup. No YouTube API key or embedded player is needed; browsers request only
   the channel image from Google's image CDN, without sending a referrer.
@@ -121,6 +125,40 @@ is a personal project and largely a learning exercise for me.
   GET requests. POST lookups verify a signed-in, non-anonymous Supabase user
   (matching the creator editor's authenticated-user policy), accept only YouTube
   channel paths, disable redirects, and bound channel-metadata reads to 2 MB/10 seconds.
+  Twitch channel URLs (`https://www.twitch.tv/username`) also enable automatic
+  profile photos and live/offline status. **Look up Twitch channel** accepts a
+  username or channel URL, validates it through Twitch, canonicalizes the link,
+  sets the platform, and fills an empty creator name. It does not save automatically.
+  Replacing a YouTube integration asks before clearing its channel ID, and edits
+  made during a lookup are never overwritten.
+  Live creators show the stream title, category, and **Watch live** link; offline
+  creators show their latest available archived broadcast, or an explicit
+  no-public-broadcasts message. VODs can expire or require a subscription; the
+  site does not bypass Twitch's playback restrictions. Twitch failures retain
+  channel links and do not hide working YouTube data. Photos load only from
+  `static-cdn.jtvnw.net`, with no referrer. Twitch data is cached for one minute;
+  reopening the window after that interval or **Refresh feed** checks again.
+  There is no continuous polling or embedded player.
+  Deploy the `creator-twitch` Edge Function (`--no-verify-jwt`) and configure
+  `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` in Supabase. The workflow deploys
+  it automatically and can sync both credentials from GitHub environment secrets.
+  No additional database migration or Twitch ID field is required; integrations
+  are derived from saved channel URLs, including existing Twitch entries.
+  Public GETs fetch only enabled, configured creators. POST lookups require an
+  authenticated, non-anonymous Supabase user. Twitch app tokens stay server-side,
+  are reused until expiry, and refresh once on a revoked-token response.
+  For setup, register an application in the
+  [Twitch developer console](https://dev.twitch.tv/console/apps) using Twitch's
+  [registration guide](https://dev.twitch.tv/docs/authentication/register-app/).
+  Enable 2FA on the developer account, use a confidential/server-side application
+  with category **Website Integration**, and generate its client secret.
+  If registration requires a redirect URL, add `https://shortbits.net/`;
+  this integration uses client credentials, so it never redirects visitors or
+  asks them to log into Twitch. Add both values as secrets named
+  `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` in the GitHub **Supabase**
+  environment before deployment, or set those names directly in Supabase
+  **Edge Functions -> Secrets**. Never add the secret to browser configuration,
+  source files, or chat. No streamer-specific authorization or scopes are needed.
 - A shared virtual filesystem available through `FILE_EXPLORER.EXE` and the
   terminal's `pwd`, `ls`, `cd`, `cat`, and `files` commands
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
@@ -223,6 +261,15 @@ is a personal project and largely a learning exercise for me.
   Shop, Matrix, Sunset, the original voxel-inspired MineBits, Windows 3.1,
   Spotify, UEFI, Mac OS X Aqua, Aquatic (underwater), Atari, Commodore 64,
   Mac OS 9 Platinum, Winamp, iPod Classic, Ubuntu, PlayStation, and Xbox.
+  Aero Glass includes **Classic** (the unchanged existing look), **Windows 7**
+  (sky-blue glass and brighter desktop light), and **Vista** (smokier glass with
+  green-blue aurora accents). Select Aero Glass, then use **Variant** in View or
+  Settings. Both new variants offer dark/light palettes, persist across shared
+  public pages, and use original CSS gradients rather than bundled Windows
+  wallpapers or artwork. Their stylesheet loads only while Aero Glass is active;
+  high-contrast, effects-off, and forced-color preferences remain available.
+  Run `node scripts/aero-variants-browser.mjs` to check both pickers, persistence,
+  desktop/mobile accessibility, and Classic compatibility.
 - Experimental layout themes that restyle the whole interface rather than just
   its colors: Windows 10, Windows 11, Windows 8 (Metro), Termius, YouTube
   (BitsTube), YouTube Music, Bits 365, Google, Browser, and Legacy BIOS. They
@@ -643,6 +690,9 @@ Database and Edge Function changes ship from the same workflow. Add these
 - `RESEND_API_KEY`, `CONTACT_EMAIL_FROM`, `CONTACT_EMAIL_TO` (optional as a
   complete set): synced to enable contact notifications and confirmations.
   When incomplete, the workflow leaves existing Supabase email secrets alone.
+- `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` (optional as a complete set):
+  synced for Twitch creator lookup, profile photos, live status, and offline VODs.
+  If absent or incomplete, existing Supabase Twitch secrets are unchanged.
 
 The job deploys `contact-message` and then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static

@@ -30,6 +30,14 @@
     }
   }
 
+  function twitchLogin(value) {
+    if (!isHttpsUrl(value)) return null;
+    const url = new URL(value);
+    if (url.port || !["twitch.tv", "www.twitch.tv", "m.twitch.tv"].includes(url.hostname)) return null;
+    const login = url.pathname.match(/^\/([A-Za-z0-9_]{1,25})\/?$/)?.[1].toLowerCase();
+    return login && !["directory", "downloads", "jobs", "p", "search", "settings", "subscriptions", "turbo", "videos", "wallet"].includes(login) ? login : null;
+  }
+
   function createCreator(creator) {
     const item = document.createElement("li");
     const heading = document.createElement("div");
@@ -38,6 +46,8 @@
     avatar.setAttribute("aria-hidden", "true");
     avatar.textContent = creator.title.trim().split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join("").toUpperCase();
     if (creator.youtube_channel_id) avatar.dataset.avatarChannelId = creator.youtube_channel_id;
+    const twitch = twitchLogin(creator.channel_url);
+    if (twitch) avatar.dataset.avatarTwitchLogin = twitch;
     heading.className = "creator-heading";
     const title = document.createElement("h3");
     const platform = document.createElement("p");
@@ -59,6 +69,13 @@
       latest.textContent = "Checking latest YouTube upload...";
       item.append(latest);
     }
+    if (twitch) {
+      const latest = document.createElement("div");
+      latest.className = "creator-latest";
+      latest.dataset.twitchLogin = twitch;
+      latest.textContent = "Checking Twitch live status...";
+      item.append(latest);
+    }
     return item;
   }
 
@@ -66,6 +83,25 @@
     if (!isHttpsUrl(value)) return false;
     const url = new URL(value);
     return !url.port && ["yt3.googleusercontent.com", "yt3.ggpht.com"].includes(url.hostname);
+  }
+
+  function showPhoto(container, avatarUrl, platform) {
+    const image = document.createElement("img");
+    image.alt = "";
+    image.width = 64;
+    image.height = 64;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.referrerPolicy = "no-referrer";
+    image.addEventListener("load", () => image.classList.add("is-loaded"), { once: true });
+    image.addEventListener("error", () => {
+      image.remove();
+      console.warn(`Unable to display ${platform} channel photo.`);
+      container.title = `${platform} channel photo unavailable.`;
+      report("Creator list loaded. Some channel photos could not load; initials are shown instead.", "warning");
+    }, { once: true });
+    image.src = avatarUrl;
+    container.append(image);
   }
 
   async function loadLatest(url, anonKey) {
@@ -94,22 +130,7 @@
         unavailable = true;
         return;
       }
-      const image = document.createElement("img");
-      image.alt = "";
-      image.width = 64;
-      image.height = 64;
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.referrerPolicy = "no-referrer";
-      image.addEventListener("load", () => image.classList.add("is-loaded"), { once: true });
-      image.addEventListener("error", () => {
-        image.remove();
-        console.warn(`Unable to display channel photo for ${entry.channelId}.`);
-        container.title = "YouTube channel photo unavailable.";
-        report("Creator list loaded. Some channel photos could not load; initials are shown instead.", "warning");
-      }, { once: true });
-      image.src = entry.avatarUrl;
-      container.append(image);
+      showPhoto(container, entry.avatarUrl, "YouTube");
     });
     list.querySelectorAll("[data-channel-id]").forEach((container) => {
       const entry = videos.get(container.dataset.channelId);
@@ -130,8 +151,59 @@
     return unavailable;
   }
 
+  async function loadTwitch(url, anonKey) {
+    const response = await fetch(`${url.replace(/\/$/, "")}/functions/v1/creator-twitch`, {
+      headers: { apikey: anonKey }, signal: AbortSignal.timeout(45_000),
+    });
+    if (!response.ok) throw new Error(`Twitch service returned HTTP ${response.status}.`);
+    const payload = await response.json();
+    if (!Array.isArray(payload.channels) || payload.channels.some(entry => (
+      !entry || typeof entry.login !== "string" || !/^[a-z0-9_]{1,25}$/.test(entry.login)
+      || typeof entry.unavailable !== "boolean"
+      || (entry.avatarUrl !== null && (!isHttpsUrl(entry.avatarUrl)
+        || new URL(entry.avatarUrl).hostname !== "static-cdn.jtvnw.net" || new URL(entry.avatarUrl).port))
+      || (entry.live !== null && (!entry.live || typeof entry.live.title !== "string" || typeof entry.live.game !== "string"
+        || !Number.isFinite(Date.parse(entry.live.startedAt))))
+      || (entry.video !== null && (!entry.video || typeof entry.video.title !== "string"
+        || !/^https:\/\/www\.twitch\.tv\/videos\/\d+$/.test(entry.video.url)
+        || !Number.isFinite(Date.parse(entry.video.publishedAt))))
+      || (entry.live !== null && entry.video !== null)
+    ))) throw new Error("Twitch service returned invalid data.");
+    const channels = new Map(payload.channels.map(entry => [entry.login, entry]));
+    let unavailable = false;
+    list.querySelectorAll("[data-avatar-twitch-login]").forEach(container => {
+      const entry = channels.get(container.dataset.avatarTwitchLogin);
+      if (entry?.avatarUrl) showPhoto(container, entry.avatarUrl, "Twitch");
+      else {
+        container.title = "Twitch channel photo unavailable.";
+        unavailable = true;
+      }
+    });
+    list.querySelectorAll("[data-twitch-login]").forEach(container => {
+      const entry = channels.get(container.dataset.twitchLogin);
+      if (!entry || entry.unavailable) {
+        container.textContent = "Twitch status unavailable. The channel link still works.";
+        unavailable = true;
+      } else if (entry.live) {
+        const label = document.createElement("p");
+        label.textContent = `LIVE ON TWITCH${entry.live.game ? ` / ${entry.live.game}` : ""}`;
+        const title = document.createElement("p");
+        title.textContent = entry.live.title;
+        container.replaceChildren(label, title, externalLink("WATCH LIVE", `https://www.twitch.tv/${entry.login}`));
+      } else if (entry.video) {
+        const label = document.createElement("p");
+        label.textContent = "OFFLINE / LATEST TWITCH VOD";
+        const date = document.createElement("time");
+        date.dateTime = entry.video.publishedAt;
+        date.textContent = new Date(entry.video.publishedAt).toLocaleDateString();
+        container.replaceChildren(label, externalLink(entry.video.title, entry.video.url), date);
+      } else container.textContent = "Offline. No public past broadcasts found.";
+    });
+    return unavailable;
+  }
+
   async function load(force = false) {
-    if (loading || (!force && Date.now() - loadedAt < 300_000)) return;
+    if (loading || (!force && Date.now() - loadedAt < (list.querySelector("[data-twitch-login]") ? 60_000 : 300_000))) return;
     loading = true;
     refresh.disabled = true;
     report("Loading CREATOR.FEED...");
@@ -158,21 +230,30 @@
         return;
       }
       report("Creator list loaded.", "success");
-      if (creators.some((creator) => creator.youtube_channel_id)) {
+      const services = [];
+      if (creators.some((creator) => creator.youtube_channel_id)) services.push({
+        name: "YouTube", load: loadLatest, selector: "[data-channel-id]",
+        failure: "Latest video unavailable. The channel link still works.",
+      });
+      if (creators.some((creator) => twitchLogin(creator.channel_url))) services.push({
+        name: "Twitch", load: loadTwitch, selector: "[data-twitch-login]",
+        failure: "Twitch status unavailable. The channel link still works.",
+      });
+      const unavailable = await Promise.all(services.map(async service => {
         try {
-          const unavailable = await loadLatest(url, anonKey);
-          report(unavailable
-            ? "Creator list loaded. Some YouTube videos or photos are unavailable; try Refresh later."
-            : "Creator list loaded. YouTube uploads and photos may be cached for up to 10 minutes.",
-          unavailable ? "warning" : "success");
+          return await service.load(url, anonKey);
         } catch (error) {
-          console.warn("Unable to load latest creator videos:", error);
-          list.querySelectorAll("[data-channel-id]").forEach((container) => {
-            container.textContent = "Latest video unavailable. The channel link still works.";
+          console.warn(`Unable to load ${service.name} creator data:`, error);
+          list.querySelectorAll(service.selector).forEach((container) => {
+            container.textContent = service.failure;
           });
-          report("Creator list loaded, but YouTube videos and photos are unavailable. Initials are shown instead. Try Refresh later.", "warning");
+          return true;
         }
-      }
+      }));
+      if (services.length) report(unavailable.some(Boolean)
+        ? "Creator list loaded. Some channel videos, live status, or photos are unavailable; initials and channel links remain available. Try Refresh later."
+        : `Creator list loaded.${services.some(service => service.name === "YouTube") ? " YouTube uploads and photos may be cached for up to 10 minutes." : ""}${services.some(service => service.name === "Twitch") ? " Twitch status may be cached for up to one minute; use Refresh for updates." : ""}`,
+      unavailable.some(Boolean) ? "warning" : "success");
     } catch (error) {
       console.error("Unable to load creator feed:", error);
       loadedAt = 0;

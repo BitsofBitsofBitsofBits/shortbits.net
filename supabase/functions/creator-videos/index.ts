@@ -69,9 +69,15 @@ function channelPath(input: string): string {
   const value = input.trim();
   const url = new URL(value.startsWith("@") || /^UC[A-Za-z0-9_-]{22}$/.test(value)
     ? `https://www.youtube.com/${value.startsWith("@") ? value : `channel/${value}`}` : value);
-  const path = url.pathname.match(/^\/(@[^/]+|channel\/UC[A-Za-z0-9_-]{22}|c\/[^/]+|user\/[^/]+)(?:\/(?:featured|videos|shorts|streams|about))?\/?$/);
+  const path = url.pathname.match(/^\/(@[^/]+|channel\/UC[A-Za-z0-9_-]{22}|c\/[^/]+|user\/[^/]+|[A-Za-z0-9_-]+)(?:\/(?:featured|videos|shorts|streams|about))?\/?$/);
+  const reservedPaths = new Set([
+    "account", "attribution_link", "channel", "clip", "c", "embed", "feed", "gaming",
+    "get_video_info", "hashtag", "history", "home", "live", "logout", "music", "oembed",
+    "playlist", "premium", "redirect", "results", "shorts", "signin", "t", "upload",
+    "user", "watch", "youtubei",
+  ]);
   if (url.protocol !== "https:" || !["youtube.com", "www.youtube.com", "m.youtube.com"].includes(url.hostname)
-    || url.username || url.password || url.port || !path) {
+    || url.username || url.password || url.port || !path || reservedPaths.has(path[1].toLowerCase())) {
     throw new Error("Enter a YouTube channel URL, @handle, or UC channel ID.");
   }
   return `/${path[1]}`;

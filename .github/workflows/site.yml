@@ -65,6 +65,7 @@ jobs:
         run: |
           npm run test:browser
           node scripts/creators-browser.mjs --root .site-build
+          node scripts/aero-variants-browser.mjs --root .site-build
           node scripts/messages-browser.mjs --root .site-build
           node scripts/critical-css-browser.mjs --root .site-build
 
@@ -139,6 +140,8 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
           CONTACT_EMAIL_TO: ${{ secrets.CONTACT_EMAIL_TO }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
         run: |
           if [ -n "$TURNSTILE_SECRET_KEY" ]; then
             supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" TURNSTILE_SECRET_KEY="$TURNSTILE_SECRET_KEY"
@@ -152,6 +155,13 @@ jobs:
               CONTACT_EMAIL_TO="$CONTACT_EMAIL_TO"
           else
             echo "::warning::Resend secrets are incomplete; existing Supabase email secrets are unchanged. Configure all three secrets to enable contact emails."
+          fi
+          if [ -n "$TWITCH_CLIENT_ID" ] && [ -n "$TWITCH_CLIENT_SECRET" ]; then
+            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+              TWITCH_CLIENT_ID="$TWITCH_CLIENT_ID" \
+              TWITCH_CLIENT_SECRET="$TWITCH_CLIENT_SECRET"
+          else
+            echo "Twitch secrets are not configured in GitHub; existing Supabase Twitch secrets are unchanged."
           fi
 
       # The function must exist before the migration revokes direct inserts into messages.
@@ -167,6 +177,14 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy creator-videos
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
+      - name: Deploy Twitch creator Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy creator-twitch
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api

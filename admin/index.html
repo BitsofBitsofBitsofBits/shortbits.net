@@ -21,7 +21,7 @@
     <script src="/admin-shell.js?v=admin-shell-3" defer></script>
     <script src="/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin-publishing.js?v=publishing-1" defer></script>
-    <script src="/admin.js?v=admin-31" defer></script>
+    <script src="/admin.js?v=admin-32" defer></script>
     <script src="/admin-backup.js?v=backup-2" defer></script>
     <script src="/admin-messages.js?v=messages-2" defer></script>
   </head>
@@ -423,7 +423,10 @@
             <span>CREATORS WORTH WATCHING</span>
           </div>
           <p>Add creators from any platform. Enable entries to publish them. Lower display-order numbers appear first; ties follow entry order.</p>
-          <p data-admin-view="guide" data-admin-view-label="YouTube guide">For YouTube uploads and automatic channel photos, paste a channel URL or @handle into CHANNEL / PROFILE URL and click LOOK UP YOUTUBE CHANNEL, then save. You can also enter the UC... channel ID manually (24 characters). On YouTube, open the channel description / About, then Share channel &gt; Copy channel ID; for your own channel, use Settings &gt; Advanced settings. Leave the ID blank for profile links only. Other platforms show initials. Public feeds can include Shorts and livestreams; uploads and photos are cached for up to ten minutes. If YouTube blocks a photo request, initials are shown instead.</p>
+          <div data-admin-view="guide" data-admin-view-label="Channel integrations">
+          <p>For YouTube uploads and automatic channel photos, paste a channel URL or @handle into CHANNEL / PROFILE URL and click LOOK UP YOUTUBE CHANNEL, then save. You can also enter the UC... channel ID manually (24 characters). On YouTube, open the channel description / About, then Share channel &gt; Copy channel ID; for your own channel, use Settings &gt; Advanced settings. Leave the ID blank for profile links only. Public feeds can include Shorts and livestreams; uploads and photos are cached for up to ten minutes. If YouTube blocks a photo request, initials are shown instead.</p>
+          <p>For Twitch, paste a channel URL or username and click LOOK UP TWITCH CHANNEL, then save. Twitch channel URLs automatically enable profile photos, live status with a Watch live link, and the latest available past broadcast when offline. No separate channel ID is needed. The server needs TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET configured in Supabase. Status is cached for up to one minute; reopen the feed or use Refresh to update it. VODs may be expired, unavailable, or subscriber-only. Other platforms show initials.</p>
+          </div>
           <form id="creators-form" class="admin-form content-admin-form" data-admin-view="creators" data-admin-view-label="Creators">
             <div class="repeatable-admin-actions">
               <button id="creators-entry-add" type="button">+ ADD_CREATOR</button>

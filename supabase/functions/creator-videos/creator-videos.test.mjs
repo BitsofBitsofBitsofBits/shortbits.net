@@ -40,7 +40,7 @@ function setup(options = {}) {
       }
       assert.equal(init.redirect, "error");
       if (!url.includes("/feeds/")) {
-        assert.match(url, /^https:\/\/www\.youtube\.com\/(?:channel\/UC[A-Za-z0-9_-]{22}|@[^/]+|c\/[^/]+|user\/[^/]+)$/);
+        assert.match(url, /^https:\/\/www\.youtube\.com\/(?:channel\/UC[A-Za-z0-9_-]{22}|@[^/]+|c\/[^/]+|user\/[^/]+|[A-Za-z0-9_-]+)$/);
         if (options.photoError) throw options.photoError;
         const id = url.match(/\/channel\/(UC[A-Za-z0-9_-]{22})$/)?.[1] ?? channelId;
         return new Response(options.html ?? page(id), { status: options.photoStatus ?? 200 });
@@ -175,6 +175,8 @@ test("authenticated lookup accepts handles, channel URLs, legacy URLs and IDs wi
     "@example", channelId, `https://www.youtube.com/channel/${channelId}`,
     "https://www.youtube.com/@example/videos?view=0", "https://m.youtube.com/@example/",
     "https://youtube.com/c/example", "https://www.youtube.com/user/example",
+    "https://www.youtube.com/OzMediaOfficial", "https://youtube.com/OzMediaOfficial/",
+    "https://www.youtube.com/OzMediaOfficial/videos?view=0",
   ]) {
     const app = setup();
     const response = await app.post(input);
@@ -184,6 +186,18 @@ test("authenticated lookup accepts handles, channel URLs, legacy URLs and IDs wi
     assert.equal(app.calls.length, 2);
     assert.ok(app.calls.every(({ url }) => !url.includes("/rest/") && !url.includes("/feeds/")));
   }
+});
+
+test("legacy top-level channel URLs resolve the canonical channel ID and photo", async () => {
+  const ozMediaId = "UCtoURJvRdVfT2APGqLOt0nA";
+  const app = setup({ html: page(ozMediaId) });
+  const response = await app.post("https://www.youtube.com/OzMediaOfficial");
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    channelId: ozMediaId, avatarUrl, photoUnavailable: false,
+  });
+  assert.equal(app.calls[1].url, "https://www.youtube.com/OzMediaOfficial");
+  assert.equal(app.calls[1].init.redirect, "error");
 });
 
 test("channel ID lookup still succeeds when a photo is missing", async () => {
@@ -211,6 +225,10 @@ test("lookups reject non-channel URLs without following redirects or fetching ar
     "https://user:password@www.youtube.com/@example", "http://www.youtube.com/@example",
     "https://www.youtube.com:444/@example", "https://www.youtube.com/watch?v=abcdefghijk",
     "https://www.youtube.com/redirect?url=https://private.example", "", null, "x".repeat(501),
+    "https://www.youtube.com/results?search_query=example", "https://www.youtube.com/feed",
+    "https://www.youtube.com/playlist?list=example", "https://www.youtube.com/shorts",
+    "https://www.youtube.com/Watch", "https://www.youtube.com/channel",
+    "https://www.youtube.com/OzMediaOfficial/unrecognized", "https://www.youtube.com/%72edirect",
   ]) {
     const app = setup();
     assert.equal((await app.post(input)).status, 400, String(input));

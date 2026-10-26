@@ -11,6 +11,16 @@ const effectsSource = readFileSync(new URL("../theme-effects.js", import.meta.ur
 const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
 
+test("Aero retains Classic as its default and exposes opt-in Windows 7/Vista variants without experimental layout chrome", () => {
+  const { available } = themesOn(2026, 10, 22);
+  const aero = available.find(theme => theme.id === "aero-glass");
+  assert.equal(aero.stylesheet, true);
+  assert.equal(aero.experimental, undefined);
+  assert.deepEqual(Array.from(aero.variants, variant => variant.id), ["classic", "windows-7", "vista"]);
+  assert.equal(aero.darkColor, "#0d3358");
+  assert.equal(aero.lightColor, "#cfe8fb");
+});
+
 function themesOn(year, month, day, preferences = {}) {
   const date = new Date(year, month - 1, day, 12);
   const stored = new Map(Object.entries(preferences));
