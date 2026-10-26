@@ -444,6 +444,7 @@ const baseHardwareJokes = {
     "Applying thermal paste conceptually.",
   ],
 };
+Object.entries(baseHardwareJokes).forEach(([metric, pool]) => window.BITS_MESSAGE_CATALOG?.bind("standard", `monitor.${metric}`, pool));
 // Keep the seasonal profile's existing key so seasonal messages move with the jokes.
 const seasonalHardwareJokes = window.BITS_SEASONAL_PROFILE?.monitorJokes ?? {};
 const hardwareJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
@@ -453,6 +454,14 @@ const hardwareJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
       [...jokes, ...(seasonalHardwareJokes[metric] ?? [])],
     ]));
 const hardwareChatter = Object.values(hardwareJokes).flat();
+window.addEventListener("bits:messages-updated", () => {
+  const profile = window.BITS_SEASONAL_PROFILE;
+  Object.keys(baseHardwareJokes).forEach((metric) => {
+    const seasonal = profile?.monitorJokes[metric] ?? [];
+    hardwareJokes[metric] = profile?.mode === "exclusive" ? [...seasonal] : [...baseHardwareJokes[metric], ...seasonal];
+  });
+  hardwareChatter.splice(0, hardwareChatter.length, ...Object.values(hardwareJokes).flat());
+});
 
 function readCollapsedHardware(key = hardwareCollapsedKey) {
   try {
@@ -734,7 +743,8 @@ function updateHardwareStatus() {
     updateHardwareNas(live.querySelector(".hardware-nas"), status.nas_metrics, online);
     if (online && hardwareChatter.length) {
       chatter.hidden = false;
-      chatter.textContent = `AGENT CHATTER // ${hardwareChatter[Math.floor(Date.now() / 6000) % hardwareChatter.length]}`;
+      window.BITS_MESSAGE_TEXT.render(chatter, hardwareChatter[Math.floor(Date.now() / 6000) % hardwareChatter.length],
+        { prefix: "AGENT CHATTER // " });
     }
   });
 }

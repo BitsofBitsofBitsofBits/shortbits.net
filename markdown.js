@@ -22,11 +22,16 @@
     }
   }
 
-  function appendInline(parent, source) {
+  function appendInline(parent, source, options = {}) {
     let cursor = 0;
     inlinePattern.lastIndex = 0;
     for (const match of source.matchAll(inlinePattern)) {
       parent.append(document.createTextNode(source.slice(cursor, match.index)));
+      if (options.textOnly && (match[2] !== undefined || match[8] !== undefined)) {
+        parent.append(document.createTextNode(match[0]));
+        cursor = match.index + match[0].length;
+        continue;
+      }
       let element;
       if (match[2] !== undefined) {
         const sourceUrl = safeLink(match[3], false);
@@ -66,7 +71,7 @@
         }
         element = document.createElement("span");
         element.className = `blog-text-${type}-${value}`;
-        appendInline(element, content);
+        appendInline(element, content, options);
       } else if (match[8] !== undefined) {
         const href = safeLink(match[9]);
         if (!href) {
@@ -86,19 +91,19 @@
         element.textContent = match[10];
       } else if (match[11] !== undefined || match[12] !== undefined) {
         element = document.createElement("strong");
-        appendInline(element, match[11] ?? match[12]);
+        appendInline(element, match[11] ?? match[12], options);
       } else if (match[13] !== undefined) {
         element = document.createElement("u");
-        appendInline(element, match[13]);
+        appendInline(element, match[13], options);
       } else if (match[14] !== undefined) {
         element = document.createElement("mark");
-        appendInline(element, match[14]);
+        appendInline(element, match[14], options);
       } else if (match[15] !== undefined || match[16] !== undefined) {
         element = document.createElement("em");
-        appendInline(element, match[15] ?? match[16]);
+        appendInline(element, match[15] ?? match[16], options);
       } else {
         element = document.createElement("s");
-        appendInline(element, match[17]);
+        appendInline(element, match[17], options);
       }
       parent.append(element);
       cursor = match.index + match[0].length;
@@ -296,5 +301,11 @@
     return Math.max(1, Math.ceil(words / 220));
   }
 
-  window.BITS_MARKDOWN = Object.freeze({ render, readingTime });
+  function renderInline(source) {
+    const fragment = document.createDocumentFragment();
+    appendInline(fragment, String(source ?? ""), { textOnly: true });
+    return fragment;
+  }
+
+  window.BITS_MARKDOWN = Object.freeze({ render, renderInline, readingTime });
 })();

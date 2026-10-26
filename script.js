@@ -148,6 +148,9 @@ function validateTextOptions(options, name) {
       || !Number.isFinite(option.weight)
       || option.weight <= 0
       || (option.colorful !== undefined && typeof option.colorful !== "boolean")
+      || (option.markup !== undefined && typeof option.markup !== "boolean")
+      || (option.correctedText !== undefined && (typeof option.correctedText !== "string"
+        || !option.correctedText.trim() || option.correctedText.length > 2000))
     ) {
       throw new Error(`Invalid entry at ${name}[${index}].`);
     }
@@ -160,7 +163,7 @@ validateTextOptions(activities, "BITS_ACTIVITIES");
 if (
   !Array.isArray(shutdownMessages)
   || shutdownMessages.length === 0
-  || shutdownMessages.some((message) => typeof message !== "string" || !message.trim())
+  || shutdownMessages.some((message) => !window.BITS_MESSAGE_TEXT.isMessage(message))
 ) {
   throw new Error("BITS_SHUTDOWN_MESSAGES must contain at least one message.");
 }
@@ -921,16 +924,7 @@ function renderLinks(allowRare404 = true) {
   }
 }
 
-const supportedMessageStyles = [
-  "color",
-  "fontWeight",
-  "fontFamily",
-  "fontSize",
-  "fontStyle",
-  "letterSpacing",
-  "textDecoration",
-  "textTransform",
-];
+const applyTextFormat = window.BITS_MESSAGE_TEXT.applyFormat;
 
 function pickWeightedOption(options) {
   const totalWeight = options.reduce((total, option) => total + option.weight, 0);
@@ -946,49 +940,13 @@ function pickWeightedOption(options) {
   return options[options.length - 1];
 }
 
-function applyTextFormat(element, format = {}) {
-  supportedMessageStyles.forEach((property) => {
-    element.style[property] = "";
-  });
-
-  Object.entries(format).forEach(([property, value]) => {
-    if (!supportedMessageStyles.includes(property)) {
-      throw new Error(`Unsupported message format property: ${property}`);
-    }
-
-    element.style[property] = value;
-  });
-}
-
-let graphemeSegmenter;
-
-function splitVisibleCharacters(text) {
-  if (/^[\x00-\x7F]*$/.test(text)) {
-    return Array.from(text);
-  }
-  if (graphemeSegmenter === undefined) {
-    graphemeSegmenter = typeof Intl.Segmenter === "function"
-      ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
-      : null;
-  }
-  return graphemeSegmenter
-    ? Array.from(graphemeSegmenter.segment(text), ({ segment }) => segment)
-    : Array.from(text);
-}
-
 const rainbowColors = {
   dark: ["#ff6d7a", "#ff9b62", "#ffcc66", "#66ff9a", "#63d8ff", "#7aa7ff", "#b99aff"],
   light: ["#b4232f", "#a44800", "#746000", "#087a2a", "#006a8e", "#3155a6", "#743aa2"],
 };
 
-function renderMessageText(element, characters, length, colorful = false) {
-  const visibleCharacters = characters.slice(0, length);
-  element.classList.toggle("is-colorful-text", colorful);
-  element.textContent = visibleCharacters.join("");
-}
-
 let currentMessage = pickWeightedOption(messages);
-let currentMessageCharacters = splitVisibleCharacters(currentMessage.text);
+let currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
 let characterIndex = 0;
 let deleting = false;
 const typoMessage = {
@@ -1008,17 +966,26 @@ function pickNextMessage() {
 }
 
 function runTypoCorrection() {
+  if (!currentMessage.correctedText) currentMessage = { ...typoMessage };
+  const correctingMessage = currentMessage;
+  const correctedMessage = { ...correctingMessage, text: correctingMessage.correctedText, wasCorrected: true };
+  const originalCharacters = window.BITS_MESSAGE_TEXT.prepare(correctingMessage).characters;
+  const correctedCharacters = window.BITS_MESSAGE_TEXT.prepare(correctedMessage).characters;
+  let sharedLength = 0;
+  while (sharedLength < originalCharacters.length && sharedLength < correctedCharacters.length
+    && originalCharacters[sharedLength] === correctedCharacters[sharedLength]) sharedLength++;
   commandLine.classList.add("is-correcting");
-  typedText.textContent = "the bits are definite_";
+  window.BITS_MESSAGE_TEXT.render(typedText, correctingMessage, { length: sharedLength, suffix: "_" });
   window.setTimeout(() => {
-    currentMessage = {
-      text: typoMessage.correctedText,
-      wasCorrected: true,
-    };
-    currentMessageCharacters = splitVisibleCharacters(currentMessage.text);
-    characterIndex = currentMessageCharacters.length;
-    typedText.textContent = currentMessage.text;
     commandLine.classList.remove("is-correcting");
+    if (currentMessage !== correctingMessage) {
+      window.setTimeout(updateMessage, 1600);
+      return;
+    }
+    currentMessage = correctedMessage;
+    currentMessageCharacters = correctedCharacters;
+    characterIndex = currentMessageCharacters.length;
+    window.BITS_MESSAGE_TEXT.render(typedText, currentMessage);
     showAchievement("NOTHING HAPPENED", "TYPO CORRECTION", 1800, "typo-corrected");
     deleting = true;
     window.setTimeout(updateMessage, 1600);
@@ -1031,12 +998,7 @@ function updateMessage() {
     return;
   }
 
-  renderMessageText(
-    typedText,
-    currentMessageCharacters,
-    characterIndex,
-    currentMessage.colorful,
-  );
+  window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
 
   if (deleting) {
     characterIndex -= 1;
@@ -1048,7 +1010,7 @@ function updateMessage() {
         displayedMessageHistory.shift();
       }
       displayedMessageHistoryIndex = displayedMessageHistory.length;
-      currentMessageCharacters = splitVisibleCharacters(currentMessage.text);
+      currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
       applyTextFormat(typedText, currentMessage.format);
       setTimeout(updateMessage, 250 + Math.random() * 500);
       return;
@@ -1082,14 +1044,13 @@ function updateActivity() {
 
   setTimeout(() => {
     if (new Date().getHours() === 0) {
-      activityText.textContent = "pretending tomorrow is not approaching...";
+      window.BITS_MESSAGE_TEXT.render(activityText, "pretending tomorrow is not approaching...");
       activityText.classList.remove("is-changing");
       setTimeout(updateActivity, 60000);
       return;
     }
     const activity = pickWeightedOption(activities);
-    activityText.textContent = activity.text;
-    applyTextFormat(activityText, activity.format);
+    window.BITS_MESSAGE_TEXT.render(activityText, activity);
     activityText.classList.remove("is-changing");
     setTimeout(updateActivity, 4000 + Math.random() * 6000);
   }, 150);
@@ -1442,6 +1403,7 @@ const basePlayingDeadMessages = [
   "The process moved slightly when nobody was looking.",
   "Diagnostic result: suspiciously alive for something this dead.",
 ];
+window.BITS_MESSAGE_CATALOG?.bind("standard", "playingDeadMessages", basePlayingDeadMessages);
 const seasonalDesktopProfile = window.BITS_SEASONAL_PROFILE;
 const seasonalPlayingDeadMessages = seasonalDesktopProfile?.playingDeadMessages ?? [];
 const playingDeadMessages = seasonalDesktopProfile?.mode === "exclusive"
@@ -1452,12 +1414,23 @@ const baseGlitchMessages = [
   "M3M0RY LEAK DETECTED: several memories now belong to the toolbar",
   "QUARANTINE STATUS: YES // NO // FILE NOT EMOTIONALLY AVAILABLE",
 ];
+window.BITS_MESSAGE_CATALOG?.bind("standard", "glitchMessages", baseGlitchMessages);
 const seasonalGlitchMessages = seasonalDesktopProfile?.glitchMessages ?? [];
 const glitchMessages = seasonalDesktopProfile?.mode === "exclusive"
   ? seasonalGlitchMessages
   : seasonalGlitchMessages.length
     ? [seasonalGlitchMessages[0], baseGlitchMessages[1], seasonalGlitchMessages.at(-1)]
     : baseGlitchMessages;
+window.addEventListener("bits:messages-updated", () => {
+  const profile = window.BITS_SEASONAL_PROFILE;
+  const dead = profile?.playingDeadMessages ?? [];
+  const glitch = profile?.glitchMessages ?? [];
+  const nextDead = profile?.mode === "exclusive" ? dead : [...basePlayingDeadMessages, ...dead];
+  const nextGlitch = profile?.mode === "exclusive" ? glitch : glitch.length
+    ? [glitch[0], baseGlitchMessages[1] ?? baseGlitchMessages[0], glitch.at(-1)] : [...baseGlitchMessages];
+  playingDeadMessages.splice(0, playingDeadMessages.length, ...nextDead);
+  glitchMessages.splice(0, glitchMessages.length, ...nextGlitch);
+});
 let playingDeadChecks = 0;
 
 function closePlayingDeadProcess() {
@@ -1475,9 +1448,9 @@ function inspectPlayingDeadProcess() {
   fakeRecycleBin.classList.add("is-playing-dead");
   fakeRecycleIcon.textContent = "[x_x]";
   fakeRecycleLabel.textContent = "playing_dead.exe";
-  fakePlayingDeadMessage.textContent = playingDeadChecks > playingDeadMessages.length
-    ? `${message} Check #${playingDeadChecks} has changed nothing.`
-    : message;
+  window.BITS_MESSAGE_TEXT.render(fakePlayingDeadMessage, message, {
+    suffix: playingDeadChecks > playingDeadMessages.length ? ` Check #${playingDeadChecks} has changed nothing.` : "",
+  });
   fakePlayingDead.hidden = false;
   fakePlayingDeadClose.focus();
 }
@@ -2117,8 +2090,8 @@ function triggerVirusScreen(networkName) {
     virusScreenProgress.textContent = `${progress}%`;
     virusScreenMeterFill.style.width = `${progress}%`;
     if (progress > 0 && progress < 100 && progress % 30 === 0) {
-      virusScreenCopy.textContent =
-        glitchMessages[(progress / 30 - 1) % glitchMessages.length];
+      window.BITS_MESSAGE_TEXT.render(virusScreenCopy,
+        glitchMessages[(progress / 30 - 1) % glitchMessages.length]);
       virusScreen.classList.add("is-glitch-spike");
       window.clearTimeout(virusTextTimer);
       virusTextTimer = window.setTimeout(() => {
@@ -2348,9 +2321,9 @@ closeButton.addEventListener("click", () => {
     return;
   }
 
-  shutdownMessage.textContent = shutdownMessages[
+  window.BITS_MESSAGE_TEXT.render(shutdownMessage, shutdownMessages[
     Math.floor(Math.random() * shutdownMessages.length)
-  ];
+  ]);
   shutdownCode.textContent = `STOP CODE: ${pickStopCode()}`;
   reportLinks.textContent = String(sessionMetrics.linksOpened);
   reportCommands.textContent = String(sessionMetrics.commandsEntered);
@@ -3117,17 +3090,12 @@ function showPreviousSplash(direction) {
   }
 
   currentMessage = historicalMessage;
-  currentMessageCharacters = splitVisibleCharacters(currentMessage.text);
+  currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
   characterIndex = currentMessageCharacters.length;
   deleting = true;
   applyTextFormat(typedText, currentMessage.format);
-  renderMessageText(
-    typedText,
-    currentMessageCharacters,
-    characterIndex,
-    currentMessage.colorful,
-  );
-  showAchievement(currentMessage.text, "COMMAND HISTORY", 1800);
+  window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
+  showAchievement(window.BITS_MESSAGE_TEXT.plainText(currentMessage), "COMMAND HISTORY", 1800);
 }
 
 document.addEventListener("keydown", (event) => {
@@ -3676,12 +3644,7 @@ async function loadBuildMetadata() {
 }
 
 applyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);
-renderMessageText(
-  typedText,
-  currentMessageCharacters,
-  characterIndex,
-  currentMessage.colorful,
-);
+window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
 applyTextFormat(typedText, currentMessage.format);
 document.querySelector("#year").textContent = new Date().getFullYear();
 loadBuildMetadata();

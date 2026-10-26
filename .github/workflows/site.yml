@@ -65,6 +65,7 @@ jobs:
         run: |
           npm run test:browser
           node scripts/creators-browser.mjs --root .site-build
+          node scripts/messages-browser.mjs --root .site-build
           node scripts/critical-css-browser.mjs --root .site-build
 
       - name: Enforce pre-deployment performance budgets

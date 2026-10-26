@@ -15,12 +15,15 @@
     <script src="/markdown.js?v=markdown-2" defer></script>
     <script src="/shortbits.js?v=shortbits-1" defer></script>
     <script src="/seasonal-calendar.js?v=calendar-1" defer></script>
+    <script src="/message-text.js?v=messages-1" defer></script>
+    <script src="/message-catalog.js?v=messages-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
     <script src="/admin-shell.js?v=admin-shell-2" defer></script>
     <script src="/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/admin.js?v=admin-31" defer></script>
     <script src="/admin-backup.js?v=backup-2" defer></script>
+    <script src="/admin-messages.js?v=messages-1" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -87,7 +90,7 @@
 
         <section id="backup-editor" class="profile-editor" aria-labelledby="backup-editor-heading">
           <h2 id="backup-editor-heading">Content backups</h2>
-          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
+          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, the message library, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
           <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
           <button id="backup-export" type="button">Download content backup</button>
           <h3>Restore content</h3>
@@ -292,6 +295,63 @@
           </form>
         </section>
 
+        <section id="message-library-editor" class="profile-editor" aria-labelledby="message-library-heading">
+          <div class="section-label">
+            <h2 id="message-library-heading">MESSAGE LIBRARY</h2>
+            <span>STATUS / SEASONAL / BOOT / MONITOR</span>
+          </div>
+          <p>Edit message text, rarity weights, formatting, and publication. Seasonal dates and exclusive/additive behavior stay unchanged. An empty enabled pool uses its bundled fallback; hiding or deleting every entry does not turn off that feature. Public edits refresh within five minutes on reload or refocus; a running boot sequence is not interrupted.</p>
+          <div class="admin-form">
+            <label>SEASON / PROFILE<select id="message-profile"></select></label>
+            <label>MESSAGE TYPE<select id="message-category"></select></label>
+            <label>SEARCH THIS POOL<input id="message-search" type="search" maxlength="120"></label>
+          </div>
+          <ul id="message-library-list" class="message-library-list"></ul>
+          <div class="repeatable-admin-actions">
+            <button id="message-page-previous" type="button">PREVIOUS</button>
+            <span id="message-page-label"></span>
+            <button id="message-page-next" type="button">NEXT</button>
+            <button id="message-new" type="button">+ ADD_MESSAGE</button>
+          </div>
+          <form id="message-library-form" class="admin-form">
+            <p id="message-editing-label">NEW MESSAGE</p>
+            <label class="admin-checkbox"><input id="message-markup" type="checkbox">ENABLE INLINE MARKUP</label>
+            <p id="message-markup-help">With inline markup enabled: <code>**bold**</code>, <code>*italic*</code>, <code>++underline++</code>, <code>~~strike~~</code>, <code>`code`</code>, <code>{{color:red|colored words}}</code>, and <code>{{color:rainbow|rainbow words}}</code>. You can also use <code>{{font:serif|words}}</code> and <code>{{size:large|words}}</code>. Select text and use the buttons below, or type markup directly. HTML, links, and images stay literal. Leave disabled to preserve literal punctuation.</p>
+            <div id="message-markup-toolbar" class="repeatable-admin-actions" role="group" aria-label="Format selected message text">
+              <button type="button" data-message-markup="bold">BOLD</button>
+              <button type="button" data-message-markup="italic">ITALIC</button>
+              <button type="button" data-message-markup="underline">UNDERLINE</button>
+              <button type="button" data-message-markup="strike">STRIKE</button>
+              <button type="button" data-message-markup="code">CODE</button>
+              <label>INLINE COLOR<select id="message-markup-color"><option value="accent">Accent</option><option value="red">Red</option><option value="orange">Orange</option><option value="yellow">Yellow</option><option value="green">Green</option><option value="cyan">Cyan</option><option value="blue">Blue</option><option value="purple">Purple</option><option value="pink">Pink</option><option value="white">White</option><option value="muted">Muted</option></select></label>
+              <button type="button" data-message-markup="color">COLOR</button>
+              <button type="button" data-message-markup="rainbow">RAINBOW</button>
+            </div>
+            <label>MESSAGE TEXT<textarea id="message-text" maxlength="2000" aria-describedby="message-markup-help" required></textarea></label>
+            <fieldset id="message-mistype-options">
+              <legend>MISTYPE EASTER EGG</legend>
+              <label class="admin-checkbox"><input id="message-mistype" type="checkbox">MISTYPE: CORRECT THIS MESSAGE AFTER TYPING</label>
+              <p id="message-mistype-help">Splash/status messages only. Write the misspelled version above and a different, corrected version below. When this message finishes typing, it corrects itself and unlocks the existing Mistyped Easter egg. Both versions use the same inline markup setting and whole-message defaults.</p>
+              <label>CORRECTED TEXT<textarea id="message-corrected-text" maxlength="2000" aria-describedby="message-mistype-help" disabled></textarea></label>
+              <div id="message-corrected-preview-container" hidden><p>CORRECTED PREVIEW</p><p id="message-corrected-preview"></p></div>
+            </fieldset>
+            <fieldset id="message-weighted-options">
+              <legend>WEIGHT AND APPEARANCE</legend>
+              <p>Optional whole-message defaults. Use inline markup above to style only selected words.</p>
+              <p>Higher weights appear more often: 3 = common, 1 = standard, 0.5 = rare, 0.25 = very rare.</p>
+              <label>WEIGHT<input id="message-weight" type="number" min="0.000001" max="1000" step="any" value="1" required></label>
+              <label class="admin-checkbox"><input id="message-colorful" type="checkbox">RAINBOW CHARACTERS</label>
+              <div id="message-format-fields" class="message-format-fields"></div>
+            </fieldset>
+            <label class="admin-checkbox"><input id="message-enabled" type="checkbox">ENABLED / PUBLIC</label>
+            <div aria-label="Message preview"><p>PREVIEW</p><p id="message-preview"></p></div>
+            <div class="repeatable-admin-actions">
+              <button id="message-save" type="submit">SAVE MESSAGE</button>
+              <button id="message-delete" type="button" disabled>DELETE MESSAGE</button>
+            </div>
+          </form>
+          <p id="message-library-status" class="form-status" role="status" aria-live="polite"></p>
+        </section>
         <section id="creators-editor" class="profile-editor" aria-labelledby="creators-editor-heading">
           <div class="section-label">
             <h2 id="creators-editor-heading">CREATOR.FEED</h2>

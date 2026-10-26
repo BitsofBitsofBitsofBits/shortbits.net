@@ -14,6 +14,7 @@ function backup() {
 test("accepts complete versioned editorial backups without private tables", () => {
   assert.equal(validate(backup()), 3);
   assert.ok(tables.includes("site_creators"));
+  assert.ok(tables.includes("site_message_catalog"));
   for (const name of ["messages", "site_hardware_devices", "site_short_links", "arcade_scores"]) assert.ok(!tables.includes(name));
 });
 test("rejects incomplete, unknown, malformed, and oversized content", () => {

@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "SYNC social_nodes .......... CONNECTED",
     "START presence.exe ......... READY",
   ];
+  const bindBootMessages = () => window.BITS_MESSAGE_CATALOG?.bind("standard", "initialBootSteps", baseBootSteps);
+  bindBootMessages();
+  window.addEventListener("bits:runtime-ready", bindBootMessages, { once: true });
   const timers = [];
   let finished = false;
 
@@ -99,7 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bootSteps.forEach((step, index) => {
       timers.push(window.setTimeout(() => {
         const item = document.createElement("li");
-        item.textContent = step;
+        if (window.BITS_MESSAGE_TEXT) window.BITS_MESSAGE_TEXT.render(item, step);
+        else item.textContent = step;
         bootLog.append(item);
         bootProgressBar.style.width = `${Math.round(((index + 1) / bootSteps.length) * 100)}%`;
         if (index === bootSteps.length - 1) {

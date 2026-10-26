@@ -1,7 +1,7 @@
 (() => {
   const tables = [
     "pronoun_profiles", "site_blog_posts", "site_changelog", "site_creators", "site_favorite_games",
-    "site_hardware", "site_hardware_machine_order", "site_now",
+    "site_hardware", "site_hardware_machine_order", "site_message_catalog", "site_now",
     "site_resume_certifications", "site_resume_education", "site_resume_entries",
     "site_resume_profile", "spotify_featured_playlists", "spotify_featured_tracks",
   ];
@@ -116,6 +116,9 @@
       let cacheWarning = "";
       try {
         localStorage.removeItem("bits-public-content-v5");
+        for (const key of Object.keys(localStorage)) {
+          if (key.startsWith("bits-message-catalog-v1:")) localStorage.removeItem(key);
+        }
       } catch (error) {
         console.warn("Content restored but the local public-content cache could not be cleared:", error);
         cacheWarning = " This browser's public content may stay cached for up to five minutes.";

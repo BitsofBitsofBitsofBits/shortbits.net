@@ -59,8 +59,8 @@ for (const [year, month, day, id] of holidays) {
     assert.equal(new Set(profile.messages.map((entry) => entry.text)).size, 16);
     const share = totalWeight(profile.messages) / totalWeight(window.BITS_MESSAGES);
     const activityShare = totalWeight(profile.activities) / totalWeight(window.BITS_ACTIVITIES);
-    assert.ok(share >= 0.3 && share <= 0.45, `${id}: holiday message share ${share}`);
-    assert.ok(activityShare >= 0.4 && activityShare <= 0.6, `${id}: holiday activity share ${activityShare}`);
+    assert.equal(share, 16 * 18 / (totalWeight(base.messages) + 16 * 18), `${id}: holiday message share`);
+    assert.equal(activityShare, 6 * 12 / (totalWeight(base.activities) + 6 * 12), `${id}: holiday activity share`);
     assert.ok(window.BITS_GET_SEASONAL_THEME_STATE(new Date(year, month - 1, day)).availableThemeIds.includes(id));
   });
 

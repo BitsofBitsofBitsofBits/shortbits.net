@@ -294,8 +294,8 @@ is a personal project and largely a learning exercise for me.
 - Valentine's Day, St. Patrick's Day, Easter, Earth Day, Independence Day,
   and Thanksgiving also add seasonal messages without replacing the normal
   pool: each has 16 messages at weight 18 and six activities at weight 12.
-  Against the current regular pools, that gives a single holiday about 35%
-  of the weighted message pool and 50% of activities before repeat avoidance.
+  Their share is the seasonal total weight divided by the combined regular
+  and seasonal weight; adding/editing messages changes those probabilities.
   Boot messages, live-agent hardware chatter, shutdown text, and desktop
   jokes also get holiday additions through the existing seasonal consumers.
   Existing New Year, Halloween, and Christmas exclusivity is unchanged.
@@ -304,6 +304,57 @@ is a personal project and largely a learning exercise for me.
   Gregorian Easter calculation between visual themes and message profiles.
   Run `node --test scripts/holiday-themes.test.mjs scripts/seasonal-messages.test.mjs`
   to validate schedules, complete pool retention, and weighted shares.
+- **Admin -> Content -> Message library** manages regular and seasonal status
+  messages, activities, shutdown messages, fixed endless-boot messages, initial
+  boot steps, playing-dead/glitch messages, and six hardware-monitor joke pools.
+  Filter by season and message type, search, page through entries, add/edit/delete,
+  enable/hide, adjust positive rarity weights (up to 1000), and preview rainbow
+  text and the eight supported style properties. Date rules and exclusive/additive
+  seasonal behavior remain in code, as do procedural boot generators, themed
+  narratives, game/dialog text, and interface labels.
+  Deploy `20261025030000_create_message_catalog.sql` and
+  `20261025031000_seed_message_catalog.sql`; the seed preserves all 2,207 current
+  entries, including local additions, weights, formatting, and duplicate entries.
+  It is a one-time snapshot, not a deploy-time overwrite of Admin edits.
+  `messages.js`, `seasonal-messages.js`, and the existing local boot/monitor
+  definitions remain bundled fallbacks. Empty enabled pools use their bundled
+  defaults rather than breaking weighted selection; deleting/hiding an entire
+  pool does not disable that feature. Edit the database through Admin going forward.
+  `message-catalog.js` keeps existing consumer arrays live, applies a valid cached
+  snapshot immediately, and fetches active season/standard entries in 500-row pages
+  in the background after startup. Cached data lasts five minutes; reload/refocus
+  refreshes expired data. Network/schema failures log a warning and retain cached
+  or bundled data. The initial automatic boot never waits for the network; a
+  running sequence finishes unchanged and later replays use updated messages.
+  Run `node --test scripts/message-catalog.test.mjs scripts/message-catalog-database.test.mjs`
+  and `node scripts/messages-browser.mjs --root .site-build` for regression coverage.
+  Each entry also has **Enable inline markup**, off by default so existing text
+  stays literal. After deploying `20261025032000_message_inline_markup.sql`,
+  style selected words with `**bold**`, `*italic*`, `++underline++`, `~~strike~~`,
+  backtick code, `{{color:red|words}}`, or `{{color:rainbow|words}}`.
+  The existing blog palette/font/size names also work, for example
+  `{{font:serif|words}}` and `{{size:large|words}}`. Formatting buttons wrap the
+  selected text and the live preview uses the public renderer. All library
+  categories support markup; optional whole-message defaults still apply to
+  statuses/activities. The typewriter counts rendered graphemes, not delimiters,
+  and preserves styling while typing/deleting. Raw HTML, links, images, and
+  block markup are not enabled for messages. Export a fresh backup after this
+  migration; backups without the new `markup` column fail exact-schema validation.
+  Run `node --test scripts/message-text.test.mjs scripts/startup-formatting.test.mjs`
+  to verify safe inline rendering, Unicode, and plain-text compatibility.
+  Splash/status entries also support **Mistype** with a **Corrected text** field
+  after deploying `20261025033000_message_mistype_corrections.sql`. Enter the
+  misspelled message as the message text and a different, nonblank corrected
+  version (up to 2,000 characters). After typing the original, the splash briefly
+  rewinds to the first differing character, displays the correction, and unlocks
+  the existing Mistyped achievement. Both versions share the inline markup flag
+  and whole-message defaults; Admin previews both, and the formatting toolbar
+  works on whichever text field was last focused. This is limited to the
+  splash/status type, not activities, boot logs, or other non-typewriter pools.
+  Turning the toggle off saves a null `corrected_text`; existing messages remain
+  unchanged and the rare built-in typo continues to appear independently.
+  Corrections are cached and included in content backups. Export a fresh backup
+  after deployment; earlier backups lack the new column and fail schema validation.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions
@@ -657,12 +708,12 @@ scoped passwordless `sudo` access to `caddy validate`,
   Edits, scheduling, deletion, and unpublishing require another deploy to update
   static copies and RSS. Do not treat unpublishing alone as immediate removal of
   previously deployed public content.
-- The Admin center's **Content backups** page exports 14 editorial tables,
-  including creators and drafts. Restore validates the complete schema and runs atomically
+- The Admin center's **Content backups** page exports 15 editorial tables,
+  including creators, message catalogs, and drafts. Restore validates the complete schema and runs atomically
   under existing authenticated permissions. A safety backup downloads first.
-  The backup and creator migrations must be deployed before these actions work.
-  Export a new backup after the creator migration; older 13-table backups do not
-  match the current schema and are rejected rather than silently clearing creators.
+  The backup, creator, and message-catalog migrations must be deployed before these actions work.
+  Export a new backup after schema updates; older 13/14-table backups do not
+  match the current schema and are rejected rather than silently clearing new content.
 - Backups exclude private messages, guestbook entries, leaderboards, analytics,
   short links, device credentials, live telemetry, and image binaries. Keep
   backups private, retain separate Supabase database/Storage backups, and reload

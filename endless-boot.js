@@ -291,11 +291,14 @@
     "COMMITING ARSON ................... ACCIDENTALLY",
     "COMMITING ARSON ................... AS A MISDEMEANOR",
   ];
+  window.BITS_MESSAGE_CATALOG?.bind("standard", "bootMessages", baseFixedMessages);
   const seasonalProfile = window.BITS_SEASONAL_PROFILE;
-  const seasonalBootMessages = seasonalProfile?.bootMessages ?? [];
-  const fixedMessages = seasonalProfile?.mode === "exclusive"
-    ? seasonalBootMessages
-    : baseFixedMessages;
+  const seasonalBootMessages = [...(seasonalProfile?.bootMessages ?? [])];
+  const fixedMessages = [...(seasonalProfile?.mode === "exclusive" ? seasonalBootMessages : baseFixedMessages)];
+  window.addEventListener("bits:messages-updated", () => {
+    seasonalBootMessages.splice(0, seasonalBootMessages.length, ...(seasonalProfile?.bootMessages ?? []));
+    fixedMessages.splice(0, fixedMessages.length, ...(seasonalProfile?.mode === "exclusive" ? seasonalBootMessages : baseFixedMessages));
+  });
   const bootPhases = [
     {
       name: "FIRMWARE POWER-ON SELF TEST",
@@ -1761,7 +1764,7 @@
     toggle.type = "button";
     toggle.className = "endless-boot-log-entry";
     toggle.setAttribute("aria-expanded", "false");
-    summary.textContent = message;
+    window.BITS_MESSAGE_TEXT.render(summary, message);
     detail.textContent = randomItem(diagnosticDetails);
     toggle.append(summary, detail);
     toggle.addEventListener("click", () => {
@@ -1800,10 +1803,11 @@
         message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
       }
       attempts += 1;
-    } while (recentMessageSet.has(message) && attempts < 100);
+    } while (recentMessageSet.has(window.BITS_MESSAGE_TEXT.plainText(message)) && attempts < 100);
 
-    recentMessages.push(message);
-    recentMessageSet.add(message);
+    const key = window.BITS_MESSAGE_TEXT.plainText(message);
+    recentMessages.push(key);
+    recentMessageSet.add(key);
     if (recentMessages.length > 240) {
       recentMessageSet.delete(recentMessages.shift());
     }
@@ -1913,27 +1917,7 @@
       message = weightedTransmission();
     } while (message.text === lastTransmission && (window.BITS_MESSAGES?.length ?? 0) > 1);
     lastTransmission = message.text;
-    messageOutput.replaceChildren();
-    messageOutput.removeAttribute("style");
-    if (message.format) {
-      Object.entries(message.format).forEach(([property, value]) => {
-        if (property in messageOutput.style) {
-          messageOutput.style[property] = value;
-        }
-      });
-    }
-    if (message.colorful) {
-      [...message.text].forEach((character, index) => {
-        const span = document.createElement("span");
-        span.textContent = character;
-        if (character.trim()) {
-          span.style.color = `hsl(${(index * 37) % 360} 88% 70%)`;
-        }
-        messageOutput.append(span);
-      });
-    } else {
-      messageOutput.textContent = message.text;
-    }
+    window.BITS_MESSAGE_TEXT.render(messageOutput, message);
   }
 
   function showEvent([code, title, detail], kind = "incident", duration = 3200) {

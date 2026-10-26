@@ -1077,6 +1077,8 @@
     },
   ];
 
+  window.BITS_MESSAGE_CATALOG?.registerProfiles(profiles);
+
   function mergeMonitorJokes(activeProfiles) {
     return activeProfiles.reduce((merged, profile) => {
       Object.entries(profile.monitorJokes ?? {}).forEach(([metric, messages]) => {
@@ -1111,10 +1113,27 @@
   }
 
   const activeProfile = resolveProfile();
+  const regularPools = {
+    messages: window.BITS_MESSAGES,
+    activities: window.BITS_ACTIVITIES,
+    shutdownMessages: window.BITS_SHUTDOWN_MESSAGES,
+  };
   window.BITS_GET_SEASONAL_PROFILE = resolveProfile;
   window.BITS_SEASONAL_PROFILE = activeProfile;
 
+  window.addEventListener?.("bits:messages-updated", () => {
+    Object.assign(activeProfile, resolveProfile());
+    for (const [field, global] of [["messages", "BITS_MESSAGES"], ["activities", "BITS_ACTIVITIES"], ["shutdownMessages", "BITS_SHUTDOWN_MESSAGES"]]) {
+      if (!Array.isArray(window[global])) continue;
+      const seasonal = field === "shutdownMessages" && activeProfile.mode === "additive"
+        ? activeProfile[field].flatMap((message) => Array(12).fill(message)) : activeProfile[field];
+      const values = activeProfile.mode === "exclusive" ? [...seasonal] : [...regularPools[field], ...seasonal];
+      window[global].splice(0, window[global].length, ...values);
+    }
+  });
+
   if (!activeProfile.active) {
+    if (Array.isArray(window.BITS_MESSAGES)) window.BITS_MESSAGE_CATALOG?.start();
     return;
   }
 
@@ -1136,4 +1155,5 @@
       ? activeProfile.shutdownMessages
       : [...window.BITS_SHUTDOWN_MESSAGES, ...frequentShutdownMessages];
   }
+  if (Array.isArray(window.BITS_MESSAGES)) window.BITS_MESSAGE_CATALOG?.start();
 })();

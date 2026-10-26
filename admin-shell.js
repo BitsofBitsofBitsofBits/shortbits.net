@@ -64,6 +64,7 @@
     { route: "resume", sourceId: "resume-editor", label: "Résumé", group: "content", icon: "document", description: "Edit CAREER.SYS, work history, education, and certifications.", keywords: "resume career jobs education certifications" },
     { route: "now", sourceId: "now-editor", label: "Now", group: "content", icon: "note", description: "Update current projects and interests.", keywords: "now.txt status" },
     { route: "changelog", sourceId: "changelog-editor", label: "Changelog", group: "content", icon: "history", description: "Manage the public deployment history.", keywords: "releases updates" },
+    { route: "messages", sourceId: "message-library-editor", label: "Message library", group: "content", icon: "note", description: "Edit rotating, seasonal, boot, shutdown, and hardware-monitor messages.", keywords: "status activities weights rarity rainbow holidays text" },
     { route: "blog", sourceId: "blog-editor", label: "Blog", group: "content", icon: "edit", description: "Write, preview, draft, and publish Markdown posts.", keywords: "posts markdown articles" },
     { route: "games", sourceId: "games-editor", label: "Games", group: "showcase", icon: "game", description: "Manage the public favorite-games library.", keywords: "library favorites" },
     { route: "creators", sourceId: "creators-editor", label: "Creators", group: "showcase", icon: "person", description: "Curate CREATOR.FEED, channel links, and latest YouTube uploads.", keywords: "youtube twitch videos channels content creators" },
