@@ -6,13 +6,14 @@ import { messageCatalogDefaults } from "./message-catalog-data.mjs";
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const defaults = messageCatalogDefaults();
-function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, cache = null, storageFails = false, pools = [], timezone = "America/Chicago" } = {}) {
+function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, cache = null, storageFails = false, pools = [], timezone = "America/Chicago", switchDateAfterFetch = null } = {}) {
   const events = new EventTarget();
   const storage = new Map(cache ? Object.entries(cache) : []);
   const calls = [];
   const warnings = [];
   const timers = [];
   let currentDate = date;
+  let advancedDate = false;
   const window = {
     SUPABASE_CONFIG: { url: "https://database.example", anonKey: "public-key" },
     addEventListener: events.addEventListener.bind(events),
@@ -42,7 +43,10 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
       const ids = query.get("profile").slice(4, -1).split(",");
       const filtered = rows.filter((row) => ids.includes(row.profile));
       const offset = Number(query.get("offset"));
-      return { ok: true, json: async () => filtered.slice(offset, offset + 500) };
+      return { ok: true, json: async () => {
+        if (switchDateAfterFetch && !advancedDate) { currentDate = switchDateAfterFetch; advancedDate = true; }
+        return filtered.slice(offset, offset + 500);
+      } };
     },
   });
   vm.runInContext(read("seasonal-calendar.js"), context);
@@ -266,4 +270,21 @@ test("an open page checks for calendar-day changes and refreshes its active pool
   await refresh.callback();
   assert.equal(app.window.BITS_SEASONAL_PROFILE.mode, "standard");
   assert.ok(!app.window.BITS_MESSAGES.some((message) => message.text === "today"));
+});
+
+test("a fetch crossing Central midnight keeps its selection timestamp so the next day check loads the new pool", async () => {
+  const pools = [
+    datedPool("before", { mode: "exclusive" }),
+    datedPool("after", { mode: "exclusive", starts_on: "2000-08-11", ends_on: "2000-08-11" }),
+  ];
+  const app = setup({
+    date: "2026-08-10T23:59:59-05:00", switchDateAfterFetch: "2026-08-11T00:00:01-05:00",
+    pools, rows: [...defaults, ...pools.map((pool, index) => poolMessage(pool, 9001 + index))],
+  });
+  assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+  app.timers.find((timer) => timer.delay === 60_000).callback();
+  const refresh = app.timers.find((timer) => timer.delay === 1000);
+  assert.ok(refresh, "a pre-midnight selection must not be marked as already refreshed for the new date");
+  await refresh.callback();
+  assert.deepEqual(Array.from(app.window.BITS_MESSAGES, (message) => message.text), ["after"]);
 });

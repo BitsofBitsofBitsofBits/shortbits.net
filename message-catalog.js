@@ -22,7 +22,7 @@
   let timezone = null;
   let loadedDay = "";
   const formatters = new Map();
-  const activeProfiles = (options) => ["standard", ...(window.BITS_GET_SEASONAL_PROFILE?.(new Date(), options)?.ids ?? [])];
+  const activeProfiles = (options, date = new Date()) => ["standard", ...(window.BITS_GET_SEASONAL_PROFILE?.(date, options)?.ids ?? [])];
   const cacheKey = () => "bits-message-catalog-v2";
   const weighted = (category) => category === "messages" || category === "activities";
   const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -178,7 +178,8 @@
         if (definitions.length >= 1000) throw new Error("Too many custom pools; at most 999 are supported.");
         const zone = validateTimezone(settings[0].timezone);
         definitions.forEach(validatePool);
-        const ids = activeProfiles({ pools: definitions, timezone: zone });
+        const selectionDate = new Date();
+        const ids = activeProfiles({ pools: definitions, timezone: zone }, selectionDate);
         const rows = [];
         for (let offset = 0; ; offset += 500) {
           const query = new URLSearchParams({
@@ -197,8 +198,8 @@
           if (page.length < 500) break;
         }
         apply(rows, definitions, zone);
-        loadedAt = Date.now();
-        loadedDay = dayKey(calendarDate(new Date()));
+        loadedAt = selectionDate.getTime();
+        loadedDay = dayKey(calendarDate(selectionDate));
         status = "Database messages are active; empty pools use bundled messages.";
         try {
           localStorage.setItem(cacheKey(), JSON.stringify({ rows, pools: definitions, timezone: zone, loadedAt }));
