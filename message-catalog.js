@@ -28,6 +28,8 @@
   const cacheKey = () => "bits-message-catalog-v2";
   const weighted = (category) => category === "messages" || category === "activities";
   const clone = (value) => JSON.parse(JSON.stringify(value));
+  const yieldToBrowser = () => typeof window.scheduler?.yield === "function"
+    ? window.scheduler.yield() : new Promise((resolve) => window.setTimeout(resolve, 0));
 
   function validateEntry(row, allowedProfiles) {
     if (row?.corrected_text != null && (row.category !== "messages"
@@ -205,10 +207,12 @@
           if (rows.length > 10000) throw new Error("Message catalog exceeds 10,000 entries.");
           if (page.length < 500) break;
         }
+        await yieldToBrowser();
         apply(rows, definitions, zone);
         loadedAt = selectionDate.getTime();
         loadedDay = dayKey(calendarDate(selectionDate));
         status = "Database messages are active; empty pools use bundled messages.";
+        await yieldToBrowser();
         try {
           localStorage.setItem(cacheKey(), JSON.stringify({ rows, pools: definitions, timezone: zone, loadedAt }));
         } catch (error) {

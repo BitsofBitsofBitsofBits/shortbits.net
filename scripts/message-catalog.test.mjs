@@ -19,6 +19,7 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
     addEventListener: events.addEventListener.bind(events),
     dispatchEvent: events.dispatchEvent.bind(events),
     setTimeout: (callback, delay) => { timers.push({ callback, delay }); return timers.length; },
+    scheduler: { yield: async () => {} },
   };
   const context = vm.createContext({
     window, URLSearchParams, AbortSignal, CustomEvent, Temporal: temporal,
@@ -309,4 +310,39 @@ test("native Temporal avoids locale-format startup while preserving timezone val
   assert.ok(instants.some((value) => value > 0), "date conversion must use the requested instant");
   assert.throws(() => app.window.BITS_MESSAGE_CATALOG.validateTimezone("Invalid/Timezone"), /Invalid time zone/);
   assert.throws(() => app.window.BITS_MESSAGE_CATALOG.validateTimezone("+05:00"), /IANA timezone/);
+});
+
+test("background refresh yields between parsing, applying the complete snapshot, and persisting its cache", async () => {
+  const rows = defaults.map((row, index) => index === 0 ? { ...row, text: "YIELDED MESSAGE" } : row);
+  const app = setup({ rows });
+  const releases = [];
+  app.window.scheduler.yield = () => new Promise((resolve) => releases.push(resolve));
+  const refresh = app.window.BITS_MESSAGE_CATALOG.refresh();
+  await new Promise(setImmediate);
+  assert.equal(releases.length, 1);
+  assert.equal(app.window.BITS_MESSAGES[0].text, defaults[0].text);
+  assert.equal(app.storage.size, 0);
+  releases[0]();
+  await new Promise(setImmediate);
+  assert.equal(app.window.BITS_MESSAGES[0].text, "YIELDED MESSAGE");
+  assert.equal(releases.length, 2);
+  assert.equal(app.storage.size, 0);
+  releases[1]();
+  assert.equal(await refresh, true);
+  assert.equal(app.storage.size, 1);
+});
+
+test("older browsers without scheduler.yield use separate timer tasks for refresh application and caching", async () => {
+  const app = setup();
+  app.window.scheduler = undefined;
+  const refresh = app.window.BITS_MESSAGE_CATALOG.refresh();
+  await new Promise(setImmediate);
+  const apply = app.timers.filter((timer) => timer.delay === 0);
+  assert.equal(apply.length, 1);
+  apply[0].callback();
+  await new Promise(setImmediate);
+  const tasks = app.timers.filter((timer) => timer.delay === 0);
+  assert.equal(tasks.length, 2);
+  tasks[1].callback();
+  assert.equal(await refresh, true);
 });

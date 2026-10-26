@@ -378,6 +378,8 @@ is a personal project and largely a learning exercise for me.
   previous complete cached catalog/configuration or bundled fallbacks.
   Browsers with native Temporal convert timezone dates without initializing
   locale formatting during startup; older browsers use a cached Intl formatter.
+  Background refresh yields between response processing, atomic application, and
+  cache persistence so these stages do not form one long input-blocking task.
   Pools/settings are included in content backups, with definitions restored before
   their messages. Export a new backup after deploying this migration; older
   backups do not have the two new tables.
