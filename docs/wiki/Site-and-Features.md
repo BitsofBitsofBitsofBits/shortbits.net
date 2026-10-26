@@ -48,6 +48,10 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
 
 - Theme-driven, high-contrast, and reduced-motion display profiles
 
+- The Online profile header uses the favicon as Caleb's profile picture on the
+  left, with the interactive bit avatar on the right. On smaller screens, both
+  sit above the profile text; the avatar's reactions and Easter eggs remain intact.
+
 - Spotify now-playing integration through a Supabase Edge Function
 
 - Cached Discord presence, custom status, and activity through Lanyard

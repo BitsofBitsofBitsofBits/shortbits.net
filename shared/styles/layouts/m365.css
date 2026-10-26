@@ -50,14 +50,13 @@
 :root[data-interface-theme="m365"] .m365-search-icon{fill:none;stroke:#616161;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}:root[data-interface-theme="m365"][data-color-scheme="dark"] .m365-search-icon{stroke:#c8c8c8}
 :root[data-interface-theme="m365"] :is(.name-field,.theme-atmosphere,.binary-rain,.noise,.scanlines){display:none}
 :root[data-interface-theme="m365"] .shell{background:transparent;box-shadow:none;backdrop-filter:none;overflow:visible}
-:root[data-interface-theme="m365"] .profile{grid-template-columns:128px minmax(0,1fr);gap:26px;min-height:0;padding:26px 30px}
+:root[data-interface-theme="m365"] .profile{grid-template-columns:128px minmax(0,1fr) 128px;gap:26px;min-height:0;padding:26px 30px}
 :root[data-interface-theme="m365"] .avatar-wrap{grid-row:auto;width:128px;height:128px;aspect-ratio:1}
 :root[data-interface-theme="m365"] .identity{grid-column:auto}
 :root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log,:root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log *{color:#d9f2df!important;text-shadow:none!important}
 :root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log li{border-color:#46564d}
 :root[data-interface-theme="m365"] .endless-boot-transmission{color:var(--ink)}:root[data-interface-theme="m365"] .endless-boot-transmission>span{color:var(--muted)}
-@media(max-width:760px){:root[data-interface-theme="m365"] .profile{grid-template-columns:96px minmax(0,1fr);gap:16px}:root[data-interface-theme="m365"] .avatar-wrap{width:96px;height:96px}}
-@media(max-width:460px){:root[data-interface-theme="m365"] .profile{grid-template-columns:1fr}:root[data-interface-theme="m365"] .avatar-wrap{width:96px;height:96px}}
+@media(max-width:760px){:root[data-interface-theme="m365"] .profile{grid-template-columns:minmax(0,1fr) 96px;gap:16px}:root[data-interface-theme="m365"] .profile > .profile-picture{max-width:96px}:root[data-interface-theme="m365"] .profile > .identity{grid-column:1 / -1;grid-row:2}:root[data-interface-theme="m365"] .profile > .avatar-wrap{grid-column:2;grid-row:1;width:96px;height:96px}}
 :root[data-interface-theme="m365"] [hidden]{display:none!important}
 :root[data-interface-theme="m365"] #app-menu-bar{display:flex;position:relative;gap:4px;min-height:40px;margin:0 0 22px;padding:4px;border:1px solid var(--border);border-radius:4px;color:var(--ink);background:var(--panel);box-shadow:var(--shadow)}
 :root[data-interface-theme="m365"] #app-menu-bar .app-menu>summary{padding:6px 12px;border-radius:3px;color:var(--ink);font:500 13px/20px var(--font-family);cursor:pointer}

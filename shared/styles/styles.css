@@ -3633,10 +3633,25 @@ html.is-page-hidden * {
 
 .profile {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  grid-template-columns: 150px minmax(0, 1fr) 150px;
   gap: 34px;
   align-items: center;
   padding: 48px 44px 38px;
+}
+
+.profile-picture {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid var(--accent);
+  background: var(--panel-2);
+}
+
+.identity {
+  min-width: 0;
 }
 
 .avatar-wrap {
@@ -14837,14 +14852,28 @@ html.is-root-mode .name-field {
   }
 
   .profile {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 126px;
     gap: 24px;
     padding: 34px 24px 30px;
   }
 
   .avatar-wrap {
     width: 126px;
-    justify-self: start;
+    justify-self: end;
+  }
+
+  .profile > .profile-picture {
+    max-width: 126px;
+  }
+
+  .profile > .identity {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .profile > .avatar-wrap {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .featured-section,

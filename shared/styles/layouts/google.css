@@ -127,7 +127,11 @@
 :root[data-interface-theme="google"] #interface-shell .app-menu-bar { border: 0; background: transparent; margin: -12px 0 0; padding: 0; gap: 12px; }
 :root[data-interface-theme="google"] .app-menu > summary { border-radius: 20px; color: var(--muted); font-size: 11px; }
 :root[data-interface-theme="google"] .app-menu-popup { background: var(--panel); border-radius: 16px; box-shadow: var(--shadow); }
-:root[data-interface-theme="google"] #interface-shell > .profile { grid-column: 2; grid-row: 4 / span 5; align-self: start; display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 24px; margin: 0; border: 1px solid var(--border); border-radius: 20px; background: var(--panel); }
+:root[data-interface-theme="google"] #interface-shell > .profile { grid-column: 2; grid-row: 4 / span 5; align-self: start; display: grid; grid-template-columns: minmax(0, 1fr) 116px; align-items: center; gap: 12px; padding: 24px; margin: 0; border: 1px solid var(--border); border-radius: 20px; background: var(--panel); }
+:root[data-interface-theme="google"] .profile > :is(.google-panel-label, .google-person-name, .google-panel-footnote) { grid-column: 1 / -1; }
+:root[data-interface-theme="google"] .profile > .profile-picture { grid-column: 1; grid-row: 3; max-width: 116px; }
+:root[data-interface-theme="google"] .profile > .avatar-wrap { grid-column: 2; grid-row: 3; width: 116px; }
+:root[data-interface-theme="google"] .profile > .identity { grid-column: 1 / -1; grid-row: 4; }
 :root[data-interface-theme="google"] .google-panel-label { color: var(--muted); font-size: 12px; margin: 0; }
 :root[data-interface-theme="google"] .profile .avatar-wrap { margin: 4px auto 12px; }
 :root[data-interface-theme="google"] .profile .avatar { background: var(--google-tonal); border-color: var(--google-on-tonal); color: var(--google-on-tonal); border-radius: 24px; box-shadow: none; }

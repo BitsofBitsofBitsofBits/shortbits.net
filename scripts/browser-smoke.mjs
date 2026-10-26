@@ -91,6 +91,51 @@ try {
         await page.evaluate(() => { document.documentElement.dataset.effects = "off"; });
         await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount === 0);
       }
+      if (path === "/online/") {
+        const picture = page.locator(".profile-picture");
+        assert.ok(await picture.evaluate(img => img.complete && img.naturalWidth > 0), "Profile picture loads");
+        assert.equal(await picture.getAttribute("src"), "/shared/images/favicon.png");
+        const portrait = await picture.boundingBox();
+        const avatar = await page.locator("#avatar-wrap").boundingBox();
+        const identity = await page.locator(".profile > .identity").boundingBox();
+        assert.ok(portrait.x + portrait.width <= avatar.x, "Profile picture is left of the animated avatar");
+        if (width <= 640) {
+          assert.ok(identity.y >= Math.max(portrait.y + portrait.height, avatar.y + avatar.height),
+            "Mobile profile text sits below the picture and avatar");
+        } else {
+          assert.ok(portrait.x + portrait.width <= identity.x && identity.x + identity.width <= avatar.x,
+            "Desktop identity remains between the picture and animated avatar");
+        }
+        const reaction = await page.locator("#avatar-reaction").textContent();
+        for (let poke = 0; poke < 3; poke++) await page.locator("#avatar-button").click();
+        assert.notEqual(await page.locator("#avatar-reaction").textContent(), reaction,
+          "Animated avatar still reacts to pokes");
+        for (const theme of ["google", "m365", "youtube"]) {
+          await page.locator("#interface-theme-select").selectOption(theme, { force: true });
+          await page.waitForFunction(theme => {
+            const sheet = document.querySelector("#bits-theme-stylesheet");
+            return document.documentElement.dataset.interfaceTheme === theme
+              && sheet?.href.includes(`/${theme}.css`) && sheet.sheet;
+          }, theme);
+          if (theme === "google") await page.locator(".google-panel-label").waitFor();
+          const imageBox = await picture.boundingBox();
+          const agentBox = await page.locator("#avatar-wrap").boundingBox();
+          assert.ok(imageBox.x + imageBox.width <= agentBox.x,
+            `${width}px ${theme}: profile picture stays left of the animated avatar`);
+          assert.ok(await page.evaluate(() => {
+            const panel = document.querySelector(".profile");
+            return [...panel.children].every(child => {
+              const box = child.getBoundingClientRect();
+              const bounds = panel.getBoundingClientRect();
+              return box.left >= bounds.left - 1 && box.right <= bounds.right + 1;
+            });
+          }), `${width}px ${theme}: header contents fit the profile panel`);
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2),
+            `${width}px ${theme}: no horizontal overflow`);
+        }
+        await page.locator("#interface-theme-select").selectOption("default", { force: true });
+        await page.waitForFunction(() => document.documentElement.dataset.interfaceTheme === "default");
+      }
       if (path === "/professional/resume/") {
         assert.equal(await page.locator("#resume-status").textContent(), "Saved resume is current.");
         assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
