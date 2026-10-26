@@ -31,7 +31,8 @@ Database and Edge Function changes ship from the same workflow. Add these
   synced for Twitch creator lookup, profile photos, live status, and offline VODs.
   If absent or incomplete, existing Supabase Twitch secrets are unchanged.
 
-The job deploys `contact-message` and then runs `supabase db push`. When the
+The job deploys `contact-message`, `creator-videos`, `creator-twitch`,
+`youtube-presence`, and `hardware-sync`, then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
 
@@ -44,6 +45,23 @@ installed unpacked from the repository, not copied into the public site build.
 Provision its revocable device token in Supabase's SQL editor using the
 [extension setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence).
 It requires no additional GitHub or YouTube secrets.
+
+The updated `spotify-now-playing` function is also required for media-session
+timing. It is not currently listed in this workflow's Edge Function deploy
+steps; deploy it explicitly as described in
+[YouTube watching presence](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence).
+
+Pushing a commit starts validation; it does not apply migrations immediately.
+The Supabase job depends on successful validation and is skipped when validation
+fails. Inspect **Apply database migrations** directly before trying newly added
+database functions. An overall failed run may instead be a later Lighthouse
+failure after a successful deploy, so distinguish job results.
+
+The October 26 changelog catch-up is stored in
+`20261026070000_recent_changes_changelog.sql`. It appends dated, enabled entries
+after the highest existing position without replacing earlier releases or Admin
+drafts. The public `CHANGELOG.LOG` updates after this migration, subject to the
+existing five-minute content cache; publishing the Wiki alone does not update it.
 
 Before deployment, the workflow builds an offline fixture site and runs browser
 smoke checks, axe accessibility checks, and mobile/desktop Lighthouse budgets.

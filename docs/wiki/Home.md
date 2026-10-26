@@ -7,10 +7,12 @@ terminal-inspired personal website of BitsofBitsofBits.
 
 | Page | Contents |
 | --- | --- |
+| [Recent changes](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Recent-Changes) | October 26 catch-up since the 2.0 changelog: messages, themes, workspaces, media presence, creators, and reliability. |
 | [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout) | Shared assets, page-owned files, entry HTML, and generated build outputs. |
 | [Site and features](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Site-and-Features) | Public pages, desktop windows, games, achievements, and everyday site behavior. |
 | [Admin and content](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Admin-and-Content) | Admin navigation and editors for career data, blog posts, games, guestbook, and ShortBits. |
 | [Creator feed](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Creator-Feed) | YouTube channel lookup, photos, uploads, and Twitch setup and live status. |
+| [YouTube watching presence](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence) | Extension installation, device tokens, shared Spotify/YouTube player, session ordering, privacy, and migration troubleshooting. |
 | [Hardware and agents](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Hardware-and-Agents) | Hardware imports, Windows live agents, and the Unraid Docker collector. |
 | [Themes and appearance](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Themes-and-Appearance) | Theme catalog, variants, accessibility, optional effects, and seasonal themes. |
 | [Message library](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Message-Library) | Message editing, inline markup, Mistype corrections, bulk actions, and scheduled pools. |

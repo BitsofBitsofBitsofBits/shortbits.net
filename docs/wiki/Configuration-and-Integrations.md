@@ -12,7 +12,7 @@ and Spotify in the existing player area. Playing media is prioritized over
 paused media; otherwise the earlier continuous listening/watching session
 appears first. Track and video changes do not reset the session.
 
-See the [extension setup and privacy guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence)
+See [YouTube watching presence](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence)
 for unpacked installation, device-token provisioning/revocation, migrations,
 and observation-gap limitations. Sharing is off by default; reports expire
 after 90 seconds without updates. No YouTube API credentials are required.

@@ -51,6 +51,8 @@ scripts/                   Node build, validation, test, and maintenance tools
 docs/wiki/                 Versioned Wiki sources
 supabase/                  Database migrations and server-side functions
 agents/                    Optional hardware collectors
+extensions/
+  youtube-presence/        Locally installed Chromium extension; not a site asset
 ```
 
 ## Entry HTML and public routes
@@ -83,8 +85,8 @@ which contains Node tooling and is not copied into the public build.
 from `shared/styles/styles.css`; do not edit the generated file by hand.
 
 The production build copies the public page and shared directories while
-excluding tooling, Wiki sources, database sources, dependencies, and hardware
-agents. It preserves the same asset folder structure as a local static server.
+excluding tooling, Wiki sources, database sources, dependencies, hardware
+agents, and locally installed extensions. It preserves the same asset folder structure as a local static server.
 The online optimization step generates `online/styles/site.css` and
 `online/scripts/startup.js` only in the build output. Blog article generation,
 the printable resume snapshot, URL versioning, and compression remain unchanged.

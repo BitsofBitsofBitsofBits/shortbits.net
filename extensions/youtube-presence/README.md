@@ -6,11 +6,14 @@ status to the same website player area as Spotify.
 
 ## 1. Deploy the backend and website
 
-The normal site workflow deploys `youtube-presence`, the updated
-`spotify-now-playing` function, and these migrations:
+The normal site workflow deploys `youtube-presence` and these migrations:
 
 - `supabase/migrations/20261026050000_youtube_presence.sql`
 - `supabase/migrations/20261026060000_youtube_session_continuity.sql`
+
+The updated `spotify-now-playing` function must also be deployed for session
+timing. It is not currently in the workflow's automatic Edge Function deploy
+list; deploy it explicitly using the command below.
 
 Deploy the website changes too, including `media-player.js` and its stylesheet.
 The Edge Functions use Supabase's built-in database credentials. No YouTube API

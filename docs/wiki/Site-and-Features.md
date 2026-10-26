@@ -57,13 +57,14 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   sit above the profile text; the avatar's reactions and Easter eggs remain intact.
   The high-priority profile image is separate from the unchanged favicon PNG to
   avoid transferring the full favicon asset for the page's largest-contentful paint.
+  The portrait carries visible credit to **Kay (@galacticcookie)**.
 
 - Spotify now-playing and opt-in YouTube watching presence share the player
   area. Arrow controls switch sources; playing media takes priority over paused
   media, then the earlier continuous listening/watching session appears first.
   YouTube reporting uses a locally installed Chromium extension, starts off by
   default, and expires within 90 seconds without updates. See the
-  [setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence).
+  [setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence).
 
 - Cached Discord presence, custom status, and activity through Lanyard
 

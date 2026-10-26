@@ -29,13 +29,28 @@ npx playwright install chromium
 npm run test:browser
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
+node scripts/media-player-browser.mjs --root .site-build
+node scripts/youtube-extension-browser.mjs
 node scripts/aero-variants-browser.mjs --root .site-build
 node scripts/theme-collection-browser.mjs --root .site-build
 node scripts/theme-picker-browser.mjs --root .site-build
+node scripts/desktop-workspaces-browser.mjs --root .site-build
 node scripts/messages-browser.mjs --root .site-build
 node scripts/critical-css-browser.mjs --root .site-build
 npm run audit
 ```
+
+The unpacked-extension check requires Playwright's bundled Chromium rather
+than branded Chrome. CI explicitly installs it with
+`npx playwright install --with-deps chromium`. The extension check uses real
+extension contexts with fixture YouTube playback and intercepted service
+responses; it does not publish personal viewing data.
+
+Message-browser snapshot assertions pause only the `updateMessage` timer chain
+while reading quote and author text, including after cached reloads and
+Mistype correction. Tests advance deletion ticks explicitly, avoiding a race
+where animation erases the final Unicode grapheme before an assertion.
+Other live widgets and production animation behavior are unchanged.
 
 Local and post-deployment Lighthouse audits share `scripts/audit-site.mjs`.
 For live checks, run

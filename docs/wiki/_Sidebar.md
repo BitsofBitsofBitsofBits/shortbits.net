@@ -1,9 +1,11 @@
 [**Documentation home**](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki)
 
+- [Recent changes](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Recent-Changes)
 - [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout)
 - [Site and features](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Site-and-Features)
 - [Admin and content](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Admin-and-Content)
 - [Creator feed](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Creator-Feed)
+- [YouTube watching presence](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence)
 - [Hardware and agents](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Hardware-and-Agents)
 - [Themes and appearance](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Themes-and-Appearance)
 - [Message library](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Message-Library)
