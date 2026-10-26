@@ -8,17 +8,18 @@ import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { buildSite, filesUnder, versionAssets, compressAssets, optimizeStyles, optimizeStartup } from "./build-site.mjs";
 import { pagePath, validateSeo } from "./build-seo.mjs";
+import { writeSiteVerification } from "./write-site-verification.mjs";
 
 test("build preserves page routes and organized assets without shipping repository tooling", async () => {
   const directory = await mkdtemp(join(tmpdir(), "shortbits-layout-"));
   try {
     await buildSite(directory, fileURLToPath(new URL("./fixtures/blog-posts.json", import.meta.url)));
     const entries = await readdir(directory, { withFileTypes: true });
-    assert.deepEqual(
-      await readFile(join(directory, "google2dd607a2af6e8097.html")),
-      await readFile(new URL("../google2dd607a2af6e8097.html", import.meta.url)),
-      "Google's ownership verification file must be published unchanged at the site root",
-    );
+    assert.ok(!entries.some(entry => /^google[a-f0-9]+\.html$/.test(entry.name)),
+      "Ownership verification must be injected at deployment, not sourced from the repository");
+    const verification = "google-site-verification: google0123456789abcdef.html";
+    await writeSiteVerification(directory, verification);
+    assert.equal(await readFile(join(directory, "google0123456789abcdef.html"), "utf8"), verification);
     assert.ok(!entries.some(entry => entry.isFile() && /\.(?:js|css)$/.test(entry.name)), "Public assets stay out of the root");
     for (const path of [
       "index.html", "404.html", "admin.html", "source.html", "useless.html",

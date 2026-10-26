@@ -23,12 +23,12 @@ test("page paths preserve canonical directories and file routes on Windows", () 
 });
 
 test("Google ownership verification is preserved without page metadata", () => {
-  const path = "/google2dd607a2af6e8097.html";
+  const path = "/google0123456789abcdef.html";
   const html = `google-site-verification: ${path.slice(1)}`;
   assert.equal(enrichSeo(html, path), html);
   assert.equal(enrichSeo(`${html}\n`, path), `${html}\n`);
   assert.throws(() => enrichSeo("google-site-verification: different.html", path), /SEO:/);
-  assert.throws(() => enrichSeo(html, "/blog/google2dd607a2af6e8097.html"), /SEO:/);
+  assert.throws(() => enrichSeo(html, "/blog/google0123456789abcdef.html"), /SEO:/);
   assert.equal(validateSeo([{ path: "/", html: fixture() }, { path, html }], sitemap(["/"])), 1);
 });
 

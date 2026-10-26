@@ -44,11 +44,16 @@ in again; this does not change server-side account/content data.
    complete DNS ownership verification. Never commit account credentials or
    private verification material into the site.
    Alternatively, create a **URL-prefix property** for
-   `https://www.shortbits.net/` and use HTML-file verification. The provided
-   public verification file is published at
-   `https://www.shortbits.net/google2dd607a2af6e8097.html`, unchanged by the
-   build and outside the sitemap. After deployment, select **Verify** in
-   Search Console. Keep this file deployed so Google can recheck ownership.
+   `https://www.shortbits.net/` and use HTML-file verification. Store the complete
+   downloaded file contents in the **production** environment's GitHub Actions
+   secret named `GOOGLE_SITE_VERIFICATION`. Deployment injects the file into
+   the built site after building, before validation and upload. Missing or
+   malformed contents stop deployment. The file stays out of the current
+   repository tree and sitemap; root-level `google*.html` files are ignored.
+   The verification URL (`https://www.shortbits.net/google<token>.html`) must
+   remain publicly accessible for Google, so this is not a way to hide it
+   from website visitors. After deployment, select **Verify** in Search Console.
+   Keep the secret configured so Google can recheck ownership after future deployments.
    HTML-file verification does not verify a Domain property; that requires DNS.
 2. Submit `https://www.shortbits.net/sitemap.xml`. Use URL Inspection on the
    homepage, professional profile, and a published article; check the

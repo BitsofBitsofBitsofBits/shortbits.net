@@ -6,6 +6,7 @@ Thumbs.db
 .vscode/
 node_modules/
 .site-build/
+/google*.html
 lighthouse-reports/
 supabase/.temp/
 agents/unraid/config.json

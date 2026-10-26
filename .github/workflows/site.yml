@@ -269,6 +269,11 @@ jobs:
       - name: Build published content and versioned assets
         run: node scripts/build-site.mjs
 
+      - name: Inject Google ownership verification
+        env:
+          GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION }}
+        run: node scripts/write-site-verification.mjs --root .site-build
+
       - name: Validate production build
         run: node scripts/validate-site.mjs --root .site-build
 
