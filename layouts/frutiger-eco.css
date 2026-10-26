@@ -1,0 +1,38 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="frutiger-eco"] {
+  --bg: #12362f;
+  --panel: #1c453d;
+  --panel-2: #2d574c;
+  --ink: #f0fff4;
+  --muted: #c3e2d2;
+  --accent: #a0e9bf;
+  --accent-rgb: 160, 233, 191;
+  --border: #82b8a1;
+  --shell-radius: 22px;
+  --window-radius: 16px;
+  --control-radius: 10px;
+  --body-background:
+    radial-gradient(ellipse at 82% 8%, rgba(130, 219, 242, 0.45), transparent 45%),
+    radial-gradient(ellipse at 10% 100%, rgba(145, 208, 78, 0.5), transparent 52%), var(--bg);
+}
+
+:root[data-interface-theme="frutiger-eco"][data-color-scheme="light"] {
+  --bg: #e5f4e9;
+  --panel: #f5fff7;
+  --panel-2: #d4ecdf;
+  --ink: #143e34;
+  --muted: #3f6455;
+  --accent: #17633e;
+  --accent-rgb: 23, 99, 62;
+  --border: #6b9c85;
+}
+
+html[data-interface-theme="frutiger-eco"] :is(.system-bar, .desktop-window-bar, .link-card, .spotify-widget) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 48%), var(--panel);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 30, 20, 0.1);
+}
+
+html[data-interface-theme="frutiger-eco"] .avatar {
+  border-radius: 36% 64% 50% 50%;
+}

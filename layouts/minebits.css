@@ -1,5 +1,49 @@
 ﻿/* Minebits biome variants. The default Overworld remains defined by styles.css. */
 
+:root[data-interface-theme="minebits"][data-theme-variant="mushroom-fields"] {
+  --accent: #ffc4b9;
+  --accent-rgb: 255, 196, 185;
+  --spotify-accent: var(--accent);
+  --bg: #302532;
+  --panel: #453344;
+  --panel-2: #634356;
+  --panel-strong: #372a39;
+  --ink: #fff0e8;
+  --muted: #e0c3cc;
+  --warning: #ffdb91;
+  --border: #211923;
+  --shell-bg: #40313f;
+  --overlay-bg: #372a39;
+  --admin-bg: #372a39;
+  --mb-sky: #74657c;
+  --mb-top: #966e94;
+  --mb-wood: #674558;
+  --mb-stone: #493744;
+  --mb-deep: #302532;
+  --mb-titlebar: #753846;
+  --mb-icon-top: #dc8074;
+  --mb-icon-bottom: #744b5a;
+  --mb-button-hover: #5a4050;
+  --mb-accent-deep: #c88d99;
+  --body-background:
+    radial-gradient(circle at 18px 18px, rgba(255, 238, 225, 0.2) 0 3px, transparent 4px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(20, 11, 22, 0.16) 31px 32px),
+    linear-gradient(180deg, #74657c 0 18%, #966e94 18% 22%, #674558 22% 60%, #493744 60% 84%, #302532 84%);
+  --body-background-size: 64px 64px, 32px 32px, 100% 100%;
+  --scrollbar-track: #302532;
+  --scrollbar-track-border: #211923;
+  --scrollbar-thumb-color: #db9ca9;
+  --scrollbar-thumb-background: repeating-linear-gradient(135deg, #db9ca9 0 6px, #ad7187 6px 12px);
+  --scrollbar-thumb-hover: #ffc4b9;
+  --scrollbar-thumb-active: #ffc4b9;
+  --scrollbar-thumb-border: 3px solid #211923;
+}
+
+html[data-interface-theme="minebits"][data-theme-variant="mushroom-fields"] :is(.settings-actions button:last-child, .settings-status.is-error) {
+  color: #ffb5c1;
+  border-color: #ffb5c1;
+}
+
 :root[data-interface-theme="minebits"][data-theme-variant="cherry-grove"] {
   --accent: #ff9fc5;
   --accent-rgb: 255, 159, 197;

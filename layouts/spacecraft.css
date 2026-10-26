@@ -1,0 +1,43 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="spacecraft"] {
+  --bg: #20292d;
+  --panel: #29353a;
+  --panel-2: #36454b;
+  --ink: #f5edda;
+  --muted: #c8c5b7;
+  --accent: #ffbd81;
+  --accent-rgb: 255, 189, 129;
+  --border: #9a9d8f;
+  --font-family: "Courier New", monospace;
+  --shell-radius: 18px;
+  --window-radius: 14px;
+  --control-radius: 3px;
+  --body-background: radial-gradient(ellipse at 50% 0, #495653, transparent 65%), var(--bg);
+}
+
+:root[data-interface-theme="spacecraft"][data-color-scheme="light"] {
+  --bg: #eee8d9;
+  --panel: #f9f2df;
+  --panel-2: #ddd9c6;
+  --ink: #2a3534;
+  --muted: #565f55;
+  --accent: #95400d;
+  --accent-rgb: 149, 64, 13;
+  --border: #777f6d;
+}
+
+html[data-interface-theme="spacecraft"] :is(.shell, .desktop-window) {
+  border-width: 3px;
+  box-shadow: inset 0 0 0 5px var(--panel-2), 0 14px 36px rgba(0, 0, 0, 0.25);
+}
+
+html[data-interface-theme="spacecraft"] :is(.section-label, .desktop-window-bar) {
+  border-left: 6px solid var(--accent);
+  padding-left: 14px;
+}
+
+html[data-interface-theme="spacecraft"] .link-card {
+  border-radius: 4px;
+  border-left: 5px solid var(--accent);
+}

@@ -11797,6 +11797,14 @@ html[data-boot-degradation="3"] .endless-boot-machine {
   accent-color: var(--accent);
 }
 
+.settings-group .settings-check[hidden] {
+  display: none;
+}
+
+#settings-eink-refresh-option {
+  margin-top: 12px;
+}
+
 .settings-actions {
   display: grid;
   gap: 8px;

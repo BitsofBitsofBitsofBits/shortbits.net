@@ -104,6 +104,86 @@
   --aero-card: rgba(247, 252, 249, 0.97);
 }
 
+:root[data-interface-theme="aero-glass"]:is([data-theme-variant="graphite"], [data-theme-variant="rose"], [data-theme-variant="frost"]) {
+  --accent: #c3d5ee;
+  --accent-rgb: 195, 213, 238;
+  --bg: #222831;
+  --panel: #2c3540;
+  --panel-2: #3b4755;
+  --panel-strong: var(--panel-2);
+  --ink: #f4f8fd;
+  --muted: #c8d1dd;
+  --border: #a6b5c7;
+  --shell-bg: var(--panel);
+  --overlay-bg: var(--panel);
+  --admin-bg: var(--panel);
+  --aero-frame: var(--border);
+  --aero-frame-tint: rgba(var(--accent-rgb), 0.2);
+  --aero-titlebar: linear-gradient(180deg, rgba(var(--accent-rgb), 0.18), transparent 49%, rgba(0, 0, 0, 0.13) 51%), var(--panel-2);
+  --aero-menu: var(--panel-2);
+  --aero-card: var(--panel);
+  --aero-button: linear-gradient(180deg, #667589, #283747);
+  --aero-button-hover: linear-gradient(180deg, #718499, #344d66);
+  --aero-wallpaper: radial-gradient(ellipse at 80% 0, rgba(var(--accent-rgb), 0.2), transparent 55%);
+  --aero-glints: linear-gradient(135deg, transparent 64%, rgba(255, 255, 255, 0.08) 65%, transparent 70%);
+  --body-background: radial-gradient(ellipse at 15% 100%, rgba(var(--accent-rgb), 0.18), transparent 65%), var(--bg);
+}
+
+:root[data-interface-theme="aero-glass"][data-theme-variant="rose"] {
+  --bg: #382432;
+  --panel: #432d3d;
+  --panel-2: #56394c;
+  --accent: #ffbfd7;
+  --accent-rgb: 255, 191, 215;
+  --ink: #fff3f7;
+  --muted: #e9c7d7;
+  --border: #d9a4bd;
+}
+
+:root[data-interface-theme="aero-glass"][data-theme-variant="frost"] {
+  --bg: #173440;
+  --panel: #203f4c;
+  --panel-2: #2e5360;
+  --accent: #b6f0ff;
+  --accent-rgb: 182, 240, 255;
+  --ink: #f4fcff;
+  --muted: #c5e5ef;
+  --border: #a0ccd8;
+}
+
+:root[data-interface-theme="aero-glass"]:is([data-theme-variant="graphite"], [data-theme-variant="rose"], [data-theme-variant="frost"])[data-color-scheme="light"] {
+  --bg: #e1e5eb;
+  --panel: #f7f9fc;
+  --panel-2: #d6dfe9;
+  --ink: #243141;
+  --muted: #4b5b6e;
+  --accent: #405d83;
+  --accent-rgb: 64, 93, 131;
+  --border: #758ba6;
+}
+
+:root[data-interface-theme="aero-glass"][data-theme-variant="rose"][data-color-scheme="light"] {
+  --bg: #f8e7ee;
+  --panel: #fff8fb;
+  --panel-2: #f0d6e3;
+  --ink: #4c263c;
+  --muted: #735166;
+  --accent: #8b3d65;
+  --accent-rgb: 139, 61, 101;
+  --border: #aa728c;
+}
+
+:root[data-interface-theme="aero-glass"][data-theme-variant="frost"][data-color-scheme="light"] {
+  --bg: #edf7fc;
+  --panel: #fbfeff;
+  --panel-2: #d9ecf5;
+  --ink: #203b4d;
+  --muted: #456479;
+  --accent: #206480;
+  --accent-rgb: 32, 100, 128;
+  --border: #699eb6;
+}
+
 html[data-interface-theme="aero-glass"][data-theme-variant]:not([data-theme-variant="classic"]) :is(.shell, .desktop-window, .system-window, .fake-desktop-app) {
   border-color: var(--aero-frame);
   box-shadow:

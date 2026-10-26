@@ -1,0 +1,46 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="museum"] {
+  --bg: #292925;
+  --panel: #33342e;
+  --panel-2: #414239;
+  --ink: #f6f2e5;
+  --muted: #cac6b7;
+  --accent: #d6d5ac;
+  --accent-rgb: 214, 213, 172;
+  --border: #90927e;
+  --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --control-radius: 0;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --shadow: none;
+}
+
+:root[data-interface-theme="museum"][data-color-scheme="light"] {
+  --bg: #f5f2e9;
+  --panel: #fffdf5;
+  --panel-2: #e8e8da;
+  --ink: #293227;
+  --muted: #596150;
+  --accent: #4b5937;
+  --accent-rgb: 75, 89, 55;
+  --border: #8b947c;
+}
+
+html[data-interface-theme="museum"] :is(h1, h2) {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+html[data-interface-theme="museum"] .link-card {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding-block: 22px;
+  border-radius: 0;
+}
+
+html[data-interface-theme="museum"] .section-label {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ink);
+}

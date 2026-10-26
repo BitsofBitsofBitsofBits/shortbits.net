@@ -252,7 +252,7 @@ is a personal project and largely a learning exercise for me.
   reduced-motion, forced-colors, and performance preferences
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
-- Forty-five persistent full-interface themes, each with its own fixed accent,
+- Fifty-five persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
   Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Windows XP
@@ -260,11 +260,28 @@ is a personal project and largely a learning exercise for me.
   Gruvbox, Tokyo Night, Monokai, Game Bit, High Contrast, Deep Ocean, Coffee
   Shop, Matrix, Sunset, the original voxel-inspired MineBits, Windows 3.1,
   Spotify, UEFI, Mac OS X Aqua, Aquatic (underwater), Atari, Commodore 64,
-  Mac OS 9 Platinum, Winamp, iPod Classic, Ubuntu, PlayStation, and Xbox.
+  Mac OS 9 Platinum, Winamp, iPod Classic, Ubuntu, PlayStation, Xbox, E-Ink
+  Reader, Blueprint, Spacecraft Console, Frutiger Eco, Holographic Foil,
+  Newspaper, Workbench, Stickerbook, Night Train, and Museum Terminal.
+  The ten newest themes support dark/light modes and load their stylesheets
+  (including their shared collection styles) only while selected. E-Ink,
+  Frutiger Eco, Newspaper, Stickerbook, and Museum default to light mode.
+  Holographic uses a pointer-responsive foil border without a continuous
+  animation loop; it remains static with reduced motion or effects off.
+  E-Ink adds an optional **Gentle E-Ink Refresh** checkbox in Settings > Appearance,
+  visible only while E-Ink is selected and **off by default**. It remembers your
+  choice and briefly overlays a low-opacity neutral tint when opening or
+  restoring a window, never just focusing an already-visible window or
+  restoring the session during page startup. Refreshes
+  are limited to one per two seconds and suppressed by reduced motion, effects
+  off, high contrast, forced colors, or a hidden tab; Reset All clears the choice.
+  Run `node scripts/theme-collection-browser.mjs` for desktop/mobile theme,
+  accessibility, persistence, lazy-loading, and optional-effect checks.
   Aero Glass includes **Classic** (the unchanged existing look), **Windows 7**
   (sky-blue glass and brighter desktop light), and **Vista** (smokier glass with
-  green-blue aurora accents). Select Aero Glass, then use **Variant** in View or
-  Settings. Both new variants offer dark/light palettes, persist across shared
+  green-blue aurora accents), plus **Graphite**, **Rose**, and **Frost**.
+  Select Aero Glass, then use **Variant** in View or Settings.
+  All five alternate variants offer dark/light palettes, persist across shared
   public pages, and use original CSS gradients rather than bundled Windows
   wallpapers or artwork. Their stylesheet loads only while Aero Glass is active;
   high-contrast, effects-off, and forced-color preferences remain available.
@@ -300,9 +317,10 @@ is a personal project and largely a learning exercise for me.
 - A VARIANT picker beside COLOR MODE for themes with alternate styles:
   Windows XP (Luna Blue, Olive Green, Silver, Royale/Media Center, Royale Noir,
   Zune, Embedded), MineBits biomes and mobs (Overworld, Cherry Grove, Jungle,
-  Desert, Snowy Taiga, Ocean Monument, Deep Dark, Nether, The End, Creeper),
+  Desert, Snowy Taiga, Ocean Monument, Deep Dark, Nether, The End, Creeper,
+  Mushroom Fields),
   Aurora colors (Borealis, Australis, Solar Storm, Glacier, Amethyst),
-  Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert),
+  Terminal phosphors (Green, White, Cyan, IBM Blue, Red Alert, Amber Phosphor),
   RGB lighting (Rainbow, Synthwave, Ice Blue, Firestorm, Toxic Green, Cotton
   Candy, Arctic White), with animated color-matched borders, accents, glow,
   scrollbars, and falling bits; reduced-motion preferences still apply,

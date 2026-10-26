@@ -29,7 +29,7 @@
     <title>BitsofBitsofBits // BITSOFWEBSITE</title>
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/seasonal-calendar.js?v=calendar-1"></script>
-    <script src="/theme-init.js?v=theme-26"></script>
+    <script src="/theme-init.js?v=theme-27"></script>
     <script src="/boot.js?v=boot-2"></script>
     <link rel="preconnect" href="https://arjwrycitgobvlodmkeo.supabase.co" crossorigin>
     <link rel="stylesheet" href="/styles.css?v=upgrade-134">
@@ -47,13 +47,13 @@
     <script src="/supabase-config.js" type="application/x-bits-runtime"></script>
     <script src="/analytics.js?v=analytics-5" type="application/x-bits-runtime"></script>
     <script src="/notifications.js?v=notifications-2" type="application/x-bits-runtime"></script>
-    <script src="/theme-effects.js?v=theme-effects-5" type="application/x-bits-runtime"></script>
+    <script src="/theme-effects.js?v=theme-effects-6" type="application/x-bits-runtime"></script>
     <script src="/screensaver.js?v=screensaver-1" type="application/x-bits-runtime"></script>
     <script src="/script.js?v=upgrade-66" type="application/x-bits-runtime"></script>
-    <script src="/windows.js?v=windows-12" type="application/x-bits-runtime"></script>
+    <script src="/windows.js?v=windows-13" type="application/x-bits-runtime"></script>
     <script src="/launcher.js?v=launcher-1" type="application/x-bits-runtime"></script>
     <script src="/arcade-loader.js?v=arcade-2" type="application/x-bits-runtime"></script>
-    <script src="/settings.js?v=settings-8" type="application/x-bits-runtime"></script>
+    <script src="/settings.js?v=settings-9" type="application/x-bits-runtime"></script>
     <script src="/death-screens.js?v=death-screens-2" type="application/x-bits-runtime"></script>
     <script src="/bsod-classic.js?v=bsod-classic-1" type="application/x-bits-runtime"></script>
     <script src="/career-format.js?v=career-2" type="application/x-bits-runtime"></script>
@@ -1010,6 +1010,11 @@
               <select id="settings-variant"></select>
             </label>
             <button id="settings-theme-random" type="button">RANDOM THEME</button>
+            <label class="settings-check" id="settings-eink-refresh-option" hidden>
+              <input id="settings-eink-refresh" type="checkbox" aria-describedby="settings-eink-refresh-help">
+              <span>GENTLE E-INK REFRESH</span>
+            </label>
+            <p id="settings-eink-refresh-help" class="settings-status" hidden>Optional, off by default: a brief, low-opacity refresh when opening a window. Suppressed by reduced motion, high contrast, forced colors, or decorative effects being off.</p>
           </fieldset>
           <fieldset class="settings-group">
             <legend>ACCESSIBILITY</legend>

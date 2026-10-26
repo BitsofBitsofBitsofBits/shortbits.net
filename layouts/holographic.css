@@ -1,0 +1,45 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="holographic"] {
+  --bg: #1b1c2e;
+  --panel: #25263b;
+  --panel-2: #32344c;
+  --ink: #f5f1ff;
+  --muted: #cac5df;
+  --accent: #d6c1ff;
+  --accent-rgb: 214, 193, 255;
+  --border: #b9a0d5;
+  --shell-radius: 16px;
+  --window-radius: 12px;
+  --body-background: radial-gradient(ellipse at 20% 0, rgba(111, 124, 232, 0.22), transparent 60%), var(--bg);
+}
+
+:root[data-interface-theme="holographic"][data-color-scheme="light"] {
+  --bg: #f0effb;
+  --panel: #fdfbff;
+  --panel-2: #e6e2f5;
+  --ink: #2e2945;
+  --muted: #5f5677;
+  --accent: #61408b;
+  --accent-rgb: 97, 64, 139;
+  --border: #8e78ac;
+}
+
+html[data-interface-theme="holographic"] :is(.shell, .desktop-window, .link-card) {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--panel), var(--panel)) padding-box,
+    conic-gradient(from 40deg at var(--foil-x, 50%) var(--foil-y, 50%), #bceaff, #e9baff, #ffe7bd, #b5f2dd, #bceaff) border-box;
+}
+
+html[data-interface-theme="holographic"][data-contrast="high"] :is(.shell, .desktop-window, .link-card) {
+  border-color: var(--accent);
+  background: var(--bg);
+}
+
+@media (forced-colors: active) {
+  html[data-interface-theme="holographic"] :is(.shell, .desktop-window, .link-card) {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+}

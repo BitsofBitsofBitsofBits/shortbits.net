@@ -1,3 +1,31 @@
+:root[data-interface-theme="terminal"][data-theme-variant="amber"] {
+  --bg: #100a02;
+  --panel: #1b1004;
+  --panel-2: #2b1b08;
+  --panel-strong: var(--panel-2);
+  --ink: #ffe3ac;
+  --muted: #ddba80;
+  --accent: #ffcc70;
+  --accent-rgb: 255, 204, 112;
+  --spotify-accent: var(--accent);
+  --border: #9b702e;
+  --shell-bg: #160d03;
+  --overlay-bg: #1b1004;
+  --admin-bg: #160d03;
+  --body-background: repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.025) 0 1px, transparent 1px 4px), var(--bg);
+  --scrollbar-track: var(--bg);
+  --scrollbar-track-border: var(--border);
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--ink);
+  --scrollbar-thumb-border: 3px solid var(--bg);
+}
+
+html[data-interface-theme="terminal"][data-theme-variant="amber"] :is(.system-bar, .app-menu-bar, .desktop-window-bar, footer, .root-panel) {
+  background: var(--panel);
+}
+
 /* P4 white phosphor. Green intentionally inherits styles.css unchanged. */
 :root[data-interface-theme="terminal"][data-theme-variant="white"] {
   --accent: #e4e9ee;

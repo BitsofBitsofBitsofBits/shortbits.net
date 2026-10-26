@@ -1,0 +1,40 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="blueprint"] {
+  --bg: #0b2443;
+  --panel: #102d50;
+  --panel-2: #1a3e63;
+  --ink: #ecf7ff;
+  --muted: #b8d5ea;
+  --accent: #9de8ff;
+  --accent-rgb: 157, 232, 255;
+  --border: #709dbc;
+  --font-family: Consolas, "Liberation Mono", monospace;
+  --control-radius: 0;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --body-background:
+    linear-gradient(rgba(141, 207, 246, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(141, 207, 246, 0.12) 1px, transparent 1px), var(--bg);
+  --body-background-size: 24px 24px, 24px 24px, auto;
+}
+
+:root[data-interface-theme="blueprint"][data-color-scheme="light"] {
+  --bg: #e6f0fa;
+  --panel: #f5faff;
+  --panel-2: #dceaf7;
+  --ink: #153552;
+  --muted: #3e5c78;
+  --accent: #0a5686;
+  --accent-rgb: 10, 86, 134;
+  --border: #688cab;
+}
+
+html[data-interface-theme="blueprint"] :is(.shell, .desktop-window, .link-card, .featured-project) {
+  border-style: dashed;
+  box-shadow: 4px 4px 0 var(--bg), 5px 5px 0 var(--border);
+}
+
+html[data-interface-theme="blueprint"] :is(.section-label, .system-bar, .desktop-window-bar) {
+  border-bottom-style: dashed;
+}

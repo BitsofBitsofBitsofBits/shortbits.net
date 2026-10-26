@@ -23,6 +23,34 @@ const themeParticleCounts = {
   "independence-day": 64,
   thanksgiving: 18,
 };
+let einkRefreshAnimation = null;
+let lastEinkRefresh = -Infinity;
+
+function canRefreshEink() {
+  return document.documentElement.dataset.interfaceTheme === "eink-reader"
+    && document.documentElement.dataset.runtime === "ready"
+    && document.documentElement.dataset.einkRefresh === "on"
+    && canRenderAtmosphere() && !hasReducedAtmosphereMotion() && !document.hidden;
+}
+
+function refreshEink(event) {
+  if (event.detail?.newlyOpened !== true || !canRefreshEink() || Date.now() - lastEinkRefresh < 2000) return;
+  lastEinkRefresh = Date.now();
+  const overlay = document.createElement("div");
+  overlay.className = "eink-refresh-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.append(overlay);
+  const animation = overlay.animate([{ opacity: 0 }, { opacity: 0.08, offset: 0.35 }, { opacity: 0 }], {
+    duration: 260, easing: "ease-out",
+  });
+  einkRefreshAnimation = animation;
+  const cleanup = () => {
+    overlay.remove();
+    if (einkRefreshAnimation === animation) einkRefreshAnimation = null;
+  };
+  animation.onfinish = cleanup;
+  animation.oncancel = cleanup;
+}
 
 function hasReducedAtmosphereMotion() {
   return document.documentElement.dataset.motion === "reduced"
@@ -67,6 +95,11 @@ function renderThemeAtmosphere() {
   const enabled = canRenderAtmosphere();
   const reducedMotion = hasReducedAtmosphereMotion();
   const particleCount = enabled ? themeParticleCounts[theme] ?? 0 : 0;
+  if (!canRefreshEink()) einkRefreshAnimation?.cancel();
+  if (theme !== "holographic" || reducedMotion || !enabled) {
+    document.documentElement.style.removeProperty("--foil-x");
+    document.documentElement.style.removeProperty("--foil-y");
+  }
 
   themeAtmosphere.dataset.theme = theme;
   themeAtmosphere.dataset.motion = reducedMotion ? "reduced" : "full";
@@ -89,6 +122,11 @@ window.addEventListener("pointermove", (event) => {
       "--atmosphere-x",
       `${(event.clientX / window.innerWidth) * 100}%`,
     );
+    if (document.documentElement.dataset.interfaceTheme === "holographic"
+      && canRenderAtmosphere() && !hasReducedAtmosphereMotion()) {
+      document.documentElement.style.setProperty("--foil-x", `${20 + (event.clientX / window.innerWidth) * 60}%`);
+      document.documentElement.style.setProperty("--foil-y", `${20 + (event.clientY / window.innerHeight) * 60}%`);
+    }
     themeAtmosphere.style.setProperty(
       "--atmosphere-y",
       `${(event.clientY / window.innerHeight) * 100}%`,
@@ -101,6 +139,10 @@ window.addEventListener("bits:appearance-changed", renderThemeAtmosphere);
 window.addEventListener("bits:preferences-changed", renderThemeAtmosphere);
 reducedMotionMedia.addEventListener("change", renderThemeAtmosphere);
 forcedColorsMedia.addEventListener("change", renderThemeAtmosphere);
+window.addEventListener("desktop-window:opened", refreshEink);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) einkRefreshAnimation?.cancel();
+});
 
 const atmosphereObserver = new MutationObserver(renderThemeAtmosphere);
 atmosphereObserver.observe(document.documentElement, {
@@ -110,6 +152,7 @@ atmosphereObserver.observe(document.documentElement, {
     "data-effects",
     "data-contrast",
     "data-motion",
+    "data-eink-refresh",
   ],
 });
 

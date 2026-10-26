@@ -1,0 +1,39 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="night-train"] {
+  --bg: #101e30;
+  --panel: #192d43;
+  --panel-2: #263d53;
+  --ink: #fff2d9;
+  --muted: #d5c9af;
+  --accent: #ffd087;
+  --accent-rgb: 255, 208, 135;
+  --border: #a79572;
+  --font-family: "Courier New", monospace;
+  --shell-radius: 12px;
+  --window-radius: 10px;
+  --body-background:
+    linear-gradient(180deg, transparent 65%, rgba(220, 166, 74, 0.06) 66%, transparent 67%), var(--bg);
+}
+
+:root[data-interface-theme="night-train"][data-color-scheme="light"] {
+  --bg: #e8e8df;
+  --panel: #faf7ea;
+  --panel-2: #dedfcf;
+  --ink: #273440;
+  --muted: #556051;
+  --accent: #81510d;
+  --accent-rgb: 129, 81, 13;
+  --border: #828b76;
+}
+
+html[data-interface-theme="night-train"] :is(.status-row, .activity-line) {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: "Courier New", monospace;
+}
+
+html[data-interface-theme="night-train"] :is(.section-label, .system-bar, .desktop-window-bar) {
+  border-bottom: 2px solid var(--accent);
+}

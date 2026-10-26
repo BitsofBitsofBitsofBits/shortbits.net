@@ -1,0 +1,44 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="workbench"] {
+  --bg: #272b2e;
+  --panel: #303639;
+  --panel-2: #3d4549;
+  --ink: #f4f3e9;
+  --muted: #c7c9bc;
+  --accent: #f5cf87;
+  --accent-rgb: 245, 207, 135;
+  --border: #9caaa8;
+  --font-family: Consolas, "Liberation Mono", monospace;
+  --control-radius: 2px;
+  --shell-radius: 5px;
+  --window-radius: 5px;
+  --body-background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px), var(--bg);
+}
+
+:root[data-interface-theme="workbench"][data-color-scheme="light"] {
+  --bg: #e4e6e5;
+  --panel: #f4f5ef;
+  --panel-2: #d5dcd8;
+  --ink: #28312e;
+  --muted: #525e55;
+  --accent: #79500c;
+  --accent-rgb: 121, 80, 12;
+  --border: #718279;
+}
+
+html[data-interface-theme="workbench"] :is(.shell, .desktop-window) {
+  border-width: 3px;
+  box-shadow: inset 0 0 0 4px var(--panel-2), 5px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+html[data-interface-theme="workbench"] :is(.system-bar, .desktop-window-bar) {
+  background:
+    radial-gradient(circle at 9px 50%, var(--border) 0 2px, transparent 3px),
+    radial-gradient(circle at calc(100% - 9px) 50%, var(--border) 0 2px, transparent 3px),
+    var(--panel-2);
+}
+
+html[data-interface-theme="workbench"] .link-card {
+  border-left: 4px solid var(--accent);
+}

@@ -151,7 +151,7 @@ export function renderArticle(post, renderer) {
     <link rel="alternate" type="application/rss+xml" title="BLOG.LOG RSS" href="/blog/feed.xml">
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/seasonal-calendar.js?v=calendar-1"></script>
-    <script src="/theme-init.js?v=theme-26"></script>
+    <script src="/theme-init.js?v=theme-27"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-132">
     <script type="application/ld+json">${jsonScript(schema)}</script>
     <script src="/site-config.js?v=site-config-3" defer></script>

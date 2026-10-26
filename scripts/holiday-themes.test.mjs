@@ -11,14 +11,29 @@ const effectsSource = readFileSync(new URL("../theme-effects.js", import.meta.ur
 const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
 
-test("Aero retains Classic as its default and exposes opt-in Windows 7/Vista variants without experimental layout chrome", () => {
+test("Aero retains Classic as its default and exposes five opt-in variants without experimental layout chrome", () => {
   const { available } = themesOn(2026, 10, 22);
   const aero = available.find(theme => theme.id === "aero-glass");
   assert.equal(aero.stylesheet, true);
   assert.equal(aero.experimental, undefined);
-  assert.deepEqual(Array.from(aero.variants, variant => variant.id), ["classic", "windows-7", "vista"]);
+  assert.deepEqual(Array.from(aero.variants, variant => variant.id), ["classic", "windows-7", "vista", "graphite", "rose", "frost"]);
   assert.equal(aero.darkColor, "#0d3358");
   assert.equal(aero.lightColor, "#cfe8fb");
+});
+
+test("The ten collection themes use lazy CSS and both schemes without experimental chrome", () => {
+  const { available } = themesOn(2026, 10, 22);
+  for (const id of ["eink-reader", "blueprint", "spacecraft", "frutiger-eco", "holographic", "newspaper", "workbench", "stickerbook", "night-train", "museum"]) {
+    const theme = available.find(theme => theme.id === id);
+    assert.ok(theme, id);
+    assert.equal(theme.stylesheet, true, id);
+    assert.equal(theme.experimental, undefined, id);
+    assert.ok(theme.darkColor && theme.lightColor, id);
+    assert.match(readFileSync(new URL(`../layouts/${id}.css`, import.meta.url), "utf8"), /@import "\/layouts\/collection-base\.css\?v=/);
+  }
+  for (const [id, variant] of [["terminal", "amber"], ["minebits", "mushroom-fields"]]) {
+    assert.ok(available.find(theme => theme.id === id).variants.some(entry => entry.id === variant));
+  }
 });
 
 function themesOn(year, month, day, preferences = {}) {
@@ -211,25 +226,100 @@ function atmosphere(options = {}) {
     textContent: "",
   });
   const layer = { dataset: {}, hidden: false, replaceChildren(...children) { this.children = children; } };
-  const root = { dataset: { interfaceTheme: "independence-day", ...options.dataset } };
+  const root = {
+    dataset: { interfaceTheme: "independence-day", runtime: "ready", ...options.dataset },
+    style: { removeProperty() {}, setProperty() {} },
+  };
+  const events = new Map();
+  const overlays = [];
+  const animations = [];
+  const clock = { now: 10000 };
   const context = {
     document: {
       documentElement: root,
+      hidden: Boolean(options.hidden),
+      addEventListener(name, handler) { events.set(name, handler); },
+      body: { append(node) { overlays.push(node); } },
       querySelector: () => layer,
-      createElement() { const node = element(); node.style.owner = node; return node; },
+      createElement() {
+        const node = element();
+        node.style.owner = node;
+        node.setAttribute = () => {};
+        node.remove = () => { overlays.splice(overlays.indexOf(node), 1); };
+        node.animate = (frames, timing) => {
+          const animation = { frames, timing, cancel() { this.oncancel?.(); } };
+          animations.push(animation);
+          return animation;
+        };
+        return node;
+      },
     },
     window: {
-      addEventListener() {},
+      addEventListener(name, handler) { events.set(name, handler); },
       matchMedia: (query) => ({
         matches: query.includes("reduced-motion") ? Boolean(options.reducedMotion) : Boolean(options.forcedColors),
         addEventListener() {},
       }),
     },
     MutationObserver: class { observe() {} },
+    Date: { now: () => clock.now },
   };
   vm.runInNewContext(effectsSource, context);
-  return { layer, root, render: context.renderThemeAtmosphere };
+  return { layer, root, render: context.renderThemeAtmosphere, events, overlays, animations, clock, document: context.document };
 }
+
+test("E-Ink refresh defaults off and only runs on real window opens, with bounded opacity and frequency", () => {
+  const app = atmosphere({ dataset: { interfaceTheme: "eink-reader" } });
+  const open = newlyOpened => app.events.get("desktop-window:opened")({ detail: { newlyOpened } });
+  open(true);
+  assert.equal(app.animations.length, 0);
+  app.root.dataset.einkRefresh = "on";
+  app.render();
+  assert.equal(app.animations.length, 0, "Selecting E-Ink or changing settings must not flash");
+  open(false);
+  assert.equal(app.animations.length, 0, "Focusing a visible window must not refresh");
+  open(true);
+  assert.equal(app.overlays.length, 1);
+  assert.equal(app.animations[0].timing.duration, 260);
+  assert.equal(Math.max(...app.animations[0].frames.map(frame => frame.opacity)), 0.08);
+  app.animations[0].onfinish();
+  assert.equal(app.overlays.length, 0);
+  open(true);
+  assert.equal(app.animations.length, 1, "Rapid opens are throttled");
+  app.clock.now += 2000;
+  open(true);
+  assert.equal(app.animations.length, 2);
+  app.root.dataset.einkRefresh = "off";
+  app.render();
+  assert.equal(app.overlays.length, 0, "Turning the preference off cancels and removes the overlay");
+});
+
+for (const options of [
+  { dataset: { motion: "reduced" } }, { reducedMotion: true },
+  { dataset: { effects: "off" } }, { dataset: { contrast: "high" } },
+  { forcedColors: true }, { hidden: true },
+  { dataset: { runtime: "pending" } },
+]) {
+  test(`E-Ink refresh respects accessibility/visibility: ${JSON.stringify(options)}`, () => {
+    const app = atmosphere({ ...options, dataset: { interfaceTheme: "eink-reader", einkRefresh: "on", ...options.dataset } });
+    app.events.get("desktop-window:opened")({ detail: { newlyOpened: true } });
+    assert.equal(app.animations.length, 0);
+  });
+}
+
+test("Active E-Ink refresh is cleaned up when leaving the theme or hiding the tab", () => {
+  const app = atmosphere({ dataset: { interfaceTheme: "eink-reader", einkRefresh: "on" } });
+  app.events.get("desktop-window:opened")({ detail: { newlyOpened: true } });
+  app.root.dataset.interfaceTheme = "default";
+  app.render();
+  assert.equal(app.overlays.length, 0);
+  app.root.dataset.interfaceTheme = "eink-reader";
+  app.clock.now += 2000;
+  app.events.get("desktop-window:opened")({ detail: { newlyOpened: true } });
+  app.document.hidden = true;
+  app.events.get("visibilitychange")();
+  assert.equal(app.overlays.length, 0);
+});
 
 test("fireworks have a bounded four bursts of sixteen binary Bits", () => {
   const { layer } = atmosphere();

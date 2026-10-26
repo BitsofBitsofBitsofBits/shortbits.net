@@ -48,6 +48,7 @@ const baseInterfaceThemes = [
       { id: "cyan", name: "CYAN", darkColor: "#00080a" },
       { id: "ibm-blue", name: "IBM BLUE", darkColor: "#00051a" },
       { id: "red-alert", name: "RED ALERT", darkColor: "#0a0000" },
+      { id: "amber", name: "AMBER PHOSPHOR", darkColor: "#100a02" },
     ],
   },
   { id: "vaporwave", name: "VAPORWAVE", darkColor: "#160d2b", lightColor: "#fff0fb" },
@@ -93,6 +94,9 @@ const baseInterfaceThemes = [
       { id: "classic", name: "CLASSIC" },
       { id: "windows-7", name: "WINDOWS 7", darkColor: "#0b3b70", lightColor: "#c6e4fa" },
       { id: "vista", name: "VISTA", darkColor: "#101e21", lightColor: "#d8e7de" },
+      { id: "graphite", name: "GRAPHITE", darkColor: "#222831", lightColor: "#e1e5eb" },
+      { id: "rose", name: "ROSE", darkColor: "#382432", lightColor: "#f8e7ee" },
+      { id: "frost", name: "FROST", darkColor: "#173440", lightColor: "#edf7fc" },
     ],
   },
   {
@@ -113,6 +117,7 @@ const baseInterfaceThemes = [
       { id: "nether", name: "NETHER", darkColor: "#2a0c0c" },
       { id: "the-end", name: "THE END", darkColor: "#120d1c" },
       { id: "creeper", name: "CREEPER", darkColor: "#13240f" },
+      { id: "mushroom-fields", name: "MUSHROOM FIELDS", darkColor: "#302532" },
     ],
   },
   { id: "catppuccin", name: "CATPPUCCIN", darkColor: "#1e1e2e", lightColor: "#eff1f5" },
@@ -133,6 +138,16 @@ const baseInterfaceThemes = [
   { id: "coffee", name: "COFFEE SHOP", darkColor: "#1f1510", lightColor: "#f6efe4" },
   { id: "matrix", name: "MATRIX", darkColor: "#000a02", lightColor: "#000a02", schemes: ["dark"] },
   { id: "sunset", name: "SUNSET", darkColor: "#1d0f24", lightColor: "#fff1e6" },
+  { id: "eink-reader", name: "E-INK READER", darkColor: "#222321", lightColor: "#eeeadd", nativeScheme: "light", stylesheet: true },
+  { id: "blueprint", name: "BLUEPRINT", darkColor: "#0b2443", lightColor: "#e6f0fa", stylesheet: true },
+  { id: "spacecraft", name: "SPACECRAFT CONSOLE", darkColor: "#20292d", lightColor: "#eee8d9", stylesheet: true },
+  { id: "frutiger-eco", name: "FRUTIGER ECO", darkColor: "#12362f", lightColor: "#e5f4e9", nativeScheme: "light", stylesheet: true },
+  { id: "holographic", name: "HOLOGRAPHIC FOIL", darkColor: "#1b1c2e", lightColor: "#f0effb", stylesheet: true },
+  { id: "newspaper", name: "NEWSPAPER", darkColor: "#26231f", lightColor: "#f3eddf", nativeScheme: "light", stylesheet: true },
+  { id: "workbench", name: "WORKBENCH", darkColor: "#272b2e", lightColor: "#e4e6e5", stylesheet: true },
+  { id: "stickerbook", name: "STICKERBOOK", darkColor: "#302938", lightColor: "#fff1e6", nativeScheme: "light", stylesheet: true },
+  { id: "night-train", name: "NIGHT TRAIN", darkColor: "#101e30", lightColor: "#e8e8df", stylesheet: true },
+  { id: "museum", name: "MUSEUM TERMINAL", darkColor: "#292925", lightColor: "#f5f2e9", nativeScheme: "light", stylesheet: true },
   {
     id: "windows-31",
     name: "WINDOWS 3.1",
@@ -426,7 +441,7 @@ const baseInterfaceThemes = [
     experimental: true,
   },
 ];
-const layoutAssetVersion = "layouts-6";
+const layoutAssetVersion = "layouts-7";
 const lastStandardThemeKey = "bits-last-standard-theme";
 const themeVariantKey = "bits-theme-variants";
 
@@ -1012,6 +1027,8 @@ document.documentElement.dataset.contrast =
   localStorage.getItem("bits-contrast") === "high" ? "high" : "default";
 document.documentElement.dataset.effects =
   localStorage.getItem("bits-effects") === "off" ? "off" : "on";
+document.documentElement.dataset.einkRefresh =
+  localStorage.getItem("bits-eink-refresh") === "on" ? "on" : "off";
 if (document.documentElement.dataset.page === "online") {
   let runtimeLite = false;
   try {

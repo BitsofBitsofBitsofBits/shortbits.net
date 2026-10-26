@@ -16,6 +16,13 @@ const server = await startSiteServer(resolve(option("root") || "."));
 const screenshots = option("screenshots");
 if (screenshots) await mkdir(resolve(screenshots), { recursive: true });
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
+const palettes = {
+  "windows-7": { dark: "#0b3b70", light: "#c6e4fa" },
+  vista: { dark: "#101e21", light: "#d8e7de" },
+  graphite: { dark: "#222831", light: "#e1e5eb" },
+  rose: { dark: "#382432", light: "#f8e7ee" },
+  frost: { dark: "#173440", light: "#edf7fc" },
+};
 let browser;
 try {
   browser = await chromium.launch({
@@ -23,7 +30,14 @@ try {
   });
   for (const width of [1440, 390]) {
     const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-    await context.addInitScript(() => sessionStorage.setItem("bits-boot-seen-v1", "true"));
+    await context.addInitScript(() => {
+      sessionStorage.setItem("bits-boot-seen-v1", "true");
+      const rows = ["messages", "activities"].map((category, index) => ({
+        position: index + 1, profile: "standard", category, text: "THEME PREVIEW", weight: 1,
+        colorful: false, format: {}, enabled: true, markup: false, corrected_text: null,
+      }));
+      localStorage.setItem("bits-message-catalog-v2", JSON.stringify({ rows, pools: [], timezone: "UTC", loadedAt: Date.now() }));
+    });
     await context.route("**/*", route => {
       const url = new URL(route.request().url());
       if (url.pathname.includes("/rest/v1/")) return route.fulfill({
@@ -42,14 +56,14 @@ try {
     await page.locator("#settings-theme").selectOption("aero-glass");
     await page.waitForFunction(() => document.querySelector("#bits-theme-stylesheet")?.sheet);
     assert.equal(await page.locator("#settings-variant").inputValue(), "classic", "Existing Aero users retain the original variant");
-    assert.deepEqual(await page.locator("#settings-variant option").evaluateAll(options => options.map(option => option.value)), ["classic", "windows-7", "vista"]);
+    assert.deepEqual(await page.locator("#settings-variant option").evaluateAll(options => options.map(option => option.value)), ["classic", ...Object.keys(palettes)]);
     const classic = await page.locator("#interface-shell").evaluate(element => {
       const style = getComputedStyle(element);
       return [style.background, style.border, style.boxShadow];
     });
     await page.addScriptTag({ path: axePath });
     const backgrounds = new Set();
-    for (const variant of ["windows-7", "vista"]) {
+    for (const variant of Object.keys(palettes)) {
       for (const scheme of ["dark", "light"]) {
         await page.locator("#settings-variant").selectOption(variant);
         await page.locator("#settings-scheme").selectOption(scheme);
@@ -58,7 +72,7 @@ try {
         assert.equal(await page.locator("#interface-variant-select").inputValue(), variant, "Settings and View pickers remain synchronized");
         backgrounds.add(await page.locator("html").evaluate(root => getComputedStyle(root).getPropertyValue("--body-background")));
         assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"),
-          variant === "windows-7" ? scheme === "dark" ? "#0b3b70" : "#c6e4fa" : scheme === "dark" ? "#101e21" : "#d8e7de");
+          palettes[variant][scheme]);
         const violations = await page.evaluate(async () => (await axe.run(document, {
           runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
         })).violations.map(issue => ({ id: issue.id, nodes: issue.nodes.map(node => ({ target: node.target, summary: node.failureSummary })) })));
@@ -71,7 +85,7 @@ try {
         }
       }
     }
-    assert.equal(backgrounds.size, 4, "Both palettes of both variants must have visibly distinct desktop backgrounds");
+    assert.equal(backgrounds.size, 10, "Both palettes of all five variants must have visibly distinct desktop backgrounds");
     await page.locator("#settings-scheme").selectOption("dark");
     await page.locator("#settings-variant").selectOption("classic");
     assert.deepEqual(await page.locator("#interface-shell").evaluate(element => {
@@ -109,7 +123,7 @@ try {
     assert.equal(await page.locator("#bits-theme-stylesheet").count(), 0, "Leaving Aero removes its stylesheet");
     assert.equal(await page.locator("html").getAttribute("data-theme-variant"), null);
     assert.deepEqual(errors, []);
-    console.log(`PASS ${width}px Aero: Classic compatibility, Windows 7/Vista light/dark, both pickers, persistence/shared pages, lazy CSS, accessibility, contrast/effects/forced colors`);
+    console.log(`PASS ${width}px Aero: Classic compatibility, five variants light/dark, both pickers, persistence/shared pages, lazy CSS, accessibility, contrast/effects/forced colors`);
     await context.close();
   }
 } finally {

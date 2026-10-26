@@ -169,6 +169,7 @@ function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
     return;
   }
 
+  const newlyOpened = windowElement.hidden || windowElement.classList.contains("is-minimized");
   windowElement.hidden = false;
   windowElement.classList.remove("is-minimized");
   windowElement.dataset.launcherId = launcher?.id || "";
@@ -194,7 +195,7 @@ function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
   focusDesktopWindow(windowElement);
   updateDesktopWindowCount();
   window.dispatchEvent(new CustomEvent("desktop-window:opened", {
-    detail: { windowId: windowElement.id },
+    detail: { windowId: windowElement.id, newlyOpened },
   }));
   openedDesktopWindowIds.add(windowElement.id);
   if (openedDesktopWindowIds.size === desktopWindows.length) {

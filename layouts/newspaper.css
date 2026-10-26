@@ -1,0 +1,42 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="newspaper"] {
+  --bg: #26231f;
+  --panel: #302b26;
+  --panel-2: #3c362f;
+  --ink: #f3e9d6;
+  --muted: #cfc0a9;
+  --accent: #f1d5ad;
+  --accent-rgb: 241, 213, 173;
+  --border: #ab947a;
+  --font-family: Georgia, "Times New Roman", serif;
+  --control-radius: 0;
+  --shell-radius: 0;
+  --window-radius: 0;
+  --shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+:root[data-interface-theme="newspaper"][data-color-scheme="light"] {
+  --bg: #f3eddf;
+  --panel: #fff9eb;
+  --panel-2: #e9e0cf;
+  --ink: #30281f;
+  --muted: #675844;
+  --accent: #6c3a24;
+  --accent-rgb: 108, 58, 36;
+  --border: #8c775c;
+}
+
+html[data-interface-theme="newspaper"] :is(.system-bar, .section-label, .desktop-window-bar) {
+  border-bottom: 3px double var(--ink);
+}
+
+html[data-interface-theme="newspaper"] :is(h1, h2, h3) {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+html[data-interface-theme="newspaper"] .link-card {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}

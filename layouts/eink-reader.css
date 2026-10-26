@@ -1,0 +1,56 @@
+@import "/layouts/collection-base.css?v=collection-1";
+
+:root[data-interface-theme="eink-reader"] {
+  --bg: #222321;
+  --panel: #2a2c29;
+  --panel-2: #343732;
+  --ink: #eeeee3;
+  --muted: #c2c3b8;
+  --accent: #e2dfcf;
+  --accent-rgb: 226, 223, 207;
+  --border: #73776a;
+  --font-family: Georgia, "Times New Roman", serif;
+  --control-radius: 2px;
+  --shell-radius: 3px;
+  --window-radius: 3px;
+  --shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+:root[data-interface-theme="eink-reader"][data-color-scheme="light"] {
+  --bg: #eeeadd;
+  --panel: #f8f5ea;
+  --panel-2: #e7e2d4;
+  --ink: #262823;
+  --muted: #56594e;
+  --accent: #3e4438;
+  --accent-rgb: 62, 68, 56;
+  --border: #797d6e;
+}
+
+html[data-interface-theme="eink-reader"] :is(.system-bar, .app-menu-bar, .desktop-window-bar, button, input, select) {
+  font-family: system-ui, sans-serif;
+}
+
+html[data-interface-theme="eink-reader"] :is(.shell, .desktop-window, .link-card) {
+  border-style: solid;
+  text-shadow: none;
+}
+
+html[data-interface-theme="eink-reader"] .avatar {
+  filter: grayscale(1);
+}
+
+.eink-refresh-overlay {
+  position: fixed;
+  z-index: 2147483646;
+  inset: 0;
+  pointer-events: none;
+  background: var(--ink);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .eink-refresh-overlay {
+    display: none;
+  }
+}

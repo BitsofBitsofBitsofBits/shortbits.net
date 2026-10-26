@@ -3,6 +3,7 @@ const settingsMotion = document.querySelector("#settings-motion");
 const settingsLargeText = document.querySelector("#settings-large-text");
 const settingsHighContrast = document.querySelector("#settings-high-contrast");
 const settingsEffects = document.querySelector("#settings-effects");
+const settingsEinkRefresh = document.querySelector("#settings-eink-refresh");
 const settingsCopyLink = document.querySelector("#settings-copy-link");
 const settingsResetWindows = document.querySelector("#settings-reset-windows");
 const settingsResetAll = document.querySelector("#settings-reset-all");
@@ -20,6 +21,7 @@ const preferenceKeys = [
   "bits-text-size",
   "bits-contrast",
   "bits-effects",
+  "bits-eink-refresh",
   "bits-insider-channel",
 ];
 
@@ -39,11 +41,15 @@ function setSettingsStatus(message, isError = false) {
 
 function syncAppearanceControls() {
   settingsTheme.value = document.documentElement.dataset.interfaceTheme;
+  const eink = settingsTheme.value === "eink-reader";
+  document.querySelector("#settings-eink-refresh-option").hidden = !eink;
+  document.querySelector("#settings-eink-refresh-help").hidden = !eink;
+  settingsEinkRefresh.checked = document.documentElement.dataset.einkRefresh === "on";
 }
 
 function applyAccessibilityPreference(key, value) {
   localStorage.setItem(`bits-${key}`, value);
-  const datasetKey = key === "text-size" ? "textsize" : key;
+  const datasetKey = key === "text-size" ? "textsize" : key === "eink-refresh" ? "einkRefresh" : key;
   document.documentElement.dataset[datasetKey] = value;
   window.dispatchEvent(new CustomEvent("bits:preferences-changed", {
     detail: { key, value },
@@ -117,6 +123,17 @@ settingsEffects.addEventListener("change", () => {
     "effects",
     settingsEffects.checked ? "on" : "off",
   );
+});
+
+settingsEinkRefresh.addEventListener("change", () => {
+  applyAccessibilityPreference("eink-refresh", settingsEinkRefresh.checked ? "on" : "off");
+  setSettingsStatus("E-Ink refresh preference saved.");
+});
+window.addEventListener("storage", event => {
+  if (event.key !== "bits-eink-refresh") return;
+  document.documentElement.dataset.einkRefresh = event.newValue === "on" ? "on" : "off";
+  syncAppearanceControls();
+  window.dispatchEvent(new CustomEvent("bits:preferences-changed"));
 });
 
 toolbarTheme.addEventListener("change", syncAppearanceControls);
