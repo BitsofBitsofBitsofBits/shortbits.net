@@ -7,6 +7,7 @@ terminal-inspired personal website of BitsofBitsofBits.
 
 | Page | Contents |
 | --- | --- |
+| [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout) | Shared assets, page-owned files, entry HTML, and generated build outputs. |
 | [Site and features](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Site-and-Features) | Public pages, desktop windows, games, achievements, and everyday site behavior. |
 | [Admin and content](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Admin-and-Content) | Admin navigation and editors for career data, blog posts, games, guestbook, and ShortBits. |
 | [Creator feed](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Creator-Feed) | YouTube channel lookup, photos, uploads, and Twitch setup and live status. |

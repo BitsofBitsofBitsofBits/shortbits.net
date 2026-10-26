@@ -15181,7 +15181,7 @@ html[data-motion="reduced"] *::after {
   }
 }
 
-/* Experimental layout notice, shown by /layouts/runtime.js. Layout themes may restyle it. */
+/* Experimental layout notice, shown by /shared/scripts/layouts/runtime.js. Layout themes may restyle it. */
 .bits-layout-notice {
   position: fixed;
   left: 50%;

@@ -185,7 +185,7 @@ try {
     const context = await browser.newContext({ viewport: { width, height: 1000 } });
     await context.route("**/*", (route) => {
       const url = new URL(route.request().url());
-      if (url.pathname === "/supabase-config.js") return route.fulfill({
+      if (url.pathname === "/shared/scripts/supabase-config.js") return route.fulfill({
         contentType: "text/javascript",
         body: `
           window.SUPABASE_CONFIG = { url: "https://test.example", anonKey: "test-key" };

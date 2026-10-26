@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const calendarSource = readFileSync(new URL("../seasonal-calendar.js", import.meta.url), "utf8");
-const messageSource = readFileSync(new URL("../messages.js", import.meta.url), "utf8");
-const seasonalSource = readFileSync(new URL("../seasonal-messages.js", import.meta.url), "utf8");
-const themeSource = readFileSync(new URL("../theme-init.js", import.meta.url), "utf8");
+const calendarSource = readFileSync(new URL("../shared/scripts/seasonal-calendar.js", import.meta.url), "utf8");
+const messageSource = readFileSync(new URL("../shared/scripts/messages.js", import.meta.url), "utf8");
+const seasonalSource = readFileSync(new URL("../shared/scripts/seasonal-messages.js", import.meta.url), "utf8");
+const themeSource = readFileSync(new URL("../shared/scripts/theme-init.js", import.meta.url), "utf8");
 const scheduleSource = themeSource.slice(0, themeSource.indexOf("const seasonalThemeState ="));
 const metrics = ["cpu", "gpu", "network", "ram", "storage", "thermal"];
 const holidays = [
@@ -155,9 +155,9 @@ test("all HTML consumers load the shared calendar before its dependents", () => 
     "boot/index.html", "professional/index.html", "blog/index.html", "blog/post.html", "admin/index.html",
   ]) {
     const html = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
-    const calendar = html.indexOf('src="/seasonal-calendar.js?');
+    const calendar = html.indexOf('src="/shared/scripts/seasonal-calendar.js?');
     assert.ok(calendar >= 0, file);
-    for (const asset of ["theme-init.js", "seasonal-messages.js"]) {
+    for (const asset of ["shared/scripts/theme-init.js", "shared/scripts/seasonal-messages.js"]) {
       const dependent = html.indexOf(`src="/${asset}?`);
       if (dependent >= 0) assert.ok(calendar < dependent, `${file}: ${asset}`);
     }

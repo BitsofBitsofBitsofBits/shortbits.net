@@ -8,7 +8,7 @@ const links = [
     description: "Tiny Bits Production Factory",
     url: "https://github.com/BitsofBitsofBitsofBits",
     icon: "GH",
-    iconPath: "/images/github.svg",
+    iconPath: "/shared/images/github.svg",
     color: "#66ff9a",
   },
   {
@@ -31,7 +31,7 @@ const links = [
     description: "Flying blue Bits in the Sky",
     url: "https://bsky.app/profile/shortbits.net",
     icon: "BS",
-    iconPath: "/images/bluesky.svg",
+    iconPath: "/shared/images/bluesky.svg",
     color: "#7aa7ff",
   },
   {
@@ -39,7 +39,7 @@ const links = [
     description: "Occasionally moving pixels",
     url: "https://www.youtube.com/@BitsofBitsofBits",
     icon: "YT",
-    iconPath: "/images/youtube.svg",
+    iconPath: "/shared/images/youtube.svg",
     color: "#ff6d7a",
   },
   {
@@ -47,7 +47,7 @@ const links = [
     description: "Sometimes my Bits Twitch a little.",
     url: "https://www.twitch.tv/bitsofbitsofbits",
     icon: "TV",
-    iconPath: "/images/twitch.svg",
+    iconPath: "/shared/images/twitch.svg",
     color: "#b99aff",
   },
   {
@@ -55,7 +55,7 @@ const links = [
     description: "Wumpus stole my bits :(",
     url: "https://discord.com/users/202220288459538442",
     icon: "DC",
-    iconPath: "/images/discord.svg",
+    iconPath: "/shared/images/discord.svg",
     color: "#5865f2",
   },
   {
@@ -63,7 +63,7 @@ const links = [
     description: "Professional Bits",
     url: "https://www.linkedin.com/in/calebkmasters/",
     icon: "IN",
-    iconPath: "/images/linkedin.svg",
+    iconPath: "/shared/images/linkedin.svg",
     color: "#0a66c2",
   },
   {
@@ -71,14 +71,14 @@ const links = [
     description: "Musical Bits",
     url: "https://open.spotify.com/user/22fainfo6ycgibjw5xlhmp3ba",
     icon: "SP",
-    iconPath: "/images/spotify.svg",
+    iconPath: "/shared/images/spotify.svg",
     color: "#1db954",
   },
   { label: "Facebook",
     description: "Bits with a book full of faces",
     url: "https://www.facebook.com/calebkmasters",
     icon: "FB",
-    iconPath: "/images/facebook.svg",
+    iconPath: "/shared/images/facebook.svg",
     color: "#1877f2",
   },
   {
@@ -86,7 +86,7 @@ const links = [
     description: "Bits in the hivemind",
     url: "https://www.reddit.com/user/BitsofBitsofBits/",
     icon: "RD",
-    iconPath: "/images/reddit.svg?v=reddit-1",
+    iconPath: "/shared/images/reddit.svg?v=reddit-1",
     color: "#ff4500",
   },
 ];
@@ -126,7 +126,7 @@ const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
 ];
 
 if (!window.BITS_INTERFACE_THEMES) {
-  console.warn("theme-init.js did not load; using the built-in theme configuration.");
+  console.warn("shared/scripts/theme-init.js did not load; using the built-in theme configuration.");
   document.documentElement.dataset.colorScheme = "dark";
   document.documentElement.dataset.interfaceTheme = "default";
 }

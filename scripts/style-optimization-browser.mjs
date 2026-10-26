@@ -11,7 +11,7 @@ if (index < 0 || !args[index + 1]) throw new Error("--root requires a staged bui
 const root = resolve(args[index + 1]);
 const sourceRoot = fileURLToPath(new URL("..", import.meta.url));
 const sourceStyles = (await Promise.all([
-  "styles.css", "bsod-classic.css", "launcher.css", "contact-reliability.css",
+  "shared/styles/styles.css", "shared/styles/bsod-classic.css", "online/styles/launcher.css", "shared/styles/contact-reliability.css",
 ].map((file) => readFile(join(sourceRoot, file), "utf8")))).join("\n");
 const server = await startSiteServer(root);
 let browser;
@@ -33,7 +33,7 @@ try {
         const url = new URL(route.request().url());
         if (url.origin !== server.origin) return route.abort();
         if (baseline && url.pathname.endsWith(".css")) {
-          const css = url.pathname === "/online/site.css"
+          const css = url.pathname === "/online/styles/site.css"
             ? sourceStyles : await readFile(join(sourceRoot, url.pathname.slice(1)), "utf8");
           return route.fulfill({ contentType: "text/css", body: css });
         }
@@ -63,7 +63,7 @@ try {
           if (await stylesheet.count()) await page.waitForFunction(() => document.querySelector("#bits-theme-stylesheet").sheet);
           if (theme.experimental) {
             await page.waitForFunction((id) => performance.getEntriesByType("resource").some(
-              (entry) => new URL(entry.name).pathname === `/layouts/${id}.js`,
+              (entry) => new URL(entry.name).pathname === `/shared/scripts/layouts/${id}.js`,
             ), theme.id);
           }
           return page.evaluate(async () => {

@@ -6,7 +6,7 @@
 
 | Path | Page | Source |
 | --- | --- | --- |
-| `/` | Themed boot-menu chooser between the two sites | `index.html`, `chooser.js`, `chooser.css` |
+| `/` | Themed boot-menu chooser between the two sites | `index.html`, `home/scripts/chooser.js`, `home/styles/chooser.css` |
 | `/online/` | The playful internet presence (desktop windows, games, Easter eggs) | `online/index.html` |
 | `/professional/` | Recruiter-facing professional profile | `professional/` |
 
@@ -14,8 +14,11 @@ The chooser can remember a visitor's pick in `localStorage` (`bits-site-choice`)
 and redirect on later visits; `/?choose` always shows the menu, and both sites
 link to it from their footers. Legacy deep links such as `/?window=resume` or
 `/#…` are forwarded to `/online/` with their query and hash intact. Shared
-scripts, styles, and images stay at the site root, so pages in subfolders must
-reference them with root-absolute paths (`/script.js`, `/images/...`).
+assets live in `shared/` or their owning page's `scripts/` and `styles/` folders.
+Pages reference them with root-absolute paths such as
+`/shared/scripts/theme-init.js`, `/online/scripts/script.js`, and `/shared/images/...`.
+Route-entry HTML stays in place so page URLs and basic static serving still work.
+See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout).
 
 ## Public features
 
@@ -29,13 +32,13 @@ reference them with root-absolute paths (`/script.js`, `/images/...`).
   shared with `CAREER.SYS`; the hand-written cards in `professional/index.html`
   are only a fallback when Supabase is unreachable. Summary lines starting with
   `•` or `-` render as bullets, and technologies (comma- or double-space-
-  separated) render as tags via `career-format.js`.
+  separated) render as tags via `shared/scripts/career-format.js`.
   Education entries (school, credential, period, and optional bullet details)
   are edited in the same Admin form, stored in `site_resume_education`, and
   shown in both `CAREER.SYS` and the professional Education section.
   Certifications (name, issuer, issue date, credential ID, and an HTTPS
   verification link) use the same pattern through
-  `site_resume_certifications`. `career-data.js` shares one cached loader
+  `site_resume_certifications`. `shared/scripts/career-data.js` shares one cached loader
   between the professional page and its printable résumé.
 
 - A print-ready résumé at `/professional/resume/` built from the same Admin

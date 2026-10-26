@@ -2750,7 +2750,7 @@ try {
   loginSubmit.disabled = true;
   setAdminStatus(
     loginStatus,
-    "Supabase is not configured. Update supabase-config.js first.",
+    "Supabase is not configured. Update shared/scripts/supabase-config.js first.",
     "error",
   );
 }

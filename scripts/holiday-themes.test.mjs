@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const themeSource = readFileSync(new URL("../theme-init.js", import.meta.url), "utf8");
-const calendarSource = readFileSync(new URL("../seasonal-calendar.js", import.meta.url), "utf8");
+const themeSource = readFileSync(new URL("../shared/scripts/theme-init.js", import.meta.url), "utf8");
+const calendarSource = readFileSync(new URL("../shared/scripts/seasonal-calendar.js", import.meta.url), "utf8");
 const preferenceSource = themeSource.slice(0, themeSource.indexOf("function getColorSchemePreference()"));
 const optionsSource = themeSource.slice(themeSource.indexOf("function buildThemeOptions("), themeSource.indexOf("function getPageId("));
-const effectsSource = readFileSync(new URL("../theme-effects.js", import.meta.url), "utf8");
-const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+const effectsSource = readFileSync(new URL("../online/scripts/theme-effects.js", import.meta.url), "utf8");
+const styles = readFileSync(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
 
 test("Aero retains Classic as its default and exposes five opt-in variants without experimental layout chrome", () => {
@@ -29,7 +29,7 @@ test("The ten collection themes use lazy CSS and both schemes without experiment
     assert.equal(theme.stylesheet, true, id);
     assert.equal(theme.experimental, undefined, id);
     assert.ok(theme.darkColor && theme.lightColor, id);
-    assert.match(readFileSync(new URL(`../layouts/${id}.css`, import.meta.url), "utf8"), /@import "\/layouts\/collection-base\.css\?v=/);
+    assert.match(readFileSync(new URL(`../shared/styles/layouts/${id}.css`, import.meta.url), "utf8"), /@import "\/shared\/styles\/layouts\/collection-base\.css\?v=/);
   }
   for (const [id, variant] of [["terminal", "amber"], ["minebits", "mushroom-fields"]]) {
     assert.ok(available.find(theme => theme.id === id).variants.some(entry => entry.id === variant));

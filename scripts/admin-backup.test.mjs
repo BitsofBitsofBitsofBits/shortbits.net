@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const context = { window: {}, document: { querySelector: () => null } };
-vm.runInNewContext(readFileSync(new URL("../admin-backup.js", import.meta.url), "utf8"), context);
+vm.runInNewContext(readFileSync(new URL("../admin/scripts/admin-backup.js", import.meta.url), "utf8"), context);
 const { tables, validate } = context.window.BITS_CONTENT_BACKUP;
 function backup() {
   const tablesData = Object.fromEntries(tables.map((table) => [table, []]));

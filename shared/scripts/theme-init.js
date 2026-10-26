@@ -945,7 +945,7 @@ function syncThemeAssets(theme) {
     delete root.dataset.layoutTheme;
   }
   const stylesheetHref = theme.experimental || theme.stylesheet
-    ? `/layouts/${theme.id}.css?v=${layoutAssetVersion}`
+    ? `/shared/styles/layouts/${theme.id}.css?v=${layoutAssetVersion}`
     : "";
   let stylesheet = document.getElementById("bits-theme-stylesheet");
   if (!stylesheetHref) {
@@ -974,7 +974,7 @@ function syncThemeAssets(theme) {
   }
   if (theme.experimental && !document.getElementById("bits-layout-runtime")) {
     const runtime = document.createElement("script");
-    runtime.src = `/layouts/runtime.js?v=${layoutAssetVersion}`;
+    runtime.src = `/shared/scripts/layouts/runtime.js?v=${layoutAssetVersion}`;
     runtime.id = "bits-layout-runtime";
     runtime.defer = true;
     head.append(runtime);

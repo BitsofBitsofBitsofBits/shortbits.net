@@ -4,7 +4,7 @@
 
 ## Public configuration and services
 
-`supabase-config.js` contains the public Supabase project URL and publishable
+`shared/scripts/supabase-config.js` contains the public Supabase project URL and publishable
 key used by the browser. Spotify credentials are not stored in this repository;
 the Edge Function reads them from Supabase secrets:
 
@@ -103,10 +103,10 @@ Supabase functions. The browser counts a daily session once with
 `sessionStorage`, honors Global Privacy Control and Do Not Track, and never
 transmits or stores a visitor identifier.
 
-`site-config.js` holds optional public third-party identifiers:
+`shared/scripts/site-config.js` holds optional public third-party identifiers:
 
 - `cloudflareAnalyticsToken`: the Cloudflare Web Analytics site token.
-  `cf-analytics.js` loads the cookieless beacon on public pages only when the
+  `shared/scripts/cf-analytics.js` loads the cookieless beacon on public pages only when the
   token is set, and skips it on localhost or when Global Privacy Control or
   Do Not Track is enabled.
 - `turnstileSiteKey`: the public Cloudflare Turnstile site key. When set, the
@@ -121,7 +121,7 @@ transmits or stores a visitor identifier.
   `invalid-input-response` or `timeout-or-duplicate` requires a fresh check.
   Siteverify network/HTTP/invalid-JSON failures return a service error and never
   allow storage or email. Logs exclude tokens, secrets, IPs, and raw responses.
-  Match the secret to the public widget key in `site-config.js`; if GitHub's
+  Match the secret to the public widget key in `shared/scripts/site-config.js`; if GitHub's
   Supabase environment also defines the secret, update it there so deployment
   does not overwrite a dashboard-only correction.
 

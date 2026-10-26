@@ -27,7 +27,7 @@ const settle = page => page.evaluate(() => new Promise(resolve => requestAnimati
 async function waitForTheme(page, id) {
   await page.waitForFunction(id => {
     const link = document.querySelector("#bits-theme-stylesheet");
-    if (!link?.href.includes(`/layouts/${id}.css`) || !link.sheet) return false;
+    if (!link?.href.includes(`/shared/styles/layouts/${id}.css`) || !link.sheet) return false;
     return !["eink-reader", "blueprint", "spacecraft", "frutiger-eco", "holographic", "newspaper", "workbench", "stickerbook", "night-train", "museum"].includes(id)
       || [...link.sheet.cssRules].some(rule => rule.type === CSSRule.IMPORT_RULE && rule.styleSheet?.cssRules.length);
   }, id);
@@ -72,12 +72,12 @@ try {
     const missing = [];
     page.on("pageerror", error => errors.push(error.message));
     page.on("response", response => {
-      if (response.status() >= 400 && new URL(response.url()).pathname.startsWith("/layouts/")) missing.push(response.url());
+      if (response.status() >= 400 && new URL(response.url()).pathname.startsWith("/shared/styles/layouts/")) missing.push(response.url());
     });
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
     assert.equal(await page.evaluate(() => window.BITS_ACTIVITIES[0].text), "THEME PREVIEW", "Audits must use the deterministic catalog");
-    assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").filter(entry => /\/layouts\/(?:collection-base|eink-reader|blueprint|spacecraft|frutiger-eco|holographic|newspaper|workbench|stickerbook|night-train|museum)\.css/.test(entry.name)).length), 0, "No collection CSS is fetched for Default");
+    assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").filter(entry => /\/shared\/styles\/layouts\/(?:collection-base|eink-reader|blueprint|spacecraft|frutiger-eco|holographic|newspaper|workbench|stickerbook|night-train|museum)\.css/.test(entry.name)).length), 0, "No collection CSS is fetched for Default");
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     await page.addScriptTag({ path: axePath });
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));

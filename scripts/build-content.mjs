@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import vm from "node:vm";
-import publishing from "../publishing-status.js";
+import publishing from "../shared/scripts/publishing-status.js";
 
 export const normalizePosts = publishing.normalizePosts;
 
@@ -68,7 +68,7 @@ export function markdownRenderer(source) {
       createTextNode: textNode,
       createDocumentFragment: () => new Node(),
     },
-  }, { timeout: 1000, filename: "markdown.js" });
+  }, { timeout: 1000, filename: "shared/scripts/markdown.js" });
   return {
     render: (markdown) => String(window.BITS_MARKDOWN.render(markdown)),
     readingTime: window.BITS_MARKDOWN.readingTime,
@@ -76,7 +76,7 @@ export function markdownRenderer(source) {
 }
 
 export async function publicConfig(root, env = process.env) {
-  const source = await readFile(join(root, "supabase-config.js"), "utf8");
+  const source = await readFile(join(root, "shared/scripts/supabase-config.js"), "utf8");
   const url = env.SUPABASE_URL || /url:\s*"([^"]+)"/.exec(source)?.[1];
   const anonKey = env.SUPABASE_ANON_KEY || /anonKey:\s*"([^"]+)"/.exec(source)?.[1];
   let role;
@@ -119,7 +119,7 @@ export function renderArticle(post, renderer) {
   const url = siteUrl + articlePath(post.slug);
   const title = escapeHtml(post.title);
   const excerpt = escapeHtml(post.excerpt);
-  const image = `${siteUrl}/images/social-preview.png`;
+  const image = `${siteUrl}/shared/images/social-preview.png`;
   const schema = {
     "@context": "https://schema.org", "@type": "BlogPosting",
     headline: post.title, description: post.excerpt, url, mainEntityOfPage: url,
@@ -149,13 +149,13 @@ export function renderArticle(post, renderer) {
     <meta name="twitter:description" content="${excerpt}">
     <meta name="twitter:image" content="${image}">
     <link rel="alternate" type="application/rss+xml" title="BLOG.LOG RSS" href="/blog/feed.xml">
-    <link rel="icon" type="image/png" href="/images/favicon.png">
-    <script src="/seasonal-calendar.js?v=calendar-1"></script>
-    <script src="/theme-init.js?v=theme-27"></script>
-    <link rel="stylesheet" href="/styles.css?v=upgrade-132">
+    <link rel="icon" type="image/png" href="/shared/images/favicon.png">
+    <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
+    <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
+    <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <script type="application/ld+json">${jsonScript(schema)}</script>
-    <script src="/site-config.js?v=site-config-3" defer></script>
-    <script src="/cf-analytics.js?v=cf-analytics-2" defer></script>
+    <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
   </head>
   <body class="blog-page blog-post-page">
     <a class="skip-link" href="#blog-post">Skip to article</a>
@@ -217,7 +217,7 @@ export async function buildContent({ root = defaultRoot, input, env = process.en
   const posts = input
     ? normalizePosts(JSON.parse(await readFile(resolve(input), "utf8")), now)
     : await fetchPosts(await publicConfig(root, env), { fetchImpl, now });
-  const renderer = markdownRenderer(await readFile(join(root, "markdown.js"), "utf8"));
+  const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"));
   const articles = posts.map((post) => [post.slug, renderArticle(post, renderer)]);
   const manifest = await publishing.snapshot(posts, now);
   const archiveFile = join(root, "blog", "index.html");

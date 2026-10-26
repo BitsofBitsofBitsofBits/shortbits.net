@@ -54,7 +54,7 @@ test("snapshot serialization includes only rendered public fields and rejects ma
 test("resume build persists deterministic visible HTML without contact details or duplicated snapshot payloads", async () => {
   const directory = await mkdtemp(join(tmpdir(), "shortbits-resume-"));
   try {
-    for (const file of ["career-format.js", "career-data.js", "resume-content.js", "professional"]) {
+    for (const file of ["shared/scripts/career-format.js", "shared/scripts/career-data.js", "professional/resume/scripts/resume-content.js", "professional"]) {
       await cp(join(root, file), join(directory, file), { recursive: true });
     }
     await buildResume({ root: directory, input: fileURLToPath(fixture) });
@@ -68,7 +68,7 @@ test("resume build persists deterministic visible HTML without contact details o
     assert.equal(document.querySelector("#resume-summary").textContent, data.profile.summary);
     assert.equal(document.querySelectorAll('a[href^="mailto:"], a[href^="tel:"]').length, 0);
     assert.equal(document.querySelector('script[type="application/json"]'), null);
-    assert.ok(document.querySelector('link[href^="/professional/resume.css"]'));
+    assert.ok(document.querySelector('link[href^="/professional/resume/styles/resume.css"]'));
     await buildResume({ root: directory, input: fileURLToPath(fixture) });
     assert.equal(await readFile(join(directory, "professional", "resume", "index.html"), "utf8"), first);
     const invalid = join(directory, "invalid.json");
@@ -103,7 +103,7 @@ test("career fetches use enabled public queries, pagination, credentials, and ex
 });
 
 test("fresh career reads bypass shared cache and mark incomplete optional data", async () => {
-  const source = await readFile(join(root, "career-data.js"), "utf8");
+  const source = await readFile(join(root, "shared/scripts/career-data.js"), "utf8");
   let calls = 0;
   const warnings = [];
   const window = { SUPABASE_CONFIG: { url: "https://example.supabase.co", anonKey: "public" } };

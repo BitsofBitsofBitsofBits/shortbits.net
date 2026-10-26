@@ -43,7 +43,7 @@ during setup; unsupported schemas fail explicitly rather than publishing zeros.
 4. In website Admin -> Hardware -> Live agents, create a **separate device token**
    with an explicit safe public name such as `NAS`. Do not reuse the desktop
    token and do not leave the name blank. Save the token locally; it is shown once.
-5. Get the site's public Supabase URL and publishable key from `supabase-config.js`.
+5. Get the site's public Supabase URL and publishable key from `shared/scripts/supabase-config.js`.
    Use the public/publishable key, **never a service-role or secret key**.
 
 The following commands run in the **Unraid Linux terminal**, not PowerShell.

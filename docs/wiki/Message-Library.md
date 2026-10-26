@@ -12,7 +12,7 @@
   Existing New Year, Halloween, and Christmas exclusivity is unchanged.
   Bundled fallback dates use the visitor's local calendar, not the selected visual theme;
   when the database catalog is active, its configured timezone governs message dates instead;
-  overlapping additive holidays combine. `seasonal-calendar.js` shares
+  overlapping additive holidays combine. `shared/scripts/seasonal-calendar.js` shares
   Gregorian Easter calculation between visual themes and message profiles.
   Run `node --test scripts/holiday-themes.test.mjs scripts/seasonal-messages.test.mjs`
   to validate schedules, complete pool retention, and weighted shares.
@@ -29,11 +29,11 @@
   `20261025031000_seed_message_catalog.sql`; the seed preserves all 2,207 current
   entries, including local additions, weights, formatting, and duplicate entries.
   It is a one-time snapshot, not a deploy-time overwrite of Admin edits.
-  `messages.js`, `seasonal-messages.js`, and the existing local boot/monitor
+  `shared/scripts/messages.js`, `shared/scripts/seasonal-messages.js`, and the existing local boot/monitor
   definitions remain bundled fallbacks. Empty enabled pools use their bundled
   defaults rather than breaking weighted selection; deleting/hiding an entire
   pool does not disable that feature. Edit the database through Admin going forward.
-  `message-catalog.js` keeps existing consumer arrays live, applies a valid cached
+  `shared/scripts/message-catalog.js` keeps existing consumer arrays live, applies a valid cached
   snapshot immediately, and fetches active season/standard entries in 500-row pages
   in the background after startup. Cached data lasts five minutes; reload/refocus
   refreshes expired data. Network/schema failures log a warning and retain cached

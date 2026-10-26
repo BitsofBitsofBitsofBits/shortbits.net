@@ -79,7 +79,7 @@
     }
     requestedScripts.add(theme.id);
     const script = document.createElement("script");
-    script.src = `/layouts/${theme.id}.js?v=${preference?.layoutAssetVersion ?? "1"}`;
+    script.src = `/shared/scripts/layouts/${theme.id}.js?v=${preference?.layoutAssetVersion ?? "1"}`;
     script.defer = true;
     document.head.append(script);
   }

@@ -12,7 +12,7 @@
     "slug": "safe-markdown",
     "title": "Escaping <markup> & \"quotes\"",
     "excerpt": "</script><script>alert('not executable')</script>",
-    "body_markdown": "<script>alert('not executable')</script>\n\n[bad](javascript:alert)\n\n![bad image](data:image/svg+xml,evil)\n\n[good](https://example.com/?x=1&y=2)\n\n![A \"caption\"](/images/favicon.png \"An image\")",
+    "body_markdown": "<script>alert('not executable')</script>\n\n[bad](javascript:alert)\n\n![bad image](data:image/svg+xml,evil)\n\n[good](https://example.com/?x=1&y=2)\n\n![A \"caption\"](/shared/images/favicon.png \"An image\")",
     "published": true,
     "published_at": "2026-10-02T12:00:00Z",
     "updated_at": "2026-10-03T12:00:00Z"

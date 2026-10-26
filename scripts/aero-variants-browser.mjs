@@ -51,7 +51,7 @@ try {
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
-    assert.equal(await page.locator('link[href*="/layouts/aero-glass.css"]').count(), 0, "Aero CSS is not loaded for other themes");
+    assert.equal(await page.locator('link[href*="/shared/styles/layouts/aero-glass.css"]').count(), 0, "Aero CSS is not loaded for other themes");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
     await page.locator("#settings-theme").selectOption("aero-glass");
     await page.waitForFunction(() => document.querySelector("#bits-theme-stylesheet")?.sheet);

@@ -26,7 +26,7 @@ html[data-interface-theme="terminal"][data-theme-variant="amber"] :is(.system-ba
   background: var(--panel);
 }
 
-/* P4 white phosphor. Green intentionally inherits styles.css unchanged. */
+/* P4 white phosphor. Green intentionally inherits shared/styles/styles.css unchanged. */
 :root[data-interface-theme="terminal"][data-theme-variant="white"] {
   --accent: #e4e9ee;
   --accent-rgb: 228, 233, 238;
@@ -88,7 +88,7 @@ html[data-interface-theme="terminal"][data-theme-variant="white"] body.error-pag
   background-size: auto, 100% 100%, 100% 100%;
 }
 
-/* Cyan phosphor. Green intentionally inherits styles.css unchanged. */
+/* Cyan phosphor. Green intentionally inherits shared/styles/styles.css unchanged. */
 :root[data-interface-theme="terminal"][data-theme-variant="cyan"] {
   --accent: #62efff;
   --accent-rgb: 98, 239, 255;
@@ -150,7 +150,7 @@ html[data-interface-theme="terminal"][data-theme-variant="cyan"] body.error-page
   background-size: auto, 100% 100%, 100% 100%;
 }
 
-/* IBM blue phosphor. Green intentionally inherits styles.css unchanged. */
+/* IBM blue phosphor. Green intentionally inherits shared/styles/styles.css unchanged. */
 :root[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] {
   --accent: #4ea6ff;
   --accent-rgb: 78, 166, 255;
@@ -212,7 +212,7 @@ html[data-interface-theme="terminal"][data-theme-variant="ibm-blue"] body.error-
   background-size: auto, 100% 100%, 100% 100%;
 }
 
-/* Red alert phosphor. Green intentionally inherits styles.css unchanged. */
+/* Red alert phosphor. Green intentionally inherits shared/styles/styles.css unchanged. */
 :root[data-interface-theme="terminal"][data-theme-variant="red-alert"] {
   --accent: #ff737a;
   --accent-rgb: 255, 115, 122;

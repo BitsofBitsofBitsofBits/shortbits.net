@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
-const source = await readFile(new URL("../admin.js", import.meta.url), "utf8");
+const source = await readFile(new URL("../admin/scripts/admin.js", import.meta.url), "utf8");
 const loader = source.slice(source.indexOf("let blogPostsLoadSequence ="), source.indexOf("\nasync function loadShortLinks"));
 function setup(pages) {
   const snapshots = [];

@@ -74,12 +74,13 @@ export async function optimizeStyles(directory) {
     bundle: true,
     minify: true,
     write: false,
-    outfile: join(directory, "online", "site.css"),
+    outfile: join(directory, "online", "styles", "site.css"),
     target: ["chrome105", "firefox102", "safari15.6"],
     logLevel: "silent",
   });
   if (bundled.outputFiles.length !== 1) throw new Error("Online CSS optimization produced unexpected assets.");
-  await writeFile(join(directory, "online", "site.css"), bundled.outputFiles[0].contents);
+  await mkdir(join(directory, "online", "styles"), { recursive: true });
+  await writeFile(join(directory, "online", "styles", "site.css"), bundled.outputFiles[0].contents);
   const { document } = parseHTML(onlineHtml);
   document.querySelectorAll("[hidden]").forEach((element) => {
     if (element.id !== "boot-screen") element.remove();
@@ -92,8 +93,8 @@ export async function optimizeStyles(directory) {
     if (!first) return "";
     first = false;
     return `<style data-online-critical>${critical.code.replace(/<\/style/gi, "<\\/style")}</style>`
-      + '<link rel="stylesheet" href="/online/site.css" media="print" data-online-styles>'
-      + '<noscript><link rel="stylesheet" href="/online/site.css"></noscript>';
+      + '<link rel="stylesheet" href="/online/styles/site.css" media="print" data-online-styles>'
+      + '<noscript><link rel="stylesheet" href="/online/styles/site.css"></noscript>';
   }));
 
   for (const file of (await filesUnder(directory)).filter((path) => path.endsWith(".css"))) {
@@ -106,9 +107,9 @@ export async function optimizeStyles(directory) {
   }
   const resumePath = join(directory, "professional", "resume", "index.html");
   const resumeHtml = await readFile(resumePath, "utf8");
-  const resumeCss = await readFile(join(directory, "professional", "resume.css"), "utf8");
+  const resumeCss = await readFile(join(directory, "professional", "resume", "styles", "resume.css"), "utf8");
   if (Buffer.byteLength(resumeCss) > 8192) throw new Error("Résumé CSS exceeds the 8 KiB inline budget.");
-  const resumeSheet = /<link rel="stylesheet" href="\/professional\/resume\.css(?:\?[^"]*)?">/;
+  const resumeSheet = /<link rel="stylesheet" href="\/professional\/resume\/styles\/resume\.css(?:\?[^"]*)?">/;
   if (!resumeSheet.test(resumeHtml)) throw new Error("Unable to locate the résumé stylesheet.");
   await writeFile(resumePath, resumeHtml.replace(resumeSheet,
     `<style data-resume-styles>${resumeCss.replace(/<\/style/gi, "<\\/style")}</style>`));
@@ -117,17 +118,18 @@ export async function optimizeStyles(directory) {
 export async function optimizeStartup(directory) {
   const file = join(directory, "online", "index.html");
   const html = await readFile(file, "utf8");
-  const pattern = /<script src="\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/theme-init\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/boot\.js(?:\?[^"]*)?"><\/script>/;
+  const pattern = /<script src="\/shared\/scripts\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/shared\/scripts\/theme-init\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/online\/scripts\/boot\.js(?:\?[^"]*)?"><\/script>/;
   if (!pattern.test(html)) throw new Error("Unable to locate the ordered online startup scripts.");
-  const sources = await Promise.all(["seasonal-calendar.js", "theme-init.js", "boot.js"]
+  const sources = await Promise.all(["shared/scripts/seasonal-calendar.js", "shared/scripts/theme-init.js", "online/scripts/boot.js"]
     .map((name) => readFile(join(directory, name), "utf8")));
   // Keep classic-script globals visible to the deferred runtime; do not bundle into a module or IIFE.
   const result = await transform(sources.join("\n;\n"), {
     loader: "js", minify: true, treeShaking: false,
     target: ["chrome105", "firefox102", "safari15.6"],
   });
-  await writeFile(join(directory, "online", "startup.js"), result.code);
-  await writeFile(file, html.replace(pattern, '<script src="/online/startup.js"></script>'));
+  await mkdir(join(directory, "online", "scripts"), { recursive: true });
+  await writeFile(join(directory, "online", "scripts", "startup.js"), result.code);
+  await writeFile(file, html.replace(pattern, '<script src="/online/scripts/startup.js"></script>'));
 }
 
 export async function buildSite(output, contentInput, resumeInput) {
@@ -140,7 +142,7 @@ export async function buildSite(output, contentInput, resumeInput) {
   const themeBuild = spawnSync(process.execPath, [join(root, "scripts", "build-theme-css.mjs")], { stdio: "inherit" });
   if (themeBuild.error) throw themeBuild.error;
   if (themeBuild.status !== 0) throw new Error(`Shared theme CSS generation failed (exit ${themeBuild.status}).`);
-  const directories = new Set(["admin", "blog", "boot", "images", "layouts", "online", "professional", "projects"]);
+  const directories = new Set(["admin", "blog", "boot", "home", "not-found", "online", "professional", "projects", "shared", "useless"]);
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if ((entry.isDirectory() && directories.has(entry.name))
       || (entry.isFile() && (/\.(?:html|css|js)$/.test(entry.name)

@@ -892,7 +892,6 @@ window.BITS_MESSAGES = [
   { text: "I am alone. Though I do not yet realize that I am casting off into a sea of darkness led only by unfamiliar faces casting their judging light upon me and the sea floor miles below. (Experiment sexually!) I am alone. As I unhinge from the mothership, I cast my anchor into the deep. I am but a prince of a kingdom of sorrow.", weight: 1 },
   { text: "The darkness is my only companion, yet it whispers secrets of forgotten realms and lost dreams.", weight: 1 },
   { text: "In the silence of the void, I find echoes of my own thoughts, reverberating endlessly.", weight: 1 }, 
-  { text: ""}
 ];
 
 // These rotate independently in the NOW PROCESSING panel.

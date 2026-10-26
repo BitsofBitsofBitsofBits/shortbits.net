@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
-const source = await readFile(new URL("../about.js", import.meta.url), "utf8");
+const source = await readFile(new URL("../online/scripts/about.js", import.meta.url), "utf8");
 
 test("About does no timezone work while hidden and refreshes immediately on open and visibility restore", () => {
   const elements = new Map();

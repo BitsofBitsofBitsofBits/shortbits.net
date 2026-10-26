@@ -23,8 +23,8 @@ try {
     await context.route("**/*", async (route) => {
       const url = new URL(route.request().url());
       if (url.origin !== server.origin) return route.abort();
-      if (url.pathname === "/online/site.css") await fullCss;
-      if (url.pathname.endsWith(".js") && !["/online/startup.js", "/online-runtime.js"].includes(url.pathname)) {
+      if (url.pathname === "/online/styles/site.css") await fullCss;
+      if (url.pathname.endsWith(".js") && !["/online/scripts/startup.js", "/online/scripts/online-runtime.js"].includes(url.pathname)) {
         return route.fulfill({ contentType: "text/javascript", body: "" });
       }
       return route.continue();
@@ -35,7 +35,7 @@ try {
     assert.equal(await page.locator("style[data-online-critical]").count(), 1);
     assert.equal(await page.evaluate(() => document.documentElement.dataset.runtime), "pending");
     assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").some(
-      (entry) => new URL(entry.name).pathname === "/script.js",
+      (entry) => new URL(entry.name).pathname === "/online/scripts/script.js",
     )), false, "enhancements must wait for full styles");
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     const themes = await page.evaluate(() => window.BITS_INTERFACE_THEMES.filter((theme) => !theme.experimental)
@@ -74,7 +74,7 @@ try {
   await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
   assert.equal(await page.locator("#interface-shell").isVisible(), true);
   assert.equal(await page.locator("noscript link[rel=stylesheet]").count(), 1);
-  assert.ok(await page.evaluate(() => [...document.styleSheets].some((sheet) => sheet.href?.includes("/online/site.css"))));
+  assert.ok(await page.evaluate(() => [...document.styleSheets].some((sheet) => sheet.href?.includes("/online/styles/site.css"))));
   console.log("PASS JavaScript-disabled stylesheet fallback");
   await context.close();
 } finally {

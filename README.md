@@ -26,6 +26,7 @@ Setup, configuration, feature guides, deployment, and troubleshooting live in th
 - [Deployment and operations](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Deployment)
 
 Wiki sources are versioned in [`docs/wiki/`](docs/wiki/Home.md).
+See [Repository layout](docs/wiki/Repository-Layout.md) for the source organization.
 
 ## AI Notice
 

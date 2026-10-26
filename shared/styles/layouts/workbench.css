@@ -1,4 +1,4 @@
-@import "/layouts/collection-base.css?v=collection-1";
+@import "/shared/styles/layouts/collection-base.css?v=collection-1";
 
 :root[data-interface-theme="workbench"] {
   --bg: #272b2e;

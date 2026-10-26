@@ -52,7 +52,7 @@ budgets and the separate deployed-site health checks remain enabled.
 `npm run build` requires an empty output directory, copies only public site
 assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS
 URLs, and writes Brotli/gzip sidecars. Public Supabase configuration is read from
-`supabase-config.js`; optional `SUPABASE_URL` and `SUPABASE_ANON_KEY` overrides
+`shared/scripts/supabase-config.js`; optional `SUPABASE_URL` and `SUPABASE_ANON_KEY` overrides
 must be public credentials, never service-role secrets. Failed content fetches
 fail the build rather than deploying an empty archive or an incomplete resume snapshot.
 

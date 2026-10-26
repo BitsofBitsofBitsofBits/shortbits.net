@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
-const archiveSource = await readFile(new URL("../blog/blog.js", import.meta.url), "utf8");
-const postSource = await readFile(new URL("../blog/post.js", import.meta.url), "utf8");
+const archiveSource = await readFile(new URL("../blog/scripts/blog.js", import.meta.url), "utf8");
+const postSource = await readFile(new URL("../blog/scripts/post.js", import.meta.url), "utf8");
 
 class Element {
   constructor(tag = "") {

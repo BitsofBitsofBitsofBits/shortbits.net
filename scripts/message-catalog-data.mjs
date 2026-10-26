@@ -12,10 +12,10 @@ export function messageCatalogDefaults() {
     });
   });
   const context = vm.createContext({ window: {}, Date });
-  vm.runInContext(read("seasonal-calendar.js"), context);
-  vm.runInContext(read("messages.js"), context);
-  vm.runInContext(read("message-text.js"), context);
-  vm.runInContext(read("message-catalog.js"), context);
+  vm.runInContext(read("shared/scripts/seasonal-calendar.js"), context);
+  vm.runInContext(read("shared/scripts/messages.js"), context);
+  vm.runInContext(read("shared/scripts/message-text.js"), context);
+  vm.runInContext(read("shared/scripts/message-catalog.js"), context);
   for (const [category, global] of [["messages", "BITS_MESSAGES"], ["activities", "BITS_ACTIVITIES"], ["shutdownMessages", "BITS_SHUTDOWN_MESSAGES"]]) {
     add("standard", category, context.window[global]);
   }
@@ -30,18 +30,18 @@ export function messageCatalogDefaults() {
         Object.entries(profile.monitorJokes ?? {}).forEach(([metric, pool]) => add(profile.id, `monitor.${metric}`, pool));
       });
   };
-  vm.runInContext(read("seasonal-messages.js"), context);
+  vm.runInContext(read("shared/scripts/seasonal-messages.js"), context);
   const literal = (file, name, indent, kind = "array") => {
     const brackets = kind === "array" ? ["\\[", "\\]"] : ["\\{", "\\}"];
     const match = read(file).match(new RegExp(`const ${name} = (${brackets[0]}[\\s\\S]*?\\n${" ".repeat(indent)}${brackets[1]});`));
     if (!match) throw new Error(`Cannot locate ${name} in ${file}.`);
     return vm.runInNewContext(`(${match[1]})`);
   };
-  add("standard", "initialBootSteps", literal("boot.js", "baseBootSteps", 2));
-  add("standard", "bootMessages", literal("endless-boot.js", "baseFixedMessages", 2));
-  add("standard", "playingDeadMessages", literal("script.js", "basePlayingDeadMessages", 0));
-  add("standard", "glitchMessages", literal("script.js", "baseGlitchMessages", 0));
-  Object.entries(literal("content.js", "baseHardwareJokes", 0, "object"))
+  add("standard", "initialBootSteps", literal("online/scripts/boot.js", "baseBootSteps", 2));
+  add("standard", "bootMessages", literal("boot/scripts/endless-boot.js", "baseFixedMessages", 2));
+  add("standard", "playingDeadMessages", literal("online/scripts/script.js", "basePlayingDeadMessages", 0));
+  add("standard", "glitchMessages", literal("online/scripts/script.js", "baseGlitchMessages", 0));
+  Object.entries(literal("online/scripts/content.js", "baseHardwareJokes", 0, "object"))
     .forEach(([metric, pool]) => add("standard", `monitor.${metric}`, pool));
   return JSON.parse(JSON.stringify(rows));
 }

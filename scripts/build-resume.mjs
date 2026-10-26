@@ -7,7 +7,7 @@ import { publicConfig } from "./build-content.mjs";
 
 export async function resumeContext(root, document) {
   const context = vm.createContext({ window: {}, document });
-  for (const script of ["career-format.js", "career-data.js", "resume-content.js"]) {
+  for (const script of ["shared/scripts/career-format.js", "shared/scripts/career-data.js", "professional/resume/scripts/resume-content.js"]) {
     vm.runInContext(await readFile(join(root, script), "utf8"), context, { filename: script, timeout: 1000 });
   }
   return context.window;

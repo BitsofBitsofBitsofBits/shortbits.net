@@ -1,5 +1,6 @@
 [**Documentation home**](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki)
 
+- [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout)
 - [Site and features](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Site-and-Features)
 - [Admin and content](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Admin-and-Content)
 - [Creator feed](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Creator-Feed)

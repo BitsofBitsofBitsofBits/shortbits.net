@@ -61,7 +61,7 @@
     const active = element('div', 'browser-tab browser-tab-active');
     active.setAttribute('aria-current', 'page');
     const favicon = element('img', 'browser-favicon');
-    favicon.src = '/images/favicon.png';
+    favicon.src = '/shared/images/favicon.png';
     favicon.alt = '';
     const title = element('span', 'browser-tab-title', document.title);
     active.append(favicon, title);

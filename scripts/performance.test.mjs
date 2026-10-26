@@ -5,10 +5,10 @@ import vm from "node:vm";
 import { buildThemeCss } from "./build-theme-css.mjs";
 import { versionAssets } from "./build-site.mjs";
 
-const bootSource = await readFile(new URL("../boot.js", import.meta.url), "utf8");
-const loaderSource = await readFile(new URL("../arcade-loader.js", import.meta.url), "utf8");
-const themeSource = await readFile(new URL("../theme-init.js", import.meta.url), "utf8");
-const runtimeSource = await readFile(new URL("../online-runtime.js", import.meta.url), "utf8");
+const bootSource = await readFile(new URL("../online/scripts/boot.js", import.meta.url), "utf8");
+const loaderSource = await readFile(new URL("../online/scripts/arcade-loader.js", import.meta.url), "utf8");
+const themeSource = await readFile(new URL("../shared/scripts/theme-init.js", import.meta.url), "utf8");
+const runtimeSource = await readFile(new URL("../online/scripts/online-runtime.js", import.meta.url), "utf8");
 
 function runBoot({ mobile = false, reduced = false, seen = false, steps, runtime } = {}) {
   const listeners = new Map();
@@ -105,7 +105,7 @@ test("arcade loads once on first open, retries failure, and preserves the versio
   const context = {
     URL,
     document: {
-      currentScript: { src: "https://example.test/arcade-loader.js?v=arcade-10" },
+      currentScript: { src: "https://example.test/online/scripts/arcade-loader.js?v=arcade-10" },
       querySelector: (selector) => selector === "#arcade-window" ? arcade : {},
       head: { append: (script) => scripts.push(script) },
       createElement() {
@@ -125,7 +125,7 @@ test("arcade loads once on first open, retries failure, and preserves the versio
   observe();
   observe();
   assert.equal(scripts.length, 1);
-  assert.equal(scripts[0].src, "https://example.test/arcade.js?v=arcade-10");
+  assert.equal(scripts[0].src, "https://example.test/online/scripts/arcade.js?v=arcade-10");
   scripts[0].listeners.error();
   await Promise.resolve();
   observe();
@@ -144,7 +144,7 @@ test("online runtime starts after first paint and preserves dependency/version o
   const context = {
     document: {
       documentElement: root,
-      querySelectorAll: () => [{ src: "https://example.test/messages.js?v=123" }, { src: "https://example.test/script.js?v=123" }],
+      querySelectorAll: () => [{ src: "https://example.test/shared/scripts/messages.js?v=123" }, { src: "https://example.test/online/scripts/script.js?v=123" }],
       createElement: () => ({
         listeners: {},
         addEventListener(type, callback) { this.listeners[type] = callback; },
@@ -164,8 +164,8 @@ test("online runtime starts after first paint and preserves dependency/version o
   assert.equal(appended.length, 0);
   frames.shift()();
   assert.deepEqual(appended.map(({ src, async }) => [src, async]), [
-    ["https://example.test/messages.js?v=123", false],
-    ["https://example.test/script.js?v=123", false],
+    ["https://example.test/shared/scripts/messages.js?v=123", false],
+    ["https://example.test/online/scripts/script.js?v=123", false],
   ]);
   appended[0].listeners.load();
   assert.equal(root.dataset.runtime, "pending");
@@ -189,7 +189,7 @@ test("online runtime queues early control clicks until ordered initialization co
   const context = {
     document: {
       documentElement: { dataset: {} },
-      querySelectorAll: () => [{ src: "https://example.test/script.js" }],
+      querySelectorAll: () => [{ src: "https://example.test/online/scripts/script.js" }],
       addEventListener: (type, callback) => handlers.set(type, callback),
       removeEventListener: (type) => handlers.delete(type),
       createElement: () => ({
@@ -225,7 +225,7 @@ for (const failure of ["fetch", "execution", "timeout"]) {
     let errorHandler;
     let timeout;
     const root = { dataset: {} };
-    const source = "https://example.test/script.js?v=build";
+    const source = "https://example.test/online/scripts/script.js?v=build";
     const context = {
       document: {
         documentElement: root,
@@ -275,7 +275,7 @@ for (const outcome of ["load", "error", "timeout"]) {
       document: {
         documentElement: root,
         querySelector: (selector) => selector === "[data-online-styles]" ? stylesheet : null,
-        querySelectorAll: () => [{ src: "https://example.test/script.js" }],
+        querySelectorAll: () => [{ src: "https://example.test/online/scripts/script.js" }],
         createElement: () => ({
           listeners: {},
           addEventListener(name, callback) { this.listeners[name] = callback; },
@@ -319,7 +319,7 @@ test("paint-aware browsers do not fetch enhancement scripts before content is pa
   const context = {
     document: {
       documentElement: { dataset: {} },
-      querySelectorAll: () => [{ src: "https://example.test/script.js?v=build" }],
+      querySelectorAll: () => [{ src: "https://example.test/online/scripts/script.js?v=build" }],
       createElement: () => ({ addEventListener() {} }),
       head: { append: (script) => appended.push(script) },
     },
@@ -341,8 +341,8 @@ test("paint-aware browsers do not fetch enhancement scripts before content is pa
 });
 
 test("compact shared stylesheet is current and removes at least 70% of desktop CSS", async () => {
-  const actual = await readFile(new URL("../theme-base.css", import.meta.url), "utf8");
-  const source = await readFile(new URL("../styles.css", import.meta.url), "utf8");
+  const actual = await readFile(new URL("../shared/styles/theme-base.css", import.meta.url), "utf8");
+  const source = await readFile(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
   assert.equal(actual, await buildThemeCss(), "Run node scripts\\build-theme-css.mjs after shared CSS changes.");
   assert.ok(Buffer.byteLength(actual) < Buffer.byteLength(source) * 0.3);
   for (const match of source.matchAll(/:root\[data-interface-theme="([^"]+)"\]/g)) {
@@ -355,11 +355,12 @@ test("compact shared stylesheet is current and removes at least 70% of desktop C
 test("staged theme stylesheet and runtime URLs contain exactly one build version", async () => {
   const directory = new URL("../.performance-asset-test/", import.meta.url);
   await mkdir(directory);
+  await mkdir(new URL("shared/scripts/", directory), { recursive: true });
   try {
-    await writeFile(new URL("theme-init.js", directory), themeSource);
+    await writeFile(new URL("shared/scripts/theme-init.js", directory), themeSource);
     const { fileURLToPath } = await import("node:url");
     const version = await versionAssets(fileURLToPath(directory).replace(/[\\/]$/, ""));
-    const staged = await readFile(new URL("theme-init.js", directory), "utf8");
+    const staged = await readFile(new URL("shared/scripts/theme-init.js", directory), "utf8");
     const nodes = new Map();
     const context = {
       layoutAssetVersion: "layouts-6",
@@ -374,8 +375,8 @@ test("staged theme stylesheet and runtime URLs contain exactly one build version
     const start = staged.indexOf("function syncThemeAssets(");
     const end = staged.indexOf('document.documentElement.dataset.page = getPageId();', start);
     vm.runInNewContext(`${staged.slice(start, end)}\nsyncThemeAssets({ id: "terminal", experimental: true });`, context);
-    assert.equal(nodes.get("bits-theme-stylesheet").href, `/layouts/terminal.css?v=${version}`);
-    assert.equal(nodes.get("bits-layout-runtime").src, `/layouts/runtime.js?v=${version}`);
+    assert.equal(nodes.get("bits-theme-stylesheet").href, `/shared/styles/layouts/terminal.css?v=${version}`);
+    assert.equal(nodes.get("bits-layout-runtime").src, `/shared/scripts/layouts/runtime.js?v=${version}`);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

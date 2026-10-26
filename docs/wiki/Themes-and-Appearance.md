@@ -54,9 +54,9 @@
   back to the last standard theme, and are skipped by RANDOM THEME. Windows 8,
   10, and 11 also restyle the BITS OS desktop; the others temporarily switch the
   desktop to the last standard theme (with a notification) and come back when
-  the desktop is closed. Each layout lives in `layouts/<id>.css` and
-  `layouts/<id>.js` and is only downloaded while that theme is active;
-  `layouts/runtime.js` mounts and unmounts layout chrome
+  the desktop is closed. Each layout lives in `shared/styles/layouts/<id>.css`
+  and `shared/scripts/layouts/<id>.js` and is only downloaded while that theme
+  is active; `shared/scripts/layouts/runtime.js` mounts and unmounts layout chrome
 
 - A shared COLOR MODE preference (Theme default, Dark, or Light) on the online
   app menu, Settings, `/boot`, and `/professional`. Most themes have a dark and
@@ -97,7 +97,7 @@
   spoofs (Chrome, Firefox, Edge, Edge Legacy, Internet Explorer 6, Safari,
   Opera GX, Netscape Navigator). The Browser layout also moves the BITS OS
   FILE / EDIT / VIEW menu bar into its favorites/bookmarks bar.
-  Each theme remembers its own variant; styles live in `layouts/<id>.css`
+  Each theme remembers its own variant; styles live in `shared/styles/layouts/<id>.css`
 
 - A RANDOM THEME button on the same pages. On `/boot`, the `theme random`,
   `theme dark`, `theme light`, `theme auto`, and `theme variant <name>`

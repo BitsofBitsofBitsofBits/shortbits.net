@@ -19,7 +19,7 @@ const contactCopy = professionalContact
       success: "Packet delivered. Thanks for saying hello.",
       verify: "Human verification required before transmitting.",
     };
-// Read lazily: site-config.js may load after this deferred script.
+// Read lazily: shared/scripts/site-config.js may load after this deferred script.
 function getTurnstileSiteKey() {
   return window.SITE_CONFIG?.turnstileSiteKey ?? "";
 }

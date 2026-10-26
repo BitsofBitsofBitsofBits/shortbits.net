@@ -50,11 +50,11 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
       } };
     },
   });
-  vm.runInContext(read("seasonal-calendar.js"), context);
-  vm.runInContext(read("messages.js"), context);
-  vm.runInContext(read("message-text.js"), context);
-  vm.runInContext(read("message-catalog.js"), context);
-  vm.runInContext(read("seasonal-messages.js"), context);
+  vm.runInContext(read("shared/scripts/seasonal-calendar.js"), context);
+  vm.runInContext(read("shared/scripts/messages.js"), context);
+  vm.runInContext(read("shared/scripts/message-text.js"), context);
+  vm.runInContext(read("shared/scripts/message-catalog.js"), context);
+  vm.runInContext(read("shared/scripts/seasonal-messages.js"), context);
   return { window, context, calls, warnings, storage, timers, setDate: (value) => { currentDate = value; } };
 }
 test("catalog startup never waits for the network, validates all seeded messages, and pages beyond 500 entries", async () => {

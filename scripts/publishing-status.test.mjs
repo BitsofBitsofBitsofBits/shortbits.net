@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import publishing from "../publishing-status.js";
+import publishing from "../shared/scripts/publishing-status.js";
 
 const fixtures = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"));
 const now = new Date("2026-10-22T12:00:00Z");

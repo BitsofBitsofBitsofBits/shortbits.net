@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { publicConfig } from "./build-content.mjs";
-import publishing from "../publishing-status.js";
+import publishing from "../shared/scripts/publishing-status.js";
 
 export async function monitorSite({
   origin = "https://www.shortbits.net", config, expectedCommit = "",

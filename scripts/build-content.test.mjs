@@ -13,7 +13,7 @@ const fixturePath = join(root, "scripts", "fixtures", "blog-posts.json");
 const fixtures = JSON.parse(await readFile(fixturePath, "utf8"));
 const now = new Date("2026-10-22T12:00:00Z");
 const posts = normalizePosts(fixtures, now);
-const renderer = markdownRenderer(await readFile(join(root, "markdown.js"), "utf8"));
+const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"));
 
 test("publication rules exclude drafts and future posts and reject malformed data", () => {
   assert.deepEqual(posts.map((post) => post.slug), ["safe-markdown", "first-lab-notes"]);
@@ -53,7 +53,7 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.equal(schema.dateModified, posts[0].updated_at);
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /<div class="blog-markdown">/);
-  assert.doesNotMatch(html, /post.js|supabase-config.js| hidden/);
+  assert.doesNotMatch(html, /post\.js|shared\/scripts\/supabase-config\.js| hidden/);
 });
 
 test("RSS, static archive and sitemap use only published static URLs", () => {
@@ -96,7 +96,7 @@ test("build writes persistent outputs, removes stale articles, and never overwri
   const output = join(root, `.content-test-${process.pid}`);
   await mkdir(join(output, "blog", "articles", "removed-post"), { recursive: true });
   try {
-    for (const file of ["markdown.js", "supabase-config.js", "sitemap.xml", join("blog", "index.html")]) {
+    for (const file of ["shared/scripts/markdown.js", "shared/scripts/supabase-config.js", "sitemap.xml", join("blog", "index.html")]) {
       await cp(join(root, file), join(output, file));
     }
     await writeFile(join(output, "blog", "articles", "removed-post", "index.html"), "old article");

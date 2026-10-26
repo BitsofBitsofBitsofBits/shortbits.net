@@ -4,9 +4,9 @@ import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 import { parseHTML } from "linkedom";
 
-const source = await readFile(new URL("../script.js", import.meta.url), "utf8");
-const charactersSource = await readFile(new URL("../message-text.js", import.meta.url), "utf8");
-const markdownSource = await readFile(new URL("../markdown.js", import.meta.url), "utf8");
+const source = await readFile(new URL("../online/scripts/script.js", import.meta.url), "utf8");
+const charactersSource = await readFile(new URL("../shared/scripts/message-text.js", import.meta.url), "utf8");
+const markdownSource = await readFile(new URL("../shared/scripts/markdown.js", import.meta.url), "utf8");
 const clockSource = source.slice(source.indexOf("let fakeDesktopClockFormatter;"), source.indexOf('fakeDesktopRestore.addEventListener'));
 const buildSource = source.slice(source.indexOf("async function loadBuildMetadata()"), source.indexOf("\napplyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);"));
 

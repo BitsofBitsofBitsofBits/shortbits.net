@@ -92,7 +92,7 @@ try {
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#build-link")?.dataset.commit);
     assert.match(await page.locator("#build-link").getAttribute("title"), /^Deployed .* UTC$/);
-    assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").some((entry) => /\/arcade\.js/.test(entry.name))), false, "Arcade must not load before it is opened");
+    assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").some((entry) => /\/online\/scripts\/arcade\.js/.test(entry.name))), false, "Arcade must not load before it is opened");
     await page.keyboard.press("Control+k");
     await page.addScriptTag({ path: axePath });
     const launcherViolations = await page.evaluate(async () => (
@@ -115,7 +115,7 @@ try {
     await page.waitForFunction(() => document.activeElement.getClientRects().length > 0, undefined, { timeout: 5000 });
     if (width > 900) {
       await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("arcade"));
-      await page.waitForFunction(() => performance.getEntriesByType("resource").some((entry) => /\/arcade\.js/.test(entry.name)));
+      await page.waitForFunction(() => performance.getEntriesByType("resource").some((entry) => /\/online\/scripts\/arcade\.js/.test(entry.name)));
     }
     await page.goto(`${server.origin}/online/?window=about`, { waitUntil: "networkidle" });
     await page.locator("#about-window").waitFor({ state: "visible" });
@@ -172,7 +172,7 @@ try {
     assert.ok((await staticResume.pdf({ format: "Letter" })).length > 1000);
     await noScript.close();
     console.log(`PASS ${width}px immediate resume snapshot, explicit update, offline/partial data, no-JS and print`);
-    await page.route(/\/admin\.js(?:\?|$)/, (route) => route.fulfill({
+    await page.route(/\/admin\/scripts\/admin\.js(?:\?|$)/, (route) => route.fulfill({
       contentType: "text/javascript", body: "/* Admin writes disabled in the offline publishing-status test. */",
     }));
     await page.goto(`${server.origin}/admin/#/blog`, { waitUntil: "networkidle" });
@@ -212,7 +212,7 @@ try {
     assert.equal(await page.locator("#blog-deployment-details li").count(), 0);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), "Publishing status must not overflow");
     console.log(`PASS ${width}px read-only publishing status: synchronized, pending, scheduled, error/retry, and sign-out reset`);
-    const runtimeScript = /\/script\.js(?:\?|$)/;
+    const runtimeScript = /\/online\/scripts\/script\.js(?:\?|$)/;
     await page.route(runtimeScript, (route) => route.abort("failed"));
     await page.goto(`${server.origin}/online/`, { waitUntil: "domcontentloaded" });
     await page.locator('html[data-runtime="error"]').waitFor();

@@ -4,8 +4,8 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { parseHTML } from "linkedom";
 
-const markdown = readFileSync(new URL("../markdown.js", import.meta.url), "utf8");
-const source = readFileSync(new URL("../message-text.js", import.meta.url), "utf8");
+const markdown = readFileSync(new URL("../shared/scripts/markdown.js", import.meta.url), "utf8");
+const source = readFileSync(new URL("../shared/scripts/message-text.js", import.meta.url), "utf8");
 function setup() {
   const { document } = parseHTML("<html><body></body></html>");
   const window = { location: { origin: "https://example.test" } };

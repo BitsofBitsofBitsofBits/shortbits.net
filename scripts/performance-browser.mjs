@@ -9,8 +9,8 @@ import path from "node:path";
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
-const fullCss = await readFile(path.join(root, "styles.css"), "utf8");
-const compactCss = await readFile(path.join(root, "theme-base.css"), "utf8");
+const fullCss = await readFile(path.join(root, "shared/styles/styles.css"), "utf8");
+const compactCss = await readFile(path.join(root, "shared/styles/theme-base.css"), "utf8");
 const themes = [...new Set([...fullCss.matchAll(/data-interface-theme="([^"]+)"/g)].map((match) => match[1]))];
 const server = createServer(async (request, response) => {
   try {
@@ -41,12 +41,12 @@ async function preparePage(compact, width = 1280, allowProfile = true) {
     if (url.origin !== origin) {
       return route.abort();
     }
-    if (["/styles.css", "/theme-base.css"].includes(url.pathname)) {
+    if (["/shared/styles/styles.css", "/shared/styles/theme-base.css"].includes(url.pathname)) {
       return route.fulfill({ contentType: "text/css", body: compact ? compactCss : fullCss });
     }
     if (url.pathname.endsWith(".js") && ![
-      "/seasonal-calendar.js", "/theme-init.js",
-      ...(allowProfile ? ["/professional/profile.js"] : []),
+      "/shared/scripts/seasonal-calendar.js", "/shared/scripts/theme-init.js",
+      ...(allowProfile ? ["/professional/scripts/profile.js"] : []),
     ].includes(url.pathname)) {
       return route.fulfill({ contentType: "text/javascript", body: "" });
     }
@@ -132,19 +132,19 @@ try {
         if (!html.includes('type="application/x-bits-runtime"')) {
           html = html.replace(/<script src="([^"]+)" defer><\/script>/g,
             '<script type="application/x-bits-runtime" src="$1"></script>');
-          html = html.replace("</head>", '<script src="/online-runtime.js" defer></script></head>');
+          html = html.replace("</head>", '<script src="/online/scripts/online-runtime.js" defer></script></head>');
         }
         return route.fulfill({
           contentType: "text/html",
-          body: html.replace(/src="\/arcade\.js([?"][^>]*)/g, 'src="/arcade-loader.js$1'),
+          body: html.replace(/src="\/online\/scripts\/arcade\.js([?"][^>]*)/g, 'src="/online/scripts/arcade-loader.js$1'),
         });
       }
-      if (url.pathname === "/arcade.js") {
+      if (url.pathname === "/online/scripts/arcade.js") {
         arcadeRequests += 1;
       }
       if (url.pathname.endsWith(".js") && ![
-        "/seasonal-calendar.js", "/theme-init.js", "/boot.js",
-        "/windows.js", "/arcade-loader.js", "/arcade.js", "/online-runtime.js",
+        "/shared/scripts/seasonal-calendar.js", "/shared/scripts/theme-init.js", "/online/scripts/boot.js",
+        "/online/scripts/windows.js", "/online/scripts/arcade-loader.js", "/online/scripts/arcade.js", "/online/scripts/online-runtime.js",
       ].includes(url.pathname)) {
         return route.fulfill({ contentType: "text/javascript", body: "" });
       }

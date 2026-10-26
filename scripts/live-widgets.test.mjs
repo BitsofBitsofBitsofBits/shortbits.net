@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const discordSource = readFileSync(new URL("../discord.js", import.meta.url), "utf8");
-const spotifySource = readFileSync(new URL("../spotify.js", import.meta.url), "utf8");
+const discordSource = readFileSync(new URL("../online/scripts/discord.js", import.meta.url), "utf8");
+const spotifySource = readFileSync(new URL("../online/scripts/spotify.js", import.meta.url), "utf8");
 
 async function setup(source, initialPayload) {
   const elements = new Map();
