@@ -87,7 +87,7 @@
       if (ctx.page === 'online') {
         const tabs = node('nav', 'google-tabs');
         tabs.setAttribute('aria-label', 'Search categories');
-        [['All', '#interface-shell'], ['Images', '#avatar-wrap'], ['News', '#content-files-heading'], ['Videos', '#spotify-widget'], ['Professional', '/professional/']].forEach(([name, href], index) => {
+        [['All', '#interface-shell'], ['Images', '#avatar-wrap'], ['News', '#content-files-heading'], ['Videos', '#media-player'], ['Professional', '/professional/']].forEach(([name, href], index) => {
           const tab = link(name, href);
           if (!index) tab.setAttribute('aria-current', 'page');
           tabs.append(tab);
@@ -134,4 +134,3 @@
     }
   });
 })();
-

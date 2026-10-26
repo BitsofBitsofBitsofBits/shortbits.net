@@ -58,7 +58,12 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   The high-priority profile image is separate from the unchanged favicon PNG to
   avoid transferring the full favicon asset for the page's largest-contentful paint.
 
-- Spotify now-playing integration through a Supabase Edge Function
+- Spotify now-playing and opt-in YouTube watching presence share the player
+  area. Arrow controls switch sources; playing media takes priority over paused
+  media, then the earlier continuous listening/watching session appears first.
+  YouTube reporting uses a locally installed Chromium extension, starts off by
+  default, and expires within 90 seconds without updates. See the
+  [setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence).
 
 - Cached Discord presence, custom status, and activity through Lanyard
 

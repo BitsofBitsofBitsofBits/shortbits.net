@@ -65,13 +65,14 @@ Deno.serve(async (request: Request) => {
       try { report = JSON.parse(new TextDecoder().decode(raw)); }
       catch { return respond(request, { error: "Report must be JSON." }, 400); }
       if (!report || typeof report !== "object" || !("item" in report)
+        || ("endSession" in report && typeof report.endSession !== "boolean")
         || (report.item !== null && !validItem(report.item))) {
         return respond(request, { error: "Invalid YouTube playback report." }, 400);
       }
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
       const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
       rpc = "report_youtube_presence";
-      body = { p_token_hash: hash, p_item: report.item };
+      body = { p_token_hash: hash, p_item: report.item, p_end_session: report.endSession === true };
     }
     const headers: Record<string, string> = { apikey: key, "Content-Type": "application/json" };
     if (!key.startsWith("sb_")) headers.Authorization = `Bearer ${key}`;

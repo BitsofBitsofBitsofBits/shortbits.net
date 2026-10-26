@@ -73,9 +73,18 @@ try {
       assert.equal(await page.locator("#about-window").isVisible(), true);
 
       const search = page.locator(".workspace-search input");
+      await page.keyboard.press("Control+k");
+      assert.equal(await search.evaluate((element) => element === document.activeElement), true,
+        "Workspace command shortcut does not also open the global launcher");
       await search.fill(id === "termius" ? "open hardware" : "bits://hardware");
       await search.press("Enter");
       assert.equal(await page.locator("#hardware-window").isVisible(), true, "Command/search opens real hardware");
+      if (await page.locator("body").getAttribute("data-workspace-mode") === "tabbed") {
+        assert.ok(await page.locator("#hardware-window").evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth + 1 && rect.bottom <= innerHeight + 1;
+        }), "Docked app fits the actual viewport");
+      }
       await page.locator(".workspace-launcher > summary").click();
       await page.locator(".workspace-launch-panel input").press("Escape");
       assert.equal(await page.locator(".workspace-launcher").getAttribute("open"), null);
@@ -132,6 +141,12 @@ try {
         `${id} has no horizontal page overflow`);
       assert.ok(await page.locator(".workspace-home").evaluate((element) => element.scrollWidth <= element.clientWidth + 1),
         `${id} app library has no horizontal overflow`);
+      await page.locator("#cookie-notice").evaluate((element) => { element.hidden = false; });
+      assert.ok(await page.locator("#cookie-dismiss").evaluate((element) => {
+        const reserved = Number.parseFloat(getComputedStyle(document.body).getPropertyValue("--workspace-bottom"));
+        return element.getBoundingClientRect().bottom <= innerHeight - reserved;
+      }), "Global notices remain above the workspace dock/player");
+      await page.locator("#cookie-dismiss").click();
       if (id === "legacy-bios") await page.keyboard.press("F10");
       else await page.locator(".workspace-exit").click();
       assert.equal(await page.locator(".workspace-chrome").count(), 0);
@@ -168,6 +183,28 @@ try {
     console.log(`PASS ${width}px live theme transitions, standard desktop, and URL restoration`);
     await context.close();
   }
+  const recovery = await browser.newContext({ viewport: { width: 390, height: 900 }, reducedMotion: "reduce" });
+  await recovery.addInitScript(() => {
+    sessionStorage.setItem("bits-boot-seen-v1", "true");
+    localStorage.setItem("bits-interface-theme", "browser");
+  });
+  await recovery.route("**/*", (route) => new URL(route.request().url()).origin === server.origin
+    ? route.continue() : route.abort());
+  const page = await recovery.newPage();
+  currentPage = page;
+  await page.route("**/online/styles/desktop-workspaces.css?*", (route) => route.abort());
+  await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
+  await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+  await page.locator("#desktop-workspace-entry").click();
+  await page.waitForSelector("#desktop-workspace-error");
+  assert.equal(await page.locator(".fake-desktop-icons").isVisible(), true, "Load failure keeps the standard desktop usable");
+  await page.unroute("**/online/styles/desktop-workspaces.css?*");
+  await page.locator("#desktop-workspace-error button").click();
+  await page.waitForSelector('body[data-desktop-workspace="browser"]');
+  assert.equal(await page.locator("#desktop-workspace-error").count(), 0, "Retry clears the visible load error");
+  assert.equal(await page.locator(".workspace-chrome").count(), 1);
+  await recovery.close();
+  console.log("PASS visible asset failure, usable regular desktop, and successful workspace retry");
 } catch (error) {
   if (currentPage && !currentPage.isClosed()) {
     console.error(await currentPage.evaluate(() => [...document.querySelectorAll(

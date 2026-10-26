@@ -103,7 +103,7 @@
 :root[data-interface-theme="youtube"] .content-file-grid > button > strong { padding: 4px 8px 0; color: var(--ink); font-size: 14px; font-weight: 600; letter-spacing: normal; }
 :root[data-interface-theme="youtube"] .content-file-grid > button > span { padding-inline: 8px; color: var(--muted); font-size: 12px; }
 :root[data-interface-theme="youtube"] .yt-card-channel { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; font-weight: 400; }
-:root[data-interface-theme="youtube"] #spotify-widget { position: relative; margin: 24px 0 0; padding: 42px 18px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+:root[data-interface-theme="youtube"] .spotify-widget { position: relative; margin: 24px 0 0; padding: 42px 18px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
 :root[data-interface-theme="youtube"] .yt-now-playing { position: absolute; top: 12px; left: 18px; color: var(--ink); font-size: 12px; font-weight: 600; }
 :root[data-interface-theme="youtube"] .spotify-progress { background-color: var(--yt-red); }
 :root[data-interface-theme="youtube"] .desktop-window { border: 1px solid var(--border); border-radius: 12px; color: var(--ink); background: var(--panel-strong); box-shadow: 0 16px 60px #0008; }

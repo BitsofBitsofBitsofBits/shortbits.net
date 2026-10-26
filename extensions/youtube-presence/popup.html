@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouTube sharing</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <h1>YouTube sharing</h1>
+  <p>When enabled, your current video, channel, playback time, and paused status are public on shortbits.net.</p>
+  <form id="settings">
+    <label for="token">Device token</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="sbyt_...">
+    <p id="token-hint">Create a token using the extension setup guide. Tokens stay in this browser's local storage, not Chrome Sync.</p>
+    <label class="toggle"><input id="enabled" type="checkbox"> Share my YouTube playback</label>
+    <button id="save" type="submit">Save sharing settings</button>
+  </form>
+  <p id="status" role="status" aria-live="polite">Loading settings...</p>
+  <p>Sharing is off by default. Incognito windows are excluded. Turn sharing off before watching anything private. Closing YouTube clears the card; reports expire within 90 seconds if updates stop.</p>
+</body>
+</html>

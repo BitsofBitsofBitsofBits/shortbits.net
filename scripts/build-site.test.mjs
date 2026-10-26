@@ -30,7 +30,7 @@ test("build preserves page routes and organized assets without shipping reposito
     const faviconSize = (await stat(join(directory, "shared/images/favicon.png"))).size;
     assert.ok(portraitSize < 30 * 1024 && portraitSize < faviconSize * 0.3,
       "The LCP profile picture stays below 30 KiB and 30% of the original favicon size");
-    for (const name of ["scripts", "docs", "supabase", "agents", "node_modules", "layouts", "images"]) {
+    for (const name of ["scripts", "docs", "supabase", "agents", "extensions", "node_modules", "layouts", "images"]) {
       assert.ok(!entries.some(entry => entry.name === name), `${name} must not be published at the root`);
     }
     for (const path of (await filesUnder(directory)).filter(path => path.endsWith(".js"))) {

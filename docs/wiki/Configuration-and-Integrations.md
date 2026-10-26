@@ -4,6 +4,21 @@
 
 ## Public configuration and services
 
+### YouTube watching presence
+
+An opt-in Chromium extension reports playing and paused YouTube videos to
+`youtube-presence`. The online page uses arrows to switch between YouTube
+and Spotify in the existing player area. Playing media is prioritized over
+paused media; otherwise the earlier continuous listening/watching session
+appears first. Track and video changes do not reset the session.
+
+See the [extension setup and privacy guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence)
+for unpacked installation, device-token provisioning/revocation, migrations,
+and observation-gap limitations. Sharing is off by default; reports expire
+after 90 seconds without updates. No YouTube API credentials are required.
+
+### Spotify and public configuration
+
 `shared/scripts/supabase-config.js` contains the public Supabase project URL and publishable
 key used by the browser. Spotify credentials are not stored in this repository;
 the Edge Function reads them from Supabase secrets:

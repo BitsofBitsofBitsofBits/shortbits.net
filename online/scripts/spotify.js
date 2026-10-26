@@ -31,6 +31,7 @@ let featuredTracksLoadedAt = 0;
 let featuredTracksRequestInFlight = null;
 let spotifyLastUpdatedAt = 0;
 let spotifyHasSnapshot = false;
+let spotifySessionStartedAt = null;
 let playbackClock = {
   durationMs: 0,
   isPlaying: false,
@@ -43,6 +44,14 @@ function formatPlaybackTime(milliseconds) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = String(totalSeconds % 60).padStart(2, "0");
   return `${minutes}:${seconds}`;
+}
+
+function publishSpotifyMediaState() {
+  window.dispatchEvent(new CustomEvent("media:spotify", { detail: {
+    available: hasSpotifyPlayback,
+    isPlaying: hasSpotifyPlayback && spotifyWidget.dataset.state === "playing",
+    sessionStartedAt: spotifySessionStartedAt,
+  } }));
 }
 
 function updateSpotifyTimeline() {
@@ -80,6 +89,7 @@ function markSpotifyStale() {
   };
   spotifyWidget.dataset.state = "stale";
   spotifyState.textContent = `LAST KNOWN // ${new Date(spotifyLastUpdatedAt).toLocaleString()}`;
+  publishSpotifyMediaState();
 }
 
 function recordSpotifySnapshot(playback) {
@@ -117,11 +127,14 @@ function setSpotifyIdle(message, detail = "Check back when the bits are louder."
   };
   updateSpotifyTimeline();
   spotifyLink.hidden = true;
+  spotifySessionStartedAt = null;
+  publishSpotifyMediaState();
 }
 
 function renderSpotifyPlayback(playback) {
   const { item } = playback;
   recordSpotifySnapshot(playback);
+  if (Object.hasOwn(playback, "sessionStartedAt")) spotifySessionStartedAt = playback.sessionStartedAt;
 
   if (!item) {
     setSpotifyIdle("Nothing is playing rn");
@@ -530,6 +543,7 @@ function applySpotifyPlayback(playback, item) {
   } else {
     spotifyLink.hidden = true;
   }
+  publishSpotifyMediaState();
 }
 
 function renderLanyardSpotify(spotify) {
@@ -574,6 +588,7 @@ function handleLanyardSpotify(event) {
   spotifyWidget.dataset.state = "paused";
   spotifyState.textContent = "PLAYBACK PAUSED";
   updateSpotifyTimeline();
+  publishSpotifyMediaState();
 }
 
 async function refreshSpotifyPlayback() {
@@ -622,9 +637,12 @@ async function refreshSpotifyPlayback() {
     }
 
     const hasRecentLanyard = Date.now() - lastLanyardSpotifyUpdateAt < lanyardOverrideWindowMs;
+    if (Object.hasOwn(playback, "sessionStartedAt")) spotifySessionStartedAt = playback.sessionStartedAt;
     if (!hasRecentLanyard) {
       hasLanyardSpotifyPlayback = false;
       renderSpotifyPlayback(playback);
+    } else {
+      publishSpotifyMediaState();
     }
     const retryAfterSeconds = Number(playback.retryAfterSeconds);
     if (

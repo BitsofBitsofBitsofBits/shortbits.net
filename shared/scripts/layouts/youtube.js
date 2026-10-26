@@ -116,7 +116,9 @@
         recommendations.setAttribute("aria-label", "Recommended videos — site destinations");
         recommendations.append(video("A few Bits of my internet", "#identity-name", 0, "Personal projects · A little bit of everything"), video("Inside the home lab", "/professional/#projects", 1, "Systems, servers & experiments"), video("Booting the Bits. Forever.", "/boot/", 2, "Premiere · Live from the terminal"));
         document.querySelector(".profile")?.before(recommendations);
-        document.querySelector("#spotify-widget")?.prepend(make("span", "yt-now-playing", "▶  Now playing"));
+        document.querySelectorAll("#media-player .spotify-widget").forEach(widget => {
+          widget.prepend(make("span", "yt-now-playing", "▶  Now playing"));
+        });
       }
       if (ctx.page === "professional") {
         const channel = make("section", "yt-channel");
@@ -165,4 +167,3 @@
     },
   });
 })();
-

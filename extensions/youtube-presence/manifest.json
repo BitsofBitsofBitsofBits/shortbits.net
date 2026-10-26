@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "ShortBits YouTube Presence",
+  "version": "1.0.0",
+  "description": "Opt in to sharing your current YouTube playback on shortbits.net.",
+  "minimum_chrome_version": "120",
+  "incognito": "not_allowed",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://arjwrycitgobvlodmkeo.supabase.co/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "YouTube sharing is off" },
+  "content_scripts": [{
+    "matches": ["https://www.youtube.com/*"],
+    "js": ["playback.js", "content.js"]
+  }]
+}

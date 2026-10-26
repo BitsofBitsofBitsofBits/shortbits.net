@@ -35,6 +35,16 @@ The job deploys `contact-message` and then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
 
+YouTube watching presence additionally deploys `youtube-presence` and uses
+the updated `spotify-now-playing` function for continuous session timing.
+Apply both `20261026050000_youtube_presence.sql` and
+`20261026060000_youtube_session_continuity.sql`; the latter is also required
+when the first migration has already shipped. The browser extension is
+installed unpacked from the repository, not copied into the public site build.
+Provision its revocable device token in Supabase's SQL editor using the
+[extension setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence).
+It requires no additional GitHub or YouTube secrets.
+
 Before deployment, the workflow builds an offline fixture site and runs browser
 smoke checks, axe accessibility checks, and mobile/desktop Lighthouse budgets.
 After each deploy, the `lighthouse` job also audits the chooser, `/online/`,

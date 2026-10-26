@@ -1,0 +1,10 @@
+body { width: 310px; margin: 0; padding: 18px; background: #101923; color: #e6eef5; font: 14px/1.5 system-ui, sans-serif; }
+h1 { margin: 0 0 12px; font-size: 20px; }
+p { color: #bacbd8; }
+label { display: block; margin-top: 12px; }
+input[type="password"] { box-sizing: border-box; width: 100%; margin-top: 6px; padding: 8px; border: 1px solid #8ca4b8; border-radius: 4px; background: #182635; color: #fff; }
+.toggle { display: flex; gap: 8px; align-items: center; }
+button { width: 100%; padding: 10px; margin-top: 14px; border: 1px solid #80dfff; border-radius: 4px; background: #173b4b; color: #fff; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+:focus-visible { outline: 2px solid #80dfff; outline-offset: 3px; }
+#status[data-error="true"] { color: #ffb4ad; }

@@ -1,0 +1,51 @@
+.spotify-widget[hidden],
+.media-navigation[hidden] {
+  display: none;
+}
+
+.youtube-widget {
+  --spotify-accent: var(--accent);
+}
+
+.media-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: -4px 44px 12px;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.media-navigation button {
+  min-width: 36px;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.media-navigation button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.media-status {
+  margin: 0 44px 12px;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.media-status:empty {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .media-navigation,
+  .media-status {
+    margin-right: 18px;
+    margin-left: 18px;
+  }
+}

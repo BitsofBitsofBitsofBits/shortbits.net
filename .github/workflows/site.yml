@@ -59,12 +59,17 @@ jobs:
       - name: Validate generated pages and assets
         run: node scripts/validate-site.mjs --root .site-build
 
+      - name: Install Chromium for unpacked extension checks
+        run: npx playwright install --with-deps chromium
+
       - name: Check browser behavior and accessibility
         env:
           BITS_BROWSER_CHANNEL: chrome
         run: |
           npm run test:browser
           node scripts/creators-browser.mjs --root .site-build
+          node scripts/media-player-browser.mjs --root .site-build
+          node scripts/youtube-extension-browser.mjs
           node scripts/aero-variants-browser.mjs --root .site-build
           node scripts/theme-collection-browser.mjs --root .site-build
           node scripts/theme-picker-browser.mjs --root .site-build
@@ -192,7 +197,6 @@ jobs:
           --no-verify-jwt
           --use-api
 
-      # The hardware agent authenticates with its own device token, not a Supabase JWT.
       - name: Deploy YouTube presence Edge Function
         if: steps.credentials.outputs.ready == 'true'
         run: >-

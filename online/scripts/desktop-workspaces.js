@@ -234,7 +234,7 @@
     function renderState() {
       const state = api.state();
       const active = state.find((app) => app.active);
-      if (mode === "tabbed" && !active && previousActive
+      if (!active && previousActive
         && !state.some((app) => app.slug === previousActive && !app.minimized)) {
         previousActive = "";
         const next = state.filter((app) => !app.minimized).at(-1);
@@ -245,7 +245,9 @@
       }
       const returnHomeFocus = previousActive && !active;
       previousActive = active?.slug || "";
-      home.hidden = (mode === "tabbed" && Boolean(active)) || utilities.some(({ element }) => !element.hidden);
+      body.dataset.workspaceHome = String(!active);
+      home.hidden = ((mode === "tabbed" || config.layout === "tiles") && Boolean(active))
+        || utilities.some(({ element }) => !element.hidden);
       const nextSignature = JSON.stringify(state);
       if (signature === nextSignature) return;
       signature = nextSignature;
@@ -307,7 +309,9 @@
         target.querySelector("summary").focus();
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        if (document.querySelector(".system-overlay:not([hidden]), .death-screen:not([hidden]), #bits-launcher[open]")) return;
         event.preventDefault();
+        event.stopImmediatePropagation();
         search.focus();
         search.select();
       }
@@ -362,7 +366,7 @@
     renderLauncher();
     renderState();
     syncStatus();
-    homeButton.focus();
+    if (!document.activeElement.closest("[data-window]")) homeButton.focus();
     return {
       themeId: theme.id,
       destroy() {
@@ -375,6 +379,7 @@
         delete body.dataset.desktopWorkspace;
         delete body.dataset.workspaceMode;
         delete body.dataset.workspaceLayout;
+        delete body.dataset.workspaceHome;
       },
     };
   }
