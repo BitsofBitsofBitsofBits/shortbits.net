@@ -51,7 +51,7 @@ try {
         ];
         return [...document.querySelectorAll(
           "#interface-shell,.profile,.identity,.bio,.command-line,.featured-section,.app-menu-bar,.link-card",
-        )].map((element) => {
+        )].filter((element) => !element.closest("[hidden]")).map((element) => {
           const style = getComputedStyle(element);
           return [element.id || element.className, ...properties.map((property) => style[property])];
         });
