@@ -376,6 +376,8 @@ is a personal project and largely a learning exercise for me.
   catalog; cached configuration applies immediately on later visits. An open,
   visible page checks for a calendar-day change once a minute. Outages retain the
   previous complete cached catalog/configuration or bundled fallbacks.
+  Browsers with native Temporal convert timezone dates without initializing
+  locale formatting during startup; older browsers use a cached Intl formatter.
   Pools/settings are included in content backups, with definitions restored before
   their messages. Export a new backup after deploying this migration; older
   backups do not have the two new tables.

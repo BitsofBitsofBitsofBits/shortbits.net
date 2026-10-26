@@ -6,7 +6,7 @@ import { messageCatalogDefaults } from "./message-catalog-data.mjs";
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const defaults = messageCatalogDefaults();
-function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, cache = null, storageFails = false, pools = [], timezone = "America/Chicago", switchDateAfterFetch = null } = {}) {
+function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, cache = null, storageFails = false, pools = [], timezone = "America/Chicago", switchDateAfterFetch = null, temporal = undefined } = {}) {
   const events = new EventTarget();
   const storage = new Map(cache ? Object.entries(cache) : []);
   const calls = [];
@@ -21,7 +21,7 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
     setTimeout: (callback, delay) => { timers.push({ callback, delay }); return timers.length; },
   };
   const context = vm.createContext({
-    window, URLSearchParams, AbortSignal, CustomEvent,
+    window, URLSearchParams, AbortSignal, CustomEvent, Temporal: temporal,
     Date: class extends Date {
       constructor(...args) { super(...(args.length ? args : [currentDate])); }
       static now() { return new Date(currentDate).getTime(); }
@@ -287,4 +287,26 @@ test("a fetch crossing Central midnight keeps its selection timestamp so the nex
   assert.ok(refresh, "a pre-midnight selection must not be marked as already refreshed for the new date");
   await refresh.callback();
   assert.deepEqual(Array.from(app.window.BITS_MESSAGES, (message) => message.text), ["after"]);
+});
+
+test("native Temporal avoids locale-format startup while preserving timezone validation and date selection", async () => {
+  const instants = [];
+  const temporal = { Instant: { fromEpochMilliseconds(value) {
+    instants.push(value);
+    return { toZonedDateTimeISO(zone) {
+      if (zone !== "America/Chicago") throw new RangeError("Invalid time zone");
+      return { year: 2026, month: 8, day: 10 };
+    } };
+  } } };
+  const pool = datedPool("native", { mode: "exclusive" });
+  const app = setup({ temporal, pools: [pool], rows: [...defaults, poolMessage(pool, 9001)] });
+  app.context.Intl = { DateTimeFormat: class {
+    constructor() { throw new Error("Native calendar conversion must not initialize locale formatting."); }
+  } };
+  assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+  assert.equal(app.window.BITS_MESSAGES[0].text, "native");
+  assert.ok(instants.includes(0), "the zone must be validated through Temporal");
+  assert.ok(instants.some((value) => value > 0), "date conversion must use the requested instant");
+  assert.throws(() => app.window.BITS_MESSAGE_CATALOG.validateTimezone("Invalid/Timezone"), /Invalid time zone/);
+  assert.throws(() => app.window.BITS_MESSAGE_CATALOG.validateTimezone("+05:00"), /IANA timezone/);
 });

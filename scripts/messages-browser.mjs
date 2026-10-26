@@ -69,6 +69,18 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+    const dates = await page.evaluate(() => {
+      const catalog = window.BITS_MESSAGE_CATALOG;
+      const formatter = Intl.DateTimeFormat;
+      try {
+        if (typeof Temporal !== "undefined") Intl.DateTimeFormat = function () { throw new Error("Native timezone conversion initialized locale formatting."); };
+        return ["2026-08-10T04:59:59Z", "2026-08-10T05:00:00Z", "2026-02-10T05:59:59Z", "2026-02-10T06:00:00Z"].map((instant) => {
+          const date = catalog.calendarDate(new Date(instant), "America/Chicago");
+          return `${date.getMonth() + 1}-${date.getDate()}`;
+        });
+      } finally { Intl.DateTimeFormat = formatter; }
+    });
+    assert.deepEqual(dates, ["8-9", "8-10", "2-9", "2-10"]);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].text), "DATABASE STATUS");
     assert.equal(await page.evaluate(() => activities[0].text), "DATABASE ACTIVITY");

@@ -22,6 +22,8 @@
   let timezone = null;
   let loadedDay = "";
   const formatters = new Map();
+  const validatedZones = new Set();
+  const temporal = typeof Temporal === "undefined" ? null : Temporal;
   const activeProfiles = (options, date = new Date()) => ["standard", ...(window.BITS_GET_SEASONAL_PROFILE?.(date, options)?.ids ?? [])];
   const cacheKey = () => "bits-message-catalog-v2";
   const weighted = (category) => category === "messages" || category === "activities";
@@ -49,16 +51,22 @@
 
   const validate = (row) => validateEntry(row, profiles);
   function validateTimezone(value) {
-    if (typeof value !== "string" || !value.trim() || value.length > 100) throw new Error("Enter a valid IANA timezone, such as America/Chicago.");
-    if (!formatters.has(value)) formatters.set(value, new Intl.DateTimeFormat("en-US", {
-      timeZone: value, year: "numeric", month: "2-digit", day: "2-digit",
-    }));
+    if (typeof value !== "string" || !value.trim() || value.length > 100 || /^[+-]/.test(value)) throw new Error("Enter a valid IANA timezone, such as America/Chicago.");
+    if (!validatedZones.has(value)) {
+      if (temporal) temporal.Instant.fromEpochMilliseconds(0).toZonedDateTimeISO(value);
+      else formatters.set(value, new Intl.DateTimeFormat("en-US", {
+        timeZone: value, year: "numeric", month: "2-digit", day: "2-digit",
+      }));
+      validatedZones.add(value);
+    }
     return value;
   }
   function calendarDate(date, zone = timezone) {
     if (!zone) return date;
-    const parts = Object.fromEntries(formatters.get(validateTimezone(zone)).formatToParts(date).map(({ type, value }) => [type, value]));
-    return new Date(`${parts.year}-${parts.month}-${parts.day}T12:00:00`);
+    validateTimezone(zone);
+    const parts = temporal ? temporal.Instant.fromEpochMilliseconds(date.getTime()).toZonedDateTimeISO(zone)
+      : Object.fromEntries(formatters.get(zone).formatToParts(date).map(({ type, value }) => [type, value]));
+    return new Date(`${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}T12:00:00`);
   }
   const dayKey = (date) => `${date.getFullYear().toString().padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   function validatePool(pool) {
