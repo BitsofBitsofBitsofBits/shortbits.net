@@ -122,7 +122,7 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   sessions, and popular windows without cookies, IP addresses,
   fingerprints, user agents, or individual event records
 
-- Terminal-themed 404 recovery with bounded, theme-colored falling binary bits
+- Terminal-themed 404 recovery with a bounded, theme-colored mix of falling `404`, `4`, and `0` particles
   behind the recovery panel. Decoration pauses and clears when the page is hidden,
   and stays off with reduced motion, effects off, high contrast, or forced colors.
   ShortBit routes do not run the decoration. Production builds include generated metadata.

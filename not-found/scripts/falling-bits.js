@@ -4,6 +4,7 @@
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = window.matchMedia("(forced-colors: active)");
   const compact = window.matchMedia("(max-width: 900px)");
+  const errorBits = ["404", "4", "0"];
   let timer;
   let suspended = false;
 
@@ -18,7 +19,7 @@
     if (layer.childElementCount >= (compact.matches ? 6 : 12)) return;
     const bit = document.createElement("span");
     bit.className = "falling-bit";
-    bit.textContent = Math.random() < 0.5 ? "0" : "1";
+    bit.textContent = errorBits[Math.floor(Math.random() * errorBits.length)];
     bit.style.setProperty("--bit-x", `${Math.random() * 100}%`);
     bit.style.setProperty("--bit-size", `${0.65 + Math.random() * 0.7}rem`);
     bit.style.setProperty("--bit-speed", `${5 + Math.random() * 5}s`);

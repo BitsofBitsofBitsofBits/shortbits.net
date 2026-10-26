@@ -72,6 +72,8 @@ try {
       if (path === "/missing-bits-check") {
         assert.equal(await page.locator("#not-found-bits").getAttribute("aria-hidden"), "true");
         assert.ok(await page.locator("#not-found-bits .falling-bit").count() > 0);
+        assert.ok((await page.locator("#not-found-bits .falling-bit").allTextContents())
+          .every(text => /^(404|4|0)$/.test(text)), "404 decoration uses only error-code particles");
         assert.equal(await page.locator("#not-found-bits .falling-bit").first().evaluate(bit => getComputedStyle(bit).animationName), "fall-bit");
         assert.ok(await page.locator(".error-window").evaluate(panel =>
           Number(getComputedStyle(panel).zIndex) > Number(getComputedStyle(document.querySelector("#not-found-bits")).zIndex)));

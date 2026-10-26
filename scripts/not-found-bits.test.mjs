@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const source = readFileSync(new URL("../not-found/scripts/falling-bits.js", import.meta.url), "utf8");
-function setup({ dataset = {}, reduced = false, forced = false, compact = false, hidden = false, path = "/missing" } = {}) {
+function setup({ dataset = {}, reduced = false, forced = false, compact = false, hidden = false, path = "/missing", random = Math.random } = {}) {
   const children = [];
   const layer = {
     hidden: true, children,
@@ -32,6 +32,7 @@ function setup({ dataset = {}, reduced = false, forced = false, compact = false,
   };
   vm.runInNewContext(source, {
     document,
+    Math: Object.assign(Object.create(Math), { random }),
     window: {
       location: { pathname: path },
       matchMedia(query) {
@@ -66,7 +67,7 @@ for (const compact of [false, true]) {
     const app = setup({ compact });
     assert.equal(app.layer.hidden, false);
     assert.equal(app.layer.childElementCount, compact ? 3 : 4);
-    assert.ok(app.layer.children.every(bit => bit.tag === "span" && /^[01]$/.test(bit.textContent)
+    assert.ok(app.layer.children.every(bit => bit.tag === "span" && /^(404|4|0)$/.test(bit.textContent)
       && bit.className === "falling-bit" && Number.parseFloat(bit.style.animationDelay) < 0));
     for (let index = 0; index < 40; index++) app.tick();
     assert.equal(app.layer.childElementCount, compact ? 6 : 12);
@@ -74,6 +75,15 @@ for (const compact of [false, true]) {
     app.layer.children[0].animationend();
     app.tick();
     assert.equal(app.layer.childElementCount, compact ? 6 : 12);
+  });
+}
+
+for (const [random, expected] of [[0, "404"], [0.5, "4"], [0.999, "0"]]) {
+  test(`404 particles can show ${expected}, both initially and on subsequent falls`, () => {
+    const app = setup({ random: () => random });
+    assert.ok(app.layer.children.every(bit => bit.textContent === expected));
+    app.tick();
+    assert.equal(app.layer.children.at(-1).textContent, expected);
   });
 }
 
