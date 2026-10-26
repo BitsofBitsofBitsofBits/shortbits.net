@@ -20,6 +20,10 @@ online/
   index.html
   scripts/                 Online desktop, windows, games, and widgets
   styles/                  Online-only styles
+nowplaying/
+  index.html               Dedicated live presentation of both playback sources
+  scripts/                 Fullscreen, controls, session clocks, theme selection
+  styles/
 admin/
   index.html
   scripts/                 Admin modules and legacy redirect

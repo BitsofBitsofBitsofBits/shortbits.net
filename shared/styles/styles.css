@@ -4124,6 +4124,12 @@ h1 .dim {
   display: none;
 }
 
+.featured-section[hidden],
+.project-tags[hidden],
+body:has(#featured-project-section[hidden]) a[href="#featured-heading"] {
+  display: none !important;
+}
+
 .featured-section,
 .content-files-section,
 .link-section {

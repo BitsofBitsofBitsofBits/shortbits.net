@@ -95,7 +95,7 @@
         header.after(tabs);
         document.querySelector('#interface-shell').prepend(node('p', 'google-results-count', 'About one very specific person · A web full of little Bits'));
         const results = [
-          ['.featured-section', 'shortbits.net › online › projects', 'BitsofBits — projects, experiments & little ideas', '#featured-heading'],
+          ['.featured-section', 'shortbits.net › online › projects', 'Featured project — manually curated', '#featured-heading'],
           ['.link-section', 'shortbits.net › online › connections', 'Find Caleb around the internet', '#link-heading'],
           ['.content-files-section', 'shortbits.net › online › public-files', 'More about Caleb K Masters', '#content-files-heading'],
           ['.contact-section', 'shortbits.net › online › contact', 'Contact Caleb — send a message', '#contact-heading']

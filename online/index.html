@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
-      content="The terminal-shaped internet presence of Caleb K Masters: links, projects, musical bits, achievements, and a suspiciously opinionated avatar."
+      content="BitsofBitsofBits is Caleb K Masters' interactive personal website. Explore IT projects, home lab hardware, music, games, themes, and technical blog posts."
     >
     <meta name="author" content="Caleb K Masters">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#070b0f">
     <meta property="og:type" content="profile">
     <meta property="og:site_name" content="BitsofBitsofBits">
-    <meta property="og:title" content="BitsofBitsofBits // Internet Presence">
+    <meta property="og:title" content="BitsofBitsofBits | Caleb K Masters' Personal Website">
     <meta property="og:description" content="Links, projects, musical bits, and questionable CSS from Caleb K Masters.">
     <meta property="og:url" content="https://www.shortbits.net/online/">
     <meta property="og:image" content="https://www.shortbits.net/shared/images/social-preview.png">
@@ -22,11 +22,32 @@
     <meta property="profile:first_name" content="Caleb">
     <meta property="profile:last_name" content="Masters">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BitsofBitsofBits // Internet Presence">
+    <meta name="twitter:title" content="BitsofBitsofBits | Caleb K Masters' Personal Website">
     <meta name="twitter:description" content="Links, projects, musical bits, and questionable CSS.">
     <meta name="twitter:image" content="https://www.shortbits.net/shared/images/social-preview.png">
     <link rel="canonical" href="https://www.shortbits.net/online/">
-    <title>BitsofBitsofBits // BITSOFWEBSITE</title>
+    <title>BitsofBitsofBits | Caleb K Masters' Personal Website</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "@id": "https://www.shortbits.net/online/#webpage",
+        "url": "https://www.shortbits.net/online/",
+        "name": "BitsofBitsofBits | Caleb K Masters' Personal Website",
+        "mainEntity": {
+          "@type": "Person",
+          "@id": "https://www.shortbits.net/#person",
+          "name": "Caleb K Masters",
+          "alternateName": "BitsofBitsofBits",
+          "url": "https://www.shortbits.net/professional/",
+          "image": "https://www.shortbits.net/shared/images/profile.webp",
+          "sameAs": [
+            "https://github.com/BitsofBitsofBitsofBits",
+            "https://www.linkedin.com/in/calebkmasters/"
+          ]
+        }
+      }
+    </script>
     <link rel="icon" type="image/png" href="/shared/images/favicon.png">
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
     <script src="/shared/scripts/theme-init.js?v=theme-29"></script>
@@ -574,30 +595,20 @@
 
       </section>
 
-      <section class="featured-section" aria-labelledby="featured-heading">
+      <section id="featured-project-section" class="featured-section" aria-labelledby="featured-heading" hidden>
         <div class="section-label">
           <h2 id="featured-heading">FEATURED_PROCESS</h2>
           <span>MANUALLY CURATED</span>
         </div>
         <article class="featured-project">
           <div class="featured-project-copy">
-            <p class="featured-project-status">PID 0101 // RUNNING</p>
-            <h3>BITSOFBITS WEBSITE</h3>
-            <p>
-              Where I keep my personal projects and experiments, sharing them with the world.
-            </p>
-            <ul class="project-tags" aria-label="Technologies">
-              <li>HTML</li>
-              <li>CSS</li>
-              <li>JAVASCRIPT</li>
-              <li>SUPABASE</li>
-            </ul>
+            <p id="featured-project-status" class="featured-project-status"></p>
+            <h3 id="featured-project-title"></h3>
+            <p id="featured-project-summary"></p>
+            <ul id="featured-project-tags" class="project-tags" aria-label="Technologies"></ul>
           </div>
           <div class="featured-project-actions">
-            <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net" target="_blank" rel="noreferrer" data-source-link>SOURCE ↗</a>
-            <button class="mini-window-launch" type="button" data-window-target="source-window">
-              OPEN WINDOW
-            </button>
+            <a id="featured-project-link" target="_blank" rel="noreferrer"></a>
           </div>
         </article>
       </section>
@@ -633,6 +644,7 @@
         </div>
       </aside>
       <aside id="youtube-widget" class="spotify-widget youtube-widget" aria-label="Currently watching on YouTube" data-state="idle" hidden>
+        <img id="youtube-artwork" class="spotify-artwork youtube-artwork" alt="" referrerpolicy="no-referrer" decoding="async" hidden>
         <div class="spotify-placeholder" aria-hidden="true">YT</div>
         <div class="spotify-copy">
           <p id="youtube-state" class="activity-label">YOUTUBE</p>
@@ -654,6 +666,7 @@
         <button id="media-next" type="button" aria-label="Next media source">&#8594;</button>
       </nav>
       <p id="media-status" class="media-status" role="status" aria-live="polite"></p>
+      <a class="media-presentation-link" href="/nowplaying/">OPEN NOW PLAYING // PRESENTATION &#8599;</a>
       </div>
 
       <section class="link-section" aria-labelledby="link-heading">
@@ -762,7 +775,7 @@
         <p>
           © <span id="year"></span> BITS_OF_BITS_OF_BITS
         </p>
-        <p><a class="site-switch-link" href="/?choose">&lt; SWITCH_SITE</a></p>
+        <p><a class="site-switch-link" href="/projects/">PROJECTS</a> &middot; <a class="site-switch-link" href="/blog/">BLOG</a> &middot; <a class="site-switch-link" href="/?choose">&lt; SWITCH_SITE</a></p>
       </footer>
     </main>
 

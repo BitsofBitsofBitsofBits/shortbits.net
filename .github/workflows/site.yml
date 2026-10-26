@@ -69,6 +69,7 @@ jobs:
           npm run test:browser
           node scripts/creators-browser.mjs --root .site-build
           node scripts/media-player-browser.mjs --root .site-build
+          node scripts/nowplaying-browser.mjs --root .site-build
           node scripts/youtube-extension-browser.mjs
           node scripts/aero-variants-browser.mjs --root .site-build
           node scripts/theme-collection-browser.mjs --root .site-build
@@ -294,7 +295,7 @@ jobs:
             .site-build/blog/articles/ \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/blog/articles/"
 
-      - name: Configure approved integrations and versioned asset caching
+      - name: Configure integrations, canonical host, and versioned asset caching
         shell: bash
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}

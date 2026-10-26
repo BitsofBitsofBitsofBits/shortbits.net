@@ -51,6 +51,8 @@ function publishSpotifyMediaState() {
     available: hasSpotifyPlayback,
     isPlaying: hasSpotifyPlayback && spotifyWidget.dataset.state === "playing",
     sessionStartedAt: spotifySessionStartedAt,
+    state: spotifyWidget.dataset.state,
+    updatedAt: spotifyLastUpdatedAt,
   } }));
 }
 
@@ -726,7 +728,8 @@ window.addEventListener("desktop-window:opened", (event) => {
     loadFeaturedTracks();
   }
 });
-if (!document.querySelector("#spotify-window")?.hidden) {
+const spotifyWindow = document.querySelector("#spotify-window");
+if (spotifyWindow && !spotifyWindow.hidden) {
   loadSpotifyHistory();
   loadFeaturedPlaylists();
   loadFeaturedTracks();

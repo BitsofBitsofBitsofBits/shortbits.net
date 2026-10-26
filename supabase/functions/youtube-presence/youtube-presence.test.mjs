@@ -62,6 +62,25 @@ test("public reads require no device token and use no-store responses", async ()
   assert.equal((await app.method("DELETE")).status, 405);
 });
 
+test("optional channel artwork accepts only bounded public YouTube CDN URLs", async () => {
+  const app = setup();
+  for (const channelAvatarUrl of [null, "https://yt3.ggpht.com/channel=s88-c",
+    "https://yt3.googleusercontent.com/ytc/channel=s88-c"]) {
+    const playback = { ...item, channelAvatarUrl };
+    assert.equal((await app.send(JSON.stringify({ item: playback }))).status, 200);
+    assert.deepEqual(app.calls.at(-1).body.p_item, playback);
+  }
+  const invalid = setup();
+  for (const channelAvatarUrl of ["http://yt3.ggpht.com/channel", "https://untrusted.example/icon.png",
+    "https://yt3.ggpht.com.evil.example/icon", "https://yt3.ggpht.com@evil.example/icon",
+    "https://yt3.ggpht.com:444/icon", "https://yt3.ggpht.com/icon?private=value",
+    "https://yt3.ggpht.com/icon#fragment", "https://yt3.ggpht.com/\\evil.example",
+    "https://yt3.ggpht.com/white space", `https://yt3.ggpht.com/${"a".repeat(2048)}`, 42, {}]) {
+    assert.equal((await invalid.send(JSON.stringify({ item: { ...item, channelAvatarUrl } }))).status, 400);
+  }
+  assert.equal(invalid.calls.length, 0);
+});
+
 test("invalid tokens, malformed bodies and oversized streams never reach the database", async () => {
   const app = setup();
   assert.equal((await app.send(JSON.stringify({ item }), "bad-token")).status, 401);

@@ -122,10 +122,11 @@ export function renderArticle(post, renderer) {
   const image = `${siteUrl}/shared/images/social-preview.png`;
   const schema = {
     "@context": "https://schema.org", "@type": "BlogPosting",
-    headline: post.title, description: post.excerpt, url, mainEntityOfPage: url,
+    "@id": `${url}#article`,
+    headline: post.title, description: post.excerpt, url, mainEntityOfPage: { "@id": `${url}#webpage` },
     datePublished: post.published_at,
     dateModified: Number.isFinite(Date.parse(post.updated_at)) ? post.updated_at : post.published_at,
-    author: { "@type": "Person", name: "Caleb Masters", url: `${siteUrl}/professional/` },
+    author: { "@type": "Person", "@id": `${siteUrl}/#person`, name: "Caleb K Masters", url: `${siteUrl}/professional/` },
     image,
   };
   return `<!doctype html>

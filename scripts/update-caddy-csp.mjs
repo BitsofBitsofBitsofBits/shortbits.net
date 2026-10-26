@@ -120,6 +120,10 @@ const staticCacheRules = [
   "  }",
   '  header @bits_versioned_static >Cache-Control "public, max-age=31536000, immutable"',
 ].join("\n");
+const canonicalHostRules = [
+  "  @bits_noncanonical_host host shortbits.net",
+  "  redir @bits_noncanonical_host https://www.shortbits.net{uri} 308",
+].join("\n");
 
 export function updateCaddyConfig(caddyfile) {
   const blocks = findBlocks(caddyfile);
@@ -133,6 +137,9 @@ export function updateCaddyConfig(caddyfile) {
     throw new Error("Cannot safely identify exactly one shortbits.net site block.");
   }
   const site = sites[0];
+  if (!site.header.split(/[\s,]+/).some((address) => /^(?:https?:\/\/)?www\.shortbits\.net(?::(?:80|443))?$/.test(address))) {
+    throw new Error("The site must declare www.shortbits.net before enabling the canonical-host redirect.");
+  }
   let body = caddyfile.slice(site.open + 1, site.close);
   const nested = findBlocks(body);
   const rootLines = [...body.matchAll(/^[ \t]*root[ \t]+\*[ \t]+(?:"\/[^"\n]+"|\/[^\s{}]+)[ \t]*$/gm)]
@@ -198,6 +205,13 @@ export function updateCaddyConfig(caddyfile) {
     }
   } else {
     body = `${body.trimEnd()}\n${staticCacheRules}\n`;
+  }
+  if (body.includes("@bits_noncanonical_host")) {
+    if (!body.includes(canonicalHostRules)) {
+      throw new Error("Existing @bits_noncanonical_host rules differ; refusing an unsafe redirect rewrite.");
+    }
+  } else {
+    body = `${body.trimEnd()}\n${canonicalHostRules}\n`;
   }
   body = updateCaddyCsp(body);
   return caddyfile.slice(0, site.open + 1) + body + caddyfile.slice(site.close);

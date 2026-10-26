@@ -14,6 +14,7 @@ function backup() {
 test("accepts complete versioned editorial backups without private tables", () => {
   assert.equal(validate(backup()), 4);
   assert.ok(tables.includes("site_creators"));
+  assert.ok(tables.includes("site_featured_project"));
   assert.ok(tables.includes("site_message_catalog"));
   assert.ok(tables.includes("site_message_pools"));
   assert.ok(tables.includes("site_message_settings"));

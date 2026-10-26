@@ -30,6 +30,7 @@ npm run test:browser
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
 node scripts/media-player-browser.mjs --root .site-build
+node scripts/nowplaying-browser.mjs --root .site-build
 node scripts/youtube-extension-browser.mjs
 node scripts/aero-variants-browser.mjs --root .site-build
 node scripts/theme-collection-browser.mjs --root .site-build

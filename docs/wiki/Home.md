@@ -19,6 +19,7 @@ terminal-inspired personal website of BitsofBitsofBits.
 | [Configuration and integrations](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Configuration-and-Integrations) | Supabase, Spotify, Discord, public configuration, analytics, and contact verification. |
 | [Contact and email](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Contact-and-Email) | Resend setup, notifications, delivery limitations, and contact tests. |
 | [Deployment](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Deployment) | GitHub Actions secrets, static deployment, Supabase migrations, Caddy, and performance gates. |
+| [Search visibility and SEO](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Search-and-SEO) | Canonical URLs, static search metadata, indexing checks, and Google/Bing owner setup. |
 | [Monitoring](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Monitoring) | Read-only production probes, SSH transport, outage issues, and monitoring limitations. |
 | [Publishing and recovery](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Publishing-and-Recovery) | Static publishing status, discovery, backups, restoration, and recovery behavior. |
 | [Development and validation](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Development-and-Validation) | Local serving, builds, browser checks, Lighthouse budgets, and startup profiling. |

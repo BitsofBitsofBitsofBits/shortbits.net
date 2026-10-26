@@ -126,15 +126,17 @@ test("content snapshots only expose a real watch video and handle pauses, seeks,
   const video = Object.assign(new Video(), { paused: false, ended: false, currentTime: 2, duration: 100, readyState: 4 });
   let containerId = "abcdefghijk";
   let ad = false;
+  let avatar = "https://yt3.ggpht.com/example=s88-c-k-c0x00ffffff-no-rj";
   const container = { getAttribute: () => containerId,
-    querySelector: selector => selector.includes("video") ? video : { textContent: "Channel name" } };
+    querySelector: selector => selector.includes("video") ? video : { textContent: "Channel name" },
+    querySelectorAll: () => [{ currentSrc: avatar, getAttribute: () => null }] };
   const context = vm.createContext({
     URL, location, HTMLVideoElement: Video, console,
     document: {
       title: "Fallback video - YouTube",
       querySelector: selector => selector.includes("ad-showing") ? ad
-        : selector.includes("watch-flexy") ? container
-        : selector.includes("formatted-string") ? { textContent: "A title" } : null,
+        : selector.includes("watch-flexy") || selector.includes("reel-video-renderer") && !selector.includes("h2") ? container
+        : selector.includes("formatted-string") || selector.includes("h2") ? { textContent: "A title" } : null,
       addEventListener: (type, callback) => { listeners[type] = callback; },
     },
     chrome: { runtime: { id: "extension-id", onMessage: { addListener: callback => { listeners.message = callback; } },
@@ -148,6 +150,17 @@ test("content snapshots only expose a real watch video and handle pauses, seeks,
     return result;
   };
   assert.equal(snapshot().item.title, "A title");
+  assert.equal(snapshot().item.channelAvatarUrl, avatar);
+  avatar = "https://untrusted.example/channel.jpg";
+  assert.equal(snapshot().item.channelAvatarUrl, null, "Unapproved images are not published");
+  avatar = "";
+  assert.equal(snapshot().item.channelAvatarUrl, null, "Missing artwork does not stop playback sharing");
+  location.href = "https://www.youtube.com/shorts/abcdefghijk";
+  location.pathname = "/shorts/abcdefghijk";
+  avatar = "https://yt3.googleusercontent.com/ytc/short-channel=s88-c";
+  assert.equal(snapshot().item.channelAvatarUrl, avatar, "Active Shorts also report their channel icon");
+  location.href = "https://www.youtube.com/watch?v=abcdefghijk";
+  location.pathname = "/watch";
   video.paused = true;
   assert.equal(snapshot().item.isPlaying, false);
   video.currentTime = 12;
@@ -159,6 +172,24 @@ test("content snapshots only expose a real watch video and handle pauses, seeks,
   assert.equal(snapshot().transient, true);
   location.href = "https://www.youtube.com/";
   assert.equal(snapshot().item, null);
+});
+
+test("channel icons are optional and limited to public YouTube image hosts without query strings", () => {
+  const extension = setup();
+  extension.context.__item = item;
+  for (const url of [null, undefined, "https://yt3.ggpht.com/channel=s88-c",
+    "https://yt3.googleusercontent.com/ytc/channel=s88-c"]) {
+    extension.context.__avatar = url;
+    assert.equal(extension.run("BITS_YOUTUBE.validPlayback({ ...__item, channelAvatarUrl: __avatar })"), true);
+  }
+  for (const url of ["http://yt3.ggpht.com/channel", "https://yt3.ggpht.com.evil.example/channel",
+    "https://yt3.ggpht.com@evil.example/channel", "https://yt3.ggpht.com:444/channel",
+    "https://yt3.ggpht.com/channel?private=value", "https://yt3.ggpht.com/channel#fragment",
+    "https://yt3.ggpht.com/\\evil.example", "https://yt3.ggpht.com/white space",
+    `https://yt3.ggpht.com/${"a".repeat(2048)}`, 42, {}]) {
+    extension.context.__avatar = url;
+    assert.equal(extension.run("BITS_YOUTUBE.validPlayback({ ...__item, channelAvatarUrl: __avatar })"), false);
+  }
 });
 
 test("watch and Shorts URL recognition excludes unrelated hosts, playlists, and malformed video IDs", () => {

@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { build, transform } from "esbuild";
 import { buildResume } from "./build-resume.mjs";
+import { buildSeo } from "./build-seo.mjs";
 import { parseHTML } from "linkedom";
 import { filterCssForMarkup } from "./build-theme-css.mjs";
 
@@ -142,7 +143,7 @@ export async function buildSite(output, contentInput, resumeInput) {
   const themeBuild = spawnSync(process.execPath, [join(root, "scripts", "build-theme-css.mjs")], { stdio: "inherit" });
   if (themeBuild.error) throw themeBuild.error;
   if (themeBuild.status !== 0) throw new Error(`Shared theme CSS generation failed (exit ${themeBuild.status}).`);
-  const directories = new Set(["admin", "blog", "boot", "home", "not-found", "online", "professional", "projects", "shared", "useless"]);
+  const directories = new Set(["admin", "blog", "boot", "home", "not-found", "nowplaying", "online", "professional", "projects", "shared", "useless"]);
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if ((entry.isDirectory() && directories.has(entry.name))
       || (entry.isFile() && (/\.(?:html|css|js)$/.test(entry.name)
@@ -159,6 +160,7 @@ export async function buildSite(output, contentInput, resumeInput) {
     root: destination,
     input: resumeInput || (contentInput ? join(root, "scripts", "fixtures", "resume-data.json") : undefined),
   });
+  await buildSeo(destination, await filesUnder(destination));
   await optimizeStyles(destination);
   await optimizeStartup(destination);
   const version = await versionAssets(destination);

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const compactPages = ["index.html", path.join("professional", "index.html")];
+const compactPages = ["index.html", path.join("professional", "index.html"), path.join("nowplaying", "index.html")];
 
 // Keep the full desktop stylesheet as the source of truth. Compact pages get
 // the same cascade, without selectors for desktop windows and other unused UI.

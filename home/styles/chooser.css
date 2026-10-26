@@ -148,6 +148,26 @@
   cursor: pointer;
 }
 
+.chooser-resources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0 0 16px;
+}
+
+.chooser-resources a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  font-size: 0.76rem;
+}
+
+.chooser-resources a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .chooser-remember input {
   width: 16px;
   height: 16px;

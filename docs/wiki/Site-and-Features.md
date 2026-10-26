@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | `/` | Themed boot-menu chooser between the two sites | `index.html`, `home/scripts/chooser.js`, `home/styles/chooser.css` |
 | `/online/` | The playful internet presence (desktop windows, games, Easter eggs) | `online/index.html` |
+| `/nowplaying/` | Live Spotify and YouTube presentation | `nowplaying/` |
 | `/professional/` | Recruiter-facing professional profile | `professional/` |
 
 The chooser can remember a visitor's pick in `localStorage` (`bits-site-choice`)
@@ -65,6 +66,16 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   YouTube reporting uses a locally installed Chromium extension, starts off by
   default, and expires within 90 seconds without updates. See the
   [setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence).
+
+- `/nowplaying/` presents both playback statuses simultaneously: side by side
+  on desktop, stacked on mobile, with large artwork, playback timelines, and
+  continuous server-observed session lengths (including pauses). It inherits
+  the site's theme/color preferences without mounting desktop or parody-layout
+  chrome. Presentation controls support fullscreen (`F`, or Escape to leave),
+  optional four-second auto-hide, and theme/color selection. Pointer activity
+  and keyboard focus reveal controls; keyboard-focused controls remain visible.
+  Idle, expired, and unavailable sources retain explanatory cards instead of
+  showing another provider in their place. The same integrations power both pages.
 
 - Cached Discord presence, custom status, and activity through Lanyard
 

@@ -92,7 +92,7 @@
         <section id="backup-editor" class="profile-editor" aria-labelledby="backup-editor-heading">
           <h2 id="backup-editor-heading">Content backups</h2>
           <div data-admin-view="export" data-admin-view-label="Export backup">
-            <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, the message library, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
+            <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, the featured project, favorite games, creators, the message library, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
             <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
             <button id="backup-export" type="button">Download content backup</button>
           </div>
@@ -261,6 +261,25 @@
             </div>
             <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
+          </form>
+        </section>
+
+        <section id="featured-project-editor" class="profile-editor" aria-labelledby="featured-project-editor-heading">
+          <div class="section-label">
+            <h2 id="featured-project-editor-heading">FEATURED_PROCESS</h2>
+            <span>ONLINE SHOWCASE</span>
+          </div>
+          <p>Feature one project on Online. Leave publishing disabled to hide the entire box without losing your draft.</p>
+          <form id="featured-project-form" class="admin-form content-admin-form">
+            <label><span>TITLE</span><input name="title" maxlength="120"></label>
+            <label><span>SUMMARY</span><textarea name="summary" maxlength="1000"></textarea></label>
+            <label><span>STATUS (OPTIONAL)</span><input name="status" maxlength="120" placeholder="PID 0101 // RUNNING"></label>
+            <label><span>TECHNOLOGIES (COMMA-SEPARATED, OPTIONAL)</span><input name="tags" maxlength="300" placeholder="HTML, CSS, JavaScript"></label>
+            <label><span>PROJECT LINK (HTTPS)</span><input name="link_url" type="url" maxlength="2000"></label>
+            <label><span>LINK LABEL</span><input name="link_label" maxlength="60" placeholder="VIEW PROJECT"></label>
+            <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH FEATURED_PROCESS ON ONLINE</span></label>
+            <p id="featured-project-admin-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="featured-project-submit" type="submit">&gt; SAVE_FEATURED_PROJECT</button>
           </form>
         </section>
 

@@ -15,7 +15,7 @@ let discordLastUpdatedAt = 0;
 let discordRequestInFlight = false;
 
 function markDiscordStale() {
-  if (!discordLastPresence) return;
+  if (!discordLastPresence || !discordStatus) return;
   discordStatus.dataset.state = "stale";
   discordStatus.textContent = `${String(discordLastPresence.status || "offline").toUpperCase()} // LAST KNOWN ${new Date(discordLastUpdatedAt).toLocaleString()}`;
 }
@@ -27,22 +27,24 @@ function formatDiscordActivity(activity) {
 }
 
 function renderDiscordPresence(presence) {
-  discordStatus.dataset.state = presence.stale ? "stale" : "fresh";
+  if (discordStatus) discordStatus.dataset.state = presence.stale ? "stale" : "fresh";
   if (!presence.enrolled) {
     discordLastPresence = undefined;
     lanyardUserId = undefined;
     disconnectLanyardSocket();
-    discordStatus.textContent = "SETUP REQUIRED";
-    discordCustomStatus.textContent = "Join Lanyard to publish presence";
-    discordActivity.textContent = "Unavailable";
+    if (discordStatus) discordStatus.textContent = "SETUP REQUIRED";
+    if (discordCustomStatus) discordCustomStatus.textContent = "Join Lanyard to publish presence";
+    if (discordActivity) discordActivity.textContent = "Unavailable";
     return;
   }
 
-  discordStatus.textContent = String(presence.status || "offline").toUpperCase();
-  discordCustomStatus.textContent = presence.customStatus || "No custom status";
-  discordActivity.textContent = presence.activities?.length
-    ? presence.activities.map(formatDiscordActivity).join(" | ")
-    : "No public activity";
+  if (discordStatus) discordStatus.textContent = String(presence.status || "offline").toUpperCase();
+  if (discordCustomStatus) discordCustomStatus.textContent = presence.customStatus || "No custom status";
+  if (discordActivity) {
+    discordActivity.textContent = presence.activities?.length
+      ? presence.activities.map(formatDiscordActivity).join(" | ")
+      : "No public activity";
+  }
   discordLastPresence = presence;
   const age = Number(presence.cacheAgeMs);
   discordLastUpdatedAt = Date.now() - (Number.isFinite(age) ? Math.max(0, age) : 0);
@@ -180,7 +182,7 @@ async function refreshDiscordPresence() {
   const anonKey = window.SUPABASE_CONFIG?.anonKey;
 
   if (!projectUrl || projectUrl.toLowerCase().includes("your_project_id")) {
-    discordStatus.textContent = "NOT CONFIGURED";
+    if (discordStatus) discordStatus.textContent = "NOT CONFIGURED";
     return;
   }
 
@@ -206,9 +208,9 @@ async function refreshDiscordPresence() {
     if (discordLastPresence) {
       markDiscordStale();
     } else {
-      discordStatus.textContent = "SIGNAL UNAVAILABLE";
-      discordCustomStatus.textContent = "Presence could not be loaded";
-      discordActivity.textContent = "Unavailable";
+      if (discordStatus) discordStatus.textContent = "SIGNAL UNAVAILABLE";
+      if (discordCustomStatus) discordCustomStatus.textContent = "Presence could not be loaded";
+      if (discordActivity) discordActivity.textContent = "Unavailable";
     }
   } finally {
     discordRequestInFlight = false;

@@ -7,6 +7,30 @@
   --spotify-accent: var(--accent);
 }
 
+.media-presentation-link {
+  display: block;
+  width: fit-content;
+  margin: 0 44px 12px;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+@media (max-width: 700px) {
+  .media-presentation-link {
+    margin-inline: 24px;
+  }
+}
+
+.youtube-artwork {
+  cursor: default;
+  object-fit: contain;
+  background: var(--panel-2);
+}
+
+.youtube-artwork[data-kind="channel"] {
+  object-fit: cover;
+}
+
 .media-navigation {
   display: flex;
   align-items: center;

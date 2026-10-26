@@ -1,0 +1,381 @@
+:root[data-page="nowplaying"] body.nowplaying-page {
+  min-height: 100svh;
+  margin: 0;
+  padding: clamp(20px, 3vw, 48px);
+  padding-bottom: 150px;
+  color: var(--ink);
+  background: var(--body-background);
+  background-size: var(--body-background-size);
+  font-family: var(--font-family);
+}
+
+.presentation-header,
+.nowplaying-page main {
+  width: min(1440px, 100%);
+  margin-inline: auto;
+}
+
+.presentation-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: clamp(24px, 4vh, 48px);
+}
+
+.presentation-brand {
+  flex-basis: 100%;
+  width: fit-content;
+  color: var(--accent);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.presentation-brand span {
+  color: var(--muted);
+}
+
+.presentation-heading h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.presentation-heading h1 span {
+  color: var(--accent);
+}
+
+.presentation-heading p,
+.presentation-sync {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.presentation-sync {
+  color: var(--accent);
+  text-align: right;
+}
+
+.presentation-sync span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+#media-player.presentation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 32px);
+}
+
+.nowplaying-page #media-player .presentation-card {
+  --spotify-accent: color-mix(in srgb, var(--accent) 35%, var(--ink));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr auto;
+  align-items: start;
+  gap: 24px;
+  min-width: 0;
+  margin: 0;
+  padding: clamp(20px, 2.5vw, 36px);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--window-radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.presentation-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.presentation-card-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+}
+
+.presentation-card-header > span {
+  font-size: 0.6rem;
+  text-align: right;
+}
+
+.presentation-artwork {
+  display: grid;
+  width: min(100%, clamp(180px, 23vw, 320px));
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.nowplaying-page .presentation-artwork :is(.spotify-artwork, .spotify-placeholder) {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: var(--control-radius);
+}
+
+.nowplaying-page .presentation-artwork .spotify-artwork {
+  cursor: default;
+}
+
+.nowplaying-page .presentation-artwork .spotify-placeholder {
+  font-size: clamp(2rem, 6vw, 5rem);
+}
+
+.nowplaying-page .presentation-artwork .spotify-placeholder img {
+  width: 35%;
+  height: 35%;
+}
+
+.nowplaying-page .presentation-card .activity-label {
+  margin: 0 0 12px;
+  font-size: 0.65rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.nowplaying-page .presentation-card :is(.spotify-track, .spotify-artist) {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.nowplaying-page .presentation-card .spotify-track {
+  font-size: clamp(1.3rem, 2.3vw, 2.3rem);
+  line-height: 1.25;
+}
+
+.nowplaying-page .presentation-card .spotify-artist {
+  margin-top: 12px;
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
+  line-height: 1.6;
+}
+
+.nowplaying-page .presentation-card .spotify-timeline {
+  margin-top: 24px;
+  gap: 12px;
+  font-size: 0.75rem;
+}
+
+.nowplaying-page .presentation-card .spotify-progress {
+  height: 6px;
+}
+
+.presentation-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.presentation-session {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.presentation-session span,
+.presentation-session strong {
+  display: block;
+}
+
+.presentation-session span {
+  color: var(--muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.presentation-session strong {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.nowplaying-page .presentation-card .spotify-track-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-size: 0.65rem;
+}
+
+.nowplaying-page .presentation-card[data-state="stale"] {
+  border-top-color: var(--warning);
+}
+
+.presentation-card[data-state="stale"] .presentation-artwork {
+  opacity: 0.55;
+}
+
+.nowplaying-page #media-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.presentation-note,
+.presentation-notice {
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.8;
+}
+
+.presentation-note {
+  margin: 24px 0 0;
+}
+
+.presentation-controls {
+  position: fixed;
+  z-index: 100;
+  right: 20px;
+  bottom: 16px;
+  left: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px 20px;
+  width: fit-content;
+  max-width: calc(100% - 40px);
+  margin-inline: auto;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--window-radius);
+  color: var(--ink);
+  background: var(--panel-2);
+  box-shadow: var(--shadow);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.presentation-controls :is(a, button, select, label) {
+  font: inherit;
+  font-size: 0.65rem;
+}
+
+.presentation-controls :is(a, button, select) {
+  min-height: 36px;
+  color: var(--ink);
+}
+
+.presentation-controls a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.presentation-controls :is(button, select) {
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  padding: 8px 10px;
+  background: var(--panel);
+}
+
+.presentation-controls button {
+  cursor: pointer;
+}
+
+.presentation-controls :is(button, select):disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.presentation-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.presentation-controls select {
+  max-width: 180px;
+}
+
+.presentation-auto-hide input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+#presentation-control-status {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.6rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.presentation-controls-hidden .presentation-controls {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+
+.nowplaying-page :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+
+.presentation-skip {
+  position: fixed;
+  z-index: 200;
+  top: 12px;
+  left: 20px;
+  padding: 12px;
+  color: var(--ink);
+  background: var(--panel-2);
+  transform: translateY(-200%);
+}
+
+.presentation-skip:focus {
+  transform: none;
+}
+
+@media (max-width: 700px) {
+  :root[data-page="nowplaying"] body.nowplaying-page {
+    padding-bottom: 250px;
+  }
+
+  #media-player.presentation-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .presentation-artwork {
+    width: min(100%, 240px);
+  }
+
+  .presentation-sync {
+    text-align: left;
+  }
+
+  .presentation-controls {
+    gap: 10px 14px;
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presentation-controls {
+    transition: none;
+  }
+}
+
+:root[data-motion="reduced"] .presentation-controls {
+  transition: none;
+}
+
+.nowplaying-page #media-player [hidden],
+.nowplaying-page #presentation-controls [hidden] {
+  display: none;
+}

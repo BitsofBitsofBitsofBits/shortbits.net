@@ -32,9 +32,12 @@ try {
     };
   });
   const youtube = await context.newPage();
+  await youtube.route("https://yt3.ggpht.com/**", route => route.fulfill({
+    contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88"></svg>',
+  }));
   await youtube.route("https://www.youtube.com/**", route => route.fulfill({
     contentType: "text/html",
-    body: '<!doctype html><title>A browser test video - YouTube</title><ytd-watch-flexy video-id="abcdefghijk"><h1 class="ytd-watch-metadata"><yt-formatted-string>Browser test video</yt-formatted-string></h1><div id="channel-name"><a>Browser test channel</a></div><video class="html5-main-video"></video></ytd-watch-flexy>',
+    body: '<!doctype html><title>A browser test video - YouTube</title><ytd-watch-flexy video-id="abcdefghijk"><h1 class="ytd-watch-metadata"><yt-formatted-string>Browser test video</yt-formatted-string></h1><div id="owner"><div id="avatar"><img src="https://yt3.ggpht.com/browser-channel=s88-c"></div></div><div id="channel-name"><a>Browser test channel</a></div><video class="html5-main-video"></video></ytd-watch-flexy>',
   }));
   await youtube.goto("https://www.youtube.com/watch?v=abcdefghijk");
   const cdp = await context.newCDPSession(youtube);
@@ -66,6 +69,7 @@ try {
   const report = await worker.evaluate(() => self.__reports.at(-1));
   assert.equal(report.item.title, "Browser test video");
   assert.equal(report.item.channel, "Browser test channel");
+  assert.equal(report.item.channelAvatarUrl, "https://yt3.ggpht.com/browser-channel=s88-c");
   assert.equal(report.item.isPlaying, true);
   assert.equal(report.item.progressMs, 12000);
   assert.equal(await worker.evaluate(() => self.__spotifyRequests), 1);

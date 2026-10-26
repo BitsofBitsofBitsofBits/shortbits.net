@@ -64,13 +64,23 @@ test("preserves existing simple file_server options and enables both sidecar for
 });
 
 test("accepts a single-line header directive with an absolute quoted site root", () => {
-  const input = `https://shortbits.net {
+  const input = `https://www.shortbits.net {
   root * "/srv/shortbits site"
   header Content-Security-Policy "default-src 'self';"
   file_server
 }
 `;
   assert.match(updateCaddyConfig(input), /precompressed br gzip/);
+});
+
+test("permanently redirects only the alternate host and preserves the complete URI", () => {
+  const output = updateCaddyConfig(site);
+  assert.match(output, /@bits_noncanonical_host host shortbits\.net/);
+  assert.ok(output.includes("redir @bits_noncanonical_host https://www.shortbits.net{uri} 308"));
+  assert.equal(updateCaddyConfig(output), output);
+  assert.throws(() => updateCaddyConfig(site.replace("www.shortbits.net, ", "")), /must declare www/);
+  assert.throws(() => updateCaddyConfig(site.replace("  encode gzip",
+    "  @bits_noncanonical_host host www.shortbits.net\n  encode gzip")), /unsafe redirect/);
 });
 
 test("fails explicitly for unknown or ambiguous deployment layouts", () => {

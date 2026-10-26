@@ -19,6 +19,8 @@ function validItem(value: unknown): boolean {
   return typeof item.videoId === "string" && /^[A-Za-z0-9_-]{11}$/.test(item.videoId)
     && typeof item.title === "string" && item.title.trim().length > 0 && item.title.length <= 300
     && typeof item.channel === "string" && item.channel.trim().length > 0 && item.channel.length <= 200
+    && (item.channelAvatarUrl == null || (typeof item.channelAvatarUrl === "string" && item.channelAvatarUrl.length <= 2048
+      && /^https:\/\/(?:yt3\.ggpht\.com|yt3\.googleusercontent\.com)\/[^\s?#\\]+$/.test(item.channelAvatarUrl)))
     && typeof item.isPlaying === "boolean"
     && Number.isInteger(item.progressMs) && Number(item.progressMs) >= 0 && Number(item.progressMs) <= 2_147_483_647
     && Number.isInteger(item.durationMs) && Number(item.durationMs) >= 0 && Number(item.durationMs) <= 2_147_483_647;

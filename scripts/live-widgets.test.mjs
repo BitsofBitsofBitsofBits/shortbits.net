@@ -6,7 +6,7 @@ import vm from "node:vm";
 const discordSource = readFileSync(new URL("../online/scripts/discord.js", import.meta.url), "utf8");
 const spotifySource = readFileSync(new URL("../online/scripts/spotify.js", import.meta.url), "utf8");
 
-async function setup(source, initialPayload) {
+async function setup(source, initialPayload, options = {}) {
   const elements = new Map();
   const events = new Map();
   const visibility = {};
@@ -14,6 +14,7 @@ async function setup(source, initialPayload) {
   let payload = initialPayload;
   let failure;
   let requests = 0;
+  const urls = [];
   let timerId = 0;
   const element = (selector) => {
     if (!elements.has(selector)) {
@@ -37,13 +38,14 @@ async function setup(source, initialPayload) {
     window, Date, performance,
     document: {
       visibilityState: "visible",
-      querySelector: element,
+      querySelector: selector => options.missing?.includes(selector) ? null : element(selector),
       addEventListener(type, callback) { visibility[type] = callback; },
     },
     CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options?.detail; } },
     console: { error() {}, warn() {} },
-    fetch: async () => {
+    fetch: async url => {
       requests++;
+      urls.push(url);
       if (failure) throw new Error("Connection failed");
       return { ok: true, json: async () => payload };
     },
@@ -51,7 +53,7 @@ async function setup(source, initialPayload) {
   vm.runInContext(source, context);
   await new Promise(setImmediate);
   return {
-    context, element, timeouts, events,
+    context, element, timeouts, events, urls,
     fail() { failure = true; },
     payload(value) { failure = false; payload = value; },
     requests: () => requests,
@@ -128,4 +130,40 @@ test("Spotify cache fallback always shows last-known time, including no active p
   await page.refresh("refreshSpotifyPlayback");
   assert.equal(page.element("#spotify-widget").dataset.state, "stale");
   assert.match(page.element("#spotify-state").textContent, /LAST KNOWN/);
+});
+
+test("presentation Spotify publishes observed session metadata without requesting desktop history", async () => {
+  const sessionStartedAt = new Date(Date.now() - 600_000).toISOString();
+  const page = await setup(spotifySource, { ...playback, sessionStartedAt }, { missing: ["#spotify-window"] });
+  assert.equal(page.urls.length, 1);
+  assert.match(page.urls[0], /\/spotify-now-playing$/);
+  let detail;
+  page.context.window.addEventListener("media:spotify", event => { detail = event.detail; });
+  await page.refresh("refreshSpotifyPlayback");
+  assert.equal(detail.available, true);
+  assert.equal(detail.state, "playing");
+  assert.equal(detail.sessionStartedAt, sessionStartedAt);
+  assert.ok(detail.updatedAt > 0);
+  page.fail();
+  await page.refresh("refreshSpotifyPlayback");
+  assert.equal(detail.state, "stale");
+  assert.equal(detail.sessionStartedAt, sessionStartedAt);
+});
+
+test("Lanyard Spotify updates work without rendering a Discord status panel", async () => {
+  const presence = { enrolled: true, status: "online" };
+  const page = await setup(discordSource, presence, {
+    missing: ["#discord-presence-status", "#discord-custom-status", "#discord-activity"],
+  });
+  assert.equal(vm.runInContext("discordLastPresence.status", page.context), "online");
+  let detail;
+  page.context.window.addEventListener("lanyard:spotify", event => { detail = event.detail; });
+  vm.runInContext(`publishLanyardSpotify({ listening_to_spotify: true, spotify: {
+    song: "Live song", artist: "Live artist", timestamps: { start: 1000, end: 181000 }
+  } })`, page.context);
+  assert.equal(detail.song, "Live song");
+  assert.equal(detail.artist, "Live artist");
+  page.payload({ enrolled: false });
+  await page.refresh("refreshDiscordPresence");
+  assert.equal(vm.runInContext("discordLastPresence", page.context), undefined);
 });

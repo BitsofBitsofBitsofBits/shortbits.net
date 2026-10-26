@@ -42,6 +42,10 @@ const resumeCertificationAdd = document.querySelector("#resume-certification-add
 const nowForm = document.querySelector("#now-form");
 const nowSubmit = document.querySelector("#now-submit");
 const nowAdminStatus = document.querySelector("#now-admin-status");
+const featuredProjectForm = document.querySelector("#featured-project-form");
+const featuredProjectSubmit = document.querySelector("#featured-project-submit");
+const featuredProjectAdminStatus = document.querySelector("#featured-project-admin-status");
+const featuredProjectFields = ["title", "summary", "status", "tags", "link_url", "link_label"];
 const changelogForm = document.querySelector("#changelog-form");
 const changelogSubmit = document.querySelector("#changelog-submit");
 const changelogAdminStatus = document.querySelector("#changelog-admin-status");
@@ -1609,6 +1613,27 @@ async function loadResumeContent() {
   return true;
 }
 
+async function loadFeaturedProjectContent() {
+  featuredProjectSubmit.disabled = true;
+  setAdminStatus(featuredProjectAdminStatus, "Loading featured project...");
+  const { data, error } = await adminClient
+    .from("site_featured_project")
+    .select(`${featuredProjectFields.join(", ")}, enabled`)
+    .eq("position", 1)
+    .maybeSingle();
+  if (error) {
+    console.error("Unable to load featured project:", error);
+    setAdminStatus(featuredProjectAdminStatus, `Featured project failed to load: ${error.message}. Ensure the featured-project migration is applied.`, "error");
+    return;
+  }
+  featuredProjectFields.forEach((field) => {
+    featuredProjectForm.elements[field].value = data?.[field] ?? "";
+  });
+  featuredProjectForm.elements.enabled.checked = data?.enabled === true;
+  featuredProjectSubmit.disabled = false;
+  setAdminStatus(featuredProjectAdminStatus, "Featured project loaded.", "success");
+}
+
 async function loadNowContent() {
   setAdminStatus(nowAdminStatus, "Loading NOW.TXT...");
   const { data, error } = await adminClient
@@ -2733,6 +2758,7 @@ async function showInbox() {
     loadFeaturedTracks(),
     loadResumeContent(),
     loadNowContent(),
+    loadFeaturedProjectContent(),
     loadChangelogContent(),
     loadFavoriteGames(),
     loadCreators(),
@@ -3426,6 +3452,43 @@ if (adminClient) {
     }
     clearPublicContentCache();
     setAdminStatus(resumeAdminStatus, "Résumé data updated.", "success");
+  });
+
+  featuredProjectForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(featuredProjectForm);
+    const project = Object.fromEntries(featuredProjectFields.map((field) => [
+      field, String(formData.get(field) ?? "").trim(),
+    ]));
+    project.enabled = formData.has("enabled");
+    if (project.enabled && (!project.title || !project.summary || !project.link_url || !project.link_label)) {
+      setAdminStatus(featuredProjectAdminStatus, "A published project needs a title, summary, HTTPS link, and link label.", "error");
+      return;
+    }
+    if (project.link_url) {
+      try {
+        const url = new URL(project.link_url);
+        if (url.protocol !== "https:" || url.username || url.password) {
+          throw new Error("Use an HTTPS project link without credentials.");
+        }
+        project.link_url = url.href;
+      } catch (error) {
+        setAdminStatus(featuredProjectAdminStatus, `Invalid project link: ${error.message}`, "error");
+        return;
+      }
+    }
+    featuredProjectSubmit.disabled = true;
+    setAdminStatus(featuredProjectAdminStatus, "Saving featured project...");
+    const { error } = await adminClient.from("site_featured_project").upsert({
+      ...project, position: 1, updated_at: new Date().toISOString(),
+    }, { onConflict: "position" });
+    featuredProjectSubmit.disabled = false;
+    if (error) {
+      console.error("Unable to save featured project:", error);
+      setAdminStatus(featuredProjectAdminStatus, `Featured project update failed: ${error.message}`, "error");
+      return;
+    }
+    setAdminStatus(featuredProjectAdminStatus, "Featured project saved. Reload Online to see the change.", "success");
   });
 
   nowForm.addEventListener("submit", async (event) => {

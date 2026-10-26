@@ -13,10 +13,11 @@ The main-branch workflow must finish validation and then successfully run the
 **Supabase -> Apply database migrations** step. It deploys `youtube-presence`.
 The updated `spotify-now-playing` function is also required for session timing;
 it is not currently in the automatic Edge Function deploy list, so deploy it
-explicitly using the command below. Apply both migrations:
+explicitly using the command below. Apply all three presence migrations:
 
 1. `20261026050000_youtube_presence.sql`
 2. `20261026060000_youtube_session_continuity.sql`
+3. `20261026080000_youtube_channel_artwork.sql`
 
 Deploy the matching website assets too. The extension itself is installed
 locally from the source checkout and is excluded from the public site build.
@@ -59,9 +60,24 @@ browser-store listing. See its
 
 ## Sharing, ordering, and expiry
 
-- Sharing includes video ID, title, channel, playback position, duration, and
+For a presentation view, open `/nowplaying/` (also linked below the online-page
+player). Spotify and YouTube remain visible together, with large artwork,
+playback timelines, and continuous session clocks. It uses the same public
+presence and expiry rules, not a second publishing channel or embedded video
+player. Fullscreen, auto-hiding controls, and the site's saved theme/color
+preferences are supported. Session clocks include pauses; missing timing is
+labeled unavailable rather than estimated from video position.
+
+- Sharing includes video ID, title, channel, its public icon URL when available,
+  playback position, duration, and
   playing/paused status. It does not collect viewing-history lists, search
   queries, cookies, Google credentials, or playlists.
+- The card uses the watched channel's icon, falling back to a video thumbnail
+  fitted without stretching or cropping. If both images fail, it shows `YT`.
+  Icons are restricted to YouTube's public HTTPS image hosts
+  (`yt3.ggpht.com` and `yt3.googleusercontent.com`) without query strings;
+  image requests do not send a referrer. Older extensions use thumbnails
+  until reloaded, along with their YouTube tabs, after an update.
 - Playing media comes before paused media. With equal playback state, the
   earlier continuous session appears first. Song changes, video changes, and
   seeking do not restart the session. Arrows override the displayed source
@@ -119,6 +135,7 @@ from its stored hash.
 | The push is visible but the function is still missing | Validation runs before Supabase. An in-progress or failed validation job has not applied the migrations. Check job/step results, not just the commit or overall run badge. |
 | Function works but publishing fails | Apply the continuity migration too, deploy the updated functions, and check the popup error/`!` badge. The raw device token must not be a publishable key or service-role key. |
 | Existing YouTube tabs are not detected | Reload them after installing or reloading the extension. |
+| Only a thumbnail appears instead of a channel icon | Apply the artwork migration, deploy the updated function/site, then reload the extension and YouTube tabs. Some YouTube layouts do not expose a channel icon; thumbnails are the intended fallback. |
 | Sharing was turned off but a card remains briefly | The immediate clear may have failed or a visitor may be between polls. The popup reports clear failures; the last report expires within 90 seconds. |
 | Session timing is unavailable | Check the session migration and updated Spotify function. Existing Spotify playback remains usable if session persistence fails, but the site does not invent a session start. |
 
@@ -133,5 +150,6 @@ node scripts\media-player-browser.mjs --root .site-build
 
 The real-extension check uses bundled Chromium with fixture playback and
 intercepted backend responses. The carousel check covers desktop/mobile
+channel icons, fitted thumbnail/error fallbacks, image URL validation,
 session ordering, paused clocks, arrow controls, metadata safety, expiry,
 independent failure handling, theme layouts, and accessibility.

@@ -944,6 +944,9 @@ function getPageId() {
   if (path.startsWith("/online")) {
     return "online";
   }
+  if (path.startsWith("/nowplaying")) {
+    return "nowplaying";
+  }
   if (path.startsWith("/professional/resume")) {
     return "resume";
   }
@@ -998,7 +1001,7 @@ function syncThemeAssets(theme) {
       }, { once: true });
     }
   }
-  if (theme.experimental && !document.getElementById("bits-layout-runtime")) {
+  if (theme.experimental && root.dataset.page !== "nowplaying" && !document.getElementById("bits-layout-runtime")) {
     const runtime = document.createElement("script");
     runtime.src = `/shared/scripts/layouts/runtime.js?v=${layoutAssetVersion}`;
     runtime.id = "bits-layout-runtime";

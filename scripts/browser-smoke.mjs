@@ -241,8 +241,23 @@ try {
     assert.equal(await staticResume.locator("#resume-summary").isVisible(), true);
     await staticResume.emulateMedia({ media: "print" });
     assert.ok((await staticResume.pdf({ format: "Letter" })).length > 1000);
+    await staticResume.emulateMedia({ media: "screen" });
+    await staticResume.goto(`${server.origin}/?choose`);
+    for (const href of ["/projects/", "/blog/", "/professional/resume/"]) {
+      assert.equal(await staticResume.locator(`.chooser-resources a[href="${href}"]`).isVisible(), true,
+        "Important content is discoverable through static links without JavaScript");
+    }
+    await staticResume.locator('.chooser-resources a[href="/projects/"]').click();
+    await staticResume.locator('h2 a[href="/projects/homelab/"]').click();
+    assert.equal(await staticResume.locator("#case-study h1").isVisible(), true);
+    await staticResume.goto(`${server.origin}/blog/`);
+    await staticResume.locator('#blog-post-list a[href="/blog/articles/first-lab-notes/"]').click();
+    assert.equal(await staticResume.locator("#blog-post h1").textContent(), "First lab notes");
+    const structured = JSON.parse(await staticResume.locator("script[data-seo]").textContent());
+    assert.equal(structured["@graph"].find(item => item["@type"] === "BreadcrumbList").itemListElement.length, 3);
     await noScript.close();
     console.log(`PASS ${width}px immediate resume snapshot, explicit update, offline/partial data, no-JS and print`);
+    console.log(`PASS ${width}px crawlable project/blog links and static article structured data without JavaScript`);
     await page.route(/\/admin\/scripts\/admin\.js(?:\?|$)/, (route) => route.fulfill({
       contentType: "text/javascript", body: "/* Admin writes disabled in the offline publishing-status test. */",
     }));

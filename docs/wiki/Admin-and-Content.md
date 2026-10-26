@@ -23,6 +23,16 @@
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
 
+- **Showcase > Featured project** (`/admin/#/featured-project`) controls the
+  Online `FEATURED_PROCESS` box: title, summary, optional status and comma-separated
+  technology tags, HTTPS project link, link label, and publishing checkbox.
+  It is disabled by default; disabling it hides the entire section while keeping
+  the saved draft. Changes appear when Online is reloaded, without rebuilding.
+  Apply `supabase/migrations/20261026090000_featured_project.sql` before using
+  the editor. Until then (or if the request fails), the public section stays hidden.
+  Featured-project drafts and publishing state are included in content backups;
+  export a fresh backup after applying the migration.
+
 - A public `GUESTBOOK.LOG` with immediate publishing and authenticated Admin
   deletion controls
 

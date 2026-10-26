@@ -2,21 +2,28 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { brotliDecompressSync, gunzipSync } from "node:zlib";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { buildSite, filesUnder, versionAssets, compressAssets, optimizeStyles, optimizeStartup } from "./build-site.mjs";
+import { pagePath, validateSeo } from "./build-seo.mjs";
 
 test("build preserves page routes and organized assets without shipping repository tooling", async () => {
   const directory = await mkdtemp(join(tmpdir(), "shortbits-layout-"));
   try {
     await buildSite(directory, fileURLToPath(new URL("./fixtures/blog-posts.json", import.meta.url)));
     const entries = await readdir(directory, { withFileTypes: true });
+    assert.deepEqual(
+      await readFile(join(directory, "google2dd607a2af6e8097.html")),
+      await readFile(new URL("../google2dd607a2af6e8097.html", import.meta.url)),
+      "Google's ownership verification file must be published unchanged at the site root",
+    );
     assert.ok(!entries.some(entry => entry.isFile() && /\.(?:js|css)$/.test(entry.name)), "Public assets stay out of the root");
     for (const path of [
       "index.html", "404.html", "admin.html", "source.html", "useless.html",
       "online/index.html", "admin/index.html", "boot/index.html", "blog/index.html",
+      "nowplaying/index.html", "nowplaying/scripts/presentation.js", "nowplaying/styles/presentation.css",
       "professional/index.html", "professional/resume/index.html",
       "shared/scripts/supabase-config.js", "shared/styles/theme-base.css",
       "shared/styles/layouts/collection-base.css", "shared/scripts/layouts/runtime.js",
@@ -36,6 +43,16 @@ test("build preserves page routes and organized assets without shipping reposito
     for (const path of (await filesUnder(directory)).filter(path => path.endsWith(".js"))) {
       const source = await readFile(path, "utf8");
       assert.doesNotThrow(() => new vm.Script(source), path);
+    }
+    const pages = await Promise.all((await filesUnder(directory)).filter(path => path.endsWith(".html"))
+      .map(async (file) => ({ path: pagePath(relative(directory, file)), html: await readFile(file, "utf8") })));
+    const sourceSitemap = await readFile(new URL("../sitemap.xml", import.meta.url), "utf8");
+    const expectedPages = [...sourceSitemap.matchAll(/<loc>/g)].length + 2;
+    assert.equal(validateSeo(pages, await readFile(join(directory, "sitemap.xml"), "utf8")), expectedPages);
+    for (const page of pages.filter(page => page.html.includes('rel="canonical"')
+      && !/<meta[^>]*content="noindex/i.test(page.html))) {
+      assert.match(page.html, /data-seo=/, `${page.path} has build-time structured data`);
+      assert.match(page.html, /max-image-preview:large/, `${page.path} enables larger search previews`);
     }
   } finally {
     await rm(directory, { recursive: true });

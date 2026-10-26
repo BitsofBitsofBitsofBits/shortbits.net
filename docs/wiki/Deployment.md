@@ -105,6 +105,15 @@ root, quoted CSP, and a simple file server. It rejects unsupported custom routin
 instead of silently rewriting it; adapt the server configuration deliberately
 if validation reports an unsupported layout. Never bypass `caddy validate`.
 
+The updater also adds a permanent 308 redirect from `shortbits.net` to the
+canonical `https://www.shortbits.net`, preserving the path and query string.
+The site block must explicitly include `www.shortbits.net`; an apex-only
+configuration is rejected instead of redirecting to an unconfigured host.
+The build generates static search/social metadata and breadcrumbs, and site
+validation checks sitemap/canonical consistency. See
+[Search visibility and SEO](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Search-and-SEO)
+for Google Search Console and Bing Webmaster Tools setup after deployment.
+
 Cloudflare JavaScript Detections can inject inline code that the site's strict
 CSP rejects. Disable that injection for these static pages in Cloudflare, or
 configure compatible nonce handling at the edge. Do not add `unsafe-inline` or

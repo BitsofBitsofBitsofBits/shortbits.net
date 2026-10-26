@@ -11,6 +11,8 @@ and a personal learning project.
 - **[Professional](https://www.shortbits.net/professional/):** career highlights,
   projects, a printable resume, and a contact form.
 - **[Blog](https://www.shortbits.net/blog/):** project updates and longer-form notes.
+- **[Now Playing](https://www.shortbits.net/nowplaying/):** live Spotify and
+  shared YouTube status together in a themed, fullscreen-friendly presentation.
 
 The site includes customizable themes, accessibility preferences, and an Admin
 center for managing content. It is built with HTML, CSS, and JavaScript, with

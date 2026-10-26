@@ -10,6 +10,7 @@ The normal site workflow deploys `youtube-presence` and these migrations:
 
 - `supabase/migrations/20261026050000_youtube_presence.sql`
 - `supabase/migrations/20261026060000_youtube_session_continuity.sql`
+- `supabase/migrations/20261026080000_youtube_channel_artwork.sql`
 
 The updated `spotify-now-playing` function must also be deployed for session
 timing. It is not currently in the workflow's automatic Edge Function deploy
@@ -28,7 +29,8 @@ supabase functions deploy youtube-presence --project-ref arjwrycitgobvlodmkeo --
 supabase functions deploy spotify-now-playing --project-ref arjwrycitgobvlodmkeo --no-verify-jwt
 ```
 
-Do not skip the second migration if the first is already applied.
+Apply all migrations, including continuity and channel artwork, even if the
+initial presence migration is already applied.
 
 ## 2. Create a device token
 
@@ -80,7 +82,8 @@ through a browser store. No developer signing or build step is required.
 
 - Only `https://www.youtube.com` watch pages and Shorts are observed. YouTube
   phone/TV apps, embedded players, other sites, and incognito windows are not.
-- Reports contain the video ID, title, channel name, playback position,
+- Reports contain the video ID, title, channel name, public channel-icon URL
+  when available, playback position,
   duration, and paused/playing state. The server assigns session timestamps.
   No cookies, Google account credentials, search queries, playlists, or
   viewing-history lists are collected.
@@ -101,6 +104,18 @@ through a browser store. No developer signing or build step is required.
 - The popup shows errors and an `!` badge for failed updates. Sharing remains
   off if clearing a previous configuration fails during a settings change.
   If a token is revoked, replace it with a newly generated token in the popup.
+
+## Artwork
+
+The YouTube card uses the watched channel's icon from the active video page.
+Only public HTTPS images on YouTube's `yt3.ggpht.com` and
+`yt3.googleusercontent.com` hosts are accepted, without query strings.
+If the icon is missing or fails to load, the card uses the video's thumbnail,
+fitted into the existing artwork space without stretching or cropping.
+If that also fails, the `YT` placeholder remains. Website image requests do
+not send a referrer. No YouTube API key or new extension permission is needed.
+Older extension versions still work with thumbnail artwork; reload the
+extension and your YouTube tabs after updating to enable channel icons.
 
 ## Session ordering
 
@@ -141,5 +156,6 @@ command-line loading of unpacked extensions. CI installs this browser explicitly
 
 The extension browser check loads the real unpacked extension in Chromium
 with synthetic YouTube playback and intercepted backend responses. The
-carousel check tests desktop/mobile priority, paused playback, arrows,
+carousel check tests channel icons, thumbnail/error fallbacks, image URL
+validation, desktop/mobile priority, paused playback, arrows,
 metadata safety, expiry, independent failures, and accessibility.

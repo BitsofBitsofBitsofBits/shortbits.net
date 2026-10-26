@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { pagePath, validateSeo } from "./build-seo.mjs";
 
 const rootIndex = process.argv.indexOf("--root");
 if (rootIndex >= 0 && !process.argv[rootIndex + 1]) throw new Error("--root requires a directory.");
@@ -65,4 +66,10 @@ if (!robots.includes("https://www.shortbits.net/sitemap.xml")) {
   throw new Error("robots.txt does not advertise the production sitemap.");
 }
 
+const seoPages = validateSeo(htmlFiles.map((file) => ({
+  path: pagePath(file),
+  html: readFileSync(resolve(root, file), "utf8"),
+})), readFileSync(resolve(root, "sitemap.xml"), "utf8"));
+
 console.log(`Validated ${htmlFiles.length} HTML files and their local assets.`);
+console.log(`Validated ${seoPages} canonical sitemap pages and their static SEO metadata.`);

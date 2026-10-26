@@ -12,6 +12,7 @@
 - [Configuration and integrations](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Configuration-and-Integrations)
 - [Contact and email](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Contact-and-Email)
 - [Deployment](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Deployment)
+- [Search visibility and SEO](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Search-and-SEO)
 - [Monitoring](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Monitoring)
 - [Publishing and recovery](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Publishing-and-Recovery)
 - [Development and validation](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Development-and-Validation)

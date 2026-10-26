@@ -91,6 +91,42 @@ async function fetchPublicContentTable(query) {
   return response.json();
 }
 
+async function loadFeaturedProject() {
+  const section = document.querySelector("#featured-project-section");
+  if (!section) return;
+  section.hidden = true;
+  try {
+    const [project] = await fetchPublicContentTable(
+      "site_featured_project?select=title,summary,status,tags,link_url,link_label&enabled=eq.true&position=eq.1",
+    );
+    if (!project) return;
+    const url = new URL(project.link_url);
+    if (url.protocol !== "https:" || url.username || url.password) {
+      throw new Error("Featured project requires an HTTPS link without credentials.");
+    }
+    document.querySelector("#featured-project-title").textContent = project.title;
+    document.querySelector("#featured-project-summary").textContent = project.summary;
+    const status = document.querySelector("#featured-project-status");
+    status.textContent = project.status;
+    status.hidden = !project.status;
+    const tags = document.querySelector("#featured-project-tags");
+    tags.replaceChildren(...project.tags.split(",").map((tag) => tag.trim()).filter(Boolean).map((tag) => {
+      const item = document.createElement("li");
+      item.textContent = tag;
+      return item;
+    }));
+    tags.hidden = !tags.childElementCount;
+    const link = document.querySelector("#featured-project-link");
+    link.href = url.href;
+    link.textContent = project.link_label;
+    section.hidden = false;
+  } catch (error) {
+    console.error("Unable to load featured project:", error);
+  }
+}
+
+loadFeaturedProject();
+
 async function requestPublicContent() {
   const cached = getCachedPublicContent();
   if (cached) {
