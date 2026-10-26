@@ -140,6 +140,7 @@ toolbarTheme.addEventListener("change", syncAppearanceControls);
 window.addEventListener("bits:theme-applied", syncAppearanceControls);
 window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(document.querySelector("#settings-scheme"));
 window.BITS_THEME_PREFERENCE?.bindVariantSelect?.(document.querySelector("#settings-variant"));
+window.BITS_THEME_PICKER.bind(settingsTheme, document.querySelector("#settings-variant"));
 document.querySelector("#settings-theme-random")?.addEventListener("click", () => {
   document.querySelector("#interface-theme-random")?.click();
   setSettingsStatus("Random interface theme applied.");

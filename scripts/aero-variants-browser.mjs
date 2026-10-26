@@ -53,7 +53,7 @@ try {
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     assert.equal(await page.locator('link[href*="/shared/styles/layouts/aero-glass.css"]').count(), 0, "Aero CSS is not loaded for other themes");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
-    await page.locator("#settings-theme").selectOption("aero-glass");
+    await page.locator("#settings-theme").selectOption("aero-glass", { force: true });
     await page.waitForFunction(() => document.querySelector("#bits-theme-stylesheet")?.sheet);
     assert.equal(await page.locator("#settings-variant").inputValue(), "classic", "Existing Aero users retain the original variant");
     assert.deepEqual(await page.locator("#settings-variant option").evaluateAll(options => options.map(option => option.value)), ["classic", ...Object.keys(palettes)]);
@@ -65,7 +65,7 @@ try {
     const backgrounds = new Set();
     for (const variant of Object.keys(palettes)) {
       for (const scheme of ["dark", "light"]) {
-        await page.locator("#settings-variant").selectOption(variant);
+        await page.locator("#settings-variant").selectOption(variant, { force: true });
         await page.locator("#settings-scheme").selectOption(scheme);
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         assert.equal(await page.locator("html").getAttribute("data-theme-variant"), variant);
@@ -87,15 +87,15 @@ try {
     }
     assert.equal(backgrounds.size, 10, "Both palettes of all five variants must have visibly distinct desktop backgrounds");
     await page.locator("#settings-scheme").selectOption("dark");
-    await page.locator("#settings-variant").selectOption("classic");
+    await page.locator("#settings-variant").selectOption("classic", { force: true });
     assert.deepEqual(await page.locator("#interface-shell").evaluate(element => {
       const style = getComputedStyle(element);
       return [style.background, style.border, style.boxShadow];
     }), classic, "Returning to Classic restores the original Aero styling exactly");
-    await page.locator("#settings-variant").selectOption("vista");
+    await page.locator("#settings-variant").selectOption("vista", { force: true });
     await page.keyboard.press("Escape");
-    await page.locator(".app-menu").filter({ has: page.locator("#interface-variant-select") }).locator("summary").click();
-    await page.locator("#interface-variant-select").selectOption("windows-7");
+    await page.locator(".app-menu").filter({ has: page.locator("#interface-variant-select") }).locator(":scope > summary").click();
+    await page.locator("#interface-variant-select").selectOption("windows-7", { force: true });
     assert.equal(await page.locator("#settings-variant").inputValue(), "windows-7", "The View picker also updates Settings");
     await page.reload({ waitUntil: "networkidle" });
     assert.equal(await page.locator("html").getAttribute("data-theme-variant"), "windows-7", "Variant selection persists after reload");

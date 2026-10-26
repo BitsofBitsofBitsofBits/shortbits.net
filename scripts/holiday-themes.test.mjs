@@ -7,6 +7,7 @@ const themeSource = readFileSync(new URL("../shared/scripts/theme-init.js", impo
 const calendarSource = readFileSync(new URL("../shared/scripts/seasonal-calendar.js", import.meta.url), "utf8");
 const preferenceSource = themeSource.slice(0, themeSource.indexOf("function getColorSchemePreference()"));
 const optionsSource = themeSource.slice(themeSource.indexOf("function buildThemeOptions("), themeSource.indexOf("function getPageId("));
+const groupsSource = themeSource.slice(themeSource.indexOf("function getThemeGroups("), themeSource.indexOf("function buildThemeOptions("));
 const effectsSource = readFileSync(new URL("../online/scripts/theme-effects.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
@@ -56,14 +57,30 @@ function themesOn(year, month, day, preferences = {}) {
     },
   };
   vm.runInNewContext(`String.prototype.localeCompare = () => { throw new Error("Theme startup must not initialize locale collation."); };
-    ${calendarSource}\n${preferenceSource}\n${optionsSource}
+    ${calendarSource}\n${preferenceSource}\n${groupsSource}\n${optionsSource}
     globalThis.api = {
       state: seasonalThemeState, initial: initialInterfaceTheme.id,
       catalog: seasonalInterfaceThemes, select: selectInterfaceTheme,
-      resolve: resolveInterfaceTheme, buildOptions: buildThemeOptions
+      resolve: resolveInterfaceTheme, buildOptions: buildThemeOptions, getGroups: getThemeGroups
     };`, context);
   return { ...context.api, available: context.window.BITS_INTERFACE_THEMES, stored };
 }
+
+test("Theme families include every available theme exactly once and keep macOS subthemes together", () => {
+  for (const preferences of [{}, { "bits-theme-debug": "enabled" }]) {
+    const { available, getGroups } = themesOn(2026, 10, 22, preferences);
+    const groups = getGroups();
+    const ids = Array.from(groups).flatMap(group => Array.from(group.themes, theme => theme.id));
+    assert.equal(new Set(ids).size, ids.length);
+    assert.deepEqual([...ids].sort(), Array.from(available, theme => theme.id).sort());
+    assert.deepEqual(Array.from(groups.find(group => group.name === "macOS").themes, theme => theme.id).sort(),
+      ["aqua", "mac-os-9", "macos"]);
+    assert.ok(groups.every(group => group.themes.length > 0));
+    const seasonal = groups.find(group => group.name === "Seasonal");
+    assert.equal(Boolean(seasonal), preferences["bits-theme-debug"] === "enabled");
+    assert.ok(!seasonal || seasonal.themes.every(theme => theme.seasonal));
+  }
+});
 
 test("fixed uppercase ASCII theme names keep the same alphabetical order without locale initialization", () => {
   const { available } = themesOn(2026, 10, 22, { "bits-theme-debug": "enabled" });

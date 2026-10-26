@@ -47,6 +47,10 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   It is also the default `RESUME.PDF` target when no external résumé URL is set.
 
 - Theme-driven, high-contrast, and reduced-motion display profiles
+  - Online's View menu and Control Panel use expandable family menus, then
+    subthemes and variants (for example, macOS > Aqua > Graphite), instead of a
+    single long theme dropdown. Experimental layouts are marked, and saved theme
+    IDs, per-theme variants, random selection, and seasonal availability are preserved.
 
 - The Online profile header uses the favicon as Caleb's profile picture on the
   left, with the interactive bit avatar on the right. On smaller screens, both

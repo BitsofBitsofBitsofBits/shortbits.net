@@ -31,6 +31,7 @@ node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
 node scripts/aero-variants-browser.mjs --root .site-build
 node scripts/theme-collection-browser.mjs --root .site-build
+node scripts/theme-picker-browser.mjs --root .site-build
 node scripts/messages-browser.mjs --root .site-build
 node scripts/critical-css-browser.mjs --root .site-build
 npm run audit

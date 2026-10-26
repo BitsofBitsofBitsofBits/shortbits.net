@@ -879,6 +879,27 @@ function getLastStandardThemeId() {
   return storedTheme && !storedTheme.experimental ? storedTheme.id : "default";
 }
 
+function getThemeGroups() {
+  const families = [
+    ["Essentials", ["default", "high-contrast"]],
+    ["macOS", ["macos", "aqua", "mac-os-9"]],
+    ["Windows", ["windows-31", "windows-95", "windows-xp", "aero-glass", "windows-8", "windows-10", "windows-11", "mica", "fluent"]],
+    ["Terminals & retro computers", ["terminal", "amber-crt", "dos-blue", "matrix", "termius", "legacy-bios", "uefi", "commodore-64", "ubuntu"]],
+    ["Games & consoles", ["game-bit", "atari", "playstation", "xbox", "minebits"]],
+    ["Media & web", ["spotify", "winamp", "ipod-classic", "youtube", "youtube-music", "m365", "google", "browser"]],
+    ["Color palettes", ["solarized", "nord", "dracula", "catppuccin", "gruvbox", "tokyo-night", "monokai", "rgb", "midnight-oled"]],
+    ["Atmospheres & materials", []],
+    ["Seasonal", []],
+  ];
+  const groups = families.map(([name]) => ({ name, themes: [] }));
+  for (const theme of window.BITS_INTERFACE_THEMES) {
+    const index = theme.seasonal ? families.length - 1
+      : families.findIndex(([, ids]) => ids.includes(theme.id));
+    groups[index < 0 ? families.length - 2 : index].themes.push(theme);
+  }
+  return groups.filter(group => group.themes.length);
+}
+
 function buildThemeOptions(formatLabel = (label) => label) {
   const createOption = (theme) => {
     const option = document.createElement("option");
@@ -990,6 +1011,7 @@ window.BITS_THEME_PREFERENCE = {
   getTheme: getThemeById,
   getLastStandard: getLastStandardThemeId,
   buildOptions: buildThemeOptions,
+  getGroups: getThemeGroups,
   colorSchemeKey,
   colorSchemeOptions,
   select: selectInterfaceTheme,

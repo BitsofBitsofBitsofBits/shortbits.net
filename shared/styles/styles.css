@@ -3036,6 +3036,92 @@ html.is-page-hidden * {
   color: var(--accent);
 }
 
+.theme-picker-native {
+  display: none !important;
+}
+
+.theme-picker {
+  width: 100%;
+  min-width: 0;
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.app-menu-popup .theme-picker {
+  width: min(340px, calc(100vw - 64px));
+}
+
+.theme-picker > summary,
+.theme-picker .theme-picker-branch > summary {
+  padding: 10px 12px;
+  min-height: 44px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  background: var(--panel-2);
+  font: inherit;
+  letter-spacing: normal;
+}
+
+.theme-picker > summary {
+  border: 1px solid var(--border-strong);
+}
+
+.theme-picker-list {
+  max-height: min(420px, 55vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+}
+
+.theme-picker .theme-picker-branch {
+  margin-block: 4px;
+}
+
+.theme-picker-branch > .theme-picker-branch,
+.theme-picker .theme-picker-choice {
+  margin-left: 10px;
+  width: calc(100% - 10px);
+}
+
+.theme-picker .theme-picker-choice {
+  display: block;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.theme-picker .theme-picker-choice[aria-pressed="true"] {
+  border-color: var(--accent);
+  font-weight: 700;
+  background: var(--accent-soft);
+}
+
+.theme-picker summary:hover,
+.theme-picker .theme-picker-choice:hover {
+  background: var(--accent-soft);
+}
+
+.theme-picker summary:focus-visible,
+.theme-picker .theme-picker-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+
 .arcade-window {
   max-width: none;
   max-height: none;

@@ -10,6 +10,15 @@
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
 
+- Online's View menu and Control Panel use expandable theme families with
+  subthemes and variants. For example, **macOS > Aqua > Graphite** or
+  **Windows > Aero Glass > Vista**. The selected path is shown on the picker;
+  menus support keyboard navigation and Escape, scroll within a bounded panel,
+  and mark experimental layouts. Existing theme/variant preferences are unchanged.
+  Other public pages retain their native theme and variant dropdowns.
+  Run `node scripts/theme-picker-browser.mjs --root .site-build` to verify
+  desktop/mobile selection, synchronization, persistence, and accessibility.
+
 - Fifty-five persistent full-interface themes, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
@@ -38,7 +47,8 @@
   Aero Glass includes **Classic** (the unchanged existing look), **Windows 7**
   (sky-blue glass and brighter desktop light), and **Vista** (smokier glass with
   green-blue aurora accents), plus **Graphite**, **Rose**, and **Frost**.
-  Select Aero Glass, then use **Variant** in View or Settings.
+  On Online, expand **Windows > Aero Glass** in View or Settings and choose a variant.
+  Other public pages expose the same choices in their **Variant** dropdown.
   All five alternate variants offer dark/light palettes, persist across shared
   public pages, and use original CSS gradients rather than bundled Windows
   wallpapers or artwork. Their stylesheet loads only while Aero Glass is active;
@@ -49,8 +59,8 @@
 - Experimental layout themes that restyle the whole interface rather than just
   its colors: Windows 10, Windows 11, Windows 8 (Metro), Termius, YouTube
   (BitsTube), YouTube Music, Bits 365, Google, Browser, and Legacy BIOS. They
-  are grouped under EXPERIMENTAL LAYOUTS in every
-  theme picker, show a dismissible experimental notice with a one-click way
+  are marked **experimental** within Online's theme families and grouped under
+  EXPERIMENTAL LAYOUTS in native dropdowns. They show a dismissible experimental notice with a one-click way
   back to the last standard theme, and are skipped by RANDOM THEME. Windows 8,
   10, and 11 also restyle the BITS OS desktop; the others temporarily switch the
   desktop to the last standard theme (with a notification) and come back when

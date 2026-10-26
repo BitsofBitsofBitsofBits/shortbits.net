@@ -524,6 +524,7 @@ document.addEventListener("keydown", (event) => {
   );
   if (
     event.key === "Escape"
+    && !event.target.closest?.(".theme-picker[open]")
     && !blockingInterface
     && activeDesktopWindow
     && !activeDesktopWindow.hidden

@@ -82,7 +82,7 @@ try {
     await page.addScriptTag({ path: axePath });
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
     for (const theme of themes) {
-      await page.locator("#settings-theme").selectOption(theme);
+      await page.locator("#settings-theme").selectOption(theme, { force: true });
       await waitForTheme(page, theme);
       assert.equal(await page.locator("#interface-theme-select").inputValue(), theme, "View follows Settings");
       assert.equal(await page.locator("#settings-variant").isVisible(), false);
@@ -109,19 +109,19 @@ try {
       await page.emulateMedia({ forcedColors: "none" });
     }
     for (const [theme, variant] of [["terminal", "amber"], ["minebits", "mushroom-fields"]]) {
-      await page.locator("#settings-theme").selectOption(theme);
+      await page.locator("#settings-theme").selectOption(theme, { force: true });
       await waitForTheme(page, theme);
-      await page.locator("#settings-variant").selectOption(variant);
+      await page.locator("#settings-variant").selectOption(variant, { force: true });
       await settle(page);
       assert.equal(await page.locator("#interface-variant-select").inputValue(), variant);
       await audit(page, `${width}px ${theme}/${variant}`);
     }
     assert.deepEqual(auditFailures, [], "All theme palettes must pass accessibility checks");
-    await page.locator("#settings-theme").selectOption("blueprint");
+    await page.locator("#settings-theme").selectOption("blueprint", { force: true });
     await waitForTheme(page, "blueprint");
     await page.keyboard.press("Escape");
-    await page.locator(".app-menu").filter({ has: page.locator("#interface-theme-select") }).locator("summary").click();
-    await page.locator("#interface-theme-select").selectOption("museum");
+    await page.locator(".app-menu").filter({ has: page.locator("#interface-theme-select") }).locator(":scope > summary").click();
+    await page.locator("#interface-theme-select").selectOption("museum", { force: true });
     await waitForTheme(page, "museum");
     assert.equal(await page.locator("#settings-theme").inputValue(), "museum", "Settings follows View");
     await page.reload({ waitUntil: "networkidle" });
@@ -135,7 +135,7 @@ try {
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
-    await page.locator("#settings-theme").selectOption("eink-reader");
+    await page.locator("#settings-theme").selectOption("eink-reader", { force: true });
     await waitForTheme(page, "eink-reader");
     assert.equal(await page.locator("#settings-eink-refresh").isChecked(), false, "Refresh defaults off");
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -150,7 +150,7 @@ try {
     await page.locator("#settings-effects").uncheck();
     await page.waitForFunction(() => !document.querySelector(".eink-refresh-overlay"));
     await page.locator("#settings-effects").check();
-    await page.locator("#settings-theme").selectOption("holographic");
+    await page.locator("#settings-theme").selectOption("holographic", { force: true });
     await waitForTheme(page, "holographic");
     await page.mouse.move(width / 3, 120);
     await page.waitForFunction(() => document.documentElement.style.getPropertyValue("--foil-x"));
@@ -161,7 +161,7 @@ try {
     await page.mouse.move(width / 2, 130);
     await settle(page);
     assert.equal(await page.locator("html").evaluate(root => root.style.getPropertyValue("--foil-x")), "");
-    await page.locator("#settings-theme").selectOption("eink-reader");
+    await page.locator("#settings-theme").selectOption("eink-reader", { force: true });
     await waitForTheme(page, "eink-reader");
     assert.equal(await page.locator("#settings-eink-refresh").isChecked(), true, "Refresh preference survives switching themes");
     await page.emulateMedia({ reducedMotion: "no-preference" });
