@@ -228,7 +228,7 @@
   :root[data-interface-theme="youtube"] .content-file-grid .yt-thumb-play { font-size: 20px; }
   :root[data-interface-theme="youtube"] .link-grid { grid-template-columns: 1fr; }
   :root[data-interface-theme="youtube"] #interface-shell > .profile { grid-template-columns: minmax(0, 1fr) 64px; gap: 14px; }
-  :root[data-interface-theme="youtube"] .profile > .profile-picture { max-width: 64px; }
+  :root[data-interface-theme="youtube"] .profile > .profile-portrait { max-width: 64px; }
   :root[data-interface-theme="youtube"] .profile > .avatar-wrap { width: 64px; }
   :root[data-interface-theme="youtube"] .profile > .identity { grid-column: 1 / -1; grid-row: 2; }
   :root[data-interface-theme="youtube"] .profile > .avatar-wrap { grid-column: 2; grid-row: 1; }

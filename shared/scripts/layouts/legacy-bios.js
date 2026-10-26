@@ -59,7 +59,7 @@
       ['PnP/PCI Configurations', '/professional/#skills', 'skills', 'Inspect supported platforms, technical skills, and tools.'],
       ['PC Health Status', '/blog/', 'blog', 'Read the event log: project updates, notes, and blog entries.'],
       ['Set Supervisor Password', '/professional/#contact', 'contact', 'Open contact options. This site does not set a BIOS password.'],
-      ['Save & Exit Setup', '/online/', 'online', 'Leave setup and launch the Online desktop. Its last compatible theme will be used.'],
+      ['Save & Exit Setup', '/online/', 'online', 'Leave this page and launch the Online profile. Minimize its main interface to open the setup-style app workspace.'],
     ];
     const plainLabels = ['Boot Device Priority', 'System Information', 'Peripheral Configuration', 'Power-On Diagnostics', 'Supported Platforms', 'System Event Log', 'Contact Administrator', 'Exit to Desktop'];
     const help = make('aside', 'bios-item-help');

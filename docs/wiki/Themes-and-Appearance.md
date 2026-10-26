@@ -61,12 +61,34 @@
   (BitsTube), YouTube Music, Bits 365, Google, Browser, and Legacy BIOS. They
   are marked **experimental** within Online's theme families and grouped under
   EXPERIMENTAL LAYOUTS in native dropdowns. They show a dismissible experimental notice with a one-click way
-  back to the last standard theme, and are skipped by RANDOM THEME. Windows 8,
-  10, and 11 also restyle the BITS OS desktop; the others temporarily switch the
-  desktop to the last standard theme (with a notification) and come back when
-  the desktop is closed. Each layout lives in `shared/styles/layouts/<id>.css`
+  back to the last standard theme, and are skipped by RANDOM THEME. All ten
+  retain their selected theme when the main Online interface is minimized:
+  Windows 8 uses Start tiles and an app switcher; Windows 10/11 use Start,
+  pinned app launchers, a running-app taskbar, and floating windows. Browser
+  uses app tabs and a `bits://<app>` address/command bar; Termius uses local
+  sessions and `open <app>` commands (not real SSH). Bits 365 includes recent
+  apps and document-style panels; Google offers app search and workspace
+  panels; BitsTube has category cards and focused viewers. Bits Music offers
+  collections, real Spotify status, and the existing music app/links, not
+  simulated audio playback. Legacy BIOS uses keyboard-friendly setup pages
+  for real site tools, not actual firmware; arrows select apps, Enter opens,
+  and F10 returns to the main site.
+
+  Every workspace includes all available apps, Settings, desktop utilities,
+  and a Main site exit. Ctrl/Cmd+K focuses app search. Open apps keep their
+  original contents and shareable URLs across view/theme switches; tabbed
+  layouts use the existing window controls without dragging/resizing.
+  Desktop-only apps remain desktop-only on narrow screens. Experimental
+  labels remain in place. The workspace script/styles are downloaded only
+  on first entering an experimental desktop, never during normal startup;
+  a visible retry message is shown if loading fails. Run
+  `node scripts/desktop-workspaces-browser.mjs --root .site-build` for
+  desktop/mobile app, utility, command, lifecycle, URL, and accessibility checks.
+
+  Each page layout lives in `shared/styles/layouts/<id>.css`
   and `shared/scripts/layouts/<id>.js` and is only downloaded while that theme
   is active; `shared/scripts/layouts/runtime.js` mounts and unmounts layout chrome
+  while `online/scripts/desktop-workspaces.js` manages the native app workspaces.
 
 - A shared COLOR MODE preference (Theme default, Dark, or Light) on the online
   app menu, Settings, `/boot`, and `/professional`. Most themes have a dark and

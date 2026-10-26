@@ -135,7 +135,9 @@
     edge.addEventListener("mouseleave", event => { if (!panel.contains(event.relatedTarget) && event.relatedTarget !== toggle) close(); });
     edge.addEventListener("focusin", open);
     edge.addEventListener("focusout", event => { if (!edge.contains(event.relatedTarget)) close(); });
-    const keyHandler = event => { if (event.key === "Escape") { close(); toggle.focus(); } };
+    const keyHandler = event => {
+      if (event.key === "Escape" && !document.body.dataset.desktopWorkspace) { close(); toggle.focus(); }
+    };
     document.addEventListener("keydown", keyHandler);
     cleanups.push(() => document.removeEventListener("keydown", keyHandler));
     edge.append(toggle, panel);

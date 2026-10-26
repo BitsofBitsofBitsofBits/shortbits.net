@@ -63,6 +63,33 @@ function updateDesktopWindowCount() {
   );
 }
 
+function getDesktopWindowCatalog() {
+  return desktopWindows.map((element) => ({
+    slug: getDesktopWindowSlug(element),
+    title: document.getElementById(element.getAttribute("aria-labelledby"))?.textContent.trim()
+      || getDesktopWindowSlug(element),
+    desktopOnly: element.hasAttribute("data-desktop-only"),
+  }));
+}
+
+function getDesktopWindowState() {
+  return getDesktopWindowCatalog().filter(({ slug }) => !desktopWindowsBySlug.get(slug).hidden)
+    .map((app) => {
+      const element = desktopWindowsBySlug.get(app.slug);
+      return {
+        ...app,
+        minimized: element.classList.contains("is-minimized"),
+        active: activeDesktopWindow === element && !element.classList.contains("is-minimized"),
+      };
+    });
+}
+
+function publishDesktopWindowState() {
+  window.dispatchEvent(new CustomEvent("desktop-window:state", {
+    detail: { windows: getDesktopWindowState() },
+  }));
+}
+
 function focusDesktopWindow(windowElement) {
   const otherOpenWindows = desktopWindows.filter((candidate) => (
     candidate !== windowElement && !candidate.hidden
@@ -72,6 +99,10 @@ function focusDesktopWindow(windowElement) {
   });
   windowElement.style.zIndex = String(30 + otherOpenWindows.length);
   activeDesktopWindow = windowElement;
+  desktopWindows.forEach((candidate) => {
+    candidate.classList.toggle("is-workspace-active", candidate === windowElement);
+  });
+  publishDesktopWindowState();
 }
 
 function constrainDesktopWindow(windowElement, x, y) {
@@ -214,7 +245,7 @@ function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
 
 function closeDesktopWindow(windowElement, syncUrl = true) {
   windowElement.hidden = true;
-  windowElement.classList.remove("is-minimized");
+  windowElement.classList.remove("is-minimized", "is-workspace-active");
   updateDesktopWindowCount();
   const remainingOpen = desktopWindows.filter((candidate) => !candidate.hidden).length;
 
@@ -235,6 +266,7 @@ function closeDesktopWindow(windowElement, syncUrl = true) {
       windowId: windowElement.id,
     },
   }));
+  publishDesktopWindowState();
 }
 
 function applyDesktopWindowUrl() {
@@ -260,7 +292,7 @@ function applyDesktopWindowUrl() {
 function resetDesktopWindowLayout() {
   desktopWindows.forEach((windowElement) => {
     windowElement.hidden = true;
-    windowElement.classList.remove("is-minimized", "is-dragging", "is-resizing");
+    windowElement.classList.remove("is-minimized", "is-dragging", "is-resizing", "is-workspace-active");
     windowElement.removeAttribute("style");
     delete windowElement.dataset.positioned;
     delete windowElement.dataset.launcherId;
@@ -270,6 +302,7 @@ function resetDesktopWindowLayout() {
   resizeState = null;
   updateDesktopWindowCount();
   syncDesktopWindowUrl();
+  publishDesktopWindowState();
 }
 
 function toggleDesktopWindowMinimized(windowElement) {
@@ -330,6 +363,7 @@ desktopWindows.forEach((windowElement) => {
     if (
       event.button !== 0
       || event.target.closest("button")
+      || document.body.dataset.workspaceMode === "tabbed"
       || windowElement.hasAttribute("data-window-fullscreen")
       || window.matchMedia("(max-width: 640px)").matches
     ) {
@@ -388,6 +422,7 @@ desktopWindows.forEach((windowElement) => {
       if (
         event.button !== 0
         || windowElement.classList.contains("is-minimized")
+        || document.body.dataset.workspaceMode === "tabbed"
         || windowElement.hasAttribute("data-window-fullscreen")
         || window.matchMedia("(max-width: 640px)").matches
       ) {
@@ -436,6 +471,7 @@ desktopWindows.forEach((windowElement) => {
   resizeHandle?.addEventListener("keydown", (event) => {
     if (
       !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+      || document.body.dataset.workspaceMode === "tabbed"
       || windowElement.classList.contains("is-minimized")
     ) {
       return;
@@ -499,6 +535,9 @@ window.addEventListener("resize", () => {
         closeDesktopWindow(windowElement);
         return;
       }
+      if (document.body.dataset.workspaceMode === "tabbed") {
+        return;
+      }
       if (windowElement.hasAttribute("data-window-fullscreen")) {
         windowElement.style.left = "8px";
         windowElement.style.top = "8px";
@@ -525,6 +564,7 @@ document.addEventListener("keydown", (event) => {
   if (
     event.key === "Escape"
     && !event.target.closest?.(".theme-picker[open]")
+    && !event.target.closest?.(".workspace-launcher[open], .workspace-tools[open]")
     && !blockingInterface
     && activeDesktopWindow
     && !activeDesktopWindow.hidden
@@ -534,6 +574,8 @@ document.addEventListener("keydown", (event) => {
 }, { capture: true });
 
 window.BITS_DESKTOP_WINDOWS = {
+  catalog: getDesktopWindowCatalog,
+  state: getDesktopWindowState,
   getShareUrl() {
     syncDesktopWindowUrl();
     return window.location.href;
@@ -544,6 +586,21 @@ window.BITS_DESKTOP_WINDOWS = {
       throw new Error(`Unknown desktop window: ${slug}`);
     }
     openDesktopWindow(windowElement);
+  },
+  close(slug) {
+    const element = desktopWindowsBySlug.get(slug);
+    if (!element) throw new Error(`Unknown desktop window: ${slug}`);
+    closeDesktopWindow(element);
+  },
+  minimize(slug) {
+    const element = desktopWindowsBySlug.get(slug);
+    if (!element || element.hidden) throw new Error(`Desktop window is not open: ${slug}`);
+    toggleDesktopWindowMinimized(element);
+  },
+  deactivate() {
+    activeDesktopWindow = null;
+    desktopWindows.forEach((element) => element.classList.remove("is-workspace-active"));
+    publishDesktopWindowState();
   },
   resetLayout: resetDesktopWindowLayout,
 };

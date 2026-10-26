@@ -1367,10 +1367,51 @@ function setFakeDesktopVisible(visible) {
     closeFakeDesktopApps();
   }
   syncDesktopThemeFallback();
+  window.dispatchEvent(new CustomEvent("bits:desktop-visibility"));
 }
 
 let desktopFallbackThemeId = "";
 let isApplyingDesktopFallback = false;
+let desktopWorkspaceLoading = false;
+
+async function loadDesktopWorkspace() {
+  if (window.BITS_DESKTOP_WORKSPACE || desktopWorkspaceLoading) return;
+  desktopWorkspaceLoading = true;
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "/online/styles/desktop-workspaces.css?v=workspace-1";
+  const script = document.createElement("script");
+  script.src = "/online/scripts/desktop-workspaces.js?v=workspace-1";
+  const load = (element) => new Promise((resolve, reject) => {
+    element.addEventListener("load", resolve, { once: true });
+    element.addEventListener("error", () => reject(new Error(`Unable to load ${element.href || element.src}`)), { once: true });
+    document.head.append(element);
+  });
+  try {
+    await load(stylesheet);
+    await load(script);
+    document.querySelector("#desktop-workspace-error")?.remove();
+  } catch (error) {
+    stylesheet.remove();
+    script.remove();
+    console.error("Unable to load the experimental desktop workspace:", error);
+    let notice = document.querySelector("#desktop-workspace-error");
+    if (!notice) {
+      notice = document.createElement("p");
+      notice.id = "desktop-workspace-error";
+      notice.setAttribute("role", "alert");
+      notice.append("The experimental workspace could not load. The regular desktop is still available. ");
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.textContent = "Retry workspace";
+      retry.addEventListener("click", loadDesktopWorkspace);
+      notice.append(retry);
+      fakeDesktop.prepend(notice);
+    }
+  } finally {
+    desktopWorkspaceLoading = false;
+  }
+}
 
 function syncDesktopThemeFallback() {
   const preference = window.BITS_THEME_PREFERENCE;
@@ -1379,6 +1420,9 @@ function syncDesktopThemeFallback() {
   }
   const desktopVisible = !fakeDesktop.hidden;
   const activeTheme = preference.getTheme(document.documentElement.dataset.interfaceTheme);
+  if (desktopVisible && activeTheme?.experimental && activeTheme.desktopCapable) {
+    loadDesktopWorkspace();
+  }
   isApplyingDesktopFallback = true;
   try {
     if (desktopVisible && activeTheme?.experimental && !activeTheme.desktopCapable) {

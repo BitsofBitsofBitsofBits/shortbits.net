@@ -56,7 +56,7 @@
 :root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log,:root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log *{color:#d9f2df!important;text-shadow:none!important}
 :root[data-interface-theme="m365"] .endless-boot-terminal .endless-boot-log li{border-color:#46564d}
 :root[data-interface-theme="m365"] .endless-boot-transmission{color:var(--ink)}:root[data-interface-theme="m365"] .endless-boot-transmission>span{color:var(--muted)}
-@media(max-width:760px){:root[data-interface-theme="m365"] .profile{grid-template-columns:minmax(0,1fr) 96px;gap:16px}:root[data-interface-theme="m365"] .profile > .profile-picture{max-width:96px}:root[data-interface-theme="m365"] .profile > .identity{grid-column:1 / -1;grid-row:2}:root[data-interface-theme="m365"] .profile > .avatar-wrap{grid-column:2;grid-row:1;width:96px;height:96px}}
+@media(max-width:760px){:root[data-interface-theme="m365"] .profile{grid-template-columns:minmax(0,1fr) 96px;gap:16px}:root[data-interface-theme="m365"] .profile > .profile-portrait{max-width:96px}:root[data-interface-theme="m365"] .profile > .identity{grid-column:1 / -1;grid-row:2}:root[data-interface-theme="m365"] .profile > .avatar-wrap{grid-column:2;grid-row:1;width:96px;height:96px}}
 :root[data-interface-theme="m365"] [hidden]{display:none!important}
 :root[data-interface-theme="m365"] #app-menu-bar{display:flex;position:relative;gap:4px;min-height:40px;margin:0 0 22px;padding:4px;border:1px solid var(--border);border-radius:4px;color:var(--ink);background:var(--panel);box-shadow:var(--shadow)}
 :root[data-interface-theme="m365"] #app-menu-bar .app-menu>summary{padding:6px 12px;border-radius:3px;color:var(--ink);font:500 13px/20px var(--font-family);cursor:pointer}

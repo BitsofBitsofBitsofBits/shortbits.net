@@ -3725,6 +3725,20 @@ html.is-page-hidden * {
   padding: 48px 44px 38px;
 }
 
+.profile-portrait {
+  width: 100%;
+  max-width: 150px;
+  margin: 0;
+}
+
+.profile-portrait figcaption {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .profile-picture {
   display: block;
   width: 100%;
@@ -14964,7 +14978,7 @@ html.is-root-mode .name-field {
     justify-self: end;
   }
 
-  .profile > .profile-picture {
+  .profile > .profile-portrait {
     max-width: 126px;
   }
 

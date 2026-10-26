@@ -368,8 +368,8 @@ const baseInterfaceThemes = [
     experimental: true,
     desktopCapable: true,
   },
-  { id: "termius", name: "TERMIUS", darkColor: "#141729", lightColor: "#eef0f7", experimental: true },
-  { id: "youtube", name: "YOUTUBE", darkColor: "#0f0f0f", lightColor: "#ffffff", experimental: true },
+  { id: "termius", name: "TERMIUS", darkColor: "#141729", lightColor: "#eef0f7", experimental: true, desktopCapable: true },
+  { id: "youtube", name: "YOUTUBE", darkColor: "#0f0f0f", lightColor: "#ffffff", experimental: true, desktopCapable: true },
   {
     id: "m365",
     name: "BITS 365",
@@ -377,6 +377,7 @@ const baseInterfaceThemes = [
     lightColor: "#faf9f8",
     nativeScheme: "light",
     experimental: true,
+    desktopCapable: true,
   },
   {
     id: "google",
@@ -385,6 +386,7 @@ const baseInterfaceThemes = [
     lightColor: "#ffffff",
     nativeScheme: "light",
     experimental: true,
+    desktopCapable: true,
   },
   {
     id: "browser",
@@ -393,6 +395,7 @@ const baseInterfaceThemes = [
     lightColor: "#dee1e6",
     nativeScheme: "light",
     experimental: true,
+    desktopCapable: true,
     variants: [
       { id: "chrome", name: "CHROME" },
       { id: "firefox", name: "FIREFOX", darkColor: "#1c1b22", lightColor: "#f0f0f4" },
@@ -426,6 +429,7 @@ const baseInterfaceThemes = [
     lightColor: "#0000a8",
     schemes: ["dark"],
     experimental: true,
+    desktopCapable: true,
     variants: [
       { id: "award", name: "AWARD" },
       { id: "phoenix", name: "PHOENIX", darkColor: "#a8a8a8" },
@@ -439,9 +443,10 @@ const baseInterfaceThemes = [
     lightColor: "#030303",
     schemes: ["dark"],
     experimental: true,
+    desktopCapable: true,
   },
 ];
-const layoutAssetVersion = "layouts-7";
+const layoutAssetVersion = "layouts-8";
 const lastStandardThemeKey = "bits-last-standard-theme";
 const themeVariantKey = "bits-theme-variants";
 
