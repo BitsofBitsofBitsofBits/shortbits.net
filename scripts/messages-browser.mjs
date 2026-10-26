@@ -46,7 +46,10 @@ try {
       const schedule = window.setTimeout.bind(window);
       window.setTimeout = (callback, delay, ...args) => {
         const timer = schedule(callback, delay, ...args);
-        if (typeof callback === "function" && callback.name === "updateMessage") window.__messageTimer = timer;
+        if (typeof callback === "function" && callback.name === "updateMessage") {
+          window.__messageTimer = timer;
+          if (window.__pauseMessageTypewriter) window.clearTimeout(timer);
+        }
         return timer;
       };
     });
@@ -94,6 +97,8 @@ try {
     useMarkup = true;
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
     await page.evaluate(() => {
+      window.__pauseMessageTypewriter = true;
+      clearTimeout(window.__messageTimer);
       displayedMessageHistory.push(window.BITS_MESSAGES[0]);
       displayedMessageHistoryIndex = displayedMessageHistory.length;
       showPreviousSplash(-1);
@@ -155,6 +160,7 @@ try {
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].correctedText), markupRows[0].corrected_text);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].author), markupRows[0].author);
     await page.evaluate(() => {
+      window.__pauseMessageTypewriter = true;
       clearTimeout(window.__messageTimer);
       currentMessage = window.BITS_MESSAGES[0];
       currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
