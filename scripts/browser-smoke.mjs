@@ -183,6 +183,7 @@ try {
       window.dispatchEvent(new CustomEvent("admin:authenticated"));
       await window.BITS_PUBLISHING_UI.update(posts);
     }, savedPosts);
+    await page.locator('#blog-editor [data-admin-subsection="publishing"]').click();
     await page.locator('#blog-deployment-status[data-state="success"]').waitFor();
     const pendingPosts = savedPosts.filter((post) => post.slug !== "safe-markdown").map((post) => (
       post.slug === "first-lab-notes" ? { ...post, title: `${post.title} updated` } : post

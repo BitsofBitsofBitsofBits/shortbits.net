@@ -77,8 +77,13 @@ is a personal project and largely a learning exercise for me.
   help, account), a collapsible grouped left navigation that becomes a drawer
   on small screens, hash-routed pages such as `/admin/#/inbox`, a Home
   dashboard with quick actions and live counts, and right-side flyout panels
-  for messages, hardware import, live agents, and settings. Light, dark, or
-  system appearance is saved per device
+  for inbox messages and settings. Each module has its own subsection navigation,
+  which wraps into horizontal buttons on smaller screens. Larger editors split
+  into focused views (for example résumé profile/experience/education/certifications,
+  blog posts/editor/publishing, and hardware machines/import/live agents).
+  Switching subsections preserves unsaved form values; shared Save buttons still
+  submit the complete form, and validation reveals hidden fields that need attention.
+  Light, dark, or system appearance is saved per device
 - An accessible public `BLOG.LOG` with draft-aware Supabase publishing,
   semantic article pages, safe Markdown rendering, and a live Markdown preview
   in the Admin Portal
@@ -123,7 +128,7 @@ is a personal project and largely a learning exercise for me.
 - An Admin-managed `HARDWARE.SYS` window listing real machine specs grouped
   by machine. Admin edits each machine as its own card with a component list
   (add, remove, show or hide parts; rename or remove the whole machine).
-  Admin's **Import from a PC** flyout provides a read-only PowerShell
+  Admin's **Import from a PC** subsection provides a read-only PowerShell
   scan script (CPU, GPU, RAM, motherboard, storage, displays, OS; no serial
   numbers) that copies JSON to the clipboard for pasting back into the editor
   before saving. The scan names the machine from its system model, falling
@@ -135,7 +140,7 @@ is a personal project and largely a learning exercise for me.
   Admin's **Move up / Move down**
   controls and **Save hardware** persist the public device order, including
   live devices without component rows; new unordered devices appear afterward.
-- Optional live hardware agents: Admin's **Live agents** flyout issues a
+- Optional live hardware agents: Admin's **Live agents** subsection issues a
   per-machine device token (only its SHA-256 hash is stored, revocable at any
   time) and a PowerShell installer. The installer saves the token
   DPAPI-encrypted under `%LOCALAPPDATA%\BitsHardwareAgent` and registers a
@@ -356,9 +361,23 @@ is a personal project and largely a learning exercise for me.
   Corrections are cached and included in content backups. Export a fresh backup
   after deployment; earlier backups lack the new column and fail schema validation.
   After `20261025034000_scheduled_message_pools.sql`, each message row has explicit
-  **Edit** (scrolls to and focuses the populated editor) and **Delete** actions.
-  Under **Manage date-based pools and timezone**, create, rename, disable, or delete
-  custom pools, then select them in **Season / profile** to manage their messages.
+  **Edit** (expands an editor directly beneath that message and focuses it) and
+  **Delete** actions. **Add message** expands the same shared editor above the list;
+  click the expanded toggle again or **Close editor** to collapse it. Only one
+  editor is open at a time. Switching rows, changing pages/filters/search, closing,
+  or reloading confirms before discarding a message draft. Leaving the page with
+  unsaved message, pool, or calendar changes triggers the browser's unload warning.
+  Select individual rows or **Select page**, then **Enable selected**,
+  **Disable selected**, or **Delete selected**. Actions confirm the selected count
+  and affect only explicit IDs in the current pool/type on the current page
+  (at most 25 messages). Paging, filters/search, or reload clears selection.
+  Failed writes retain selection for retry; concurrent removals are reported with
+  the actual affected count rather than complete-success feedback. Deletion is
+  permanent; disabling retains entries for editing.
+  Under **Scheduled pools**, create, rename, disable, or delete custom pools,
+  then select them in **Season / profile** to manage their messages in **Messages**.
+  **Calendar** contains the timezone settings. Switching these subsections keeps
+  drafts intact and the pool selector remains available throughout.
   Pool deletion atomically removes all associated messages, including hidden ones.
   Built-in holiday definitions remain available and are not deleted by this UI.
   Schedules support inclusive one-time dates/ranges and annually recurring

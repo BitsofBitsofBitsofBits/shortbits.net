@@ -2153,6 +2153,7 @@ function importHardwareScan() {
   hardwareImportMachine.value = "";
   hardwareImportMachine.dataset.autofilled = "false";
   hardwareImportMachineHint.textContent = "";
+  window.BITS_ADMIN_SHELL?.showSubsection("hardware", "machines");
   card.scrollIntoView({ block: "nearest" });
   setAdminStatus(
     hardwareAdminStatus,

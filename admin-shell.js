@@ -78,6 +78,7 @@
   ];
   const modulesByRoute = new Map(modules.map((module) => [module.route, module]));
   const navItems = new Map();
+  const sectionViews = new Map();
   let currentRoute = "home";
   let activePanel = null;
   let pendingGoKey = false;
@@ -524,35 +525,95 @@
       legacyLabel?.classList.add("ac-legacy-label");
     });
 
-    document.querySelectorAll("#hardware-editor details.hardware-import").forEach((details, index, all) => {
+    document.querySelectorAll("#hardware-editor details.hardware-import").forEach((details, index) => {
       const body = details.querySelector(".hardware-import-body");
       if (!body) {
         return;
       }
-      let bar = document.querySelector("#ac-hardware-commandbar");
-      if (!bar) {
-        bar = document.createElement("div");
-        bar.id = "ac-hardware-commandbar";
-        bar.className = "ac-commandbar";
-        all[0].before(bar);
-      }
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "ac-command";
-      button.dataset.acHardwarePanel = String(index);
-      button.append(createIcon(index === 0 ? "upload" : "chip"), details.dataset.panelTitle || details.querySelector("summary").textContent);
-      button.addEventListener("click", () => {
-        openPanel({
-          title: details.dataset.panelTitle,
-          description: details.dataset.panelDescription,
-          content: body,
-          size: "large",
-          onClose: () => details.append(body),
-        });
-      });
-      bar.append(button);
-      details.hidden = true;
+      body.dataset.adminView = index === 0 ? "import" : "agents";
+      body.dataset.adminViewLabel = details.dataset.panelTitle || details.querySelector("summary").textContent;
+      body.classList.add("ac-form-pane");
+      details.replaceWith(body);
     });
+  }
+
+  function showSubsection(route, view, { focus = false } = {}) {
+    const state = sectionViews.get(route);
+    if (!state?.groups.has(view)) return false;
+    state.active = view;
+    state.groups.forEach((group, key) => {
+      group.panes.forEach((pane) => { pane.hidden = key !== view; });
+      if (key === view) group.button.setAttribute("aria-current", "page");
+      else group.button.removeAttribute("aria-current");
+    });
+    if (focus) state.groups.get(view).button.focus();
+    return true;
+  }
+
+  function prepareSectionNavigation() {
+    modules.forEach((module) => {
+      const section = document.getElementById(module.sourceId);
+      if (!section) return;
+      const layout = document.createElement("div");
+      layout.className = "ac-section-layout";
+      const nav = document.createElement("nav");
+      nav.className = "ac-section-nav";
+      nav.setAttribute("aria-label", `${module.label} subsections`);
+      const caption = document.createElement("p");
+      caption.className = "ac-section-nav-caption";
+      caption.textContent = "In this section";
+      nav.append(caption);
+      const body = document.createElement("div");
+      body.className = "ac-section-body";
+      [...section.children].filter((child) => !child.classList.contains("ac-legacy-label")).forEach((child) => body.append(child));
+      let panes = [...body.querySelectorAll("[data-admin-view]")];
+      if (!panes.length) {
+        const pane = document.createElement("div");
+        pane.className = "ac-form-pane";
+        pane.dataset.adminView = "manage";
+        pane.dataset.adminViewLabel = module.label;
+        pane.append(...body.childNodes);
+        body.append(pane);
+        panes = [pane];
+      }
+      const groups = new Map();
+      panes.forEach((pane, index) => {
+        const key = pane.dataset.adminView;
+        if (!groups.has(key)) groups.set(key, { label: pane.dataset.adminViewLabel, panes: [] });
+        if (!pane.hasAttribute("id")) pane.setAttribute("id", `ac-${module.route}-${key}-${index}`);
+        groups.get(key).panes.push(pane);
+      });
+      const defaultView = section.dataset.adminDefaultView || panes[0].dataset.adminView;
+      const ordered = [...groups.entries()].sort(([a], [b]) => Number(b === defaultView) - Number(a === defaultView));
+      ordered.forEach(([key, group]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.adminSubsection = key;
+        button.className = "ac-button";
+        button.textContent = group.label;
+        button.setAttribute("aria-controls", group.panes.map((pane) => pane.getAttribute("id")).join(" "));
+        button.addEventListener("click", () => showSubsection(module.route, key));
+        group.button = button;
+        nav.append(button);
+      });
+      sectionViews.set(module.route, { groups, active: defaultView });
+      layout.append(nav, body);
+      section.append(layout);
+      showSubsection(module.route, defaultView);
+      let invalidPending = false;
+      section.addEventListener("invalid", (event) => {
+        if (invalidPending) return;
+        const pane = event.target.closest("[data-admin-view]");
+        if (!pane) return;
+        invalidPending = true;
+        showSubsection(module.route, pane.dataset.adminView);
+        queueMicrotask(() => { invalidPending = false; });
+      }, true);
+    });
+    document.querySelector("#blog-admin-list").addEventListener("click", (event) => {
+      if (event.target.closest(".blog-admin-post-button")) showSubsection("blog", "editor");
+    }, true);
+    document.querySelector("#blog-post-new").addEventListener("click", () => showSubsection("blog", "editor"), true);
   }
 
   // Suite bar
@@ -860,6 +921,7 @@
   hydrateIcons();
   buildNav();
   prepareModules();
+  prepareSectionNavigation();
   buildHome();
   fluentCase();
   syncNavMode();
@@ -869,6 +931,7 @@
     openPanel,
     closePanel,
     navigate,
+    showSubsection,
     get route() {
       return currentRoute;
     },

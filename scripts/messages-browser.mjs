@@ -35,7 +35,7 @@ try {
   browser = await chromium.launch({
     ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}), headless: true,
   });
-  for (const width of [1440, 390]) {
+  for (const width of args.includes("--admin-only") ? [] : [1440, 390]) {
     const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
     let fail = false;
     let useMarkup = false;
@@ -192,6 +192,8 @@ try {
           window.__messageRows = ${JSON.stringify([
             ...Array.from({ length: 30 }, (_, index) => entry(index + 1, "messages", `Regular message ${index + 1}`)),
             entry(31, "bootMessages", "Seasonal boot fixture", "halloween"),
+            entry(100, "monitor.cpu", "Bulk deletion fixture one"),
+            entry(101, "monitor.cpu", "Bulk deletion fixture two"),
           ])};
           window.__poolRows = [];
           window.__messageSettings = [{ id: "primary", timezone: "America/Chicago" }];
@@ -206,6 +208,7 @@ try {
               const query = {
                 select() { return query; },
                 eq(key, value) { filters.push(row => row[key] === value); return query; },
+                in(key, values) { filters.push(row => values.includes(row[key])); return query; },
                 ilike(key, value) { filters.push(row => row[key].toLowerCase().includes(value.slice(1, -1).toLowerCase())); return query; },
                 order(key, options) { orderKey = key; descending = options?.ascending === false; return query; },
                 range(start, last) { offset = start; end = last; return query; },
@@ -238,7 +241,17 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    page.on("dialog", (dialog) => dialog.accept());
+    let acceptDialogs = true;
+    page.on("dialog", (dialog) => acceptDialogs ? dialog.accept() : dialog.dismiss());
+    const assertNoOverflow = async (label) => {
+      const result = await page.evaluate(() => ({
+        viewport: innerWidth, width: document.documentElement.scrollWidth,
+        nodes: [...document.querySelectorAll(".ac-module:not([hidden]) *")]
+          .filter(node => node.getBoundingClientRect().right > innerWidth + 2 || node.getBoundingClientRect().left < -2)
+          .slice(0, 12).map(node => ({ tag: node.tagName, id: node.getAttribute("id"), width: node.getBoundingClientRect().width, left: node.getBoundingClientRect().left, right: node.getBoundingClientRect().right })),
+      }));
+      assert.ok(result.width <= result.viewport + 2 && result.nodes.length === 0, `${label}: ${JSON.stringify(result)}`);
+    };
     await page.goto(`${server.origin}/admin/#/messages`, { waitUntil: "networkidle" });
     await page.evaluate(() => {
       loginView.hidden = true;
@@ -247,8 +260,169 @@ try {
     });
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 25);
     assert.equal(await page.locator("#message-library-editor").isVisible(), true);
+    assert.equal(await page.locator("#message-library-form").isVisible(), false, "The editor starts collapsed");
+    assert.equal(await page.locator("#message-bulk-delete").isDisabled(), true);
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator('[data-message-select="2"]').check();
+    assert.equal(await page.locator("#message-select-page").evaluate((field) => field.indeterminate), true);
+    assert.equal(await page.locator("#message-selected-count").textContent(), "2 selected");
+    await page.locator("#message-bulk-disable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 selected message(s) disabled."));
+    assert.equal(await page.evaluate(() => window.__messageRows.filter(row => [1, 2].includes(row.position)).every(row => !row.enabled)), true);
+    assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 3).enabled), true);
+    assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected");
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator('[data-message-select="2"]').check();
+    acceptDialogs = false;
+    await page.locator("#message-bulk-delete").click();
+    assert.equal(await page.evaluate(() => window.__messageRows.length), 33, "Cancelled bulk deletion must not write");
+    assert.equal(await page.locator("#message-selected-count").textContent(), "2 selected");
+    acceptDialogs = true;
+    await page.evaluate(() => { window.__messageFailure = true; });
+    await page.locator("#message-bulk-enable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").dataset.state === "error");
+    assert.equal(await page.locator("#message-selected-count").textContent(), "2 selected", "Failed writes keep the selection available to retry");
+    assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 1).enabled), false);
+    await page.evaluate(() => { window.__messageFailure = false; });
+    await page.locator("#message-bulk-enable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 selected message(s) enabled."));
+    assert.equal(await page.evaluate(() => window.__messageRows.every(row => row.enabled)), true);
+    await page.locator("#message-select-page").check();
+    assert.equal(await page.locator("#message-selected-count").textContent(), "25 selected");
     await page.locator("#message-page-next").click();
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 5);
+    assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected", "Selection does not cross pages");
+    assert.equal(await page.locator("#message-select-page").isChecked(), false);
+    await page.locator('[data-message-select]').first().check();
+    await page.locator("#message-category").selectOption("monitor.cpu");
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 2);
+    assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected", "Filters clear selection");
+    await page.locator('[data-message-select="100"]').check();
+    await page.locator("#message-bulk-delete").click();
+    await page.waitForFunction(() => !window.__messageRows.some(row => row.position === 100));
+    assert.equal(await page.evaluate(() => window.__messageRows.some(row => row.position === 101)), true, "Bulk delete only affects selected rows");
+    await page.locator("#message-select-page").check();
+    await page.locator("#message-bulk-delete").click();
+    await page.waitForFunction(() => document.querySelector(".message-library-empty") !== null);
+    assert.equal(await page.locator("#message-select-page").isDisabled(), true);
+    assert.equal(await page.evaluate(() => window.__messageRows.length), 31);
+    await page.locator("#message-category").selectOption("messages");
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 25);
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator('[data-message-select="2"]').check();
+    await page.evaluate(() => { window.__messageRows = window.__messageRows.filter(row => row.position !== 2); });
+    await page.locator("#message-bulk-enable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.includes("1 of 2"));
+    assert.equal(await page.locator("#message-library-status").getAttribute("data-state"), "error", "Concurrent removals must not report complete success");
+    await page.evaluate((row) => window.__messageRows.push(row), entry(2, "messages", "Regular message 2"));
+    await page.locator("#message-reload").click();
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 25 && !document.querySelector("#message-new").disabled);
+    await page.addScriptTag({ path: axePath });
+    for (const route of ["inbox", "guestbook", "resume", "now", "changelog", "messages", "blog", "games", "creators", "hardware", "playlists", "songs", "arcade", "pronouns", "shortbits", "backups"]) {
+      await page.evaluate((route) => window.BITS_ADMIN_SHELL.navigate(route), route);
+      await page.waitForFunction((route) => window.BITS_ADMIN_SHELL.route === route, route);
+      const module = page.locator(".ac-module:not([hidden])");
+      assert.equal(await module.count(), 1);
+      const buttons = module.locator(".ac-section-nav button");
+      assert.ok(await buttons.count() >= 1, `${route} has subsection navigation`);
+      for (const button of await buttons.all()) {
+        await button.click();
+        assert.equal(await button.getAttribute("aria-current"), "page");
+        const paneIds = (await button.getAttribute("aria-controls")).split(" ");
+        const pane = page.locator(`[id="${paneIds[0]}"]`);
+        if (!await pane.isVisible()) {
+          assert.fail(`${route}/${await button.getAttribute("data-admin-subsection")} is hidden: ${await pane.evaluate((node) => {
+            const parents = [];
+            for (let element = node; element; element = element.parentElement) {
+              parents.push({ tag: element.tagName, id: element.id, hidden: element.hidden, display: getComputedStyle(element).display });
+            }
+            return JSON.stringify(parents);
+          })}`);
+        }
+      }
+      await assertNoOverflow(`${route} subsections must not overflow at ${width}px`);
+      const issues = await module.evaluate(async (module) => (await axe.run(module, {
+        runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+      })).violations.map(issue => ({ id: issue.id, targets: issue.nodes.map(node => node.target) })));
+      assert.deepEqual(issues, [], `${width}px ${route} subsection accessibility`);
+    }
+    assert.deepEqual(await page.evaluate(() => {
+      const seen = new Set();
+      return [...document.querySelectorAll("[id]")].map(node => node.getAttribute("id")).filter(id => seen.has(id) || !seen.add(id));
+    }), [], "Subsections and shared editors keep unique element IDs");
+    await page.evaluate(() => {
+      window.BITS_ADMIN_SHELL.navigate("resume");
+      window.BITS_ADMIN_SHELL.showSubsection("resume", "profile");
+      document.querySelector('#resume-form [name="headline"]').value = "Unsaved profile draft";
+    });
+    await page.waitForFunction(() => window.BITS_ADMIN_SHELL.route === "resume");
+    const resumeData = await page.locator("#resume-form").evaluate((form) => [...new FormData(form)]);
+    await page.locator('#resume-editor [data-admin-subsection="education"]').click();
+    assert.equal(await page.locator("#resume-submit").isVisible(), true, "Shared Save remains available across form subsections");
+    assert.deepEqual(await page.locator("#resume-form").evaluate((form) => [...new FormData(form)]), resumeData, "Switching subsections must preserve all submitted form values");
+    await page.evaluate(() => {
+      window.BITS_ADMIN_SHELL.navigate("hardware");
+      window.BITS_ADMIN_SHELL.showSubsection("hardware", "import");
+    });
+    await page.waitForFunction(() => window.BITS_ADMIN_SHELL.route === "hardware");
+    await page.locator("#hardware-import-json").fill(JSON.stringify({
+      machine: "Navigation test PC", components: [{ component: "CPU", name: "Browser test processor", detail: "Fixture only" }],
+    }));
+    await page.locator("#hardware-import-apply").click();
+    assert.equal(await page.locator("#hardware-form").isVisible(), true, "Import reveals the machines subsection for review");
+    assert.equal(await page.locator('#hardware-slots [data-entry-field="name"]').inputValue(), "Browser test processor");
+    assert.match(await page.locator("#hardware-admin-status").textContent(), /Imported 1 component/);
+    await page.evaluate(() => {
+      window.BITS_ADMIN_SHELL.navigate("pronouns");
+      window.BITS_ADMIN_SHELL.showSubsection("pronouns", "preferences");
+    });
+    await page.waitForFunction(() => window.BITS_ADMIN_SHELL.route === "pronouns");
+    await page.locator("#pronoun-profile-form").evaluate((form) => form.requestSubmit());
+    assert.equal(await page.locator('#pronoun-editor [data-admin-subsection="pronouns"]').getAttribute("aria-current"), "page", "Native validation reveals the first invalid field's subsection");
+    assert.equal(await page.locator('#pronoun-profile-form [name="display_name"]').evaluate((field) => document.activeElement === field), true);
+    await page.evaluate(() => {
+      window.BITS_ADMIN_SHELL.navigate("blog");
+      window.BITS_ADMIN_SHELL.showSubsection("blog", "posts");
+    });
+    await page.waitForFunction(() => window.BITS_ADMIN_SHELL.route === "blog");
+    await page.locator("#blog-post-new").click();
+    assert.equal(await page.locator("#blog-post-form").isVisible(), true, "New post opens the editor subsection before focusing it");
+    await page.evaluate(() => {
+      window.BITS_ADMIN_SHELL.navigate("messages");
+      window.BITS_ADMIN_SHELL.showSubsection("messages", "messages");
+    });
+    await page.waitForFunction(() => window.BITS_ADMIN_SHELL.route === "messages");
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator("#message-search").fill("Regular message 1");
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 11 && !document.querySelector("#message-new").disabled);
+    assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected", "Searching clears selection");
+    await page.locator("#message-search").fill("");
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 25 && !document.querySelector("#message-new").disabled);
+    await page.locator('[data-message-action="edit"]').first().click();
+    assert.equal(await page.locator("#message-library-form").evaluate((form) => form.closest("li")?.dataset.messagePosition), "1");
+    await page.locator("#message-text").fill("Unsaved inline draft");
+    await page.locator('#message-library-editor [data-admin-subsection="pools"]').click();
+    await page.locator('#message-library-editor [data-admin-subsection="messages"]').click();
+    assert.equal(await page.locator("#message-text").inputValue(), "Unsaved inline draft", "Subsection navigation preserves the open message draft");
+    acceptDialogs = false;
+    await page.locator("#message-page-next").click();
+    await page.locator("#message-cancel").click();
+    await page.locator('[data-message-action="edit"]').nth(1).click();
+    assert.equal(await page.locator("#message-text").inputValue(), "Unsaved inline draft", "Declining discard preserves the inline draft through paging, closing and row changes");
+    acceptDialogs = true;
+    await page.locator("#message-cancel").click();
+    assert.equal(await page.locator("#message-library-form").isVisible(), false);
+    assert.equal(await page.locator('[data-message-action="edit"]').first().getAttribute("aria-expanded"), "false");
+    assert.equal(await page.locator("#message-library-form").count(), 1, "Only one shared editor is used");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.locator("#message-new").click();
+    assert.equal(await page.locator("#message-inline-panel").evaluate((panel) => panel.getAnimations().length), 0, "Reduced motion disables slide-down animation");
+    assert.equal(await page.locator("#message-library-form").evaluate((form) => form.closest("#message-new-panel-slot") !== null), true);
+    await page.locator("#message-new").click();
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    assert.equal(await page.locator("#message-library-form").isVisible(), false);
+    await page.locator("#message-page-next").click();
+    await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 5);
     await page.locator("#message-page-previous").click();
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 25);
     await page.locator('[data-message-action="edit"]').first().click();
@@ -257,6 +431,7 @@ try {
       return top >= 0 && top < 200;
     });
     assert.equal(await page.locator("#message-text").evaluate((field) => document.activeElement === field), true);
+    await assertNoOverflow(`${width}px inline message editor must not overflow`);
     await page.locator("#message-text").fill("<script>not executable</script> edited message");
     await page.locator("#message-weight").fill("0.25");
     await page.locator('[data-message-format="fontWeight"]').fill("700");
@@ -291,7 +466,8 @@ try {
     assert.equal(await page.locator("#message-corrected-preview script").count(), 0);
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows[0].corrected_text?.startsWith("**Corrected**"));
-    await page.locator("#message-library-list button").first().click();
+    await page.locator("#message-cancel").click();
+    await page.locator('[data-message-action="edit"]').first().click();
     assert.equal(await page.locator("#message-mistype").isChecked(), true);
     assert.equal(await page.locator("#message-corrected-text").inputValue(), "**Corrected** {{color:red|red}} <script>still literal</script>");
     await page.locator("#message-mistype").uncheck();
@@ -325,7 +501,7 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.find(row => row.position === 31).text === "Updated **seasonal** boot message");
     assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 31).markup), true);
-    await page.locator("#message-library-editor summary").click();
+    await page.locator('#message-library-editor [data-admin-subsection="pools"]').click();
     await page.locator("#message-pool-new").click();
     await page.locator("#message-pool-title").fill("Year boundary");
     await page.locator("#message-pool-start").fill("2000-12-30");
@@ -335,15 +511,19 @@ try {
     await page.locator('#message-pool-form button[type="submit"]').click();
     await page.waitForFunction(() => window.__poolRows.length === 1 && document.querySelector("#message-profile").value === window.__poolRows[0].id);
     const customId = await page.locator("#message-profile").inputValue();
+    await page.locator('#message-library-editor [data-admin-subsection="messages"]').click();
+    await page.locator("#message-new").click();
     await page.locator("#message-text").fill("CUSTOM BOOT");
     await page.locator("#message-enabled").check();
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.some(row => row.text === "CUSTOM BOOT"));
     await page.locator("#message-category").selectOption("messages");
+    await page.locator("#message-new").click();
     await page.locator("#message-text").fill("CUSTOM STATUS");
     await page.locator("#message-enabled").check();
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.some(row => row.text === "CUSTOM STATUS"));
+    await page.locator('#message-library-editor [data-admin-subsection="pools"]').click();
     await page.locator("#message-pool-title").fill("One-time celebration");
     await page.locator("#message-pool-schedule").selectOption("once");
     await page.locator("#message-pool-start").fill("2026-12-30");
@@ -355,6 +535,7 @@ try {
     await page.locator('#message-pool-form button[type="submit"]').click();
     await page.waitForFunction(() => window.__poolRows[0].schedule === "once");
     assert.equal(await page.evaluate(() => window.__poolRows[0].id), customId, "editing a pool must preserve its message association");
+    await page.locator('#message-library-editor [data-admin-subsection="calendar"]').click();
     await page.locator("#message-timezone").fill("Invalid/Timezone");
     await page.locator('#message-timezone-form button[type="submit"]').click();
     await page.waitForFunction(() => document.querySelector("#message-pool-status").dataset.state === "error");
@@ -362,9 +543,11 @@ try {
     await page.locator("#message-timezone").fill("America/New_York");
     await page.locator('#message-timezone-form button[type="submit"]').click();
     await page.waitForFunction(() => window.__messageSettings[0].timezone === "America/New_York");
+    await page.locator('#message-library-editor [data-admin-subsection="pools"]').click();
     await page.locator("#message-pool-delete").click();
     await page.waitForFunction(() => window.__poolRows.length === 0 && document.querySelector("#message-profile").value === "standard");
     assert.equal(await page.evaluate((id) => window.__messageRows.some(row => row.profile === id), customId), false);
+    await page.locator('#message-library-editor [data-admin-subsection="messages"]').click();
     await page.locator("#message-profile").selectOption("halloween");
     await page.locator("#message-category").selectOption("bootMessages");
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
@@ -374,13 +557,13 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => document.querySelector("#message-library-status").dataset.state === "error");
     assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 31).text), "Updated **seasonal** boot message");
-    await page.addScriptTag({ path: axePath });
+    await page.waitForFunction(() => document.querySelector("#message-inline-panel").getAnimations().length === 0);
     const violations = await page.evaluate(async () => (await axe.run(document.querySelector("#message-library-editor"), {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
-    })).violations.map((violation) => ({ id: violation.id, targets: violation.nodes.map((node) => node.target) })));
+    })).violations.map((violation) => ({ id: violation.id, targets: violation.nodes.map((node) => ({ target: node.target, summary: node.failureSummary })) })));
     assert.deepEqual(violations, [], `${width}px message editor accessibility`);
     assert.deepEqual(errors, []);
-    console.log(`PASS ${width}px Admin message library: row Edit/Delete and auto-scroll, pool create/edit/delete, annual/one-time ranges, timezone validation/save, routing, paging, markup/mistype, failure reporting, accessibility`);
+    console.log(`PASS ${width}px Admin: all-module subsections, form preservation/validation, inline/add editors and discard protection, page-only bulk CRUD/cancellation/errors/concurrency, pools, timezone, markup/mistype, accessibility`);
     await context.close();
   }
 } finally {

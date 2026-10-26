@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <script src="/admin-appearance.js?v=admin-appearance-1"></script>
     <link rel="stylesheet" href="/styles.css?v=upgrade-134">
-    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-5">
+    <link rel="stylesheet" href="/admin/admin.css?v=admin-ui-6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/supabase-config.js" defer></script>
     <script src="/markdown.js?v=markdown-2" defer></script>
@@ -18,12 +18,12 @@
     <script src="/message-text.js?v=messages-1" defer></script>
     <script src="/message-catalog.js?v=messages-1" defer></script>
     <script src="/seasonal-messages.js?v=seasonal-4" defer></script>
-    <script src="/admin-shell.js?v=admin-shell-2" defer></script>
+    <script src="/admin-shell.js?v=admin-shell-3" defer></script>
     <script src="/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/admin.js?v=admin-31" defer></script>
     <script src="/admin-backup.js?v=backup-2" defer></script>
-    <script src="/admin-messages.js?v=messages-1" defer></script>
+    <script src="/admin-messages.js?v=messages-2" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -90,9 +90,12 @@
 
         <section id="backup-editor" class="profile-editor" aria-labelledby="backup-editor-heading">
           <h2 id="backup-editor-heading">Content backups</h2>
-          <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, the message library, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
-          <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
-          <button id="backup-export" type="button">Download content backup</button>
+          <div data-admin-view="export" data-admin-view-label="Export backup">
+            <p>Export résumé data, pronouns, blog posts (including drafts), now/changelog entries, favorite games, creators, the message library, hardware specs/order, and featured music. Backups are private files, not encrypted. Export a new backup after schema updates; older schemas cannot be restored.</p>
+            <p>Messages, guestbook entries, scores, analytics, short links, agent credentials, live telemetry, and uploaded image files are excluded. Image URLs remain in posts; back up Supabase Storage separately. This is an editorial-content backup, not a full database backup.</p>
+            <button id="backup-export" type="button">Download content backup</button>
+          </div>
+          <div data-admin-view="restore" data-admin-view-label="Restore backup">
           <h3>Restore content</h3>
           <p>Restoring replaces all included editorial content in one database transaction. A safety backup is downloaded first. Keep other admin sessions and hardware agents idle during restoration. After restoring, reload this page and deploy to regenerate static blog pages and RSS.</p>
           <label for="backup-file">Backup JSON file</label>
@@ -100,6 +103,7 @@
           <label for="backup-confirm">Type RESTORE to replace current content</label>
           <input id="backup-confirm" type="text" autocomplete="off" spellcheck="false">
           <button id="backup-restore" type="button" disabled>Restore content</button>
+          </div>
           <p id="backup-status" class="form-status" role="status" aria-live="polite"></p>
         </section>
 
@@ -132,7 +136,7 @@
             <h2 id="arcade-editor-heading">ARCADE_CONTROL</h2>
             <span>PUBLIC LEADERBOARD + OPERATOR SETTINGS</span>
           </div>
-          <form id="arcade-settings-form" class="admin-form">
+          <form id="arcade-settings-form" class="admin-form" data-admin-view="settings" data-admin-view-label="Settings">
             <label class="settings-check">
               <input id="arcade-leaderboard-enabled" type="checkbox">
               <span>ENABLE PUBLIC LEADERBOARDS</span>
@@ -143,11 +147,13 @@
             </label>
             <button id="arcade-settings-submit" type="submit">&gt; SAVE_ARCADE_SETTINGS</button>
           </form>
+          <div data-admin-view="scores" data-admin-view-label="Scores">
           <div class="repeatable-admin-actions">
             <button id="refresh-arcade-scores" type="button">REFRESH SCORES</button>
           </div>
-          <p id="arcade-admin-status" class="form-status" role="status" aria-live="polite"></p>
           <div id="arcade-admin-list" class="message-list"></div>
+          </div>
+          <p id="arcade-admin-status" class="form-status" role="status" aria-live="polite"></p>
         </section>
 
         <section id="pronoun-editor" class="profile-editor" aria-labelledby="pronoun-editor-heading">
@@ -156,6 +162,7 @@
             <span>PUBLIC IDENTITY REFERENCE</span>
           </div>
           <form id="pronoun-profile-form" class="admin-form pronoun-admin-form">
+            <div class="ac-form-pane" data-admin-view="pronouns" data-admin-view-label="Name and pronouns">
             <label>
               <span>DISPLAY NAME</span>
               <input name="display_name" maxlength="80" required>
@@ -167,10 +174,13 @@
               <label><span>POSSESSIVE PRONOUN</span><input name="possessive_pronoun" maxlength="30" required></label>
               <label><span>REFLEXIVE</span><input name="reflexive_pronoun" maxlength="30" required></label>
             </div>
+            </div>
+            <div class="ac-form-pane" data-admin-view="preferences" data-admin-view-label="Terms and preferences">
             <label><span>HONORIFICS</span><textarea name="honorifics" maxlength="200" required></textarea></label>
             <label><span>GENDERED TERMS</span><textarea name="gendered_terms" maxlength="500" required></textarea></label>
             <label><span>COMPLIMENTS</span><textarea name="compliments" maxlength="500" required></textarea></label>
             <label><span>RELATIONSHIP TERMS</span><textarea name="relationship_terms" maxlength="500" required></textarea></label>
+            </div>
             <p id="pronoun-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="pronoun-profile-submit" type="submit">&gt; SAVE_PROFILE</button>
           </form>
@@ -206,13 +216,13 @@
           </form>
         </section>
 
-        <section id="resume-editor" class="profile-editor" aria-labelledby="resume-editor-heading">
+        <section id="resume-editor" class="profile-editor" aria-labelledby="resume-editor-heading" data-admin-default-view="profile">
           <div class="section-label">
             <h2 id="resume-editor-heading">RESUME_PROFILE</h2>
             <span>PUBLIC CAREER DATA</span>
           </div>
           <form id="resume-form" class="admin-form content-admin-form">
-            <p class="blog-markdown-help">
+            <p class="blog-markdown-help" data-admin-view="guide" data-admin-view-label="Publishing guide">
               Publishes to CAREER.SYS on the main page and the experience timeline on
               <a href="/professional/#experience" target="_blank" rel="noreferrer">/professional/</a>.
               Start summary lines with &bull; or - for bullet points; separate technologies with commas.
@@ -220,6 +230,7 @@
               Everything here also feeds the printable
               <a href="/professional/resume/" target="_blank" rel="noreferrer">résumé</a>.
             </p>
+            <div class="ac-form-pane" data-admin-view="profile" data-admin-view-label="Profile">
             <div class="content-admin-profile-grid">
               <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
               <label><span>AVAILABILITY</span><input name="availability" maxlength="120"></label>
@@ -228,18 +239,25 @@
             </div>
             <label><span>SUMMARY</span><textarea name="summary" maxlength="1200"></textarea></label>
             <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH RÉSUMÉ</span></label>
+            </div>
+            <div class="ac-form-pane" data-admin-view="experience" data-admin-view-label="Experience">
             <div class="repeatable-admin-actions">
               <button id="resume-entry-add" type="button">+ ADD_EXPERIENCE</button>
             </div>
             <div id="resume-entry-slots" class="curated-admin-grid"></div>
+            </div>
+            <div class="ac-form-pane" data-admin-view="education" data-admin-view-label="Education">
             <div class="repeatable-admin-actions">
               <button id="resume-education-add" type="button">+ ADD_EDUCATION</button>
             </div>
             <div id="resume-education-slots" class="curated-admin-grid"></div>
+            </div>
+            <div class="ac-form-pane" data-admin-view="certifications" data-admin-view-label="Certifications">
             <div class="repeatable-admin-actions">
               <button id="resume-certification-add" type="button">+ ADD_CERTIFICATION</button>
             </div>
             <div id="resume-certification-slots" class="curated-admin-grid"></div>
+            </div>
             <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
           </form>
@@ -251,9 +269,11 @@
             <span>CURRENT OPERATOR STATE</span>
           </div>
           <form id="now-form" class="admin-form content-admin-form">
+            <div class="ac-form-pane" data-admin-view="overview" data-admin-view-label="Overview">
             <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
             <label><span>SUMMARY</span><textarea name="summary" maxlength="1000"></textarea></label>
-            <div class="content-admin-profile-grid">
+            </div>
+            <div class="content-admin-profile-grid" data-admin-view="interests" data-admin-view-label="Current interests">
               <label><span>BUILDING</span><textarea name="building" maxlength="300"></textarea></label>
               <label><span>LEARNING</span><textarea name="learning" maxlength="300"></textarea></label>
               <label><span>PLAYING</span><textarea name="playing" maxlength="300"></textarea></label>
@@ -300,16 +320,43 @@
             <h2 id="message-library-heading">MESSAGE LIBRARY</h2>
             <span>STATUS / SEASONAL / BOOT / MONITOR</span>
           </div>
-          <p>Edit or delete existing messages using each row's buttons, or add new messages. Choose a built-in season or create your own dated pool below. Active exclusive pools combine and replace standard/additive messages; message types without exclusive entries keep their standard fallback. Public edits refresh within five minutes on reload or refocus; dates follow the configured timezone and a running boot sequence is not interrupted.</p>
-          <details>
-            <summary>MANAGE DATE-BASED POOLS AND TIMEZONE</summary>
-            <form id="message-timezone-form" class="admin-form">
+          <p>Edit messages in place, or select messages on the current page for bulk actions. Use Scheduled pools to manage custom dates and Calendar to change the timezone. Public edits refresh within five minutes on reload or refocus; running boot sequences are not interrupted.</p>
+          <div class="message-library-context admin-form">
+            <label>SEASON / PROFILE<select id="message-profile"></select></label>
+            <button id="message-reload" type="button">RELOAD LIBRARY</button>
+          </div>
+          <div id="message-list-view" data-admin-view="messages" data-admin-view-label="Messages">
+          <div class="admin-form message-library-filters">
+            <label>MESSAGE TYPE<select id="message-category"></select></label>
+            <label>SEARCH THIS POOL<input id="message-search" type="search" maxlength="120"></label>
+          </div>
+          <div class="repeatable-admin-actions message-library-commandbar">
+            <button id="message-new" type="button" aria-expanded="false" aria-controls="message-inline-panel">+ ADD_MESSAGE</button>
+          </div>
+          <div id="message-new-panel-slot"></div>
+          <div class="message-bulk-bar repeatable-admin-actions" role="group" aria-label="Bulk message actions" aria-describedby="message-bulk-help">
+            <label class="admin-checkbox"><input id="message-select-page" type="checkbox" disabled>SELECT PAGE</label>
+            <span id="message-selected-count" role="status" aria-live="polite">0 selected</span>
+            <button id="message-bulk-enable" type="button" disabled>ENABLE SELECTED</button>
+            <button id="message-bulk-disable" type="button" disabled>DISABLE SELECTED</button>
+            <button id="message-bulk-delete" type="button" disabled>DELETE SELECTED</button>
+          </div>
+          <p id="message-bulk-help">Selection is limited to this page. Changing pages, filters, or search, or reloading clears the selection. Deletion is permanent; disabled messages remain editable.</p>
+          <ul id="message-library-list" class="message-library-list"></ul>
+          <div class="repeatable-admin-actions">
+            <button id="message-page-previous" type="button">PREVIOUS</button>
+            <span id="message-page-label"></span>
+            <button id="message-page-next" type="button">NEXT</button>
+          </div>
+          </div>
+            <form id="message-timezone-form" class="admin-form" data-admin-view="calendar" data-admin-view-label="Calendar">
+              <h3>Calendar timezone</h3>
               <label>CALENDAR TIMEZONE<input id="message-timezone" type="text" maxlength="100" value="America/Chicago" list="message-timezones" required></label>
               <datalist id="message-timezones"><option value="America/Chicago"><option value="America/New_York"><option value="America/Denver"><option value="America/Los_Angeles"><option value="UTC"></datalist>
               <p>Use an IANA timezone name. America/Chicago is Central Time and automatically observes daylight saving. This calendar applies to built-in holidays and custom pools for every visitor.</p>
               <button type="submit">SAVE TIMEZONE</button>
             </form>
-            <form id="message-pool-form" class="admin-form">
+            <form id="message-pool-form" class="admin-form" data-admin-view="pools" data-admin-view-label="Scheduled pools">
               <p id="message-pool-label">NEW CUSTOM POOL</p>
               <label>POOL NAME<input id="message-pool-title" type="text" maxlength="100" required></label>
               <label>SCHEDULE<select id="message-pool-schedule"><option value="annual">Every year</option><option value="once">One-time date range</option></select></label>
@@ -323,23 +370,11 @@
                 <button id="message-pool-new" type="button">+ NEW POOL</button>
                 <button id="message-pool-delete" type="button" disabled>DELETE POOL AND ITS MESSAGES</button>
               </div>
-              <p>To edit a custom pool, select it in Season / profile below. Built-in seasons are retained. After creating a pool, add messages using the usual message editor. New pools and messages start disabled; enable both to publish.</p>
+              <p>To edit a custom pool, select it in Season / profile above. Built-in seasons are retained. After creating a pool, use Messages to add entries. New pools and messages start disabled; enable both to publish. Active exclusive pools combine and replace standard/additive messages; types without exclusive entries retain their standard fallback.</p>
             </form>
             <p id="message-pool-status" class="form-status" role="status" aria-live="polite"></p>
-          </details>
-          <div class="admin-form">
-            <label>SEASON / PROFILE<select id="message-profile"></select></label>
-            <label>MESSAGE TYPE<select id="message-category"></select></label>
-            <label>SEARCH THIS POOL<input id="message-search" type="search" maxlength="120"></label>
-          </div>
-          <ul id="message-library-list" class="message-library-list"></ul>
-          <div class="repeatable-admin-actions">
-            <button id="message-page-previous" type="button">PREVIOUS</button>
-            <span id="message-page-label"></span>
-            <button id="message-page-next" type="button">NEXT</button>
-            <button id="message-new" type="button">+ ADD_MESSAGE</button>
-            <button id="message-reload" type="button">RELOAD LIBRARY</button>
-          </div>
+          <div id="message-editor-home" hidden>
+          <div id="message-inline-panel" class="message-inline-panel" hidden>
           <form id="message-library-form" class="admin-form">
             <p id="message-editing-label">NEW MESSAGE</p>
             <label class="admin-checkbox"><input id="message-markup" type="checkbox">ENABLE INLINE MARKUP</label>
@@ -375,18 +410,21 @@
             <div class="repeatable-admin-actions">
               <button id="message-save" type="submit">SAVE MESSAGE</button>
               <button id="message-delete" type="button" disabled>DELETE MESSAGE</button>
+              <button id="message-cancel" type="button">CLOSE EDITOR</button>
             </div>
           </form>
+          </div>
+          </div>
           <p id="message-library-status" class="form-status" role="status" aria-live="polite"></p>
         </section>
-        <section id="creators-editor" class="profile-editor" aria-labelledby="creators-editor-heading">
+        <section id="creators-editor" class="profile-editor" aria-labelledby="creators-editor-heading" data-admin-default-view="creators">
           <div class="section-label">
             <h2 id="creators-editor-heading">CREATOR.FEED</h2>
             <span>CREATORS WORTH WATCHING</span>
           </div>
           <p>Add creators from any platform. Enable entries to publish them. Lower display-order numbers appear first; ties follow entry order.</p>
-          <p>For YouTube uploads and automatic channel photos, paste a channel URL or @handle into CHANNEL / PROFILE URL and click LOOK UP YOUTUBE CHANNEL, then save. You can also enter the UC... channel ID manually (24 characters). On YouTube, open the channel description / About, then Share channel &gt; Copy channel ID; for your own channel, use Settings &gt; Advanced settings. Leave the ID blank for profile links only. Other platforms show initials. Public feeds can include Shorts and livestreams; uploads and photos are cached for up to ten minutes. If YouTube blocks a photo request, initials are shown instead.</p>
-          <form id="creators-form" class="admin-form content-admin-form">
+          <p data-admin-view="guide" data-admin-view-label="YouTube guide">For YouTube uploads and automatic channel photos, paste a channel URL or @handle into CHANNEL / PROFILE URL and click LOOK UP YOUTUBE CHANNEL, then save. You can also enter the UC... channel ID manually (24 characters). On YouTube, open the channel description / About, then Share channel &gt; Copy channel ID; for your own channel, use Settings &gt; Advanced settings. Leave the ID blank for profile links only. Other platforms show initials. Public feeds can include Shorts and livestreams; uploads and photos are cached for up to ten minutes. If YouTube blocks a photo request, initials are shown instead.</p>
+          <form id="creators-form" class="admin-form content-admin-form" data-admin-view="creators" data-admin-view-label="Creators">
             <div class="repeatable-admin-actions">
               <button id="creators-entry-add" type="button">+ ADD_CREATOR</button>
             </div>
@@ -396,7 +434,7 @@
           </form>
         </section>
 
-        <section id="hardware-editor" class="profile-editor" aria-labelledby="hardware-editor-heading">
+        <section id="hardware-editor" class="profile-editor" aria-labelledby="hardware-editor-heading" data-admin-default-view="machines">
           <div class="section-label">
             <h2 id="hardware-editor-heading">HARDWARE.SYS</h2>
             <span>REAL MACHINE SPECS</span>
@@ -451,7 +489,7 @@
               <p id="hardware-device-status" class="form-status" role="status" aria-live="polite"></p>
             </div>
           </details>
-          <form id="hardware-form" class="admin-form content-admin-form">
+          <form id="hardware-form" class="admin-form content-admin-form" data-admin-view="machines" data-admin-view-label="Machines">
             <p class="blog-markdown-help">
               Publishes to HARDWARE.SYS on <a href="/online/?window=hardware" target="_blank" rel="noreferrer">/online/</a>.
               Each machine has its own component list. Add, edit, or remove parts, untick <strong>Shown</strong> to hide one, then save.
@@ -463,32 +501,32 @@
             <div id="hardware-slots" class="hw-machines"></div>
             <datalist id="hardware-machine-names"></datalist>
             <datalist id="hardware-component-types"><option value="CPU"><option value="GPU"><option value="RAM"><option value="Motherboard"><option value="Storage"><option value="PSU"><option value="Case"><option value="Cooling"><option value="Display"><option value="Network"><option value="OS"><option value="Keyboard"><option value="Mouse"><option value="Audio"><option value="Other"></datalist>
-            <p id="hardware-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="hardware-submit" type="submit">&gt; SAVE_HARDWARE</button>
           </form>
+          <p id="hardware-admin-status" class="form-status" role="status" aria-live="polite"></p>
         </section>
 
-        <section id="blog-editor" class="profile-editor" aria-labelledby="blog-editor-heading">
+        <section id="blog-editor" class="profile-editor" aria-labelledby="blog-editor-heading" data-admin-default-view="posts">
           <div class="section-label">
             <h2 id="blog-editor-heading">BLOG.LOG</h2>
             <span>MARKDOWN PUBLISHING CONSOLE</span>
           </div>
-          <p class="admin-subtitle">Publishing saves to the live database; it does not trigger a site rebuild. New posts remain readable through the live blog archive and legacy post links. Run a deployment to generate or refresh static articles, search-engine metadata, the RSS feed, and sitemap. Scheduled posts enter those files only on a deployment after their publish time. Unpublishing or deleting a post hides it from live queries immediately, but its existing static page and feed entry remain public until the next deployment removes them.</p>
-          <div class="repeatable-admin-actions">
+          <p class="admin-subtitle" data-admin-view="publishing" data-admin-view-label="Publishing status">Publishing saves to the live database; it does not trigger a site rebuild. New posts remain readable through the live blog archive and legacy post links. Run a deployment to generate or refresh static articles, search-engine metadata, the RSS feed, and sitemap. Scheduled posts enter those files only on a deployment after their publish time. Unpublishing or deleting a post hides it from live queries immediately, but its existing static page and feed entry remain public until the next deployment removes them.</p>
+          <div class="repeatable-admin-actions" data-admin-view="publishing" data-admin-view-label="Publishing status">
             <button id="blog-deployment-refresh" type="button" disabled>Check deployment status</button>
             <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net/actions/workflows/site.yml" target="_blank" rel="noopener noreferrer">Deployment workflow</a>
           </div>
-          <p id="blog-deployment-status" class="form-status" role="status" aria-live="polite">Sign in to compare saved posts with the deployed site.</p>
-          <ul id="blog-deployment-details" class="admin-subtitle"></ul>
+          <p id="blog-deployment-status" class="form-status" role="status" aria-live="polite" data-admin-view="publishing" data-admin-view-label="Publishing status">Sign in to compare saved posts with the deployed site.</p>
+          <ul id="blog-deployment-details" class="admin-subtitle" data-admin-view="publishing" data-admin-view-label="Publishing status"></ul>
           <div class="blog-admin-layout">
-            <aside class="blog-admin-posts" aria-labelledby="blog-admin-posts-heading">
+            <aside class="blog-admin-posts" aria-labelledby="blog-admin-posts-heading" data-admin-view="posts" data-admin-view-label="Posts">
               <div class="repeatable-admin-actions">
                 <h3 id="blog-admin-posts-heading">POSTS</h3>
                 <button id="blog-post-new" type="button">+ NEW_POST</button>
               </div>
               <div id="blog-admin-list" class="blog-admin-list"></div>
             </aside>
-            <form id="blog-post-form" class="admin-form blog-admin-form">
+            <form id="blog-post-form" class="admin-form blog-admin-form" data-admin-view="editor" data-admin-view-label="Editor">
               <input name="id" type="hidden">
               <div class="content-admin-profile-grid">
                 <label>
@@ -633,7 +671,7 @@
             <h2 id="short-links-editor-heading">SHORTBITS</h2>
             <span>ADMIN-GENERATED REDIRECTS</span>
           </div>
-          <form id="short-link-create-form" class="admin-form short-link-create-form">
+          <form id="short-link-create-form" class="admin-form short-link-create-form" data-admin-view="create" data-admin-view-label="Create ShortBit">
             <label>
               <span>DESTINATION URL</span>
               <input name="destination_url" type="url" maxlength="2000" placeholder="https://example.com/path" required>
@@ -665,13 +703,15 @@
               <span>EXPIRES AT</span>
               <input name="expires_at" type="datetime-local">
             </label>
-            <p id="short-links-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="short-link-create" type="submit">&gt; CREATE_SHORTBIT</button>
           </form>
+          <p id="short-links-admin-status" class="form-status" role="status" aria-live="polite"></p>
+          <div data-admin-view="links" data-admin-view-label="Existing ShortBits">
           <div class="repeatable-admin-actions">
             <button id="short-links-refresh" type="button">REFRESH SHORTBITS</button>
           </div>
           <div id="short-links-list" class="short-links-admin-list"></div>
+          </div>
         </section>
       </main>
     </div>
