@@ -52,9 +52,11 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
     single long theme dropdown. Experimental layouts are marked, and saved theme
     IDs, per-theme variants, random selection, and seasonal availability are preserved.
 
-- The Online profile header uses the favicon as Caleb's profile picture on the
+- The Online profile header uses an optimized WebP copy of the favicon as Caleb's profile picture on the
   left, with the interactive bit avatar on the right. On smaller screens, both
   sit above the profile text; the avatar's reactions and Easter eggs remain intact.
+  The high-priority profile image is separate from the unchanged favicon PNG to
+  avoid transferring the full favicon asset for the page's largest-contentful paint.
 
 - Spotify now-playing integration through a Supabase Edge Function
 

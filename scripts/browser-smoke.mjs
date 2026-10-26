@@ -94,7 +94,8 @@ try {
       if (path === "/online/") {
         const picture = page.locator(".profile-picture");
         assert.ok(await picture.evaluate(img => img.complete && img.naturalWidth > 0), "Profile picture loads");
-        assert.equal(await picture.getAttribute("src"), "/shared/images/favicon.png");
+        assert.equal(await picture.getAttribute("src"), "/shared/images/profile.webp");
+        assert.equal(await picture.getAttribute("fetchpriority"), "high");
         const portrait = await picture.boundingBox();
         const avatar = await page.locator("#avatar-wrap").boundingBox();
         const identity = await page.locator(".profile > .identity").boundingBox();

@@ -20,12 +20,16 @@ test("build preserves page routes and organized assets without shipping reposito
       "professional/index.html", "professional/resume/index.html",
       "shared/scripts/supabase-config.js", "shared/styles/theme-base.css",
       "shared/styles/layouts/collection-base.css", "shared/scripts/layouts/runtime.js",
-      "shared/images/favicon.png", "home/scripts/chooser.js", "home/styles/chooser.css",
+      "shared/images/favicon.png", "shared/images/profile.webp", "home/scripts/chooser.js", "home/styles/chooser.css",
       "online/scripts/startup.js", "online/styles/site.css", "online/scripts/arcade.js",
       "admin/scripts/admin.js", "admin/styles/admin.css", "boot/scripts/endless-boot.js",
       "blog/scripts/blog.js", "professional/scripts/profile.js",
       "professional/resume/scripts/resume.js", "not-found/scripts/not-found.js", "useless/scripts/useless.js",
     ]) assert.ok((await stat(join(directory, path))).isFile(), path);
+    const portraitSize = (await stat(join(directory, "shared/images/profile.webp"))).size;
+    const faviconSize = (await stat(join(directory, "shared/images/favicon.png"))).size;
+    assert.ok(portraitSize < 30 * 1024 && portraitSize < faviconSize * 0.3,
+      "The LCP profile picture stays below 30 KiB and 30% of the original favicon size");
     for (const name of ["scripts", "docs", "supabase", "agents", "node_modules", "layouts", "images"]) {
       assert.ok(!entries.some(entry => entry.name === name), `${name} must not be published at the root`);
     }
