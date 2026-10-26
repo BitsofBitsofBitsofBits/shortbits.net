@@ -300,7 +300,33 @@
             <h2 id="message-library-heading">MESSAGE LIBRARY</h2>
             <span>STATUS / SEASONAL / BOOT / MONITOR</span>
           </div>
-          <p>Edit message text, rarity weights, formatting, and publication. Seasonal dates and exclusive/additive behavior stay unchanged. An empty enabled pool uses its bundled fallback; hiding or deleting every entry does not turn off that feature. Public edits refresh within five minutes on reload or refocus; a running boot sequence is not interrupted.</p>
+          <p>Edit or delete existing messages using each row's buttons, or add new messages. Choose a built-in season or create your own dated pool below. Active exclusive pools combine and replace standard/additive messages; message types without exclusive entries keep their standard fallback. Public edits refresh within five minutes on reload or refocus; dates follow the configured timezone and a running boot sequence is not interrupted.</p>
+          <details>
+            <summary>MANAGE DATE-BASED POOLS AND TIMEZONE</summary>
+            <form id="message-timezone-form" class="admin-form">
+              <label>CALENDAR TIMEZONE<input id="message-timezone" type="text" maxlength="100" value="America/Chicago" list="message-timezones" required></label>
+              <datalist id="message-timezones"><option value="America/Chicago"><option value="America/New_York"><option value="America/Denver"><option value="America/Los_Angeles"><option value="UTC"></datalist>
+              <p>Use an IANA timezone name. America/Chicago is Central Time and automatically observes daylight saving. This calendar applies to built-in holidays and custom pools for every visitor.</p>
+              <button type="submit">SAVE TIMEZONE</button>
+            </form>
+            <form id="message-pool-form" class="admin-form">
+              <p id="message-pool-label">NEW CUSTOM POOL</p>
+              <label>POOL NAME<input id="message-pool-title" type="text" maxlength="100" required></label>
+              <label>SCHEDULE<select id="message-pool-schedule"><option value="annual">Every year</option><option value="once">One-time date range</option></select></label>
+              <label>START DATE<input id="message-pool-start" type="date" min="1000-01-01" max="9999-12-31" required></label>
+              <label>END DATE<input id="message-pool-end" type="date" min="1000-01-01" max="9999-12-31"></label>
+              <p>Dates are inclusive. Leave the end blank for a single day. Annual schedules ignore the years and can wrap from December into January; choose a leap year to select February 29.</p>
+              <label>BEHAVIOR<select id="message-pool-mode"><option value="additive">Mix with regular messages</option><option value="exclusive">Exclusive: replace regular/additive messages</option></select></label>
+              <label class="admin-checkbox"><input id="message-pool-enabled" type="checkbox">ENABLE POOL ON ITS SCHEDULE</label>
+              <div class="repeatable-admin-actions">
+                <button type="submit">SAVE POOL</button>
+                <button id="message-pool-new" type="button">+ NEW POOL</button>
+                <button id="message-pool-delete" type="button" disabled>DELETE POOL AND ITS MESSAGES</button>
+              </div>
+              <p>To edit a custom pool, select it in Season / profile below. Built-in seasons are retained. After creating a pool, add messages using the usual message editor. New pools and messages start disabled; enable both to publish.</p>
+            </form>
+            <p id="message-pool-status" class="form-status" role="status" aria-live="polite"></p>
+          </details>
           <div class="admin-form">
             <label>SEASON / PROFILE<select id="message-profile"></select></label>
             <label>MESSAGE TYPE<select id="message-category"></select></label>
@@ -312,6 +338,7 @@
             <span id="message-page-label"></span>
             <button id="message-page-next" type="button">NEXT</button>
             <button id="message-new" type="button">+ ADD_MESSAGE</button>
+            <button id="message-reload" type="button">RELOAD LIBRARY</button>
           </div>
           <form id="message-library-form" class="admin-form">
             <p id="message-editing-label">NEW MESSAGE</p>

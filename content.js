@@ -447,18 +447,16 @@ const baseHardwareJokes = {
 Object.entries(baseHardwareJokes).forEach(([metric, pool]) => window.BITS_MESSAGE_CATALOG?.bind("standard", `monitor.${metric}`, pool));
 // Keep the seasonal profile's existing key so seasonal messages move with the jokes.
 const seasonalHardwareJokes = window.BITS_SEASONAL_PROFILE?.monitorJokes ?? {};
-const hardwareJokes = window.BITS_SEASONAL_PROFILE?.mode === "exclusive"
-  ? seasonalHardwareJokes
-  : Object.fromEntries(Object.entries(baseHardwareJokes).map(([metric, jokes]) => [
-      metric,
-      [...jokes, ...(seasonalHardwareJokes[metric] ?? [])],
-    ]));
+const hardwareJokes = Object.fromEntries(Object.entries(baseHardwareJokes).map(([metric, jokes]) => [
+  metric, window.BITS_SEASONAL_PROFILE?.mode === "exclusive" && seasonalHardwareJokes[metric]?.length
+    ? [...seasonalHardwareJokes[metric]] : [...jokes, ...(seasonalHardwareJokes[metric] ?? [])],
+]));
 const hardwareChatter = Object.values(hardwareJokes).flat();
 window.addEventListener("bits:messages-updated", () => {
   const profile = window.BITS_SEASONAL_PROFILE;
   Object.keys(baseHardwareJokes).forEach((metric) => {
     const seasonal = profile?.monitorJokes[metric] ?? [];
-    hardwareJokes[metric] = profile?.mode === "exclusive" ? [...seasonal] : [...baseHardwareJokes[metric], ...seasonal];
+    hardwareJokes[metric] = profile?.mode === "exclusive" && seasonal.length ? [...seasonal] : [...baseHardwareJokes[metric], ...seasonal];
   });
   hardwareChatter.splice(0, hardwareChatter.length, ...Object.values(hardwareJokes).flat());
 });

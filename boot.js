@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function playBoot() {
     const seasonalProfile = window.BITS_SEASONAL_PROFILE;
     const seasonalBootSteps = seasonalProfile?.initialBootSteps ?? [];
-    const bootSteps = seasonalProfile?.mode === "exclusive"
+    const bootSteps = seasonalProfile?.mode === "exclusive" && seasonalBootSteps.length
       ? seasonalBootSteps
       : [...baseBootSteps, ...seasonalBootSteps];
     timers.splice(0).forEach((timer) => window.clearTimeout(timer));

@@ -26,6 +26,10 @@ const markupRows = publicRows.map((row) => ({
   ...row, markup: true, text: `${row.text} **BOLD** {{color:red|red}} {{color:rainbow|彩色}}`,
   corrected_text: row.category === "messages" ? "DATABASE CORRECTED **BOLD** {{color:red|red}} {{color:rainbow|彩色}}" : null,
 }));
+const customPools = ["one", "two"].map((name) => ({
+  id: `custom-${name}`, title: name, schedule: "annual", starts_on: "2000-01-01", ends_on: "2000-12-31",
+  mode: "exclusive", enabled: true,
+}));
 let browser;
 try {
   browser = await chromium.launch({
@@ -35,6 +39,7 @@ try {
     const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
     let fail = false;
     let useMarkup = false;
+    let useCustom = false;
     const errors = [];
     await context.addInitScript(() => {
       sessionStorage.setItem("bits-boot-seen-v1", "true");
@@ -49,9 +54,13 @@ try {
       const url = new URL(route.request().url());
       if (url.pathname.includes("/rest/v1/")) {
         const isCatalog = url.pathname.endsWith("/site_message_catalog");
+        const data = url.pathname.endsWith("/site_message_settings") ? [{ id: "primary", timezone: "America/Chicago" }]
+          : url.pathname.endsWith("/site_message_pools") ? (useCustom ? customPools : [])
+          : isCatalog ? (useCustom ? [...markupRows, ...customPools.map((pool, index) => entry(9001 + index, "messages", `CUSTOM ${pool.title}`, pool.id))]
+            : useMarkup ? markupRows : publicRows) : [];
         return route.fulfill({
           status: isCatalog && fail ? 503 : 200, contentType: "application/json",
-          headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(isCatalog ? (useMarkup ? markupRows : publicRows) : []),
+          headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(data),
         });
       }
       return url.origin === server.origin ? route.continue() : route.abort();
@@ -136,8 +145,28 @@ try {
     assert.equal(await page.locator("#typed-text").textContent(), "DATABASE CORRECTED BOLD red 彩色");
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
     assert.equal(await page.evaluate(() => unlockedAchievements.some((achievement) => achievement.id === "typo-corrected")), true);
+    fail = false;
+    useCustom = true;
+    assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
+    assert.deepEqual(await page.evaluate(() => window.BITS_MESSAGES.filter((message) => message.text.startsWith("CUSTOM")).map((message) => message.text)), ["CUSTOM one", "CUSTOM two"]);
+    assert.equal(await page.evaluate(() => window.BITS_MESSAGES.some((message) => message.text.startsWith("DATABASE STATUS"))), false);
+    assert.equal(await page.evaluate(() => [activities, shutdownMessages, playingDeadMessages, glitchMessages, hardwareChatter].every((pool) => pool.length > 0)), true);
+    await page.evaluate(() => {
+      const matchMedia = window.matchMedia;
+      const motion = document.documentElement.dataset.motion;
+      window.matchMedia = () => ({ matches: false });
+      document.documentElement.dataset.motion = "full";
+      window.BITS_BOOT.play();
+      window.matchMedia = matchMedia;
+      document.documentElement.dataset.motion = motion;
+    });
+    await page.waitForFunction(() => document.querySelector("#boot-log strong")?.textContent === "BOLD");
+    await page.evaluate(() => window.BITS_BOOT.skip());
+    await page.goto(`${server.origin}/boot/`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => Array.from(document.querySelectorAll("#endless-boot-log span")).some(
+      (span) => span.textContent.startsWith("DATABASE BOOT") && span.querySelector("strong")?.textContent === "BOLD"));
     assert.deepEqual(errors, []);
-    console.log(`PASS ${width}px public messages: inline status/history, mistype correction/unlock, activities, shutdown, monitor, desktop/glitches, boot/replay/transmission, cache, and outages`);
+    console.log(`PASS ${width}px public messages: overlapping scheduled exclusives, empty-category boot/monitor fallbacks, inline status/history, mistype correction/unlock, activities, shutdown, desktop/glitches, cache, and outages`);
     await context.close();
   }
   for (const width of [1440, 390]) {
@@ -152,17 +181,21 @@ try {
             ...Array.from({ length: 30 }, (_, index) => entry(index + 1, "messages", `Regular message ${index + 1}`)),
             entry(31, "bootMessages", "Seasonal boot fixture", "halloween"),
           ])};
+          window.__poolRows = [];
+          window.__messageSettings = [{ id: "primary", timezone: "America/Chicago" }];
           window.createSiteSupabaseClient = () => ({
             auth: { getSession: async () => ({ data: { session: null }, error: null }) },
             from(table) {
-              if (table !== "site_message_catalog") throw new Error("Unexpected table " + table);
+              const store = { site_message_catalog: "__messageRows", site_message_pools: "__poolRows", site_message_settings: "__messageSettings" }[table];
+              if (!store) throw new Error("Unexpected table " + table);
               let operation = "select", payload, single = false, descending = false, offset = 0, end = Infinity, limit = Infinity;
+              let orderKey = "position";
               const filters = [];
               const query = {
                 select() { return query; },
                 eq(key, value) { filters.push(row => row[key] === value); return query; },
                 ilike(key, value) { filters.push(row => row[key].toLowerCase().includes(value.slice(1, -1).toLowerCase())); return query; },
-                order(key, options) { descending = options?.ascending === false; return query; },
+                order(key, options) { orderKey = key; descending = options?.ascending === false; return query; },
                 range(start, last) { offset = start; end = last; return query; },
                 limit(value) { limit = value; return query; },
                 single() { single = true; return query; },
@@ -171,11 +204,14 @@ try {
                 delete() { operation = "delete"; return query; },
                 then(resolve) {
                   if (window.__messageFailure) return Promise.resolve({ error: new Error("Simulated database outage"), data: null }).then(resolve);
-                  let result = window.__messageRows.filter(row => filters.every(filter => filter(row)));
-                  if (operation === "insert") { window.__messageRows.push(payload); result = [payload]; }
+                  let result = window[store].filter(row => filters.every(filter => filter(row)));
+                  if (operation === "insert") { window[store].push(payload); result = [payload]; }
                   if (operation === "update") result.forEach(row => Object.assign(row, payload));
-                  if (operation === "delete") window.__messageRows = window.__messageRows.filter(row => !result.includes(row));
-                  result = [...result].sort((a,b) => descending ? b.position-a.position : a.position-b.position);
+                  if (operation === "delete") {
+                    window[store] = window[store].filter(row => !result.includes(row));
+                    if (store === "__poolRows") window.__messageRows = window.__messageRows.filter(row => !result.some(pool => pool.id === row.profile));
+                  }
+                  result = [...result].sort((a,b) => (typeof a[orderKey] === "string" ? a[orderKey].localeCompare(b[orderKey]) : a[orderKey]-b[orderKey]) * (descending ? -1 : 1));
                   const count = result.length;
                   result = result.slice(offset, Math.min(end+1, offset+limit));
                   return Promise.resolve({ data: structuredClone(single ? result[0] : result), error: null, count }).then(resolve);
@@ -203,7 +239,12 @@ try {
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 5);
     await page.locator("#message-page-previous").click();
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 25);
-    await page.locator("#message-library-list button").first().click();
+    await page.locator('[data-message-action="edit"]').first().click();
+    await page.waitForFunction(() => {
+      const top = document.querySelector("#message-library-form").getBoundingClientRect().top;
+      return top >= 0 && top < 200;
+    });
+    assert.equal(await page.locator("#message-text").evaluate((field) => document.activeElement === field), true);
     await page.locator("#message-text").fill("<script>not executable</script> edited message");
     await page.locator("#message-weight").fill("0.25");
     await page.locator('[data-message-format="fontWeight"]').fill("700");
@@ -257,13 +298,13 @@ try {
     assert.equal(await page.evaluate(() => window.__messageRows.at(-1).markup), false, "new messages start as literal text");
     await page.locator("#message-search").fill("Added in Admin");
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
-    await page.locator("#message-delete").click();
+    await page.locator('[data-message-action="delete"]').click();
     await page.waitForFunction(() => window.__messageRows.length === 31);
     await page.locator("#message-search").fill("");
     await page.locator("#message-profile").selectOption("halloween");
     await page.locator("#message-category").selectOption("bootMessages");
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
-    await page.locator("#message-library-list button").click();
+    await page.locator('[data-message-action="edit"]').click();
     assert.equal(await page.locator("#message-weighted-options").isVisible(), false);
     assert.equal(await page.locator("#message-mistype-options").isVisible(), false);
     await page.locator("#message-text").fill("Updated **seasonal** boot message");
@@ -272,6 +313,50 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.find(row => row.position === 31).text === "Updated **seasonal** boot message");
     assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 31).markup), true);
+    await page.locator("#message-library-editor summary").click();
+    await page.locator("#message-pool-new").click();
+    await page.locator("#message-pool-title").fill("Year boundary");
+    await page.locator("#message-pool-start").fill("2000-12-30");
+    await page.locator("#message-pool-end").fill("2000-01-02");
+    await page.locator("#message-pool-mode").selectOption("exclusive");
+    await page.locator("#message-pool-enabled").check();
+    await page.locator('#message-pool-form button[type="submit"]').click();
+    await page.waitForFunction(() => window.__poolRows.length === 1 && document.querySelector("#message-profile").value === window.__poolRows[0].id);
+    const customId = await page.locator("#message-profile").inputValue();
+    await page.locator("#message-text").fill("CUSTOM BOOT");
+    await page.locator("#message-enabled").check();
+    await page.locator("#message-save").click();
+    await page.waitForFunction(() => window.__messageRows.some(row => row.text === "CUSTOM BOOT"));
+    await page.locator("#message-category").selectOption("messages");
+    await page.locator("#message-text").fill("CUSTOM STATUS");
+    await page.locator("#message-enabled").check();
+    await page.locator("#message-save").click();
+    await page.waitForFunction(() => window.__messageRows.some(row => row.text === "CUSTOM STATUS"));
+    await page.locator("#message-pool-title").fill("One-time celebration");
+    await page.locator("#message-pool-schedule").selectOption("once");
+    await page.locator("#message-pool-start").fill("2026-12-30");
+    await page.locator("#message-pool-end").fill("2026-01-02");
+    await page.locator('#message-pool-form button[type="submit"]').click();
+    await page.waitForFunction(() => document.querySelector("#message-pool-status").dataset.state === "error");
+    assert.equal(await page.evaluate(() => window.__poolRows[0].schedule), "annual");
+    await page.locator("#message-pool-end").fill("2027-01-02");
+    await page.locator('#message-pool-form button[type="submit"]').click();
+    await page.waitForFunction(() => window.__poolRows[0].schedule === "once");
+    assert.equal(await page.evaluate(() => window.__poolRows[0].id), customId, "editing a pool must preserve its message association");
+    await page.locator("#message-timezone").fill("Invalid/Timezone");
+    await page.locator('#message-timezone-form button[type="submit"]').click();
+    await page.waitForFunction(() => document.querySelector("#message-pool-status").dataset.state === "error");
+    assert.equal(await page.evaluate(() => window.__messageSettings[0].timezone), "America/Chicago");
+    await page.locator("#message-timezone").fill("America/New_York");
+    await page.locator('#message-timezone-form button[type="submit"]').click();
+    await page.waitForFunction(() => window.__messageSettings[0].timezone === "America/New_York");
+    await page.locator("#message-pool-delete").click();
+    await page.waitForFunction(() => window.__poolRows.length === 0 && document.querySelector("#message-profile").value === "standard");
+    assert.equal(await page.evaluate((id) => window.__messageRows.some(row => row.profile === id), customId), false);
+    await page.locator("#message-profile").selectOption("halloween");
+    await page.locator("#message-category").selectOption("bootMessages");
+    await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
+    await page.locator('[data-message-action="edit"]').click();
     await page.evaluate(() => { window.__messageFailure = true; });
     await page.locator("#message-text").fill("Must not save");
     await page.locator("#message-save").click();
@@ -283,7 +368,7 @@ try {
     })).violations.map((violation) => ({ id: violation.id, targets: violation.nodes.map((node) => node.target) })));
     assert.deepEqual(violations, [], `${width}px message editor accessibility`);
     assert.deepEqual(errors, []);
-    console.log(`PASS ${width}px Admin message library: routing, pagination, safe preview, mistype toggle/preview/formatting/persistence/validation, weights, styles, hide, add/search/delete, seasonal pools, failure reporting, accessibility`);
+    console.log(`PASS ${width}px Admin message library: row Edit/Delete and auto-scroll, pool create/edit/delete, annual/one-time ranges, timezone validation/save, routing, paging, markup/mistype, failure reporting, accessibility`);
     await context.close();
   }
 } finally {

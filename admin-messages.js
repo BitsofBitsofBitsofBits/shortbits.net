@@ -24,6 +24,12 @@
   const remove = get("delete");
   const add = get("new");
   const formats = new Map();
+  const poolForm = get("pool-form");
+  const timezoneForm = get("timezone-form");
+  let pools = [];
+  let editingPool = null;
+  let poolDirty = false;
+  let poolReady = false;
   let page = 0;
   let total = 0;
   let selected = null;
@@ -39,9 +45,13 @@
     status.dataset.state = state;
   }
   function controls() {
-    form.inert = busy;
+    form.inert = busy || !poolReady;
+    poolForm.inert = busy || !poolReady;
+    timezoneForm.inert = busy || !poolReady;
     list.inert = busy;
-    [save, add, profile, category, search].forEach((control) => { control.disabled = busy; });
+    [save, add, profile, category, search].forEach((control) => { control.disabled = busy || !poolReady; });
+    get("reload").disabled = busy;
+    get("pool-delete").disabled = busy || !editingPool;
     remove.disabled = busy || selected === null;
     previous.disabled = busy || page === 0;
     next.disabled = busy || (page + 1) * 25 >= total;
@@ -84,7 +94,84 @@
     controls();
   }
   function discard() {
-    return !dirty || window.confirm("Discard the unsaved message changes?");
+    return (!dirty && !poolDirty) || window.confirm("Discard the unsaved message or pool changes?");
+  }
+  function focusEditor() {
+    form.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    text.focus({ preventScroll: true });
+  }
+  function reportPool(message, state = "") {
+    get("pool-status").textContent = message;
+    get("pool-status").dataset.state = state;
+  }
+  function editPool(pool = null) {
+    editingPool = pool?.id ?? null;
+    poolDirty = false;
+    get("pool-label").textContent = pool ? `EDITING POOL: ${pool.title}` : "NEW CUSTOM POOL";
+    get("pool-title").value = pool?.title ?? "";
+    get("pool-schedule").value = pool?.schedule ?? "annual";
+    get("pool-start").value = pool?.starts_on ?? "";
+    get("pool-end").value = pool?.ends_on ?? "";
+    get("pool-mode").value = pool?.mode ?? "additive";
+    get("pool-enabled").checked = pool?.enabled ?? false;
+    controls();
+  }
+  async function loadPools(preferred = profile.value) {
+    const [definitions, settings] = await Promise.all([
+      adminClient.from("site_message_pools").select("*").order("title"),
+      adminClient.from("site_message_settings").select("*").eq("id", "primary").single(),
+    ]);
+    if (definitions.error) throw definitions.error;
+    if (settings.error) throw settings.error;
+    if (!Array.isArray(definitions.data) || definitions.data.length >= 1000 || !settings.data) {
+      throw new Error("Invalid pool settings or too many custom pools (maximum 999).");
+    }
+    catalog.validateTimezone(settings.data.timezone);
+    catalog.setAdminPools(definitions.data);
+    pools = definitions.data;
+    profile.replaceChildren(...catalog.profiles.map((value) => {
+      const option = document.createElement("option");
+      option.value = value;
+      const pool = pools.find((item) => item.id === value);
+      option.textContent = pool ? `${pool.enabled ? "" : "[DISABLED] "}${pool.title}` : value === "standard" ? "Standard / year-round" : value.replaceAll("-", " ");
+      return option;
+    }));
+    profile.value = catalog.profiles.includes(preferred) ? preferred : "standard";
+    selectedProfile = profile.value;
+    get("timezone").value = settings.data.timezone;
+    poolReady = true;
+    editPool(pools.find((pool) => pool.id === profile.value));
+    reportPool(`${pools.length} custom pool(s). Dates use ${settings.data.timezone}.`, "success");
+  }
+  async function reloadLibrary() {
+    busy = true;
+    controls();
+    try {
+      await loadPools();
+      page = 0;
+      edit();
+      await load();
+    } catch (error) {
+      console.error("Unable to load message pool settings:", error);
+      report(`Message pool settings failed to load: ${error.message}. Check the scheduled-pools migration, then reload the library.`, "error");
+      reportPool(`Pool settings failed to load: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
+  }
+  async function deleteMessage(row) {
+    if (busy || !discard() || !window.confirm(`Delete message ${row.position} permanently? Empty pools use their fallback.`)) return;
+    busy = true;
+    controls();
+    try {
+      const { data, error } = await adminClient.from("site_message_catalog").delete().eq("position", row.position).select("position");
+      if (error) throw error;
+      if (!data?.length) throw new Error("The message no longer exists. Reload the library.");
+      edit();
+      if (!await load()) return;
+      report("Message deleted. Remaining enabled entries will be used; empty pools use fallbacks.", "success");
+    } catch (error) {
+      console.error("Unable to delete message:", error);
+      report(`Message deletion failed: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
   }
   async function load() {
     const current = ++request;
@@ -105,8 +192,20 @@
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = `${row.enabled ? "" : "[HIDDEN] "}${row.text.slice(0, 140)}`;
-        button.addEventListener("click", () => { if (discard()) edit(row); });
-        item.append(button);
+        const select = () => { if (discard()) { edit(row); focusEditor(); } };
+        button.addEventListener("click", select);
+        const actions = document.createElement("div");
+        actions.className = "repeatable-admin-actions";
+        for (const action of ["edit", "delete"]) {
+          const control = document.createElement("button");
+          control.type = "button";
+          control.dataset.messageAction = action;
+          control.textContent = action.toUpperCase();
+          control.setAttribute("aria-label", `${action === "edit" ? "Edit" : "Delete"} message ${row.position}`);
+          control.addEventListener("click", action === "edit" ? select : () => deleteMessage(row));
+          actions.append(control);
+        }
+        item.append(button, actions);
         return item;
       }));
       get("page-label").textContent = `${total ? page * 25 + 1 : 0}-${Math.min(total, (page + 1) * 25)} of ${total}`;
@@ -150,6 +249,7 @@
     selectedProfile = profile.value;
     selectedCategory = category.value;
     page = 0;
+    editPool(pools.find((pool) => pool.id === profile.value));
     edit();
     load();
   }));
@@ -179,7 +279,79 @@
     previewMessage();
     target.focus();
   }));
-  add.addEventListener("click", () => { if (discard()) { edit(); text.focus(); } });
+  add.addEventListener("click", () => { if (discard()) { edit(); focusEditor(); } });
+  get("reload").addEventListener("click", () => { if (discard()) reloadLibrary(); });
+  poolForm.addEventListener("input", () => { poolDirty = true; });
+  get("pool-new").addEventListener("click", () => {
+    if (!discard()) return;
+    edit();
+    editPool();
+    get("pool-title").focus();
+  });
+  poolForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy || (dirty && !window.confirm("Discard unsaved message changes and save this pool?"))) return;
+    busy = true;
+    controls();
+    try {
+      const row = {
+        id: editingPool ?? `custom-${crypto.randomUUID()}`, title: get("pool-title").value.trim(),
+        schedule: get("pool-schedule").value, starts_on: get("pool-start").value,
+        ends_on: get("pool-end").value || get("pool-start").value, mode: get("pool-mode").value,
+        enabled: get("pool-enabled").checked, updated_at: new Date().toISOString(),
+      };
+      catalog.validatePool(row);
+      const query = editingPool ? adminClient.from("site_message_pools").update(row).eq("id", editingPool)
+        : adminClient.from("site_message_pools").insert(row);
+      const { data, error } = await query.select("*").single();
+      if (error) throw error;
+      if (!data) throw new Error("The pool was not saved. Reload the library.");
+      editPool(data);
+      await loadPools(row.id);
+      page = 0;
+      edit();
+      await load();
+      reportPool("Pool saved. Add messages below; public schedules refresh within five minutes on reload or refocus.", "success");
+    } catch (error) {
+      console.error("Unable to save message pool:", error);
+      reportPool(`Pool save failed: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
+  });
+  get("pool-delete").addEventListener("click", async () => {
+    if (busy || !editingPool || !window.confirm("Permanently delete this custom pool AND ALL its messages, including hidden messages?")) return;
+    busy = true;
+    controls();
+    try {
+      const { data, error } = await adminClient.from("site_message_pools").delete().eq("id", editingPool).select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("The pool no longer exists. Reload the library.");
+      await loadPools("standard");
+      page = 0;
+      edit();
+      await load();
+      reportPool("Custom pool and its messages deleted.", "success");
+    } catch (error) {
+      console.error("Unable to delete message pool:", error);
+      reportPool(`Pool deletion failed: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
+  });
+  timezoneForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    busy = true;
+    controls();
+    try {
+      const timezone = catalog.validateTimezone(get("timezone").value.trim());
+      const { data, error } = await adminClient.from("site_message_settings")
+        .update({ timezone, updated_at: new Date().toISOString() }).eq("id", "primary").select("*").single();
+      if (error) throw error;
+      if (!data) throw new Error("The calendar settings were not saved. Reload the library.");
+      reportPool(`Calendar timezone saved: ${data.timezone}. Public calendars refresh within five minutes on reload or refocus.`, "success");
+    } catch (error) {
+      console.error("Unable to save message timezone:", error);
+      reportPool(`Timezone save failed: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
+  });
   previous.addEventListener("click", () => { page--; load(); });
   next.addEventListener("click", () => { page++; load(); });
   form.addEventListener("submit", async (event) => {
@@ -219,22 +391,7 @@
       report(`Message save failed: ${error.message}`, "error");
     } finally { busy = false; controls(); }
   });
-  remove.addEventListener("click", async () => {
-    if (busy || selected === null || !window.confirm("Delete this message permanently? Empty pools use bundled fallbacks.")) return;
-    busy = true;
-    controls();
-    try {
-      const { data, error } = await adminClient.from("site_message_catalog").delete().eq("position", selected).select("position");
-      if (error) throw error;
-      if (!data?.length) throw new Error("The message no longer exists. Reload the library.");
-      edit();
-      if (!await load()) return;
-      report("Message deleted. Remaining enabled entries will be used; empty pools use bundled fallbacks.", "success");
-    } catch (error) {
-      console.error("Unable to delete message:", error);
-      report(`Message deletion failed: ${error.message}`, "error");
-    } finally { busy = false; controls(); }
-  });
-  window.addEventListener("admin:authenticated", () => { edit(); load(); });
+  remove.addEventListener("click", () => { if (selected !== null) deleteMessage({ position: selected }); });
+  window.addEventListener("admin:authenticated", reloadLibrary);
   edit();
 })();

@@ -1,7 +1,8 @@
 (() => {
-  const profiles = ["standard", "new-year", "christmas", "halloween", "birthday", "valentines",
+  const builtinProfiles = ["standard", "new-year", "christmas", "halloween", "birthday", "valentines",
     "st-patricks", "easter", "earth-day", "independence-day", "pi-day", "april-fools",
     "404-day", "may-fourth", "leap-day", "thanksgiving", "friday-the-13th"];
+  const profiles = [...builtinProfiles];
   const categories = {
     messages: "Rotating status messages", activities: "Activities", shutdownMessages: "Shutdown messages",
     bootMessages: "Endless boot messages", initialBootSteps: "Initial boot steps",
@@ -17,19 +18,23 @@
   let started = false;
   let pending = null;
   let status = "Bundled messages are active.";
-  const activeProfiles = () => ["standard", ...(window.BITS_SEASONAL_PROFILE?.ids ?? [])];
-  const cacheKey = () => `bits-message-catalog-v1:${activeProfiles().join(",")}`;
+  let pools = [];
+  let timezone = null;
+  let loadedDay = "";
+  const formatters = new Map();
+  const activeProfiles = (options) => ["standard", ...(window.BITS_GET_SEASONAL_PROFILE?.(new Date(), options)?.ids ?? [])];
+  const cacheKey = () => "bits-message-catalog-v2";
   const weighted = (category) => category === "messages" || category === "activities";
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
-  function validate(row) {
+  function validateEntry(row, allowedProfiles) {
     if (row?.corrected_text != null && (row.category !== "messages"
       || typeof row.corrected_text !== "string" || !row.corrected_text.trim()
       || row.corrected_text.length > 2000 || row.corrected_text === row.text)) {
       throw new Error("Mistype corrections need different, nonblank corrected text of at most 2,000 characters and are only supported for splash/status messages.");
     }
     if (!row || !Number.isInteger(row.position) || row.position <= 0
-      || !profiles.includes(row.profile) || !Object.hasOwn(categories, row.category)
+      || !allowedProfiles.includes(row.profile) || !Object.hasOwn(categories, row.category)
       || typeof row.text !== "string" || !row.text.trim() || row.text.length > 2000
       || !Number.isFinite(row.weight) || row.weight <= 0 || row.weight > 1000
       || typeof row.colorful !== "boolean" || !row.format || typeof row.format !== "object" || Array.isArray(row.format)
@@ -42,13 +47,65 @@
     return row;
   }
 
-  function applyBinding(key, binding) {
-    if (!snapshot || !activeProfiles().includes(binding.profile)) return;
-    const rows = snapshot.filter((row) => `${row.profile}/${row.category}` === key);
-    const values = rows.length ? rows.map((row) => weighted(row.category)
+  const validate = (row) => validateEntry(row, profiles);
+  function validateTimezone(value) {
+    if (typeof value !== "string" || !value.trim() || value.length > 100) throw new Error("Enter a valid IANA timezone, such as America/Chicago.");
+    if (!formatters.has(value)) formatters.set(value, new Intl.DateTimeFormat("en-US", {
+      timeZone: value, year: "numeric", month: "2-digit", day: "2-digit",
+    }));
+    return value;
+  }
+  function calendarDate(date, zone = timezone) {
+    if (!zone) return date;
+    const parts = Object.fromEntries(formatters.get(validateTimezone(zone)).formatToParts(date).map(({ type, value }) => [type, value]));
+    return new Date(`${parts.year}-${parts.month}-${parts.day}T12:00:00`);
+  }
+  const dayKey = (date) => `${date.getFullYear().toString().padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  function validatePool(pool) {
+    const validDate = (value) => typeof value === "string" && /^[1-9]\d{3}-\d{2}-\d{2}$/.test(value)
+      && !Number.isNaN(Date.parse(`${value}T12:00:00Z`)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
+    if (!pool || !/^custom-[a-z0-9-]{1,70}$/.test(pool.id) || typeof pool.title !== "string"
+      || !pool.title.trim() || pool.title.length > 100 || !["annual", "once"].includes(pool.schedule)
+      || !["exclusive", "additive"].includes(pool.mode) || typeof pool.enabled !== "boolean"
+      || !validDate(pool.starts_on) || !validDate(pool.ends_on)
+      || (pool.schedule === "once" && pool.ends_on < pool.starts_on)) {
+      throw new Error("Enter a pool name, valid dates, and an additive/exclusive mode. One-time ranges must end on or after their start.");
+    }
+    return pool;
+  }
+  function setAdminPools(values) {
+    values.forEach(validatePool);
+    pools = values;
+    profiles.splice(0, profiles.length, ...builtinProfiles, ...values.map((pool) => pool.id));
+  }
+  function valueFor(row) {
+    return weighted(row.category)
       ? { text: row.text, weight: row.weight, colorful: row.colorful, format: clone(row.format), markup: row.markup ?? false,
         ...(row.corrected_text == null ? {} : { correctedText: row.corrected_text }) }
-      : row.markup ? { text: row.text, markup: true } : row.text)
+      : row.markup ? { text: row.text, markup: true } : row.text;
+  }
+  function scheduledProfiles(date, definitions = pools) {
+    const today = dayKey(date);
+    return definitions.filter((pool) => {
+      if (!pool.enabled) return false;
+      if (pool.schedule === "once") return today >= pool.starts_on && today <= pool.ends_on;
+      const day = today.slice(5), start = pool.starts_on.slice(5), end = pool.ends_on.slice(5);
+      return start <= end ? day >= start && day <= end : day >= start || day <= end;
+    }).map((pool) => {
+      const profile = { id: pool.id, mode: pool.mode, monitorJokes: {} };
+      Object.keys(categories).forEach((category) => {
+        const values = (snapshot ?? []).filter((row) => row.profile === pool.id && row.category === category).map(valueFor);
+        if (category.startsWith("monitor.")) profile.monitorJokes[category.slice(8)] = values;
+        else profile[category] = values;
+      });
+      return profile;
+    });
+  }
+
+  function applyBinding(key, binding, ids = activeProfiles()) {
+    if (!snapshot || !ids.includes(binding.profile)) return;
+    const rows = snapshot.filter((row) => `${row.profile}/${row.category}` === key);
+    const values = rows.length ? rows.map(valueFor)
       : clone(binding.fallback);
     if (!rows.length && binding.fallback.length) {
       console.warn(`No enabled database entries for ${key}; using bundled messages.`);
@@ -81,12 +138,20 @@
     });
   }
 
-  function apply(rows) {
+  function apply(rows, definitions, zone) {
+    if (!Array.isArray(definitions) || definitions.length > 1000) throw new Error("Invalid scheduled message pools.");
+    definitions.forEach(validatePool);
+    if (new Set(definitions.map((pool) => pool.id)).size !== definitions.length) throw new Error("Duplicate message pool IDs.");
+    validateTimezone(zone);
     if (!Array.isArray(rows) || rows.length > 10000) throw new Error("The message catalog has an invalid size.");
-    rows.forEach(validate);
+    const allowed = [...builtinProfiles, ...definitions.map((pool) => pool.id)];
+    rows.forEach((row) => validateEntry(row, allowed));
     if (new Set(rows.map((row) => row.position)).size !== rows.length) throw new Error("The message catalog contains duplicate IDs.");
+    setAdminPools(definitions);
+    timezone = zone;
     snapshot = rows;
-    bindings.forEach((binding, key) => applyBinding(key, binding));
+    const ids = activeProfiles();
+    bindings.forEach((binding, key) => applyBinding(key, binding, ids));
     window.dispatchEvent(new CustomEvent("bits:messages-updated"));
   }
 
@@ -96,11 +161,29 @@
       try {
         const { url, anonKey } = window.SUPABASE_CONFIG ?? {};
         if (!url || !anonKey) throw new Error("Message database configuration is missing.");
+        const read = async (table, query) => {
+          const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${table}?${new URLSearchParams(query)}`, {
+            headers: { apikey: anonKey }, signal: AbortSignal.timeout(10_000),
+          });
+          if (!response.ok) throw new Error(`${table} returned HTTP ${response.status}.`);
+          const result = await response.json();
+          if (!Array.isArray(result)) throw new Error(`${table} returned invalid data.`);
+          return result;
+        };
+        const [settings, definitions] = await Promise.all([
+          read("site_message_settings", { select: "id,timezone", id: "eq.primary" }),
+          read("site_message_pools", { select: "id,title,schedule,starts_on,ends_on,mode,enabled", enabled: "eq.true", order: "id.asc", limit: "1000" }),
+        ]);
+        if (settings.length !== 1 || settings[0].id !== "primary") throw new Error("The message calendar settings are missing.");
+        if (definitions.length >= 1000) throw new Error("Too many custom pools; at most 999 are supported.");
+        const zone = validateTimezone(settings[0].timezone);
+        definitions.forEach(validatePool);
+        const ids = activeProfiles({ pools: definitions, timezone: zone });
         const rows = [];
         for (let offset = 0; ; offset += 500) {
           const query = new URLSearchParams({
             select: "position,profile,category,text,weight,colorful,format,markup,corrected_text",
-            enabled: "eq.true", profile: `in.(${activeProfiles().join(",")})`,
+            enabled: "eq.true", profile: `in.(${ids.join(",")})`,
             order: "position.asc", limit: "500", offset: String(offset),
           });
           const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/site_message_catalog?${query}`, {
@@ -113,11 +196,12 @@
           if (rows.length > 10000) throw new Error("Message catalog exceeds 10,000 entries.");
           if (page.length < 500) break;
         }
-        apply(rows);
+        apply(rows, definitions, zone);
         loadedAt = Date.now();
+        loadedDay = dayKey(calendarDate(new Date()));
         status = "Database messages are active; empty pools use bundled messages.";
         try {
-          localStorage.setItem(cacheKey(), JSON.stringify({ rows, loadedAt }));
+          localStorage.setItem(cacheKey(), JSON.stringify({ rows, pools: definitions, timezone: zone, loadedAt }));
         } catch (error) {
           console.warn("Unable to cache database messages:", error);
         }
@@ -140,15 +224,16 @@
       const cached = JSON.parse(localStorage.getItem(cacheKey()) ?? "null");
       if (cached) {
         if (!Number.isFinite(cached.loadedAt)) throw new Error("Invalid message cache timestamp.");
-        apply(cached.rows);
+        apply(cached.rows, cached.pools, cached.timezone);
         loadedAt = cached.loadedAt;
+        loadedDay = dayKey(calendarDate(new Date(loadedAt)));
         status = "Cached database messages are active.";
       }
     } catch (error) {
       console.warn("Unable to restore cached messages; using bundled messages:", error);
     }
     const schedule = () => {
-      if (Date.now() - loadedAt < ttl) return;
+      if (Date.now() - loadedAt < ttl && loadedDay === dayKey(calendarDate(new Date()))) return;
       if (window.requestIdleCallback) window.requestIdleCallback(() => refresh(), { timeout: 5000 });
       else window.setTimeout(() => refresh(), 1000);
     };
@@ -158,9 +243,15 @@
       document.addEventListener("DOMContentLoaded", schedule, { once: true });
     } else schedule();
     window.addEventListener("focus", schedule);
+    const checkDay = () => {
+      if (!document.hidden && snapshot && loadedDay !== dayKey(calendarDate(new Date()))) schedule();
+      window.setTimeout(checkDay, 60_000);
+    };
+    window.setTimeout(checkDay, 60_000);
   }
 
-  window.BITS_MESSAGE_CATALOG = { profiles, categories, styles, weighted, validate, bind, registerProfiles, start, refresh,
+  window.BITS_MESSAGE_CATALOG = { profiles, builtinProfiles, categories, styles, weighted, validate, validatePool,
+    validateTimezone, calendarDate, scheduledProfiles, setAdminPools, bind, registerProfiles, start, refresh,
     get status() { return status; } };
   for (const [category, global] of [["messages", "BITS_MESSAGES"], ["activities", "BITS_ACTIVITIES"], ["shutdownMessages", "BITS_SHUTDOWN_MESSAGES"]]) {
     if (Array.isArray(window[global])) bind("standard", category, window[global]);

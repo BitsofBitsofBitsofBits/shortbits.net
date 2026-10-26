@@ -1861,6 +1861,21 @@ body.admin-center.ac-panel-open {
   overflow-wrap: anywhere;
 }
 
+.message-library-list li {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--ac-border, #d1d1d1);
+}
+
+.message-library-list .repeatable-admin-actions button {
+  width: auto;
+}
+
+#message-library-form {
+  scroll-margin-top: 100px;
+}
+
 .message-format-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));

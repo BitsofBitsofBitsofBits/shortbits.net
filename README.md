@@ -355,6 +355,30 @@ is a personal project and largely a learning exercise for me.
   unchanged and the rare built-in typo continues to appear independently.
   Corrections are cached and included in content backups. Export a fresh backup
   after deployment; earlier backups lack the new column and fail schema validation.
+  After `20261025034000_scheduled_message_pools.sql`, each message row has explicit
+  **Edit** (scrolls to and focuses the populated editor) and **Delete** actions.
+  Under **Manage date-based pools and timezone**, create, rename, disable, or delete
+  custom pools, then select them in **Season / profile** to manage their messages.
+  Pool deletion atomically removes all associated messages, including hidden ones.
+  Built-in holiday definitions remain available and are not deleted by this UI.
+  Schedules support inclusive one-time dates/ranges and annually recurring
+  month/day ranges, including December-to-January wrapping and February 29.
+  For annual ranges the years in the date inputs are ignored; a blank end means
+  a single day. New pools start disabled until explicitly enabled.
+  Active additive pools mix with standard messages. When exclusive pools overlap,
+  all matching exclusive pools (including built-in holidays) combine and suppress
+  standard/additive entries for message types they populate. Empty exclusive
+  message types retain standard/bundled content so boot, monitor, and typewriter
+  features never receive empty arrays.
+  The configurable IANA timezone defaults to `America/Chicago` (Central Time,
+  including daylight saving) and governs both built-in and custom message dates
+  for every visitor. Settings and definitions load in the background with the
+  catalog; cached configuration applies immediately on later visits. An open,
+  visible page checks for a calendar-day change once a minute. Outages retain the
+  previous complete cached catalog/configuration or bundled fallbacks.
+  Pools/settings are included in content backups, with definitions restored before
+  their messages. Export a new backup after deploying this migration; older
+  backups do not have the two new tables.
 - Terminal-themed 404 recovery and generated production build metadata
 - Self-hosted source browser with raw-file and archive access
 - Automated validation and SSH deployment through GitHub Actions

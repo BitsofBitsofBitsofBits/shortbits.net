@@ -71,8 +71,15 @@ test("desktop boot finishes within 900ms and manual replay stays available", () 
   assert.equal(result.background.inert, false);
 });
 
-test("an empty exclusive seasonal boot cannot trap the page", () => {
-  assert.equal(runBoot({ steps: [] }).document.documentElement.dataset.boot, "complete");
+test("an empty exclusive seasonal boot uses standard steps and still finishes within 900ms", () => {
+  const result = runBoot({ steps: [] });
+  const steps = [...result.timers];
+  assert.ok(steps.length > 0);
+  steps.forEach(({ callback }) => callback());
+  assert.ok(Math.max(...steps.map(({ delay }) => delay)) + result.timers.at(-1).delay <= 900);
+  result.timers.at(-1).callback();
+  assert.equal(result.document.documentElement.dataset.boot, "complete");
+  assert.equal(result.background.inert, false);
 });
 
 test("desktop boot waits for deferred seasonal data and can still be skipped", () => {

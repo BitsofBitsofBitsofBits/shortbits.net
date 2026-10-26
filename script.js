@@ -1406,7 +1406,7 @@ const basePlayingDeadMessages = [
 window.BITS_MESSAGE_CATALOG?.bind("standard", "playingDeadMessages", basePlayingDeadMessages);
 const seasonalDesktopProfile = window.BITS_SEASONAL_PROFILE;
 const seasonalPlayingDeadMessages = seasonalDesktopProfile?.playingDeadMessages ?? [];
-const playingDeadMessages = seasonalDesktopProfile?.mode === "exclusive"
+const playingDeadMessages = seasonalDesktopProfile?.mode === "exclusive" && seasonalPlayingDeadMessages.length
   ? seasonalPlayingDeadMessages
   : [...basePlayingDeadMessages, ...seasonalPlayingDeadMessages];
 const baseGlitchMessages = [
@@ -1416,7 +1416,7 @@ const baseGlitchMessages = [
 ];
 window.BITS_MESSAGE_CATALOG?.bind("standard", "glitchMessages", baseGlitchMessages);
 const seasonalGlitchMessages = seasonalDesktopProfile?.glitchMessages ?? [];
-const glitchMessages = seasonalDesktopProfile?.mode === "exclusive"
+const glitchMessages = seasonalDesktopProfile?.mode === "exclusive" && seasonalGlitchMessages.length
   ? seasonalGlitchMessages
   : seasonalGlitchMessages.length
     ? [seasonalGlitchMessages[0], baseGlitchMessages[1], seasonalGlitchMessages.at(-1)]
@@ -1425,8 +1425,8 @@ window.addEventListener("bits:messages-updated", () => {
   const profile = window.BITS_SEASONAL_PROFILE;
   const dead = profile?.playingDeadMessages ?? [];
   const glitch = profile?.glitchMessages ?? [];
-  const nextDead = profile?.mode === "exclusive" ? dead : [...basePlayingDeadMessages, ...dead];
-  const nextGlitch = profile?.mode === "exclusive" ? glitch : glitch.length
+  const nextDead = profile?.mode === "exclusive" && dead.length ? dead : [...basePlayingDeadMessages, ...dead];
+  const nextGlitch = profile?.mode === "exclusive" && glitch.length ? glitch : glitch.length
     ? [glitch[0], baseGlitchMessages[1] ?? baseGlitchMessages[0], glitch.at(-1)] : [...baseGlitchMessages];
   playingDeadMessages.splice(0, playingDeadMessages.length, ...nextDead);
   glitchMessages.splice(0, glitchMessages.length, ...nextGlitch);

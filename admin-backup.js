@@ -1,7 +1,8 @@
 (() => {
   const tables = [
     "pronoun_profiles", "site_blog_posts", "site_changelog", "site_creators", "site_favorite_games",
-    "site_hardware", "site_hardware_machine_order", "site_message_catalog", "site_now",
+    "site_hardware", "site_hardware_machine_order", "site_message_catalog", "site_message_pools",
+    "site_message_settings", "site_now",
     "site_resume_certifications", "site_resume_education", "site_resume_entries",
     "site_resume_profile", "spotify_featured_playlists", "spotify_featured_tracks",
   ];
@@ -23,7 +24,7 @@
       count += rows.length;
     }
     if (count > 10000) throw new Error("The backup exceeds 10,000 rows.");
-    for (const table of ["pronoun_profiles", "site_now", "site_resume_profile"]) {
+    for (const table of ["pronoun_profiles", "site_now", "site_resume_profile", "site_message_settings"]) {
       if (backup.tables[table].length !== 1 || backup.tables[table][0].id !== "primary") {
         throw new Error(`Missing primary record in ${table}.`);
       }

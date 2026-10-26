@@ -1088,19 +1088,21 @@
     }, {});
   }
 
-  function resolveProfile(date = new Date()) {
-    const exclusive = profiles.find((profile) => (
-      profile.mode === "exclusive" && profile.matches(date)
-    ));
-    const activeProfiles = exclusive
-      ? [exclusive]
-      : profiles.filter((profile) => profile.mode === "additive" && profile.matches(date));
+  function resolveProfile(date = new Date(), options = {}) {
+    const catalog = window.BITS_MESSAGE_CATALOG;
+    date = catalog?.calendarDate(date, options.timezone) ?? date;
+    const matching = [
+      ...profiles.filter((profile) => profile.matches(date)),
+      ...(catalog?.scheduledProfiles(date, options.pools) ?? []),
+    ];
+    const exclusive = matching.filter((profile) => profile.mode === "exclusive");
+    const activeProfiles = exclusive.length ? exclusive : matching;
 
     return {
       active: activeProfiles.length > 0,
       id: activeProfiles.map((profile) => profile.id).join("+") || "standard",
       ids: activeProfiles.map((profile) => profile.id),
-      mode: exclusive ? "exclusive" : activeProfiles.length ? "additive" : "standard",
+      mode: exclusive.length ? "exclusive" : activeProfiles.length ? "additive" : "standard",
       messages: activeProfiles.flatMap((profile) => profile.messages ?? []),
       activities: activeProfiles.flatMap((profile) => profile.activities ?? []),
       bootMessages: activeProfiles.flatMap((profile) => profile.bootMessages ?? []),
@@ -1127,7 +1129,7 @@
       if (!Array.isArray(window[global])) continue;
       const seasonal = field === "shutdownMessages" && activeProfile.mode === "additive"
         ? activeProfile[field].flatMap((message) => Array(12).fill(message)) : activeProfile[field];
-      const values = activeProfile.mode === "exclusive" ? [...seasonal] : [...regularPools[field], ...seasonal];
+      const values = activeProfile.mode === "exclusive" && seasonal.length ? [...seasonal] : [...regularPools[field], ...seasonal];
       window[global].splice(0, window[global].length, ...values);
     }
   });
@@ -1138,12 +1140,12 @@
   }
 
   if (Array.isArray(window.BITS_MESSAGES)) {
-    window.BITS_MESSAGES = activeProfile.mode === "exclusive"
+    window.BITS_MESSAGES = activeProfile.mode === "exclusive" && activeProfile.messages.length
       ? activeProfile.messages
       : [...window.BITS_MESSAGES, ...activeProfile.messages];
   }
   if (Array.isArray(window.BITS_ACTIVITIES)) {
-    window.BITS_ACTIVITIES = activeProfile.mode === "exclusive"
+    window.BITS_ACTIVITIES = activeProfile.mode === "exclusive" && activeProfile.activities.length
       ? activeProfile.activities
       : [...window.BITS_ACTIVITIES, ...activeProfile.activities];
   }
@@ -1151,7 +1153,7 @@
     const frequentShutdownMessages = activeProfile.shutdownMessages.flatMap((message) => (
       Array.from({ length: 12 }, () => message)
     ));
-    window.BITS_SHUTDOWN_MESSAGES = activeProfile.mode === "exclusive"
+    window.BITS_SHUTDOWN_MESSAGES = activeProfile.mode === "exclusive" && activeProfile.shutdownMessages.length
       ? activeProfile.shutdownMessages
       : [...window.BITS_SHUTDOWN_MESSAGES, ...frequentShutdownMessages];
   }

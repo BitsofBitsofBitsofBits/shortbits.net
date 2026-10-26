@@ -294,10 +294,10 @@
   window.BITS_MESSAGE_CATALOG?.bind("standard", "bootMessages", baseFixedMessages);
   const seasonalProfile = window.BITS_SEASONAL_PROFILE;
   const seasonalBootMessages = [...(seasonalProfile?.bootMessages ?? [])];
-  const fixedMessages = [...(seasonalProfile?.mode === "exclusive" ? seasonalBootMessages : baseFixedMessages)];
+  const fixedMessages = [...(seasonalProfile?.mode === "exclusive" && seasonalBootMessages.length ? seasonalBootMessages : baseFixedMessages)];
   window.addEventListener("bits:messages-updated", () => {
     seasonalBootMessages.splice(0, seasonalBootMessages.length, ...(seasonalProfile?.bootMessages ?? []));
-    fixedMessages.splice(0, fixedMessages.length, ...(seasonalProfile?.mode === "exclusive" ? seasonalBootMessages : baseFixedMessages));
+    fixedMessages.splice(0, fixedMessages.length, ...(seasonalProfile?.mode === "exclusive" && seasonalBootMessages.length ? seasonalBootMessages : baseFixedMessages));
   });
   const bootPhases = [
     {
@@ -1795,7 +1795,7 @@
     let message;
     let attempts = 0;
     do {
-      if (seasonalProfile?.mode === "exclusive") {
+      if (seasonalProfile?.mode === "exclusive" && seasonalBootMessages.length) {
         message = randomItem(fixedMessages);
       } else if (seasonalBootMessages.length && Math.random() < 0.22) {
         message = randomItem(seasonalBootMessages);
