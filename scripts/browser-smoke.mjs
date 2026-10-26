@@ -54,10 +54,13 @@ try {
     });
     const page = await context.newPage();
     page.on("pageerror", (error) => errors.push(`${width}px: ${error.message}`));
+    await page.route(`${server.origin}/missing-bits-check`, async route => route.fulfill({
+      status: 404, contentType: "text/html", body: await readFile(resolve(root, "404.html"), "utf8"),
+    }));
     for (const path of [
       "/?choose", "/online/", "/professional/", "/professional/resume/",
       "/projects/", "/projects/homelab/", "/projects/shortbits/", "/blog/",
-      "/blog/articles/first-lab-notes/",
+      "/blog/articles/first-lab-notes/", "/missing-bits-check",
     ]) {
       await page.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
       await page.addScriptTag({ path: axePath });
@@ -66,6 +69,26 @@ try {
       })).violations.map((violation) => ({ id: violation.id, nodes: violation.nodes.map((node) => node.target) })));
       assert.deepEqual(violations, [], `${width}px ${path}: accessibility violations`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), `${width}px ${path}: horizontal overflow`);
+      if (path === "/missing-bits-check") {
+        assert.equal(await page.locator("#not-found-bits").getAttribute("aria-hidden"), "true");
+        assert.ok(await page.locator("#not-found-bits .falling-bit").count() > 0);
+        assert.equal(await page.locator("#not-found-bits .falling-bit").first().evaluate(bit => getComputedStyle(bit).animationName), "fall-bit");
+        assert.ok(await page.locator(".error-window").evaluate(panel =>
+          Number(getComputedStyle(panel).zIndex) > Number(getComputedStyle(document.querySelector("#not-found-bits")).zIndex)));
+        const initialTransform = await page.locator("#not-found-bits .falling-bit").first().evaluate(bit => getComputedStyle(bit).transform);
+        await page.waitForFunction(transform => {
+          const bit = document.querySelector("#not-found-bits .falling-bit");
+          return bit && getComputedStyle(bit).transform !== transform;
+        }, initialTransform);
+        assert.equal(await page.locator("#error-path").textContent(), "PATH: /missing-bits-check");
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount === 0);
+        assert.equal(await page.locator("#not-found-bits").isVisible(), false);
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount > 0);
+        await page.evaluate(() => { document.documentElement.dataset.effects = "off"; });
+        await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount === 0);
+      }
       if (path === "/professional/resume/") {
         assert.equal(await page.locator("#resume-status").textContent(), "Saved resume is current.");
         assert.equal(await page.locator("#resume-refresh").isDisabled(), true);

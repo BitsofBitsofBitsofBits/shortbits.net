@@ -1,0 +1,4 @@
+.error-page .error-window {
+  position: relative;
+  z-index: 2;
+}
