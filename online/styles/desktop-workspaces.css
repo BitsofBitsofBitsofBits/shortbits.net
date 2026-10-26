@@ -119,9 +119,12 @@ body[data-desktop-workspace] .fake-taskbar {
   inset: auto 0 0;
   height: var(--workspace-bottom);
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
+  font: inherit;
+  letter-spacing: normal;
 }
 .workspace-running { display: flex; flex: 1; min-width: 0; min-height: 44px; overflow-x: auto; scrollbar-width: none; gap: 6px; }
 .workspace-running::-webkit-scrollbar { display: none; }
@@ -179,6 +182,7 @@ body[data-workspace-mode="windowed"] .workspace-home { background: transparent; 
 body[data-workspace-layout="desktop"] .workspace-app-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 130px)); }
 body[data-workspace-layout="desktop"] .workspace-home .workspace-app-card { min-height: 120px; align-items: center; padding: 10px; text-align: center; }
 body[data-workspace-layout="tiles"] .workspace-home .workspace-app-card { border-radius: 0; background: var(--panel-strong); border-bottom: 5px solid var(--accent); min-height: 170px; }
+body[data-workspace-layout="tiles"] .workspace-home > :is(h1, .workspace-results) { width: fit-content; padding: 8px 12px; color: var(--ink); background: var(--panel-strong); }
 body[data-desktop-workspace="windows-11"] .workspace-footer { justify-content: center; border-radius: 12px 12px 0 0; }
 body[data-desktop-workspace="windows-11"] .workspace-running { flex: 0 1 auto; }
 body[data-desktop-workspace="windows-11"] .workspace-launch-panel { left: 50%; transform: translateX(-50%); }

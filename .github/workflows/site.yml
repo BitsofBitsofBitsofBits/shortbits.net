@@ -193,6 +193,15 @@ jobs:
           --use-api
 
       # The hardware agent authenticates with its own device token, not a Supabase JWT.
+      - name: Deploy YouTube presence Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy youtube-presence
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
+      # The hardware agent authenticates with its own device token, not a Supabase JWT.
       - name: Deploy hardware sync Edge Function
         if: steps.credentials.outputs.ready == 'true'
         run: >-

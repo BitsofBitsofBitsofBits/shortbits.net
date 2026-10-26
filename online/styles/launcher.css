@@ -23,3 +23,21 @@
 @media (forced-colors: active) {
   .bits-launcher { color: CanvasText; background: Canvas; border-color: CanvasText; }
 }
+#desktop-workspace-entry {
+  position: fixed;
+  z-index: 1101;
+  right: 16px;
+  bottom: 16px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--overlay-bg);
+  box-shadow: var(--shadow);
+  font: 14px/1.4 var(--font-family, system-ui, sans-serif);
+  cursor: pointer;
+}
+#desktop-workspace-entry[hidden] { display: none; }
+#desktop-workspace-entry:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+body.has-workspace-entry .bits-layout-notice { bottom: 76px !important; }

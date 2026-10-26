@@ -11,6 +11,7 @@ const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 const themes = ["windows-10", "windows-11", "windows-8", "browser", "termius",
   "m365", "google", "youtube", "youtube-music", "legacy-bios"];
 let browser;
+let currentPage;
 try {
   browser = await chromium.launch({
     ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}),
@@ -25,17 +26,19 @@ try {
     await context.route("**/*", (route) => new URL(route.request().url()).origin === server.origin
       ? route.continue() : route.abort());
     const page = await context.newPage();
+    currentPage = page;
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+    await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     assert.equal(await page.evaluate(() => performance.getEntriesByType("resource")
       .some((entry) => entry.name.includes("desktop-workspaces"))), false, "Workspaces do not load at startup");
     await page.addScriptTag({ path: axePath });
 
     for (const id of themes) {
       await page.locator("#interface-theme-select").selectOption(id, { force: true });
-      await page.locator("#minimize-button").click();
+      await page.locator("#desktop-workspace-entry").click();
       await page.waitForFunction((theme) => document.body.dataset.desktopWorkspace === theme, id).catch(async (error) => {
         console.error({ errors, state: await page.evaluate(() => ({
           theme: document.documentElement.dataset.interfaceTheme,
@@ -139,7 +142,7 @@ try {
     }
 
     await page.locator("#interface-theme-select").selectOption("browser", { force: true });
-    await page.locator("#minimize-button").click();
+    await page.locator("#desktop-workspace-entry").click();
     await page.waitForSelector('body[data-desktop-workspace="browser"]');
     await page.evaluate(() => {
       window.BITS_DESKTOP_WINDOWS.open("about");
@@ -149,7 +152,7 @@ try {
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
     assert.deepEqual(await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.state().map((app) => app.slug).sort()),
       ["about", "hardware"], "Deep-linked open apps survive reload");
-    await page.evaluate(() => document.querySelector("#minimize-button").click());
+    await page.evaluate(() => document.querySelector("#desktop-workspace-entry").click());
     await page.waitForSelector('body[data-desktop-workspace="browser"]');
     await page.locator("#interface-theme-select").selectOption("termius", { force: true });
     await page.waitForSelector('body[data-desktop-workspace="termius"]');
@@ -165,6 +168,18 @@ try {
     console.log(`PASS ${width}px live theme transitions, standard desktop, and URL restoration`);
     await context.close();
   }
+} catch (error) {
+  if (currentPage && !currentPage.isClosed()) {
+    console.error(await currentPage.evaluate(() => [...document.querySelectorAll(
+      ".workspace-footer,.workspace-running,.workspace-running-app,[data-close-app=settings]",
+    )].map((element) => ({
+      selector: element.className || element.dataset.closeApp,
+      rect: element.getBoundingClientRect().toJSON(),
+      scrollWidth: element.scrollWidth, clientWidth: element.clientWidth,
+      scrollLeft: element.scrollLeft, display: getComputedStyle(element).display,
+    }))));
+  }
+  throw error;
 } finally {
   await browser?.close();
   await server.close();

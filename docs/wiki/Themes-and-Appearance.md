@@ -62,7 +62,8 @@
   are marked **experimental** within Online's theme families and grouped under
   EXPERIMENTAL LAYOUTS in native dropdowns. They show a dismissible experimental notice with a one-click way
   back to the last standard theme, and are skipped by RANDOM THEME. All ten
-  retain their selected theme when the main Online interface is minimized:
+  retain their selected theme when the main Online interface is minimized
+  (or through the persistent **Open workspace** button):
   Windows 8 uses Start tiles and an app switcher; Windows 10/11 use Start,
   pinned app launchers, a running-app taskbar, and floating windows. Browser
   uses app tabs and a `bits://<app>` address/command bar; Termius uses local

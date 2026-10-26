@@ -1367,12 +1367,29 @@ function setFakeDesktopVisible(visible) {
     closeFakeDesktopApps();
   }
   syncDesktopThemeFallback();
+  syncDesktopWorkspaceEntry();
   window.dispatchEvent(new CustomEvent("bits:desktop-visibility"));
 }
 
 let desktopFallbackThemeId = "";
 let isApplyingDesktopFallback = false;
 let desktopWorkspaceLoading = false;
+
+function syncDesktopWorkspaceEntry() {
+  const theme = window.BITS_THEME_PREFERENCE?.getTheme(document.documentElement.dataset.interfaceTheme);
+  const available = Boolean(theme?.experimental && theme.desktopCapable && fakeDesktop.hidden);
+  document.body.classList.toggle("has-workspace-entry", available);
+  let entry = document.querySelector("#desktop-workspace-entry");
+  if (!entry && available) {
+    entry = document.createElement("button");
+    entry.id = "desktop-workspace-entry";
+    entry.type = "button";
+    entry.textContent = "Open workspace";
+    entry.addEventListener("click", () => minimizeButton.click());
+    document.body.append(entry);
+  }
+  if (entry) entry.hidden = !available;
+}
 
 async function loadDesktopWorkspace() {
   if (window.BITS_DESKTOP_WORKSPACE || desktopWorkspaceLoading) return;
@@ -1457,6 +1474,7 @@ function syncDesktopThemeFallback() {
 }
 
 window.addEventListener("bits:theme-applied", () => {
+  syncDesktopWorkspaceEntry();
   if (document.documentElement.dataset.interfaceTheme === "rgb") {
     setRgbMode(true);
   }
@@ -1464,6 +1482,7 @@ window.addEventListener("bits:theme-applied", () => {
     window.setTimeout(syncDesktopThemeFallback, 0);
   }
 });
+syncDesktopWorkspaceEntry();
 
 const basePlayingDeadMessages = [
   "The process is extremely committed to the bit.",

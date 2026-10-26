@@ -14,6 +14,25 @@ let cachedHistory: Record<string, unknown> | null = null;
 let cachedHistoryAt = 0;
 let spotifyHistoryRequestInFlight: Promise<Response> | null = null;
 
+async function observeSpotifySession(active: boolean): Promise<string | null> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const keys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? keys.default;
+  if (!url || typeof key !== "string" || !key) throw new Error("Spotify session tracking is not configured.");
+  const headers: Record<string, string> = { apikey: key, "Content-Type": "application/json" };
+  if (!key.startsWith("sb_")) headers.Authorization = `Bearer ${key}`;
+  const response = await fetch(`${url}/rest/v1/rpc/observe_spotify_session`, {
+    method: "POST", headers, body: JSON.stringify({ p_active: active }),
+    signal: AbortSignal.timeout(10_000), redirect: "error",
+  });
+  if (!response.ok) throw new Error(`Spotify session tracking returned HTTP ${response.status}.`);
+  const startedAt = await response.json();
+  if (startedAt !== null && (typeof startedAt !== "string" || !Number.isFinite(Date.parse(startedAt)))) {
+    throw new Error("Spotify session tracking returned invalid data.");
+  }
+  return startedAt;
+}
+
 function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
   return {
@@ -418,6 +437,18 @@ Deno.serve(async (request) => {
 
   if (!spotifyRequestInFlight) {
     spotifyRequestInFlight = fetchSpotifyPlayback(request)
+      .then(async (response) => {
+        if (!response.ok) return response;
+        const playback = await response.json();
+        try {
+          playback.sessionStartedAt = await observeSpotifySession(Boolean(playback.item));
+        } catch (error) {
+          console.error("Unable to track Spotify session:", error);
+          playback.sessionStartedAt = null;
+          playback.sessionTrackingUnavailable = true;
+        }
+        return jsonResponse(request, playback);
+      })
       .finally(() => {
         spotifyRequestInFlight = null;
       });
