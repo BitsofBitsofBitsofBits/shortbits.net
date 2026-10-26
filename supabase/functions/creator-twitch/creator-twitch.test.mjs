@@ -125,6 +125,16 @@ test("lookup rejects unrelated hosts, credentials, non-HTTPS URLs and non-channe
   assert.equal((await setup({ users: [] }).post("example")).status, 404);
 });
 
+test("malformed Twitch URLs return actionable guidance without contacting Twitch", async () => {
+  for (const input of ["https://www.twitch/human1", "www.twitch.tv/human1", "not a URL", ""]) {
+    const app = setup();
+    const response = await app.post(input);
+    assert.equal(response.status, 400, input);
+    assert.match((await response.json()).error, /Twitch username.*https:\/\/www\.twitch\.tv\/human1/);
+    assert.equal(app.calls.length, 1, "Only Supabase session verification should run");
+  }
+});
+
 test("partial API failures preserve the photo/channel, log errors and never cache an offline-shaped success", async () => {
   for (const options of [{ failResource: "streams" }, { streams: [], failResource: "videos" },
     { streams: [{ ...stream, user_id: "999" }] }, { streams: [], videos: [{ ...vod, id: "../evil" }] }]) {

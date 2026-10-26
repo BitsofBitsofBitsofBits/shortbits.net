@@ -149,6 +149,8 @@ function validateTextOptions(options, name) {
       || option.weight <= 0
       || (option.colorful !== undefined && typeof option.colorful !== "boolean")
       || (option.markup !== undefined && typeof option.markup !== "boolean")
+      || (option.author !== undefined && (typeof option.author !== "string"
+        || !option.author.trim() || option.author.length > 200))
       || (option.correctedText !== undefined && (typeof option.correctedText !== "string"
         || !option.correctedText.trim() || option.correctedText.length > 2000))
     ) {
@@ -179,6 +181,8 @@ if (
 const linkGrid = document.querySelector("#link-grid");
 const linkCount = document.querySelector("#link-count");
 const typedText = document.querySelector("#typed-text");
+const typedAuthor = document.querySelector("#typed-author");
+const authorBox = document.querySelector("#message-author-box");
 const terminalOutput = document.querySelector("#terminal-output");
 const activityText = document.querySelector("#activity-text");
 const uptime = document.querySelector("#uptime");
@@ -947,6 +951,8 @@ const rainbowColors = {
 
 let currentMessage = pickWeightedOption(messages);
 let currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
+let currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
+let authorCharacterIndex = 0;
 let characterIndex = 0;
 let deleting = false;
 const typoMessage = {
@@ -965,8 +971,18 @@ function pickNextMessage() {
   return pickWeightedOption(messages);
 }
 
+function renderMessageAuthor() {
+  authorBox.hidden = currentAuthorCharacters.length === 0;
+  typedAuthor.textContent = currentAuthorCharacters.slice(0, Math.max(0, authorCharacterIndex)).join("");
+}
+
 function runTypoCorrection() {
-  if (!currentMessage.correctedText) currentMessage = { ...typoMessage };
+  if (!currentMessage.correctedText) {
+    currentMessage = { ...typoMessage };
+    currentAuthorCharacters = [];
+    authorCharacterIndex = 0;
+    renderMessageAuthor();
+  }
   const correctingMessage = currentMessage;
   const correctedMessage = { ...correctingMessage, text: correctingMessage.correctedText, wasCorrected: true };
   const originalCharacters = window.BITS_MESSAGE_TEXT.prepare(correctingMessage).characters;
@@ -986,6 +1002,7 @@ function runTypoCorrection() {
     currentMessageCharacters = correctedCharacters;
     characterIndex = currentMessageCharacters.length;
     window.BITS_MESSAGE_TEXT.render(typedText, currentMessage);
+    renderMessageAuthor();
     showAchievement("NOTHING HAPPENED", "TYPO CORRECTION", 1800, "typo-corrected");
     deleting = true;
     window.setTimeout(updateMessage, 1600);
@@ -999,10 +1016,12 @@ function updateMessage() {
   }
 
   window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
+  renderMessageAuthor();
 
   if (deleting) {
-    characterIndex -= 1;
-    if (characterIndex < 0) {
+    characterIndex = Math.max(-1, characterIndex - 1);
+    authorCharacterIndex = Math.max(-1, authorCharacterIndex - 1);
+    if (characterIndex < 0 && authorCharacterIndex < 0) {
       deleting = false;
       currentMessage = pickNextMessage();
       displayedMessageHistory.push(currentMessage);
@@ -1011,13 +1030,16 @@ function updateMessage() {
       }
       displayedMessageHistoryIndex = displayedMessageHistory.length;
       currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
+      currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
+      characterIndex = 0;
+      authorCharacterIndex = 0;
+      renderMessageAuthor();
       applyTextFormat(typedText, currentMessage.format);
       setTimeout(updateMessage, 250 + Math.random() * 500);
       return;
     }
   } else {
-    characterIndex += 1;
-    if (characterIndex > currentMessageCharacters.length) {
+    if (characterIndex >= currentMessageCharacters.length && authorCharacterIndex >= currentAuthorCharacters.length) {
       if (currentMessage.correctedText && !currentMessage.wasCorrected) {
         runTypoCorrection();
         return;
@@ -1026,6 +1048,8 @@ function updateMessage() {
       setTimeout(updateMessage, 1400 + Math.random() * 1600);
       return;
     }
+    characterIndex = Math.min(currentMessageCharacters.length, characterIndex + 1);
+    authorCharacterIndex = Math.min(currentAuthorCharacters.length, authorCharacterIndex + 1);
   }
 
   const typingDelay = deleting
@@ -3093,9 +3117,12 @@ function showPreviousSplash(direction) {
   currentMessage = historicalMessage;
   currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
   characterIndex = currentMessageCharacters.length;
+  currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
+  authorCharacterIndex = currentAuthorCharacters.length;
   deleting = true;
   applyTextFormat(typedText, currentMessage.format);
   window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
+  renderMessageAuthor();
   showAchievement(window.BITS_MESSAGE_TEXT.plainText(currentMessage), "COMMAND HISTORY", 1800);
 }
 
@@ -3646,6 +3673,7 @@ async function loadBuildMetadata() {
 
 applyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);
 window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
+renderMessageAuthor();
 applyTextFormat(typedText, currentMessage.format);
 document.querySelector("#year").textContent = new Date().getFullYear();
 loadBuildMetadata();

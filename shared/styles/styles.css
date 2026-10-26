@@ -4061,6 +4061,22 @@ h1 .dim {
   font-size: 0.75rem;
 }
 
+.message-author-box {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  color: var(--muted);
+  background: var(--panel-2);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.message-author-box[hidden] {
+  display: none;
+}
+
 .prompt {
   margin-right: 7px;
   color: var(--accent);

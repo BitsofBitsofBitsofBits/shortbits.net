@@ -34,12 +34,18 @@ function headers(request: Request, cacheable = false): Record<string, string> {
 
 function channelLogin(input: string): string {
   const value = input.trim();
-  const url = new URL(/^[A-Za-z0-9_]{1,25}$/.test(value) ? `https://www.twitch.tv/${value}` : value);
+  const guidance = "Enter a Twitch username (for example, human1) or a channel URL such as https://www.twitch.tv/human1, not a clip, video, or directory URL.";
+  let url: URL;
+  try {
+    url = new URL(/^[A-Za-z0-9_]{1,25}$/.test(value) ? `https://www.twitch.tv/${value}` : value);
+  } catch {
+    throw new Error(guidance);
+  }
   const match = url.pathname.match(/^\/([A-Za-z0-9_]{1,25})\/?$/);
   const reserved = new Set(["directory", "downloads", "jobs", "p", "search", "settings", "subscriptions", "turbo", "videos", "wallet"]);
   if (url.protocol !== "https:" || !["twitch.tv", "www.twitch.tv", "m.twitch.tv"].includes(url.hostname)
     || url.username || url.password || url.port || !match || reserved.has(match[1].toLowerCase())) {
-    throw new Error("Enter a Twitch channel URL or username, not a clip, video, or directory URL.");
+    throw new Error(guidance);
   }
   return match[1].toLowerCase();
 }

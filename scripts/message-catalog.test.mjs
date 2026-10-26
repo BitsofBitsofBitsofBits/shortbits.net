@@ -41,6 +41,7 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
       if (new URL(url).pathname.endsWith("/site_message_pools")) return { ok: true, json: async () => pools.filter((pool) => pool.enabled) };
       assert.equal(query.get("enabled"), "eq.true");
       assert.ok(query.get("select").split(",").includes("corrected_text"));
+      assert.ok(query.get("select").split(",").includes("author"));
       const ids = query.get("profile").slice(4, -1).split(",");
       const filtered = rows.filter((row) => ids.includes(row.profile));
       const offset = Number(query.get("offset"));
@@ -57,6 +58,31 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
   vm.runInContext(read("shared/scripts/seasonal-messages.js"), context);
   return { window, context, calls, warnings, storage, timers, setDate: (value) => { currentDate = value; } };
 }
+test("quote authors survive standard/seasonal pools and cache reloads", async () => {
+  for (const date of ["2026-08-10T12:00:00", "2026-04-05T12:00:00", "2026-12-25T12:00:00"]) {
+    const rows = defaults.map(row => row.category === "messages" ? { ...row, author: `Author ${row.profile}` } : row);
+    const app = setup({ date, rows });
+    assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+    assert.ok(app.window.BITS_MESSAGES.every(message => message.author?.startsWith("Author ")));
+    const cached = setup({ date, fail: true, cache: Object.fromEntries(app.storage) });
+    assert.ok(cached.window.BITS_MESSAGES.every(message => message.author?.startsWith("Author ")));
+    assert.equal(await cached.window.BITS_MESSAGE_CATALOG.refresh(), false);
+    assert.ok(cached.window.BITS_MESSAGES.every(message => message.author?.startsWith("Author ")));
+  }
+});
+test("invalid quote authors are rejected atomically without replacing the current catalog", async () => {
+  for (const changes of [
+    { author: " " }, { author: "x".repeat(201) }, { author: 123 },
+    { author: "Ada", category: "activities" }, { author: "Ada", category: "bootMessages" },
+  ]) {
+    const rows = defaults.map((row, index) => index ? row : { ...row, ...changes });
+    const app = setup({ rows });
+    const before = app.window.BITS_MESSAGES[0].text;
+    assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), false);
+    assert.equal(app.window.BITS_MESSAGES[0].text, before);
+    assert.ok(app.warnings.length > 0);
+  }
+});
 test("catalog startup never waits for the network, validates all seeded messages, and pages beyond 500 entries", async () => {
   const app = setup();
   assert.equal(app.calls.length, 0);

@@ -95,7 +95,7 @@ test("desktop clock only formats while visible and reuses its formatter", () => 
 });
 
 function correctionSetup(message) {
-  const { document } = parseHTML("<html><body><div id='command'><span id='typed'></span></div></body></html>");
+  const { document } = parseHTML("<html><body><div id='command'><span id='typed'></span></div><div id='author-box' hidden><span id='author'></span></div></body></html>");
   const timers = [];
   const achievements = [];
   const schedule = (callback, delay) => { timers.push({ callback, delay }); return timers.length; };
@@ -105,15 +105,77 @@ function correctionSetup(message) {
     currentMessage: message, characterIndex: 0, deleting: false,
     messages: [{ text: "ordinary message", weight: 1 }], pickWeightedOption: (options) => options[0],
     commandLine: document.querySelector("#command"), typedText: document.querySelector("#typed"),
+    typedAuthor: document.querySelector("#author"), authorBox: document.querySelector("#author-box"),
+    authorCharacterIndex: 0,
     showAchievement: (...args) => achievements.push(args),
   });
   vm.runInContext(markdownSource, context);
   vm.runInContext(charactersSource, context);
   context.applyTextFormat = window.BITS_MESSAGE_TEXT.applyFormat;
   context.currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(message).characters;
+  context.currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(message.author ?? "");
   vm.runInContext(source.slice(source.indexOf("const typoMessage ="), source.indexOf("\nfunction updateActivity()")), context);
   return { context, timers, achievements, window };
 }
+
+for (const [quote, author] of [["A long quoted message", "Ada"], ["Hi", "A longer author name"]]) {
+  test(`quote and author type, hold, and backspace together (${quote.length}/${author.length})`, () => {
+    const { context, timers } = correctionSetup({ text: quote, author });
+    const step = () => { timers.length = 0; vm.runInContext("updateMessage()", context); };
+    for (let index = 0; index <= Math.max(quote.length, author.length); index++) step();
+    assert.equal(context.typedText.textContent, quote);
+    assert.equal(context.typedAuthor.textContent, author);
+    assert.equal(context.authorBox.hidden, false);
+    assert.equal(context.deleting, true);
+    assert.ok(timers[0].delay >= 1400, "Both strings finish before the hold begins");
+    step();
+    step();
+    assert.equal(context.typedText.textContent, quote.slice(0, -1));
+    assert.equal(context.typedAuthor.textContent, author.slice(0, -1), "Both strings start erasing on the same tick");
+    for (let index = 0; index < Math.max(quote.length, author.length); index++) step();
+    assert.equal(context.currentMessage.text, "ordinary message");
+    assert.equal(context.typedAuthor.textContent, "");
+    assert.equal(context.authorBox.hidden, true, "Unattributed messages never keep the previous author");
+  });
+}
+
+test("author text is literal and grapheme-safe, and hidden tabs pause both typewriters", () => {
+  const { context } = correctionSetup({ text: "Quote", author: "👩‍💻e\u0301 <b>Ada</b>" });
+  context.authorCharacterIndex = 1;
+  vm.runInContext("renderMessageAuthor()", context);
+  assert.equal(context.typedAuthor.textContent, "👩‍💻");
+  context.authorCharacterIndex = 2;
+  vm.runInContext("renderMessageAuthor()", context);
+  assert.equal(context.typedAuthor.textContent, "👩‍💻e\u0301");
+  context.authorCharacterIndex = context.currentAuthorCharacters.length;
+  vm.runInContext("renderMessageAuthor()", context);
+  assert.equal(context.typedAuthor.querySelector("b"), null);
+  assert.match(context.typedAuthor.textContent, /<b>Ada<\/b>$/);
+  context.document.hidden = true;
+  vm.runInContext("updateMessage()", context);
+  assert.equal(context.characterIndex, 0);
+  assert.equal(context.authorCharacterIndex, context.currentAuthorCharacters.length);
+});
+
+test("quote attribution survives Mistype corrections and is restored with historical messages", () => {
+  const { context, timers } = correctionSetup({ text: "tyop", correctedText: "typo", author: "Ada" });
+  context.characterIndex = context.currentMessageCharacters.length;
+  context.authorCharacterIndex = context.currentAuthorCharacters.length;
+  vm.runInContext("updateMessage()", context);
+  assert.equal(context.typedAuthor.textContent, "Ada");
+  timers.shift().callback();
+  assert.equal(context.currentMessage.author, "Ada");
+  assert.equal(context.typedAuthor.textContent, "Ada");
+  vm.runInContext('displayedMessageHistory.splice(0, displayedMessageHistory.length, { text: "Past quote", author: "Grace" }, { text: "No author" }); displayedMessageHistoryIndex = 1;', context);
+  vm.runInContext(source.slice(source.indexOf("function showPreviousSplash("),
+    source.indexOf('\ndocument.addEventListener("keydown"', source.indexOf("function showPreviousSplash("))), context);
+  vm.runInContext("showPreviousSplash(-1)", context);
+  assert.equal(context.typedAuthor.textContent, "Grace");
+  assert.equal(context.authorBox.hidden, false);
+  vm.runInContext("showPreviousSplash(1)", context);
+  assert.equal(context.typedAuthor.textContent, "");
+  assert.equal(context.authorBox.hidden, true);
+});
 
 test("configured mistypes correct after typing, preserve markup/defaults, unlock once, and delete normally", () => {
   const app = correctionSetup({

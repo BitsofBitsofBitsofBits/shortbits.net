@@ -10,10 +10,10 @@ const root = resolve(rootIndex < 0 ? "." : args[rootIndex + 1]);
 const server = await startSiteServer(root);
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 const entry = (position, category, text, profile = "standard") => ({
-  position, profile, category, text, weight: 1, colorful: false, format: {}, enabled: true, markup: false, corrected_text: null,
+  position, profile, category, text, weight: 1, colorful: false, format: {}, enabled: true, markup: false, corrected_text: null, author: null,
 });
 const publicRows = [
-  entry(1, "messages", "DATABASE STATUS"),
+  { ...entry(1, "messages", "DATABASE STATUS"), author: "Test author 👩‍💻" },
   entry(2, "activities", "DATABASE ACTIVITY"),
   entry(3, "shutdownMessages", "DATABASE_SHUTDOWN"),
   entry(4, "bootMessages", "DATABASE BOOT .................... OK"),
@@ -111,6 +111,15 @@ try {
     });
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
     assert.equal(await page.locator("#typed-text .blog-text-color-red").textContent(), "red");
+    assert.equal(await page.locator("#message-author-box").isVisible(), true);
+    assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻");
+    await page.addScriptTag({ path: axePath });
+    const quoteViolations = await page.evaluate(async () => (await axe.run(document.querySelector(".profile"), {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+    })).violations.map(issue => ({ id: issue.id, targets: issue.nodes.map(node => node.target) })));
+    assert.deepEqual(quoteViolations, [], `${width}px quote attribution accessibility`);
+    assert.ok(await page.locator("#message-author-box").evaluate(element => element.scrollWidth <= element.clientWidth + 1),
+      "The attribution box wraps instead of overflowing");
     assert.equal(await page.locator("#fake-playing-dead-message strong").textContent(), "BOLD");
     assert.ok((await page.locator("#fake-playing-dead-message").textContent()).includes("Check #2"));
     assert.equal(await page.locator(".hardware-live-chatter strong").textContent(), "BOLD");
@@ -144,11 +153,14 @@ try {
     assert.equal(await page.evaluate(() => glitchMessages[0].markup), true);
     assert.equal(await page.evaluate(() => hardwareChatter[0].markup), true);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].correctedText), markupRows[0].corrected_text);
+    assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].author), markupRows[0].author);
     await page.evaluate(() => {
       clearTimeout(window.__messageTimer);
       currentMessage = window.BITS_MESSAGES[0];
       currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
       characterIndex = currentMessageCharacters.length;
+      currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
+      authorCharacterIndex = currentAuthorCharacters.length;
       deleting = false;
       updateMessage();
     });
@@ -156,12 +168,30 @@ try {
     await page.waitForFunction(() => currentMessage.wasCorrected === true);
     assert.equal(await page.locator("#typed-text").textContent(), "DATABASE CORRECTED BOLD red 彩色");
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
+    assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻", "Author remains during correction");
+    const erased = await page.evaluate(() => {
+      clearTimeout(window.__messageTimer);
+      updateMessage();
+      clearTimeout(window.__messageTimer);
+      updateMessage();
+      clearTimeout(window.__messageTimer);
+      return { quote: typedText.textContent, author: typedAuthor.textContent };
+    });
+    assert.equal(erased.quote, "DATABASE CORRECTED BOLD red 彩");
+    assert.equal(erased.author, "Test author ", "Author backspaces a whole grapheme alongside the quote");
     assert.equal(await page.evaluate(() => unlockedAchievements.some((achievement) => achievement.id === "typo-corrected")), true);
     fail = false;
     useCustom = true;
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
     assert.deepEqual(await page.evaluate(() => window.BITS_MESSAGES.filter((message) => message.text.startsWith("CUSTOM")).map((message) => message.text)), ["CUSTOM one", "CUSTOM two"]);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES.some((message) => message.text.startsWith("DATABASE STATUS"))), false);
+    await page.evaluate(() => {
+      displayedMessageHistory.push(window.BITS_MESSAGES[0]);
+      displayedMessageHistoryIndex = displayedMessageHistory.length;
+      showPreviousSplash(-1);
+    });
+    assert.equal(await page.locator("#message-author-box").isVisible(), false);
+    assert.equal(await page.locator("#typed-author").textContent(), "", "Unattributed scheduled statuses clear the previous attribution");
     assert.equal(await page.evaluate(() => [activities, shutdownMessages, playingDeadMessages, glitchMessages, hardwareChatter].every((pool) => pool.length > 0)), true);
     await page.evaluate(() => {
       const matchMedia = window.matchMedia;
@@ -261,6 +291,7 @@ try {
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 25);
     assert.equal(await page.locator("#message-library-editor").isVisible(), true);
     assert.equal(await page.locator("#message-library-form").isVisible(), false, "The editor starts collapsed");
+    assert.equal(await page.locator("#message-pool-help").isVisible(), false, "Non-boot pools do not show procedural boot counts");
     assert.equal(await page.locator("#message-bulk-delete").isDisabled(), true);
     await page.locator('[data-message-select="1"]').check();
     await page.locator('[data-message-select="2"]').check();
@@ -271,6 +302,42 @@ try {
     assert.equal(await page.evaluate(() => window.__messageRows.filter(row => [1, 2].includes(row.position)).every(row => !row.enabled)), true);
     assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 3).enabled), true);
     assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected");
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator("#message-state-filter").selectOption("enabled");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("28 enabled message(s)"));
+    assert.equal(await page.locator("#message-selected-count").textContent(), "0 selected", "Status filtering clears bulk selection");
+    assert.equal(await page.locator('[data-message-select="1"]').count(), 0);
+    assert.equal(await page.locator("#message-page-label").textContent(), "1-25 of 28");
+    await page.locator("#message-page-next").click();
+    await page.waitForFunction(() => document.querySelector("#message-page-label").textContent === "26-28 of 28");
+    await page.locator("#message-state-filter").selectOption("disabled");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 disabled message(s)"));
+    assert.equal(await page.locator("#message-page-label").textContent(), "1-2 of 2", "Status changes return to the first page");
+    assert.equal(await page.locator("#message-page-next").isDisabled(), true);
+    await page.locator("#message-search").fill("Regular message 1");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("1 disabled message(s)"));
+    assert.equal(await page.locator('[data-message-select="1"]').count(), 1, "Search and disabled status are combined");
+    await page.locator("#message-search").fill("");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 disabled message(s)"));
+    await page.locator('[data-message-toggle="1"]').first().click();
+    await page.locator("#message-text").fill("Unsaved status-filter test");
+    acceptDialogs = false;
+    await page.locator("#message-state-filter").selectOption("enabled");
+    assert.equal(await page.locator("#message-state-filter").inputValue(), "disabled", "Cancelled filter changes restore the selected status");
+    assert.equal(await page.locator("#message-text").inputValue(), "Unsaved status-filter test");
+    acceptDialogs = true;
+    await page.locator("#message-cancel").click();
+    await page.locator("#message-select-page").check();
+    await page.locator("#message-bulk-enable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 selected message(s) enabled."));
+    assert.equal(await page.locator(".message-library-empty").isVisible(), true, "Enabled rows leave the disabled-only list");
+    assert.equal(await page.locator("#message-page-label").textContent(), "0-0 of 0");
+    await page.locator("#message-state-filter").selectOption("all");
+    await page.waitForFunction(() => document.querySelector("#message-page-label").textContent === "1-25 of 30");
+    await page.locator('[data-message-select="1"]').check();
+    await page.locator('[data-message-select="2"]').check();
+    await page.locator("#message-bulk-disable").click();
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("2 selected message(s) disabled."));
     await page.locator('[data-message-select="1"]').check();
     await page.locator('[data-message-select="2"]').check();
     acceptDialogs = false;
@@ -433,6 +500,8 @@ try {
     assert.equal(await page.locator("#message-text").evaluate((field) => document.activeElement === field), true);
     await assertNoOverflow(`${width}px inline message editor must not overflow`);
     await page.locator("#message-text").fill("<script>not executable</script> edited message");
+    await page.locator("#message-author").fill("  Ada <script>literal</script>  ");
+    assert.equal(await page.locator("#message-author-preview script").count(), 0);
     await page.locator("#message-weight").fill("0.25");
     await page.locator('[data-message-format="fontWeight"]').fill("700");
     await page.locator("#message-colorful").check();
@@ -440,6 +509,7 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("Message saved."));
     assert.equal(await page.evaluate(() => window.__messageRows[0].weight), 0.25);
+    assert.equal(await page.evaluate(() => window.__messageRows[0].author), "Ada <script>literal</script>");
     assert.equal(await page.evaluate(() => window.__messageRows[0].format.fontWeight), "700");
     await page.locator("#message-text").fill("Normal bold and {{color:red|red}} {{color:rainbow|彩色}}");
     await page.locator('[data-message-format="fontWeight"]').fill("");
@@ -469,12 +539,15 @@ try {
     await page.locator("#message-cancel").click();
     await page.locator('[data-message-action="edit"]').first().click();
     assert.equal(await page.locator("#message-mistype").isChecked(), true);
+    assert.equal(await page.locator("#message-author").inputValue(), "Ada <script>literal</script>", "Saved quote authors can be edited");
+    await page.locator("#message-author").fill("");
     assert.equal(await page.locator("#message-corrected-text").inputValue(), "**Corrected** {{color:red|red}} <script>still literal</script>");
     await page.locator("#message-mistype").uncheck();
     assert.equal(await page.locator("#message-corrected-text").isDisabled(), true);
     assert.equal(await page.locator("#message-corrected-preview-container").isVisible(), false);
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows[0].corrected_text === null);
+    assert.equal(await page.evaluate(() => window.__messageRows[0].author), null, "Blank authors remove the attribution");
     await page.locator("#message-enabled").uncheck();
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows[0].enabled === false);
@@ -484,6 +557,7 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.length === 32);
     assert.equal(await page.evaluate(() => window.__messageRows.at(-1).markup), false, "new messages start as literal text");
+    assert.equal(await page.evaluate(() => window.__messageRows.at(-1).author), null, "New messages are unattributed by default");
     await page.locator("#message-search").fill("Added in Admin");
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
     await page.locator('[data-message-action="delete"]').click();
@@ -492,8 +566,20 @@ try {
     await page.locator("#message-profile").selectOption("halloween");
     await page.locator("#message-category").selectOption("bootMessages");
     await page.waitForFunction(() => document.querySelector("#message-library-list").children.length === 1);
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("1 fixed message(s)"));
+    assert.match(await page.locator("#message-page-label").textContent(), /of 1 fixed entries$/);
+    assert.equal(await page.locator("#message-pool-help").isVisible(), true);
+    assert.match(await page.locator("#message-pool-help").textContent(), /29 actions, 37 subjects, and 30 results\/statuses: 32,190 possible combinations/);
+    assert.match(await page.locator("#message-pool-help").textContent(), /nonempty active exclusive boot pool replaces/);
+    await page.locator("#message-search").fill("no such fixed message");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("0 fixed message(s)"));
+    assert.match(await page.locator("#message-library-status").textContent(), /matching this search/);
+    assert.match(await page.locator("#message-pool-help").textContent(), /32,190 possible combinations/);
+    await page.locator("#message-search").fill("");
+    await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("1 fixed message(s)"));
     await page.locator('[data-message-action="edit"]').click();
     assert.equal(await page.locator("#message-weighted-options").isVisible(), false);
+    assert.equal(await page.locator("#message-author-options").isVisible(), false, "Authors apply only to rotating splash/status quotes");
     assert.equal(await page.locator("#message-mistype-options").isVisible(), false);
     await page.locator("#message-text").fill("Updated **seasonal** boot message");
     await page.locator("#message-markup").check();
@@ -518,6 +604,7 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows.some(row => row.text === "CUSTOM BOOT"));
     await page.locator("#message-category").selectOption("messages");
+    assert.equal(await page.locator("#message-pool-help").isVisible(), false);
     await page.locator("#message-new").click();
     await page.locator("#message-text").fill("CUSTOM STATUS");
     await page.locator("#message-enabled").check();

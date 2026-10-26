@@ -15,6 +15,7 @@ test("message migration preserves every fallback entry, weights and formatting, 
     await db.exec(await readFile(new URL("../supabase/migrations/20261025032000_message_inline_markup.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261025033000_message_mistype_corrections.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261025034000_scheduled_message_pools.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261026030000_message_authors.sql", import.meta.url), "utf8"));
     const columns = "position,profile,category,text,weight,colorful,format,enabled";
     const entries = (await db.query(`select ${columns} from site_message_catalog order by position`)).rows;
     assert.deepEqual(entries, messageCatalogDefaults());
@@ -26,6 +27,9 @@ test("message migration preserves every fallback entry, weights and formatting, 
     await db.exec("set role authenticated");
     await db.exec("update site_message_catalog set text = 'Admin edited text', enabled = false where position = 1");
     await db.exec("update site_message_catalog set corrected_text = 'Admin corrected text' where position = 1");
+    await db.exec("update site_message_catalog set author = 'Ada Lovelace' where position = 1");
+    assert.equal((await db.query("select author from site_message_catalog where position = 1")).rows[0].author, "Ada Lovelace");
+    assert.equal((await db.query("select count(*)::int as count from site_message_catalog where author is null")).rows[0].count, 2206);
     assert.equal((await db.query("select corrected_text from site_message_catalog where position = 1")).rows[0].corrected_text, "Admin corrected text");
     await db.exec("update site_message_catalog set text = '**Inline boot**', markup = true where category = 'bootMessages'");
     assert.ok((await db.query("select markup from site_message_catalog where category = 'bootMessages' limit 1")).rows[0].markup);
@@ -38,12 +42,15 @@ test("message migration preserves every fallback entry, weights and formatting, 
       "corrected_text = ' '", "corrected_text = text", "corrected_text = repeat('x', 2001)",
       "category = 'activities', corrected_text = 'Correction'",
       "category = 'bootMessages', corrected_text = 'Correction'",
+      "author = ' '", "author = repeat('x', 201)", "author = 'Ada', category = 'activities'",
+      "author = 'Ada', category = 'bootMessages'",
     ]) await assert.rejects(db.exec(`update site_message_catalog set ${assignment} where position = 2`), /check constraint/);
     await db.exec("set role anon");
     assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2206);
     await assert.rejects(db.exec("update site_message_catalog set enabled = true"), /permission denied/);
     await assert.rejects(db.exec("delete from site_message_catalog"), /permission denied/);
     await assert.rejects(db.exec("update site_message_catalog set corrected_text = 'Unauthorized'"), /permission denied/);
+    await assert.rejects(db.exec("update site_message_catalog set author = 'Unauthorized'"), /permission denied/);
     await db.exec("set role authenticated; delete from site_message_catalog where position = 1");
     assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2206);
   } finally { await db.close(); }

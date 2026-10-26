@@ -5,6 +5,7 @@
   const get = (id) => document.getElementById(`message-${id}`);
   const profile = get("profile");
   const category = get("category");
+  const stateFilter = get("state-filter");
   const search = get("search");
   const list = get("library-list");
   const form = get("library-form");
@@ -16,6 +17,7 @@
   const markup = get("markup");
   const mistype = get("mistype");
   const correctedText = get("corrected-text");
+  const author = get("author");
   let markupTarget = text;
   const preview = get("preview");
   const previous = get("page-previous");
@@ -48,11 +50,28 @@
   let searchTimer;
   let selectedProfile = "standard";
   let selectedCategory = "messages";
+  let selectedState = "all";
   let selectedSearch = "";
 
   function report(message, state = "") {
     status.textContent = message;
     status.dataset.state = state;
+  }
+  function describePool() {
+    const help = get("pool-help");
+    const boot = category.value === "bootMessages";
+    help.hidden = !boot;
+    help.textContent = "";
+    if (!boot) return;
+    const generator = window.BITS_BOOT_MESSAGE_GENERATOR;
+    const combinations = generator.combinations.toLocaleString("en-US");
+    help.textContent = `This list edits fixed boot messages, not every possible boot line. `
+      + `Entry counts follow the status and search filters; All entries includes disabled messages. `
+      + `The built-in generator also combines ${generator.actions.length} actions, ${generator.subjects.length} subjects, `
+      + `and ${generator.results.length} results/statuses: ${combinations} possible combinations. `
+      + `Those generator parts are defined in code, not editable in this list. `
+      + `Additive scheduled pools mix in extra fixed messages; a nonempty active exclusive boot pool replaces the normal fixed/generated mix. `
+      + `Phase, theme, narrative, and event lines can add further variety.`;
   }
   function controls() {
     const blocked = busy || loading || !poolReady || searching;
@@ -61,7 +80,7 @@
     timezoneForm.inert = blocked;
     list.inert = blocked;
     [save, add, get("cancel")].forEach((control) => { control.disabled = blocked; });
-    [profile, category, search].forEach((control) => { control.disabled = busy || loading || !poolReady; });
+    [profile, category, stateFilter, search].forEach((control) => { control.disabled = busy || loading || !poolReady; });
     get("reload").disabled = busy || loading || searching;
     get("pool-delete").disabled = blocked || !editingPool;
     remove.disabled = blocked || selected === null;
@@ -83,6 +102,11 @@
     };
     window.BITS_MESSAGE_TEXT.render(preview, option);
     const supportsMistype = category.value === "messages";
+    get("author-options").hidden = !supportsMistype;
+    get("author-options").disabled = !supportsMistype;
+    const attribution = supportsMistype ? author.value.trim() : "";
+    get("author-preview").hidden = !attribution;
+    get("author-preview").textContent = attribution ? `Author: ${attribution}` : "";
     get("mistype-options").hidden = !supportsMistype;
     get("mistype-options").disabled = !supportsMistype;
     const corrects = supportsMistype && mistype.checked;
@@ -103,6 +127,7 @@
     markup.checked = row?.markup ?? false;
     mistype.checked = row?.corrected_text != null;
     correctedText.value = row?.corrected_text ?? "";
+    author.value = row?.author ?? "";
     markupTarget = text;
     formats.forEach((input, key) => { input.value = row?.format[key] ?? ""; });
     get("editing-label").textContent = selected === null ? "NEW MESSAGE" : `EDITING MESSAGE ${selected}`;
@@ -247,9 +272,11 @@
     pageRows = [];
     controls();
     report("Loading message library...");
+    describePool();
     try {
       let query = adminClient.from("site_message_catalog").select("*", { count: "exact" })
         .eq("profile", profile.value).eq("category", category.value);
+      if (stateFilter.value !== "all") query = query.eq("enabled", stateFilter.value === "enabled");
       if (search.value.trim()) query = query.ilike("text", `%${search.value.trim().replace(/[\\%_]/g, "\\$&")}%`);
       const { data, error, count } = await query.order("position").range(page * 25, page * 25 + 24);
       if (current !== request) return;
@@ -279,7 +306,7 @@
         button.className = "message-row-text";
         button.dataset.messageToggle = String(row.position);
         button.setAttribute("aria-controls", panel.id);
-        button.textContent = row.text.slice(0, 140);
+        button.textContent = row.text.slice(0, 140) + (row.author ? ` - ${row.author}` : "");
         const select = () => toggleEditor(row);
         button.addEventListener("click", select);
         const badge = document.createElement("span");
@@ -307,13 +334,17 @@
       if (!data.length) {
         const empty = document.createElement("li");
         empty.className = "message-library-empty";
-        empty.textContent = "No messages match this pool and search. Add a message or change the filters.";
+        empty.textContent = "No messages match this pool, status, and search. Add a message or change the filters.";
         list.append(empty);
       }
       if (editorOpen) placeEditor();
       else syncEditorControls();
-      get("page-label").textContent = `${total ? page * 25 + 1 : 0}-${Math.min(total, (page + 1) * 25)} of ${total}`;
-      report(`${total} message(s) in this pool. Select one to edit, or add a message.`, "success");
+      const boot = category.value === "bootMessages";
+      const noun = boot ? "fixed message(s)" : "message(s)";
+      const filtered = search.value.trim() ? " matching this search" : "";
+      get("page-label").textContent = `${total ? page * 25 + 1 : 0}-${Math.min(total, (page + 1) * 25)} of ${total}${boot ? " fixed entries" : ""}`;
+      const state = stateFilter.value === "all" ? "" : `${stateFilter.value} `;
+      report(`${total} ${state}${noun} in this pool${filtered}. Select one to edit, or add a message.`, "success");
       return true;
     } catch (error) {
       if (current !== request) return;
@@ -396,10 +427,16 @@
     formats.set(key, input);
     get("format-fields").append(label);
   }
-  [profile, category].forEach((filter) => filter.addEventListener("change", () => {
-    if (!discard()) { profile.value = selectedProfile; category.value = selectedCategory; return; }
+  [profile, category, stateFilter].forEach((filter) => filter.addEventListener("change", () => {
+    if (!discard()) {
+      profile.value = selectedProfile;
+      category.value = selectedCategory;
+      stateFilter.value = selectedState;
+      return;
+    }
     selectedProfile = profile.value;
     selectedCategory = category.value;
+    selectedState = stateFilter.value;
     page = 0;
     editPool(pools.find((pool) => pool.id === profile.value));
     closeEditor();
@@ -539,6 +576,7 @@
         enabled: enabled.checked, updated_at: new Date().toISOString(),
         markup: markup.checked,
         corrected_text: category.value === "messages" && mistype.checked ? correctedText.value.trim() : null,
+        author: category.value === "messages" ? author.value.trim() || null : null,
       };
       catalog.validate(row);
       const query = selected === null ? adminClient.from("site_message_catalog").insert(row)

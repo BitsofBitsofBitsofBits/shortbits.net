@@ -204,6 +204,12 @@ try {
             if (!["creator-videos", "creator-twitch"].includes(name)) throw new Error("Unexpected function " + name);
             window.__lookupInput = options.body.channelUrl;
             if (window.__delayLookup) await new Promise(resolve => { window.__completeLookup = resolve; });
+            if (window.__lookupHttpFailure) {
+              const failure = window.__lookupHttpFailure;
+              return { data: null, error: Object.assign(new Error("Edge Function returned a non-2xx status code"), {
+                context: new Response(failure.body, { status: failure.status })
+              }) };
+            }
             return window.__lookupFailure
               ? { data: null, error: new Error("Channel lookup unavailable") }
               : { data: name === "creator-twitch"
@@ -287,6 +293,29 @@ try {
   await twitchLookup.click();
   assert.match(await twitchLookupStatus.textContent(), /Twitch lookup failed/);
   assert.equal(await newEntry.locator('[data-entry-field="channel_url"]').inputValue(), "https://www.twitch.tv/example");
+  await page.evaluate(() => { window.__lookupFailure = false; });
+  for (const [status, body, message] of [
+    [400, { error: "Enter a Twitch username or a channel URL such as https://www.twitch.tv/human1." }, "https://www.twitch.tv/human1"],
+    [401, { error: "Your Admin session expired. Sign in again." }, "Your Admin session expired. Sign in again."],
+    [404, { error: "No Twitch channel was found for that username." }, "No Twitch channel was found for that username."],
+    [502, { error: "Twitch lookup/feed is unavailable. Check the server's Twitch application credentials." }, "Twitch application credentials"],
+    [503, { message: "Function temporarily unavailable." }, "Function temporarily unavailable."],
+    [502, null, "Edge Function returned a non-2xx status code"],
+  ]) {
+    await page.evaluate(({ status, body }) => {
+      window.__lookupHttpFailure = { status, body: body ? JSON.stringify(body) : "Bad gateway" };
+    }, { status, body });
+    await twitchLookup.click();
+    await twitchLookupStatus.filter({ hasText: message }).waitFor();
+    assert.equal(await newEntry.locator('[data-entry-field="channel_url"]').inputValue(), "https://www.twitch.tv/example", "Failed lookups preserve the channel");
+    assert.equal(await twitchLookup.isEnabled(), true);
+  }
+  await page.evaluate(() => {
+    window.__lookupHttpFailure = { status: 401, body: JSON.stringify({ error: "Your Admin session expired. Sign in again." }) };
+  });
+  await lookup.click();
+  await lookupStatus.filter({ hasText: "Your Admin session expired. Sign in again." }).waitFor();
+  await page.evaluate(() => { window.__lookupHttpFailure = null; });
   await page.evaluate(() => { window.__lookupFailure = false; window.__delayLookup = true; window.__completeLookup = null; });
   await twitchLookup.click();
   await page.waitForFunction(() => typeof window.__completeLookup === "function");

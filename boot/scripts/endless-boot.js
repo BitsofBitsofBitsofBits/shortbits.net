@@ -72,35 +72,6 @@
     )),
   );
 
-  const subjects = [
-    "avatar.service", "binary_rain.sys", "bitclip.dll", "caffeine.driver",
-    "changelog.cache", "cookie_eater.sys", "cobits.language.model",
-    "confidence.module", "cursor_enthusiasm", "desktop.ini", "discord.presence",
-    "dramatic_lighting.fx", "filesystem.vibes", "firmware.personality",
-    "guestbook.daemon", "help_request", "installed.apps", "internet.presence",
-    "keyboard_clacks.wav", "linktree.compat", "missing_bit.trace", "my.bits",
-    "Nemo", "notification.anxiety", "packet_router", "playlist.telemetry",
-    "questionable_css.dll", "rgb_process", "ShortBits", "side_project_daemon",
-    "social_nodes", "spotify.signal", "support.ticket", "terminal.sarcasm",
-    "theme_atmosphere", "unallocated.bit", "BitsofBits",
-  ];
-  const actions = [
-    "ALLOCATE", "AUTHENTICATE", "CALIBRATE", "CHECK", "COMPILE", "CONNECT",
-    "CREATE", "DEFRAGMENT", "ENUMERATE", "FIND", "INDEX", "INITIALIZE",
-    "INSTALL", "LOAD", "MOUNT", "NEGOTIATE", "PING", "PRETEND TO UNDERSTAND",
-    "RECONCILE", "RENDER", "RESOLVE", "SCAN", "SEND", "SHORT", "SOLVE",
-    "SUBMIT", "SYNC", "VALIDATE", "WAKE",
-  ];
-  const results = [
-    "OK", "READY", "NOMINAL", "PROBABLY FINE", "OPINIONATED", "TOO MANY BITS",
-    "SUSPICIOUSLY FAST", "NO NOTES", "STILL THINKING", "CONNECTED",
-    "MOSTLY HARMLESS", "WITH FEELING", "UNREASONABLY CONFIDENT", "CACHE HIT",
-    "CACHE MISS (IT DUCKED)", "ENABLED", "ABSOLUTELY", "ASK AGAIN LATER",
-    "TECHNICALLY WORKING", "VIBES PASS", "0 ERRORS, 3 CONCERNS",
-    "PENDING APPROVAL", "ESCALATED TO THE BITS", "WORKS ON MY MACHINE",
-    "REQUIRES MORE COFFEE", "NOT REPRODUCIBLE", "SENT TO TIER 2",
-    "CLOSED AS DESIGNED", "WAITING FOR REBOOT", "DOCUMENTATION UNCLEAR",
-  ];
   const baseFixedMessages = [
     "MEMORY CHECK ........................ TOO MANY BITS",
     "MOUNT /dev/internet ................. OK",
@@ -1784,11 +1755,7 @@
   }
 
   function generatedMessage() {
-    const subject = randomItem(subjects);
-    const action = randomItem(actions);
-    const result = randomItem(results);
-    const dots = ".".repeat(Math.max(3, 39 - action.length - subject.length));
-    return `${action} ${subject} ${dots} ${result}`;
+    return window.BITS_BOOT_MESSAGE_GENERATOR.generate();
   }
 
   function nextMessage() {

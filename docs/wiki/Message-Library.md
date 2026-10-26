@@ -20,11 +20,39 @@
 - **Admin -> Content -> Message library** manages regular and seasonal status
   messages, activities, shutdown messages, fixed endless-boot messages, initial
   boot steps, playing-dead/glitch messages, and six hardware-monitor joke pools.
-  Filter by season and message type, search, page through entries, add/edit/delete,
+  Filter by season, message type, and entry status (**All entries**, **Enabled only**,
+  or **Disabled only**), search, page through entries, add/edit/delete,
   enable/hide, adjust positive rarity weights (up to 1000), and preview rainbow
   text and the eight supported style properties. Date rules and exclusive/additive
   seasonal behavior remain in code, as do procedural boot generators, themed
   narratives, game/dialog text, and interface labels.
+  **Endless boot / fixed messages** lists editable fixed entries, not the total
+  number of possible lines. The procedural generator combines **29 actions x
+  37 subjects x 30 results/statuses = 32,190 combinations**, in addition to fixed,
+  phase, theme, narrative, and event lines. `shared/scripts/boot-message-generator.js`
+  supplies both the public generator and Admin's counts so they cannot drift.
+  The generator components are defined in code, not editable database entries.
+  Admin labels pagination/counts as fixed entries (filtered by status and search;
+  All entries includes disabled entries), and explains that additive pools contribute fixed lines
+  while a nonempty active exclusive boot pool replaces the normal fixed/generated
+  mix. The initial boot steps are a separate, non-procedural category.
+  Status filtering applies to the database query before pagination, so totals
+  reflect all matching entries rather than just the current page. Changing status
+  resets pagination and clears bulk selection, with the usual unsaved-change
+  confirmation. Enabling/disabling entries refreshes the filtered list, removing
+  entries that no longer match.
+  Status messages also support an optional **Author** (plain text, up to 200
+  characters) after applying `20261026030000_message_authors.sql`. Use it to
+  attribute real quotations. Admin previews the attribution and allows it to be
+  edited or removed by clearing the field. Other message types do not expose it.
+  On Online, an attributed message shows a separate author box below the quote:
+  both type concurrently, the hold starts only after both finish, and both
+  backspace together before the next message. Unicode names are grapheme-safe;
+  names are always literal text, even when the quote uses inline markup.
+  Authors survive Mistype correction, status history, scheduled pools, and cached
+  catalog reloads. Unattributed messages hide and clear the author box.
+  Export a fresh content backup after this migration: backups from before the
+  `author` column was added fail the existing exact-schema restore validation.
   Deploy `20261025030000_create_message_catalog.sql` and
   `20261025031000_seed_message_catalog.sql`; the seed preserves all 2,207 current
   entries, including local additions, weights, formatting, and duplicate entries.

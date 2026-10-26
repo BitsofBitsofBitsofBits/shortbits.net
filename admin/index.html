@@ -23,7 +23,8 @@
     <script src="/admin/scripts/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/admin/scripts/admin.js?v=admin-32" defer></script>
     <script src="/admin/scripts/admin-backup.js?v=backup-2" defer></script>
-    <script src="/admin/scripts/admin-messages.js?v=messages-2" defer></script>
+    <script src="/shared/scripts/boot-message-generator.js?v=boot-generator-1" defer></script>
+    <script src="/admin/scripts/admin-messages.js?v=messages-5" defer></script>
   </head>
   <body class="admin-center">
     <a class="ac-skip-link" href="#ac-main">Skip to main content</a>
@@ -326,8 +327,10 @@
             <button id="message-reload" type="button">RELOAD LIBRARY</button>
           </div>
           <div id="message-list-view" data-admin-view="messages" data-admin-view-label="Messages">
+          <p id="message-pool-help" hidden></p>
           <div class="admin-form message-library-filters">
             <label>MESSAGE TYPE<select id="message-category"></select></label>
+            <label>ENTRY STATUS<select id="message-state-filter"><option value="all">All entries</option><option value="enabled">Enabled only</option><option value="disabled">Disabled only</option></select></label>
             <label>SEARCH THIS POOL<input id="message-search" type="search" maxlength="120"></label>
           </div>
           <div class="repeatable-admin-actions message-library-commandbar">
@@ -390,6 +393,12 @@
               <button type="button" data-message-markup="rainbow">RAINBOW</button>
             </div>
             <label>MESSAGE TEXT<textarea id="message-text" maxlength="2000" aria-describedby="message-markup-help" required></textarea></label>
+            <fieldset id="message-author-options">
+              <legend>QUOTE ATTRIBUTION</legend>
+              <label>AUTHOR (OPTIONAL)<input id="message-author" type="text" maxlength="200" aria-describedby="message-author-help"></label>
+              <p id="message-author-help">Splash/status messages only. Use plain text for the person's name or attribution. It types in a separate box below the message, stays while the quote is shown, and backspaces alongside it. Leave blank for no attribution.</p>
+              <p id="message-author-preview" hidden></p>
+            </fieldset>
             <fieldset id="message-mistype-options">
               <legend>MISTYPE EASTER EGG</legend>
               <label class="admin-checkbox"><input id="message-mistype" type="checkbox">MISTYPE: CORRECT THIS MESSAGE AFTER TYPING</label>

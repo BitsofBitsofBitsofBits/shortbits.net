@@ -40,6 +40,10 @@
   profile photos and live/offline status. **Look up Twitch channel** accepts a
   username or channel URL, validates it through Twitch, canonicalizes the link,
   sets the platform, and fills an empty creator name. It does not save automatically.
+  Use the full `twitch.tv` hostname (for example,
+  `https://www.twitch.tv/human1`), or enter just `human1`; `https://www.twitch/human1`
+  is not a Twitch channel URL. Lookup errors display the server's explanation,
+  including invalid URLs, expired Admin sessions, and channels not found.
   Replacing a YouTube integration asks before clearing its channel ID, and edits
   made during a lookup are never overwritten.
   Live creators show the stream title, category, and **Watch live** link; offline

@@ -32,12 +32,14 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec(await readFile(new URL("../supabase/migrations/20261025032000_message_inline_markup.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261025033000_message_mistype_corrections.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261025034000_scheduled_message_pools.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261026030000_message_authors.sql", import.meta.url), "utf8"));
     await db.exec("set role anon");
     await assert.rejects(db.query("select public.export_site_content()"), /permission denied/);
     await assert.rejects(db.query("select public.restore_site_content('{}'::jsonb)"), /permission denied/);
     await db.exec("set role authenticated");
     await db.exec("insert into site_creators (position, title, platform, channel_url, enabled) values (1, 'Original creator', 'YouTube', 'https://www.youtube.com/@example', true)");
     await db.exec("insert into site_message_catalog (position, profile, category, text, markup, corrected_text) values (1, 'standard', 'messages', 'Private message draft', true, '**Corrected** draft')");
+    await db.exec("update site_message_catalog set author = 'Ada Lovelace' where position = 1");
     await db.exec("insert into site_message_pools (id,title,schedule,starts_on,ends_on,enabled) values ('custom-backup','Backup pool','annual','2000-12-30','2000-01-02',true)");
     await db.exec("insert into site_message_catalog (position,profile,category,text) values (2,'custom-backup','messages','Custom backup message')");
     await db.exec("update site_message_settings set timezone = 'America/New_York'");
@@ -48,6 +50,7 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     assert.equal(exported.tables.site_message_catalog[0].text, "Private message draft");
     assert.equal(exported.tables.site_message_catalog[0].markup, true);
     assert.equal(exported.tables.site_message_catalog[0].corrected_text, "**Corrected** draft");
+    assert.equal(exported.tables.site_message_catalog[0].author, "Ada Lovelace");
     await db.exec("update public.site_blog_posts set body = 'changed'");
     await db.exec("delete from site_creators");
     await db.exec("delete from site_message_catalog");
@@ -63,6 +66,15 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     assert.equal((await db.query("select text from site_message_catalog")).rows[0].text, "Private message draft");
     assert.equal((await db.query("select markup from site_message_catalog")).rows[0].markup, true);
     assert.equal((await db.query("select corrected_text from site_message_catalog")).rows[0].corrected_text, "**Corrected** draft");
+    assert.equal((await db.query("select author from site_message_catalog")).rows[0].author, "Ada Lovelace");
+    const oldAuthorSchema = structuredClone(exported);
+    delete oldAuthorSchema.tables.site_message_catalog[0].author;
+    await assert.rejects(db.query("select public.restore_site_content($1::jsonb)", [JSON.stringify(oldAuthorSchema)]), /schema does not match/);
+    const invalidAuthor = structuredClone(exported);
+    invalidAuthor.tables.site_blog_posts[0].body = "must roll back";
+    invalidAuthor.tables.site_message_catalog[0].author = " ";
+    await assert.rejects(db.query("select public.restore_site_content($1::jsonb)", [JSON.stringify(invalidAuthor)]), /check constraint/);
+    assert.equal((await db.query("select body from site_blog_posts")).rows[0].body, "original");
 
     const outdated = structuredClone(exported);
     delete outdated.tables.site_message_catalog;

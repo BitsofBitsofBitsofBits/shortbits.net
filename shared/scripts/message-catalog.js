@@ -5,7 +5,7 @@
   const profiles = [...builtinProfiles];
   const categories = {
     messages: "Rotating status messages", activities: "Activities", shutdownMessages: "Shutdown messages",
-    bootMessages: "Endless boot messages", initialBootSteps: "Initial boot steps",
+    bootMessages: "Endless boot / fixed messages", initialBootSteps: "Initial boot steps",
     playingDeadMessages: "Playing-dead messages", glitchMessages: "Desktop glitch messages",
     "monitor.cpu": "Monitor / CPU", "monitor.gpu": "Monitor / GPU", "monitor.network": "Monitor / Network",
     "monitor.ram": "Monitor / RAM", "monitor.storage": "Monitor / Storage", "monitor.thermal": "Monitor / Temperature",
@@ -32,6 +32,10 @@
     ? window.scheduler.yield() : new Promise((resolve) => window.setTimeout(resolve, 0));
 
   function validateEntry(row, allowedProfiles) {
+    if (row?.author != null && (row.category !== "messages"
+      || typeof row.author !== "string" || !row.author.trim() || row.author.length > 200)) {
+      throw new Error("Authors must be nonblank text of at most 200 characters and are only supported for splash/status messages.");
+    }
     if (row?.corrected_text != null && (row.category !== "messages"
       || typeof row.corrected_text !== "string" || !row.corrected_text.trim()
       || row.corrected_text.length > 2000 || row.corrected_text === row.text)) {
@@ -91,7 +95,8 @@
   function valueFor(row) {
     return weighted(row.category)
       ? { text: row.text, weight: row.weight, colorful: row.colorful, format: clone(row.format), markup: row.markup ?? false,
-        ...(row.corrected_text == null ? {} : { correctedText: row.corrected_text }) }
+        ...(row.corrected_text == null ? {} : { correctedText: row.corrected_text }),
+        ...(row.author == null ? {} : { author: row.author }) }
       : row.markup ? { text: row.text, markup: true } : row.text;
   }
   function scheduledProfiles(date, definitions = pools) {
@@ -193,7 +198,7 @@
         const rows = [];
         for (let offset = 0; ; offset += 500) {
           const query = new URLSearchParams({
-            select: "position,profile,category,text,weight,colorful,format,markup,corrected_text",
+            select: "position,profile,category,text,weight,colorful,format,markup,corrected_text,author",
             enabled: "eq.true", profile: `in.(${ids.join(",")})`,
             order: "position.asc", limit: "500", offset: String(offset),
           });

@@ -836,6 +836,19 @@ function createAdminCheckbox(labelText, name, options = {}) {
   return label;
 }
 
+async function creatorLookupErrorMessage(error) {
+  if (error.context instanceof Response) {
+    try {
+      const body = await error.context.clone().json();
+      if (typeof body?.error === "string" && body.error.trim()) return body.error;
+      if (typeof body?.message === "string" && body.message.trim()) return body.message;
+    } catch (responseError) {
+      console.error("Unable to read channel lookup error response:", responseError);
+    }
+  }
+  return error.message;
+}
+
 function createRepeatableEntry(editor, entry = {}) {
   const fieldset = document.createElement("fieldset");
   const legend = document.createElement("legend");
@@ -897,7 +910,7 @@ function createRepeatableEntry(editor, entry = {}) {
         setAdminStatus(lookupStatus, "YouTube channel ID filled in. Save creators to publish uploads and the channel photo.", "success");
       } catch (error) {
         console.error("Unable to look up YouTube channel:", error);
-        setAdminStatus(lookupStatus, `Channel lookup failed: ${error.message} Check the channel URL or @handle, or enter the UC... ID manually.`, "error");
+        setAdminStatus(lookupStatus, `Channel lookup failed: ${await creatorLookupErrorMessage(error)} Check the channel URL or @handle, or enter the UC... ID manually.`, "error");
       } finally {
         lookup.disabled = false;
       }
@@ -944,7 +957,7 @@ function createRepeatableEntry(editor, entry = {}) {
         setAdminStatus(twitchStatus, "Twitch channel found. Save creators to publish its photo, live status, and latest available past broadcast.", "success");
       } catch (error) {
         console.error("Unable to look up Twitch channel:", error);
-        setAdminStatus(twitchStatus, `Twitch lookup failed: ${error.message} Check the channel URL and server Twitch API credentials.`, "error");
+        setAdminStatus(twitchStatus, `Twitch lookup failed: ${await creatorLookupErrorMessage(error)}`, "error");
       } finally {
         twitchLookup.disabled = false;
       }
