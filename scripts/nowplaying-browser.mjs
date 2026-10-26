@@ -17,7 +17,7 @@ try {
     headless: true,
   });
   for (const width of [1440, 390]) {
-    const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport: { width, height: width > 700 ? 900 : 1000 }, reducedMotion: "reduce" });
     let fixtureNow = Date.now();
     let spotifyStatus = 200;
     let youtubeStatus = 200;
@@ -89,6 +89,9 @@ try {
       assert.ok(first && second, "Both statuses remain visible");
       if (width > 700) {
         assert.ok(Math.abs(first.y - second.y) < 1 && second.x > first.x, "Desktop cards are side by side");
+        const height = page.viewportSize().height;
+        assert.ok(first.y + first.height <= height && second.y + second.height <= height,
+          `Both desktop cards, including session clocks, fit inside the presentation viewport: ${JSON.stringify({ height, first, second })}`);
       } else {
         assert.ok(second.y > first.y && Math.abs(second.x - first.x) < 1, "Mobile cards are stacked");
       }
@@ -111,6 +114,14 @@ try {
     assert.match(await page.locator("#youtube-session").textContent(), /^00:15:/);
     assert.equal(historyRequests, 0, "Standalone playback does not load desktop history or curated lists");
     await assertLayout();
+    if (width > 700) {
+      await page.setViewportSize({ width, height: 768 });
+      await page.waitForFunction(() => innerHeight === 768);
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await assertLayout();
+      await page.setViewportSize({ width, height: 900 });
+      await page.waitForFunction(() => innerHeight === 900);
+    }
 
     await page.mouse.move(5, 5);
     await page.clock.fastForward(4200);
@@ -165,6 +176,7 @@ try {
     await page.locator("#presentation-theme").selectOption("default");
     await page.locator("#presentation-scheme").selectOption("light");
     await page.waitForFunction(() => document.documentElement.dataset.colorScheme === "light");
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     await page.addScriptTag({ path: axePath });
     assert.deepEqual(await page.evaluate(async () => (await axe.run(document, {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] },
