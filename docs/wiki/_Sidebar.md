@@ -1,0 +1,16 @@
+[**Documentation home**](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki)
+
+- [Site and features](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Site-and-Features)
+- [Admin and content](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Admin-and-Content)
+- [Creator feed](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Creator-Feed)
+- [Hardware and agents](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Hardware-and-Agents)
+- [Themes and appearance](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Themes-and-Appearance)
+- [Message library](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Message-Library)
+- [Configuration and integrations](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Configuration-and-Integrations)
+- [Contact and email](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Contact-and-Email)
+- [Deployment](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Deployment)
+- [Monitoring](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Monitoring)
+- [Publishing and recovery](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Publishing-and-Recovery)
+- [Development and validation](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Development-and-Validation)
+
+[Visit the site](https://www.shortbits.net/) | [Repository](https://github.com/BitsofBitsofBitsofBits/shortbits.net)

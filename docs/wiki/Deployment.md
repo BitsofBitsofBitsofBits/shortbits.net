@@ -1,0 +1,84 @@
+# Deployment
+
+[Wiki home](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki) | [Source repository](https://github.com/BitsofBitsofBitsofBits/shortbits.net)
+
+The production site is served as static files from `/srv/bitsofbits/`.
+When changing cached CSS or JavaScript, update its query-string version in the
+HTML before publishing.
+
+Pushes to `main` are validated and then deployed with
+`.github/workflows/site.yml`. Configure the following repository environment
+secrets for the `production` environment:
+
+- `DEPLOY_HOST`: production server hostname
+- `DEPLOY_USER`: SSH user with write access to `/srv/bitsofbits/`
+- `DEPLOY_SSH_KEY`: private Ed25519 key for that user
+- `DEPLOY_KNOWN_HOSTS`: pinned `known_hosts` entry for the production server
+
+Set the optional `DEPLOY_PORT` environment variable when SSH does not use port
+22.
+
+Database and Edge Function changes ship from the same workflow. Add these
+`Supabase` environment secrets to enable the `supabase` job:
+
+- `SUPABASE_ACCESS_TOKEN`: a Supabase personal access token
+- `SUPABASE_DB_PASSWORD`: the project's database password
+- `TURNSTILE_SECRET_KEY` (optional): synced to the Edge Function secrets
+- `RESEND_API_KEY`, `CONTACT_EMAIL_FROM`, `CONTACT_EMAIL_TO` (optional as a
+  complete set): synced to enable contact notifications and confirmations.
+  When incomplete, the workflow leaves existing Supabase email secrets alone.
+- `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` (optional as a complete set):
+  synced for Twitch creator lookup, profile photos, live status, and offline VODs.
+  If absent or incomplete, existing Supabase Twitch secrets are unchanged.
+
+The job deploys `contact-message` and then runs `supabase db push`. When the
+required secrets are missing it logs a warning and skips, and the static
+deploy still runs if the job fails.
+
+Before deployment, the workflow builds an offline fixture site and runs browser
+smoke checks, axe accessibility checks, and mobile/desktop Lighthouse budgets.
+After each deploy, the `lighthouse` job also audits the chooser, `/online/`,
+`/professional/`, and `/professional/resume/` on mobile and desktop. It writes
+a score table to the run summary, logs failing audits, and uploads the JSON
+reports as an artifact. Both audit runs require performance >= 90,
+accessibility and SEO = 100, LCP <= 2.5 seconds, and CLS <= 0.1. Missing reports
+and audit runtime errors fail the check. The pre-deployment check blocks
+deployment; a failing post-deployment check marks the workflow unsuccessful
+but does not automatically roll back the deployed site.
+
+## Static files and Caddy
+
+The workflow validates JavaScript and local asset references, scans for
+committed secrets, generates `build-info.json`, and uploads only public static
+site files from `.site-build`. It mirrors only the generated
+`blog/articles/` directory with `rsync --delete`, so unpublished or removed
+articles do not leave public HTML behind. Other production directories are
+not deleted.
+
+The production Caddy server must route missing paths to the themed error page
+while retaining the HTTP 404 status. The active Caddy configuration supplies
+that internal error handling for `/404.html`.
+
+After deploying the static files, the workflow downloads
+`/etc/caddy/Caddyfile`, updates its quoted Content Security Policy with the
+approved YouTube, Vimeo, Spotify, and Cloudflare Turnstile `frame-src` values
+plus the Cloudflare Web Analytics, Turnstile, and Lanyard WebSocket origins.
+It enables precompressed Brotli/gzip files and year-long immutable caching
+only for existing CSS/JS with a generated 16-hex asset version. It then
+validates the candidate
+configuration, installs it, and reloads Caddy. A failed reload restores the
+original Caddyfile automatically. The deployment user therefore needs narrowly
+scoped passwordless `sudo` access to `caddy validate`,
+`install /tmp/Caddyfile.* /etc/caddy/Caddyfile`, and
+`systemctl reload caddy`.
+
+The Caddy updater accepts one unambiguous top-level shortbits.net site with a
+root, quoted CSP, and a simple file server. It rejects unsupported custom routing
+instead of silently rewriting it; adapt the server configuration deliberately
+if validation reports an unsupported layout. Never bypass `caddy validate`.
+
+Cloudflare JavaScript Detections can inject inline code that the site's strict
+CSP rejects. Disable that injection for these static pages in Cloudflare, or
+configure compatible nonce handling at the edge. Do not add `unsafe-inline` or
+static hashes for Cloudflare's changing injected code. This dashboard setting
+is separate from the repository and is not changed by deployment.
