@@ -44,8 +44,7 @@
     option.title = description;
     get("variable-select").append(option);
   }
-  const previous = get("page-previous");
-  const next = get("page-next");
+  const paginations = [...section.querySelectorAll("[data-message-pagination]")];
   const save = get("save");
   const remove = get("delete");
   const add = get("new");
@@ -65,6 +64,7 @@
   let timezoneDirty = false;
   let poolReady = false;
   let page = 0;
+  let pageSize = 25;
   let total = 0;
   let selected = null;
   let dirty = false;
@@ -113,8 +113,31 @@
     get("pool-delete").disabled = blocked || !editingPool?.startsWith("custom-");
     get("pool-reset").disabled = blocked || !pools.some(pool => pool.id === editingPool);
     remove.disabled = blocked || selected === null;
-    previous.disabled = blocked || page === 0;
-    next.disabled = blocked || (page + 1) * 25 >= total;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    paginations.forEach((navigation) => {
+      navigation.querySelectorAll("[data-message-page]").forEach((button) => {
+        const backwards = ["first", "previous"].includes(button.dataset.messagePage);
+        button.disabled = blocked || (backwards ? page === 0 : page >= pageCount - 1);
+      });
+      const number = navigation.querySelector("[data-message-page-number]");
+      if (number.options.length !== pageCount) {
+        number.replaceChildren(...Array.from({ length: pageCount }, (_, index) => {
+          const option = document.createElement("option");
+          option.value = String(index);
+          option.textContent = `${index + 1} of ${pageCount}`;
+          return option;
+        }));
+      } else {
+        [...number.options].forEach((option, index) => { option.textContent = `${index + 1} of ${pageCount}`; });
+      }
+      number.value = String(page);
+      number.disabled = blocked || !total;
+      const size = navigation.querySelector("[data-message-page-size]");
+      size.value = String(pageSize);
+      size.disabled = blocked;
+      navigation.querySelector("[data-message-range]").textContent =
+        `${total ? page * pageSize + 1 : 0}-${Math.min(total, (page + 1) * pageSize)} of ${total}${category.value === "bootMessages" ? " fixed entries" : ""}`;
+    });
     selectPage.disabled = blocked || !pageRows.length;
     selectPage.checked = pageRows.length > 0 && checked.size === pageRows.length;
     selectPage.indeterminate = checked.size > 0 && checked.size < pageRows.length;
@@ -347,13 +370,13 @@
         .eq("profile", profile.value).eq("category", category.value);
       if (stateFilter.value !== "all") query = query.eq("enabled", stateFilter.value === "enabled");
       if (search.value.trim()) query = query.ilike("text", `%${search.value.trim().replace(/[\\%_]/g, "\\$&")}%`);
-      const { data, error, count } = await query.order("position").range(page * 25, page * 25 + 24);
+      const { data, error, count } = await query.order("position").range(page * pageSize, (page + 1) * pageSize - 1);
       if (current !== request) return;
       if (error) throw error;
       if (!Array.isArray(data) || !Number.isInteger(count)) throw new Error("Message library returned invalid data.");
       data.forEach(catalog.validate);
       total = count;
-      if (page > 0 && page * 25 >= total) { page = Math.max(0, Math.ceil(total / 25) - 1); return await load(); }
+      if (page > 0 && page * pageSize >= total) { page = Math.max(0, Math.ceil(total / pageSize) - 1); return await load(); }
       parkEditor();
       pageRows = data;
       list.replaceChildren(...data.map((row) => {
@@ -411,7 +434,6 @@
       const boot = category.value === "bootMessages";
       const noun = boot ? "fixed message(s)" : "message(s)";
       const filtered = search.value.trim() ? " matching this search" : "";
-      get("page-label").textContent = `${total ? page * 25 + 1 : 0}-${Math.min(total, (page + 1) * 25)} of ${total}${boot ? " fixed entries" : ""}`;
       const state = stateFilter.value === "all" ? "" : `${stateFilter.value} `;
       report(`${total} ${state}${noun} in this pool${filtered}. Select one to edit, or add a message.`, "success");
       return true;
@@ -421,6 +443,7 @@
       list.replaceChildren();
       pageRows = [];
       total = 0;
+      page = 0;
       console.error("Unable to load message library:", error);
       report(`Message library failed to load: ${error.message}. Check that its migrations are deployed; change a filter to retry.`, "error");
       return false;
@@ -735,8 +758,34 @@
     } finally { busy = false; controls(); }
   });
   timezoneForm.addEventListener("input", () => { timezoneDirty = true; });
-  previous.addEventListener("click", () => { if (discardMessage()) { closeEditor(); page--; load(); } });
-  next.addEventListener("click", () => { if (discardMessage()) { closeEditor(); page++; load(); } });
+  async function navigateMessages(targetPage, targetSize, control) {
+    if (busy || loading || searching || !poolReady) return;
+    if (!discardMessage()) { controls(); return; }
+    closeEditor();
+    page = targetPage;
+    pageSize = targetSize;
+    if (!await load()) return;
+    const top = paginations[0];
+    if (!top.contains(control)) {
+      top.scrollIntoView({ block: "start" });
+      top.querySelector(control.hasAttribute("data-message-page-size") || !total
+        ? "[data-message-page-size]" : "[data-message-page-number]").focus({ preventScroll: true });
+    } else if (control.disabled) {
+      top.querySelector("[data-message-page-number]").focus({ preventScroll: true });
+    }
+  }
+  paginations.forEach((navigation) => {
+    navigation.querySelectorAll("[data-message-page]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targets = { first: 0, previous: page - 1, next: page + 1, last: Math.max(0, Math.ceil(total / pageSize) - 1) };
+        navigateMessages(targets[button.dataset.messagePage], pageSize, button);
+      });
+    });
+    const number = navigation.querySelector("[data-message-page-number]");
+    number.addEventListener("change", () => navigateMessages(Number(number.value), pageSize, number));
+    const size = navigation.querySelector("[data-message-page-size]");
+    size.addEventListener("change", () => navigateMessages(0, Number(size.value), size));
+  });
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (busy) return;
