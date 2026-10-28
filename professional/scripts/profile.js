@@ -144,7 +144,7 @@
     number.setAttribute("aria-hidden", "true");
     number.textContent = `${String(index + 1).padStart(2, "0")} /`;
     period.className = "profile-kicker";
-    window.CareerFormat.buildPeriod(period, entry.period);
+    window.CareerFormat.buildPeriod(period, entry.period, { live: true });
     meta.append(number, period);
 
     role.textContent = entry.role;

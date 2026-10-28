@@ -34,6 +34,12 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   are only a fallback when Supabase is unreachable. Summary lines starting with
   `•` or `-` render as bullets, and technologies (comma- or double-space-
   separated) render as tags via `shared/scripts/career-format.js`.
+  Experience durations are calculated from month/year ranges rather than
+  copied duration labels. Active ranges ending in `Present`, `Current`, or
+  `Now` advance automatically on load, at month rollover, on returning to
+  the tab, and immediately before printing. Calendar months are inclusive
+  (March through October counts as eight months), using UTC consistently.
+  Custom labels and education periods retain their authored formatting.
   Education entries (school, credential, period, and optional bullet details)
   are edited in the same Admin form, stored in `site_resume_education`, and
   shown in both `CAREER.SYS` and the professional Education section.

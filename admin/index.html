@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="/shared/images/favicon.png">
     <script src="/admin/scripts/admin-appearance.js?v=admin-appearance-1"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-134">
-    <link rel="stylesheet" href="/admin/styles/admin.css?v=admin-ui-6">
+    <link rel="stylesheet" href="/admin/styles/admin.css?v=admin-ui-7">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
@@ -21,7 +21,8 @@
     <script src="/admin/scripts/admin-shell.js?v=admin-shell-3" defer></script>
     <script src="/shared/scripts/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin/scripts/admin-publishing.js?v=publishing-1" defer></script>
-    <script src="/admin/scripts/admin.js?v=admin-32" defer></script>
+    <script src="/shared/scripts/career-format.js?v=career-3" defer></script>
+    <script src="/admin/scripts/admin.js?v=admin-33" defer></script>
     <script src="/admin/scripts/admin-backup.js?v=backup-2" defer></script>
     <script src="/shared/scripts/boot-message-generator.js?v=boot-generator-1" defer></script>
     <script src="/admin/scripts/admin-messages.js?v=messages-5" defer></script>
@@ -364,13 +365,26 @@
             <button id="message-bulk-disable" type="button" disabled>DISABLE SELECTED</button>
             <button id="message-bulk-delete" type="button" disabled>DELETE SELECTED</button>
           </div>
-          <p id="message-bulk-help">Selection is limited to this page. Changing pages, filters, or search, or reloading clears the selection. Deletion is permanent; disabled messages remain editable.</p>
+          <p id="message-bulk-help">Selection is limited to this page. Changing pages, page size, filters, or search, or reloading clears the selection. Use the controls above or below the list to jump to any page or show 25, 50, or 100 messages at a time. Deletion is permanent; disabled messages remain editable.</p>
+          <nav id="message-pagination-top" class="admin-form message-pagination" aria-label="Message pages, top" data-message-pagination>
+            <span id="message-page-label-top" data-message-range></span>
+            <label>Per page<select data-message-page-size aria-controls="message-library-list"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
+            <button type="button" data-message-page="first">FIRST</button>
+            <button type="button" data-message-page="previous">PREVIOUS</button>
+            <label>Page<select data-message-page-number aria-controls="message-library-list"><option value="0">1 of 1</option></select></label>
+            <button type="button" data-message-page="next">NEXT</button>
+            <button type="button" data-message-page="last">LAST</button>
+          </nav>
           <ul id="message-library-list" class="message-library-list"></ul>
-          <div class="repeatable-admin-actions">
-            <button id="message-page-previous" type="button">PREVIOUS</button>
-            <span id="message-page-label"></span>
-            <button id="message-page-next" type="button">NEXT</button>
-          </div>
+          <nav class="admin-form message-pagination" aria-label="Message pages, bottom" data-message-pagination>
+            <span id="message-page-label" data-message-range></span>
+            <label>Per page<select data-message-page-size aria-controls="message-library-list"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
+            <button type="button" data-message-page="first">FIRST</button>
+            <button id="message-page-previous" type="button" data-message-page="previous">PREVIOUS</button>
+            <label>Page<select data-message-page-number aria-controls="message-library-list"><option value="0">1 of 1</option></select></label>
+            <button id="message-page-next" type="button" data-message-page="next">NEXT</button>
+            <button type="button" data-message-page="last">LAST</button>
+          </nav>
           </div>
             <form id="message-timezone-form" class="admin-form" data-admin-view="calendar" data-admin-view-label="Calendar">
               <h3>Calendar timezone</h3>

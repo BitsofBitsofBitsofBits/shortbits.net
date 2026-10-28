@@ -29,6 +29,8 @@ test("shared renderer escapes content and preserves formatting, safe links, and 
   assert.equal(ResumeContent.render(input), true);
   assert.equal(document.querySelector("#resume-summary").textContent, input.profile.summary);
   assert.equal(document.querySelector("#resume-summary img"), null);
+  assert.equal(document.querySelector("#resume-experience [data-career-period]").dataset.careerPeriod, input.entries[0].period);
+  assert.equal(document.querySelector("#resume-education [data-career-period]"), null);
   assert.equal(document.querySelectorAll("#resume-experience .resume-bullets li").length, 2);
   assert.equal(document.querySelector("#resume-experience .resume-tech").textContent, "Windows \u00b7 PowerShell");
   assert.equal(document.querySelector("#resume-education").innerHTML, education);

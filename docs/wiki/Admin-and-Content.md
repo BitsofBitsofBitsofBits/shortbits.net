@@ -22,6 +22,15 @@
 
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
+  - Experience entries support **Use start/end date selectors**, start/end
+    months, and **I'm still here** for an active role. The generated period
+    stores only the date range, not a duration that will become stale. End dates
+    cannot precede the start, and role dates cannot be in the future.
+    Existing month/year ranges prefill these controls; custom labels remain
+    editable when date selectors are off. A label such as `Current` needs its
+    actual start month entered once before tenure can be calculated.
+    These controls reuse the existing `period` field, so no database migration
+    or backup-format change is required.
 
 - **Showcase > Featured project** (`/admin/#/featured-project`) controls the
   Online `FEATURED_PROCESS` box: title, summary, optional status and comma-separated

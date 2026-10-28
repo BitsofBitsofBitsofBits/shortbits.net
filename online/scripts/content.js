@@ -203,7 +203,7 @@ function createResumeEntry(entry) {
   role.textContent = entry.role;
   organization.textContent = entry.organization;
   if (window.CareerFormat) {
-    window.CareerFormat.buildPeriod(period, entry.period);
+    window.CareerFormat.buildPeriod(period, entry.period, { live: true });
   } else {
     period.textContent = entry.period;
   }

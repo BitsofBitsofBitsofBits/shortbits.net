@@ -28,6 +28,7 @@ node scripts/validate-site.mjs --root .site-build
 npx playwright install chromium
 npm run test:browser
 node scripts/resume-browser.mjs --root .site-build
+node scripts/career-dates-browser.mjs --root .site-build
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
 node scripts/media-player-browser.mjs --root .site-build
@@ -82,6 +83,13 @@ five-minute shared cache. New data is applied only after clicking "Update resume
 printing always uses the version currently visible. Failed or incomplete checks
 leave the saved version intact and display an explicit status. Email and phone
 links remain runtime-only and are not injected into the generated HTML.
+Experience date ranges are also stored on their rendered period elements.
+The shared formatter refreshes derived durations without replacing the saved
+career content or requiring the explicit data-update button. The offline
+snapshot includes the duration calculated at build time; a saved PDF is static.
+`career-dates.test.mjs` verifies month arithmetic and refresh events, and
+`career-dates-browser.mjs` advances the browser clock across a month boundary
+on all three career views and exercises Admin date controls and validation.
 The focused resume browser check verifies two-page PDF output with six
 representative career entries, long headlines, aligned contact details and
 dates, section-heading break rules, and preserved mobile screen styling.

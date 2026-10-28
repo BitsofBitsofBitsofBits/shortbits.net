@@ -850,6 +850,71 @@ function createAdminCheckbox(labelText, name, options = {}) {
   return label;
 }
 
+function addRoleDateFields(fieldset, entryKey) {
+  const period = fieldset.querySelector('[data-entry-field="period"]');
+  const dates = window.CareerFormat.parseRolePeriod(period.value);
+  const prefix = `experience_${entryKey}`;
+  const modeLabel = createAdminCheckbox("Use start/end date selectors", `${prefix}_use_dates`, { checked: Boolean(dates) });
+  const startLabel = createAdminField("START MONTH", `${prefix}_start`, { type: "month", value: dates?.start });
+  const endLabel = createAdminField("END MONTH", `${prefix}_end`, { type: "month", value: dates?.end });
+  const currentLabel = createAdminCheckbox("I'm still here", `${prefix}_current`, {
+    checked: dates?.current ?? /^(current|present|now)$/i.test(period.value.trim()),
+  });
+  const mode = modeLabel.querySelector("input");
+  const start = startLabel.querySelector("input");
+  const end = endLabel.querySelector("input");
+  const current = currentLabel.querySelector("input");
+  const fields = document.createElement("div");
+  const preview = document.createElement("p");
+  fields.className = "resume-date-fields";
+  preview.className = "resume-date-preview";
+  preview.setAttribute("aria-live", "polite");
+  fields.append(startLabel, endLabel, currentLabel);
+  period.closest("label").before(modeLabel, fields);
+  period.closest("label").after(preview);
+  let customPeriod = period.value;
+
+  for (const input of [start, end]) {
+    input.min = "1000-01";
+    input.pattern = "[1-9][0-9]{3}-(0[1-9]|1[0-2])";
+    input.placeholder = "YYYY-MM";
+  }
+  function update() {
+    const automatic = mode.checked;
+    const now = new Date();
+    const thisMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+    start.max = end.max = thisMonth;
+    fields.hidden = !automatic;
+    start.disabled = current.disabled = !automatic;
+    end.disabled = !automatic || current.checked;
+    start.required = automatic;
+    end.required = automatic && !current.checked;
+    end.setCustomValidity(automatic && !current.checked && end.value && start.value && end.value < start.value
+      ? "The end month must be on or after the start month." : "");
+    period.readOnly = automatic;
+    preview.removeAttribute("data-career-period");
+    if (!automatic) {
+      preview.textContent = "Custom labels are preserved. Month/year ranges calculate duration automatically.";
+      return;
+    }
+    const valid = start.value && start.validity.valid
+      && (current.checked || (end.value && end.validity.valid));
+    period.value = valid ? window.CareerFormat.formatRolePeriod(start.value, end.value, current.checked) : "";
+    if (valid) {
+      window.CareerFormat.buildPeriod(preview, period.value, { live: true });
+    } else {
+      preview.textContent = "Choose a valid start month, then an end month or \"I'm still here\". Dates cannot be in the future.";
+    }
+  }
+  mode.addEventListener("change", () => {
+    if (mode.checked) customPeriod = period.value;
+    else period.value = customPeriod;
+    update();
+  });
+  for (const input of [start, end, current]) input.addEventListener("input", update);
+  update();
+}
+
 async function creatorLookupErrorMessage(error) {
   if (error.context instanceof Response) {
     try {
@@ -889,6 +954,9 @@ function createRepeatableEntry(editor, entry = {}) {
       },
     ));
   });
+  if (editor === repeatableEditors.resume) {
+    addRoleDateFields(fieldset, entryKey);
+  }
   if (editor === repeatableEditors.creators) {
     const lookup = document.createElement("button");
     const lookupStatus = document.createElement("p");
@@ -3384,6 +3452,10 @@ if (adminClient) {
 
   resumeForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!resumeForm.reportValidity()) {
+      setAdminStatus(resumeAdminStatus, "Correct the highlighted résumé fields before saving.", "error");
+      return;
+    }
     const formData = new FormData(resumeForm);
     const profile = Object.fromEntries(
       resumeProfileFields.map((field) => [

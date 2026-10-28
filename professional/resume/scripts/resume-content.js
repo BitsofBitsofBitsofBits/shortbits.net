@@ -29,7 +29,7 @@
     const { profile, entries, education, certifications } = normalize(input);
     if (!profile) return false;
     const format = window.CareerFormat;
-    function header(title, subtitle, periodValue) {
+    function header(title, subtitle, periodValue, live = false) {
       const node = document.createElement("header");
       const group = document.createElement("div");
       const heading = document.createElement("h3");
@@ -42,14 +42,14 @@
       if (periodValue) {
         const period = document.createElement("p");
         period.className = "resume-period";
-        format.buildPeriod(period, periodValue);
+        format.buildPeriod(period, periodValue, { live });
         node.append(period);
       }
       return node;
     }
     function experience(entry) {
       const item = document.createElement("li");
-      item.append(header(entry.role, entry.organization, entry.period),
+      item.append(header(entry.role, entry.organization, entry.period, true),
         format.buildSummary(entry.summary, { list: "resume-bullets" }));
       const technologies = format.splitTechnologies(entry.technologies);
       if (technologies.length) {
