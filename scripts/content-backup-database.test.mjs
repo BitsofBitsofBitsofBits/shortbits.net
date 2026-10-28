@@ -34,6 +34,7 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec(await readFile(new URL("../supabase/migrations/20261025034000_scheduled_message_pools.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261026030000_message_authors.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261026090000_featured_project.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261028070000_builtin_message_pool_settings.sql", import.meta.url), "utf8"));
     await db.exec("set role anon");
     await assert.rejects(db.query("select public.export_site_content()"), /permission denied/);
     await assert.rejects(db.query("select public.restore_site_content('{}'::jsonb)"), /permission denied/);
@@ -43,6 +44,7 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("update site_message_catalog set author = 'Ada Lovelace' where position = 1");
     await db.exec("insert into site_message_pools (id,title,schedule,starts_on,ends_on,enabled) values ('custom-backup','Backup pool','annual','2000-12-30','2000-01-02',true)");
     await db.exec("insert into site_message_catalog (position,profile,category,text) values (2,'custom-backup','messages','Custom backup message')");
+    await db.exec("insert into site_message_pools(id,title,schedule,mode,enabled) values ('easter','Backup Easter','automatic','exclusive',false)");
     await db.exec("update site_message_settings set timezone = 'America/New_York'");
     const exported = (await db.query("select public.export_site_content() as backup")).rows[0].backup;
     assert.equal(Object.keys(exported.tables).length, names.length + 5);
@@ -60,10 +62,12 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("delete from site_message_pools");
     await db.exec("update site_message_settings set timezone = 'UTC'");
     const result = (await db.query("select public.restore_site_content($1::jsonb) as result", [JSON.stringify(exported)])).rows[0].result;
-    assert.deepEqual(result, { rows: 19, tables: 18 });
+    assert.deepEqual(result, { rows: 20, tables: 18 });
     assert.equal((await db.query("select title from site_featured_project")).rows[0].title, "BITSOFBITS WEBSITE");
     assert.equal((await db.query("select enabled from site_featured_project")).rows[0].enabled, false);
     assert.equal((await db.query("select title from site_message_pools")).rows[0].title, "Backup pool");
+    assert.deepEqual((await db.query("select schedule, starts_on, ends_on, enabled from site_message_pools where id='easter'")).rows[0],
+      { schedule: "automatic", starts_on: null, ends_on: null, enabled: false });
     assert.equal((await db.query("select text from site_message_catalog where profile = 'custom-backup'")).rows[0].text, "Custom backup message");
     assert.equal((await db.query("select timezone from site_message_settings")).rows[0].timezone, "America/New_York");
     assert.equal((await db.query("select body from site_blog_posts")).rows[0].body, "original");

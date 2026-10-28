@@ -26,6 +26,10 @@
     option.textContent = label;
     get("markup-font").append(option);
   }
+  const customFontOption = document.createElement("option");
+  customFontOption.value = "custom";
+  customFontOption.textContent = "Custom...";
+  get("markup-font").append(customFontOption);
   for (const [name, description] of Object.entries(window.BITS_MESSAGE_TEXT.variables)) {
     const term = document.createElement("dt");
     const code = document.createElement("code");
@@ -56,6 +60,7 @@
   const timezoneForm = get("timezone-form");
   let pools = [];
   let editingPool = null;
+  let poolTimezone = "America/Chicago";
   let poolDirty = false;
   let timezoneDirty = false;
   let poolReady = false;
@@ -102,7 +107,11 @@
     [save, add, get("cancel")].forEach((control) => { control.disabled = blocked; });
     [profile, category, stateFilter, search].forEach((control) => { control.disabled = busy || loading || !poolReady; });
     get("reload").disabled = busy || loading || searching;
-    get("pool-delete").disabled = blocked || !editingPool;
+    get("pool-edit").disabled = blocked;
+    get("pool-save").disabled = blocked || editingPool === "standard";
+    get("pool-fields").disabled = editingPool === "standard";
+    get("pool-delete").disabled = blocked || !editingPool?.startsWith("custom-");
+    get("pool-reset").disabled = blocked || !pools.some(pool => pool.id === editingPool);
     remove.disabled = blocked || selected === null;
     previous.disabled = blocked || page === 0;
     next.disabled = blocked || (page + 1) * 25 >= total;
@@ -150,6 +159,9 @@
     correctedText.value = row?.corrected_text ?? "";
     author.value = row?.author ?? "";
     markupTarget = text;
+    get("custom-font").hidden = true;
+    get("custom-font-status").textContent = "";
+    get("custom-font-family").value = "";
     formats.forEach((input, key) => { input.value = row?.format[key] ?? ""; });
     get("editing-label").textContent = selected === null ? "NEW MESSAGE" : `EDITING MESSAGE ${selected}`;
     const isWeighted = catalog.weighted(category.value);
@@ -224,7 +236,37 @@
     get("pool-end").value = pool?.ends_on ?? "";
     get("pool-mode").value = pool?.mode ?? "additive";
     get("pool-enabled").checked = pool?.enabled ?? false;
+    get("pool-select").value = editingPool ?? "";
+    get("pool-reset").hidden = !catalog.builtinProfiles.includes(editingPool) || editingPool === "standard"
+      || !pools.some(value => value.id === editingPool);
+    get("pool-delete").hidden = !editingPool?.startsWith("custom-");
+    syncPoolSchedule();
     controls();
+  }
+  function selectedPool(id = profile.value) {
+    if (id === "standard") return { id, title: "Standard / year-round", schedule: "automatic", mode: "additive", enabled: true };
+    return pools.find(pool => pool.id === id) ?? catalog.builtinPool(id);
+  }
+  function syncPoolSchedule() {
+    const builtin = catalog.builtinProfiles.includes(editingPool);
+    const automatic = get("pool-schedule").value === "automatic";
+    get("pool-schedule").querySelector('[value="automatic"]').disabled = !builtin;
+    get("pool-dates").hidden = automatic;
+    get("pool-start").disabled = automatic;
+    get("pool-end").disabled = automatic;
+    get("pool-start").required = !automatic;
+    if (editingPool === "standard") {
+      get("pool-summary").textContent = "Always active as the year-round fallback. Its messages remain editable in Messages; use New pool to add a schedule.";
+      return;
+    }
+    const year = catalog.calendarDate(new Date(), poolTimezone).getFullYear();
+    const defaults = builtin ? catalog.builtinSchedule(editingPool, year) : null;
+    const dates = defaults?.ranges.map(range => range.start === range.end ? range.start : `${range.start} through ${range.end}`).join("; ");
+    const rule = defaults ? `Built-in rule: ${defaults.rule} ${year}: ${dates || "no matching dates"}. ` : "";
+    const enabled = get("pool-enabled").checked ? "Enabled" : "Disabled";
+    const mode = get("pool-mode").value === "exclusive" ? "exclusive" : "additive";
+    const range = automatic ? "automatic dates" : `${get("pool-schedule").value}: ${get("pool-start").value || "choose start"} through ${get("pool-end").value || get("pool-start").value || "choose end"}`;
+    get("pool-summary").textContent = `${rule}Current settings: ${enabled}, ${mode}, ${range}. Calendar timezone: ${poolTimezone}.`;
   }
   async function loadPools(preferred = profile.value) {
     const [definitions, settings] = await Promise.all([
@@ -234,7 +276,7 @@
     if (definitions.error) throw definitions.error;
     if (settings.error) throw settings.error;
     if (!Array.isArray(definitions.data) || definitions.data.length >= 1000 || !settings.data) {
-      throw new Error("Invalid pool settings or too many custom pools (maximum 999).");
+      throw new Error("Invalid pool settings or too many pool definitions (maximum 999).");
     }
     catalog.validateTimezone(settings.data.timezone);
     catalog.setAdminPools(definitions.data);
@@ -243,16 +285,22 @@
       const option = document.createElement("option");
       option.value = value;
       const pool = pools.find((item) => item.id === value);
-      option.textContent = pool ? `${pool.enabled ? "" : "[DISABLED] "}${pool.title}` : value === "standard" ? "Standard / year-round" : value.replaceAll("-", " ");
+      option.textContent = pool ? `${pool.enabled ? "" : "[DISABLED] "}${pool.title}`
+        : value === "standard" ? "Standard / year-round" : catalog.builtinPool(value).title;
       return option;
     }));
     profile.value = catalog.profiles.includes(preferred) ? preferred : "standard";
     selectedProfile = profile.value;
     get("timezone").value = settings.data.timezone;
+    poolTimezone = settings.data.timezone;
     timezoneDirty = false;
     poolReady = true;
-    editPool(pools.find((pool) => pool.id === profile.value));
-    reportPool(`${pools.length} custom pool(s). Dates use ${settings.data.timezone}.`, "success");
+    get("pool-select").replaceChildren(...[
+      Object.assign(document.createElement("option"), { value: "", textContent: "New custom pool..." }),
+      ...Array.from(profile.options, option => option.cloneNode(true)),
+    ]);
+    editPool(selectedPool());
+    reportPool(`${pools.filter(pool => pool.id.startsWith("custom-")).length} custom pool(s), ${pools.filter(pool => !pool.id.startsWith("custom-")).length} built-in override(s). Dates use ${settings.data.timezone}.`, "success");
   }
   async function reloadLibrary() {
     busy = true;
@@ -441,8 +489,18 @@
   for (const key of catalog.styles) {
     const label = document.createElement("label");
     const input = document.createElement("input");
-    label.textContent = key;
+    const labels = {
+      color: "Text color", fontWeight: "Font weight", fontFamily: "Font family",
+      fontSize: "Font size", fontStyle: "Font style", letterSpacing: "Letter spacing",
+      textDecoration: "Text decoration", textTransform: "Text transform",
+    };
+    label.textContent = labels[key];
     input.maxLength = 200;
+    input.placeholder = ({
+      color: "#123456", fontWeight: "700", fontFamily: "Aptos, Arial, sans-serif",
+      fontSize: "18px", fontStyle: "italic", letterSpacing: "0.05em",
+      textDecoration: "underline", textTransform: "uppercase",
+    })[key];
     input.dataset.messageFormat = key;
     label.append(input);
     formats.set(key, input);
@@ -459,7 +517,7 @@
     selectedCategory = category.value;
     selectedState = stateFilter.value;
     page = 0;
-    editPool(pools.find((pool) => pool.id === profile.value));
+    editPool(selectedPool());
     closeEditor();
     load();
   }));
@@ -475,7 +533,7 @@
     searchTimer = window.setTimeout(() => { page = 0; load(); }, 250);
   });
   form.addEventListener("input", (event) => {
-    if (get("markup-toolbar").contains(event.target)) return;
+    if (get("markup-toolbar").contains(event.target) && !get("weighted-options").contains(event.target)) return;
     dirty = true;
     previewMessage();
   });
@@ -512,10 +570,41 @@
   for (const [id, directive] of [["markup-font", "font"], ["markup-size", "size"]]) {
     get(id).addEventListener("change", (event) => {
       const value = event.target.value;
-      if (value) insertText({ open: `{{${directive}:${value}|`, close: "}}" });
+      if (directive === "font" && value === "custom") {
+        get("custom-font").hidden = false;
+        get("custom-font-status").textContent = "";
+        get("custom-font-family").focus();
+      } else if (value) {
+        if (directive === "font") get("custom-font").hidden = true;
+        insertText({ open: `{{${directive}:${value}|`, close: "}}" });
+      }
       event.target.value = "";
     });
   }
+  get("custom-font-apply").addEventListener("click", () => {
+    const family = window.BITS_MARKDOWN.customFontFamily(get("custom-font-family").value);
+    if (!family) {
+      get("custom-font-status").textContent = "Enter font names separated by commas (up to 200 characters), without CSS rules, URLs, or markup.";
+      get("custom-font-family").focus();
+      return;
+    }
+    insertText({ open: `{{font:custom:${family}|`, close: "}}" });
+  });
+  get("custom-font-cancel").addEventListener("click", () => {
+    get("custom-font").hidden = true;
+    get("custom-font-status").textContent = "";
+    markupTarget.focus();
+  });
+  get("custom-font-family").addEventListener("input", () => { get("custom-font-status").textContent = ""; });
+  get("custom-font-family").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      get("custom-font-apply").click();
+    }
+  });
+  form.addEventListener("invalid", (event) => {
+    if (get("defaults").contains(event.target)) get("defaults").open = true;
+  }, true);
   section.querySelectorAll("[data-message-variable]").forEach((button) => button.addEventListener("click", () => {
     insertText({ variable: button.dataset.messageVariable });
   }));
@@ -528,7 +617,27 @@
   add.addEventListener("click", () => toggleEditor());
   get("cancel").addEventListener("click", () => { if (discardMessage()) closeEditor(true); });
   get("reload").addEventListener("click", () => { if (discard({ calendar: true })) reloadLibrary(); });
-  poolForm.addEventListener("input", () => { poolDirty = true; });
+  poolForm.addEventListener("input", (event) => {
+    if (event.target === get("pool-select")) return;
+    poolDirty = true;
+    syncPoolSchedule();
+  });
+  get("pool-schedule").addEventListener("change", syncPoolSchedule);
+  get("pool-select").addEventListener("change", async () => {
+    const id = get("pool-select").value;
+    if (!discard()) { get("pool-select").value = editingPool ?? ""; return; }
+    closeEditor();
+    if (!id) { editPool(); return; }
+    profile.value = id;
+    selectedProfile = id;
+    page = 0;
+    editPool(selectedPool(id));
+    await load();
+  });
+  get("pool-edit").addEventListener("click", () => {
+    window.BITS_ADMIN_SHELL.showSubsection("messages", "pools");
+    get("pool-select").focus();
+  });
   get("pool-new").addEventListener("click", () => {
     if (!discard()) return;
     closeEditor();
@@ -537,18 +646,20 @@
   });
   poolForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (busy || ((dirty || timezoneDirty) && !window.confirm("Discard unsaved message or calendar changes and save this pool?"))) return;
+    if (busy || editingPool === "standard"
+      || ((dirty || timezoneDirty) && !window.confirm("Discard unsaved message or calendar changes and save this pool?"))) return;
     busy = true;
     controls();
     try {
       const row = {
         id: editingPool ?? `custom-${crypto.randomUUID()}`, title: get("pool-title").value.trim(),
-        schedule: get("pool-schedule").value, starts_on: get("pool-start").value,
-        ends_on: get("pool-end").value || get("pool-start").value, mode: get("pool-mode").value,
+        schedule: get("pool-schedule").value,
+        starts_on: get("pool-schedule").value === "automatic" ? null : get("pool-start").value,
+        ends_on: get("pool-schedule").value === "automatic" ? null : get("pool-end").value || get("pool-start").value, mode: get("pool-mode").value,
         enabled: get("pool-enabled").checked, updated_at: new Date().toISOString(),
       };
       catalog.validatePool(row);
-      const query = editingPool ? adminClient.from("site_message_pools").update(row).eq("id", editingPool)
+      const query = pools.some(pool => pool.id === editingPool) ? adminClient.from("site_message_pools").update(row).eq("id", editingPool)
         : adminClient.from("site_message_pools").insert(row);
       const { data, error } = await query.select("*").single();
       if (error) throw error;
@@ -565,7 +676,8 @@
     } finally { busy = false; controls(); }
   });
   get("pool-delete").addEventListener("click", async () => {
-    if (busy || !editingPool || !window.confirm("Permanently delete this custom pool AND ALL its messages, including hidden messages?")) return;
+    if (busy || !editingPool?.startsWith("custom-") || !discard()
+      || !window.confirm("Permanently delete this custom pool AND ALL its messages, including hidden messages?")) return;
     busy = true;
     controls();
     try {
@@ -582,6 +694,26 @@
       reportPool(`Pool deletion failed: ${error.message}`, "error");
     } finally { busy = false; controls(); }
   });
+  get("pool-reset").addEventListener("click", async () => {
+    if (busy || !catalog.builtinPool(editingPool) || !discard()
+      || !window.confirm("Restore the built-in dates, behavior, name, and enabled state? This does not delete any messages.")) return;
+    busy = true;
+    controls();
+    try {
+      const id = editingPool;
+      const { data, error } = await adminClient.from("site_message_pools").delete().eq("id", id).select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("The override no longer exists. Reload the library.");
+      await loadPools(id);
+      page = 0;
+      closeEditor();
+      await load();
+      reportPool("Built-in defaults restored. All messages were retained.", "success");
+    } catch (error) {
+      console.error("Unable to reset built-in message pool:", error);
+      reportPool(`Pool reset failed: ${error.message}`, "error");
+    } finally { busy = false; controls(); }
+  });
   timezoneForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (busy) return;
@@ -594,6 +726,8 @@
       if (error) throw error;
       if (!data) throw new Error("The calendar settings were not saved. Reload the library.");
       timezoneDirty = false;
+      poolTimezone = data.timezone;
+      syncPoolSchedule();
       reportPool(`Calendar timezone saved: ${data.timezone}. Public calendars refresh within five minutes on reload or refocus.`, "success");
     } catch (error) {
       console.error("Unable to save message timezone:", error);

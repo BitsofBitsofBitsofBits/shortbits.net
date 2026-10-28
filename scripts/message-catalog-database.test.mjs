@@ -16,6 +16,7 @@ test("message migration preserves every fallback entry, weights and formatting, 
     await db.exec(await readFile(new URL("../supabase/migrations/20261025033000_message_mistype_corrections.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261025034000_scheduled_message_pools.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261026030000_message_authors.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261028070000_builtin_message_pool_settings.sql", import.meta.url), "utf8"));
     const columns = "position,profile,category,text,weight,colorful,format,enabled";
     const entries = (await db.query(`select ${columns} from site_message_catalog order by position`)).rows;
     assert.deepEqual(entries, messageCatalogDefaults());
@@ -63,6 +64,7 @@ test("custom pools enforce dates, timezone, permissions, draft privacy, immutabl
     for (const file of [
       "20261025030000_create_message_catalog.sql", "20261025032000_message_inline_markup.sql",
       "20261025033000_message_mistype_corrections.sql", "20261025034000_scheduled_message_pools.sql",
+      "20261028070000_builtin_message_pool_settings.sql",
     ]) await db.exec(await readFile(new URL(`../supabase/migrations/${file}`, import.meta.url), "utf8"));
     assert.equal((await db.query("select timezone from site_message_settings")).rows[0].timezone, "America/Chicago");
     await db.exec("set role authenticated");
@@ -90,5 +92,41 @@ test("custom pools enforce dates, timezone, permissions, draft privacy, immutabl
     assert.equal((await db.query("select count(*)::int as n from site_message_catalog")).rows[0].n, 1);
     await db.exec("set role authenticated; delete from site_message_pools");
     assert.equal((await db.query("select count(*)::int as n from site_message_catalog")).rows[0].n, 0);
+  } finally { await db.close(); }
+});
+
+test("built-in overrides enforce automatic/fixed scheduling, public disablement, and message-safe reset", async () => {
+  const db = new PGlite();
+  try {
+    await db.exec("create role anon; create role authenticated;");
+    for (const file of [
+      "20261025030000_create_message_catalog.sql", "20261025032000_message_inline_markup.sql",
+      "20261025033000_message_mistype_corrections.sql", "20261025034000_scheduled_message_pools.sql",
+      "20261028070000_builtin_message_pool_settings.sql",
+    ]) await db.exec(await readFile(new URL(`../supabase/migrations/${file}`, import.meta.url), "utf8"));
+    await db.exec("set role authenticated");
+    await db.exec(`insert into site_message_pools(id,title,schedule,mode,enabled) values ('easter','Edited Easter','automatic','exclusive',false)`);
+    await db.exec(`insert into site_message_catalog(position,profile,category,text,enabled) values (1,'easter','messages','Keep my Easter text',true)`);
+    assert.equal((await db.query("select pool_id from site_message_catalog")).rows[0].pool_id, null);
+    for (const assignment of [
+      "id = 'christmas'", "schedule = 'annual'", "starts_on = '2000-01-01'",
+      "ends_on = '2000-01-01'", "mode = 'invalid'",
+    ]) await assert.rejects(db.exec(`update site_message_pools set ${assignment} where id = 'easter'`), /check constraint|cannot be changed/);
+    for (const id of ["standard", "custom-invalid", "unknown"]) {
+      await assert.rejects(db.exec(`insert into site_message_pools(id,title,schedule) values ('${id}','Invalid','automatic')`), /check constraint/);
+    }
+    await db.exec("update site_message_pools set schedule='annual', starts_on='2000-12-30', ends_on='2000-01-02' where id='easter'");
+    await assert.rejects(db.exec("update site_message_pools set schedule='once' where id='easter'"), /check constraint/);
+    await db.exec("update site_message_pools set schedule='automatic', starts_on=null, ends_on=null where id='easter'");
+    await db.exec("insert into site_message_pools(id,title,schedule,starts_on,ends_on) values ('custom-private','Private','annual','2000-01-01','2000-01-01')");
+    await db.exec("insert into site_message_catalog(position,profile,category,text,enabled) values (2,'custom-private','messages','Private custom message',true)");
+    await db.exec("set role anon");
+    assert.deepEqual((await db.query("select id,enabled from site_message_pools")).rows, [{ id: "easter", enabled: false }]);
+    assert.deepEqual((await db.query("select profile from site_message_catalog")).rows, [{ profile: "easter" }]);
+    await assert.rejects(db.exec("insert into site_message_pools(id,title,schedule) values ('christmas','Unauthorised','automatic')"), /permission denied/);
+    await db.exec("set role authenticated; delete from site_message_pools where id='easter'");
+    assert.equal((await db.query("select text from site_message_catalog where profile='easter'")).rows[0].text, "Keep my Easter text");
+    await db.exec("delete from site_message_pools where id='custom-private'");
+    assert.equal((await db.query("select count(*)::int as n from site_message_catalog")).rows[0].n, 1);
   } finally { await db.close(); }
 });

@@ -14,6 +14,8 @@
   const profiles = [
     {
       id: "new-year",
+      title: "New Year",
+      scheduleDescription: "December 31 through January 2 each year.",
       mode: "exclusive",
       matches: (date) => (
         (date.getMonth() === 11 && date.getDate() === 31)
@@ -265,6 +267,8 @@
     },
     {
       id: "christmas",
+      title: "Christmas",
+      scheduleDescription: "December 24 through December 26 each year.",
       mode: "exclusive",
       matches: (date) => date.getMonth() === 11 && date.getDate() >= 24 && date.getDate() <= 26,
       messages: weighted([
@@ -486,6 +490,8 @@
     },
     {
       id: "halloween",
+      title: "Halloween",
+      scheduleDescription: "October 31 each year.",
       mode: "exclusive",
       matches: (date) => date.getMonth() === 9 && date.getDate() === 31,
       messages: weighted([
@@ -574,6 +580,8 @@
     },
     {
       id: "birthday",
+      title: "Birthday",
+      scheduleDescription: "June 26 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 5 && date.getDate() === 26,
       messages: weighted([
@@ -615,6 +623,8 @@
     },
     {
       id: "valentines",
+      title: "Valentine's Day",
+      scheduleDescription: "February 14 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 1 && date.getDate() === 14,
       messages: weighted([
@@ -666,6 +676,8 @@
     },
     {
       id: "st-patricks",
+      title: "St. Patrick's Day",
+      scheduleDescription: "March 17 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 2 && date.getDate() === 17,
       messages: weighted([
@@ -717,6 +729,8 @@
     },
     {
       id: "easter",
+      title: "Easter",
+      scheduleDescription: "Gregorian Easter Sunday, recalculated each year.",
       mode: "additive",
       matches: (date) => isEasterSunday(date),
       messages: weighted([
@@ -768,6 +782,8 @@
     },
     {
       id: "earth-day",
+      title: "Earth Day",
+      scheduleDescription: "April 22 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 3 && date.getDate() === 22,
       messages: weighted([
@@ -819,6 +835,8 @@
     },
     {
       id: "independence-day",
+      title: "Independence Day",
+      scheduleDescription: "July 4 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 6 && date.getDate() === 4,
       messages: weighted([
@@ -870,6 +888,8 @@
     },
     {
       id: "pi-day",
+      title: "Pi Day",
+      scheduleDescription: "March 14 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 2 && date.getDate() === 14,
       messages: weighted([
@@ -895,6 +915,8 @@
     },
     {
       id: "april-fools",
+      title: "April Fools' Day",
+      scheduleDescription: "April 1 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 3 && date.getDate() === 1,
       messages: weighted([
@@ -921,6 +943,8 @@
     },
     {
       id: "404-day",
+      title: "404 Day",
+      scheduleDescription: "April 4 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 3 && date.getDate() === 4,
       messages: weighted([
@@ -946,6 +970,8 @@
     },
     {
       id: "may-fourth",
+      title: "May the Fourth",
+      scheduleDescription: "May 4 each year.",
       mode: "additive",
       matches: (date) => date.getMonth() === 4 && date.getDate() === 4,
       messages: weighted([
@@ -971,6 +997,8 @@
     },
     {
       id: "leap-day",
+      title: "Leap Day",
+      scheduleDescription: "February 29 in leap years only.",
       mode: "additive",
       matches: (date) => date.getMonth() === 1 && date.getDate() === 29,
       messages: weighted([
@@ -996,6 +1024,8 @@
     },
     {
       id: "thanksgiving",
+      title: "Thanksgiving",
+      scheduleDescription: "The fourth Thursday in November each year.",
       mode: "additive",
       matches: (date) => (
         date.getMonth() === 10
@@ -1052,6 +1082,8 @@
     },
     {
       id: "friday-the-13th",
+      title: "Friday the 13th",
+      scheduleDescription: "Every Friday that falls on the 13th of a month.",
       mode: "additive",
       matches: (date) => date.getDate() === 13 && date.getDay() === 5,
       messages: weighted([
@@ -1092,7 +1124,9 @@
     const catalog = window.BITS_MESSAGE_CATALOG;
     date = catalog?.calendarDate(date, options.timezone) ?? date;
     const matching = [
-      ...profiles.filter((profile) => profile.matches(date)),
+      ...profiles.map((profile) => catalog
+        ? catalog.resolveBuiltin(profile, date, options.pools)
+        : profile.matches(date) ? profile : null).filter(Boolean),
       ...(catalog?.scheduledProfiles(date, options.pools) ?? []),
     ];
     const exclusive = matching.filter((profile) => profile.mode === "exclusive");

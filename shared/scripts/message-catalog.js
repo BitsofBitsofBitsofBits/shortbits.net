@@ -12,6 +12,7 @@
   };
   const styles = window.BITS_MESSAGE_TEXT.styles;
   const bindings = new Map();
+  const builtinDefinitions = new Map();
   const ttl = 300_000;
   let snapshot = null;
   let loadedAt = 0;
@@ -78,10 +79,13 @@
   function validatePool(pool) {
     const validDate = (value) => typeof value === "string" && /^[1-9]\d{3}-\d{2}-\d{2}$/.test(value)
       && !Number.isNaN(Date.parse(`${value}T12:00:00Z`)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
-    if (!pool || !/^custom-[a-z0-9-]{1,70}$/.test(pool.id) || typeof pool.title !== "string"
-      || !pool.title.trim() || pool.title.length > 100 || !["annual", "once"].includes(pool.schedule)
+    const builtin = pool && builtinProfiles.includes(pool.id) && pool.id !== "standard";
+    if (!pool || (!builtin && !/^custom-[a-z0-9-]{1,70}$/.test(pool.id)) || typeof pool.title !== "string"
+      || !pool.title.trim() || pool.title.length > 100 || !["annual", "once", "automatic"].includes(pool.schedule)
       || !["exclusive", "additive"].includes(pool.mode) || typeof pool.enabled !== "boolean"
-      || !validDate(pool.starts_on) || !validDate(pool.ends_on)
+      || (pool.schedule === "automatic"
+        ? !builtin || pool.starts_on !== null || pool.ends_on !== null
+        : !validDate(pool.starts_on) || !validDate(pool.ends_on))
       || (pool.schedule === "once" && pool.ends_on < pool.starts_on)) {
       throw new Error("Enter a pool name, valid dates, and an additive/exclusive mode. One-time ranges must end on or after their start.");
     }
@@ -89,8 +93,45 @@
   }
   function setAdminPools(values) {
     values.forEach(validatePool);
+    if (new Set(values.map(pool => pool.id)).size !== values.length) throw new Error("Duplicate message pool IDs.");
     pools = values;
-    profiles.splice(0, profiles.length, ...builtinProfiles, ...values.map((pool) => pool.id));
+    profiles.splice(0, profiles.length, ...builtinProfiles, ...values.filter(pool => !builtinProfiles.includes(pool.id)).map(pool => pool.id));
+  }
+  function builtinPool(id) {
+    const definition = builtinDefinitions.get(id);
+    if (!definition) return null;
+    return {
+      id, title: definition.title, schedule: "automatic", starts_on: null, ends_on: null,
+      mode: definition.mode, enabled: true,
+    };
+  }
+  function builtinSchedule(id, year) {
+    const definition = builtinDefinitions.get(id);
+    if (!definition || !Number.isInteger(year) || year < 1000 || year > 9999) throw new Error("Invalid built-in pool or calendar year.");
+    const ranges = [];
+    for (let date = new Date(year, 0, 1, 12); date.getFullYear() === year; date.setDate(date.getDate() + 1)) {
+      if (!definition.matches(date)) continue;
+      const current = dayKey(date);
+      const previous = ranges.at(-1);
+      const yesterday = new Date(date);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (previous?.end === dayKey(yesterday)) previous.end = current;
+      else ranges.push({ start: current, end: current });
+    }
+    return { rule: definition.scheduleDescription, ranges };
+  }
+  function matchesPoolDate(pool, date) {
+    const today = dayKey(date);
+    if (pool.schedule === "once") return today >= pool.starts_on && today <= pool.ends_on;
+    const day = today.slice(5), start = pool.starts_on.slice(5), end = pool.ends_on.slice(5);
+    return start <= end ? day >= start && day <= end : day >= start || day <= end;
+  }
+  function resolveBuiltin(profile, date, definitions = pools) {
+    const override = definitions.find(pool => pool.id === profile.id);
+    if (!override) return profile.matches(date) ? profile : null;
+    if (!override.enabled) return null;
+    const matches = override.schedule === "automatic" ? profile.matches(date) : matchesPoolDate(override, date);
+    return matches ? { ...profile, mode: override.mode } : null;
   }
   function valueFor(row) {
     return weighted(row.category)
@@ -100,12 +141,8 @@
       : row.markup ? { text: row.text, markup: true } : row.text;
   }
   function scheduledProfiles(date, definitions = pools) {
-    const today = dayKey(date);
     return definitions.filter((pool) => {
-      if (!pool.enabled) return false;
-      if (pool.schedule === "once") return today >= pool.starts_on && today <= pool.ends_on;
-      const day = today.slice(5), start = pool.starts_on.slice(5), end = pool.ends_on.slice(5);
-      return start <= end ? day >= start && day <= end : day >= start || day <= end;
+      return !builtinProfiles.includes(pool.id) && pool.enabled && matchesPoolDate(pool, date);
     }).map((pool) => {
       const profile = { id: pool.id, mode: pool.mode, monitorJokes: {} };
       Object.keys(categories).forEach((category) => {
@@ -146,6 +183,7 @@
 
   function registerProfiles(definitions) {
     definitions.forEach((profile) => {
+      builtinDefinitions.set(profile.id, profile);
       Object.keys(categories).filter((key) => !key.startsWith("monitor.")).forEach((key) => {
         if (Array.isArray(profile[key])) bind(profile.id, key, profile[key]);
       });
@@ -187,10 +225,10 @@
         };
         const [settings, definitions] = await Promise.all([
           read("site_message_settings", { select: "id,timezone", id: "eq.primary" }),
-          read("site_message_pools", { select: "id,title,schedule,starts_on,ends_on,mode,enabled", enabled: "eq.true", order: "id.asc", limit: "1000" }),
+          read("site_message_pools", { select: "id,title,schedule,starts_on,ends_on,mode,enabled", order: "id.asc", limit: "1000" }),
         ]);
         if (settings.length !== 1 || settings[0].id !== "primary") throw new Error("The message calendar settings are missing.");
-        if (definitions.length >= 1000) throw new Error("Too many custom pools; at most 999 are supported.");
+        if (definitions.length >= 1000) throw new Error("Too many pool definitions; at most 999 are supported.");
         const zone = validateTimezone(settings[0].timezone);
         definitions.forEach(validatePool);
         const selectionDate = new Date();
@@ -269,7 +307,7 @@
   }
 
   window.BITS_MESSAGE_CATALOG = { profiles, builtinProfiles, categories, styles, weighted, validate, validatePool,
-    validateTimezone, calendarDate, scheduledProfiles, setAdminPools, bind, registerProfiles, start, refresh,
+    validateTimezone, calendarDate, builtinPool, builtinSchedule, resolveBuiltin, scheduledProfiles, setAdminPools, bind, registerProfiles, start, refresh,
     get status() { return status; } };
   for (const [category, global] of [["messages", "BITS_MESSAGES"], ["activities", "BITS_ACTIVITIES"], ["shutdownMessages", "BITS_SHUTDOWN_MESSAGES"]]) {
     if (Array.isArray(window[global])) bind("standard", category, window[global]);

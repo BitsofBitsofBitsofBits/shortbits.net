@@ -133,6 +133,53 @@ test("all 24 shared font choices have safe styles and render in messages and blo
   }
 });
 
+test("custom installed fonts normalize safely, preserve case and survive typewriter rendering and blog output", () => {
+  const { text, target, document, window } = setup();
+  for (const [input, expected] of [
+    ["Aptos, Arial,sans-serif", '"Aptos", "Arial", sans-serif'],
+    ["'Aptos Display', monospace", '"Aptos Display", monospace'],
+    ['"Yu Gothic", system-ui', '"Yu Gothic", system-ui'],
+    ["游ゴシック, serif", '"游ゴシック", serif'],
+    ["123 Font, SANS-SERIF", '"123 Font", sans-serif'],
+  ]) {
+    assert.equal(window.BITS_MARKDOWN.customFontFamily(input), expected);
+    const option = { text: `{{font:custom:${input}|**👩‍💻%year%**}}`, markup: true };
+    text.render(target, option);
+    assert.equal(target.textContent, "👩‍💻2026");
+    assert.equal(target.querySelector(".blog-text-font-custom").style.fontFamily, expected);
+    for (const length of [0, 1, 3, 5, 2]) {
+      text.render(target, option, { length });
+      assert.equal(target.textContent, text.prepare(option).characters.slice(0, length).join(""));
+      if (length) assert.equal(target.querySelector(".blog-text-font-custom").style.fontFamily, expected);
+    }
+    const blog = document.createElement("div");
+    blog.append(window.BITS_MARKDOWN.render(`{{font:custom:${input}|Words}}`));
+    assert.equal(blog.querySelector(".blog-text-font-custom").style.fontFamily, expected);
+    assert.equal(blog.textContent, "Words");
+  }
+});
+
+test("invalid custom fonts remain literal and never add CSS rules or external resources", () => {
+  const { text, target, window } = setup();
+  for (const value of [
+    "", " ", "Arial,", ",Arial", "Arial,,serif", '"Unclosed', "Unclosed'",
+    "inherit", "initial", "unset", "revert", "revert-layer", "Arial; color:red",
+    "url(https://example.test/font)", "var(--font-family)", "Arial!important",
+    '<img src=x onerror=alert(1)>', "Arial\nDisplay", "A".repeat(201),
+    "{{color:red", "Arial|injection", "Arial}", '"Arial" onmouseover="evil"',
+  ]) {
+    assert.equal(window.BITS_MARKDOWN.customFontFamily(value), null, value);
+    if (!value.includes("|") && !value.includes("}")) {
+      const markup = `{{font:custom:${value}|literal}}`;
+      text.render(target, { text: markup, markup: true });
+      assert.equal(target.textContent, markup);
+      assert.equal(target.querySelector("span,style,link,img,[onmouseover]"), null);
+    }
+  }
+  assert.equal(window.BITS_MARKDOWN.customFontFamily("A".repeat(198)), `"${"A".repeat(198)}"`);
+  assert.equal(window.BITS_MARKDOWN.customFontFamily("A".repeat(199)), null, "Normalized stacks also respect the limit");
+});
+
 test("live date/time placeholders use one local instant and preserve unknown or escaped tokens", () => {
   const { text, now } = setup();
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(now);

@@ -17,6 +17,21 @@
   const allowedFonts = new Set(Object.keys(fonts));
   const allowedSizes = new Set(["small", "normal", "large", "huge"]);
 
+  function customFontFamily(value) {
+    if (typeof value !== "string" || !value.trim() || value.length > 200) return null;
+    const families = value.split(",").map(family => family.trim());
+    const name = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u;
+    const normalized = [];
+    for (const family of families) {
+      const unquoted = /^(['"]).*\1$/.test(family) ? family.slice(1, -1) : family;
+      if (!name.test(unquoted) || /^(?:inherit|initial|unset|revert|revert-layer)$/i.test(unquoted)) return null;
+      const generic = /^(?:serif|sans-serif|monospace|cursive|fantasy|system-ui|ui-serif|ui-sans-serif|ui-monospace|ui-rounded|emoji|math|fangsong)$/i;
+      normalized.push(generic.test(unquoted) && unquoted === family ? unquoted.toLowerCase() : `"${unquoted}"`);
+    }
+    const result = normalized.join(", ");
+    return result.length <= 200 ? result : null;
+  }
+
   function safeLink(value, allowMail = true) {
     const trimmed = value.trim();
     if (trimmed.startsWith("#") || /^(?:\.{0,2}\/|\/)/.test(trimmed)) {
@@ -80,7 +95,10 @@
         element = figure;
       } else if (match[5] !== undefined) {
         const type = match[5];
-        const value = match[6].trim().toLowerCase();
+        const rawValue = match[6].trim();
+        const value = rawValue.toLowerCase();
+        const custom = type === "font" && value.startsWith("custom:")
+          ? customFontFamily(rawValue.slice("custom:".length)) : null;
         const balancedEnd = directiveEnd(source, match.index);
         if (balancedEnd < 0) {
           parent.append(document.createTextNode(match[0]));
@@ -94,13 +112,14 @@
           font: allowedFonts,
           size: allowedSizes,
         };
-        if (!allowedValues[type].has(value)) {
+        if (!custom && !allowedValues[type].has(value)) {
           parent.append(document.createTextNode(source.slice(match.index, end)));
           cursor = end;
           continue;
         }
         element = document.createElement("span");
-        element.className = `blog-text-${type}-${value}`;
+        element.className = custom ? "blog-text-font-custom" : `blog-text-${type}-${value}`;
+        if (custom) element.style.fontFamily = custom;
         appendInline(element, content, options);
       } else if (match[8] !== undefined) {
         const href = safeLink(match[9]);
@@ -337,5 +356,5 @@
     return fragment;
   }
 
-  window.BITS_MARKDOWN = Object.freeze({ fonts, render, renderInline, readingTime });
+  window.BITS_MARKDOWN = Object.freeze({ fonts, customFontFamily, render, renderInline, readingTime });
 })();

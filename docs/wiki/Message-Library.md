@@ -9,7 +9,7 @@
   and seasonal weight; adding/editing messages changes those probabilities.
   Boot messages, live-agent hardware chatter, shutdown text, and desktop
   jokes also get holiday additions through the existing seasonal consumers.
-  Existing New Year, Halloween, and Christmas exclusivity is unchanged.
+  New Year, Halloween, and Christmas are exclusive by default; pool settings can override this.
   Bundled fallback dates use the visitor's local calendar, not the selected visual theme;
   when the database catalog is active, its configured timezone governs message dates instead;
   overlapping additive holidays combine. `shared/scripts/seasonal-calendar.js` shares
@@ -23,9 +23,10 @@
   Filter by season, message type, and entry status (**All entries**, **Enabled only**,
   or **Disabled only**), search, page through entries, add/edit/delete,
   enable/hide, adjust positive rarity weights (up to 1000), and preview rainbow
-  text and the eight supported style properties. Date rules and exclusive/additive
-  seasonal behavior remain in code, as do procedural boot generators, themed
-  narratives, game/dialog text, and interface labels.
+  text and the eight supported style properties. Built-in automatic date rules
+  remain in code but can be overridden in Scheduled pools, along with exclusive/additive
+  behavior and enablement. Procedural boot generators, themed
+  narratives, game/dialog text, and interface labels remain code-defined.
   **Endless boot / fixed messages** lists editable fixed entries, not the total
   number of possible lines. The procedural generator combines **29 actions x
   37 subjects x 30 results/statuses = 32,190 combinations**, in addition to fixed,
@@ -96,6 +97,30 @@
   Use the dropdown or type an allowlisted directive such as
   `{{font:verdana|words}}`, `{{font:times-new-roman|words}}`, or
   `{{font:comic-sans|words}}`. Existing font identifiers remain unchanged.
+  Choose **Custom...** at the bottom of either editor's font dropdown to enter an
+  installed font family or comma-separated fallback stack, then **Apply font**.
+  For example, `Aptos, Arial, sans-serif` inserts
+  `{{font:custom:"Aptos", "Arial", sans-serif|selected words}}`.
+  The input accepts up to 200 characters (including normalized quotes) using
+  letters, numbers, spaces, underscores, and hyphens in family names; matching
+  single/double quotes around names are accepted. CSS rules, URLs, CSS-wide
+  keywords, functions, and markup are rejected with an explicit editor error.
+  Custom fonts do not upload or download files and are not added to the preset
+  list. Visitors need the font installed; otherwise their browser uses the
+  specified fallback stack. Custom styles survive previews, saved templates,
+  corrections, typewriter truncation, and blog rendering.
+
+  **Whole-message settings** now lives inside the top toolbar for statuses and
+  activities; there is no separate bottom **Weight and appearance** section.
+  Weight and **Rainbow characters (whole message)** remain immediately available.
+  Expand **Whole-message style defaults** for text color, font weight, font
+  family (including installed custom names/stacks), font size, font style,
+  letter spacing, text decoration, and text transform. These retain the existing
+  saved `format` fields and affect the entire message/correction, independently
+  of the selected-text formatting controls. Clearing a value removes that default.
+  Other message types still support inline formatting/custom fonts but do not
+  expose weighted-only settings. No database migration or backup schema change
+  is needed.
 
   | Placeholder | Value |
   | --- | --- |
@@ -173,12 +198,29 @@
   Failed writes retain selection for retry; concurrent removals are reported with
   the actual affected count rather than complete-success feedback. Deletion is
   permanent; disabling retains entries for editing.
-  Under **Scheduled pools**, create, rename, disable, or delete custom pools,
-  then select them in **Season / profile** to manage their messages in **Messages**.
+  Under **Scheduled pools**, select any existing built-in or custom pool in
+  **Existing pool**, or use **Edit pool settings** beside **Season / profile**.
+  View or change the pool name, schedule, exclusive/additive behavior, and enabled
+  state. The selectors stay synchronized; use **Messages** to edit that pool's entries.
+  **+ New pool** creates a custom pool.
   **Calendar** contains the timezone settings. Switching these subsections keeps
   drafts intact and the pool selector remains available throughout.
-  Pool deletion atomically removes all associated messages, including hidden ones.
-  Built-in holiday definitions remain available and are not deleted by this UI.
+  Custom pool deletion atomically removes all associated messages, including hidden ones.
+  After applying `20261028070000_builtin_message_pool_settings.sql`, built-in pools
+  can also have saved overrides. They default to **Automatic built-in dates**,
+  preserving moving holidays such as Gregorian Easter, the fourth Thursday of
+  November, and every Friday the 13th. The editor displays the actual matching
+  dates for the current year in the configured calendar timezone, alongside the
+  original rule and current enabled/behavior/schedule settings. New Year's
+  year-wrap and leap-day years are included; years with no dates say so explicitly.
+  Choose fixed annual or one-time dates to **replace**, not add to, a built-in rule.
+  Automatic schedules do not store start/end dates. Disabling a built-in pool
+  suppresses its automatic or fixed schedule, without deleting its messages.
+  **Restore built-in defaults** removes only its saved override, restoring the
+  original dates, name, mode, and enabled state while retaining every edited message.
+  Built-in pools cannot be deleted. **Standard / year-round** remains the permanent
+  fallback: its settings are read-only, but its messages remain editable.
+  Message pool overrides never change the separate visual seasonal-theme schedules.
   Schedules support inclusive one-time dates/ranges and annually recurring
   month/day ranges, including December-to-January wrapping and February 29.
   For annual ranges the years in the date inputs are ignored; a blank end means
@@ -201,3 +243,11 @@
   Pools/settings are included in content backups, with definitions restored before
   their messages. Export a new backup after deploying this migration; older
   backups do not have the two new tables.
+  Built-in overrides reuse the existing pool table and backup column shape;
+  no new backup table is needed. Restore backups containing `automatic` schedules
+  only after applying the built-in settings migration. Disabled built-in overrides
+  are public so visitor browsers can honor disablement; disabled custom pools and
+  their messages remain private. Browsers without cached configuration temporarily
+  use the bundled rules until settings load. Validate overrides with
+  `node --test scripts/builtin-pools.test.mjs scripts/message-catalog.test.mjs scripts/message-catalog-database.test.mjs scripts/content-backup-database.test.mjs`
+  and the desktop/mobile `messages-browser.mjs` checks.

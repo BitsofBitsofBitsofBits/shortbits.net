@@ -38,7 +38,10 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
       if (fail) throw new Error("network unavailable");
       const query = new URL(url).searchParams;
       if (new URL(url).pathname.endsWith("/site_message_settings")) return { ok: true, json: async () => [{ id: "primary", timezone }] };
-      if (new URL(url).pathname.endsWith("/site_message_pools")) return { ok: true, json: async () => pools.filter((pool) => pool.enabled) };
+      if (new URL(url).pathname.endsWith("/site_message_pools")) {
+        assert.equal(query.has("enabled"), false, "Disabled built-in overrides must be requested too");
+        return { ok: true, json: async () => pools.filter((pool) => pool.enabled || !pool.id.startsWith("custom-")) };
+      }
       assert.equal(query.get("enabled"), "eq.true");
       assert.ok(query.get("select").split(",").includes("corrected_text"));
       assert.ok(query.get("select").split(",").includes("author"));
@@ -58,6 +61,42 @@ function setup({ date = "2026-08-10T12:00:00", rows = defaults, fail = false, ca
   vm.runInContext(read("shared/scripts/seasonal-messages.js"), context);
   return { window, context, calls, warnings, storage, timers, setDate: (value) => { currentDate = value; } };
 }
+test("built-in overrides drive fetched profiles, cached selection, category bindings, and calendar-day refresh", async () => {
+  const automatic = { id: "christmas", title: "Edited Christmas", schedule: "automatic", starts_on: null, ends_on: null, mode: "additive", enabled: true };
+  for (const [pool, date, expectedMode, expectedIds] of [
+    [automatic, "2026-12-25T18:00:00Z", "additive", ["christmas"]],
+    [{ ...automatic, enabled: false }, "2026-12-25T18:00:00Z", "standard", []],
+    [{ ...automatic, schedule: "annual", starts_on: "2000-08-10", ends_on: "2000-08-10", mode: "exclusive" }, "2026-08-10T18:00:00Z", "exclusive", ["christmas"]],
+    [{ ...automatic, schedule: "annual", starts_on: "2000-08-10", ends_on: "2000-08-10" }, "2026-12-25T18:00:00Z", "standard", []],
+  ]) {
+    const rows = defaults.map(row => ({ ...row, text: `DB ${row.profile} ${row.position}` }));
+    const app = setup({ date, pools: [pool], rows });
+    assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+    const queries = app.calls.filter(url => new URL(url).pathname.endsWith("/site_message_catalog"));
+    assert.ok(queries.length);
+    assert.deepEqual(new URL(queries[0]).searchParams.get("profile"), `in.(standard${expectedIds.length ? ",christmas" : ""})`);
+    assert.equal(app.window.BITS_SEASONAL_PROFILE.mode, expectedMode);
+    assert.deepEqual(Array.from(app.window.BITS_SEASONAL_PROFILE.ids), expectedIds);
+    assert.ok(app.window.BITS_MESSAGES.every(message => message.text.startsWith("DB ")));
+    if (expectedMode === "additive") {
+      assert.ok(app.window.BITS_MESSAGES.some(message => message.text.startsWith("DB standard ")));
+      assert.ok(app.window.BITS_MESSAGES.some(message => message.text.startsWith("DB christmas ")));
+    }
+    if (expectedMode === "exclusive") assert.ok(app.window.BITS_MESSAGES.every(message => message.text.startsWith("DB christmas ")));
+    if (expectedMode === "standard") assert.ok(app.window.BITS_MESSAGES.every(message => message.text.startsWith("DB standard ")));
+    const cached = setup({ date, fail: true, cache: Object.fromEntries(app.storage) });
+    assert.equal(cached.window.BITS_SEASONAL_PROFILE.mode, expectedMode);
+    assert.deepEqual(Array.from(cached.window.BITS_SEASONAL_PROFILE.ids), expectedIds);
+    assert.ok(cached.window.BITS_MESSAGES.every(message => message.text.startsWith("DB ")));
+  }
+  const pool = { ...automatic, schedule: "once", starts_on: "2026-08-10", ends_on: "2026-08-10", mode: "exclusive" };
+  const app = setup({ date: "2026-08-11T03:59:59Z", timezone: "America/New_York", pools: [pool] });
+  assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+  assert.equal(app.window.BITS_SEASONAL_PROFILE.mode, "exclusive");
+  app.setDate("2026-08-11T04:00:00Z");
+  assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+  assert.equal(app.window.BITS_SEASONAL_PROFILE.mode, "standard");
+});
 test("quote authors survive standard/seasonal pools and cache reloads", async () => {
   for (const date of ["2026-08-10T12:00:00", "2026-04-05T12:00:00", "2026-12-25T12:00:00"]) {
     const rows = defaults.map(row => row.category === "messages" ? { ...row, author: `Author ${row.profile}` } : row);

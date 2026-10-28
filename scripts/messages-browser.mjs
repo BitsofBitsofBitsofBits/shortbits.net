@@ -27,8 +27,9 @@ const publicRows = [
   entry(8, "glitchMessages", "DATABASE GLITCH"),
 ];
 const markupRows = publicRows.map((row) => ({
-  ...row, markup: true, text: `${row.text} %hostname% **BOLD** {{color:red|red}} {{color:rainbow|彩色}}`,
-  corrected_text: row.category === "messages" ? "DATABASE CORRECTED %hostname% **BOLD** {{color:red|red}} {{color:rainbow|彩色}}" : null,
+  ...row, markup: true, text: `${row.text} %hostname% {{font:custom:"Aptos Display", Arial, sans-serif|**BOLD**}} {{color:red|red}} {{color:rainbow|彩色}}`,
+  corrected_text: row.category === "messages"
+    ? 'DATABASE CORRECTED %hostname% {{font:custom:"Aptos Display", Arial, sans-serif|**BOLD**}} {{color:red|red}} {{color:rainbow|彩色}}' : null,
 }));
 const customPools = ["one", "two"].map((name) => ({
   id: `custom-${name}`, title: name, schedule: "annual", starts_on: "2000-01-01", ends_on: "2000-12-31",
@@ -119,6 +120,8 @@ try {
       updateHardwareStatus();
     });
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
+    assert.equal(await page.locator("#typed-text .blog-text-font-custom").evaluate(element => element.style.fontFamily),
+      '"Aptos Display", Arial, sans-serif', "Saved custom fonts render through public splash history");
     assert.ok((await page.locator("#typed-text").textContent()).includes(new URL(server.origin).hostname));
     assert.equal(await page.locator("#typed-text .blog-text-color-red").textContent(), "red");
     assert.equal(await page.locator("#message-author-box").isVisible(), true);
@@ -136,6 +139,8 @@ try {
     await page.waitForFunction(() => document.querySelector("#activity-text strong")?.textContent === "BOLD");
     for (const selector of ["#fake-playing-dead-message", ".hardware-live-chatter", "#activity-text"]) {
       assert.ok((await page.locator(selector).textContent()).includes(new URL(server.origin).hostname), selector);
+      assert.equal(await page.locator(`${selector} .blog-text-font-custom`).evaluate(element => element.style.fontFamily),
+        '"Aptos Display", Arial, sans-serif', `${selector} renders custom fonts`);
     }
     const chatterTimes = await page.evaluate(() => {
       const RealDate = Date;
@@ -216,6 +221,8 @@ try {
     await page.waitForFunction(() => currentMessage.wasCorrected === true);
     assert.equal(await page.locator("#typed-text").textContent(), `DATABASE CORRECTED ${new URL(server.origin).hostname} BOLD red 彩色`);
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
+    assert.equal(await page.locator("#typed-text .blog-text-font-custom").evaluate(element => element.style.fontFamily),
+      '"Aptos Display", Arial, sans-serif', "Mistype correction preserves the custom font");
     assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻", "Author remains during correction");
     const erased = await page.evaluate(() => {
       clearTimeout(window.__messageTimer);
@@ -302,7 +309,7 @@ try {
                   if (operation === "update") result.forEach(row => Object.assign(row, payload));
                   if (operation === "delete") {
                     window[store] = window[store].filter(row => !result.includes(row));
-                    if (store === "__poolRows") window.__messageRows = window.__messageRows.filter(row => !result.some(pool => pool.id === row.profile));
+                    if (store === "__poolRows") window.__messageRows = window.__messageRows.filter(row => !result.some(pool => pool.id.startsWith("custom-") && pool.id === row.profile));
                   }
                   result = [...result].sort((a,b) => (typeof a[orderKey] === "string" ? a[orderKey].localeCompare(b[orderKey]) : a[orderKey]-b[orderKey]) * (descending ? -1 : 1));
                   const count = result.length;
@@ -592,8 +599,60 @@ try {
     assert.equal(fonts.length, 24);
     for (const selector of ["#message-markup-font", "#blog-format-font"]) {
       assert.deepEqual(await page.locator(`${selector} option`).evaluateAll(options => options.map(option => option.value)),
-        ["", ...fonts], `${selector} uses the shared supported font list`);
+        ["", ...fonts, "custom"], `${selector} uses the shared supported font list and Custom option`);
     }
+    assert.equal(await page.locator("#message-markup-toolbar #message-weighted-options").count(), 1);
+    assert.equal(await page.locator('#message-library-form > #message-weighted-options').count(), 0, "No bottom weight/appearance section remains");
+    assert.equal(await page.locator("#message-custom-font").isVisible(), false);
+    await page.locator("#message-text").fill("Custom words");
+    await page.locator("#message-text").evaluate(field => field.select());
+    await page.locator("#message-markup-font").selectOption("custom");
+    assert.equal(await page.locator("#message-custom-font").isVisible(), true);
+    const beforeCustom = await page.locator("#message-text").inputValue();
+    for (const invalid of ["", "Arial; color:red", "url(https://example.test/font)"]) {
+      await page.locator("#message-custom-font-family").fill(invalid);
+      await page.locator("#message-custom-font-apply").click();
+      assert.ok((await page.locator("#message-custom-font-status").textContent()).includes("Enter font names"));
+      assert.equal(await page.locator("#message-text").inputValue(), beforeCustom);
+    }
+    await page.locator("#message-custom-font-family").fill("Aptos Display, Arial, sans-serif");
+    await page.locator("#message-custom-font-family").press("Enter");
+    const customFamily = '"Aptos Display", "Arial", sans-serif';
+    const serializedCustomFamily = await page.evaluate(family => {
+      const sample = document.createElement("span");
+      sample.style.fontFamily = family;
+      return sample.style.fontFamily;
+    }, customFamily);
+    const customTemplate = `{{font:custom:${customFamily}|Custom words}}`;
+    assert.equal(await page.locator("#message-text").inputValue(), customTemplate);
+    assert.equal(await page.locator("#message-preview .blog-text-font-custom").evaluate(element => element.style.fontFamily), serializedCustomFamily);
+    assert.equal(await page.locator("#message-text").evaluate(field => document.activeElement === field), true);
+    await page.locator("#message-save").click();
+    await page.waitForFunction(template => window.__messageRows[0].text === template, customTemplate);
+    await page.locator("#message-cancel").click();
+    await page.locator('[data-message-action="edit"]').first().click();
+    assert.equal(await page.locator("#message-text").inputValue(), customTemplate);
+    assert.equal(await page.locator("#message-preview .blog-text-font-custom").evaluate(element => element.style.fontFamily), serializedCustomFamily, "Saved custom font survives reopening");
+    await page.locator("#message-weight").fill("0.5");
+    acceptDialogs = false;
+    await page.locator("#message-cancel").click();
+    assert.equal(await page.locator("#message-weight").inputValue(), "0.5", "Toolbar defaults alone mark the draft dirty");
+    assert.equal(await page.locator("#message-library-form").isVisible(), true);
+    acceptDialogs = true;
+    await page.locator("#message-weight").fill("1");
+    await page.locator("#message-markup-font").selectOption("custom");
+    await page.locator("#message-custom-font-cancel").click();
+    assert.equal(await page.locator("#message-text").inputValue(), customTemplate, "Cancel never changes stored text");
+    assert.equal(await page.locator("#message-custom-font").isVisible(), false);
+    await page.locator("#message-text").fill("x".repeat(2000));
+    await page.locator("#message-text").evaluate(field => field.select());
+    await page.locator("#message-markup-font").selectOption("custom");
+    await page.locator("#message-custom-font-family").fill("Aptos");
+    await page.locator("#message-custom-font-apply").click();
+    assert.equal((await page.locator("#message-text").inputValue()).length, 2000, "Custom font markup respects the text limit");
+    assert.equal(await page.locator("#message-library-status").getAttribute("data-state"), "error");
+    await page.locator("#message-defaults summary").click();
+    assert.equal(await page.locator("[data-message-format]").count(), 8, "Every legacy whole-message format control is retained");
     for (const id of fonts) {
       await page.locator("#message-text").fill("Font sample");
       await page.locator("#message-text").evaluate(field => field.select());
@@ -630,14 +689,26 @@ try {
     await page.locator("#message-author").fill("  Ada <script>literal</script>  ");
     assert.equal(await page.locator("#message-author-preview script").count(), 0);
     await page.locator("#message-weight").fill("0.25");
-    await page.locator('[data-message-format="fontWeight"]').fill("700");
+    const defaults = {
+      color: "#123456", fontWeight: "700", fontFamily: '"Aptos", Arial, sans-serif',
+      fontSize: "18px", fontStyle: "italic", letterSpacing: "0.05em",
+      textDecoration: "underline", textTransform: "uppercase",
+    };
+    for (const [key, value] of Object.entries(defaults)) {
+      await page.locator(`[data-message-format="${key}"]`).fill(value);
+    }
     await page.locator("#message-colorful").check();
+    assert.equal(await page.locator("#message-preview").evaluate(element => element.style.fontWeight), "700", "Toolbar defaults update previews immediately");
+    assert.equal(await page.locator("#message-preview").evaluate(element => element.classList.contains("is-colorful-text")), true);
     assert.equal(await page.locator("#message-preview script").count(), 0);
     await page.locator("#message-save").click();
     await page.waitForFunction(() => document.querySelector("#message-library-status").textContent.startsWith("Message saved."));
     assert.equal(await page.evaluate(() => window.__messageRows[0].weight), 0.25);
     assert.equal(await page.evaluate(() => window.__messageRows[0].author), "Ada <script>literal</script>");
     assert.equal(await page.evaluate(() => window.__messageRows[0].format.fontWeight), "700");
+    assert.deepEqual(await page.evaluate(() => window.__messageRows[0].format), defaults);
+    assert.equal(await page.evaluate(() => window.__messageRows[0].colorful), true);
+    for (const key of Object.keys(defaults)) await page.locator(`[data-message-format="${key}"]`).fill("");
     await page.locator("#message-text").fill("Normal bold and {{color:red|red}} {{color:rainbow|彩色}}");
     await page.locator('[data-message-format="fontWeight"]').fill("");
     await page.locator("#message-colorful").uncheck();
@@ -662,6 +733,13 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction((template) => window.__messageRows[0].text === template, liveTemplate);
     await page.locator("#message-mistype").check();
+    await page.locator("#message-corrected-text").fill("Correction");
+    await page.locator("#message-corrected-text").evaluate(field => field.select());
+    await page.locator("#message-markup-font").selectOption("custom");
+    await page.locator("#message-custom-font-family").fill("Aptos, sans-serif");
+    await page.locator("#message-custom-font-apply").click();
+    assert.equal(await page.locator("#message-corrected-preview .blog-text-font-custom").textContent(), "Correction");
+    assert.equal(await page.locator("#message-text").inputValue(), liveTemplate, "Custom fonts target corrected text without overwriting the original");
     await page.locator("#message-corrected-text").fill("Correct me");
     await page.locator("#message-corrected-text").evaluate(field => field.setSelectionRange(8, 10));
     await page.locator('[data-message-variable="day"]').click();
@@ -784,6 +862,76 @@ try {
     await page.locator("#message-pool-delete").click();
     await page.waitForFunction(() => window.__poolRows.length === 0 && document.querySelector("#message-profile").value === "standard");
     assert.equal(await page.evaluate((id) => window.__messageRows.some(row => row.profile === id), customId), false);
+    assert.equal(await page.locator("#message-pool-title").isDisabled(), true);
+    assert.equal(await page.locator("#message-pool-save").isDisabled(), true);
+    assert.match(await page.locator("#message-pool-summary").textContent(), /Always active/);
+    await page.locator("#message-pool-select").selectOption("easter");
+    await page.waitForFunction(() => !document.querySelector("#message-library-list").inert);
+    assert.equal(await page.locator("#message-profile").inputValue(), "easter");
+    assert.equal(await page.locator("#message-pool-schedule").inputValue(), "automatic");
+    assert.equal(await page.locator("#message-pool-dates").isVisible(), false);
+    assert.match(await page.locator("#message-pool-summary").textContent(), /Gregorian Easter Sunday/);
+    const easterDates = await page.evaluate(() => {
+      const catalog = window.BITS_MESSAGE_CATALOG;
+      const year = catalog.calendarDate(new Date(), "America/New_York").getFullYear();
+      return catalog.builtinSchedule("easter", year).ranges[0].start;
+    });
+    assert.ok((await page.locator("#message-pool-summary").textContent()).includes(easterDates));
+    await page.locator("#message-pool-mode").selectOption("exclusive");
+    await page.locator("#message-pool-save").click();
+    await page.waitForFunction(() => window.__poolRows.some(pool => pool.id === "easter" && pool.mode === "exclusive")
+      && !document.querySelector("#message-pool-form").inert);
+    assert.equal(await page.evaluate(() => window.__poolRows[0].starts_on), null);
+    assert.equal(await page.locator("#message-profile option[value=easter]").count(), 1);
+    await page.locator("#message-pool-schedule").selectOption("once");
+    assert.equal(await page.locator("#message-pool-dates").isVisible(), true);
+    await page.locator("#message-pool-start").fill("2026-08-10");
+    await page.locator("#message-pool-end").fill("2026-08-12");
+    await page.locator("#message-pool-save").click();
+    await page.waitForFunction(() => window.__poolRows[0].schedule === "once" && !document.querySelector("#message-pool-form").inert);
+    await page.locator("#message-pool-select").selectOption("christmas");
+    await page.waitForFunction(() => !document.querySelector("#message-pool-form").inert);
+    assert.equal(await page.locator("#message-pool-mode").inputValue(), "exclusive");
+    await page.locator("#message-pool-select").selectOption("easter");
+    await page.waitForFunction(() => !document.querySelector("#message-pool-form").inert);
+    assert.equal(await page.locator("#message-pool-start").inputValue(), "2026-08-10");
+    assert.equal(await page.locator("#message-pool-end").inputValue(), "2026-08-12");
+    await page.locator("#message-pool-schedule").selectOption("automatic");
+    await page.locator("#message-pool-enabled").uncheck();
+    acceptDialogs = false;
+    await page.locator("#message-pool-select").selectOption("halloween");
+    assert.equal(await page.locator("#message-pool-select").inputValue(), "easter", "Cancel keeps the current pool and its unsaved draft");
+    assert.equal(await page.locator("#message-pool-enabled").isChecked(), false);
+    acceptDialogs = true;
+    await page.locator("#message-pool-save").click();
+    await page.waitForFunction(() => window.__poolRows[0].schedule === "automatic" && !window.__poolRows[0].enabled
+      && !document.querySelector("#message-pool-form").inert);
+    assert.match(await page.locator("#message-pool-select option[value=easter]").textContent(), /DISABLED/);
+    await page.locator("#message-pool-reset").click();
+    await page.waitForFunction(() => window.__poolRows.length === 0 && !document.querySelector("#message-pool-form").inert);
+    assert.equal(await page.locator("#message-pool-mode").inputValue(), "additive");
+    assert.equal(await page.locator("#message-pool-enabled").isChecked(), true);
+    await page.locator("#message-pool-select").selectOption("halloween");
+    await page.waitForFunction(() => !document.querySelector("#message-pool-form").inert);
+    await page.locator("#message-pool-mode").selectOption("additive");
+    await page.locator("#message-pool-save").click();
+    await page.waitForFunction(() => window.__poolRows.length === 1 && !document.querySelector("#message-pool-form").inert);
+    await page.locator("#message-pool-reset").click();
+    await page.waitForFunction(() => window.__poolRows.length === 0 && !document.querySelector("#message-pool-form").inert);
+    assert.equal(await page.evaluate(() => window.__messageRows.find(row => row.position === 31).text), "Updated **seasonal** boot message",
+      "Resetting built-in settings must not cascade-delete its edited messages");
+    assert.equal(await page.locator("#message-pool-mode").inputValue(), "exclusive");
+    await assertNoOverflow("scheduled built-in pool editor");
+    const poolViolations = await page.evaluate(async () => (await axe.run(document.querySelector("#message-library-editor"), {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+    })).violations.map(violation => ({ id: violation.id, targets: violation.nodes.map(node => node.target) })));
+    assert.deepEqual(poolViolations, [], `${width}px scheduled pool accessibility`);
+    if (screenshots) await page.locator("#message-pool-form").screenshot({
+      path: resolve(screenshots, `builtin-pool-${width}.png`),
+    });
+    await page.locator('#message-library-editor [data-admin-subsection="messages"]').click();
+    await page.locator("#message-pool-edit").click();
+    assert.equal(await page.locator("#message-pool-form").isVisible(), true, "Pool settings are reachable beside the profile selector");
     await page.locator('#message-library-editor [data-admin-subsection="messages"]').click();
     await page.locator("#message-profile").selectOption("halloween");
     await page.locator("#message-category").selectOption("bootMessages");
@@ -799,6 +947,29 @@ try {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
     })).violations.map((violation) => ({ id: violation.id, targets: violation.nodes.map((node) => ({ target: node.target, summary: node.failureSummary })) })));
     assert.deepEqual(violations, [], `${width}px message editor accessibility`);
+    await page.evaluate(() => {
+      window.__messageFailure = false;
+      window.BITS_ADMIN_SHELL.navigate("blog");
+      window.BITS_ADMIN_SHELL.showSubsection("blog", "posts");
+    });
+    await page.locator("#blog-post-new").click();
+    assert.equal(await page.locator("#blog-custom-font").isVisible(), false);
+    await page.locator("#blog-post-markdown").fill("Blog font sample");
+    await page.locator("#blog-post-markdown").evaluate(field => field.select());
+    await page.locator("#blog-format-font").selectOption("custom");
+    await page.locator("#blog-custom-font-family").fill("url(https://example.test/font)");
+    await page.locator("#blog-custom-font-apply").click();
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Blog font sample");
+    assert.ok((await page.locator("#blog-custom-font-status").textContent()).includes("Enter font names"));
+    await page.locator("#blog-custom-font-family").fill("Aptos Display, Arial, sans-serif");
+    await page.locator("#blog-custom-font-family").press("Enter");
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), `{{font:custom:${customFamily}|Blog font sample}}`);
+    assert.equal(await page.locator("#blog-markdown-preview .blog-text-font-custom").textContent(), "Blog font sample");
+    assert.equal(await page.locator("#blog-markdown-preview .blog-text-font-custom").evaluate(element => element.style.fontFamily), serializedCustomFamily);
+    await assertNoOverflow(`${width}px custom blog font controls`);
+    await page.locator("#blog-custom-font-cancel").click();
+    assert.equal(await page.locator("#blog-custom-font").isVisible(), false);
+    assert.equal(await page.locator("#blog-post-markdown").evaluate(field => document.activeElement === field), true);
     assert.deepEqual(errors, []);
     console.log(`PASS ${width}px Admin: all-module subsections, form preservation/validation, inline/add editors and discard protection, page-only bulk CRUD/cancellation/errors/concurrency, pools, timezone, markup/mistype, accessibility`);
     await context.close();

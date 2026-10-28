@@ -631,6 +631,10 @@ for (const [id, label] of Object.entries(window.BITS_MARKDOWN.fonts)) {
   option.textContent = label;
   blogFormatFont.append(option);
 }
+const blogCustomFontOption = document.createElement("option");
+blogCustomFontOption.value = "custom";
+blogCustomFontOption.textContent = "Custom...";
+blogFormatFont.append(blogCustomFontOption);
 const blogFormatSize = document.querySelector("#blog-format-size");
 const blogImageUrl = document.querySelector("#blog-image-url");
 const blogImageUpload = document.querySelector("#blog-image-upload");
@@ -2623,6 +2627,8 @@ function renderBlogPreview() {
 
 function resetBlogEditor() {
   blogPostForm.reset();
+  document.querySelector("#blog-custom-font").hidden = true;
+  document.querySelector("#blog-custom-font-status").textContent = "";
   blogPostForm.elements.id.value = "";
   blogPostDelete.disabled = true;
   renderBlogPreview();
@@ -2631,6 +2637,9 @@ function resetBlogEditor() {
 }
 
 function selectBlogPost(post) {
+  document.querySelector("#blog-custom-font").hidden = true;
+  document.querySelector("#blog-custom-font-family").value = "";
+  document.querySelector("#blog-custom-font-status").textContent = "";
   blogPostForm.elements.id.value = post.id;
   blogPostForm.elements.title.value = post.title;
   blogPostForm.elements.slug.value = post.slug;
@@ -2845,12 +2854,42 @@ if (adminClient) {
     }
   });
   blogFormatFont.addEventListener("change", () => {
-    if (blogFormatFont.value) {
+    if (blogFormatFont.value === "custom") {
+      document.querySelector("#blog-custom-font").hidden = false;
+      document.querySelector("#blog-custom-font-status").textContent = "";
+      document.querySelector("#blog-custom-font-family").focus();
+      blogFormatFont.value = "";
+    } else if (blogFormatFont.value) {
+      document.querySelector("#blog-custom-font").hidden = true;
       wrapBlogSelection(
         `{{font:${blogFormatFont.value}|`,
         "}}",
       );
       blogFormatFont.value = "";
+    }
+  });
+  document.querySelector("#blog-custom-font-apply").addEventListener("click", () => {
+    const family = window.BITS_MARKDOWN.customFontFamily(document.querySelector("#blog-custom-font-family").value);
+    if (!family) {
+      document.querySelector("#blog-custom-font-status").textContent =
+        "Enter font names separated by commas (up to 200 characters), without CSS rules, URLs, or markup.";
+      document.querySelector("#blog-custom-font-family").focus();
+      return;
+    }
+    wrapBlogSelection(`{{font:custom:${family}|`, "}}");
+  });
+  document.querySelector("#blog-custom-font-cancel").addEventListener("click", () => {
+    document.querySelector("#blog-custom-font").hidden = true;
+    document.querySelector("#blog-custom-font-status").textContent = "";
+    blogPostMarkdown.focus();
+  });
+  document.querySelector("#blog-custom-font-family").addEventListener("input", () => {
+    document.querySelector("#blog-custom-font-status").textContent = "";
+  });
+  document.querySelector("#blog-custom-font-family").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.querySelector("#blog-custom-font-apply").click();
     }
   });
   blogFormatSize.addEventListener("change", () => {

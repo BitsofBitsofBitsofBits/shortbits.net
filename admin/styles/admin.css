@@ -912,12 +912,20 @@ body.admin-center.ac-panel-open {
   font-size: 13px;
 }
 
-.admin-center .curated-admin-grid fieldset {
+.admin-center .curated-admin-grid fieldset,
+#message-pool-fields {
   gap: 12px;
   padding: 16px;
   border: 1px solid var(--ac-stroke);
   border-radius: 8px;
   background: var(--ac-surface);
+}
+
+#message-pool-fields,
+#message-pool-dates {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 
 .admin-center .curated-admin-grid legend,
@@ -2023,6 +2031,93 @@ body.admin-center.ac-panel-open {
   border-top: 1px solid var(--ac-stroke);
   color: var(--ac-muted);
   font-size: 12px;
+}
+
+#message-markup-toolbar #message-weighted-options {
+  min-width: 0;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+  border-top: 1px solid var(--ac-stroke);
+  border-radius: 0;
+}
+
+#message-markup-toolbar #message-weighted-options legend {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--ac-muted);
+}
+
+#message-markup-toolbar #message-weighted-options label {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+
+#message-markup-toolbar #message-weight {
+  width: 90px;
+  min-height: 32px;
+}
+
+#message-markup-toolbar #message-weight-help,
+#message-markup-toolbar #message-defaults > p,
+#message-custom-font > p,
+#blog-custom-font > p {
+  flex-basis: 100%;
+  margin: 4px;
+  font-size: 12px;
+  color: var(--ac-muted);
+}
+
+#message-defaults {
+  padding: 4px;
+}
+
+#message-defaults summary {
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#message-markup-toolbar .message-format-fields label {
+  display: grid;
+}
+
+#message-markup-toolbar input:not([type="checkbox"]) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#message-custom-font {
+  border-top: 1px solid var(--ac-stroke);
+}
+
+#message-markup-toolbar #message-custom-font label,
+#blog-custom-font label {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 300px);
+}
+
+#message-custom-font-status,
+#blog-custom-font-status {
+  overflow-wrap: anywhere;
+}
+
+.admin-center #blog-custom-font {
+  flex-basis: 100%;
+  align-items: center;
+  min-width: 0;
+  padding-block: 8px;
+}
+
+#message-pool-reset[hidden],
+#message-pool-delete[hidden],
+#message-pool-dates[hidden],
+#message-markup-toolbar [hidden],
+#blog-custom-font[hidden] {
+  display: none;
 }
 
 .ac-section-body > .hardware-import-body {

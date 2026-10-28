@@ -340,9 +340,10 @@
             <h2 id="message-library-heading">MESSAGE LIBRARY</h2>
             <span>STATUS / SEASONAL / BOOT / MONITOR</span>
           </div>
-          <p>Edit messages in place, or select messages on the current page for bulk actions. Use Scheduled pools to manage custom dates and Calendar to change the timezone. Public edits refresh within five minutes on reload or refocus; running boot sequences are not interrupted.</p>
+          <p>Edit messages in place, or select messages on the current page for bulk actions. Use Scheduled pools to view or edit built-in and custom dates, enabled state, and exclusive/additive behavior. Calendar changes the timezone. Public edits refresh within five minutes on reload or refocus; running boot sequences are not interrupted.</p>
           <div class="message-library-context admin-form">
             <label>SEASON / PROFILE<select id="message-profile"></select></label>
+            <button id="message-pool-edit" type="button">EDIT POOL SETTINGS</button>
             <button id="message-reload" type="button">RELOAD LIBRARY</button>
           </div>
           <div id="message-list-view" data-admin-view="messages" data-admin-view-label="Messages">
@@ -379,20 +380,28 @@
               <button type="submit">SAVE TIMEZONE</button>
             </form>
             <form id="message-pool-form" class="admin-form" data-admin-view="pools" data-admin-view-label="Scheduled pools">
+              <label>EXISTING POOL<select id="message-pool-select"><option value="">New custom pool...</option></select></label>
               <p id="message-pool-label">NEW CUSTOM POOL</p>
+              <p id="message-pool-summary"></p>
+              <fieldset id="message-pool-fields">
+              <legend>Pool settings</legend>
               <label>POOL NAME<input id="message-pool-title" type="text" maxlength="100" required></label>
-              <label>SCHEDULE<select id="message-pool-schedule"><option value="annual">Every year</option><option value="once">One-time date range</option></select></label>
+              <label>SCHEDULE<select id="message-pool-schedule"><option value="automatic">Automatic built-in dates</option><option value="annual">Every year (fixed dates)</option><option value="once">One-time date range</option></select></label>
+              <div id="message-pool-dates">
               <label>START DATE<input id="message-pool-start" type="date" min="1000-01-01" max="9999-12-31" required></label>
               <label>END DATE<input id="message-pool-end" type="date" min="1000-01-01" max="9999-12-31"></label>
               <p>Dates are inclusive. Leave the end blank for a single day. Annual schedules ignore the years and can wrap from December into January; choose a leap year to select February 29.</p>
-              <label>BEHAVIOR<select id="message-pool-mode"><option value="additive">Mix with regular messages</option><option value="exclusive">Exclusive: replace regular/additive messages</option></select></label>
+              </div>
+              <label>BEHAVIOR<select id="message-pool-mode"><option value="additive">Mix with regular messages</option><option value="exclusive">Exclusive: replace other pools</option></select></label>
               <label class="admin-checkbox"><input id="message-pool-enabled" type="checkbox">ENABLE POOL ON ITS SCHEDULE</label>
+              </fieldset>
               <div class="repeatable-admin-actions">
-                <button type="submit">SAVE POOL</button>
+                <button id="message-pool-save" type="submit">SAVE POOL</button>
                 <button id="message-pool-new" type="button">+ NEW POOL</button>
+                <button id="message-pool-reset" type="button" hidden>RESTORE BUILT-IN DEFAULTS</button>
                 <button id="message-pool-delete" type="button" disabled>DELETE POOL AND ITS MESSAGES</button>
               </div>
-              <p>To edit a custom pool, select it in Season / profile above. Built-in seasons are retained. After creating a pool, use Messages to add entries. New pools and messages start disabled; enable both to publish. Active exclusive pools combine and replace standard/additive messages; types without exclusive entries retain their standard fallback.</p>
+              <p>Select any existing pool above to view its schedule and edit its settings. Built-in pools keep automatic dates unless you choose fixed annual or one-time dates; restoring defaults never deletes their messages. Standard/year-round is the permanent fallback and cannot be scheduled or made exclusive. New custom pools and messages start disabled; enable both to publish. Active exclusive pools combine and replace standard/additive messages; types without exclusive entries retain their standard fallback. Message pool settings do not change visual holiday themes.</p>
             </form>
             <p id="message-pool-status" class="form-status" role="status" aria-live="polite"></p>
           <div id="message-editor-home" hidden>
@@ -429,6 +438,13 @@
                   <button type="button" data-message-markup="rainbow" title="Rainbow text" aria-label="Rainbow text"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 16a8 8 0 0 1 16 0M5 16a5 5 0 0 1 10 0M8 16a2 2 0 0 1 4 0"/></svg></button>
                 </div>
               </div>
+              <div id="message-custom-font" class="message-toolbar-row" role="group" aria-label="Custom font" hidden>
+                <label>Custom font<input id="message-custom-font-family" type="text" maxlength="200" placeholder="Aptos, Arial, sans-serif" aria-describedby="message-custom-font-help"></label>
+                <button id="message-custom-font-apply" type="button">Apply font</button>
+                <button id="message-custom-font-cancel" type="button">Cancel</button>
+                <p id="message-custom-font-help">Installed font names only, separated by commas. Fonts are not downloaded; visitors without them use fallbacks.</p>
+                <p id="message-custom-font-status" role="status" aria-live="polite"></p>
+              </div>
               <div class="message-toolbar-row message-toolbar-variables" role="group" aria-label="Insert live data">
                 <span class="message-toolbar-caption">Live data</span>
                 <div class="message-toolbar-group">
@@ -442,6 +458,19 @@
                   <button id="message-variable-insert" type="button" title="Insert selected placeholder" disabled>+ Insert</button>
                 </div>
               </div>
+              <fieldset id="message-weighted-options">
+                <legend>Whole-message settings</legend>
+                <div class="message-toolbar-row">
+                  <label>Weight<input id="message-weight" type="number" min="0.000001" max="1000" step="any" value="1" required aria-describedby="message-weight-help"></label>
+                  <label class="admin-checkbox"><input id="message-colorful" type="checkbox">Rainbow characters (whole message)</label>
+                </div>
+                <p id="message-weight-help">Higher weights appear more often: 3 = common, 1 = standard, 0.5 = rare, 0.25 = very rare.</p>
+                <details id="message-defaults">
+                  <summary>Whole-message style defaults</summary>
+                  <p>These affect the entire message and its correction, not just selected text. Clear a value to use the site's default; inline formatting can override it.</p>
+                  <div id="message-format-fields" class="message-format-fields"></div>
+                </details>
+              </fieldset>
               <p id="message-toolbar-target">Editing: message text</p>
             </div>
             <label>MESSAGE TEXT<textarea id="message-text" maxlength="2000" aria-describedby="message-markup-help message-variable-help message-toolbar-target" required></textarea></label>
@@ -457,14 +486,6 @@
               <p id="message-mistype-help">Splash/status messages only. Write the misspelled version above and a different, corrected version below. When this message finishes typing, it corrects itself and unlocks the existing Mistyped Easter egg. Both versions use the same inline markup setting and whole-message defaults.</p>
               <label>CORRECTED TEXT<textarea id="message-corrected-text" maxlength="2000" aria-describedby="message-mistype-help message-variable-help" disabled></textarea></label>
               <div id="message-corrected-preview-container" hidden><p>CORRECTED PREVIEW</p><p id="message-corrected-preview"></p></div>
-            </fieldset>
-            <fieldset id="message-weighted-options">
-              <legend>WEIGHT AND APPEARANCE</legend>
-              <p>Optional whole-message defaults. Use inline markup above to style only selected words.</p>
-              <p>Higher weights appear more often: 3 = common, 1 = standard, 0.5 = rare, 0.25 = very rare.</p>
-              <label>WEIGHT<input id="message-weight" type="number" min="0.000001" max="1000" step="any" value="1" required></label>
-              <label class="admin-checkbox"><input id="message-colorful" type="checkbox">RAINBOW CHARACTERS</label>
-              <div id="message-format-fields" class="message-format-fields"></div>
             </fieldset>
             <label class="admin-checkbox"><input id="message-enabled" type="checkbox">ENABLED / PUBLIC</label>
             <div aria-label="Message preview"><p>PREVIEW</p><p id="message-preview"></p></div>
@@ -662,6 +683,13 @@
                     <option value="">FONT</option>
                   </select>
                 </label>
+                <div id="blog-custom-font" role="group" aria-label="Custom font" hidden>
+                  <label>Custom font<input id="blog-custom-font-family" type="text" maxlength="200" placeholder="Aptos, Arial, sans-serif" aria-describedby="blog-custom-font-help"></label>
+                  <button id="blog-custom-font-apply" type="button">APPLY FONT</button>
+                  <button id="blog-custom-font-cancel" type="button">CANCEL</button>
+                  <p id="blog-custom-font-help">Installed font names only, separated by commas. Fonts are not downloaded; visitors without them use fallbacks.</p>
+                  <p id="blog-custom-font-status" role="status" aria-live="polite"></p>
+                </div>
                 <label>
                   <span class="visually-hidden">Text size</span>
                   <select id="blog-format-size" aria-label="Text size">
