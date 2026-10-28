@@ -192,9 +192,11 @@ try {
     ? route.continue() : route.abort());
   const page = await recovery.newPage();
   currentPage = page;
+  await page.clock.setFixedTime(new Date("2026-10-30T12:00:00Z"));
   await page.route("**/online/styles/desktop-workspaces.css?*", (route) => route.abort());
   await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
   await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+  await page.locator("#interface-theme-select").selectOption("browser", { force: true });
   await page.locator("#desktop-workspace-entry").click();
   await page.waitForSelector("#desktop-workspace-error");
   assert.equal(await page.locator(".fake-desktop-icons").isVisible(), true, "Load failure keeps the standard desktop usable");
