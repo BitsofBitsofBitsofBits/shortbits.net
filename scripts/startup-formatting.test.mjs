@@ -98,8 +98,17 @@ function correctionSetup(message) {
   const { document } = parseHTML("<html><body><div id='command'><span id='typed'></span></div><div id='author-box' hidden><span id='author'></span></div></body></html>");
   const timers = [];
   const achievements = [];
-  const schedule = (callback, delay) => { timers.push({ callback, delay }); return timers.length; };
-  const window = { location: { origin: "https://example.test" }, setTimeout: schedule };
+  let timerId = 0;
+  const schedule = (callback, delay) => {
+    const id = ++timerId;
+    timers.push({ id, callback, delay });
+    return id;
+  };
+  const cancel = id => {
+    const index = timers.findIndex(timer => timer.id === id);
+    if (index >= 0) timers.splice(index, 1);
+  };
+  const window = { location: { origin: "https://example.test" }, setTimeout: schedule, clearTimeout: cancel };
   const context = vm.createContext({
     window, document, URL, Intl, setTimeout: schedule, Math: Object.assign(Object.create(Math), { random: () => 0.5 }),
     currentMessage: message, characterIndex: 0, deleting: false,
@@ -169,7 +178,7 @@ test("quote attribution survives Mistype corrections and is restored with histor
   assert.equal(context.typedAuthor.textContent, "Ada");
   vm.runInContext('displayedMessageHistory.splice(0, displayedMessageHistory.length, { text: "Past quote", author: "Grace" }, { text: "No author" }); displayedMessageHistoryIndex = 1;', context);
   vm.runInContext(source.slice(source.indexOf("function showPreviousSplash("),
-    source.indexOf('\ndocument.addEventListener("keydown"', source.indexOf("function showPreviousSplash("))), context);
+    source.indexOf('\npreviousMessageButton.addEventListener', source.indexOf("function showPreviousSplash("))), context);
   vm.runInContext("showPreviousSplash(-1)", context);
   assert.equal(context.typedAuthor.textContent, "Grace");
   assert.equal(context.authorBox.hidden, false);
