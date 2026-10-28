@@ -5,7 +5,16 @@
     "accent", "red", "orange", "yellow", "green", "cyan", "blue", "purple",
     "pink", "white", "muted", "rainbow",
   ]);
-  const allowedFonts = new Set(["default", "serif", "sans", "mono", "display"]);
+  const fonts = Object.freeze({
+    default: "Default (site theme)", serif: "Serif", sans: "Sans serif", mono: "Monospace", display: "Display",
+    "system-ui": "System UI", arial: "Arial", helvetica: "Helvetica", verdana: "Verdana",
+    tahoma: "Tahoma", trebuchet: "Trebuchet MS", "segoe-ui": "Segoe UI",
+    georgia: "Georgia", "times-new-roman": "Times New Roman", palatino: "Palatino",
+    garamond: "Garamond", cambria: "Cambria",
+    "courier-new": "Courier New", consolas: "Consolas", menlo: "Menlo", monaco: "Monaco",
+    impact: "Impact", "arial-narrow": "Arial Narrow", "comic-sans": "Comic Sans MS",
+  });
+  const allowedFonts = new Set(Object.keys(fonts));
   const allowedSizes = new Set(["small", "normal", "large", "huge"]);
 
   function safeLink(value, allowMail = true) {
@@ -328,5 +337,5 @@
     return fragment;
   }
 
-  window.BITS_MARKDOWN = Object.freeze({ render, renderInline, readingTime });
+  window.BITS_MARKDOWN = Object.freeze({ fonts, render, renderInline, readingTime });
 })();

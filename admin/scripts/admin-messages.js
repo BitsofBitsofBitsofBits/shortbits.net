@@ -20,6 +20,12 @@
   const author = get("author");
   let markupTarget = text;
   const preview = get("preview");
+  for (const [id, label] of Object.entries(window.BITS_MARKDOWN.fonts)) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = label;
+    get("markup-font").append(option);
+  }
   for (const [name, description] of Object.entries(window.BITS_MESSAGE_TEXT.variables)) {
     const term = document.createElement("dt");
     const code = document.createElement("code");

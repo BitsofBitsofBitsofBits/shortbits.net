@@ -6,6 +6,7 @@ import { parseHTML } from "linkedom";
 
 const markdown = readFileSync(new URL("../shared/scripts/markdown.js", import.meta.url), "utf8");
 const source = readFileSync(new URL("../shared/scripts/message-text.js", import.meta.url), "utf8");
+const stylesheet = readFileSync(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
 function setup({ device = {} } = {}) {
   const { document } = parseHTML("<html><body></body></html>");
   let now = new Date(2026, 9, 26, 13, 14, 15).getTime();
@@ -109,6 +110,27 @@ test("adding safe message-only inline rendering does not remove links or images 
   root.append(window.BITS_MARKDOWN.render("[Blog link](https://example.test) ![Blog image](https://example.test/image.png)"));
   assert.ok(root.querySelector("a"));
   assert.ok(root.querySelector("img"));
+});
+
+test("all 24 shared font choices have safe styles and render in messages and blog posts", () => {
+  const { text, target, document, window } = setup();
+  assert.equal(Object.keys(window.BITS_MARKDOWN.fonts).length, 24);
+  for (const id of Object.keys(window.BITS_MARKDOWN.fonts)) {
+    const markup = `{{font:${id}|Sample **bold**}}`;
+    text.render(target, { text: markup, markup: true });
+    assert.equal(target.textContent, "Sample bold");
+    assert.equal(target.querySelector(`.blog-text-font-${id} strong`).textContent, "bold");
+    assert.match(stylesheet, new RegExp(`\\.blog-text-font-${id}\\s*\\{[^}]*font-family:`));
+    const blog = document.createElement("div");
+    blog.append(window.BITS_MARKDOWN.render(markup));
+    assert.equal(blog.querySelector(`.blog-text-font-${id}`).textContent, "Sample bold");
+  }
+  for (const id of ["unknown", "url(https://example.test/font)", 'arial" onclick="alert(1)']) {
+    const markup = `{{font:${id}|literal}}`;
+    text.render(target, { text: markup, markup: true });
+    assert.equal(target.textContent, markup);
+    assert.equal(target.querySelector("span,[onclick]"), null);
+  }
 });
 
 test("live date/time placeholders use one local instant and preserve unknown or escaped tokens", () => {

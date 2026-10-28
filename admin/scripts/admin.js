@@ -625,6 +625,12 @@ const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
 const blogFormatBlock = document.querySelector("#blog-format-block");
 const blogFormatColor = document.querySelector("#blog-format-color");
 const blogFormatFont = document.querySelector("#blog-format-font");
+for (const [id, label] of Object.entries(window.BITS_MARKDOWN.fonts)) {
+  const option = document.createElement("option");
+  option.value = id;
+  option.textContent = label;
+  blogFormatFont.append(option);
+}
 const blogFormatSize = document.querySelector("#blog-format-size");
 const blogImageUrl = document.querySelector("#blog-image-url");
 const blogImageUpload = document.querySelector("#blog-image-upload");

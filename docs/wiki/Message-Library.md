@@ -86,6 +86,16 @@
   dropdowns apply safe markup to the selection; these enable markup automatically.
   Font, size, and color directives can be nested to combine styles on the same text.
   The controls wrap on smaller screens and follow Admin's light/dark appearance.
+  The font dropdown is shared with the blog editor and supports 24 choices:
+  Default (site theme), Serif, Sans serif, Monospace, Display, System UI,
+  Arial, Helvetica, Verdana, Tahoma, Trebuchet MS, Segoe UI, Georgia,
+  Times New Roman, Palatino, Garamond, Cambria, Courier New, Consolas,
+  Menlo, Monaco, Impact, Arial Narrow, and Comic Sans MS.
+  These use installed system fonts with fallback stacks, not external font downloads.
+  Appearance can vary by visitor device if the requested font is unavailable.
+  Use the dropdown or type an allowlisted directive such as
+  `{{font:verdana|words}}`, `{{font:times-new-roman|words}}`, or
+  `{{font:comic-sans|words}}`. Existing font identifiers remain unchanged.
 
   | Placeholder | Value |
   | --- | --- |

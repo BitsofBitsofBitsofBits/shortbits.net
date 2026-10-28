@@ -588,6 +588,26 @@ try {
     await page.locator("#message-markup-size").selectOption("large");
     assert.equal(await page.locator("#message-preview .blog-text-font-serif .blog-text-size-large").textContent(), "Sample");
     assert.equal(await page.locator("#message-preview").textContent(), "Sample", "Combined toolbar styles leave no markup delimiters behind");
+    const fonts = await page.evaluate(() => Object.keys(window.BITS_MARKDOWN.fonts));
+    assert.equal(fonts.length, 24);
+    for (const selector of ["#message-markup-font", "#blog-format-font"]) {
+      assert.deepEqual(await page.locator(`${selector} option`).evaluateAll(options => options.map(option => option.value)),
+        ["", ...fonts], `${selector} uses the shared supported font list`);
+    }
+    for (const id of fonts) {
+      await page.locator("#message-text").fill("Font sample");
+      await page.locator("#message-text").evaluate(field => field.select());
+      await page.locator("#message-markup-font").selectOption(id);
+      assert.equal(await page.locator("#message-text").inputValue(), `{{font:${id}|Font sample}}`);
+      assert.equal(await page.locator(`#message-preview .blog-text-font-${id}`).textContent(), "Font sample");
+      assert.equal(await page.locator("#message-markup-font").inputValue(), "");
+      assert.ok(await page.locator(`#message-preview .blog-text-font-${id}`).evaluate(element =>
+        [...document.styleSheets].some(sheet => {
+          if (!sheet.href || new URL(sheet.href).origin !== location.origin) return false;
+          return [...sheet.cssRules].some(rule => rule.selectorText?.includes(`.blog-text-font-${element.className.slice("blog-text-font-".length)}`)
+            && rule.style?.fontFamily);
+        })), `The optimized stylesheet retains ${id}`);
+    }
     await page.locator("#message-text").fill("x".repeat(2000));
     await page.locator("#message-text").evaluate(field => field.select());
     await page.locator('[data-message-markup="bold"]').click();
