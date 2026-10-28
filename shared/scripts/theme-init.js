@@ -1083,7 +1083,8 @@ applyThemeToDocument(initialInterfaceTheme.id);
 document.documentElement.dataset.motion =
   localStorage.getItem("bits-motion") === "reduced" ? "reduced" : "system";
 document.documentElement.dataset.textsize =
-  localStorage.getItem("bits-text-size") === "large" ? "large" : "default";
+  ["large", "extra-large"].includes(localStorage.getItem("bits-text-size"))
+    ? localStorage.getItem("bits-text-size") : "default";
 document.documentElement.dataset.contrast =
   localStorage.getItem("bits-contrast") === "high" ? "high" : "default";
 document.documentElement.dataset.effects =

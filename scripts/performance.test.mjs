@@ -10,7 +10,7 @@ const loaderSource = await readFile(new URL("../online/scripts/arcade-loader.js"
 const themeSource = await readFile(new URL("../shared/scripts/theme-init.js", import.meta.url), "utf8");
 const runtimeSource = await readFile(new URL("../online/scripts/online-runtime.js", import.meta.url), "utf8");
 
-function runBoot({ mobile = false, reduced = false, seen = false, steps, runtime } = {}) {
+function runBoot({ mobile = false, reduced = false, seen = false, paused = false, steps, runtime } = {}) {
   const listeners = new Map();
   const windowListeners = new Map();
   const elements = new Map(["boot-screen", "boot-log", "boot-progress-bar", "boot-skip"].map((id) => [
@@ -19,7 +19,7 @@ function runBoot({ mobile = false, reduced = false, seen = false, steps, runtime
   ]));
   const background = { tagName: "MAIN", inert: false };
   const timers = [];
-  const root = { dataset: { motion: reduced ? "reduced" : "system", ...(runtime ? { runtime } : {}) } };
+  const root = { dataset: { motion: reduced ? "reduced" : "system", pauseContent: paused ? "on" : "off", ...(runtime ? { runtime } : {}) } };
   const context = {
     document: {
       documentElement: root,
@@ -45,7 +45,7 @@ function runBoot({ mobile = false, reduced = false, seen = false, steps, runtime
   return { ...context, initialState, background, timers, windowListeners, screen: elements.get("#boot-screen") };
 }
 
-for (const options of [{ mobile: true }, { reduced: true }, { seen: true }]) {
+for (const options of [{ mobile: true }, { reduced: true }, { seen: true }, { paused: true }]) {
   test(`automatic boot does not block ${JSON.stringify(options)}`, () => {
     const result = runBoot(options);
     assert.equal(result.initialState, "complete");

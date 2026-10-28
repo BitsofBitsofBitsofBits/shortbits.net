@@ -81,6 +81,19 @@ test("minifies ordered startup scripts into one request without isolating shared
     assert.equal(context.window.startupResult, 8);
     assert.equal(vm.runInContext("startupThemeValue() + startupCalendarValue", context), 15);
     await assert.rejects(optimizeStartup(directory), /Unable to locate/);
+    await writeFile(join(directory, "online", "index.html"),
+      '<script src="/shared/scripts/accessibility.js?v=1"></script>'
+      + '<script src="/shared/scripts/seasonal-calendar.js?v=1"></script>'
+      + '<script src="/shared/scripts/theme-init.js?v=2"></script>'
+      + '<script src="/online/scripts/boot.js?v=3"></script>');
+    await writeFile(join(directory, "shared", "scripts", "accessibility.js"), 'window.startupAccessibility = "ready";');
+    await optimizeStartup(directory);
+    const accessibleHtml = await readFile(join(directory, "online", "index.html"), "utf8");
+    assert.doesNotMatch(accessibleHtml, /src="\/shared\/scripts\/accessibility\.js/);
+    const accessibleContext = vm.createContext({ window: {} });
+    vm.runInContext(await readFile(join(directory, "online", "scripts", "startup.js"), "utf8"), accessibleContext);
+    assert.equal(accessibleContext.window.startupAccessibility, "ready", "Shared preferences stay in the single startup request");
+    assert.equal(accessibleContext.window.startupResult, 8);
   } finally {
     await rm(directory, { recursive: true });
   }

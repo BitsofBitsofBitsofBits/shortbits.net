@@ -1026,7 +1026,7 @@
   const recentMessageSet = new Set();
   let timer = 0;
   let viewportFrame = 0;
-  let paused = false;
+  let paused = document.documentElement.dataset.pauseContent === "on";
   let speed = "normal";
   let density = "normal";
   let autoScroll = true;
@@ -1622,6 +1622,7 @@
   }
 
   function tickTelemetry() {
+    if (paused) return;
     if (Math.random() < 0.32) {
       updateTelemetryTargets();
     }
@@ -1651,7 +1652,7 @@
   }
 
   function tickEtaCountdown() {
-    if (etaCountdownSeconds === null) {
+    if (paused || etaCountdownSeconds === null) {
       return;
     }
     if (etaCountdownSeconds <= 0) {
@@ -1665,6 +1666,7 @@
   }
 
   function updateEta() {
+    if (paused) return;
     const remaining = Math.max(1, 100 - progress);
     const averageDelays = { slow: 800, normal: 270, fast: 98, absurd: 31 };
     const estimatedSeconds = Math.max(
@@ -1880,6 +1882,7 @@
   }
 
   function renderTransmission() {
+    if (paused && lastTransmission) return;
     let message;
     do {
       message = weightedTransmission();
@@ -2518,6 +2521,7 @@
   }
 
   function shiftBurnInProtection() {
+    if (paused) return;
     const offsetX = randomDelay(-2, 2);
     const offsetY = randomDelay(-2, 2);
     document.documentElement.style.setProperty("--boot-shift-x", `${offsetX}px`);
@@ -2786,5 +2790,10 @@
   window.setInterval(updateEta, 2800);
   window.setInterval(shiftBurnInProtection, 30000);
   window.setInterval(tickFallingBits, 1000);
-  scheduleNextMessage();
+  setPaused(paused);
+  window.addEventListener("bits:preferences-changed", event => {
+    if (!event.detail?.key || event.detail.key === "pause-content") {
+      setPaused(document.documentElement.dataset.pauseContent === "on");
+    }
+  });
 })();

@@ -1,0 +1,129 @@
+@media screen {
+  html[data-textsize="large"] { font-size: 112.5% !important; }
+  html[data-textsize="extra-large"] { font-size: 125% !important; }
+  html:is([data-textsize="large"], [data-textsize="extra-large"]) :is(.admin-center, .resume-sheet) :is(p, li, label, input, button, select, textarea, dt, dd) {
+    font-size: max(1em, 0.875rem) !important;
+  }
+
+  html[data-readable-text="on"] {
+    --font-family: system-ui, "Segoe UI", sans-serif !important;
+  }
+
+  html[data-readable-text="on"] body,
+  html[data-readable-text="on"] body * {
+    font-family: system-ui, "Segoe UI", sans-serif !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+  }
+
+  html[data-readable-text="on"] :is(p, li, dd, dt, label, input, textarea, select) {
+    line-height: 1.65 !important;
+  }
+
+  html[data-readable-text="on"] :is(pre, code, kbd, samp),
+  html[data-readable-text="on"] :is(pre, code, kbd, samp) * {
+    font-family: ui-monospace, Consolas, monospace !important;
+  }
+
+  html[data-large-controls="on"] :is(button, select, summary, [role="button"], a[class], nav a, input:not([type="checkbox"], [type="radio"], [type="hidden"])) {
+    box-sizing: border-box;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  html[data-large-controls="on"] label:has(> input:is([type="checkbox"], [type="radio"])) {
+    box-sizing: border-box;
+    min-height: 44px !important;
+    padding-block: 8px;
+  }
+
+  html[data-focus="enhanced"] :focus-visible {
+    outline: 3px solid var(--ac-ink, var(--ink, CanvasText)) !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 3px var(--ac-surface, var(--bg, Canvas)) !important;
+  }
+
+  :root[data-transparency="reduced"] {
+    --shell-bg: var(--panel, Canvas) !important;
+    --admin-bg: var(--panel, Canvas) !important;
+    --overlay-bg: var(--panel, Canvas) !important;
+    --material-blur: 0px !important;
+  }
+
+  html[data-transparency="reduced"] *,
+  html[data-transparency="reduced"] *::before,
+  html[data-transparency="reduced"] *::after {
+    backdrop-filter: none !important;
+  }
+
+  html[data-transparency="reduced"] :is(.shell, .desktop-window, .desktop-window-bar, .system-window, .achievements-window, .settings-group, .bits-layout-notice, .workspace-header, .workspace-sidebar, .workspace-footer, .workspace-launch-panel, .workspace-tool-list, .fake-desktop-app, .fake-action-center, .fake-wifi-picker) {
+    background: var(--panel, Canvas) !important;
+  }
+
+  html[data-pause-content="on"] :is(.binary-rain, .name-field, .theme-atmosphere, .falling-bit, .cursor-bit),
+  html[data-pause-content="on"] :is(.binary-rain, .name-field, .theme-atmosphere) *,
+  html[data-pause-content="on"] :is(.name-field, .theme-atmosphere)::before,
+  html[data-pause-content="on"] :is(.name-field, .theme-atmosphere)::after {
+    animation-play-state: paused !important;
+  }
+  html[data-pause-content="on"] * {
+    scroll-behavior: auto !important;
+  }
+
+  html[data-simple-layout="on"][data-page="online"] body {
+    display: block !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: auto !important;
+    padding: 16px !important;
+  }
+
+  html[data-simple-layout="on"] :is(.shell, .desktop-window:not([hidden]), .fake-desktop:not([hidden])) {
+    position: relative !important;
+    inset: auto !important;
+    width: min(100%, 1000px) !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto 16px !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+    z-index: auto !important;
+  }
+
+  html[data-simple-layout="on"] .desktop-window:not([hidden]) { display: flex !important; }
+  html[data-simple-layout="on"] .shell.is-minimized { display: none !important; }
+  html[data-simple-layout="on"] .desktop-window-content {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  html[data-simple-layout="on"] .desktop-window-bar { cursor: default; }
+  html[data-simple-layout="on"] :is(.desktop-window-resize-handle, .desktop-window-resize-edge) { display: none !important; }
+  html[data-simple-layout="on"] :is(.link-grid, .settings-groups) { grid-template-columns: minmax(0, 1fr) !important; }
+  html[data-simple-layout="on"] .settings-group { grid-column: auto; }
+}
+
+.paused-message-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 8px;
+}
+
+.paused-message-controls[hidden] { display: none; }
+.paused-message-controls button {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+  cursor: pointer;
+}
+.paused-message-controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.paused-message-controls button:disabled { opacity: 0.6; cursor: default; }
+
+#settings-pause-help,
+#settings-layout-help { margin: 0 0 16px; }

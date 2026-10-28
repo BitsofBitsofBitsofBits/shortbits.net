@@ -364,6 +364,7 @@ desktopWindows.forEach((windowElement) => {
       event.button !== 0
       || event.target.closest("button")
       || document.body.dataset.workspaceMode === "tabbed"
+      || document.documentElement.dataset.simpleLayout === "on"
       || windowElement.hasAttribute("data-window-fullscreen")
       || window.matchMedia("(max-width: 640px)").matches
     ) {
@@ -423,6 +424,7 @@ desktopWindows.forEach((windowElement) => {
         event.button !== 0
         || windowElement.classList.contains("is-minimized")
         || document.body.dataset.workspaceMode === "tabbed"
+        || document.documentElement.dataset.simpleLayout === "on"
         || windowElement.hasAttribute("data-window-fullscreen")
         || window.matchMedia("(max-width: 640px)").matches
       ) {
@@ -472,6 +474,7 @@ desktopWindows.forEach((windowElement) => {
     if (
       !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
       || document.body.dataset.workspaceMode === "tabbed"
+      || document.documentElement.dataset.simpleLayout === "on"
       || windowElement.classList.contains("is-minimized")
     ) {
       return;
@@ -497,6 +500,15 @@ desktopWindows.forEach((windowElement) => {
     focusDesktopWindow(windowElement);
     event.preventDefault();
   });
+});
+
+window.addEventListener("bits:preferences-changed", () => {
+  if (document.documentElement.dataset.simpleLayout !== "on") return;
+  dragState = null;
+  resizeState = null;
+  desktopWindows.forEach(element => element.classList.remove("is-dragging", "is-resizing"));
+  const current = document.activeElement?.closest("[data-window]");
+  current?.scrollIntoView({ block: "nearest" });
 });
 
 desktopWindowMirrors.forEach((mirror) => {

@@ -152,8 +152,10 @@ export function renderArticle(post, renderer) {
     <link rel="alternate" type="application/rss+xml" title="BLOG.LOG RSS" href="/blog/feed.xml">
     <link rel="icon" type="image/png" href="/shared/images/favicon.png">
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
+    <script src="/shared/scripts/accessibility.js?v=accessibility-1"></script>
     <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
+    <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
     <script type="application/ld+json">${jsonScript(schema)}</script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>

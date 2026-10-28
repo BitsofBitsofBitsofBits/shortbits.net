@@ -962,6 +962,54 @@ const typoMessage = {
 let forceTypoMessage = false;
 const displayedMessageHistory = [currentMessage];
 let displayedMessageHistoryIndex = displayedMessageHistory.length;
+let messageTimer;
+let correctionTimer;
+let activityTimer;
+const pausedMessageControls = document.querySelector("#paused-message-controls");
+const previousMessageButton = document.querySelector("#message-history-previous");
+const nextMessageButton = document.querySelector("#message-history-next");
+const changingContentPaused = () => document.documentElement.dataset.pauseContent === "on";
+
+function scheduleMessage(delay) {
+  window.clearTimeout(messageTimer);
+  if (!changingContentPaused()) messageTimer = window.setTimeout(updateMessage, delay);
+}
+
+function scheduleActivity(delay) {
+  window.clearTimeout(activityTimer);
+  if (!changingContentPaused()) activityTimer = window.setTimeout(updateActivity, delay);
+}
+
+function renderCompleteMessage() {
+  if (currentMessage.correctedText && !currentMessage.wasCorrected) {
+    currentMessage = { ...currentMessage, text: currentMessage.correctedText, wasCorrected: true };
+  }
+  currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
+  currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
+  characterIndex = currentMessageCharacters.length;
+  authorCharacterIndex = currentAuthorCharacters.length;
+  deleting = false;
+  commandLine.classList.remove("is-correcting");
+  window.BITS_MESSAGE_TEXT.render(typedText, currentMessage);
+  renderMessageAuthor();
+  previousMessageButton.disabled = displayedMessageHistoryIndex <= 0;
+}
+
+function syncChangingContent() {
+  const paused = changingContentPaused();
+  pausedMessageControls.hidden = !paused;
+  window.clearTimeout(messageTimer);
+  window.clearTimeout(correctionTimer);
+  window.clearTimeout(activityTimer);
+  activityText.classList.remove("is-changing");
+  if (paused) {
+    displayedMessageHistoryIndex = Math.min(displayedMessageHistoryIndex, displayedMessageHistory.length - 1);
+    renderCompleteMessage();
+  } else {
+    scheduleMessage(250);
+    scheduleActivity(4000 + Math.random() * 4000);
+  }
+}
 
 function pickNextMessage() {
   if (forceTypoMessage || Math.random() < 0.008) {
@@ -992,10 +1040,10 @@ function runTypoCorrection() {
     && originalCharacters[sharedLength] === correctedCharacters[sharedLength]) sharedLength++;
   commandLine.classList.add("is-correcting");
   window.BITS_MESSAGE_TEXT.render(typedText, correctingMessage, { length: sharedLength, suffix: "_" });
-  window.setTimeout(() => {
+  correctionTimer = window.setTimeout(() => {
     commandLine.classList.remove("is-correcting");
     if (currentMessage !== correctingMessage) {
-      window.setTimeout(updateMessage, 1600);
+      scheduleMessage(1600);
       return;
     }
     currentMessage = correctedMessage;
@@ -1005,13 +1053,17 @@ function runTypoCorrection() {
     renderMessageAuthor();
     showAchievement("NOTHING HAPPENED", "TYPO CORRECTION", 1800, "typo-corrected");
     deleting = true;
-    window.setTimeout(updateMessage, 1600);
+    scheduleMessage(1600);
   }, 420);
 }
 
 function updateMessage() {
+  if (changingContentPaused()) {
+    renderCompleteMessage();
+    return;
+  }
   if (document.hidden) {
-    setTimeout(updateMessage, 1000);
+    scheduleMessage(1000);
     return;
   }
 
@@ -1035,7 +1087,7 @@ function updateMessage() {
       authorCharacterIndex = 0;
       renderMessageAuthor();
       applyTextFormat(typedText, currentMessage.format);
-      setTimeout(updateMessage, 250 + Math.random() * 500);
+      scheduleMessage(250 + Math.random() * 500);
       return;
     }
   } else {
@@ -1045,7 +1097,7 @@ function updateMessage() {
         return;
       }
       deleting = true;
-      setTimeout(updateMessage, 1400 + Math.random() * 1600);
+      scheduleMessage(1400 + Math.random() * 1600);
       return;
     }
     characterIndex = Math.min(currentMessageCharacters.length, characterIndex + 1);
@@ -1055,28 +1107,30 @@ function updateMessage() {
   const typingDelay = deleting
     ? 18 + Math.random() * 28
     : 35 + Math.random() * 55;
-  setTimeout(updateMessage, typingDelay);
+  scheduleMessage(typingDelay);
 }
 
 function updateActivity() {
+  if (changingContentPaused()) return;
   if (document.hidden) {
-    setTimeout(updateActivity, 2000);
+    scheduleActivity(2000);
     return;
   }
 
   activityText.classList.add("is-changing");
 
-  setTimeout(() => {
+  activityTimer = window.setTimeout(() => {
+    if (changingContentPaused()) return;
     if (new Date().getHours() === 0) {
       window.BITS_MESSAGE_TEXT.render(activityText, "pretending tomorrow is not approaching...");
       activityText.classList.remove("is-changing");
-      setTimeout(updateActivity, 60000);
+      scheduleActivity(60000);
       return;
     }
     const activity = pickWeightedOption(activities);
     window.BITS_MESSAGE_TEXT.render(activityText, activity);
     activityText.classList.remove("is-changing");
-    setTimeout(updateActivity, 4000 + Math.random() * 6000);
+    scheduleActivity(4000 + Math.random() * 6000);
   }, 150);
 }
 
@@ -1119,6 +1173,7 @@ function getForbiddenBitX() {
 }
 
 function releaseBit(forceForbidden = false) {
+  if (changingContentPaused()) return;
   const isForbidden = forceForbidden || Math.random() < 0.015;
   if (!isForbidden && binaryRain.childElementCount >= maximumFallingBits) {
     return;
@@ -3204,8 +3259,27 @@ function showPreviousSplash(direction) {
   applyTextFormat(typedText, currentMessage.format);
   window.BITS_MESSAGE_TEXT.render(typedText, currentMessage, { length: characterIndex });
   renderMessageAuthor();
+  if (changingContentPaused()) renderCompleteMessage();
   showAchievement(window.BITS_MESSAGE_TEXT.plainText(currentMessage), "COMMAND HISTORY", 1800);
 }
+
+previousMessageButton.addEventListener("click", () => showPreviousSplash(-1));
+nextMessageButton.addEventListener("click", () => {
+  if (displayedMessageHistoryIndex < displayedMessageHistory.length - 1) {
+    showPreviousSplash(1);
+    return;
+  }
+  currentMessage = pickNextMessage();
+  displayedMessageHistory.push(currentMessage);
+  if (displayedMessageHistory.length > 30) displayedMessageHistory.shift();
+  displayedMessageHistoryIndex = displayedMessageHistory.length - 1;
+  renderCompleteMessage();
+});
+window.addEventListener("bits:preferences-changed", event => {
+  if (event.detail?.key && event.detail.key !== "pause-content") return;
+  syncChangingContent();
+  resetIdleTimer();
+});
 
 document.addEventListener("keydown", (event) => {
   if (document.documentElement.dataset.boot === "pending") {
@@ -3491,7 +3565,7 @@ function stopAvatarRoam() {
 }
 
 function enterIdleMode() {
-  if (isIdle || avatarWrap.classList.contains("has-departed")) {
+  if (changingContentPaused() || isIdle || avatarWrap.classList.contains("has-departed")) {
     return;
   }
 
@@ -3526,8 +3600,10 @@ function resetIdleTimer() {
     statusText.textContent = "ONLINE";
     processTitle.textContent = "~/internet/presence.exe";
   }
-  assistantTimer = window.setTimeout(showBitsAssistant, assistantDelayMs);
-  idleTimer = window.setTimeout(enterIdleMode, idleDelayMs);
+  if (!changingContentPaused()) {
+    assistantTimer = window.setTimeout(showBitsAssistant, assistantDelayMs);
+    idleTimer = window.setTimeout(enterIdleMode, idleDelayMs);
+  }
 }
 
 ["pointerdown", "keydown", "scroll"].forEach((eventName) => {
@@ -3759,8 +3835,7 @@ applyTextFormat(typedText, currentMessage.format);
 document.querySelector("#year").textContent = new Date().getFullYear();
 loadBuildMetadata();
 setInterval(updateUptime, 1000);
-setTimeout(updateMessage, 250);
-setTimeout(updateActivity, 4000 + Math.random() * 4000);
+syncChangingContent();
 applyTemporalEggs();
 setInterval(applyTemporalEggs, 60000);
 

@@ -2,6 +2,38 @@
 
 [Wiki home](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki) | [Source repository](https://github.com/BitsofBitsofBitsofBits/shortbits.net)
 
+## Accessibility preferences
+
+Online's Control Panel > Accessibility preserves the default experience and offers
+opt-in preferences saved in this browser across public pages and Admin:
+
+- **Text size:** Default, Large (112.5%), or Extra large (125%). Existing Large
+  preferences still work, and browser zoom remains available.
+- **Pause changing content:** completes the current message and attribution,
+  stops automatic message/activity/chatter rotation, pauses decorative CSS
+  animations, skips the automatic startup sequence, and prevents idle takeovers.
+  Previous/Next message buttons remain available. Live service data and clocks
+  continue updating. The dedicated Boot page starts with output paused; its
+  existing Resume Output button can explicitly resume that experience.
+- **Readable font and comfortable spacing:** uses a system font, normal
+  capitalization styling, and roomier reading line heights, while code retains
+  monospace formatting.
+- **Larger buttons and controls:** gives buttons, selectors, navigation targets,
+  and checkbox/radio labels at least 44px target dimensions where applicable.
+- **Simplified layout:** stacks open windows in one column, disables dragging
+  and resizing, and temporarily suspends experimental layout chrome. Theme
+  choice, window contents, and saved positions are retained when switching back.
+- **Reduce transparency:** uses solid window surfaces without background blur.
+- **Enhanced keyboard focus:** adds a thicker contrasting focus outline.
+
+Existing motion, contrast, and decorative-effects controls remain independent.
+Changes apply immediately and synchronize between open tabs. Reset Preferences
+clears these choices. Screen-only overrides do not change the printable resume.
+Keyboard access and ordinary focus indicators remain available without opting in.
+
+Validate with `node --test scripts/accessibility-preferences.test.mjs` and
+`node scripts/accessibility-preferences-browser.mjs --root .site-build`.
+
 - Distinct decorative atmospheres for every interface theme, including circuit
   pulses, aurora ribbons, petals, acrylic lighting, reveal sweeps, OLED stars,
   color orbs, and phosphor effects. These respect decorative-effects, contrast,

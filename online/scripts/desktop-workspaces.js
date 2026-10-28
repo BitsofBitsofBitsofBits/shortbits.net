@@ -386,7 +386,7 @@
 
   function sync() {
     const id = document.documentElement.dataset.interfaceTheme;
-    const config = presentations[id];
+    const config = document.documentElement.dataset.simpleLayout === "on" ? null : presentations[id];
     if (!desktop.hidden && config && mounted?.themeId === id) return;
     mounted?.destroy();
     mounted = null;
@@ -398,5 +398,6 @@
   window.BITS_DESKTOP_WORKSPACE = Object.freeze({ sync });
   window.addEventListener("bits:desktop-visibility", sync);
   window.addEventListener("bits:theme-applied", sync);
+  window.addEventListener("bits:preferences-changed", sync);
   sync();
 })();

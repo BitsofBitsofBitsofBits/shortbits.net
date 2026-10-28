@@ -49,6 +49,7 @@
       }
     </script>
     <link rel="icon" type="image/png" href="/shared/images/favicon.png">
+    <script src="/shared/scripts/accessibility.js?v=accessibility-1"></script>
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
     <script src="/shared/scripts/theme-init.js?v=theme-29"></script>
     <script src="/online/scripts/boot.js?v=boot-2"></script>
@@ -92,6 +93,7 @@
     <script src="/shared/scripts/site-config.js?v=site-config-3" type="application/x-bits-runtime"></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" type="application/x-bits-runtime"></script>
     <script src="/online/scripts/online-runtime.js?v=runtime-2" defer></script>
+    <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
   </head>
   <body>
     <noscript>
@@ -570,6 +572,10 @@
           <div id="message-author-box" class="message-author-box" hidden>
             <span aria-hidden="true">&mdash;</span>
             <span id="typed-author"></span>
+          </div>
+          <div id="paused-message-controls" class="paused-message-controls" role="group" aria-label="Message navigation" hidden>
+            <button id="message-history-previous" type="button">Previous message</button>
+            <button id="message-history-next" type="button">Next message</button>
           </div>
           <pre id="terminal-output" class="terminal-output" aria-live="polite" hidden></pre>
         </div>
@@ -1075,9 +1081,39 @@
                 <option value="reduced">REDUCED</option>
               </select>
             </label>
+            <label>
+              <span>TEXT SIZE</span>
+              <select id="settings-text-size">
+                <option value="default">DEFAULT</option>
+                <option value="large">LARGE</option>
+                <option value="extra-large">EXTRA LARGE</option>
+              </select>
+            </label>
             <label class="settings-check">
-              <input id="settings-large-text" type="checkbox">
-              <span>USE LARGER TEXT</span>
+              <input id="settings-pause-content" type="checkbox" aria-describedby="settings-pause-help">
+              <span>PAUSE CHANGING CONTENT</span>
+            </label>
+            <p id="settings-pause-help" class="settings-status">Show complete messages without typing or automatic rotation. Manual message controls remain available. Live service data and clocks still update.</p>
+            <label class="settings-check">
+              <input id="settings-readable-text" type="checkbox">
+              <span>READABLE FONT AND COMFORTABLE SPACING</span>
+            </label>
+            <label class="settings-check">
+              <input id="settings-large-controls" type="checkbox">
+              <span>LARGER BUTTONS AND CONTROLS</span>
+            </label>
+            <label class="settings-check">
+              <input id="settings-simple-layout" type="checkbox" aria-describedby="settings-layout-help">
+              <span>SIMPLIFIED LAYOUT</span>
+            </label>
+            <p id="settings-layout-help" class="settings-status">Stack open windows in a single column without dragging or resizing. Your theme and window positions are kept for when you switch back.</p>
+            <label class="settings-check">
+              <input id="settings-transparency" type="checkbox">
+              <span>REDUCE TRANSPARENCY</span>
+            </label>
+            <label class="settings-check">
+              <input id="settings-focus" type="checkbox">
+              <span>ENHANCED KEYBOARD FOCUS</span>
             </label>
             <label class="settings-check">
               <input id="settings-high-contrast" type="checkbox">
@@ -1096,7 +1132,7 @@
               <button id="settings-reset-all" type="button">RESET PREFERENCES</button>
             </div>
             <p id="settings-status" class="settings-status" role="status" aria-live="polite">
-              Preferences are saved in this browser.
+              Preferences are saved in this browser and apply across the site. The printable r&eacute;sum&eacute; layout is unchanged.
             </p>
           </fieldset>
           <details class="settings-group settings-group-wide settings-insider">

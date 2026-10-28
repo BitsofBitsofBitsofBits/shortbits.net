@@ -54,6 +54,7 @@ function refreshEink(event) {
 
 function hasReducedAtmosphereMotion() {
   return document.documentElement.dataset.motion === "reduced"
+    || document.documentElement.dataset.pauseContent === "on"
     || reducedMotionMedia.matches;
 }
 
@@ -153,6 +154,7 @@ atmosphereObserver.observe(document.documentElement, {
     "data-contrast",
     "data-motion",
     "data-eink-refresh",
+    "data-pause-content",
   ],
 });
 

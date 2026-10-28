@@ -119,9 +119,10 @@ export async function optimizeStyles(directory) {
 export async function optimizeStartup(directory) {
   const file = join(directory, "online", "index.html");
   const html = await readFile(file, "utf8");
-  const pattern = /<script src="\/shared\/scripts\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/shared\/scripts\/theme-init\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/online\/scripts\/boot\.js(?:\?[^"]*)?"><\/script>/;
+  const pattern = /(<script src="\/shared\/scripts\/accessibility\.js(?:\?[^"]*)?"><\/script>\s*)?<script src="\/shared\/scripts\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/shared\/scripts\/theme-init\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/online\/scripts\/boot\.js(?:\?[^"]*)?"><\/script>/;
   if (!pattern.test(html)) throw new Error("Unable to locate the ordered online startup scripts.");
-  const sources = await Promise.all(["shared/scripts/seasonal-calendar.js", "shared/scripts/theme-init.js", "online/scripts/boot.js"]
+  const sources = await Promise.all([...(html.match(pattern)[1] ? ["shared/scripts/accessibility.js"] : []),
+    "shared/scripts/seasonal-calendar.js", "shared/scripts/theme-init.js", "online/scripts/boot.js"]
     .map((name) => readFile(join(directory, name), "utf8")));
   // Keep classic-script globals visible to the deferred runtime; do not bundle into a module or IIFE.
   const result = await transform(sources.join("\n;\n"), {

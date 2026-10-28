@@ -128,7 +128,7 @@
 
   function sync() {
     const theme = getActiveTheme();
-    if (!theme?.experimental) {
+    if (!theme?.experimental || root.dataset.simpleLayout === "on") {
       unmountLayout();
       hideNotice();
       return;
@@ -151,7 +151,7 @@
     register(themeId, module) {
       registry.set(themeId, module);
       const theme = getActiveTheme();
-      if (theme?.id === themeId && mountedThemeId !== themeId) {
+      if (theme?.id === themeId && mountedThemeId !== themeId && root.dataset.simpleLayout !== "on") {
         mountLayout(theme);
       }
     },
@@ -159,6 +159,7 @@
   });
 
   window.addEventListener("bits:theme-applied", sync);
+  window.addEventListener("bits:preferences-changed", sync);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", sync, { once: true });
   } else {

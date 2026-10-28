@@ -1,7 +1,8 @@
 const bootSessionKey = "bits-boot-seen-v1";
 const automaticBootAllowed = !window.matchMedia(
   "(max-width: 720px), (pointer: coarse), (prefers-reduced-motion: reduce)",
-).matches && document.documentElement.dataset.motion !== "reduced";
+).matches && document.documentElement.dataset.motion !== "reduced"
+  && document.documentElement.dataset.pauseContent !== "on";
 let shouldPlayBoot = automaticBootAllowed;
 
 try {
@@ -93,7 +94,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bootSkip.focus();
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      || document.documentElement.dataset.motion === "reduced";
+      || document.documentElement.dataset.motion === "reduced"
+      || document.documentElement.dataset.pauseContent === "on";
     if (reduceMotion) {
       finishBoot();
       return;
@@ -117,6 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   bootSkip.addEventListener("click", finishBoot);
+  window.addEventListener("bits:preferences-changed", () => {
+    if (document.documentElement.dataset.pauseContent === "on") finishBoot();
+  });
   window.BITS_BOOT = { play: playBoot, skip: finishBoot };
 
   if (shouldPlayBoot) {

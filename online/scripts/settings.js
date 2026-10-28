@@ -1,6 +1,6 @@
 const settingsTheme = document.querySelector("#settings-theme");
 const settingsMotion = document.querySelector("#settings-motion");
-const settingsLargeText = document.querySelector("#settings-large-text");
+const settingsTextSize = document.querySelector("#settings-text-size");
 const settingsHighContrast = document.querySelector("#settings-high-contrast");
 const settingsEffects = document.querySelector("#settings-effects");
 const settingsEinkRefresh = document.querySelector("#settings-eink-refresh");
@@ -17,11 +17,7 @@ const preferenceKeys = [
   "bits-accent",
   "bits-color-scheme",
   "bits-rgb-mode",
-  "bits-motion",
-  "bits-text-size",
-  "bits-contrast",
-  "bits-effects",
-  "bits-eink-refresh",
+  ...window.BITS_ACCESSIBILITY.keys,
   "bits-insider-channel",
 ];
 
@@ -48,13 +44,35 @@ function syncAppearanceControls() {
 }
 
 function applyAccessibilityPreference(key, value) {
-  localStorage.setItem(`bits-${key}`, value);
-  const datasetKey = key === "text-size" ? "textsize" : key === "eink-refresh" ? "einkRefresh" : key;
-  document.documentElement.dataset[datasetKey] = value;
-  window.dispatchEvent(new CustomEvent("bits:preferences-changed", {
-    detail: { key, value },
-  }));
-  setSettingsStatus("Accessibility preferences saved.");
+  try {
+    window.BITS_ACCESSIBILITY.set(key, value);
+    setSettingsStatus("Accessibility preferences saved for this browser across the site.");
+  } catch (error) {
+    console.error("Unable to save accessibility preferences:", error);
+    syncAccessibilityControls();
+    setSettingsStatus("Unable to save this preference. Check browser storage permissions and try again.", true);
+  }
+}
+
+const accessibilityChecks = [
+  ["pause-content", "pauseContent", "on", "off"],
+  ["readable-text", "readableText", "on", "off"],
+  ["large-controls", "largeControls", "on", "off"],
+  ["simple-layout", "simpleLayout", "on", "off"],
+  ["transparency", "transparency", "reduced", "default"],
+  ["focus", "focus", "enhanced", "default"],
+];
+
+function syncAccessibilityControls() {
+  const preferences = document.documentElement.dataset;
+  settingsMotion.value = preferences.motion;
+  settingsTextSize.value = preferences.textsize;
+  settingsHighContrast.checked = preferences.contrast === "high";
+  settingsEffects.checked = preferences.effects !== "off";
+  accessibilityChecks.forEach(([key, attribute, value]) => {
+    document.querySelector(`#settings-${key}`).checked = preferences[attribute] === value;
+  });
+  syncAppearanceControls();
 }
 
 async function copyText(text) {
@@ -88,11 +106,7 @@ if (window.BITS_THEME_PREFERENCE?.buildOptions) {
     })),
   );
 }
-settingsMotion.value = document.documentElement.dataset.motion;
-settingsLargeText.checked = document.documentElement.dataset.textsize === "large";
-settingsHighContrast.checked = document.documentElement.dataset.contrast === "high";
-settingsEffects.checked = document.documentElement.dataset.effects !== "off";
-syncAppearanceControls();
+syncAccessibilityControls();
 
 settingsTheme.addEventListener("change", () => {
   toolbarTheme.value = settingsTheme.value;
@@ -104,12 +118,15 @@ settingsMotion.addEventListener("change", () => {
   applyAccessibilityPreference("motion", settingsMotion.value);
 });
 
-settingsLargeText.addEventListener("change", () => {
-  applyAccessibilityPreference(
-    "text-size",
-    settingsLargeText.checked ? "large" : "default",
-  );
+settingsTextSize.addEventListener("change", () => {
+  applyAccessibilityPreference("text-size", settingsTextSize.value);
 });
+
+accessibilityChecks.forEach(([key, , on, off]) => {
+  const control = document.querySelector(`#settings-${key}`);
+  control.addEventListener("change", () => applyAccessibilityPreference(key, control.checked ? on : off));
+});
+window.addEventListener("bits:preferences-changed", syncAccessibilityControls);
 
 settingsHighContrast.addEventListener("change", () => {
   applyAccessibilityPreference(
@@ -127,13 +144,6 @@ settingsEffects.addEventListener("change", () => {
 
 settingsEinkRefresh.addEventListener("change", () => {
   applyAccessibilityPreference("eink-refresh", settingsEinkRefresh.checked ? "on" : "off");
-  setSettingsStatus("E-Ink refresh preference saved.");
-});
-window.addEventListener("storage", event => {
-  if (event.key !== "bits-eink-refresh") return;
-  document.documentElement.dataset.einkRefresh = event.newValue === "on" ? "on" : "off";
-  syncAppearanceControls();
-  window.dispatchEvent(new CustomEvent("bits:preferences-changed"));
 });
 
 toolbarTheme.addEventListener("change", syncAppearanceControls);
