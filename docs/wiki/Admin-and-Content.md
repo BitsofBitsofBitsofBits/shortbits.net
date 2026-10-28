@@ -40,6 +40,22 @@
     published experiences into an additional group, excluding private drafts.
     New skills are managed in Skills, not copied automatically from legacy fields.
 
+- **Content > Social links** (`/admin/#/social-links`) manages the personal
+  site's link grid and the professional profile, contact, and footer links.
+  Add, edit, remove, or disable links as private drafts. Each entry has a label,
+  description, HTTPS or `/local/path` destination, accent color, and separate
+  personal/professional visibility checkboxes. Display order is a non-negative
+  number: lower values appear first, with entry number breaking ties.
+  Choose a bundled brand icon, enter a custom HTTPS/local image URL, or use
+  text only. Custom images override the bundled icon; broken images show the
+  text fallback. The editor previews the result before saving.
+  Public pages fetch fresh links on load; successfully empty lists stay empty.
+  Saved static/no-JavaScript copies and structured-data links update on deployment.
+  Source/repository links within project descriptions and résumé contact details
+  remain separate editorial content. Apply
+  `supabase/migrations/20261028180000_social_links.sql` and export a fresh
+  content backup, since the exact-schema format now requires `site_social_links`.
+
 - **Showcase > Featured project** (`/admin/#/featured-project`) controls the
   Online `FEATURED_PROCESS` box: title, summary, optional status and comma-separated
   technology tags, HTTPS project link, link label, and publishing checkbox.

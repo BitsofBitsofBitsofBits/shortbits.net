@@ -23,6 +23,7 @@
     <script src="/shared/scripts/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin/scripts/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/shared/scripts/career-format.js?v=career-3" defer></script>
+    <script src="/shared/scripts/social-links.js?v=social-1" defer></script>
     <script src="/admin/scripts/admin.js?v=admin-34" defer></script>
     <script src="/admin/scripts/admin-backup.js?v=backup-3" defer></script>
     <script src="/shared/scripts/boot-message-generator.js?v=boot-generator-1" defer></script>
@@ -273,6 +274,18 @@
             </div>
             <p id="resume-admin-status" class="form-status" role="status" aria-live="polite"></p>
             <button id="resume-submit" type="submit">&gt; SAVE_RESUME</button>
+          </form>
+        </section>
+
+        <section id="social-links-editor" class="profile-editor" aria-labelledby="social-links-editor-heading">
+          <div class="section-label"><h2 id="social-links-editor-heading">SOCIAL LINKS</h2><span>BOTH SITES</span></div>
+          <p>Manage link labels, descriptions, destinations, icons, and accent colors. Choose which site shows each link. Lower display-order numbers appear first; ties use the entry number.</p>
+          <p>Custom image URLs override the built-in icon. Leave both empty for text. Use HTTPS URLs or local paths starting with one slash; a broken image displays the text fallback.</p>
+          <form id="social-links-form" class="admin-form content-admin-form">
+            <div class="repeatable-admin-actions"><button id="social-link-add" type="button">+ ADD_SOCIAL_LINK</button></div>
+            <div id="social-link-slots" class="curated-admin-grid"></div>
+            <p id="social-links-status" class="form-status" role="status" aria-live="polite"></p>
+            <button id="social-links-submit" type="submit" disabled>&gt; SAVE_SOCIAL_LINKS</button>
           </form>
         </section>
 

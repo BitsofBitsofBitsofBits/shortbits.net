@@ -29,6 +29,7 @@ npx playwright install chromium
 npm run test:browser
 node scripts/resume-browser.mjs --root .site-build
 node scripts/career-dates-browser.mjs --root .site-build
+node scripts/social-links-browser.mjs --root .site-build
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
 node scripts/media-player-browser.mjs --root .site-build

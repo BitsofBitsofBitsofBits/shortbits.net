@@ -37,6 +37,7 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec(await readFile(new URL("../supabase/migrations/20261028070000_builtin_message_pool_settings.sql", import.meta.url), "utf8"));
     await db.exec("alter table site_resume_entries add position integer default 1, add technologies text, add enabled boolean default false");
     await db.exec(await readFile(new URL("../supabase/migrations/20261028093000_resume_skills.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261028180000_social_links.sql", import.meta.url), "utf8"));
     await db.exec("set role anon");
     await assert.rejects(db.query("select public.export_site_content()"), /permission denied/);
     await assert.rejects(db.query("select public.restore_site_content('{}'::jsonb)"), /permission denied/);
@@ -49,7 +50,8 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("insert into site_message_pools(id,title,schedule,mode,enabled) values ('easter','Backup Easter','automatic','exclusive',false)");
     await db.exec("update site_message_settings set timezone = 'America/New_York'");
     const exported = (await db.query("select public.export_site_content() as backup")).rows[0].backup;
-    assert.equal(Object.keys(exported.tables).length, names.length + 6);
+    assert.equal(Object.keys(exported.tables).length, names.length + 7);
+    assert.equal(exported.tables.site_social_links.length, 11);
     assert.equal(exported.tables.site_resume_skills.length, 6);
     assert.equal(exported.tables.site_featured_project[0].enabled, false);
     assert.equal(exported.tables.site_creators[0].title, "Original creator");
@@ -62,11 +64,13 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("delete from site_creators");
     await db.exec("delete from site_featured_project");
     await db.exec("delete from site_resume_skills");
+    await db.exec("delete from site_social_links");
     await db.exec("delete from site_message_catalog");
     await db.exec("delete from site_message_pools");
     await db.exec("update site_message_settings set timezone = 'UTC'");
     const result = (await db.query("select public.restore_site_content($1::jsonb) as result", [JSON.stringify(exported)])).rows[0].result;
-    assert.deepEqual(result, { rows: 26, tables: 19 });
+    assert.deepEqual(result, { rows: 37, tables: 20 });
+    assert.equal((await db.query("select label from site_social_links order by position")).rows[0].label, "GITHUB");
     assert.equal((await db.query("select category from site_resume_skills order by position")).rows[0].category, "Systems & identity");
     assert.equal((await db.query("select title from site_featured_project")).rows[0].title, "BITSOFBITS WEBSITE");
     assert.equal((await db.query("select enabled from site_featured_project")).rows[0].enabled, false);

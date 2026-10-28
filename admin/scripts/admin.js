@@ -682,7 +682,30 @@ const nowFields = [
   "playing",
   "reading",
 ];
+const socialLinksForm = document.querySelector("#social-links-form");
+const socialLinksStatus = document.querySelector("#social-links-status");
+const socialLinksSubmit = document.querySelector("#social-links-submit");
 const repeatableEditors = {
+  socialLinks: {
+    table: "site_social_links",
+    container: document.querySelector("#social-link-slots"),
+    addButton: document.querySelector("#social-link-add"),
+    status: socialLinksStatus,
+    itemName: "social link",
+    fields: [
+      { key: "label", label: "LABEL", maxLength: 100 },
+      { key: "description", label: "DESCRIPTION", maxLength: 300 },
+      { key: "url", label: "DESTINATION (HTTPS OR /LOCAL/PATH)", maxLength: 2000 },
+      { key: "icon", label: "BUILT-IN ICON", options: [["", "Text only"], ...Object.keys(window.SocialLinks.icons).map(name => [name, name])] },
+      { key: "image_url", label: "CUSTOM ICON IMAGE URL (OPTIONAL)", maxLength: 2000 },
+      { key: "icon_text", label: "TEXT FALLBACK", maxLength: 8 },
+      { key: "color", label: "ACCENT COLOR", type: "color", defaultValue: "#66ff9a" },
+      { key: "sort_order", label: "DISPLAY ORDER (LOWER FIRST)", type: "number", defaultValue: "0" },
+      { key: "personal", label: "SHOW ON PERSONAL SITE", type: "checkbox", defaultValue: true },
+      { key: "professional", label: "SHOW ON PROFESSIONAL SITE", type: "checkbox", defaultValue: false },
+      { key: "new_tab", label: "OPEN IN NEW TAB", type: "checkbox", defaultValue: true },
+    ],
+  },
   playlists: {
     table: "spotify_featured_playlists",
     container: playlistSlots,
@@ -826,11 +849,14 @@ let temporaryEntryId = 0;
 let pendingBlogImagePath = "";
 
 function createAdminField(labelText, name, options = {}) {
+  if (options.type === "checkbox") {
+    return createAdminCheckbox(labelText, name, { ...options, checked: options.value === true });
+  }
   const label = document.createElement("label");
   const labelCopy = document.createElement("span");
   const field = options.multiline
     ? document.createElement("textarea")
-    : document.createElement("input");
+    : document.createElement(options.options ? "select" : "input");
   labelCopy.textContent = labelText;
   field.name = name;
   if (options.type) {
@@ -843,6 +869,15 @@ function createAdminField(labelText, name, options = {}) {
     field.dataset.entryField = options.fieldKey;
   }
   field.value = options.value ?? "";
+  if (options.options) {
+    for (const [value, text] of options.options) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text;
+      field.append(option);
+    }
+    field.value = options.value ?? "";
+  }
   label.append(labelCopy, field);
   return label;
 }
@@ -969,6 +1004,28 @@ function createRepeatableEntry(editor, entry = {}) {
   });
   if (editor === repeatableEditors.resume) {
     addRoleDateFields(fieldset, entryKey);
+  }
+  if (editor === repeatableEditors.socialLinks) {
+    const preview = document.createElement("div");
+    preview.className = "social-link-preview";
+    preview.inert = true;
+    preview.setAttribute("aria-label", "Social link preview");
+    function updatePreview() {
+      const row = Object.fromEntries(editor.fields.map(field => {
+        const input = fieldset.querySelector(`[data-entry-field="${field.key}"]`);
+        return [field.key, field.type === "checkbox" ? input.checked
+          : field.type === "number" ? Number(input.value) : input.value.trim()];
+      }));
+      if (window.SocialLinks.validate(row)) {
+        preview.replaceChildren(window.SocialLinks.anchor(row, document, true));
+      } else {
+        preview.textContent = "Enter a label and valid destination to preview this link.";
+      }
+    }
+    fieldset.addEventListener("input", updatePreview);
+    fieldset.addEventListener("change", updatePreview);
+    fieldset.append(preview);
+    updatePreview();
   }
   if (editor === repeatableEditors.creators) {
     const lookup = document.createElement("button");
@@ -1111,10 +1168,8 @@ function collectRepeatableEntries(editor) {
           : null,
       };
       editor.fields.forEach((field) => {
-        entry[field.key] = fieldset
-          .querySelector(`[data-entry-field="${field.key}"]`)
-          .value
-          .trim();
+        const input = fieldset.querySelector(`[data-entry-field="${field.key}"]`);
+        entry[field.key] = field.type === "checkbox" ? input.checked : input.value.trim();
       });
       entry.enabled = fieldset
         .querySelector('[data-entry-field="enabled"]')
@@ -1130,7 +1185,8 @@ async function syncRepeatableEntries(editor, entries, updatedAt) {
     const values = Object.fromEntries(
       editor.fields.map((field) => [
         field.key,
-        field.type === "number" ? Number(entry[field.key]) : entry[field.key] || null,
+        field.type === "number" ? Number(entry[field.key])
+          : field.type === "checkbox" ? entry[field.key] : entry[field.key] || null,
       ]),
     );
     const payload = {
@@ -1814,6 +1870,25 @@ async function loadCreators() {
   }
   renderRepeatableEntries(repeatableEditors.creators, data);
   setAdminStatus(creatorsAdminStatus, `${data.length} creator(s) loaded.`, "success");
+  return true;
+}
+
+async function loadSocialLinks() {
+  socialLinksSubmit.disabled = true;
+  const editor = repeatableEditors.socialLinks;
+  editor.unavailable = true;
+  setAdminStatus(socialLinksStatus, "Loading social links...");
+  const { data, error } = await adminClient.from(editor.table).select("*")
+    .order("sort_order", { ascending: true }).order("position", { ascending: true });
+  if (error) {
+    console.error("Unable to load social links:", error);
+    setAdminStatus(socialLinksStatus, `Social links failed to load: ${error.message}. Reload to retry.`, "error");
+    return false;
+  }
+  renderRepeatableEntries(editor, data);
+  editor.unavailable = false;
+  socialLinksSubmit.disabled = false;
+  setAdminStatus(socialLinksStatus, `${data.length} social link(s) loaded.`, "success");
   return true;
 }
 
@@ -2859,6 +2934,7 @@ async function showInbox() {
     loadChangelogContent(),
     loadFavoriteGames(),
     loadCreators(),
+    loadSocialLinks(),
     loadHardware(),
     loadHardwareDevices(),
     loadBlogPosts(),
@@ -2892,6 +2968,43 @@ try {
 }
 
 if (adminClient) {
+  socialLinksForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const editor = repeatableEditors.socialLinks;
+    if (editor.unavailable) {
+      setAdminStatus(socialLinksStatus, "Social links are unavailable. Reload before saving.", "error");
+      return;
+    }
+    const entries = collectRepeatableEntries(editor);
+    const invalid = entries.some(entry => {
+      const orderValid = /^\d+$/.test(entry.sort_order) && Number(entry.sort_order) <= 2147483647;
+      if (!orderValid) return true;
+      const row = { ...entry, sort_order: Number(entry.sort_order) };
+      return entry.enabled ? !window.SocialLinks.validate(row)
+        : (entry.url && !window.SocialLinks.safeUrl(entry.url))
+          || (entry.image_url && !window.SocialLinks.safeUrl(entry.image_url));
+    });
+    if (invalid) {
+      setAdminStatus(socialLinksStatus,
+        "Published links need a label and a valid HTTPS or /local/path destination. Image URLs use the same rules. Display order must be a non-negative integer.", "error");
+      return;
+    }
+    socialLinksSubmit.disabled = true;
+    setAdminStatus(socialLinksStatus, "Saving social links...");
+    try {
+      const failed = await syncRepeatableEntries(editor, entries, new Date().toISOString());
+      if (failed) throw new Error(failed.error.message);
+      if (await loadSocialLinks()) {
+        setAdminStatus(socialLinksStatus, "Social links saved. Public pages use the new list on their next load; static/no-JavaScript copies update on deployment.", "success");
+      }
+    } catch (error) {
+      console.error("Unable to save social links:", error);
+      editor.unavailable = true;
+      setAdminStatus(socialLinksStatus, `Social links save failed; some changes may have saved: ${error.message}. Reload before retrying.`, "error");
+    } finally {
+      socialLinksSubmit.disabled = editor.unavailable;
+    }
+  });
   document.querySelector("#blog-deployment-refresh").addEventListener("click", () => loadBlogPosts());
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();

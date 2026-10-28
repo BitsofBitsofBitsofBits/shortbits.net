@@ -4,7 +4,7 @@
     "site_hardware", "site_hardware_machine_order", "site_message_catalog", "site_message_pools",
     "site_message_settings", "site_now",
     "site_resume_certifications", "site_resume_education", "site_resume_entries",
-    "site_resume_profile", "site_resume_skills", "spotify_featured_playlists", "spotify_featured_tracks",
+    "site_resume_profile", "site_resume_skills", "site_social_links", "spotify_featured_playlists", "spotify_featured_tracks",
   ];
   function validate(backup) {
     if (!backup || typeof backup !== "object" || Array.isArray(backup)

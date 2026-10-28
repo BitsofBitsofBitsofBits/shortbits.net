@@ -2,94 +2,7 @@ const repositoryUrl = "https://github.com/BitsofBitsofBitsofBits/shortbits.net";
 const siteUrl = "https://www.shortbits.net/online/";
 const sourceUrl = repositoryUrl;
 
-const links = [
-  {
-    label: "GITHUB",
-    description: "Tiny Bits Production Factory",
-    url: "https://github.com/BitsofBitsofBitsofBits",
-    icon: "GH",
-    iconPath: "/shared/images/github.svg",
-    color: "#66ff9a",
-  },
-  {
-    label: "PROJECTS",
-    description: "Things that escaped localhost",
-    url: "https://github.com/BitsofBitsofBitsofBits?tab=repositories",
-    icon: "01",
-    color: "#63d8ff",
-  },
-  {
-    label: "BLOG.LOG",
-    description: "Longer-form Bits and project notes",
-    url: "/blog/",
-    icon: "BL",
-    color: "#ffcf66",
-    external: false,
-  },
-  {
-    label: "BLUESKY",
-    description: "Flying blue Bits in the Sky",
-    url: "https://bsky.app/profile/shortbits.net",
-    icon: "BS",
-    iconPath: "/shared/images/bluesky.svg",
-    color: "#7aa7ff",
-  },
-  {
-    label: "YOUTUBE",
-    description: "Occasionally moving pixels",
-    url: "https://www.youtube.com/@BitsofBitsofBits",
-    icon: "YT",
-    iconPath: "/shared/images/youtube.svg",
-    color: "#ff6d7a",
-  },
-  {
-    label: "TWITCH",
-    description: "Sometimes my Bits Twitch a little.",
-    url: "https://www.twitch.tv/bitsofbitsofbits",
-    icon: "TV",
-    iconPath: "/shared/images/twitch.svg",
-    color: "#b99aff",
-  },
-  {
-    label: "DISCORD",
-    description: "Wumpus stole my bits :(",
-    url: "https://discord.com/users/202220288459538442",
-    icon: "DC",
-    iconPath: "/shared/images/discord.svg",
-    color: "#5865f2",
-  },
-  {
-    label: "LINKEDIN",
-    description: "Professional Bits",
-    url: "https://www.linkedin.com/in/calebkmasters/",
-    icon: "IN",
-    iconPath: "/shared/images/linkedin.svg",
-    color: "#0a66c2",
-  },
-  {
-    label: "Spotify",
-    description: "Musical Bits",
-    url: "https://open.spotify.com/user/22fainfo6ycgibjw5xlhmp3ba",
-    icon: "SP",
-    iconPath: "/shared/images/spotify.svg",
-    color: "#1db954",
-  },
-  { label: "Facebook",
-    description: "Bits with a book full of faces",
-    url: "https://www.facebook.com/calebkmasters",
-    icon: "FB",
-    iconPath: "/shared/images/facebook.svg",
-    color: "#1877f2",
-  },
-  {
-    label: "REDDIT",
-    description: "Bits in the hivemind",
-    url: "https://www.reddit.com/user/BitsofBitsofBits/",
-    icon: "RD",
-    iconPath: "/shared/images/reddit.svg?v=reddit-1",
-    color: "#ff4500",
-  },
-];
+let links = window.SocialLinks.ordered(window.SocialLinks.initial(document), "personal");
 
 const interfaceThemes = window.BITS_INTERFACE_THEMES ?? [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
@@ -877,48 +790,25 @@ function activateRare404Card() {
 }
 
 function renderLinks(allowRare404 = true) {
-  linkGrid.innerHTML = links
-    .map(
-      ({ label, description, url, icon, iconPath, color, external = true }) => `
-        <a
-          class="link-card"
-          href="${url}"
-          style="--card-accent: ${color}"
-          ${external ? 'target="_blank" rel="noreferrer"' : ""}
-        >
-          <span class="link-icon" aria-hidden="true">
-            ${
-              iconPath
-                ? `<img class="link-icon-image" src="${iconPath}" alt="">`
-                : icon
-            }
-          </span>
-          <span class="link-copy">
-            <span class="link-title">${label}</span>
-            <span class="link-description">${description}</span>
-          </span>
-          <span class="link-arrow" aria-hidden="true">${external ? "↗" : "→"}</span>
-        </a>
-      `,
-    )
-    .join("");
+  linkGrid.replaceChildren(...links.map(row => window.SocialLinks.anchor(row, document, true)));
 
   linkCount.textContent = `${String(links.length).padStart(2, "0")} NODES`;
 
   linkGrid.querySelectorAll(".link-card").forEach((card) => {
     const arrow = card.querySelector(".link-arrow");
+    const normalArrow = arrow.textContent;
     card.addEventListener("click", () => {
       sessionMetrics.linksOpened += 1;
     });
     card.addEventListener("pointerenter", () => {
       if (Math.random() < 0.01) {
-        const rareArrows = ["↗ probably safe", "↗ here goes nothing", "↗ another tab"];
+        const rareArrows = [`${normalArrow} probably safe`, `${normalArrow} here goes nothing`, `${normalArrow} follow link`];
         arrow.textContent = rareArrows[Math.floor(Math.random() * rareArrows.length)];
         card.dataset.rareHover = "true";
       }
     });
     card.addEventListener("pointerleave", () => {
-      arrow.textContent = "↗";
+      arrow.textContent = normalArrow;
       delete card.dataset.rareHover;
     });
   });
@@ -3742,6 +3632,13 @@ window.BITS_ACHIEVEMENTS = {
 
 updateAchievementCount();
 renderLinks();
+window.SocialLinks.load().then(rows => {
+  links = window.SocialLinks.ordered(rows, "personal");
+  renderLinks(false);
+}).catch(error => {
+  console.error("Unable to refresh social links; retaining saved links:", error);
+  linkCount.textContent = `${String(links.length).padStart(2, "0")} NODES (OFFLINE)`;
+});
 document.querySelectorAll(".featured-project-actions a").forEach((link) => {
   link.addEventListener("click", () => {
     sessionMetrics.linksOpened += 1;

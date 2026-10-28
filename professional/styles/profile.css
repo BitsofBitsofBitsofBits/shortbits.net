@@ -134,6 +134,34 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
   gap: 20px;
 }
 
+.profile-socials[hidden] {
+  display: none;
+}
+
+.profile-socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.profile-socials .link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  font-size: 0.65rem;
+}
+
+.profile-socials .link-icon-image {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
 .profile-header-tools {
   display: grid;
   width: min(640px, 100%);

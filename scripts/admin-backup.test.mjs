@@ -19,6 +19,7 @@ test("accepts complete versioned editorial backups without private tables", () =
   assert.ok(tables.includes("site_message_pools"));
   assert.ok(tables.includes("site_message_settings"));
   assert.ok(tables.includes("site_resume_skills"));
+  assert.ok(tables.includes("site_social_links"));
   for (const name of ["messages", "site_hardware_devices", "site_short_links", "arcade_scores"]) assert.ok(!tables.includes(name));
 });
 test("rejects incomplete, unknown, malformed, and oversized content", () => {

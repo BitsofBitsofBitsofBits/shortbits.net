@@ -41,6 +41,13 @@ The shared Skills editor requires
 It seeds the existing Toolkit categories, imports unique technologies only
 from published experience entries, and leaves original per-role data intact.
 The professional page, CAREER.SYS, and PDF use the same published Skills groups.
+The managed social-link feature additionally requires
+`20261028180000_social_links.sql`. It seeds the existing links, adds per-site
+visibility and icon/order controls, and includes `site_social_links` in content
+backups. Static builds require this table and render the published links into
+both sites; live pages fetch fresh links on load. Export a fresh backup after
+applying it.
+
 Export a fresh content backup after this migration: the exact-schema backup
 format now includes `site_resume_skills`, and older backups without that table
 are rejected rather than silently dropping Skills.

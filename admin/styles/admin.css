@@ -2314,3 +2314,6 @@ body.admin-center.ac-panel-open {
     width: 100%;
   }
 }
+.social-link-preview .link-card {
+  pointer-events: none;
+}

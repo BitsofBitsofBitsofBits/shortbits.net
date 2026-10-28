@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { build, transform } from "esbuild";
 import { buildResume } from "./build-resume.mjs";
+import { buildSocialLinks } from "./build-social-links.mjs";
 import { buildSeo } from "./build-seo.mjs";
 import { parseHTML } from "linkedom";
 import { filterCssForMarkup } from "./build-theme-css.mjs";
@@ -161,6 +162,7 @@ export async function buildSite(output, contentInput, resumeInput) {
     root: destination,
     input: resumeInput || (contentInput ? join(root, "scripts", "fixtures", "resume-data.json") : undefined),
   });
+  await buildSocialLinks(destination, { offline: Boolean(contentInput) });
   await buildSeo(destination, await filesUnder(destination));
   await optimizeStyles(destination);
   await optimizeStartup(destination);

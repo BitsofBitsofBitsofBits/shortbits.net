@@ -91,6 +91,8 @@
     <script src="/professional/scripts/profile.js?v=profile-11" defer></script>
     <script src="/shared/scripts/contact.js?v=contact-8" defer></script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/shared/scripts/social-links.js?v=social-1" defer></script>
+    <script src="/shared/scripts/social-links-profile.js?v=social-1" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
   </head>
@@ -136,7 +138,6 @@
             <div class="profile-actions">
               <a class="profile-button" href="#contact">Get in touch <span aria-hidden="true">&rarr;</span></a>
               <a class="profile-text-link" href="/professional/resume/">Résumé (PDF-ready) <span aria-hidden="true">&rarr;</span></a>
-              <a class="profile-text-link" href="https://www.linkedin.com/in/calebkmasters/" target="_blank" rel="noreferrer">View LinkedIn <span aria-hidden="true">&nearr;</span></a>
             </div>
           </div>
           <aside class="profile-overview" aria-label="Profile summary">
@@ -148,7 +149,7 @@
               <div><dt>FOCUS</dt><dd>IT support &amp; systems administration</dd></div>
               <div><dt>APPROACH</dt><dd>Hands-on learning.<br>Practical automation.</dd></div>
             </dl>
-            <div class="profile-socials">
+            <div class="profile-socials" data-social-links>
               <a href="https://www.linkedin.com/in/calebkmasters/" target="_blank" rel="noreferrer">LinkedIn &nearr;</a>
               <a href="https://github.com/BitsofBitsofBitsofBits" target="_blank" rel="noreferrer">GitHub &nearr;</a>
             </div>
@@ -158,7 +159,6 @@
         <section id="experience" class="profile-section" aria-labelledby="experience-heading">
           <header class="profile-section-heading">
             <div><p class="profile-kicker">EXPERIENCE / 02</p><h2 id="experience-heading">People, platforms, and problem-solving.</h2></div>
-            <a class="profile-text-link" href="https://www.linkedin.com/in/calebkmasters/details/experience/" target="_blank" rel="noreferrer">Full experience on LinkedIn &nearr;</a>
           </header>
           <div id="profile-experience-fallback" class="profile-experience">
             <article>
@@ -255,8 +255,9 @@
           <div>
             <p class="profile-kicker">CONTACT / 06</p>
             <h2 id="contact-heading">Start a conversation.</h2>
-            <p>For professional opportunities or questions about my work, send a message or connect on LinkedIn.</p>
-            <a class="profile-text-link" href="https://www.linkedin.com/in/calebkmasters/" target="_blank" rel="noreferrer">Connect on LinkedIn &nearr;</a>
+            <p>For professional opportunities or questions about my work, send a message or use the links below.</p>
+            <div class="profile-socials" data-social-links></div>
+            <p class="profile-help" data-social-links-status role="status"></p>
           </div>
           <form id="contact-form" class="contact-form" data-tone="professional">
             <div class="contact-fields">
@@ -270,13 +271,13 @@
               <p id="contact-status" class="form-status" role="status" aria-live="polite">Messages are encrypted in transit and visible only to the site owner.</p>
               <button id="contact-submit" type="submit" disabled>Send message</button>
             </div>
-            <noscript><p>This form requires JavaScript. Please <a href="https://www.linkedin.com/in/calebkmasters/">contact me on LinkedIn</a> instead.</p></noscript>
+            <noscript><p>This form requires JavaScript. Please use the social links beside the form instead.</p></noscript>
           </form>
         </section>
       </main>
       <footer class="profile-footer">
         <p>Caleb K Masters <span>/</span> Carbondale, Kansas</p>
-        <nav aria-label="Footer navigation"><a href="https://www.linkedin.com/in/calebkmasters/">LinkedIn</a><a href="https://github.com/BitsofBitsofBitsofBits">GitHub</a><a href="/online/">Personal site &nearr;</a><a href="/?choose">Switch site</a></nav>
+        <nav aria-label="Footer navigation"><span class="profile-socials" data-social-links></span><a href="/online/">Personal site &nearr;</a><a href="/?choose">Switch site</a></nav>
       </footer>
     </div>
   </body>
