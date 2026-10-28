@@ -10,6 +10,27 @@
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
 
+- A dedicated **Pride** family in Online's View menu and Control Panel, and
+  **PRIDE** section in native theme dropdowns. All 20 options are available
+  year-round: **PRIDE (Progress Pride)**, Rainbow, Non-Binary, Transgender,
+  Lesbian (five-stripe sunset), Gay (seven-stripe green/blue), Bisexual,
+  Pansexual, Asexual, Aromantic, Aroace (sunset), Agender, Genderfluid,
+  Genderqueer, Intersex, Polysexual, Omnisexual, Demisexual, Demiromantic,
+  and LGBTQ Rainbow (Philadelphia's black/brown-inclusive flag).
+  These are flag-inspired palettes, not a claim that one design represents
+  every person in a community. They share a single lazy-loaded stylesheet,
+  with distinct flag colors, a decorative header flag, a static color ribbon,
+  and subtle flag backgrounds. The Progress Pride flag includes its
+  black/brown/trans chevrons; Intersex uses a purple ring on yellow.
+  Dark/light modes keep text on readable neutral surfaces rather than
+  placing it directly on flag stripes. Selection persists across public
+  pages, including `/nowplaying/`, without experimental layout chrome.
+  Effects-off/high-contrast hides the background/ribbon, forced colors hides
+  decorative flags, and no new motion or external images are introduced.
+  Run `node scripts/pride-themes-browser.mjs --root .site-build` to validate
+  every palette, both schemes, desktop/mobile layout, picker grouping,
+  persistence, lazy loading, and accessibility.
+
 - Online's View menu and Control Panel use expandable theme families with
   subthemes and variants. For example, **macOS > Aqua > Graphite** or
   **Windows > Aero Glass > Vista**. The selected path is shown on the picker;
@@ -19,7 +40,8 @@
   Run `node scripts/theme-picker-browser.mjs --root .site-build` to verify
   desktop/mobile selection, synchronization, persistence, and accessibility.
 
-- Fifty-five persistent full-interface themes, each with its own fixed accent,
+- Fifty-five original persistent full-interface themes, alongside the 20 Pride
+  themes above, each with its own fixed accent,
   background, window treatment, typography, and scrollbar. These include
   Default, Aurora, Cozy Blossom, Mica, Fluent, Midnight OLED, macOS, Terminal,
   Vaporwave, Amber CRT, Y2K Silver, Cyberpunk, DOS Blue, Windows 95, Windows XP
@@ -30,7 +52,7 @@
   Mac OS 9 Platinum, Winamp, iPod Classic, Ubuntu, PlayStation, Xbox, E-Ink
   Reader, Blueprint, Spacecraft Console, Frutiger Eco, Holographic Foil,
   Newspaper, Workbench, Stickerbook, Night Train, and Museum Terminal.
-  The ten newest themes support dark/light modes and load their stylesheets
+  The ten collection themes support dark/light modes and load their stylesheets
   (including their shared collection styles) only while selected. E-Ink,
   Frutiger Eco, Newspaper, Stickerbook, and Museum default to light mode.
   Holographic uses a pointer-responsive foil border without a continuous

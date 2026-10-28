@@ -94,6 +94,30 @@ test("catalog startup never waits for the network, validates all seeded messages
   assert.deepEqual(JSON.parse(JSON.stringify(target)).map((row) => [row.text, row.weight]),
     defaults.filter((row) => row.profile === "standard" && row.category === "messages").map((row) => [row.text, row.weight]));
 });
+test("every message category retains raw placeholders through binding, cache and fresh snapshots", async () => {
+  const rows = [...new Set(defaults.map(row => row.category))].map((category, index) => ({
+    ...defaults.find(row => row.category === category), position: index + 1, profile: "standard",
+    text: `${category}: %year% / %hostname%`, markup: false, corrected_text: null, author: null,
+  }));
+  const app = setup({ rows });
+  app.window.location = { hostname: "catalog.test" };
+  assert.equal(await app.window.BITS_MESSAGE_CATALOG.refresh(), true);
+  assert.equal(rows.length, Object.keys(app.window.BITS_MESSAGE_CATALOG.categories).length);
+  const globals = { messages: "BITS_MESSAGES", activities: "BITS_ACTIVITIES", shutdownMessages: "BITS_SHUTDOWN_MESSAGES" };
+  for (const row of rows) {
+    const target = app.window[globals[row.category]] ?? [];
+    app.window.BITS_MESSAGE_CATALOG.bind("standard", row.category, target);
+    const captured = app.window.BITS_MESSAGE_TEXT.snapshot(target[0]);
+    assert.equal(app.window.BITS_MESSAGE_TEXT.plainText(captured), `${row.category}: 2026 / catalog.test`);
+    app.setDate("2027-08-10T12:00:00");
+    assert.equal(app.window.BITS_MESSAGE_TEXT.plainText(captured), `${row.category}: 2026 / catalog.test`);
+    assert.equal(app.window.BITS_MESSAGE_TEXT.plainText(app.window.BITS_MESSAGE_TEXT.snapshot(target[0])),
+      `${row.category}: 2027 / catalog.test`);
+    assert.equal(typeof target[0] === "string" ? target[0] : target[0].text, row.text);
+    app.setDate("2026-08-10T12:00:00");
+  }
+  assert.ok([...app.storage.values()].some(value => value.includes("%year%")));
+});
 test("database edits and appearance fields update weighted arrays without accumulating seasonal duplicates", async () => {
   for (const [date, season, mode] of [
     ["2026-08-10T12:00:00", null, "standard"], ["2026-04-05T12:00:00", "easter", "additive"], ["2026-12-25T12:00:00", "christmas", "exclusive"],

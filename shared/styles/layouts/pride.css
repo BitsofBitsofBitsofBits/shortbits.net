@@ -1,0 +1,207 @@
+:root[data-interface-theme="pride"],
+:root[data-interface-theme^="pride-"] {
+  color-scheme: dark;
+  --pride-color: #b69aff;
+  --pride-stripes: #e40303 0% 16.667%, #ff8c00 16.667% 33.333%, #ffed00 33.333% 50%, #008026 50% 66.667%, #004dff 66.667% 83.333%, #750787 83.333% 100%;
+  --pride-flag: linear-gradient(180deg, var(--pride-stripes));
+  --accent: color-mix(in srgb, var(--pride-color) 60%, white);
+  --accent-rgb: 182, 154, 255;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --bg: #100f18;
+  --panel: #191722;
+  --panel-2: #252131;
+  --panel-strong: #302b3e;
+  --ink: #f7f4fc;
+  --muted: #bbb3cb;
+  --warning: #ffe193;
+  --border: #51465e;
+  --shell-bg: #191722;
+  --admin-bg: #191722;
+  --overlay-bg: #100f18;
+  --shadow: 0 16px 48px #0004;
+  --spotify-accent: var(--accent);
+  --icon-filter: brightness(0) invert(1);
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0.025;
+  --body-background:
+    linear-gradient(color-mix(in srgb, var(--bg) 94%, transparent), color-mix(in srgb, var(--bg) 94%, transparent)),
+    var(--pride-flag), var(--bg);
+  --body-background-size: auto, 100% 100vh, auto;
+  --control-radius: 6px;
+  --shell-radius: 12px;
+  --window-radius: 10px;
+  --scrollbar-thumb-color: var(--accent);
+  --scrollbar-thumb-background: var(--accent);
+  --scrollbar-thumb-hover: var(--ink);
+  --scrollbar-thumb-active: var(--accent);
+}
+
+:root[data-interface-theme="pride"][data-color-scheme="light"],
+:root[data-interface-theme^="pride-"][data-color-scheme="light"] {
+  color-scheme: light;
+  --accent: color-mix(in srgb, var(--pride-color) 42%, #171022);
+  --bg: #faf8fc;
+  --panel: #ffffff;
+  --panel-2: #f0ebf5;
+  --panel-strong: #e8dfef;
+  --ink: #251b30;
+  --muted: #64536f;
+  --warning: #784300;
+  --border: #b9a7c7;
+  --shell-bg: #ffffff;
+  --admin-bg: #ffffff;
+  --overlay-bg: #faf8fc;
+  --shadow: 0 16px 48px #251b3012;
+  --icon-filter: brightness(0);
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"])[data-color-scheme="light"] #settings-reset-all {
+  border-color: #a51d43;
+  color: #a51d43;
+}
+
+:root[data-interface-theme="pride"] {
+  --pride-flag: url("/shared/images/flags/progress-pride.svg");
+}
+
+:root[data-interface-theme="pride-non-binary"] {
+  --pride-color: #fff430;
+  --pride-stripes: #fff430 0% 25%, #fff 25% 50%, #9c59d1 50% 75%, #2d2d2d 75% 100%;
+}
+
+:root[data-interface-theme="pride-transgender"] {
+  --pride-color: #5bcefa;
+  --pride-stripes: #5bcefa 0% 20%, #f5a9b8 20% 40%, #fff 40% 60%, #f5a9b8 60% 80%, #5bcefa 80% 100%;
+}
+
+:root[data-interface-theme="pride-lesbian"] {
+  --pride-color: #ff9a56;
+  --pride-stripes: #d52d00 0% 20%, #ff9a56 20% 40%, #fff 40% 60%, #d362a4 60% 80%, #a30262 80% 100%;
+}
+
+:root[data-interface-theme="pride-gay"] {
+  --pride-color: #26ceaa;
+  --pride-stripes: #078d70 0% 14.286%, #26ceaa 14.286% 28.571%, #98e8c1 28.571% 42.857%, #fff 42.857% 57.143%, #7bade2 57.143% 71.429%, #5049cc 71.429% 85.714%, #3d1a78 85.714% 100%;
+}
+
+:root[data-interface-theme="pride-bisexual"] {
+  --pride-color: #d60270;
+  --pride-stripes: #d60270 0% 40%, #9b4f96 40% 60%, #0038a8 60% 100%;
+}
+
+:root[data-interface-theme="pride-pansexual"] {
+  --pride-color: #ff218c;
+  --pride-stripes: #ff218c 0% 33.333%, #ffd800 33.333% 66.667%, #21b1ff 66.667% 100%;
+}
+
+:root[data-interface-theme="pride-asexual"] {
+  --pride-color: #a58acb;
+  --pride-stripes: #000 0% 25%, #a3a3a3 25% 50%, #fff 50% 75%, #800080 75% 100%;
+}
+
+:root[data-interface-theme="pride-aromantic"] {
+  --pride-color: #3da542;
+  --pride-stripes: #3da542 0% 20%, #a7d379 20% 40%, #fff 40% 60%, #a9a9a9 60% 80%, #000 80% 100%;
+}
+
+:root[data-interface-theme="pride-aroace"] {
+  --pride-color: #e28c00;
+  --pride-stripes: #e28c00 0% 20%, #eccd00 20% 40%, #fff 40% 60%, #62aedd 60% 80%, #203856 80% 100%;
+}
+
+:root[data-interface-theme="pride-agender"] {
+  --pride-color: #b8f483;
+  --pride-stripes: #000 0% 14.286%, #b9b9b9 14.286% 28.571%, #fff 28.571% 42.857%, #b8f483 42.857% 57.143%, #fff 57.143% 71.429%, #b9b9b9 71.429% 85.714%, #000 85.714% 100%;
+}
+
+:root[data-interface-theme="pride-genderfluid"] {
+  --pride-color: #ff75a2;
+  --pride-stripes: #ff75a2 0% 20%, #fff 20% 40%, #be18d6 40% 60%, #000 60% 80%, #333ebd 80% 100%;
+}
+
+:root[data-interface-theme="pride-genderqueer"] {
+  --pride-color: #b57edc;
+  --pride-stripes: #b57edc 0% 33.333%, #fff 33.333% 66.667%, #4a8123 66.667% 100%;
+}
+
+:root[data-interface-theme="pride-intersex"] {
+  --pride-color: #a05aba;
+  --pride-stripes: #ffd800 0% 50%, #7902aa 50% 100%;
+  --pride-flag: radial-gradient(circle at center, #ffd800 0% 24%, #7902aa 24% 31%, #ffd800 31% 100%);
+}
+
+:root[data-interface-theme="pride-polysexual"] {
+  --pride-color: #f61cb9;
+  --pride-stripes: #f61cb9 0% 33.333%, #07d569 33.333% 66.667%, #1c92f6 66.667% 100%;
+}
+
+:root[data-interface-theme="pride-omnisexual"] {
+  --pride-color: #ff9ace;
+  --pride-stripes: #ff9ace 0% 20%, #ff53bf 20% 40%, #200044 40% 60%, #6760fe 60% 80%, #8ea6ff 80% 100%;
+}
+
+:root[data-interface-theme="pride-demisexual"] {
+  --pride-color: #a58acb;
+  --pride-stripes: #fff 0% 40%, #800080 40% 60%, #a3a3a3 60% 100%;
+  --pride-flag: conic-gradient(from 225deg at 40% 50%, #000 0deg 90deg, transparent 90deg),
+    linear-gradient(180deg, var(--pride-stripes));
+}
+
+:root[data-interface-theme="pride-demiromantic"] {
+  --pride-color: #3da542;
+  --pride-stripes: #fff 0% 40%, #3da542 40% 60%, #a3a3a3 60% 100%;
+  --pride-flag: conic-gradient(from 225deg at 40% 50%, #000 0deg 90deg, transparent 90deg),
+    linear-gradient(180deg, var(--pride-stripes));
+}
+
+:root[data-interface-theme="pride-lgbtq"] {
+  --pride-stripes: #000 0% 12.5%, #784f17 12.5% 25%, #e40303 25% 37.5%, #ff8c00 37.5% 50%, #ffed00 50% 62.5%, #008026 62.5% 75%, #004dff 75% 87.5%, #750787 87.5% 100%;
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) body::before {
+  position: fixed;
+  z-index: 1000;
+  inset: 0 0 auto;
+  height: 6px;
+  background: linear-gradient(90deg, var(--pride-stripes));
+  pointer-events: none;
+  content: "";
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) :is(.shell, .chooser-terminal, .profile-layout, .blog-shell, .presentation-header) {
+  border-top: 6px solid var(--accent);
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) :is(.profile-brand, .chooser-bar, .system-bar, .presentation-brand)::after {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 30px;
+  margin-left: 12px;
+  border: 1px solid var(--border);
+  background: var(--pride-flag) center / cover no-repeat;
+  vertical-align: middle;
+  content: "";
+}
+
+@media (forced-colors: active) {
+  :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) body::before,
+  :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) :is(.profile-brand, .chooser-bar, .system-bar, .presentation-brand)::after {
+    display: none;
+  }
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]):is([data-effects="off"], [data-contrast="high"]) {
+  --body-background: var(--bg);
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]):is([data-effects="off"], [data-contrast="high"]) body::before {
+  display: none;
+}
+
+@media print {
+  :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) body::before {
+    display: none;
+  }
+}

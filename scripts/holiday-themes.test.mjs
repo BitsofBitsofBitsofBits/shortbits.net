@@ -95,6 +95,31 @@ test("fixed uppercase ASCII theme names keep the same alphabetical order without
   }
 });
 
+test("twenty Pride flags have a dedicated year-round family and native picker group", () => {
+  const expected = ["pride", "pride-rainbow", "pride-non-binary", "pride-transgender", "pride-lesbian",
+    "pride-gay", "pride-bisexual", "pride-pansexual", "pride-asexual", "pride-aromantic", "pride-aroace",
+    "pride-agender", "pride-genderfluid", "pride-genderqueer", "pride-intersex", "pride-polysexual",
+    "pride-omnisexual", "pride-demisexual", "pride-demiromantic", "pride-lgbtq"].sort();
+  for (const month of [1, 6, 10, 12]) {
+    const result = themesOn(2026, month, 10);
+    const pride = result.available.filter(theme => theme.pride);
+    assert.deepEqual(Array.from(pride, theme => theme.id).sort(), expected);
+    assert.deepEqual(Array.from(result.getGroups().find(group => group.name === "Pride").themes, theme => theme.id).sort(), expected);
+    const groups = result.buildOptions();
+    assert.deepEqual(groups.find(group => group.label === "PRIDE").children.map(option => option.value).sort(), expected);
+    assert.ok(groups.find(group => group.label === "STANDARD THEMES").children.every(option => !expected.includes(option.value)));
+    for (const theme of pride) {
+      assert.equal(theme.stylesheet, "pride");
+      assert.equal(theme.experimental, undefined);
+      assert.equal(theme.seasonal, undefined);
+      assert.equal(theme.schemes, undefined, "Pride themes support both color schemes");
+      assert.notEqual(theme.darkColor, theme.lightColor);
+      result.select(theme.id);
+      assert.equal(result.resolve(), theme.id);
+    }
+  }
+});
+
 for (const [year, month, day, theme] of [
   [2026, 2, 14, "valentines"],
   [2026, 3, 17, "st-patricks"],
@@ -202,7 +227,7 @@ test("group labels honor the picker formatter", () => {
   const debug = themesOn(2026, 8, 10, { "bits-theme-debug": "enabled" });
   const groups = debug.buildOptions((label) => label.toLowerCase().replace(/\b[a-z]/g, (letter) => letter.toUpperCase()))
     .filter((node) => node.tagName === "optgroup");
-  assert.deepEqual([...groups].map((group) => group.label), ["Standard Themes", "Special Themes", "Experimental Layouts"]);
+  assert.deepEqual([...groups].map((group) => group.label), ["Standard Themes", "Pride", "Special Themes", "Experimental Layouts"]);
 });
 
 test("normal seasonal availability remains unchanged without debug grouping", () => {
@@ -226,7 +251,7 @@ test("standard and experimental themes each appear once in their own group", () 
     for (const [label, experimental] of [["STANDARD THEMES", false], ["EXPERIMENTAL LAYOUTS", true]]) {
       assert.deepEqual(
         [...nodes.find((node) => node.label === label).children].map((node) => node.value),
-        [...result.available].filter((theme) => !theme.seasonal && Boolean(theme.experimental) === experimental)
+        [...result.available].filter((theme) => !theme.seasonal && !theme.pride && Boolean(theme.experimental) === experimental)
           .map((theme) => theme.id),
       );
     }

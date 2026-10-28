@@ -949,7 +949,7 @@ const rainbowColors = {
   light: ["#b4232f", "#a44800", "#746000", "#087a2a", "#006a8e", "#3155a6", "#743aa2"],
 };
 
-let currentMessage = pickWeightedOption(messages);
+let currentMessage = window.BITS_MESSAGE_TEXT.snapshot(pickWeightedOption(messages));
 let currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
 let currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
 let authorCharacterIndex = 0;
@@ -966,9 +966,9 @@ let displayedMessageHistoryIndex = displayedMessageHistory.length;
 function pickNextMessage() {
   if (forceTypoMessage || Math.random() < 0.008) {
     forceTypoMessage = false;
-    return { ...typoMessage };
+    return window.BITS_MESSAGE_TEXT.snapshot(typoMessage);
   }
-  return pickWeightedOption(messages);
+  return window.BITS_MESSAGE_TEXT.snapshot(pickWeightedOption(messages));
 }
 
 function renderMessageAuthor() {
@@ -978,7 +978,7 @@ function renderMessageAuthor() {
 
 function runTypoCorrection() {
   if (!currentMessage.correctedText) {
-    currentMessage = { ...typoMessage };
+    currentMessage = window.BITS_MESSAGE_TEXT.snapshot(typoMessage);
     currentAuthorCharacters = [];
     authorCharacterIndex = 0;
     renderMessageAuthor();
@@ -3177,7 +3177,7 @@ function showPreviousSplash(direction) {
     return;
   }
 
-  currentMessage = historicalMessage;
+  currentMessage = window.BITS_MESSAGE_TEXT.snapshot(historicalMessage);
   currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
   characterIndex = currentMessageCharacters.length;
   currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");

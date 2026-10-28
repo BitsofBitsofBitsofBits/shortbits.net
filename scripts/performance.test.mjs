@@ -377,6 +377,10 @@ test("staged theme stylesheet and runtime URLs contain exactly one build version
     vm.runInNewContext(`${staged.slice(start, end)}\nsyncThemeAssets({ id: "terminal", experimental: true });`, context);
     assert.equal(nodes.get("bits-theme-stylesheet").href, `/shared/styles/layouts/terminal.css?v=${version}`);
     assert.equal(nodes.get("bits-layout-runtime").src, `/shared/scripts/layouts/runtime.js?v=${version}`);
+    nodes.clear();
+    vm.runInNewContext(`${staged.slice(start, end)}\nsyncThemeAssets({ id: "pride-transgender", stylesheet: "pride" });`, context);
+    assert.equal(nodes.get("bits-theme-stylesheet").href, `/shared/styles/layouts/pride.css?v=${version}`);
+    assert.equal(nodes.has("bits-layout-runtime"), false, "Shared Pride CSS does not load experimental layout scripts");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

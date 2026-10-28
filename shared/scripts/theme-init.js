@@ -446,7 +446,33 @@ const baseInterfaceThemes = [
     desktopCapable: true,
   },
 ];
-const layoutAssetVersion = "layouts-8";
+for (const [id, name] of [
+  ["pride", "PRIDE (PROGRESS PRIDE)"],
+  ["pride-rainbow", "RAINBOW"],
+  ["pride-non-binary", "NON-BINARY"],
+  ["pride-transgender", "TRANSGENDER"],
+  ["pride-lesbian", "LESBIAN"],
+  ["pride-gay", "GAY"],
+  ["pride-bisexual", "BISEXUAL"],
+  ["pride-pansexual", "PANSEXUAL"],
+  ["pride-asexual", "ASEXUAL"],
+  ["pride-aromantic", "AROMANTIC"],
+  ["pride-aroace", "AROACE"],
+  ["pride-agender", "AGENDER"],
+  ["pride-genderfluid", "GENDERFLUID"],
+  ["pride-genderqueer", "GENDERQUEER"],
+  ["pride-intersex", "INTERSEX"],
+  ["pride-polysexual", "POLYSEXUAL"],
+  ["pride-omnisexual", "OMNISEXUAL"],
+  ["pride-demisexual", "DEMISEXUAL"],
+  ["pride-demiromantic", "DEMIROMANTIC"],
+  ["pride-lgbtq", "LGBTQ RAINBOW (PHILADELPHIA)"],
+]) {
+  baseInterfaceThemes.push({
+    id, name, pride: true, darkColor: "#100f18", lightColor: "#faf8fc", stylesheet: "pride",
+  });
+}
+const layoutAssetVersion = "layouts-9";
 const lastStandardThemeKey = "bits-last-standard-theme";
 const themeVariantKey = "bits-theme-variants";
 
@@ -893,6 +919,7 @@ function getThemeGroups() {
     ["Games & consoles", ["game-bit", "atari", "playstation", "xbox", "minebits"]],
     ["Media & web", ["spotify", "winamp", "ipod-classic", "youtube", "youtube-music", "m365", "google", "browser"]],
     ["Color palettes", ["solarized", "nord", "dracula", "catppuccin", "gruvbox", "tokyo-night", "monokai", "rgb", "midnight-oled"]],
+    ["Pride", window.BITS_INTERFACE_THEMES.filter(theme => theme.pride).map(theme => theme.id)],
     ["Atmospheres & materials", []],
     ["Seasonal", []],
   ];
@@ -916,12 +943,14 @@ function buildThemeOptions(formatLabel = (label) => label) {
     ? window.BITS_INTERFACE_THEMES.filter((theme) => theme.seasonal)
     : [];
   const standard = window.BITS_INTERFACE_THEMES.filter((theme) => (
-    !theme.experimental && !(themeDebugEnabled && theme.seasonal)
+    !theme.experimental && !theme.pride && !(themeDebugEnabled && theme.seasonal)
   ));
+  const pride = window.BITS_INTERFACE_THEMES.filter(theme => theme.pride);
   const experimental = window.BITS_INTERFACE_THEMES.filter((theme) => theme.experimental);
   const nodes = [];
   for (const [label, themes] of [
     ["STANDARD THEMES", standard],
+    ["PRIDE", pride],
     ["SPECIAL THEMES", special],
     ["EXPERIMENTAL LAYOUTS", experimental],
   ]) {
@@ -973,8 +1002,9 @@ function syncThemeAssets(theme) {
   } else {
     delete root.dataset.layoutTheme;
   }
+  const stylesheetId = typeof theme.stylesheet === "string" ? theme.stylesheet : theme.id;
   const stylesheetHref = theme.experimental || theme.stylesheet
-    ? `/shared/styles/layouts/${theme.id}.css?v=${layoutAssetVersion}`
+    ? `/shared/styles/layouts/${stylesheetId}.css?v=${layoutAssetVersion}`
     : "";
   let stylesheet = document.getElementById("bits-theme-stylesheet");
   if (!stylesheetHref) {

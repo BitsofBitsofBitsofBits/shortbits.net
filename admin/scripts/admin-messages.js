@@ -20,6 +20,20 @@
   const author = get("author");
   let markupTarget = text;
   const preview = get("preview");
+  for (const [name, description] of Object.entries(window.BITS_MESSAGE_TEXT.variables)) {
+    const term = document.createElement("dt");
+    const code = document.createElement("code");
+    code.textContent = `%${name}%`;
+    term.append(code);
+    const definition = document.createElement("dd");
+    definition.textContent = description;
+    get("variable-list").append(term, definition);
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = `%${name}%`;
+    option.title = description;
+    get("variable-select").append(option);
+  }
   const previous = get("page-previous");
   const next = get("page-next");
   const save = get("save");
@@ -96,10 +110,10 @@
   }
   function previewMessage() {
     const isWeighted = catalog.weighted(category.value);
-    const option = {
+    const option = window.BITS_MESSAGE_TEXT.snapshot({
       text: text.value, markup: markup.checked, colorful: isWeighted && colorful.checked,
       format: isWeighted ? Object.fromEntries([...formats].map(([key, input]) => [key, input.value])) : {},
-    };
+    });
     window.BITS_MESSAGE_TEXT.render(preview, option);
     const supportsMistype = category.value === "messages";
     get("author-options").hidden = !supportsMistype;
@@ -113,6 +127,7 @@
     correctedText.disabled = !corrects;
     correctedText.required = corrects;
     if (!corrects && markupTarget === correctedText) markupTarget = text;
+    get("toolbar-target").textContent = `Editing: ${markupTarget === correctedText ? "corrected text" : "message text"}`;
     get("corrected-preview-container").hidden = !corrects;
     if (corrects) window.BITS_MESSAGE_TEXT.render(get("corrected-preview"), { ...option, text: correctedText.value });
     else get("corrected-preview").replaceChildren();
@@ -453,28 +468,57 @@
     controls();
     searchTimer = window.setTimeout(() => { page = 0; load(); }, 250);
   });
-  form.addEventListener("input", () => { dirty = true; previewMessage(); });
-  [text, correctedText].forEach((field) => field.addEventListener("focus", () => { markupTarget = field; }));
+  form.addEventListener("input", (event) => {
+    if (get("markup-toolbar").contains(event.target)) return;
+    dirty = true;
+    previewMessage();
+  });
+  [text, correctedText].forEach((field) => field.addEventListener("focus", () => {
+    markupTarget = field;
+    get("toolbar-target").textContent = `Editing: ${field === correctedText ? "corrected text" : "message text"}`;
+  }));
+  function insertText({ open = "", close = "", variable } = {}) {
+    const target = markupTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    const content = variable ? `%${variable}%` : target.value.slice(start, end) || "words";
+    if (target.value.length - (end - start) + open.length + content.length + close.length > target.maxLength) {
+      report("The message would exceed 2,000 characters. Shorten it before inserting text or formatting.", "error");
+      target.focus();
+      return;
+    }
+    target.setRangeText(open + content + close, start, end, "end");
+    if (!variable) {
+      target.setSelectionRange(start + open.length, start + open.length + content.length);
+      markup.checked = true;
+    }
+    dirty = true;
+    previewMessage();
+    target.focus();
+  }
   const delimiters = { bold: ["**", "**"], italic: ["*", "*"], underline: ["++", "++"],
     strike: ["~~", "~~"], code: ["`", "`"], rainbow: ["{{color:rainbow|", "}}"] };
   section.querySelectorAll("[data-message-markup]").forEach((button) => button.addEventListener("click", () => {
     const type = button.dataset.messageMarkup;
     const [open, close] = type === "color" ? [`{{color:${get("markup-color").value}|`, "}}"] : delimiters[type];
-    const target = markupTarget;
-    const start = target.selectionStart;
-    const end = target.selectionEnd;
-    const selection = target.value.slice(start, end) || "words";
-    if (target.value.length - (end - start) + open.length + selection.length + close.length > target.maxLength) {
-      report("The formatted message would exceed 2,000 characters. Shorten it before adding markup.", "error");
-      return;
-    }
-    target.setRangeText(open + selection + close, start, end, "select");
-    target.setSelectionRange(start + open.length, start + open.length + selection.length);
-    markup.checked = true;
-    dirty = true;
-    previewMessage();
-    target.focus();
+    insertText({ open, close });
   }));
+  for (const [id, directive] of [["markup-font", "font"], ["markup-size", "size"]]) {
+    get(id).addEventListener("change", (event) => {
+      const value = event.target.value;
+      if (value) insertText({ open: `{{${directive}:${value}|`, close: "}}" });
+      event.target.value = "";
+    });
+  }
+  section.querySelectorAll("[data-message-variable]").forEach((button) => button.addEventListener("click", () => {
+    insertText({ variable: button.dataset.messageVariable });
+  }));
+  get("variable-select").addEventListener("change", () => {
+    get("variable-insert").disabled = !get("variable-select").value;
+  });
+  get("variable-insert").addEventListener("click", () => {
+    insertText({ variable: get("variable-select").value });
+  });
   add.addEventListener("click", () => toggleEditor());
   get("cancel").addEventListener("click", () => { if (discardMessage()) closeEditor(true); });
   get("reload").addEventListener("click", () => { if (discard({ calendar: true })) reloadLibrary(); });

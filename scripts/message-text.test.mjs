@@ -6,14 +6,20 @@ import { parseHTML } from "linkedom";
 
 const markdown = readFileSync(new URL("../shared/scripts/markdown.js", import.meta.url), "utf8");
 const source = readFileSync(new URL("../shared/scripts/message-text.js", import.meta.url), "utf8");
-function setup() {
+function setup({ device = {} } = {}) {
   const { document } = parseHTML("<html><body></body></html>");
-  const window = { location: { origin: "https://example.test" } };
-  const context = vm.createContext({ window, document, URL, Intl });
+  let now = new Date(2026, 9, 26, 13, 14, 15).getTime();
+  class Clock extends Date {
+    constructor(...args) { super(...(args.length ? args : [now])); }
+    static now() { return now; }
+  }
+  const window = { location: { origin: "https://example.test", hostname: "example.test" } };
+  const context = vm.createContext({ window, document, URL, Intl, Date: Clock, navigator: device });
   vm.runInContext(markdown, context);
   vm.runInContext(source, context);
   const target = document.createElement("p");
-  return { document, window, target, text: window.BITS_MESSAGE_TEXT };
+  return { document, window, target, text: window.BITS_MESSAGE_TEXT,
+    now: new Date(now), advance: (milliseconds) => { now += milliseconds; } };
 }
 
 test("inline message formatting is opt-in, preserving all existing literal punctuation", () => {
@@ -80,10 +86,114 @@ test("shared rendering supports all inline styles, literal prefixes/suffixes, an
   assert.equal(target.style.fontWeight, "");
 });
 
+test("combined font, size and color commands preserve nested styles without leaving braces in the message", () => {
+  const { target, text, window, document, now } = setup();
+  const source = "Before {{font:serif|{{size:large|{{color:red|**%day%**}}}}}} after {{size:small|last}}";
+  text.render(target, { text: source, markup: true });
+  assert.ok(target.querySelector(".blog-text-font-serif .blog-text-size-large .blog-text-color-red strong"));
+  assert.equal(target.querySelector(".blog-text-size-small").textContent, "last");
+  assert.equal(target.textContent, `Before ${new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(now)} after last`);
+  const blog = document.createElement("div");
+  blog.append(window.BITS_MARKDOWN.render("{{font:serif|{{size:large|Nested}}}}"));
+  assert.equal(blog.querySelector(".blog-text-font-serif .blog-text-size-large").textContent, "Nested");
+  for (const value of ["{{font:bad|{{size:large|literal}}}}", "{{font:serif|{{size:large|unclosed}}"]) {
+    text.render(target, { text: value, markup: true });
+    assert.equal(target.textContent, value);
+    assert.equal(target.querySelector("span"), null);
+  }
+});
+
 test("adding safe message-only inline rendering does not remove links or images from normal blog Markdown", () => {
   const { document, window } = setup();
   const root = document.createElement("div");
   root.append(window.BITS_MARKDOWN.render("[Blog link](https://example.test) ![Blog image](https://example.test/image.png)"));
   assert.ok(root.querySelector("a"));
   assert.ok(root.querySelector("img"));
+});
+
+test("live date/time placeholders use one local instant and preserve unknown or escaped tokens", () => {
+  const { text, now } = setup();
+  const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(now);
+  const time = new Intl.DateTimeFormat(undefined, { timeStyle: "medium" }).format(now);
+  const day = new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(now);
+  const month = new Intl.DateTimeFormat(undefined, { month: "long" }).format(now);
+  assert.equal(text.plainText("%CURRENTDATE% / %date% / %day% / %time% / %year% / %month% / %dayofmonth%"),
+    `${date} / ${date} / ${day} / ${time} / 2026 / ${month} / 26`);
+  assert.equal(text.plainText("%hour%:%minute%:%second% / %timezone%"),
+    `13:14:15 / ${new Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+  assert.equal(text.plainText("50% CPU; %%time%%; %% ; %unknown%; %constructor%"),
+    "50% CPU; %time%; % ; %unknown%; %constructor%");
+});
+
+test("each snapshot stays stable during typing, correction and history, but reused templates get fresh values", () => {
+  const { text, target, advance } = setup();
+  const template = { text: "**%time%** tyop", markup: true, correctedText: "**%time%** typo" };
+  const occurrence = text.snapshot(template);
+  const first = text.prepare(occurrence);
+  advance(61_000);
+  assert.notEqual(text.plainText(template), first.text);
+  for (const length of [0, 3, 5, Infinity, 4, 0]) {
+    text.render(target, occurrence, { length });
+    assert.equal(target.textContent, first.characters.slice(0, length).join(""));
+  }
+  assert.equal(text.prepare(occurrence), first, "A captured message compiles only once");
+  assert.equal(text.snapshot(occurrence), occurrence, "History preserves the original context");
+  const corrected = { ...occurrence, text: occurrence.correctedText };
+  assert.equal(text.plainText(corrected), first.text.replace("tyop", "typo"));
+  const next = text.snapshot(template);
+  assert.notEqual(text.plainText(next), first.text);
+  assert.equal(template.text, "**%time%** tyop", "Stored templates are never mutated");
+  assert.equal(JSON.stringify(occurrence), JSON.stringify(template), "Runtime context is not serialized into backups");
+  const before = text.plainText(template);
+  advance(1_000);
+  assert.notEqual(text.plainText(template), before, "Uncaptured dynamic objects must not stay cached forever");
+});
+
+test("interpolated browser data remains literal after markup parsing and supports grapheme truncation", () => {
+  const language = "👩‍💻e\u0301 **NOT BOLD** {{color:red|NOT RED}} <img src=x onerror=alert(1)> %year%";
+  const { text, target } = setup({ device: { language } });
+  const option = text.snapshot({ text: "**%language%**", markup: true });
+  text.render(target, option);
+  assert.equal(target.querySelectorAll("strong").length, 1);
+  assert.equal(target.querySelector("strong").textContent, language);
+  assert.equal(target.querySelector("img,script,span"), null);
+  text.render(target, option, { length: 2, prefix: "%year%", suffix: "%browser%" });
+  assert.equal(target.textContent, "%year%👩‍💻e\u0301%browser%", "Only authored message text interpolates");
+  text.render(target, "Plain %language%");
+  assert.equal(target.textContent, `Plain ${language}`);
+  assert.equal(target.querySelector("strong,img"), null);
+});
+
+for (const [agent, browser, os] of [
+  ["Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537.36 Edg/130", "Microsoft Edge", "Windows"],
+  ["Mozilla/5.0 (X11; Linux x86_64) Chrome/130 Safari/537.36 OPR/115", "Opera", "Linux"],
+  ["Mozilla/5.0 (Linux; Android 14) Chrome/130 SamsungBrowser/26", "Samsung Internet", "Android"],
+  ["Mozilla/5.0 (X11; CrOS x86_64) Chrome/130 Safari/537.36", "Google Chrome", "ChromeOS"],
+  ["Mozilla/5.0 (Macintosh; Intel Mac OS X) Firefox/130", "Firefox", "macOS"],
+  ["Mozilla/5.0 (iPhone) FxiOS/130 Version/17 Safari/605.1", "Firefox", "iOS"],
+  ["Mozilla/5.0 (iPad) CriOS/130 Safari/605.1", "Google Chrome", "iOS"],
+  ["Mozilla/5.0 (Macintosh) Version/17.0 Safari/605.1", "Safari", "macOS"],
+  ["custom private browser", "Unknown browser", "Unknown OS"],
+]) {
+  test(`friendly browser/OS detection: ${browser} on ${os}`, () => {
+    const { text } = setup({ device: { userAgent: agent, language: "en-GB" } });
+    assert.equal(text.plainText("%useragent% / %browser% / %os% / %language% / %hostname%"),
+      `${browser} / ${browser} / ${os} / en-GB / example.test`);
+  });
+}
+
+test("low-entropy Client Hints recognize Edge without exposing raw UA or requesting high-entropy data", () => {
+  const { text } = setup({ device: {
+    userAgent: "Chrome/130", userAgentData: {
+      brands: [{ brand: "Not_A Brand" }, { brand: "Chromium" }, { brand: "Microsoft Edge" }],
+      getHighEntropyValues() { assert.fail("Message placeholders must not request identifying data"); },
+    },
+  } });
+  assert.equal(text.plainText("%browser%"), "Microsoft Edge");
+  const samsung = setup({ device: {
+    userAgent: "Android Chrome/130 SamsungBrowser/26",
+    userAgentData: { brands: [{ brand: "Chromium" }, { brand: "Google Chrome" }] },
+  } });
+  assert.equal(samsung.text.plainText("%browser%"), "Samsung Internet", "Generic Chrome hints do not mask specific browsers");
+  assert.equal(text.plainText("%language%"), "Unknown language");
 });

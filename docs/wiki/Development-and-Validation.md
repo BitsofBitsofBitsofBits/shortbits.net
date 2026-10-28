@@ -35,6 +35,7 @@ node scripts/youtube-extension-browser.mjs
 node scripts/aero-variants-browser.mjs --root .site-build
 node scripts/theme-collection-browser.mjs --root .site-build
 node scripts/theme-picker-browser.mjs --root .site-build
+node scripts/pride-themes-browser.mjs --root .site-build
 node scripts/desktop-workspaces-browser.mjs --root .site-build
 node scripts/messages-browser.mjs --root .site-build
 node scripts/critical-css-browser.mjs --root .site-build

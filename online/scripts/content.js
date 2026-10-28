@@ -488,6 +488,7 @@ const hardwareJokes = Object.fromEntries(Object.entries(baseHardwareJokes).map((
     ? [...seasonalHardwareJokes[metric]] : [...jokes, ...(seasonalHardwareJokes[metric] ?? [])],
 ]));
 const hardwareChatter = Object.values(hardwareJokes).flat();
+const hardwareChatterSnapshots = new WeakMap();
 window.addEventListener("bits:messages-updated", () => {
   const profile = window.BITS_SEASONAL_PROFILE;
   Object.keys(baseHardwareJokes).forEach((metric) => {
@@ -777,8 +778,14 @@ function updateHardwareStatus() {
     updateHardwareNas(live.querySelector(".hardware-nas"), status.nas_metrics, online);
     if (online && hardwareChatter.length) {
       chatter.hidden = false;
-      window.BITS_MESSAGE_TEXT.render(chatter, hardwareChatter[Math.floor(Date.now() / 6000) % hardwareChatter.length],
-        { prefix: "AGENT CHATTER // " });
+      const slot = Math.floor(Date.now() / 6000);
+      const source = hardwareChatter[slot % hardwareChatter.length];
+      let current = hardwareChatterSnapshots.get(chatter);
+      if (!current || current.slot !== slot || current.source !== source) {
+        current = { slot, source, message: window.BITS_MESSAGE_TEXT.snapshot(source) };
+        hardwareChatterSnapshots.set(chatter, current);
+      }
+      window.BITS_MESSAGE_TEXT.render(chatter, current.message, { prefix: "AGENT CHATTER // " });
     }
   });
 }

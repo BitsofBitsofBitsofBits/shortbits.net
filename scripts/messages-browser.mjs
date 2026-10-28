@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
@@ -7,6 +8,9 @@ import { startSiteServer } from "./site-server.mjs";
 const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
 const root = resolve(rootIndex < 0 ? "." : args[rootIndex + 1]);
+const screenshotsIndex = args.indexOf("--screenshots");
+const screenshots = screenshotsIndex < 0 ? null : resolve(args[screenshotsIndex + 1]);
+if (screenshots) await mkdir(screenshots, { recursive: true });
 const server = await startSiteServer(root);
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 const entry = (position, category, text, profile = "standard") => ({
@@ -23,8 +27,8 @@ const publicRows = [
   entry(8, "glitchMessages", "DATABASE GLITCH"),
 ];
 const markupRows = publicRows.map((row) => ({
-  ...row, markup: true, text: `${row.text} **BOLD** {{color:red|red}} {{color:rainbow|彩色}}`,
-  corrected_text: row.category === "messages" ? "DATABASE CORRECTED **BOLD** {{color:red|red}} {{color:rainbow|彩色}}" : null,
+  ...row, markup: true, text: `${row.text} %hostname% **BOLD** {{color:red|red}} {{color:rainbow|彩色}}`,
+  corrected_text: row.category === "messages" ? "DATABASE CORRECTED %hostname% **BOLD** {{color:red|red}} {{color:rainbow|彩色}}" : null,
 }));
 const customPools = ["one", "two"].map((name) => ({
   id: `custom-${name}`, title: name, schedule: "annual", starts_on: "2000-01-01", ends_on: "2000-12-31",
@@ -115,6 +119,7 @@ try {
       updateHardwareStatus();
     });
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
+    assert.ok((await page.locator("#typed-text").textContent()).includes(new URL(server.origin).hostname));
     assert.equal(await page.locator("#typed-text .blog-text-color-red").textContent(), "red");
     assert.equal(await page.locator("#message-author-box").isVisible(), true);
     assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻");
@@ -129,6 +134,37 @@ try {
     assert.ok((await page.locator("#fake-playing-dead-message").textContent()).includes("Check #2"));
     assert.equal(await page.locator(".hardware-live-chatter strong").textContent(), "BOLD");
     await page.waitForFunction(() => document.querySelector("#activity-text strong")?.textContent === "BOLD");
+    for (const selector of ["#fake-playing-dead-message", ".hardware-live-chatter", "#activity-text"]) {
+      assert.ok((await page.locator(selector).textContent()).includes(new URL(server.origin).hostname), selector);
+    }
+    const chatterTimes = await page.evaluate(() => {
+      const RealDate = Date;
+      const original = hardwareChatter[0];
+      let instant = Math.floor(RealDate.now() / 6000) * 6000 + 100;
+      window.Date = class extends RealDate {
+        constructor(...args) { super(...(args.length ? args : [instant])); }
+        static now() { return instant; }
+      };
+      try {
+        hardwareChatter[0] = { text: "**%hour%:%minute%:%second%**", markup: true };
+        const read = () => {
+          updateHardwareStatus();
+          return document.querySelector(".hardware-live-chatter").textContent;
+        };
+        const first = read();
+        instant += 1000;
+        const repeated = read();
+        instant += 6000;
+        const next = read();
+        return { first, repeated, next };
+      } finally {
+        window.Date = RealDate;
+        hardwareChatter[0] = original;
+        updateHardwareStatus();
+      }
+    });
+    assert.equal(chatterTimes.first, chatterTimes.repeated, "Telemetry updates preserve the current message snapshot");
+    assert.notEqual(chatterTimes.first, chatterTimes.next, "The six-second rotation captures fresh clock values");
     await page.evaluate(() => {
       const matchMedia = window.matchMedia;
       const motion = document.documentElement.dataset.motion;
@@ -139,18 +175,24 @@ try {
       document.documentElement.dataset.motion = motion;
     });
     await page.waitForFunction(() => document.querySelector("#boot-log strong")?.textContent === "BOLD");
+    assert.ok((await page.locator("#boot-log").textContent()).includes(new URL(server.origin).hostname));
     await page.evaluate(() => {
       window.BITS_BOOT.skip();
       triggerVirusScreen("Test network");
     });
     await page.waitForFunction(() => document.querySelector("#virus-screen-copy strong")?.textContent === "BOLD");
+    assert.ok((await page.locator("#virus-screen-copy").textContent()).includes(new URL(server.origin).hostname));
     await page.evaluate(() => { recoverFromVirusScreen(); closeButton.click(); });
     assert.equal(await page.locator("#shutdown-message strong").textContent(), "BOLD");
+    assert.ok((await page.locator("#shutdown-message").textContent()).includes(new URL(server.origin).hostname));
     await page.goto(`${server.origin}/boot/`, { waitUntil: "networkidle" });
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
     await page.waitForFunction(() => Array.from(document.querySelectorAll("#endless-boot-log span")).some(
       (span) => span.textContent.startsWith("DATABASE BOOT") && span.querySelector("strong")?.textContent === "BOLD"));
     await page.waitForFunction(() => document.querySelector("#endless-boot-message strong")?.textContent === "BOLD");
+    for (const selector of ["#endless-boot-log", "#endless-boot-message"]) {
+      assert.ok((await page.locator(selector).textContent()).includes(new URL(server.origin).hostname), selector);
+    }
     fail = true;
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
@@ -162,7 +204,7 @@ try {
     await page.evaluate(() => {
       window.__pauseMessageTypewriter = true;
       clearTimeout(window.__messageTimer);
-      currentMessage = window.BITS_MESSAGES[0];
+      currentMessage = window.BITS_MESSAGE_TEXT.snapshot(window.BITS_MESSAGES[0]);
       currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(currentMessage).characters;
       characterIndex = currentMessageCharacters.length;
       currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(currentMessage.author ?? "");
@@ -172,7 +214,7 @@ try {
     });
     assert.equal(await page.locator(".command-line").evaluate((node) => node.classList.contains("is-correcting")), true);
     await page.waitForFunction(() => currentMessage.wasCorrected === true);
-    assert.equal(await page.locator("#typed-text").textContent(), "DATABASE CORRECTED BOLD red 彩色");
+    assert.equal(await page.locator("#typed-text").textContent(), `DATABASE CORRECTED ${new URL(server.origin).hostname} BOLD red 彩色`);
     assert.equal(await page.locator("#typed-text strong").textContent(), "BOLD");
     assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻", "Author remains during correction");
     const erased = await page.evaluate(() => {
@@ -183,7 +225,7 @@ try {
       clearTimeout(window.__messageTimer);
       return { quote: typedText.textContent, author: typedAuthor.textContent };
     });
-    assert.equal(erased.quote, "DATABASE CORRECTED BOLD red 彩");
+    assert.equal(erased.quote, `DATABASE CORRECTED ${new URL(server.origin).hostname} BOLD red 彩`);
     assert.equal(erased.author, "Test author ", "Author backspaces a whole grapheme alongside the quote");
     assert.equal(await page.evaluate(() => unlockedAchievements.some((achievement) => achievement.id === "typo-corrected")), true);
     fail = false;
@@ -505,6 +547,65 @@ try {
     });
     assert.equal(await page.locator("#message-text").evaluate((field) => document.activeElement === field), true);
     await assertNoOverflow(`${width}px inline message editor must not overflow`);
+    await page.locator("#message-text").fill("Hello visitor!");
+    await page.locator("#message-text").evaluate((field) => field.setSelectionRange(6, 13));
+    await page.locator('[data-message-variable="currentdate"]').click();
+    assert.equal(await page.locator("#message-text").inputValue(), "Hello %currentdate%!");
+    assert.equal(await page.locator("#message-markup").isChecked(), false, "Placeholders do not enable markup");
+    assert.deepEqual(await page.locator("#message-text").evaluate(field => ({
+      focused: document.activeElement === field, start: field.selectionStart, end: field.selectionEnd,
+    })), { focused: true, start: 19, end: 19 });
+    acceptDialogs = false;
+    await page.locator("#message-cancel").click();
+    assert.equal(await page.locator("#message-text").inputValue(), "Hello %currentdate%!", "Inserting a placeholder marks the draft dirty");
+    acceptDialogs = true;
+    await page.locator("#message-text").fill("");
+    for (const name of ["day", "time", "useragent"]) {
+      await page.locator(`[data-message-variable="${name}"]`).focus();
+      await page.locator(`[data-message-variable="${name}"]`).press("Enter");
+    }
+    assert.equal(await page.locator("#message-text").inputValue(), "%day%%time%%useragent%", "Repeated keyboard insertions advance the caret");
+    const variables = await page.evaluate(() => Object.keys(window.BITS_MESSAGE_TEXT.variables));
+    assert.equal(await page.locator("#message-variable-select option").count(), variables.length + 1);
+    for (const name of variables) {
+      await page.locator("#message-text").fill("");
+      await page.locator("#message-variable-select").selectOption(name);
+      await page.locator("#message-variable-insert").click();
+      assert.equal(await page.locator("#message-text").inputValue(), `%${name}%`);
+    }
+    await page.locator("#message-text").fill("x".repeat(2000));
+    await page.locator('[data-message-variable="time"]').click();
+    assert.equal((await page.locator("#message-text").inputValue()).length, 2000, "Insertion never exceeds the saved-text limit");
+    assert.equal(await page.locator("#message-library-status").getAttribute("data-state"), "error");
+    await page.locator("#message-text").evaluate(field => { field.focus(); field.setSelectionRange(1994, 2000); });
+    await page.locator('[data-message-variable="time"]').click();
+    assert.equal(await page.locator("#message-text").inputValue(), "x".repeat(1994) + "%time%", "Replacing a selection may exactly meet the limit");
+    await page.locator("#message-text").fill("Sample");
+    await page.locator("#message-text").evaluate(field => field.select());
+    await page.locator("#message-markup-font").selectOption("serif");
+    assert.equal(await page.locator("#message-text").inputValue(), "{{font:serif|Sample}}");
+    assert.equal(await page.locator("#message-preview .blog-text-font-serif").textContent(), "Sample");
+    await page.locator("#message-markup-size").selectOption("large");
+    assert.equal(await page.locator("#message-preview .blog-text-font-serif .blog-text-size-large").textContent(), "Sample");
+    assert.equal(await page.locator("#message-preview").textContent(), "Sample", "Combined toolbar styles leave no markup delimiters behind");
+    await page.locator("#message-text").fill("x".repeat(2000));
+    await page.locator("#message-text").evaluate(field => field.select());
+    await page.locator('[data-message-markup="bold"]').click();
+    assert.equal((await page.locator("#message-text").inputValue()).length, 2000, "Formatting also respects the text limit");
+    for (const appearance of ["light", "dark"]) {
+      await page.evaluate(appearance => { document.documentElement.dataset.adminAppearance = appearance; }, appearance);
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const toolbarIssues = await page.locator("#message-markup-toolbar").evaluate(async toolbar => (await axe.run(toolbar, {
+        runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+      })).violations.map(issue => ({ id: issue.id, targets: issue.nodes.map(node => node.target) })));
+      assert.deepEqual(toolbarIssues, [], `${width}px ${appearance} message toolbar accessibility`);
+      await assertNoOverflow(`${width}px ${appearance} message toolbar must wrap`);
+      if (screenshots) await page.locator("#message-markup-toolbar").screenshot({
+        path: resolve(screenshots, `message-toolbar-${width}-${appearance}.png`),
+      });
+    }
+    await page.evaluate(() => { document.documentElement.dataset.adminAppearance = "light"; });
+    await page.locator("#message-markup").uncheck();
     await page.locator("#message-text").fill("<script>not executable</script> edited message");
     await page.locator("#message-author").fill("  Ada <script>literal</script>  ");
     assert.equal(await page.locator("#message-author-preview script").count(), 0);
@@ -528,6 +629,29 @@ try {
     assert.equal(await page.locator("#message-preview .blog-text-color-red").evaluate((node) => getComputedStyle(node).color), "rgb(255, 107, 120)");
     await page.locator("#message-save").click();
     await page.waitForFunction(() => window.__messageRows[0].markup === true);
+    const liveTemplate = "**%day%** %time% / %useragent% / %hostname% / %%time%% / %unknown%";
+    await page.locator("#message-text").fill(liveTemplate);
+    assert.equal(await page.locator("#message-preview strong").textContent(),
+      await page.evaluate(() => new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(new Date())));
+    assert.ok((await page.locator("#message-preview").textContent()).includes(new URL(server.origin).hostname));
+    assert.match(await page.locator("#message-preview").textContent(), /Google Chrome|Chromium|Microsoft Edge/);
+    assert.ok((await page.locator("#message-preview").textContent()).endsWith("%time% / %unknown%"));
+    assert.equal(await page.locator("#message-variable-list dt").count(), 16);
+    await page.locator(".message-variable-help summary").click();
+    await assertNoOverflow(`${width}px live placeholder help must not overflow`);
+    await page.locator("#message-save").click();
+    await page.waitForFunction((template) => window.__messageRows[0].text === template, liveTemplate);
+    await page.locator("#message-mistype").check();
+    await page.locator("#message-corrected-text").fill("Correct me");
+    await page.locator("#message-corrected-text").evaluate(field => field.setSelectionRange(8, 10));
+    await page.locator('[data-message-variable="day"]').click();
+    assert.equal(await page.locator("#message-corrected-text").inputValue(), "Correct %day%");
+    assert.equal(await page.locator("#message-text").inputValue(), liveTemplate, "Placeholder insertion targets the last-focused corrected field only");
+    assert.equal(await page.locator("#message-toolbar-target").textContent(), "Editing: corrected text");
+    await page.locator("#message-mistype").uncheck();
+    await page.locator('[data-message-variable="day"]').click();
+    assert.equal(await page.locator("#message-toolbar-target").textContent(), "Editing: message text", "Disabling corrections restores the message target");
+    await page.locator("#message-text").fill(liveTemplate);
     await page.locator("#message-mistype").check();
     await page.locator("#message-corrected-text").fill(await page.locator("#message-text").inputValue());
     await page.locator("#message-save").click();

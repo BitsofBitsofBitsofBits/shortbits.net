@@ -69,6 +69,59 @@
   running sequence finishes unchanged and later replays use updated messages.
   Run `node --test scripts/message-catalog.test.mjs scripts/message-catalog-database.test.mjs`
   and `node scripts/messages-browser.mjs --root .site-build` for regression coverage.
+  Add `--screenshots <directory>` to capture desktop/mobile toolbar previews
+  in both Admin appearances.
+  All message-library types support live data placeholders in **Message text**,
+  including seasonal/scheduled messages and **Corrected text**. No database
+  migration or extra markup toggle is needed. Templates stay unchanged in the
+  database, cache, editor, and backups; values resolve only in the visitor's browser.
+  Expand **Live data placeholders** in the editor for the full list and descriptions.
+  The compact toolbar above the message text has **Date**, **Day**, **Time**, and
+  **Browser** insertion buttons, plus a **More placeholders** dropdown and
+  **+ Insert** button for the complete list. Insertions replace the selection or
+  insert at the caret in the last-focused message/corrected-text field, return
+  focus there, and leave inline markup unchanged. The toolbar identifies its
+  current target. All actions respect the 2,000-character limit and unsaved-change
+  protection. Compact style/color buttons and **Font family** / **Font size**
+  dropdowns apply safe markup to the selection; these enable markup automatically.
+  Font, size, and color directives can be nested to combine styles on the same text.
+  The controls wrap on smaller screens and follow Admin's light/dark appearance.
+
+  | Placeholder | Value |
+  | --- | --- |
+  | `%currentdate%`, `%date%` | Localized date, such as Oct 26, 2026 |
+  | `%day%` | Full localized weekday name, such as Monday |
+  | `%time%` | Localized time including seconds |
+  | `%year%`, `%month%`, `%dayofmonth%` | Four-digit year, full localized month name, numeric day |
+  | `%hour%`, `%minute%`, `%second%` | Two-digit local clock parts; hour is 00-23 |
+  | `%timezone%` | Visitor's IANA timezone, when available |
+  | `%useragent%`, `%browser%` | Friendly browser type, not a raw user-agent string |
+  | `%os%` | Operating system |
+  | `%language%` | Browser language, such as en-US |
+  | `%hostname%` | Current site's hostname |
+
+  For example, `Happy %day%! It's %time% and you're using %useragent%.`
+  Names are case-insensitive; unknown placeholders remain visible as typed.
+  Write `%%time%%` to display the literal text `%time%` (or `%%` for a percent sign).
+  Dates and times use the **visitor's local timezone and locale**, independently
+  of the catalog's scheduling timezone. Each message occurrence captures one
+  snapshot: values do not tick during typing, holding, deletion, or mistype
+  correction. Selecting the message again captures fresh values; navigating
+  splash history or reading an old boot-log line preserves its original snapshot.
+  Hardware chatter refreshes its snapshot on its existing six-second rotation,
+  not on every telemetry update. Admin previews capture fresh values on edits,
+  using the admin's browser, with one shared snapshot for the original/correction.
+  Attribution remains literal plain text.
+
+  Placeholders work inside safe inline formatting, such as `**%day%**` or
+  `{{color:rainbow|%browser%}}`. Replacement values are inserted as text after
+  parsing authored markup, so browser data cannot introduce HTML or formatting.
+  No additional network requests or browser identification services are used.
+  Browser/OS detection is best-effort: Client Hints are used when available,
+  with user-agent fallback; privacy restrictions may produce a generic name or
+  `Unknown browser` / `Unknown OS`. Other unavailable values display
+  `Unknown language`, `Unknown host`, or `Unknown timezone`, respectively.
+
   Each entry also has **Enable inline markup**, off by default so existing text
   stays literal. After deploying `20261025032000_message_inline_markup.sql`,
   style selected words with `**bold**`, `*italic*`, `++underline++`, `~~strike~~`,

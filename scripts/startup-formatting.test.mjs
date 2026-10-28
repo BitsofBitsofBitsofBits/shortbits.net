@@ -112,7 +112,8 @@ function correctionSetup(message) {
   vm.runInContext(markdownSource, context);
   vm.runInContext(charactersSource, context);
   context.applyTextFormat = window.BITS_MESSAGE_TEXT.applyFormat;
-  context.currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(message).characters;
+  context.currentMessage = window.BITS_MESSAGE_TEXT.snapshot(message);
+  context.currentMessageCharacters = window.BITS_MESSAGE_TEXT.prepare(context.currentMessage).characters;
   context.currentAuthorCharacters = window.BITS_MESSAGE_TEXT.splitCharacters(message.author ?? "");
   vm.runInContext(source.slice(source.indexOf("const typoMessage ="), source.indexOf("\nfunction updateActivity()")), context);
   return { context, timers, achievements, window };
@@ -214,6 +215,21 @@ test("plain corrections keep punctuation literal and never inject HTML", () => {
   timers.shift().callback();
   assert.equal(context.typedText.textContent, "**typo** <script>no</script>");
   assert.equal(context.typedText.querySelector("strong,script"), null);
+});
+
+test("typewriter corrections and deletion retain the original live-data snapshot", () => {
+  const { context, timers } = correctionSetup({
+    text: "**%year% %time%** tyop", correctedText: "**%year% %time%** typo", markup: true,
+  });
+  const before = context.currentMessageCharacters.join("");
+  context.Date = class extends Date {
+    constructor() { super("2099-12-31T23:59:59Z"); }
+  };
+  vm.runInContext("runTypoCorrection()", context);
+  timers.shift().callback();
+  assert.equal(context.typedText.textContent, before.replace("tyop", "typo"));
+  vm.runInContext("updateMessage(); updateMessage()", context);
+  assert.equal(context.typedText.textContent, before.replace("tyop", "typ"));
 });
 
 test("history navigation during a correction neither overwrites history nor awards an unseen correction", () => {

@@ -1769,6 +1769,7 @@
       } else {
         message = Math.random() < 0.38 ? randomItem(fixedMessages) : generatedMessage();
       }
+      message = window.BITS_MESSAGE_TEXT.snapshot(message);
       attempts += 1;
     } while (recentMessageSet.has(window.BITS_MESSAGE_TEXT.plainText(message)) && attempts < 100);
 

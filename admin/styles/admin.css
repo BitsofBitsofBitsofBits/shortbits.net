@@ -1918,8 +1918,111 @@ body.admin-center.ac-panel-open {
 }
 
 #message-markup-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  border: 1px solid var(--ac-stroke-strong);
+  border-radius: 4px;
+  background: var(--ac-surface-2);
+}
+
+#message-markup-toolbar .message-toolbar-row,
+#message-markup-toolbar .message-toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#message-markup-toolbar .message-toolbar-row {
+  padding: 5px 6px;
+}
+
+#message-markup-toolbar .message-toolbar-group {
+  padding-inline-end: 8px;
+  margin-inline-end: 4px;
+  border-inline-end: 1px solid var(--ac-stroke-strong);
+}
+
+#message-markup-toolbar .message-toolbar-group:last-child {
+  padding-inline-end: 0;
+  margin-inline-end: 0;
+  border-inline-end: 0;
+}
+
+#message-markup-toolbar button,
+#message-markup-toolbar select {
+  width: auto;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--ac-ink);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+#message-markup-toolbar button:hover,
+#message-markup-toolbar select:hover {
+  border-color: var(--ac-stroke-strong);
+  background: var(--ac-surface-hover);
+}
+
+#message-markup-toolbar button:active {
+  background: var(--ac-surface-pressed);
+}
+
+#message-markup-toolbar button:disabled {
+  color: var(--ac-muted);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+#message-markup-toolbar label {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
+#message-markup-toolbar svg {
+  width: 18px;
+  height: 18px;
+}
+
+#message-markup-toolbar .message-tool-color {
+  border-bottom: 3px solid var(--ac-brand-fg);
+  font-weight: 700;
+}
+
+#message-markup-toolbar .message-toolbar-variables {
+  border-top: 1px solid var(--ac-stroke);
+}
+
+#message-markup-toolbar .message-toolbar-caption {
+  padding: 0 4px;
+  color: var(--ac-muted);
+  font-size: 12px;
+}
+
+#message-markup-toolbar #message-variable-select {
+  width: 180px;
+}
+
+#message-toolbar-target {
+  margin: 0;
+  padding: 4px 10px;
+  border-top: 1px solid var(--ac-stroke);
+  color: var(--ac-muted);
+  font-size: 12px;
 }
 
 .ac-section-body > .hardware-import-body {

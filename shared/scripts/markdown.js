@@ -22,11 +22,25 @@
     }
   }
 
+  function directiveEnd(source, start) {
+    const braces = /\{\{|\}\}/g;
+    braces.lastIndex = start;
+    let depth = 0;
+    let match;
+    while ((match = braces.exec(source))) {
+      depth += match[0] === "{{" ? 1 : -1;
+      if (depth === 0) return braces.lastIndex;
+    }
+    return -1;
+  }
+
   function appendInline(parent, source, options = {}) {
     let cursor = 0;
     inlinePattern.lastIndex = 0;
     for (const match of source.matchAll(inlinePattern)) {
+      if (match.index < cursor) continue;
       parent.append(document.createTextNode(source.slice(cursor, match.index)));
+      let end = match.index + match[0].length;
       if (options.textOnly && (match[2] !== undefined || match[8] !== undefined)) {
         parent.append(document.createTextNode(match[0]));
         cursor = match.index + match[0].length;
@@ -58,15 +72,22 @@
       } else if (match[5] !== undefined) {
         const type = match[5];
         const value = match[6].trim().toLowerCase();
-        const content = match[7];
+        const balancedEnd = directiveEnd(source, match.index);
+        if (balancedEnd < 0) {
+          parent.append(document.createTextNode(match[0]));
+          cursor = end;
+          continue;
+        }
+        end = balancedEnd;
+        const content = source.slice(source.indexOf("|", match.index) + 1, end - 2);
         const allowedValues = {
           color: allowedColors,
           font: allowedFonts,
           size: allowedSizes,
         };
         if (!allowedValues[type].has(value)) {
-          parent.append(document.createTextNode(match[0]));
-          cursor = match.index + match[0].length;
+          parent.append(document.createTextNode(source.slice(match.index, end)));
+          cursor = end;
           continue;
         }
         element = document.createElement("span");
@@ -76,7 +97,7 @@
         const href = safeLink(match[9]);
         if (!href) {
           parent.append(document.createTextNode(match[0]));
-          cursor = match.index + match[0].length;
+          cursor = end;
           continue;
         }
         element = document.createElement("a");
@@ -106,7 +127,7 @@
         appendInline(element, match[17], options);
       }
       parent.append(element);
-      cursor = match.index + match[0].length;
+      cursor = end;
     }
     parent.append(document.createTextNode(source.slice(cursor)));
   }
