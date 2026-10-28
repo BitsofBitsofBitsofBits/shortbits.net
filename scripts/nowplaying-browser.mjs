@@ -84,18 +84,31 @@ try {
       await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
     };
     const assertLayout = async () => {
-      const first = await page.locator("#spotify-widget").boundingBox();
-      const second = await page.locator("#youtube-widget").boundingBox();
+      const { first, second, height, viewportWidth, overflow } = await page.evaluate(() => {
+        const bounds = (selector) => {
+          const element = document.querySelector(selector);
+          if (!element?.getClientRects().length) return null;
+          const { x, y, width, height } = element.getBoundingClientRect();
+          return { x, y, width, height };
+        };
+        return {
+          first: bounds("#spotify-widget"), second: bounds("#youtube-widget"),
+          height: innerHeight, viewportWidth: innerWidth,
+          overflow: document.documentElement.scrollWidth > innerWidth,
+        };
+      });
+      const geometry = JSON.stringify({ height, viewportWidth, first, second });
       assert.ok(first && second, "Both statuses remain visible");
+      assert.equal(viewportWidth, width, `Layout uses the requested viewport: ${geometry}`);
+      assert.equal(height, page.viewportSize().height, `Layout uses the requested viewport height: ${geometry}`);
       if (width > 700) {
-        assert.ok(Math.abs(first.y - second.y) < 1 && second.x > first.x, "Desktop cards are side by side");
-        const height = page.viewportSize().height;
+        assert.ok(Math.abs(first.y - second.y) < 1 && second.x > first.x, `Desktop cards are side by side: ${geometry}`);
         assert.ok(first.y + first.height <= height && second.y + second.height <= height,
-          `Both desktop cards, including session clocks, fit inside the presentation viewport: ${JSON.stringify({ height, first, second })}`);
+          `Both desktop cards, including session clocks, fit inside the presentation viewport: ${geometry}`);
       } else {
-        assert.ok(second.y > first.y && Math.abs(second.x - first.x) < 1, "Mobile cards are stacked");
+        assert.ok(second.y > first.y && Math.abs(second.x - first.x) < 1, `Mobile cards are stacked: ${geometry}`);
       }
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "No horizontal overflow");
+      assert.equal(overflow, false, `No horizontal overflow: ${geometry}`);
     };
     await page.goto(`${server.origin}/nowplaying/`, { waitUntil: "networkidle" });
     await text("#spotify-track", spotify.item.title);
@@ -178,9 +191,13 @@ try {
     await page.waitForFunction(() => document.documentElement.dataset.colorScheme === "light");
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     await page.addScriptTag({ path: axePath });
+    // The mocked clock's animation frames do not guarantee a compositor paint.
+    await page.screenshot();
     assert.deepEqual(await page.evaluate(async () => (await axe.run(document, {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] },
-    })).violations.map(item => ({ id: item.id, nodes: item.nodes.map(node => node.target) }))), [], "Presentation is accessible in light mode");
+    })).violations.map(item => ({ id: item.id, nodes: item.nodes.map(node => ({
+      target: node.target, summary: node.failureSummary,
+    })) }))), [], "Presentation is accessible in light mode");
     await page.locator("#presentation-scheme").selectOption("dark");
     await page.waitForFunction(() => document.documentElement.dataset.colorScheme === "dark");
     await page.waitForFunction(() => getComputedStyle(document.querySelector(".presentation-controls a")).color
@@ -188,6 +205,7 @@ try {
       && getComputedStyle(document.querySelector("#presentation-control-status")).color
       === getComputedStyle(document.querySelector(".presentation-note")).color);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await page.screenshot();
     assert.deepEqual(await page.evaluate(async () => (await axe.run(document, {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] },
     })).violations.map(item => ({ id: item.id, nodes: item.nodes.map(node => ({
