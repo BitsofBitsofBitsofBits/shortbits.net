@@ -23,7 +23,11 @@
   refresh on reopen after five minutes or immediately with **Refresh feed**;
   successful upload/photo results are cached for up to ten minutes. Feed/photo
   failures are reported independently without hiding channel links or successful
-  uploads. Photos use fixed 64px slots, lazy loading, and initials when unavailable;
+  uploads. Failed integration requests, per-channel failures, and photo-loading
+  failures do not mark the browser's feed as fresh: reopening the window retries
+  immediately, as does **Refresh feed**. Successful loads keep their normal
+  freshness window; there is still no continuous background polling.
+  Photos use fixed 64px slots, lazy loading, and initials when unavailable;
   platforms without an integration also show initials. YouTube photos are restricted
   to YouTube's image CDN hosts.
   Channel-page metadata may stop working if YouTube blocks requests or changes its

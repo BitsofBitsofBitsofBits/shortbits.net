@@ -96,6 +96,7 @@
     image.addEventListener("load", () => image.classList.add("is-loaded"), { once: true });
     image.addEventListener("error", () => {
       image.remove();
+      loadedAt = 0;
       console.warn(`Unable to display ${platform} channel photo.`);
       container.title = `${platform} channel photo unavailable.`;
       report("Creator list loaded. Some channel photos could not load; initials are shown instead.", "warning");
@@ -250,10 +251,12 @@
           return true;
         }
       }));
-      if (services.length) report(unavailable.some(Boolean)
-        ? "Creator list loaded. Some channel videos, live status, or photos are unavailable; initials and channel links remain available. Try Refresh later."
+      const hasUnavailable = unavailable.some(Boolean);
+      if (hasUnavailable) loadedAt = 0;
+      if (services.length) report(hasUnavailable
+        ? "Creator list loaded. Some channel videos, live status, or photos are unavailable; initials and channel links remain available. Use Refresh or reopen the feed to retry."
         : `Creator list loaded.${services.some(service => service.name === "YouTube") ? " YouTube uploads and photos may be cached for up to 10 minutes." : ""}${services.some(service => service.name === "Twitch") ? " Twitch status may be cached for up to one minute; use Refresh for updates." : ""}`,
-      unavailable.some(Boolean) ? "warning" : "success");
+      hasUnavailable ? "warning" : "success");
     } catch (error) {
       console.error("Unable to load creator feed:", error);
       loadedAt = 0;

@@ -91,6 +91,21 @@ try {
     });
     const page = await context.newPage();
     page.on("pageerror", (error) => errors.push(error.message));
+    const reopenFeed = async () => {
+      await page.waitForFunction(() => !document.querySelector("#creators-refresh").disabled);
+      await page.evaluate(() => {
+        window.BITS_DESKTOP_WINDOWS.close("creators");
+        window.BITS_DESKTOP_WINDOWS.open("creators");
+      });
+    };
+    const recoverOnReopen = async () => {
+      const before = listRequests;
+      await reopenFeed();
+      await page.waitForFunction(() => document.querySelector("#creators-status").dataset.state === "success"
+        && !document.querySelector("#creators-refresh").disabled);
+      assert.equal(listRequests, before + 1, "failed integrations must retry on reopen instead of keeping a cached failure");
+      assert.equal(await page.locator("[data-channel-id] a").count(), 1);
+    };
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
@@ -111,6 +126,9 @@ try {
     assert.match(await page.locator("[data-twitch-login]").textContent(), /LIVE ON TWITCH/);
     assert.equal(await page.locator("[data-twitch-login] script").count(), 0);
     assert.ok(await page.locator("[data-channel-id] a").textContent().then((text) => text.includes("<script>")));
+    const successfulRequests = listRequests;
+    await reopenFeed();
+    assert.equal(listRequests, successfulRequests, "successful feed loads must retain their normal freshness window");
     assert.ok(await page.evaluate(() => {
       const content = document.querySelector("#creators-window .desktop-window-content");
       return content.scrollWidth <= content.clientWidth + 1;
@@ -131,23 +149,27 @@ try {
     assert.equal(await page.locator("[data-channel-id] a").count(), 1, "missing photo must not remove the latest upload");
     assert.equal(await page.locator("[data-twitch-login] a").count(), 1, "YouTube photo failure must not affect Twitch");
     photoUnavailable = false;
+    await recoverOnReopen();
     imageFailure = true;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("#creators-status").textContent.includes("could not load"));
     assert.equal(await page.locator(".creator-avatar").first().textContent(), "EC");
     imageFailure = false;
+    await recoverOnReopen();
     uploadUnavailable = true;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("[data-channel-id]")?.textContent.includes("Latest video unavailable"));
     await page.waitForFunction(() => document.querySelector("[data-avatar-channel-id] img.is-loaded")?.naturalWidth === 64);
     assert.ok((await page.locator("[data-channel-id]").textContent()).includes("Latest video unavailable"));
     uploadUnavailable = false;
+    await recoverOnReopen();
     videoStatus = 503;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("#creators-status").dataset.state === "warning");
     assert.equal(await page.locator("#creators-list > li").count(), 2, "video outage must retain creator links");
     assert.equal(await page.locator("[data-twitch-login] a").getAttribute("href"), "https://www.twitch.tv/example");
     videoStatus = 200;
+    await recoverOnReopen();
     twitchLive = false;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("[data-twitch-login] a")?.href.endsWith("/videos/123"));
@@ -161,11 +183,13 @@ try {
     assert.match(await page.locator("[data-twitch-login]").textContent(), /status unavailable/);
     assert.equal(await page.locator("[data-channel-id] a").count(), 1, "Twitch outage preserves YouTube uploads");
     twitchStatus = 200;
+    await recoverOnReopen();
     twitchMalformed = true;
     await page.locator("#creators-refresh").click();
     await page.waitForFunction(() => document.querySelector("#creators-status").dataset.state === "warning");
     assert.equal(await page.locator('[src="https://evil.example/photo"]').count(), 0);
     twitchMalformed = false;
+    await recoverOnReopen();
     twitchLive = true;
     creators = [fixtures[1]];
     const before = videoRequests;
@@ -186,7 +210,7 @@ try {
     assert.deepEqual(errors, []);
     await page.goto(`${server.origin}/online/?window=creators`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#creators-status").textContent.includes("10 minutes"));
-    console.log(`PASS ${width}px creator feed: lazy YouTube/Twitch photos, live links, offline VODs, no VODs, independent platform failures, safe metadata, accessibility, retry, and deep links`);
+    console.log(`PASS ${width}px creator feed: lazy YouTube/Twitch photos, live links, offline VODs, no VODs, independent platform failures, safe metadata, accessibility, failure recovery on reopen, successful caching, retry, and deep links`);
     await context.close();
   }
 
