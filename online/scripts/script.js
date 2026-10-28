@@ -1502,6 +1502,24 @@ const baseGlitchMessages = [
   "M3M0RY LEAK DETECTED: several memories now belong to the toolbar",
   "QUARANTINE STATUS: YES // NO // FILE NOT EMOTIONALLY AVAILABLE",
 ];
+const baseNotificationMessages = [
+  "Notification dismissed\nBITS OS noticed. No action is required. Yet.",
+  "Reminder about your dismissed reminder\nThis notification is much more important because it is newer.",
+  "Final notification (2 of 7)\nPlease stop proving that the dismiss button works.",
+  "Dismissal appeal received\nYour request has been forwarded to the notification you just dismissed.",
+  "Task failed successfully\nThe notification was closed. A replacement has been dispatched.",
+  "We have been trying to reach you\nAbout your desktop's extended notification warranty.",
+  "Achievement unlocked: click again\nYour reward is another notification.",
+  "This could have been an email\nUnfortunately, the email also became a notification.",
+  "Notification recycling enabled\nThank you for keeping this popup out of the landfill.",
+  "You are now on mute\nNot me. You. I am still talking.",
+  "One more thing\nThere will be one more thing after this one more thing.",
+  "Your feedback matters\nWe interpreted that click as a request for more popups.",
+  "Background process promoted\nThis notification has decided to become a foreground problem.",
+  "Snooze button on vacation\nPlease enjoy this complimentary awake button.",
+  "Dismissal speedrun detected\nThe world record is still held by someone with notifications disabled.",
+];
+window.BITS_MESSAGE_CATALOG?.bind("standard", "notificationMessages", baseNotificationMessages);
 window.BITS_MESSAGE_CATALOG?.bind("standard", "glitchMessages", baseGlitchMessages);
 const seasonalGlitchMessages = seasonalDesktopProfile?.glitchMessages ?? [];
 const glitchMessages = seasonalDesktopProfile?.mode === "exclusive" && seasonalGlitchMessages.length
@@ -2339,15 +2357,15 @@ fakeActionNotificationDismiss.addEventListener("click", () => {
   fakeActionNotification.hidden = true;
   window.clearTimeout(actionNotificationTimer);
   actionNotificationTimer = window.setTimeout(() => {
-    const increasinglyConcerned = [
-      ["Notification dismissed", "BITS OS noticed. No action is required. Yet."],
-      ["Reminder about your dismissed reminder", "This notification is much more important because it is newer."],
-      ["Final notification (2 of 7)", "Please stop proving that the dismiss button works."],
-    ];
-    const message = increasinglyConcerned[
-      Math.min(dismissedActionNotifications - 1, increasinglyConcerned.length - 1)
-    ];
-    setActionCenterNotification(message[0], message[1]);
+    const profile = window.BITS_SEASONAL_PROFILE;
+    const seasonal = profile?.notificationMessages ?? [];
+    const pool = profile?.mode === "exclusive" && seasonal.length
+      ? seasonal : [...baseNotificationMessages, ...seasonal];
+    const message = pool[(dismissedActionNotifications - 1) % pool.length];
+    const text = window.BITS_MESSAGE_TEXT.prepare(message).text;
+    const [title, ...copy] = text.split("\n");
+    setActionCenterNotification(copy.length ? title : "BITS OS has another notification",
+      copy.length ? copy.join("\n") : title);
   }, 1200);
 });
 window.addEventListener("bits:arg-updated", (event) => {

@@ -53,6 +53,17 @@
 - A public `GUESTBOOK.LOG` with immediate publishing and authenticated Admin
   deletion controls
 
+- The Message Library's **Desktop / returning notifications** category edits
+  the fake Action Center notification that reappears after dismissal. Each
+  entry keeps its title on the first line and body on subsequent lines; a
+  single-line entry uses a default title. Variables and inline markup resolve
+  to plain text. Entries cycle in position order instead of getting stuck on
+  the final joke. Enabled filters, scheduled additive/exclusive pools, cache,
+  and bundled fallbacks work as with other message categories. Do Not Disturb
+  still suppresses returning notifications. Apply
+  `supabase/migrations/20261028095000_desktop_notification_messages.sql` to
+  enable editing and seed the 15 bundled title/body pairs.
+
 - An Admin-managed `GAMES.EXE` library of favorite games with ordered,
   publishable entries and links to their official or storefront pages
 

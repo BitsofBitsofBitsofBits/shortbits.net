@@ -25,6 +25,8 @@ const publicRows = [
   entry(6, "monitor.cpu", "DATABASE CPU CHATTER"),
   entry(7, "playingDeadMessages", "DATABASE PLAYING DEAD"),
   entry(8, "glitchMessages", "DATABASE GLITCH"),
+  entry(9, "notificationMessages", "DATABASE NOTICE\nDATABASE NOTICE BODY"),
+  entry(10, "notificationMessages", "DATABASE SINGLE LINE"),
 ];
 const markupRows = publicRows.map((row) => ({
   ...row, markup: true, text: `${row.text} %hostname% {{font:custom:"Aptos Display", Arial, sans-serif|**BOLD**}} {{color:red|red}} {{color:rainbow|彩色}}`,
@@ -64,7 +66,10 @@ try {
         const isCatalog = url.pathname.endsWith("/site_message_catalog");
         const data = url.pathname.endsWith("/site_message_settings") ? [{ id: "primary", timezone: "America/Chicago" }]
           : url.pathname.endsWith("/site_message_pools") ? (useCustom ? customPools : [])
-          : isCatalog ? (useCustom ? [...markupRows, ...customPools.map((pool, index) => entry(9001 + index, "messages", `CUSTOM ${pool.title}`, pool.id))]
+          : isCatalog ? (useCustom ? [...markupRows, ...customPools.flatMap((pool, index) => [
+            entry(9001 + index, "messages", `CUSTOM ${pool.title}`, pool.id),
+            entry(9011 + index, "notificationMessages", `CUSTOM NOTICE ${pool.title}`, pool.id),
+          ])]
             : useMarkup ? markupRows : publicRows) : [];
         return route.fulfill({
           status: isCatalog && fail ? 503 : 200, contentType: "application/json",
@@ -95,6 +100,26 @@ try {
     assert.equal(await page.evaluate(() => shutdownMessages[0]), "DATABASE_SHUTDOWN");
     assert.equal(await page.evaluate(() => hardwareChatter[0]), "DATABASE CPU CHATTER");
     assert.equal(await page.evaluate(() => playingDeadMessages[0]), "DATABASE PLAYING DEAD");
+    for (const [title, body] of [
+      ["DATABASE NOTICE", "DATABASE NOTICE BODY"],
+      ["BITS OS has another notification", "DATABASE SINGLE LINE"],
+      ["DATABASE NOTICE", "DATABASE NOTICE BODY"],
+    ]) {
+      await page.evaluate(() => {
+        fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "false");
+        fakeActionNotificationDismiss.click();
+      });
+      await page.waitForFunction(() => !document.querySelector(".fake-action-notification").hidden);
+      assert.equal(await page.locator("#fake-action-notification-title").textContent(), title);
+      assert.equal(await page.locator("#fake-action-notification-copy").textContent(), body);
+    }
+    await page.evaluate(() => {
+      fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "true");
+      fakeActionNotificationDismiss.click();
+    });
+    await page.waitForTimeout(1400);
+    assert.equal(await page.locator(".fake-action-notification").evaluate(element => element.hidden), true);
+    await page.evaluate(() => fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "false"));
     fail = true;
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), false);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].text), "DATABASE STATUS");
@@ -238,6 +263,14 @@ try {
     fail = false;
     useCustom = true;
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), true);
+    assert.deepEqual(await page.evaluate(() => window.BITS_SEASONAL_PROFILE.notificationMessages),
+      ["CUSTOM NOTICE one", "CUSTOM NOTICE two"]);
+    await page.evaluate(() => {
+      dismissedActionNotifications = 0;
+      fakeActionNotificationDismiss.click();
+    });
+    await page.waitForFunction(() => !document.querySelector(".fake-action-notification").hidden);
+    assert.equal(await page.locator("#fake-action-notification-copy").textContent(), "CUSTOM NOTICE one");
     assert.deepEqual(await page.evaluate(() => window.BITS_MESSAGES.filter((message) => message.text.startsWith("CUSTOM")).map((message) => message.text)), ["CUSTOM one", "CUSTOM two"]);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES.some((message) => message.text.startsWith("DATABASE STATUS"))), false);
     await page.evaluate(() => {

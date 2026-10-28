@@ -85,8 +85,16 @@
   function describePool() {
     const help = get("pool-help");
     const boot = category.value === "bootMessages";
-    help.hidden = !boot;
+    const notifications = category.value === "notificationMessages";
+    help.hidden = !boot && !notifications;
     help.textContent = "";
+    if (notifications) {
+      help.textContent = "Returning fake desktop notifications cycle in entry order after dismissal. "
+        + "Put the title on the first line and the body on the following lines. "
+        + "A single-line entry uses a default title. Text variables and inline markup are resolved to plain text. "
+        + "Empty enabled pools retain bundled jokes; seasonal additive/exclusive pools also apply.";
+      return;
+    }
     if (!boot) return;
     const generator = window.BITS_BOOT_MESSAGE_GENERATOR;
     const combinations = generator.combinations.toLocaleString("en-US");

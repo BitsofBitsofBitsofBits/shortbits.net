@@ -24,7 +24,7 @@ export function messageCatalogDefaults() {
   context.window.BITS_MESSAGE_CATALOG.registerProfiles = (profiles) => {
       registerProfiles(profiles);
       profiles.forEach((profile) => {
-        for (const key of ["messages", "activities", "bootMessages", "initialBootSteps", "shutdownMessages", "playingDeadMessages", "glitchMessages"]) {
+        for (const key of ["messages", "activities", "bootMessages", "initialBootSteps", "shutdownMessages", "playingDeadMessages", "glitchMessages", "notificationMessages"]) {
           if (profile[key]) add(profile.id, key, profile[key]);
         }
         Object.entries(profile.monitorJokes ?? {}).forEach(([metric, pool]) => add(profile.id, `monitor.${metric}`, pool));
@@ -43,5 +43,6 @@ export function messageCatalogDefaults() {
   add("standard", "glitchMessages", literal("online/scripts/script.js", "baseGlitchMessages", 0));
   Object.entries(literal("online/scripts/content.js", "baseHardwareJokes", 0, "object"))
     .forEach(([metric, pool]) => add("standard", `monitor.${metric}`, pool));
+  add("standard", "notificationMessages", literal("online/scripts/script.js", "baseNotificationMessages", 0));
   return JSON.parse(JSON.stringify(rows));
 }

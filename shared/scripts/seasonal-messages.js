@@ -1109,6 +1109,7 @@
     },
   ];
 
+  profiles.forEach((profile) => { profile.notificationMessages = []; });
   window.BITS_MESSAGE_CATALOG?.registerProfiles(profiles);
 
   function mergeMonitorJokes(activeProfiles) {
@@ -1145,6 +1146,7 @@
       shutdownMessages: activeProfiles.flatMap((profile) => profile.shutdownMessages ?? []),
       playingDeadMessages: activeProfiles.flatMap((profile) => profile.playingDeadMessages ?? []),
       glitchMessages: activeProfiles.flatMap((profile) => profile.glitchMessages ?? []),
+      notificationMessages: activeProfiles.flatMap((profile) => profile.notificationMessages ?? []),
     };
   }
 

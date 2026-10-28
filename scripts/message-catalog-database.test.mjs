@@ -17,20 +17,21 @@ test("message migration preserves every fallback entry, weights and formatting, 
     await db.exec(await readFile(new URL("../supabase/migrations/20261025034000_scheduled_message_pools.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261026030000_message_authors.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261028070000_builtin_message_pool_settings.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../supabase/migrations/20261028095000_desktop_notification_messages.sql", import.meta.url), "utf8"));
     const columns = "position,profile,category,text,weight,colorful,format,enabled";
     const entries = (await db.query(`select ${columns} from site_message_catalog order by position`)).rows;
     assert.deepEqual(entries, messageCatalogDefaults());
-    assert.equal(entries.length, 2207);
+    assert.equal(entries.length, 2222);
     assert.equal((await db.query("select count(*)::int as count from site_message_catalog where corrected_text is not null")).rows[0].count, 0);
     assert.equal((await db.query("select count(*)::int as count from site_message_catalog where markup")).rows[0].count, 0);
-    assert.equal(new Set(entries.map((row) => `${row.profile}/${row.category}`)).size, 221);
+    assert.equal(new Set(entries.map((row) => `${row.profile}/${row.category}`)).size, 222);
     assert.ok((await db.query("select content_backup_tables() as tables")).rows[0].tables.includes("site_message_catalog"));
     await db.exec("set role authenticated");
     await db.exec("update site_message_catalog set text = 'Admin edited text', enabled = false where position = 1");
     await db.exec("update site_message_catalog set corrected_text = 'Admin corrected text' where position = 1");
     await db.exec("update site_message_catalog set author = 'Ada Lovelace' where position = 1");
     assert.equal((await db.query("select author from site_message_catalog where position = 1")).rows[0].author, "Ada Lovelace");
-    assert.equal((await db.query("select count(*)::int as count from site_message_catalog where author is null")).rows[0].count, 2206);
+    assert.equal((await db.query("select count(*)::int as count from site_message_catalog where author is null")).rows[0].count, 2221);
     assert.equal((await db.query("select corrected_text from site_message_catalog where position = 1")).rows[0].corrected_text, "Admin corrected text");
     await db.exec("update site_message_catalog set text = '**Inline boot**', markup = true where category = 'bootMessages'");
     assert.ok((await db.query("select markup from site_message_catalog where category = 'bootMessages' limit 1")).rows[0].markup);
@@ -47,13 +48,13 @@ test("message migration preserves every fallback entry, weights and formatting, 
       "author = 'Ada', category = 'bootMessages'",
     ]) await assert.rejects(db.exec(`update site_message_catalog set ${assignment} where position = 2`), /check constraint/);
     await db.exec("set role anon");
-    assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2206);
+    assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2221);
     await assert.rejects(db.exec("update site_message_catalog set enabled = true"), /permission denied/);
     await assert.rejects(db.exec("delete from site_message_catalog"), /permission denied/);
     await assert.rejects(db.exec("update site_message_catalog set corrected_text = 'Unauthorized'"), /permission denied/);
     await assert.rejects(db.exec("update site_message_catalog set author = 'Unauthorized'"), /permission denied/);
     await db.exec("set role authenticated; delete from site_message_catalog where position = 1");
-    assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2206);
+    assert.equal((await db.query("select count(*)::int as count from site_message_catalog")).rows[0].count, 2221);
   } finally { await db.close(); }
 });
 

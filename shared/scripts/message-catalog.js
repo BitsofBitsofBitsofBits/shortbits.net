@@ -7,6 +7,7 @@
     messages: "Rotating status messages", activities: "Activities", shutdownMessages: "Shutdown messages",
     bootMessages: "Endless boot / fixed messages", initialBootSteps: "Initial boot steps",
     playingDeadMessages: "Playing-dead messages", glitchMessages: "Desktop glitch messages",
+    notificationMessages: "Desktop / returning notifications (title on first line)",
     "monitor.cpu": "Monitor / CPU", "monitor.gpu": "Monitor / GPU", "monitor.network": "Monitor / Network",
     "monitor.ram": "Monitor / RAM", "monitor.storage": "Monitor / Storage", "monitor.thermal": "Monitor / Temperature",
   };
