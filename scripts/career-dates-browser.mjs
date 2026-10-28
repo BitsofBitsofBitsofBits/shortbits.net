@@ -69,6 +69,10 @@ try {
     await page.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
     const durations = page.locator(`${selector} .career-period-duration`);
     await durations.first().waitFor();
+    await page.locator(`${skillsSelector} > :first-child`).waitFor();
+    if (path === "/online/?window=resume") {
+      assert.equal(await page.locator(skillsSelector).evaluate(node => node.closest("[data-window]")?.id), "resume-window");
+    }
     assert.equal(await page.locator(skillsSelector).evaluate(node => node.children.length), data.skills.length);
     assert.ok((await page.locator(skillsSelector).textContent()).includes("PowerShell"));
     assert.ok(!(await page.locator(selector).textContent()).includes("LEGACY_TECH_MARKER"), "Per-role technologies must not render");

@@ -10,6 +10,19 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const migration = await readFile(new URL("../supabase/migrations/20261028093000_resume_skills.sql", import.meta.url), "utf8");
 const fixture = JSON.parse(await readFile(new URL("./fixtures/resume-data.json", import.meta.url), "utf8"));
 
+test("Skills occupy an independent Admin pane and the CAREER.SYS content window", async () => {
+  const { document: admin } = parseHTML(await readFile(new URL("../admin/index.html", import.meta.url), "utf8"));
+  const pane = admin.querySelector('[data-admin-view="skills"]');
+  assert.equal(pane.parentElement.id, "resume-form");
+  assert.equal(pane.parentElement.closest("[data-admin-view]"), null);
+  const { document: online } = parseHTML(await readFile(new URL("../online/index.html", import.meta.url), "utf8"));
+  for (const id of ["resume-skills", "resume-skills-heading"]) {
+    const node = online.getElementById(id);
+    assert.equal(node.closest("[data-window]").id, "resume-window");
+    assert.equal(node.parentElement.id, "resume-content");
+  }
+});
+
 test("skills migration seeds Toolkit categories and deduplicates only published experience technologies", async () => {
   const db = new PGlite();
   try {
