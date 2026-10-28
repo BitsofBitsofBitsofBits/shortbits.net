@@ -10,10 +10,11 @@ account credentials, YouTube OAuth, and API keys are not required.
 ## Deploy before pairing
 
 The main-branch workflow must finish validation and then successfully run the
-**Supabase -> Apply database migrations** step. It deploys `youtube-presence`.
-The updated `spotify-now-playing` function is also required for session timing;
-it is not currently in the automatic Edge Function deploy list, so deploy it
-explicitly using the command below. Apply all three presence migrations:
+**Supabase -> Apply database migrations** step. It automatically deploys both
+`youtube-presence` and `spotify-now-playing`; the latter is required for continuous
+Spotify session timing and cross-provider ordering. The health check detects
+outdated Spotify functions or session-database failures, rather than accepting
+working playback alone. Apply all three presence migrations:
 
 1. `20261026050000_youtube_presence.sql`
 2. `20261026060000_youtube_session_continuity.sql`

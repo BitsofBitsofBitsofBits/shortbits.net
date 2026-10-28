@@ -199,6 +199,14 @@ jobs:
           --no-verify-jwt
           --use-api
 
+      - name: Deploy Spotify playback Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy spotify-now-playing
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
       - name: Deploy YouTube presence Edge Function
         if: steps.credentials.outputs.ready == 'true'
         run: >-

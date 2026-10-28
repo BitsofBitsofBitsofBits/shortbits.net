@@ -32,7 +32,7 @@ Database and Edge Function changes ship from the same workflow. Add these
   If absent or incomplete, existing Supabase Twitch secrets are unchanged.
 
 The job deploys `contact-message`, `creator-videos`, `creator-twitch`,
-`youtube-presence`, and `hardware-sync`, then runs `supabase db push`. When the
+`spotify-now-playing`, `youtube-presence`, and `hardware-sync`, then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
 
@@ -46,10 +46,11 @@ Provision its revocable device token in Supabase's SQL editor using the
 [extension setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/tree/main/extensions/youtube-presence).
 It requires no additional GitHub or YouTube secrets.
 
-The updated `spotify-now-playing` function is also required for media-session
-timing. It is not currently listed in this workflow's Edge Function deploy
-steps; deploy it explicitly as described in
-[YouTube watching presence](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence).
+The updated `spotify-now-playing` function is required for media-session timing
+and is deployed automatically alongside YouTube presence. The post-deployment
+Spotify health check rejects missing session fields and session-database failures,
+even when playback itself still works. An inactive response may have a null session
+start; playing or paused items must include a valid session timestamp.
 
 Pushing a commit starts validation; it does not apply migrations immediately.
 The Supabase job depends on successful validation and is skipped when validation

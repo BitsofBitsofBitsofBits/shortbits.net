@@ -17,7 +17,7 @@ function healthy(url, options) {
   if (path === "/build-info.json") return json({ commit, builtAt: manifest.generatedAt });
   if (path === "/blog/content-manifest.json") return json(manifest);
   if (path === "/blog/feed.xml") return new Response(`<rss version="2.0"><channel><item><link>${site}/blog/articles/notes/</link></item></channel></rss>`, { headers: { "Content-Type": "application/xml" } });
-  if (path.endsWith("spotify-now-playing")) return json({ isPlaying: false, item: null, cacheAgeMs: 0 });
+  if (path.endsWith("spotify-now-playing")) return json({ isPlaying: false, item: null, cacheAgeMs: 0, sessionStartedAt: null });
   if (path.endsWith("discord-presence")) return json({ enrolled: true, status: "offline", activities: [], cacheAgeMs: 0 });
   if (path.endsWith("contact-message")) {
     assert.equal(options.method, "OPTIONS");
@@ -159,5 +159,37 @@ test("post-deployment monitoring explicitly forwards its required SSH secrets", 
   for (const name of ["DEPLOY_SSH_KEY", "DEPLOY_KNOWN_HOSTS", "DEPLOY_USER", "DEPLOY_HOST"]) {
     assert.ok(health.includes(`${name}: \${{ secrets.${name} }}`), `${name} must be forwarded by the caller`);
     assert.match(reusable, new RegExp(`${name}:\\s+required: true`), `${name} must be required by the reusable workflow`);
+  }
+});
+
+test("public media session functions are deployed automatically with the configured project and gateway settings", async () => {
+  const workflow = (await readFile(new URL("../.github/workflows/site.yml", import.meta.url), "utf8")).replaceAll("\r\n", "\n");
+  const supabase = workflow.split("\n  supabase:")[1].split("\n  deploy:")[0];
+  for (const name of ["spotify-now-playing", "youtube-presence"]) {
+    const step = supabase.split("- name:").find(value => value.includes(`supabase functions deploy ${name}\n`));
+    assert.ok(step, `${name} must be included in the automatic deploy job`);
+    assert.ok(step.includes("if: steps.credentials.outputs.ready == 'true'"));
+    assert.ok(step.includes('--project-ref "$SUPABASE_PROJECT_REF"'));
+    assert.ok(step.includes("--no-verify-jwt"));
+    assert.ok(step.includes("--use-api"));
+  }
+});
+
+test("monitor rejects missing or failed Spotify sessions but accepts inactive and paused sessions", async () => {
+  for (const [payload, expected] of [
+    [{ isPlaying: false, item: null }, false],
+    [{ isPlaying: true, item: { title: "Playing" } }, false],
+    [{ isPlaying: true, item: { title: "Playing" }, sessionStartedAt: null }, false],
+    [{ isPlaying: false, item: null, sessionStartedAt: null, sessionTrackingUnavailable: true }, false],
+    [{ isPlaying: true, item: { title: "Playing" }, sessionStartedAt: "invalid" }, false],
+    [{ isPlaying: false, item: null, sessionStartedAt: null }, true],
+    [{ isPlaying: true, item: { title: "Playing" }, sessionStartedAt: "2026-10-28T06:00:00Z" }, true],
+    [{ isPlaying: false, item: { title: "Paused" }, sessionStartedAt: "2026-10-28T06:00:00Z" }, true],
+  ]) {
+    const report = await run((url, options) => new URL(url).pathname.endsWith("spotify-now-playing")
+      ? json(payload) : healthy(url, options));
+    const check = report.checks.find(check => check.name === "Integration spotify-now-playing");
+    assert.equal(check.ok, expected, JSON.stringify(payload));
+    if (!expected) assert.match(check.error, /Spotify session timing is unavailable or missing/);
   }
 });

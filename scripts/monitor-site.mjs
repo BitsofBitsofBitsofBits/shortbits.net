@@ -108,6 +108,11 @@ export async function monitorSite({
       if (name === "spotify-now-playing") {
         requireValue(typeof body.isPlaying === "boolean"
           && (body.item === null || (body.item && typeof body.item.title === "string")), "Invalid playback response.");
+        requireValue(body.sessionTrackingUnavailable !== true
+          && (body.sessionStartedAt === null
+            || (typeof body.sessionStartedAt === "string" && Number.isFinite(Date.parse(body.sessionStartedAt))))
+          && (body.item === null || body.sessionStartedAt !== null),
+        "Spotify session timing is unavailable or missing; check the deployed function and session database migration.");
       } else {
         requireValue(typeof body.enrolled === "boolean", "Invalid presence response.");
         requireValue(!body.enrolled || (["online", "idle", "dnd", "offline"].includes(body.status) && Array.isArray(body.activities)), "Invalid presence status.");
