@@ -84,6 +84,8 @@ try {
       await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
     };
     const assertLayout = async () => {
+      // Wait for real resize rendering, not only animation frames from the mocked clock.
+      await page.screenshot();
       const { first, second, height, viewportWidth, overflow } = await page.evaluate(() => {
         const bounds = (selector) => {
           const element = document.querySelector(selector);
