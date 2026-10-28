@@ -18,12 +18,12 @@
     <script src="/shared/scripts/message-text.js?v=messages-1" defer></script>
     <script src="/shared/scripts/message-catalog.js?v=messages-1" defer></script>
     <script src="/shared/scripts/seasonal-messages.js?v=seasonal-4" defer></script>
-    <script src="/admin/scripts/admin-shell.js?v=admin-shell-3" defer></script>
+    <script src="/admin/scripts/admin-shell.js?v=admin-shell-4" defer></script>
     <script src="/shared/scripts/publishing-status.js?v=publishing-1" defer></script>
     <script src="/admin/scripts/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/shared/scripts/career-format.js?v=career-3" defer></script>
-    <script src="/admin/scripts/admin.js?v=admin-33" defer></script>
-    <script src="/admin/scripts/admin-backup.js?v=backup-2" defer></script>
+    <script src="/admin/scripts/admin.js?v=admin-34" defer></script>
+    <script src="/admin/scripts/admin-backup.js?v=backup-3" defer></script>
     <script src="/shared/scripts/boot-message-generator.js?v=boot-generator-1" defer></script>
     <script src="/admin/scripts/admin-messages.js?v=messages-5" defer></script>
   </head>
@@ -227,7 +227,8 @@
             <p class="blog-markdown-help" data-admin-view="guide" data-admin-view-label="Publishing guide">
               Publishes to CAREER.SYS on the main page and the experience timeline on
               <a href="/professional/#experience" target="_blank" rel="noreferrer">/professional/</a>.
-              Start summary lines with &bull; or - for bullet points; separate technologies with commas.
+              Start summary lines with &bull; or - for bullet points. Manage shared skills
+              and the professional Technical Toolkit in the Skills tab; separate skills with commas.
               Education details accept the same bullet format, e.g. honors and activities.
               Everything here also feeds the printable
               <a href="/professional/resume/" target="_blank" rel="noreferrer">résumé</a>.
@@ -250,6 +251,14 @@
             </div>
             <div class="ac-form-pane" data-admin-view="education" data-admin-view-label="Education">
             <div class="repeatable-admin-actions">
+            <div class="ac-form-pane" data-admin-view="skills" data-admin-view-label="Skills">
+            <p class="blog-markdown-help">These categories replace per-experience technologies and the hard-coded Technical Toolkit.
+              They appear on the professional page, CAREER.SYS, and the printable résumé. Disable a group to keep it as a private draft.</p>
+            <div class="repeatable-admin-actions">
+              <button id="resume-skills-add" type="button">+ ADD_SKILL_GROUP</button>
+            </div>
+            <div id="resume-skills-slots" class="curated-admin-grid"></div>
+            </div>
               <button id="resume-education-add" type="button">+ ADD_EDUCATION</button>
             </div>
             <div id="resume-education-slots" class="curated-admin-grid"></div>

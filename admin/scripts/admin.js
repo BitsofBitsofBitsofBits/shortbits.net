@@ -35,6 +35,8 @@ const resumeSubmit = document.querySelector("#resume-submit");
 const resumeAdminStatus = document.querySelector("#resume-admin-status");
 const resumeEntrySlots = document.querySelector("#resume-entry-slots");
 const resumeEntryAdd = document.querySelector("#resume-entry-add");
+const resumeSkillsSlots = document.querySelector("#resume-skills-slots");
+const resumeSkillsAdd = document.querySelector("#resume-skills-add");
 const resumeEducationSlots = document.querySelector("#resume-education-slots");
 const resumeEducationAdd = document.querySelector("#resume-education-add");
 const resumeCertificationSlots = document.querySelector("#resume-certification-slots");
@@ -715,7 +717,6 @@ const repeatableEditors = {
       { key: "organization", label: "ORGANIZATION", maxLength: 120 },
       { key: "period", label: "PERIOD", maxLength: 100 },
       { key: "summary", label: "SUMMARY", maxLength: 1000, multiline: true },
-      { key: "technologies", label: "TECHNOLOGIES", maxLength: 300 },
     ],
   },
   education: {
@@ -730,6 +731,18 @@ const repeatableEditors = {
       { key: "credential", label: "DEGREE / CREDENTIAL", maxLength: 160 },
       { key: "period", label: "PERIOD", maxLength: 100 },
       { key: "details", label: "DETAILS (OPTIONAL)", maxLength: 600, multiline: true },
+    ],
+  },
+  skills: {
+    table: "site_resume_skills",
+    container: resumeSkillsSlots,
+    addButton: resumeSkillsAdd,
+    status: resumeAdminStatus,
+    itemName: "skill group",
+    selectFields: "position, category, skills, enabled",
+    fields: [
+      { key: "category", label: "CATEGORY", maxLength: 120 },
+      { key: "skills", label: "SKILLS (COMMA-SEPARATED)", maxLength: 6000, multiline: true },
     ],
   },
   certifications: {
@@ -1176,6 +1189,7 @@ function clearPublicContentCache() {
   localStorage.removeItem("bits-public-content-v5");
   localStorage.removeItem("bits-public-content-v6");
   localStorage.removeItem("bits-public-content-v7");
+  localStorage.removeItem("bits-public-content-v8");
 }
 
 async function setMessageRead(message, read) {
@@ -1640,7 +1654,7 @@ async function loadResumeContent() {
       .single(),
     adminClient
       .from("site_resume_entries")
-      .select("position, role, organization, period, summary, technologies, enabled")
+      .select("position, role, organization, period, summary, enabled")
       .order("position", { ascending: true }),
   ]);
 
@@ -1663,7 +1677,7 @@ async function loadResumeContent() {
   renderRepeatableEntries(repeatableEditors.resume, entriesResult.data);
 
   const unavailableSections = [];
-  for (const editorKey of ["education", "certifications"]) {
+  for (const editorKey of ["education", "certifications", "skills"]) {
     const editor = repeatableEditors[editorKey];
     const result = await adminClient
       .from(editor.table)
@@ -3456,6 +3470,10 @@ if (adminClient) {
       setAdminStatus(resumeAdminStatus, "Correct the highlighted résumé fields before saving.", "error");
       return;
     }
+    if (repeatableEditors.skills.unavailable) {
+      setAdminStatus(resumeAdminStatus, "Skills could not be loaded. Apply the skills migration or reload before saving the résumé.", "error");
+      return;
+    }
     const formData = new FormData(resumeForm);
     const profile = Object.fromEntries(
       resumeProfileFields.map((field) => [
@@ -3474,6 +3492,9 @@ if (adminClient) {
       entry.enabled && (!entry.school || !entry.credential || !entry.period)
     ));
     const certificationEntries = collectRepeatableEntries(repeatableEditors.certifications);
+    const skillEntries = collectRepeatableEntries(repeatableEditors.skills);
+    const invalidSkills = skillEntries.find((entry) => entry.enabled
+      && (!entry.category || !window.CareerFormat.splitTechnologies(entry.skills).length));
     const invalidCertification = certificationEntries.find((entry) => (
       entry.enabled && (!entry.name || !entry.issuer || !entry.issued)
     ));
@@ -3521,6 +3542,10 @@ if (adminClient) {
       setAdminStatus(resumeAdminStatus, "Certification verify URLs must use HTTPS.", "error");
       return;
     }
+    if (invalidSkills) {
+      setAdminStatus(resumeAdminStatus, "Every enabled skill group needs a category and skills.", "error");
+      return;
+    }
 
     resumeSubmit.disabled = true;
     resumeSubmit.textContent = "> SAVING...";
@@ -3550,6 +3575,7 @@ if (adminClient) {
           certificationEntries,
           updatedAt,
         ),
+      syncRepeatableEntries(repeatableEditors.skills, skillEntries, updatedAt),
     ]);
     const failedUpdate = results.find((result) => result?.error);
     resumeSubmit.disabled = false;

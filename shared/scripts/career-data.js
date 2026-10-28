@@ -1,11 +1,12 @@
 (() => {
-  const sharedCacheKey = "bits-public-content-v5";
+  const sharedCacheKey = "bits-public-content-v8";
   const sharedCacheDurationMs = 300_000;
   const queries = Object.freeze({
     profile: "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
-    entries: "site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc",
+    entries: "site_resume_entries?select=position,role,organization,period,summary&enabled=eq.true&order=position.asc",
     education: "site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc",
     certifications: "site_resume_certifications?select=position,name,issuer,issued,credential_id,credential_url&enabled=eq.true&order=position.asc",
+    skills: "site_resume_skills?select=position,category,skills&enabled=eq.true&order=position.asc",
   });
 
   function readSharedCache() {
@@ -16,12 +17,14 @@
         && typeof cached.cachedAt === "number"
         && Date.now() - cached.cachedAt < sharedCacheDurationMs
         && cached.payload
+        && Array.isArray(cached.payload.resumeSkills)
       ) {
         return {
           profile: cached.payload.resumeProfile,
           entries: cached.payload.resumeEntries ?? [],
           education: cached.payload.resumeEducation ?? [],
           certifications: cached.payload.resumeCertifications ?? [],
+          skills: cached.payload.resumeSkills,
         };
       }
     } catch {
@@ -81,11 +84,13 @@
         "certifications",
         unavailable,
       ),
-    ]).then(([profiles, entries, education, certifications]) => ({
+      fetchTable(queries.skills),
+    ]).then(([profiles, entries, education, certifications, skills]) => ({
       profile: profiles[0] ?? null,
       entries,
       education,
       certifications,
+      skills,
       unavailable,
     }));
     request.catch(() => {

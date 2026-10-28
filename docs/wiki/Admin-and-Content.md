@@ -31,6 +31,14 @@
     actual start month entered once before tenure can be calculated.
     These controls reuse the existing `period` field, so no database migration
     or backup-format change is required.
+  - **Résumé > Skills** manages the shared Skills/Technical Toolkit categories:
+    add a category and comma-separated skills, edit the list, disable it as a
+    private draft, or remove it. This replaces the per-experience Technologies
+    fields; their existing database values remain stored but are no longer
+    displayed or overwritten when saving an experience. The Skills migration
+    seeds the six Toolkit categories and imports unique technologies from
+    published experiences into an additional group, excluding private drafts.
+    New skills are managed in Skills, not copied automatically from legacy fields.
 
 - **Showcase > Featured project** (`/admin/#/featured-project`) controls the
   Online `FEATURED_PROCESS` box: title, summary, optional status and comma-separated

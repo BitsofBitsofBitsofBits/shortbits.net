@@ -252,12 +252,6 @@ body.resume-page {
   margin-top: 2px;
 }
 
-.resume-tech {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 8.5pt;
-}
-
 .resume-certs {
   margin: 0;
   padding-left: 16px;
@@ -405,15 +399,22 @@ body.resume-page {
     font-size: 10pt;
   }
 
-  .resume-period,
-  .resume-tech {
+  .resume-period {
     font-size: 8pt;
   }
 
   .resume-certs,
-  .resume-skills,
+  .resume-skills div,
   .resume-footer {
     break-inside: avoid;
+  }
+
+  .resume-skills {
+    display: block;
+  }
+
+  .resume-skills div + div {
+    margin-top: 4pt;
   }
 
   .resume-footer {

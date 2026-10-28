@@ -64,7 +64,8 @@ try {
       assert.equal(await page.locator(".resume-list header").first().evaluate(node => getComputedStyle(node).flexDirection), "row",
         "Mobile screen rules must not stack printed dates");
       assert.equal(await page.locator(".resume-contact").evaluate(node => getComputedStyle(node).textAlign), "right");
-      assert.equal(await page.locator(".resume-skills").evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length), 2);
+      assert.equal(await page.locator(".resume-skills").evaluate(node => getComputedStyle(node).display), "block");
+      assert.equal(await page.locator(".resume-skills > div").first().evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length), 2);
       for (const heading of await page.locator(".resume-sheet h2").all()) {
         assert.equal(await heading.evaluate(node => getComputedStyle(node).breakAfter), "avoid", "Section headings stay with content");
       }

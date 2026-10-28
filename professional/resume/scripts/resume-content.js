@@ -1,9 +1,10 @@
 (() => {
   const fields = {
     profile: ["headline", "summary", "location", "updated_at"],
-    entries: ["role", "organization", "period", "summary", "technologies"],
+    entries: ["role", "organization", "period", "summary"],
     education: ["school", "credential", "period", "details"],
     certifications: ["name", "issuer", "issued", "credential_id", "credential_url"],
+    skills: ["category", "skills"],
   };
   function record(value, keys) {
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid public résumé record.");
@@ -16,7 +17,7 @@
   function normalize(data) {
     if (!data || typeof data !== "object") throw new Error("Invalid public résumé data.");
     const result = { profile: data.profile === null ? null : record(data.profile, fields.profile) };
-    for (const key of ["entries", "education", "certifications"]) {
+    for (const key of ["entries", "education", "certifications", "skills"]) {
       if (!Array.isArray(data[key])) throw new Error(`Invalid public résumé ${key}.`);
       result[key] = data[key].map((entry) => record(entry, fields[key]));
     }
@@ -26,7 +27,7 @@
     return JSON.stringify(normalize(data));
   }
   function render(input) {
-    const { profile, entries, education, certifications } = normalize(input);
+    const { profile, entries, education, certifications, skills } = normalize(input);
     if (!profile) return false;
     const format = window.CareerFormat;
     function header(title, subtitle, periodValue, live = false) {
@@ -51,14 +52,16 @@
       const item = document.createElement("li");
       item.append(header(entry.role, entry.organization, entry.period, true),
         format.buildSummary(entry.summary, { list: "resume-bullets" }));
-      const technologies = format.splitTechnologies(entry.technologies);
-      if (technologies.length) {
-        const skills = document.createElement("p");
-        skills.className = "resume-tech";
-        skills.textContent = technologies.join(" \u00b7 ");
-        item.append(skills);
-      }
       return item;
+    }
+    function skillGroup(entry) {
+      const group = document.createElement("div");
+      const category = document.createElement("dt");
+      const values = document.createElement("dd");
+      category.textContent = entry.category;
+      values.textContent = format.splitTechnologies(entry.skills).join(", ");
+      group.append(category, values);
+      return group;
     }
     function school(entry) {
       const item = document.createElement("li");
@@ -90,6 +93,9 @@
     ]) {
       if (rows.length) document.getElementById(id).replaceChildren(...rows.map(create));
     }
+    const skillsList = document.getElementById("resume-skills");
+    skillsList.replaceChildren(...skills.map(skillGroup));
+    skillsList.closest("section").hidden = skills.length === 0;
     const updatedAt = new Date(profile.updated_at);
     if (!Number.isNaN(updatedAt.getTime())) {
       const label = updatedAt.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });

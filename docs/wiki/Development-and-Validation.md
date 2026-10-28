@@ -92,6 +92,12 @@ snapshot includes the duration calculated at build time; a saved PDF is static.
 on all three career views and exercises Admin date controls and validation.
 The clock test uses a non-UTC browser timezone so UTC month rollover is tested
 independently of the site's separate local-midnight theme reload.
+The same browser check verifies shared Skills rendering, removal of per-role
+technology lists, authoritative empty publishing states, and Admin skill-group
+editing, disabling, and removal. Skills are required public career data: a
+failed Skills fetch fails the snapshot build instead of publishing a partial
+résumé. Migration and backup tests verify private drafts stay private and
+Skills are restored atomically with the other editorial content.
 The focused resume browser check verifies two-page PDF output with six
 representative career entries, long headlines, aligned contact details and
 dates, section-heading break rules, and preserved mobile screen styling.

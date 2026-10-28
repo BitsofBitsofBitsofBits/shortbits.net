@@ -13,6 +13,8 @@ const resumeEducationHeading = document.querySelector("#resume-education-heading
 const resumeEducation = document.querySelector("#resume-education");
 const resumeCertificationsHeading = document.querySelector("#resume-certifications-heading");
 const resumeCertifications = document.querySelector("#resume-certifications");
+const resumeSkillsHeading = document.querySelector("#resume-skills-heading");
+const resumeSkills = document.querySelector("#resume-skills");
 const nowEmpty = document.querySelector("#now-empty");
 const nowContent = document.querySelector("#now-content");
 const nowHeadline = document.querySelector("#now-headline");
@@ -33,7 +35,7 @@ const publicContentWindowIds = new Set([
   "games-window",
   "hardware-window",
 ]);
-const publicContentCacheKey = "bits-public-content-v7";
+const publicContentCacheKey = "bits-public-content-v8";
 const publicContentCacheDurationMs = 300_000;
 
 let publicContentRequest;
@@ -66,6 +68,7 @@ function getCachedPublicContent() {
       typeof cached.cachedAt === "number"
       && Date.now() - cached.cachedAt < publicContentCacheDurationMs
       && cached.payload
+      && Array.isArray(cached.payload.resumeSkills)
     ) {
       return cached.payload;
     }
@@ -133,13 +136,13 @@ async function requestPublicContent() {
     return cached;
   }
 
-  const [resumeProfiles, resumeItems, educationItems, certificationItems, nowProfiles, changelogItems, gameItems, hardwareItems, hardwareOrder] =
+  const [resumeProfiles, resumeItems, educationItems, certificationItems, skillItems, nowProfiles, changelogItems, gameItems, hardwareItems, hardwareOrder] =
     await Promise.all([
       fetchPublicContentTable(
         "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
       ),
       fetchPublicContentTable(
-        "site_resume_entries?select=position,role,organization,period,summary,technologies&enabled=eq.true&order=position.asc",
+        "site_resume_entries?select=position,role,organization,period,summary&enabled=eq.true&order=position.asc",
       ),
       fetchPublicContentTable(
         "site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc",
@@ -153,6 +156,9 @@ async function requestPublicContent() {
         console.warn("Unable to load certifications:", error);
         return [];
       }),
+      fetchPublicContentTable(
+        "site_resume_skills?select=position,category,skills&enabled=eq.true&order=position.asc",
+      ),
       fetchPublicContentTable(
         "site_now?select=headline,summary,building,learning,playing,reading,updated_at&enabled=eq.true&id=eq.primary",
       ),
@@ -180,6 +186,7 @@ async function requestPublicContent() {
     resumeEntries: resumeItems,
     resumeEducation: educationItems,
     resumeCertifications: certificationItems,
+    resumeSkills: skillItems,
     nowProfile: nowProfiles[0] ?? null,
     changelogEntries: changelogItems,
     favoriteGames: gameItems,
@@ -216,26 +223,12 @@ function createResumeEntry(entry) {
     item.append(format.buildSummary(entry.summary, {
       list: "resume-entry-bullets",
     }));
-    const technologies = format.buildTechnologyList(
-      entry.technologies,
-      "resume-entry-technologies",
-      `${entry.role} skills`,
-    );
-    if (technologies) {
-      item.append(technologies);
-    }
     return item;
   }
 
   const summary = document.createElement("p");
   summary.textContent = entry.summary;
   item.append(summary);
-  if (entry.technologies) {
-    const technologies = document.createElement("p");
-    technologies.className = "resume-entry-technologies";
-    technologies.textContent = entry.technologies;
-    item.append(technologies);
-  }
   return item;
 }
 
@@ -305,7 +298,7 @@ function createCertificationEntry(entry) {
   return item;
 }
 
-function renderResume(profile, entries, education = [], certifications = []) {
+function renderResume(profile, entries, education = [], certifications = [], skills = []) {
   if (!profile) {
     resumeEmpty.textContent = "Résumé data is awaiting operator input.";
     resumeEmpty.hidden = false;
@@ -336,6 +329,18 @@ function renderResume(profile, entries, education = [], certifications = []) {
     resumeCertifications.hidden = certifications.length === 0;
     resumeCertificationsHeading.hidden = certifications.length === 0;
   }
+  resumeSkills.replaceChildren(...skills.map((entry) => {
+    const group = document.createElement("li");
+    const heading = document.createElement("h3");
+    const values = document.createElement("p");
+    heading.textContent = entry.category;
+    values.textContent = window.CareerFormat
+      ? window.CareerFormat.splitTechnologies(entry.skills).join(", ") : entry.skills;
+    group.append(heading, values);
+    return group;
+  }));
+  resumeSkills.hidden = skills.length === 0;
+  resumeSkillsHeading.hidden = skills.length === 0;
   resumeEmpty.hidden = true;
   resumeContent.hidden = false;
 }
@@ -781,7 +786,8 @@ function updateHardwareStatus() {
       const slot = Math.floor(Date.now() / 6000);
       const source = hardwareChatter[slot % hardwareChatter.length];
       let current = hardwareChatterSnapshots.get(chatter);
-      if (!current || current.slot !== slot || current.source !== source) {
+      if (!current || (document.documentElement.dataset.pauseContent !== "on"
+        && (current.slot !== slot || current.source !== source))) {
         current = { slot, source, message: window.BITS_MESSAGE_TEXT.snapshot(source) };
         hardwareChatterSnapshots.set(chatter, current);
       }
@@ -855,6 +861,7 @@ async function loadPublicContent() {
           content.resumeEntries,
           content.resumeEducation ?? [],
           content.resumeCertifications ?? [],
+          content.resumeSkills,
         );
         renderNow(content.nowProfile);
         renderChangelog(content.changelogEntries);

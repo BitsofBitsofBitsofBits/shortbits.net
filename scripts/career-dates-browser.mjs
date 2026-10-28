@@ -16,6 +16,7 @@ data.entries = [
   { ...data.entries[0], role: "Previous role", period: "Jan 2020 - Dec 2021 · 99 yrs" },
   { ...data.entries[0], role: "Undated role", period: "Current" },
 ];
+data.entries[0].technologies = "LEGACY_TECH_MARKER";
 const { document } = parseHTML(await readFile(resolve(root, "professional", "resume", "index.html"), "utf8"));
 const { ResumeContent } = await resumeContext(source, document);
 ResumeContent.render(data);
@@ -28,6 +29,8 @@ const adminEntry = adminSource.slice(adminSource.indexOf("function createRepeata
 const adminCollect = adminSource.slice(adminSource.indexOf("function collectRepeatableEntries"), adminSource.indexOf("async function syncRepeatableEntries"));
 const adminConfig = adminSource.slice(adminSource.indexOf("  resume: {") + "  resume: ".length,
   adminSource.indexOf("  education: {")).trim().replace(/,$/, "");
+const adminSkillsConfig = adminSource.slice(adminSource.indexOf("  skills: {") + "  skills: ".length,
+  adminSource.indexOf("  certifications: {")).trim().replace(/,$/, "");
 const server = await startSiteServer(root);
 let browser;
 try {
@@ -45,6 +48,7 @@ try {
     const rows = {
       site_resume_profile: [data.profile], site_resume_entries: data.entries,
       site_resume_education: [], site_resume_certifications: [],
+      site_resume_skills: data.skills,
     }[table] ?? [];
     return route.fulfill({ contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(rows) });
   });
@@ -53,10 +57,10 @@ try {
   }));
   await context.route(`${server.origin}/professional/resume/`, route => route.fulfill({ contentType: "text/html", body: resumeHTML }));
   await context.addInitScript(() => sessionStorage.setItem("bits-boot-seen-v1", "true"));
-  for (const [path, selector] of [
-    ["/professional/", "#profile-timeline"],
-    ["/online/?window=resume", "#resume-entries"],
-    ["/professional/resume/", "#resume-experience"],
+  for (const [path, selector, skillsSelector] of [
+    ["/professional/", "#profile-timeline", "#profile-skills"],
+    ["/online/?window=resume", "#resume-entries", "#resume-skills"],
+    ["/professional/resume/", "#resume-experience", "#resume-skills"],
   ]) {
     const page = await context.newPage();
     const errors = [];
@@ -65,6 +69,9 @@ try {
     await page.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
     const durations = page.locator(`${selector} .career-period-duration`);
     await durations.first().waitFor();
+    assert.equal(await page.locator(skillsSelector).evaluate(node => node.children.length), data.skills.length);
+    assert.ok((await page.locator(skillsSelector).textContent()).includes("PowerShell"));
+    assert.ok(!(await page.locator(selector).textContent()).includes("LEGACY_TECH_MARKER"), "Per-role technologies must not render");
     assert.deepEqual(await durations.allTextContents(), ["1 yr 8 mos", "2 yrs"]);
     assert.equal(await page.locator(`${selector} [data-career-period]`).count(), 3);
     await page.clock.fastForward(61_000);
@@ -74,6 +81,17 @@ try {
     assert.deepEqual(await durations.allTextContents(), ["1 yr 10 mos", "2 yrs"], `${path}: printing refreshes tenure immediately`);
     assert.deepEqual(errors, []);
     console.log(`PASS ${path}: current/completed/undated roles, month rollover, and print refresh`);
+    const savedSkills = data.skills;
+    data.skills = [];
+    await page.reload({ waitUntil: "networkidle" });
+    if (path === "/professional/resume/") {
+      await page.waitForFunction(() => !document.querySelector("#resume-refresh").disabled);
+      await page.locator("#resume-refresh").click();
+    }
+    assert.equal(await page.locator(skillsSelector).isVisible(), false, `${path}: unpublished Skills must not restore hard-coded Toolkit content`);
+    assert.equal(await page.locator(skillsSelector).evaluate(node => node.children.length), 0);
+    data.skills = savedSkills;
+    console.log(`PASS ${path}: shared Skills and authoritative empty publishing state`);
     await page.close();
   }
 
@@ -126,6 +144,27 @@ try {
   assert.equal(await period.inputValue(), "Current", "Switching back preserves the original custom label");
   assert.equal(await page.locator("form").evaluate(form => form.checkValidity()), true);
   console.log("PASS Admin role month selectors, current-role toggle, validation, custom-label preservation, and saved period payload");
+  await page.addScriptTag({ content: `
+    const resumeSkillsSlots = document.createElement("div");
+    const resumeSkillsAdd = document.createElement("button");
+    document.querySelector("form").append(resumeSkillsSlots);
+    repeatableEditors.skills = ${adminSkillsConfig};
+    repeatableEditors.skills.deletedPositions = new Set();
+    resumeSkillsSlots.append(createRepeatableEntry(repeatableEditors.skills, {
+      position: 1, category: "Support", skills: "Zendesk, Troubleshooting", enabled: true
+    }));
+  ` });
+  assert.equal(await page.locator('[data-entry-field="technologies"]').count(), 0, "Admin experience editor no longer edits per-role technologies");
+  await page.getByLabel("CATEGORY", { exact: true }).fill("Support & communication");
+  await page.getByLabel("SKILLS (COMMA-SEPARATED)", { exact: true }).fill("Zendesk, Technical writing");
+  const skills = await page.evaluate(() => collectRepeatableEntries(repeatableEditors.skills));
+  assert.equal(skills[0].category, "Support & communication");
+  assert.equal(skills[0].skills, "Zendesk, Technical writing");
+  await page.locator('fieldset:has([data-entry-field="category"]) [data-entry-field="enabled"]').uncheck();
+  assert.equal((await page.evaluate(() => collectRepeatableEntries(repeatableEditors.skills)))[0].enabled, false);
+  await page.locator('fieldset:has([data-entry-field="category"]) .repeatable-entry-remove').click();
+  assert.deepEqual(await page.evaluate(() => [...repeatableEditors.skills.deletedPositions]), [1]);
+  console.log("PASS Admin shared Skills editing, draft publishing, and removal");
   await context.close();
 } finally {
   if (browser) await browser.close();

@@ -32,8 +32,12 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
   location, and availability load from the Admin-managed `RESUME_PROFILE` data
   shared with `CAREER.SYS`; the hand-written cards in `professional/index.html`
   are only a fallback when Supabase is unreachable. Summary lines starting with
-  `•` or `-` render as bullets, and technologies (comma- or double-space-
-  separated) render as tags via `shared/scripts/career-format.js`.
+  `•` or `-` render as bullets via `shared/scripts/career-format.js`.
+  Skills and the former hard-coded Technical Toolkit are one categorized,
+  Admin-managed section stored in `site_resume_skills`, shared by the
+  professional page, CAREER.SYS, and printable résumé. Experience entries no
+  longer display individual technology lists. Empty published Skills data hides
+  the section rather than restoring the authored Toolkit fallback.
   Experience durations are calculated from month/year ranges rather than
   copied duration labels. Active ranges ending in `Present`, `Current`, or
   `Now` advance automatically on load, at month rollover, on returning to

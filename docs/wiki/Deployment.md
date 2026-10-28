@@ -36,6 +36,15 @@ The job deploys `contact-message`, `creator-videos`, `creator-twitch`,
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
 
+The shared Skills editor requires
+`20261028093000_resume_skills.sql` before the production content build.
+It seeds the existing Toolkit categories, imports unique technologies only
+from published experience entries, and leaves original per-role data intact.
+The professional page, CAREER.SYS, and PDF use the same published Skills groups.
+Export a fresh content backup after this migration: the exact-schema backup
+format now includes `site_resume_skills`, and older backups without that table
+are rejected rather than silently dropping Skills.
+
 YouTube watching presence additionally deploys `youtube-presence` and uses
 the updated `spotify-now-playing` function for continuous session timing.
 Apply both `20261026050000_youtube_presence.sql` and

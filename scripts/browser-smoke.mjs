@@ -7,6 +7,7 @@ import { startSiteServer } from "./site-server.mjs";
 
 const require = createRequire(import.meta.url);
 const axePath = require.resolve("axe-core/axe.min.js");
+const resumeFixture = JSON.parse(await readFile(new URL("./fixtures/resume-data.json", import.meta.url), "utf8"));
 const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
 const root = resolve(rootIndex < 0 ? ".site-build" : args[rootIndex + 1]);
@@ -35,6 +36,7 @@ try {
         position: 1, role: "IT Technician", organization: "Independent test fixture",
         period: "2024 - Present", summary: "Support and systems administration.", technologies: "PowerShell, Windows",
       }];
+      if (name === "site_resume_skills") data = resumeFixture.skills;
       if (name === "site_blog_posts") data = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"))
         .filter((post) => post.published && Date.parse(post.published_at) <= Date.now());
       if (name === "record_site_analytics" || name === "hardware_watch") data = null;

@@ -15,5 +15,13 @@
     }
   ],
   "education": [],
-  "certifications": []
+  "certifications": [],
+  "skills": [
+    { "category": "Systems & identity", "skills": "Windows Server, Active Directory, SMB shares, RDP" },
+    { "category": "Virtualization & containers", "skills": "Proxmox, UnRAID, Docker, Virtual machines" },
+    { "category": "Automation", "skills": "PowerShell, Bash, Batch" },
+    { "category": "Endpoint management", "skills": "Microsoft 365, Intune" },
+    { "category": "Networking", "skills": "VLAN segmentation, Firewall configuration" },
+    { "category": "Backup & recovery", "skills": "Veeam, Windows Backup Services, Google Drive, OneDrive" }
+  ]
 }

@@ -21,6 +21,7 @@ test("shared renderer escapes content and preserves formatting, safe links, and 
   input.profile.summary = '<img src=x onerror="alert(1)">';
   input.entries[0].summary = "- First task\n- Second task";
   input.entries[0].technologies = "Windows, windows, PowerShell";
+  input.skills = [{ category: "<Skills>", skills: "Windows, windows, PowerShell" }];
   input.certifications = [
     { name: "<Certification>", credential_url: "javascript:alert(1)" },
     { name: "Safe", credential_url: "https://example.com/verify" },
@@ -32,7 +33,10 @@ test("shared renderer escapes content and preserves formatting, safe links, and 
   assert.equal(document.querySelector("#resume-experience [data-career-period]").dataset.careerPeriod, input.entries[0].period);
   assert.equal(document.querySelector("#resume-education [data-career-period]"), null);
   assert.equal(document.querySelectorAll("#resume-experience .resume-bullets li").length, 2);
-  assert.equal(document.querySelector("#resume-experience .resume-tech").textContent, "Windows \u00b7 PowerShell");
+  assert.equal(document.querySelector("#resume-experience .resume-tech"), null);
+  assert.equal(document.querySelector("#resume-skills dt").textContent, "<Skills>");
+  assert.equal(document.querySelector("#resume-skills dd").textContent, "Windows, PowerShell");
+  assert.equal(document.querySelector("#resume-skills dt skills"), null);
   assert.equal(document.querySelector("#resume-education").innerHTML, education);
   assert.equal(document.querySelectorAll("#resume-certifications a").length, 1);
   assert.equal(document.querySelector("#resume-certifications a").getAttribute("href"), "https://example.com/verify");
@@ -45,10 +49,11 @@ test("snapshot serialization includes only rendered public fields and rejects ma
   const serialized = ResumeContent.serialize(data);
   assert.equal(ResumeContent.serialize({
     ...data, secret: "private", profile: { ...data.profile, availability: "Changed", resume_url: "https://example.com", email: "private" },
-    entries: data.entries.map((entry) => ({ position: 123, ...entry })),
+    entries: data.entries.map((entry) => ({ ...entry, position: 123, technologies: "No longer rendered" })),
   }), serialized);
   assert.notEqual(ResumeContent.serialize({ ...data, profile: { ...data.profile, headline: "Changed" } }), serialized);
-  for (const patch of [{ profile: false }, { entries: {} }, { education: [null] }, { profile: { headline: 42 } }]) {
+  assert.notEqual(ResumeContent.serialize({ ...data, skills: [] }), serialized);
+  for (const patch of [{ profile: false }, { entries: {} }, { education: [null] }, { skills: null }, { skills: [{ category: 42 }] }, { profile: { headline: 42 } }]) {
     assert.throws(() => ResumeContent.serialize({ ...data, ...patch }), /Invalid public/);
   }
 });
@@ -98,7 +103,7 @@ test("career fetches use enabled public queries, pagination, credentials, and ex
     return { ok: true, json: async () => page };
   });
   assert.equal(response.entries.length, 500);
-  assert.equal(requests.length, 5);
+  assert.equal(requests.length, 6);
   assert.ok(requests.some((url) => url.searchParams.get("offset") === "500"));
   await assert.rejects(fetchResume(config, CareerData.queries, async () => ({ ok: false, status: 503 })), /HTTP 503/);
   await assert.rejects(fetchResume(config, CareerData.queries, async () => ({ ok: true, json: async () => ({}) })), /not an array/);
@@ -111,7 +116,7 @@ test("fresh career reads bypass shared cache and mark incomplete optional data",
   const window = { SUPABASE_CONFIG: { url: "https://example.supabase.co", anonKey: "public" } };
   vm.runInNewContext(source, {
     window, AbortSignal,
-    localStorage: { getItem: () => JSON.stringify({ cachedAt: Date.now(), payload: { resumeProfile: { headline: "Stale" } } }) },
+    localStorage: { getItem: () => JSON.stringify({ cachedAt: Date.now(), payload: { resumeProfile: { headline: "Stale" }, resumeSkills: [] } }) },
     console: { warn: (...args) => warnings.push(args) },
     fetch: async (url) => {
       calls++;
@@ -123,7 +128,7 @@ test("fresh career reads bypass shared cache and mark incomplete optional data",
   assert.equal(calls, 0);
   const fresh = await window.CareerData.load({ fresh: true });
   assert.equal(fresh.profile.headline, data.profile.headline);
-  assert.equal(calls, 4);
+  assert.equal(calls, 5);
   assert.deepEqual([...fresh.unavailable], ["education"]);
   assert.equal(warnings.length, 1);
 });

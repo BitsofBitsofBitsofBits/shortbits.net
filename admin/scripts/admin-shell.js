@@ -61,7 +61,7 @@
   const modules = [
     { route: "inbox", sourceId: "message-editor", label: "Inbox", group: "communications", icon: "mail", description: "Read and manage messages sent through the contact form.", keywords: "messages contact mail packets" },
     { route: "guestbook", sourceId: "guestbook-editor", label: "Guestbook", group: "communications", icon: "book", description: "Review and remove public guestbook signatures.", keywords: "signatures moderation" },
-    { route: "resume", sourceId: "resume-editor", label: "Résumé", group: "content", icon: "document", description: "Edit CAREER.SYS, work history, education, and certifications.", keywords: "resume career jobs education certifications" },
+    { route: "resume", sourceId: "resume-editor", label: "Résumé", group: "content", icon: "document", description: "Edit CAREER.SYS, work history, skills, education, and certifications.", keywords: "resume career jobs skills toolkit education certifications" },
     { route: "now", sourceId: "now-editor", label: "Now", group: "content", icon: "note", description: "Update current projects and interests.", keywords: "now.txt status" },
     { route: "changelog", sourceId: "changelog-editor", label: "Changelog", group: "content", icon: "history", description: "Manage the public deployment history.", keywords: "releases updates" },
     { route: "messages", sourceId: "message-library-editor", label: "Message library", group: "content", icon: "note", description: "Edit rotating, seasonal, boot, shutdown, and hardware-monitor messages.", keywords: "status activities weights rarity rainbow holidays text" },

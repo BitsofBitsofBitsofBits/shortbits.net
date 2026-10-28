@@ -73,6 +73,7 @@
   const availabilityRow = document.querySelector("#profile-availability-row");
   const educationList = document.querySelector("#profile-education");
   const certificationList = document.querySelector("#profile-certifications");
+  const skillsList = document.querySelector("#profile-skills");
 
   if (!timeline || !window.CareerFormat || !window.CareerData) {
     return;
@@ -157,19 +158,11 @@
         list: "profile-timeline-bullets",
       }),
     );
-    const tags = window.CareerFormat.buildTechnologyList(
-      entry.technologies,
-      "profile-tags",
-      `Skills used as ${entry.role}`,
-    );
-    if (tags) {
-      body.append(tags);
-    }
     item.append(meta, body);
     return item;
   }
 
-  function render({ profile, entries, education, certifications }) {
+  function render({ profile, entries, education, certifications, skills }) {
     if (!profile) {
       return;
     }
@@ -179,6 +172,21 @@
     if (certificationList && Array.isArray(certifications) && certifications.length > 0) {
       certificationList.replaceChildren(...certifications.map(createCertificationEntry));
     }
+    skillsList.replaceChildren(...skills.map((entry, index) => {
+      const card = document.createElement("article");
+      const number = document.createElement("span");
+      const heading = document.createElement("h3");
+      const values = document.createElement("p");
+      number.className = "profile-card-index";
+      number.setAttribute("aria-hidden", "true");
+      number.textContent = `${String(index + 1).padStart(2, "0")} /`;
+      heading.textContent = entry.category;
+      values.textContent = window.CareerFormat.splitTechnologies(entry.skills).join(", ");
+      card.append(number, heading, values);
+      return card;
+    }));
+    document.querySelector("#skills").hidden = skills.length === 0;
+    document.querySelector('a[href="#skills"]').hidden = skills.length === 0;
     if (profile.location) {
       location.textContent = profile.location;
     }
