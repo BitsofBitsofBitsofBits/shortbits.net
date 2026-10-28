@@ -27,6 +27,7 @@ npm run build
 node scripts/validate-site.mjs --root .site-build
 npx playwright install chromium
 npm run test:browser
+node scripts/resume-browser.mjs --root .site-build
 node scripts/hardware-layout-browser.mjs --root .site-build
 node scripts/creators-browser.mjs --root .site-build
 node scripts/media-player-browser.mjs --root .site-build
@@ -81,6 +82,10 @@ five-minute shared cache. New data is applied only after clicking "Update resume
 printing always uses the version currently visible. Failed or incomplete checks
 leave the saved version intact and display an explicit status. Email and phone
 links remain runtime-only and are not injected into the generated HTML.
+The focused resume browser check verifies two-page PDF output with six
+representative career entries, long headlines, aligned contact details and
+dates, section-heading break rules, and preserved mobile screen styling.
+It runs at mobile/desktop widths with JavaScript enabled and disabled.
 
 Styles are minified with esbuild only in the staged output; source stylesheets
 remain unchanged for authoring. The online page's four shared stylesheets are

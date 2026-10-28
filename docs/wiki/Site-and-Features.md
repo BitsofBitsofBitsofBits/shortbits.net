@@ -45,6 +45,11 @@ See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/
 - A print-ready résumé at `/professional/resume/` built from the same Admin
   data. Its **Download PDF** button opens the browser's print dialog with
   Letter-sized print styles, so choosing "Save as PDF" produces a clean résumé.
+  The print layout keeps contact details alongside the name, aligns dates
+  consistently, and keeps section headings with their content. Compact print
+  spacing reduces unnecessary pages without removing career details; mobile
+  screen styling does not change the PDF layout. Disable the print dialog's
+  **Headers and footers** option to omit the browser's date, URL, and page labels.
   It is also the default `RESUME.PDF` target when no external résumé URL is set.
 
 - Theme-driven, high-contrast, and reduced-motion display profiles
