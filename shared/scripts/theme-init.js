@@ -1,5 +1,6 @@
 const baseInterfaceThemes = [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
+  { id: "html", name: "HTML", darkColor: "#ffffff", lightColor: "#ffffff", schemes: ["light"], stylesheet: true },
   {
     id: "aurora",
     name: "AURORA",
@@ -912,7 +913,7 @@ function getLastStandardThemeId() {
 
 function getThemeGroups() {
   const families = [
-    ["Essentials", ["default", "high-contrast"]],
+    ["Essentials", ["default", "html", "high-contrast"]],
     ["macOS", ["macos", "aqua", "mac-os-9"]],
     ["Windows", ["windows-31", "windows-95", "windows-xp", "aero-glass", "windows-8", "windows-10", "windows-11", "mica", "fluent"]],
     ["Terminals & retro computers", ["terminal", "amber-crt", "dos-blue", "matrix", "termius", "legacy-bios", "uefi", "commodore-64", "ubuntu"]],

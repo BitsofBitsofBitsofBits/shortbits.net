@@ -12,6 +12,20 @@ const effectsSource = readFileSync(new URL("../online/scripts/theme-effects.js",
 const styles = readFileSync(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
 const newThemes = ["valentines", "st-patricks", "easter", "earth-day", "independence-day", "thanksgiving"];
 
+test("HTML is a year-round, light-only standard theme in Essentials and persists like other themes", () => {
+  const result = themesOn(2026, 10, 28);
+  const html = result.available.find(theme => theme.id === "html");
+  assert.equal(html.name, "HTML");
+  assert.equal(html.stylesheet, true);
+  assert.equal(html.experimental, undefined);
+  assert.deepEqual(Array.from(html.schemes), ["light"]);
+  assert.equal(html.lightColor, "#ffffff");
+  assert.ok(result.getGroups().find(group => group.name === "Essentials").themes.some(theme => theme.id === "html"));
+  result.select("html");
+  assert.equal(result.resolve(), "html", "Explicit HTML selection dismisses an active seasonal theme");
+  assert.equal(result.stored.get("bits-interface-theme"), "html");
+});
+
 test("Aero retains Classic as its default and exposes five opt-in variants without experimental layout chrome", () => {
   const { available } = themesOn(2026, 10, 22);
   const aero = available.find(theme => theme.id === "aero-glass");

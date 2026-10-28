@@ -1,0 +1,152 @@
+/* Keep functional positioning, visibility, and sizing; reset only the presentation. */
+:root[data-interface-theme="html"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f0f0f0;
+  --panel-strong: #f0f0f0;
+  --ink: #000000;
+  --muted: #444444;
+  --accent: #0000ee;
+  --accent-rgb: 0, 0, 238;
+  --accent-soft: #eeeeff;
+  --warning: #8b0000;
+  --danger: #8b0000;
+  --border: #808080;
+  --border-strong: #808080;
+  --shadow: none;
+  --shell-bg: #ffffff;
+  --admin-bg: #ffffff;
+  --overlay-bg: #ffffff;
+  --body-background: #ffffff;
+  --body-background-size: auto;
+  --font-family: "Times New Roman", Times, serif;
+  --noise-opacity: 0;
+  --scanline-opacity: 0;
+  --name-field-opacity: 0;
+  --icon-filter: brightness(0);
+  --spotify-accent: #0000ee;
+  --material-blur: 0px;
+  --control-radius: 0px;
+  --shell-radius: 0px;
+  --window-radius: 0px;
+}
+
+html[data-interface-theme="html"] body {
+  color: CanvasText;
+  background: Canvas;
+  font: revert;
+}
+
+html[data-interface-theme="html"] body :where(:not([class*="blog-text-font-"])) {
+  font-family: revert;
+  letter-spacing: normal;
+  text-shadow: none;
+  text-transform: none;
+}
+
+html[data-interface-theme="html"] :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, blockquote) {
+  font-size: revert;
+  font-weight: revert;
+  line-height: normal;
+}
+
+html[data-interface-theme="html"] h1 {
+  display: revert;
+}
+
+html[data-interface-theme="html"] :any-link {
+  color: revert;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  text-decoration: revert;
+}
+
+html[data-interface-theme="html"] :is(button, input, select, textarea) {
+  appearance: auto;
+  color: revert !important;
+  background: revert;
+  border: revert;
+  border-radius: revert;
+  box-shadow: none;
+  font: revert;
+  padding: revert;
+  text-transform: none;
+}
+
+html[data-interface-theme="html"] :is(button, input, select, textarea, summary, a):focus-visible {
+  outline: auto;
+  outline-offset: 2px;
+}
+
+html[data-interface-theme="html"] :is(
+  .shell, .desktop-window, .desktop-window-bar, .system-bar,
+  .app-menu-bar, .app-menu-popup, .theme-picker-list,
+  .spotify-widget, .chooser-terminal, .chooser-bar, .notification-toast,
+  .profile-skills article, .link-card
+) {
+  background: Canvas;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+html[data-interface-theme="html"] .contact-turnstile[data-state="error"] .contact-turnstile-status,
+html[data-interface-theme="html"] .form-status.is-error {
+  color: #8b0000;
+}
+
+html[data-interface-theme="html"] .shell {
+  margin-block: 8px;
+  border: 0;
+}
+
+html[data-interface-theme="html"] :is(.chooser-terminal, .link-card) {
+  border: 0;
+}
+
+html[data-interface-theme="html"] .link-card :is(.link-icon, .link-arrow) {
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+
+html[data-interface-theme="html"] :is(.chooser-options, .content-file-grid, .link-grid) {
+  display: block;
+}
+
+html[data-interface-theme="html"] .chooser-options {
+  padding-left: 40px;
+  list-style: decimal;
+}
+
+html[data-interface-theme="html"] .chooser-options a {
+  display: block;
+  padding: 8px 0;
+  border: 0;
+  transform: none;
+}
+
+html[data-interface-theme="html"] :is(.chooser, .chooser-body) {
+  min-height: auto;
+  padding: 8px;
+}
+
+html[data-interface-theme="html"] :is(
+  .noise, .scanlines, .name-field, .theme-atmosphere,
+  .chooser-led, .chooser-cursor
+),
+html[data-interface-theme="html"] .link-card::after {
+  display: none;
+}
+
+html[data-interface-theme="html"] .chooser-terminal {
+  animation: none;
+}
+
+@media (forced-colors: active) {
+  html[data-interface-theme="html"] :is(.shell, .desktop-window, .spotify-widget) {
+    border-color: CanvasText;
+  }
+}

@@ -10,6 +10,19 @@
 - A persistent RGB interface theme that cycles rainbow gradients around the
   main shell, desktop-window edges, falling Bits, and themed scrollbars
 
+- **HTML** in the **Essentials** theme family offers a pseudo-unstyled version
+  of the real site: a white page, browser-default serif typography, blue/visited
+  links, native form controls, and no decorative backgrounds, glass, or shadows.
+  It is intentionally light-only and remembers the selection across themed public
+  pages. It does not show escaped source code or disable the site's stylesheets:
+  the structural CSS still keeps desktop windows, menus, hidden states, media,
+  forms, games, and responsive layouts working. Inline message formatting remains
+  available. Switching themes restores the usual styling. The skin is loaded only
+  while HTML is selected; no experimental workspace or additional runtime is used.
+  Run `node scripts/html-theme-browser.mjs --root .site-build` to validate the
+  native appearance, selection/persistence, windows, forms, media, themed public
+  pages, responsiveness, and accessibility.
+
 - A dedicated **Pride** family in Online's View menu and Control Panel, and
   **PRIDE** section in native theme dropdowns. All 20 options are available
   year-round: **PRIDE (Progress Pride)**, Rainbow, Non-Binary, Transgender,
