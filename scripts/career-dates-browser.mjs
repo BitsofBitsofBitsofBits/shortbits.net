@@ -35,7 +35,10 @@ try {
     ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}),
     headless: true,
   });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    timezoneId: "America/Chicago",
+  });
   await context.route(/cloudflareinsights|challenges\.cloudflare|lanyard\.rest/, route => route.abort());
   await context.route("**/rest/v1/**", route => {
     const table = new URL(route.request().url()).pathname.split("/").pop();

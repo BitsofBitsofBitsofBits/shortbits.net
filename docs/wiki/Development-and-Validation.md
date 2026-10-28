@@ -90,6 +90,8 @@ snapshot includes the duration calculated at build time; a saved PDF is static.
 `career-dates.test.mjs` verifies month arithmetic and refresh events, and
 `career-dates-browser.mjs` advances the browser clock across a month boundary
 on all three career views and exercises Admin date controls and validation.
+The clock test uses a non-UTC browser timezone so UTC month rollover is tested
+independently of the site's separate local-midnight theme reload.
 The focused resume browser check verifies two-page PDF output with six
 representative career entries, long headlines, aligned contact details and
 dates, section-heading break rules, and preserved mobile screen styling.
