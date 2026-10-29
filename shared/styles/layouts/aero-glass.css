@@ -1,3 +1,7 @@
+:root[data-interface-theme="aero-glass"] .contact-turnstile[data-state="error"] .contact-turnstile-status {
+  color: var(--ink);
+}
+
 :root[data-interface-theme="aero-glass"][data-theme-variant="windows-7"] {
   --accent: #8ad6ff;
   --accent-rgb: 138, 214, 255;

@@ -62,6 +62,8 @@ try {
       return [style.background, style.border, style.boxShadow];
     });
     await page.addScriptTag({ path: axePath });
+    await page.locator("#contact-form").dispatchEvent("focusin");
+    await page.waitForFunction(() => document.querySelector(".contact-turnstile")?.dataset.state === "error");
     const backgrounds = new Set();
     for (const variant of Object.keys(palettes)) {
       for (const scheme of ["dark", "light"]) {
