@@ -95,7 +95,7 @@ test("desktop clock only formats while visible and reuses its formatter", () => 
 });
 
 function correctionSetup(message) {
-  const { document } = parseHTML("<html><body><div id='command'><span id='typed'></span></div><div id='author-box' hidden><span id='author'></span></div></body></html>");
+  const { document } = parseHTML("<html><body><div id='command'><span id='typed'></span><span id='accessible-message'></span></div><div id='author-box' hidden><span id='author'></span></div></body></html>");
   const timers = [];
   const achievements = [];
   let timerId = 0;
@@ -135,6 +135,7 @@ for (const [quote, author] of [["A long quoted message", "Ada"], ["Hi", "A longe
     for (let index = 0; index <= Math.max(quote.length, author.length); index++) step();
     assert.equal(context.typedText.textContent, quote);
     assert.equal(context.typedAuthor.textContent, author);
+    assert.equal(context.document.querySelector("#accessible-message").textContent, `${quote} - ${author}`);
     assert.equal(context.authorBox.hidden, false);
     assert.equal(context.deleting, true);
     assert.ok(timers[0].delay >= 1400, "Both strings finish before the hold begins");
@@ -146,6 +147,13 @@ for (const [quote, author] of [["A long quoted message", "Ada"], ["Hi", "A longe
     assert.equal(context.currentMessage.text, "ordinary message");
     assert.equal(context.typedAuthor.textContent, "");
     assert.equal(context.authorBox.hidden, true, "Unattributed messages never keep the previous author");
+  });
+
+  test("full quote and attribution are available to screen readers before visible typing completes", () => {
+    const { context } = correctionSetup({ text: "A complete quote", author: "Ada" });
+    vm.runInContext("updateMessage()", context);
+    assert.equal(context.typedText.textContent, "");
+    assert.equal(context.document.querySelector("#accessible-message").textContent, "A complete quote - Ada");
   });
 }
 

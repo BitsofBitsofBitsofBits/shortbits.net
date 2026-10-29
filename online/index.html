@@ -97,6 +97,7 @@
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
   </head>
   <body>
+    <a class="skip-link" href="#interface-shell">Skip to main content</a>
     <noscript>
       <section class="noscript-fallback">
         <h1>BITSOFBITS // LIMITED MODE</h1>
@@ -407,7 +408,7 @@
       <canvas id="desktop-screensaver-canvas"></canvas>
     </div>
 
-    <main id="interface-shell" class="shell">
+    <main id="interface-shell" class="shell" tabindex="-1">
       <header class="system-bar" aria-label="System status">
         <button id="system-status-trigger" class="system-status" type="button" aria-label="System status online">
           <span class="status-dot"></span>
@@ -504,7 +505,7 @@
         <details class="app-menu" name="application-menu">
           <summary>TOOLS</summary>
           <div class="app-menu-popup">
-            <button id="bits-launcher-open" type="button" aria-haspopup="dialog" aria-controls="bits-launcher">FIND A BIT (Ctrl+K)</button>
+            <button id="bits-launcher-open" type="button" aria-haspopup="dialog" aria-controls="bits-launcher" aria-keyshortcuts="Control+k Meta+k">FIND A BIT (Ctrl+K)</button>
             <button class="arcade-desktop-launcher" type="button" data-window-target="arcade-window">BITS ARCADE</button>
             <button type="button" data-window-target="games-window">GAMES.EXE</button>
             <button type="button" data-window-target="stats-window">STATS.EXE</button>
@@ -565,12 +566,14 @@
           <button class="mini-window-launch" type="button" data-window-target="about-window">
             &gt; OPEN_ABOUT_WINDOW
           </button>
-          <div class="command-line">
+          <div class="command-line" tabindex="0" role="group" aria-label="Message and terminal commands" aria-describedby="terminal-keyboard-help">
             <span class="prompt" aria-hidden="true">&gt;</span>
-            <span id="typed-text"></span>
+            <span id="typed-text" aria-hidden="true"></span>
+            <span id="accessible-message" class="visually-hidden"></span>
             <span class="cursor" aria-hidden="true"></span>
           </div>
-          <div id="message-author-box" class="message-author-box" hidden>
+          <p id="terminal-keyboard-help" class="visually-hidden">While this terminal is focused, type a command and press Enter. Up and Down browse messages or command history. Control plus Space completes a command. Tab moves to the next control. Control or Command plus K opens Find a Bit from anywhere.</p>
+          <div id="message-author-box" class="message-author-box" aria-hidden="true" hidden>
             <span aria-hidden="true">&mdash;</span>
             <span id="typed-author"></span>
           </div>
@@ -578,7 +581,7 @@
             <button id="message-history-previous" type="button">Previous message</button>
             <button id="message-history-next" type="button">Next message</button>
           </div>
-          <pre id="terminal-output" class="terminal-output" aria-live="polite" hidden></pre>
+          <pre id="terminal-output" class="terminal-output" role="region" aria-label="Terminal output" aria-live="polite" tabindex="0" hidden></pre>
         </div>
 
         <div id="avatar-wrap" class="avatar-wrap">

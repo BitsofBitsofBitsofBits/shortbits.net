@@ -111,7 +111,10 @@
     }
   });
   dialog.addEventListener("close", () => {
-    if (!actionSelected) {
+    const needsFocus = document.activeElement === document.body
+      || dialog.contains(document.activeElement)
+      || !document.activeElement?.getClientRects().length;
+    if (!actionSelected && needsFocus) {
       const target = previousFocus?.getClientRects().length
         ? previousFocus : trigger.closest("details")?.querySelector("summary");
       target?.focus();
@@ -119,7 +122,7 @@
     actionSelected = false;
   });
   document.addEventListener("keydown", (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+    if (!event.defaultPrevented && !event.altKey && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
       if (document.querySelector(".system-overlay:not([hidden]), .death-screen:not([hidden])")) return;
       event.preventDefault();
       open();

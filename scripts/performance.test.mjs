@@ -84,18 +84,31 @@ test("an empty exclusive seasonal boot uses standard steps and still finishes wi
 
 test("desktop boot waits for deferred seasonal data and can still be skipped", () => {
   const result = runBoot({ runtime: "pending" });
-  assert.equal(result.timers.length, 0);
+  assert.equal(result.timers.length, 1);
+  assert.equal(result.timers[0].delay, 900, "Slow enhancements must not hold the main content inert");
   assert.equal(result.screen.hidden, false);
   result.window.BITS_SEASONAL_PROFILE = { mode: "exclusive", initialBootSteps: ["SEASONAL BOOT"] };
   result.windowListeners.get("bits:runtime-ready")();
-  assert.equal(result.timers.length, 1);
+  assert.equal(result.timers.length, 2);
   result.window.BITS_BOOT.skip();
   assert.equal(result.document.documentElement.dataset.boot, "complete");
 
   const skipped = runBoot({ runtime: "pending" });
   skipped.window.BITS_BOOT.skip();
   skipped.windowListeners.get("bits:runtime-ready")();
-  assert.equal(skipped.timers.length, 0);
+  assert.equal(skipped.timers.length, 1);
+});
+
+test("slow or failed enhancements release the automatic boot without interaction", () => {
+  const slow = runBoot({ runtime: "pending" });
+  slow.timers[0].callback();
+  assert.equal(slow.background.inert, false);
+  assert.equal(slow.document.documentElement.dataset.boot, "complete");
+  slow.windowListeners.get("bits:runtime-ready")();
+  assert.equal(slow.timers.length, 1, "Late enhancements must not restart boot or steal focus");
+  const failed = runBoot({ runtime: "pending" });
+  failed.windowListeners.get("bits:runtime-error")();
+  assert.equal(failed.background.inert, false);
 });
 
 test("arcade loads once on first open, retries failure, and preserves the version query", async () => {
@@ -214,6 +227,61 @@ test("online runtime queues early control clicks until ordered initialization co
   frames.shift()();
   scripts[0].listeners.load();
   assert.equal(activations, 1);
+  assert.equal(handlers.size, 0);
+});
+
+test("pending runtime leaves reading, native controls, and browser shortcuts alone but replays Find a Bit", () => {
+  const frames = [];
+  const handlers = new Map();
+  const scripts = [];
+  const replays = [];
+  let blocked = 0;
+  const target = {
+    isConnected: true,
+    closest: () => null,
+    dispatchEvent: event => replays.push(event),
+  };
+  const context = {
+    document: {
+      documentElement: { dataset: {} },
+      querySelector: selector => selector === "#interface-shell"
+        ? { setAttribute() { throw new Error("Static content must not be marked busy"); } } : null,
+      querySelectorAll: () => [{ src: "https://example.test/online/scripts/launcher.js" }],
+      addEventListener: (type, callback) => handlers.set(type, callback),
+      removeEventListener: type => handlers.delete(type),
+      createElement: () => ({
+        listeners: {},
+        addEventListener(type, callback) { this.listeners[type] = callback; },
+      }),
+      head: { append: script => scripts.push(script) },
+    },
+    window: { requestAnimationFrame: callback => frames.push(callback), dispatchEvent() {} },
+    CustomEvent: class { constructor(type) { this.type = type; } },
+    KeyboardEvent: class { constructor(type, options) { this.type = type; Object.assign(this, options); } },
+  };
+  vm.runInNewContext(runtimeSource, context);
+  for (const options of [
+    { key: "Tab" }, { key: "ArrowDown" }, { key: "h" }, { key: " " },
+    { key: "Escape" }, { key: "l", ctrlKey: true }, { key: "+", ctrlKey: true },
+    { key: "f", metaKey: true },
+  ]) {
+    handlers.get("keydown")({
+      type: "keydown", target, ...options,
+      preventDefault() { blocked += 1; }, stopImmediatePropagation() {},
+    });
+  }
+  assert.equal(blocked, 0);
+  handlers.get("keydown")({
+    type: "keydown", target, key: "k", ctrlKey: true,
+    preventDefault() { blocked += 1; }, stopImmediatePropagation() {},
+  });
+  assert.equal(blocked, 1);
+  frames.shift()();
+  frames.shift()();
+  scripts[0].listeners.load();
+  assert.equal(replays.length, 1);
+  assert.equal(replays[0].ctrlKey, true);
+  assert.equal(replays[0].key, "k");
   assert.equal(handlers.size, 0);
 });
 

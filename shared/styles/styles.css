@@ -5481,6 +5481,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .skip-link {
+ clip-path: inset(50%);
  position: fixed;
  z-index: 10000;
  top: 8px;
@@ -5493,6 +5494,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .skip-link:focus {
+ clip-path: none;
  transform: translateY(0);
 }
 

@@ -57,6 +57,25 @@ Mistype correction. Tests advance deletion ticks explicitly, avoiding a race
 where animation erases the final Unicode grapheme before an assertion.
 Other live widgets and production animation behavior are unchanged.
 
+Keyboard and screen-reader support is always available, without an accessibility
+toggle or first mouse click. Online initializes controls after first contentful
+paint; early Ctrl/Cmd+K is queued while native navigation, reading keys, browser
+shortcuts, and Tab remain available. Static main content is not marked busy
+while enhancement scripts initialize. A skip link targets the main landmark.
+The terminal exposes complete quote/author text to assistive technology while
+visual typing remains decorative; automatic rotation is not a live announcement.
+Terminal character commands and Easter-egg sequences require terminal focus.
+Tab leaves the terminal; Ctrl+Space completes commands. Window activation follows
+keyboard focus, Escape closes that window, and closing restores visible focus.
+Keyboard navigation skips the decorative boot sequence, which also restores
+focus when it finishes or when runtime initialization fails. Waiting for slow
+enhancements cannot hold the page inert for more than 900ms.
+Run `node scripts/keyboard-startup-browser.mjs --root .site-build` to exercise
+first-visit startup with a delayed script, no-click Ctrl/Cmd+K, skip links,
+accessible message snapshots, native keys, and window focus at desktop/mobile
+widths. Automated checks cover semantics and keyboard behavior, not actual
+speech output; manual NVDA/VoiceOver testing remains important.
+
 Local and post-deployment Lighthouse audits share `scripts/audit-site.mjs`.
 For live checks, run
 `node scripts/audit-site.mjs --url https://www.shortbits.net --enforce`.

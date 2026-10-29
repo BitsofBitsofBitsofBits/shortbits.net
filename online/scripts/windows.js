@@ -18,6 +18,7 @@ let activeDesktopWindow = null;
 let dragState = null;
 let resizeState = null;
 let isApplyingWindowUrl = false;
+const desktopWindowOpeners = new Map();
 
 function getDesktopWindowSlug(windowElement) {
   return windowElement.id.replace(/-window$/, "");
@@ -201,6 +202,12 @@ function openDesktopWindow(windowElement, launcher = null, syncUrl = true) {
   }
 
   const newlyOpened = windowElement.hidden || windowElement.classList.contains("is-minimized");
+  if (newlyOpened) {
+    const opener = launcher || document.activeElement;
+    if (opener && opener !== document.body && !windowElement.contains(opener)) {
+      desktopWindowOpeners.set(windowElement, opener);
+    }
+  }
   windowElement.hidden = false;
   windowElement.classList.remove("is-minimized");
   windowElement.dataset.launcherId = launcher?.id || "";
@@ -249,14 +256,19 @@ function closeDesktopWindow(windowElement, syncUrl = true) {
   updateDesktopWindowCount();
   const remainingOpen = desktopWindows.filter((candidate) => !candidate.hidden).length;
 
-  const launcherId = windowElement.dataset.launcherId;
-  if (launcherId) {
-    document.getElementById(launcherId)?.focus();
-  }
-
   if (activeDesktopWindow === windowElement) {
     activeDesktopWindow = null;
   }
+  const opener = desktopWindowOpeners.get(windowElement);
+  const returnTargets = [
+    opener, opener?.closest("details")?.querySelector("summary"),
+    ...desktopWindows.filter(candidate => !candidate.hidden && !candidate.classList.contains("is-minimized"))
+      .reverse().map(candidate => candidate.querySelector("[data-window-close]")),
+    document.querySelector("#app-menu-bar summary"), document.querySelector("#interface-shell"),
+  ];
+  returnTargets.find(target => target?.isConnected && !target.closest("[hidden], [inert]")
+    && target.getClientRects().length)?.focus();
+  desktopWindowOpeners.delete(windowElement);
   if (syncUrl) {
     syncDesktopWindowUrl();
   }
@@ -351,6 +363,9 @@ desktopWindowLaunchers.forEach((launcher, index) => {
 
 desktopWindows.forEach((windowElement) => {
   windowElement.addEventListener("pointerdown", () => focusDesktopWindow(windowElement));
+  windowElement.addEventListener("focusin", () => {
+    if (activeDesktopWindow !== windowElement) focusDesktopWindow(windowElement);
+  });
   windowElement.querySelector("[data-window-close]")?.addEventListener("click", () => {
     closeDesktopWindow(windowElement);
   });

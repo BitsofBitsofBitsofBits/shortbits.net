@@ -1,14 +1,12 @@
 (() => {
   const root = document.documentElement;
   const deferred = [...document.querySelectorAll('script[type="application/x-bits-runtime"][src]')];
-  const shell = document.querySelector?.("#interface-shell");
   const queued = [];
   const failures = new Set();
   let notice;
   let settled = false;
   let timeout;
   root.dataset.runtime = "pending";
-  shell?.setAttribute("aria-busy", "true");
 
   function showNotice(failed = false, message = "Loading controls… Your action is queued.") {
     if (!document.body) {
@@ -39,16 +37,14 @@
   }
 
   function intercept(event) {
-    if (notice?.contains(event.target) || event.target.closest?.("#boot-screen")) {
+    const launcherShortcut = event.type === "keydown" && (event.ctrlKey || event.metaKey)
+      && !event.altKey && event.key.toLowerCase() === "k";
+    if (notice?.contains(event.target) || (event.target.closest?.("#boot-screen") && !launcherShortcut)) {
       return;
     }
-    const editable = event.target.closest?.("input, textarea, select, [contenteditable]");
-    const control = event.target.closest?.("button, summary, [role=button], [data-window-target]");
+    const control = event.target.closest?.("button, [role=button], [data-window-target]");
     if (event.type === "keydown") {
-      if (editable || (control && ["Enter", " "].includes(event.key))
-        || ["Tab", "Escape", "Shift", "Control", "Alt", "Meta"].includes(event.key)) {
-        return;
-      }
+      if (!launcherShortcut) return;
     } else if (event.type !== "submit" && !control) {
       return;
     }
@@ -84,7 +80,8 @@
         altKey: event.altKey, shiftKey: event.shiftKey, metaKey: event.metaKey,
         bubbles: true, cancelable: true,
       };
-      queued.push(() => document.dispatchEvent(new KeyboardEvent("keydown", options)));
+      const target = event.target;
+      queued.push(() => (target.isConnected ? target : document).dispatchEvent(new KeyboardEvent("keydown", options)));
     }
     showNotice();
   }
@@ -161,7 +158,6 @@
     settled = true;
     window.clearTimeout?.(timeout);
     window.removeEventListener?.("error", handleRuntimeError);
-    shell?.removeAttribute("aria-busy");
     if (failures.size) {
       queued.length = 0;
       window.dispatchEvent(new CustomEvent("bits:runtime-error", {

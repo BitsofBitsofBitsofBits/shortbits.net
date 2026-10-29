@@ -124,6 +124,7 @@
 }
 .paused-message-controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .paused-message-controls button:disabled { opacity: 0.6; cursor: default; }
+.command-line:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 #settings-pause-help,
 #settings-layout-help { margin: 0 0 16px; }

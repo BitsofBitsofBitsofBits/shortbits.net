@@ -858,6 +858,8 @@ let activityTimer;
 const pausedMessageControls = document.querySelector("#paused-message-controls");
 const previousMessageButton = document.querySelector("#message-history-previous");
 const nextMessageButton = document.querySelector("#message-history-next");
+const accessibleMessage = document.querySelector("#accessible-message");
+let accessibleMessageSnapshot;
 const changingContentPaused = () => document.documentElement.dataset.pauseContent === "on";
 
 function scheduleMessage(delay) {
@@ -910,6 +912,11 @@ function pickNextMessage() {
 }
 
 function renderMessageAuthor() {
+  if (accessibleMessageSnapshot !== currentMessage) {
+    accessibleMessageSnapshot = currentMessage;
+    accessibleMessage.textContent = window.BITS_MESSAGE_TEXT.plainText(currentMessage)
+      + (currentMessage.author ? ` - ${currentMessage.author}` : "");
+  }
   authorBox.hidden = currentAuthorCharacters.length === 0;
   typedAuthor.textContent = currentAuthorCharacters.slice(0, Math.max(0, authorCharacterIndex)).join("");
 }
@@ -3182,6 +3189,20 @@ document.addEventListener("keydown", (event) => {
   if (isEditable) {
     return;
   }
+  const completeCommand = event.ctrlKey && event.code === "Space" && !event.metaKey && !event.altKey;
+  if (event.defaultPrevented || ((event.ctrlKey || event.metaKey || event.altKey) && !completeCommand)
+    || !commandLine.contains(target)) {
+    return;
+  }
+  if (completeCommand && commandInput) {
+    event.preventDefault();
+    const matches = commandSuggestions.filter(suggestion => suggestion.startsWith(commandInput.toLowerCase()));
+    const suggestions = matches.length ? matches : commandSuggestions;
+    commandInput = suggestions[autocompleteIndex % suggestions.length];
+    autocompleteIndex += 1;
+    processTitle.textContent = `> ${commandInput}_`;
+    return;
+  }
 
   const expectedKonamiKey = konamiSequence[konamiProgress];
   let matchedKonamiKey = false;
@@ -3204,7 +3225,7 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
-  if (commandLine.matches(":hover") && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+  if (!commandInput && commandHistory.length === 0 && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
     event.preventDefault();
     showPreviousSplash(event.key === "ArrowUp" ? -1 : 1);
     return;
@@ -3227,20 +3248,6 @@ document.addEventListener("keydown", (event) => {
     processTitle.textContent = commandInput
       ? `> ${commandInput}_`
       : "~/internet/presence.exe";
-    return;
-  }
-
-  if (event.key === "Tab" && commandInput) {
-    event.preventDefault();
-    const matchingSuggestions = commandSuggestions.filter((suggestion) => (
-      suggestion.startsWith(commandInput.toLowerCase())
-    ));
-    const suggestions = matchingSuggestions.length > 0
-      ? matchingSuggestions
-      : commandSuggestions;
-    commandInput = suggestions[autocompleteIndex % suggestions.length];
-    autocompleteIndex += 1;
-    processTitle.textContent = `> ${commandInput}_`;
     return;
   }
 

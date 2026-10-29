@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("bits:runtime-ready", bindBootMessages, { once: true });
   const timers = [];
   let finished = false;
+  let previousBootFocus = null;
 
   function finishBoot() {
     if (finished) {
@@ -58,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
       element.inert = false;
     });
     window.removeEventListener("keydown", handleBootKeydown, true);
+    if (bootScreen.contains?.(document.activeElement)) {
+      const target = previousBootFocus?.isConnected && previousBootFocus.getClientRects().length
+        ? previousBootFocus : document.querySelector("#interface-shell");
+      target?.focus({ preventScroll: true });
+    }
     if (shouldPlayBoot) {
       window.BITS_NOTIFICATIONS?.notify({
         title: "BOOT COMPLETE",
@@ -69,8 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleBootKeydown(event) {
-    if (event.key === "Escape") {
-      event.preventDefault();
+    if (event.key === "Escape" || event.key === "Tab" || event.ctrlKey || event.metaKey) {
+      if (event.key === "Escape") event.preventDefault();
       finishBoot();
     }
   }
@@ -91,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
       element.inert = true;
     });
     window.addEventListener("keydown", handleBootKeydown, true);
+    if (!bootScreen.contains?.(document.activeElement)) previousBootFocus = document.activeElement;
     bootSkip.focus();
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -137,6 +144,8 @@ document.addEventListener("DOMContentLoaded", () => {
           playBoot();
         }
       }, { once: true });
+      window.addEventListener("bits:runtime-error", finishBoot, { once: true });
+      timers.push(window.setTimeout(finishBoot, 900));
     } else {
       playBoot();
     }
