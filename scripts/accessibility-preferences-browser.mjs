@@ -142,7 +142,6 @@ try {
     await other.goto(`${server.origin}/boot/`, { waitUntil: "networkidle" });
     assert.equal(await other.locator("#endless-boot-pause").getAttribute("aria-pressed"), "true");
     const bootCount = await other.locator("#endless-boot-log").locator(":scope > *").count();
-    await other.clock.install();
     await other.clock.fastForward(10_000);
     assert.equal(await other.locator("#endless-boot-log").locator(":scope > *").count(), bootCount);
     await other.locator("#endless-boot-settings-toggle").click();
