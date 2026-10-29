@@ -4677,7 +4677,7 @@ html[data-interface-theme="windows-95"] .contact-turnstile-status {
 }
 
 .contact-turnstile[data-state="error"] .contact-turnstile-status {
-  color: var(--danger, #ff6d7a);
+  color: var(--danger, var(--ink));
 }
 
 .contact-turnstile[data-state="pending"] .contact-turnstile-status::after {

@@ -80,6 +80,8 @@ try {
     assert.equal(await page.evaluate(() => performance.getEntriesByType("resource").filter(entry => /\/shared\/styles\/layouts\/(?:collection-base|eink-reader|blueprint|spacecraft|frutiger-eco|holographic|newspaper|workbench|stickerbook|night-train|museum)\.css/.test(entry.name)).length), 0, "No collection CSS is fetched for Default");
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     await page.addScriptTag({ path: axePath });
+    await page.locator("#contact-form").dispatchEvent("focusin");
+    await page.waitForFunction(() => document.querySelector(".contact-turnstile")?.dataset.state === "error");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
     for (const theme of themes) {
       await page.locator("#settings-theme").selectOption(theme, { force: true });
