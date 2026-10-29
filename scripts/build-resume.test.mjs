@@ -29,6 +29,12 @@ test("shared renderer escapes content and preserves formatting, safe links, and 
   const education = document.querySelector("#resume-education").innerHTML;
   assert.equal(ResumeContent.render(input), true);
   assert.equal(document.querySelector("#resume-summary").textContent, input.profile.summary);
+  assert.equal(document.querySelector("#resume-headline").textContent, input.profile.headline);
+  assert.equal(document.querySelector("#resume-headline-heading").textContent, "Headline");
+  assert.equal(document.querySelector("#resume-summary-heading").textContent, "About");
+  assert.equal(document.querySelector(".resume-header #resume-headline"), null);
+  assert.notEqual(document.querySelector("#resume-headline").closest("section"),
+    document.querySelector("#resume-summary").closest("section"));
   assert.equal(document.querySelector("#resume-summary img"), null);
   assert.equal(document.querySelector("#resume-experience [data-career-period]").dataset.careerPeriod, input.entries[0].period);
   assert.equal(document.querySelector("#resume-education [data-career-period]"), null);

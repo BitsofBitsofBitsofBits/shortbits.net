@@ -22,6 +22,10 @@
 
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
+  - **Résumé > Profile** has separate **Headline** and **About** fields. The
+    printable résumé displays them as distinct sections with a small gap,
+    below the name/contact header. About reuses the existing summary data;
+    no content migration or re-entry is required.
   - Experience entries support **Use start/end date selectors**, start/end
     months, and **I'm still here** for an active role. The generated period
     stores only the date range, not a duration that will become stale. End dates

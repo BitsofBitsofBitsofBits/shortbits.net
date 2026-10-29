@@ -184,6 +184,14 @@ body.resume-page {
   margin-top: 16px;
 }
 
+.resume-intro + .resume-intro {
+  margin-top: 12px;
+}
+
+.resume-intro {
+  break-inside: avoid;
+}
+
 .resume-sheet h2 {
   margin: 0 0 8px;
   padding-bottom: 3px;
@@ -374,6 +382,10 @@ body.resume-page {
 
   .resume-sheet section {
     margin-top: 12pt;
+  }
+
+  .resume-sheet .resume-intro + .resume-intro {
+    margin-top: 8pt;
   }
 
   .resume-sheet h2 {

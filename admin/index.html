@@ -24,7 +24,7 @@
     <script src="/admin/scripts/admin-publishing.js?v=publishing-1" defer></script>
     <script src="/shared/scripts/career-format.js?v=career-3" defer></script>
     <script src="/shared/scripts/social-links.js?v=social-1" defer></script>
-    <script src="/admin/scripts/admin.js?v=admin-34" defer></script>
+    <script src="/admin/scripts/admin.js?v=admin-35" defer></script>
     <script src="/admin/scripts/admin-backup.js?v=backup-3" defer></script>
     <script src="/shared/scripts/boot-message-generator.js?v=boot-generator-1" defer></script>
     <script src="/admin/scripts/admin-messages.js?v=messages-5" defer></script>
@@ -237,13 +237,14 @@
               <a href="/professional/resume/" target="_blank" rel="noreferrer">résumé</a>.
             </p>
             <div class="ac-form-pane" data-admin-view="profile" data-admin-view-label="Profile">
+            <label><span>HEADLINE</span><input name="headline" maxlength="120" aria-describedby="resume-intro-help"></label>
+            <label><span>ABOUT</span><textarea name="summary" maxlength="1200" aria-describedby="resume-intro-help"></textarea></label>
+            <p id="resume-intro-help" class="blog-markdown-help">Headline and About appear as separate sections with a small gap on the printable résumé. About uses your existing summary text.</p>
             <div class="content-admin-profile-grid">
-              <label><span>HEADLINE</span><input name="headline" maxlength="120"></label>
               <label><span>AVAILABILITY</span><input name="availability" maxlength="120"></label>
               <label><span>LOCATION</span><input name="location" maxlength="120"></label>
               <label><span>RÉSUMÉ URL</span><input name="resume_url" type="url" maxlength="500"></label>
             </div>
-            <label><span>SUMMARY</span><textarea name="summary" maxlength="1200"></textarea></label>
             <label class="admin-checkbox"><input name="enabled" type="checkbox"><span>PUBLISH RÉSUMÉ</span></label>
             </div>
             <div class="ac-form-pane" data-admin-view="experience" data-admin-view-label="Experience">

@@ -56,6 +56,16 @@ try {
       const page = await context.newPage();
       await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "networkidle" });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), "Screen resume must not overflow");
+      for (const media of ["screen", "print"]) {
+        await page.emulateMedia({ media });
+        const headline = await page.locator("#resume-headline").boundingBox();
+        const about = await page.locator("#resume-summary-heading").boundingBox();
+        const gap = about.y - headline.y - headline.height;
+        assert.ok(gap >= 8 && gap <= 16, `${media}: Headline and About need a small, visible 8-16px gap; got ${gap}`);
+        assert.equal(await page.locator("#resume-headline-heading").textContent(), "Headline");
+        assert.equal(await page.locator("#resume-summary-heading").textContent(), "About");
+      }
+      await page.emulateMedia({ media: "screen" });
       assert.equal(await page.locator(".resume-list header").first().evaluate(node => getComputedStyle(node).flexDirection),
         width < 700 ? "column" : "row", "Responsive screen layout is preserved");
       await page.emulateMedia({ media: "print" });

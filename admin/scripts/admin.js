@@ -3618,7 +3618,7 @@ if (adminClient) {
     if (profile.enabled && (!profile.headline || !profile.summary)) {
       setAdminStatus(
         resumeAdminStatus,
-        "A published résumé needs a headline and summary.",
+        "A published résumé needs a headline and About text.",
         "error",
       );
       return;
