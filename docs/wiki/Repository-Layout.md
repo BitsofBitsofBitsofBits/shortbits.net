@@ -18,7 +18,7 @@ home/
   styles/                  Root chooser styles
 online/
   index.html
-  scripts/                 Online desktop, windows, games, and widgets
+  scripts/                 Online desktop feature modules, windows, games, and widgets
   styles/                  Online-only styles
 nowplaying/
   index.html               Dedicated live presentation of both playback sources
