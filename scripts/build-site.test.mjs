@@ -30,7 +30,7 @@ test("build preserves page routes and organized assets without shipping reposito
       "shared/styles/layouts/collection-base.css", "shared/scripts/layouts/runtime.js",
       "shared/images/favicon.png", "shared/images/profile.webp", "home/scripts/chooser.js", "home/styles/chooser.css",
       "online/scripts/startup.js", "online/styles/site.css", "online/scripts/arcade.js",
-      "online/scripts/achievements.js",
+      "online/scripts/achievements.js", "online/scripts/cobits.js", "online/scripts/fake-desktop.js",
       "admin/scripts/admin.js", "admin/styles/admin.css", "boot/scripts/endless-boot.js",
       "blog/scripts/blog.js", "professional/scripts/profile.js",
       "professional/resume/scripts/resume.js", "not-found/scripts/not-found.js", "useless/scripts/useless.js",

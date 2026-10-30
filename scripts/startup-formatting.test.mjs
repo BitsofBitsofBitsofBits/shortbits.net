@@ -5,9 +5,10 @@ import vm from "node:vm";
 import { parseHTML } from "linkedom";
 
 const source = await readFile(new URL("../online/scripts/script.js", import.meta.url), "utf8");
+const desktopSource = await readFile(new URL("../online/scripts/fake-desktop.js", import.meta.url), "utf8");
 const charactersSource = await readFile(new URL("../shared/scripts/message-text.js", import.meta.url), "utf8");
 const markdownSource = await readFile(new URL("../shared/scripts/markdown.js", import.meta.url), "utf8");
-const clockSource = source.slice(source.indexOf("let fakeDesktopClockFormatter;"), source.indexOf('fakeDesktopRestore.addEventListener'));
+const clockSource = desktopSource.slice(desktopSource.indexOf("let fakeDesktopClockFormatter;"), desktopSource.indexOf('fakeDesktopRestore.addEventListener'));
 const buildSource = source.slice(source.indexOf("async function loadBuildMetadata()"), source.indexOf("\napplyInterfaceTheme(interfaceThemes[interfaceThemeIndex], false);"));
 
 test("build metadata formats an unambiguous UTC tooltip without locale initialization", async () => {

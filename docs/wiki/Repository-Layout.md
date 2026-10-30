@@ -19,6 +19,9 @@ home/
 online/
   index.html
   scripts/                 Online desktop feature modules, windows, games, and widgets
+    fake-desktop.js        Desktop shell, task manager, action center, and Wi-Fi
+    cobits.js              CoBits assistant, initialized by the desktop shell
+    achievements.js        Achievement state, persistence, and UI
   styles/                  Online-only styles
 nowplaying/
   index.html               Dedicated live presentation of both playback sources

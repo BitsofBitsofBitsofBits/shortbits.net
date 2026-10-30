@@ -36,6 +36,50 @@ try {
       .some((entry) => entry.name.includes("desktop-workspaces"))), false, "Workspaces do not load at startup");
     await page.addScriptTag({ path: axePath });
 
+    await page.evaluate(() => {
+      document.querySelector("#minimize-button").click();
+      document.querySelector("#fake-task-manager-launch").click();
+    });
+    assert.equal(await page.locator("#fake-desktop").evaluate((element) => element.hidden), false);
+    assert.equal(await page.locator("#fake-task-manager").evaluate((element) => element.hidden), false);
+    await page.evaluate(() => {
+      document.querySelector('[data-fake-process="presence.exe"] [data-end-fake-process]').click();
+    });
+    assert.match(await page.locator("#fake-task-manager-status").textContent(), /ACCESS DENIED/);
+    await page.evaluate(() => {
+      document.querySelector('[data-fake-process="too_many_bits.dll"] [data-end-fake-process]').click();
+    });
+    assert.equal(await page.locator('[data-fake-process="too_many_bits.dll"] button').isDisabled(), true);
+    await page.evaluate(() => document.querySelector("#fake-cobits-launch").click());
+    assert.equal(await page.locator("#fake-task-manager").evaluate((element) => element.hidden), true);
+    assert.equal(await page.locator("#fake-cobits").evaluate((element) => element.hidden), false);
+    await page.evaluate(() => {
+      const input = document.querySelector("#fake-cobits-input");
+      input.value = "my name is Ada";
+      document.querySelector("#fake-cobits-form").requestSubmit();
+    });
+    await page.waitForFunction(() => document.querySelector("#fake-cobits-memory").textContent.includes("operator Ada"));
+    await page.evaluate(() => {
+      document.querySelector("#fake-action-center-trigger").click();
+      document.querySelector("#fake-wifi-picker-trigger").click();
+      document.querySelector('[data-wifi-network="FREE_PUBLIC_WIFI"]').click();
+    });
+    await page.waitForFunction(() => !document.querySelector("#fake-vpn-ad").hidden);
+    assert.equal(await page.locator("#fake-cobits").evaluate((element) => element.hidden), true);
+    await page.evaluate(() => document.querySelector("#fake-vpn-decline").click());
+    await page.evaluate(() => {
+      document.querySelector("#fake-action-center-trigger").click();
+      document.querySelector("#fake-wifi-picker-trigger").click();
+      document.querySelector('[data-wifi-network="Download_More_BITS"]').click();
+    });
+    await page.waitForFunction(() => !document.querySelector("#virus-screen").hidden);
+    await page.evaluate(() => document.querySelector("#virus-screen-recover").click());
+    assert.equal(await page.locator("#virus-screen").evaluate((element) => element.hidden), true);
+    assert.equal(await page.evaluate(() => window.BITS_ACHIEVEMENTS.initialize().has("wifi-virus")), true);
+    await page.evaluate(() => document.querySelector("#fake-desktop-restore").click());
+    assert.equal(await page.locator("#fake-desktop").evaluate((element) => element.hidden), true);
+    assert.deepEqual(errors, [], "Standard desktop controls initialize without runtime errors");
+
     for (const id of themes) {
       await page.locator("#interface-theme-select").selectOption(id, { force: true });
       await page.locator("#desktop-workspace-entry").click();

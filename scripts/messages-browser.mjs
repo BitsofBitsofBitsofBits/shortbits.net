@@ -99,27 +99,27 @@ try {
     assert.equal(await page.evaluate(() => activities[0].text), "DATABASE ACTIVITY");
     assert.equal(await page.evaluate(() => shutdownMessages[0]), "DATABASE_SHUTDOWN");
     assert.equal(await page.evaluate(() => hardwareChatter[0]), "DATABASE CPU CHATTER");
-    assert.equal(await page.evaluate(() => playingDeadMessages[0]), "DATABASE PLAYING DEAD");
+    assert.equal(await page.evaluate(() => desktopSystem.playingDeadMessages[0]), "DATABASE PLAYING DEAD");
     for (const [title, body] of [
       ["DATABASE NOTICE", "DATABASE NOTICE BODY"],
       ["BITS OS has another notification", "DATABASE SINGLE LINE"],
       ["DATABASE NOTICE", "DATABASE NOTICE BODY"],
     ]) {
       await page.evaluate(() => {
-        fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "false");
-        fakeActionNotificationDismiss.click();
+        document.querySelector('#fake-action-center [data-action-center-control="dnd"]').setAttribute("aria-pressed", "false");
+        document.querySelector("#fake-action-notification-dismiss").click();
       });
       await page.waitForFunction(() => !document.querySelector(".fake-action-notification").hidden);
       assert.equal(await page.locator("#fake-action-notification-title").textContent(), title);
       assert.equal(await page.locator("#fake-action-notification-copy").textContent(), body);
     }
     await page.evaluate(() => {
-      fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "true");
-      fakeActionNotificationDismiss.click();
+      document.querySelector('#fake-action-center [data-action-center-control="dnd"]').setAttribute("aria-pressed", "true");
+      document.querySelector("#fake-action-notification-dismiss").click();
     });
     await page.waitForTimeout(1400);
     assert.equal(await page.locator(".fake-action-notification").evaluate(element => element.hidden), true);
-    await page.evaluate(() => fakeActionCenter.querySelector('[data-action-center-control="dnd"]').setAttribute("aria-pressed", "false"));
+    await page.evaluate(() => document.querySelector('#fake-action-center [data-action-center-control="dnd"]').setAttribute("aria-pressed", "false"));
     fail = true;
     assert.equal(await page.evaluate(() => window.BITS_MESSAGE_CATALOG.refresh()), false);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].text), "DATABASE STATUS");
@@ -133,8 +133,8 @@ try {
       displayedMessageHistoryIndex = displayedMessageHistory.length;
       showPreviousSplash(-1);
       updateActivity();
-      inspectPlayingDeadProcess();
-      inspectPlayingDeadProcess();
+      desktopSystem.inspectPlayingDeadProcess();
+      desktopSystem.inspectPlayingDeadProcess();
       const cpu = hardwareChatter.find((message) => message.markup);
       hardwareChatter.splice(0, hardwareChatter.length, cpu);
       renderHardware([{ machine: "Markup PC", component: "CPU", name: "Test CPU", detail: null, updated_at: new Date().toISOString() }]);
@@ -208,11 +208,11 @@ try {
     assert.ok((await page.locator("#boot-log").textContent()).includes(new URL(server.origin).hostname));
     await page.evaluate(() => {
       window.BITS_BOOT.skip();
-      triggerVirusScreen("Test network");
+      desktopSystem.triggerVirusScreen("Test network");
     });
     await page.waitForFunction(() => document.querySelector("#virus-screen-copy strong")?.textContent === "BOLD");
     assert.ok((await page.locator("#virus-screen-copy").textContent()).includes(new URL(server.origin).hostname));
-    await page.evaluate(() => { recoverFromVirusScreen(); closeButton.click(); });
+    await page.evaluate(() => { desktopSystem.recoverFromVirusScreen(); closeButton.click(); });
     assert.equal(await page.locator("#shutdown-message strong").textContent(), "BOLD");
     assert.ok((await page.locator("#shutdown-message").textContent()).includes(new URL(server.origin).hostname));
     await page.goto(`${server.origin}/boot/`, { waitUntil: "networkidle" });
@@ -226,8 +226,8 @@ try {
     fail = true;
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
-    assert.equal(await page.evaluate(() => playingDeadMessages[0].markup), true, "cached markup must apply before desktop consumers copy the pool");
-    assert.equal(await page.evaluate(() => glitchMessages[0].markup), true);
+    assert.equal(await page.evaluate(() => desktopSystem.playingDeadMessages[0].markup), true, "cached markup must apply before desktop consumers copy the pool");
+    assert.equal(await page.evaluate(() => desktopSystem.glitchMessages[0].markup), true);
     assert.equal(await page.evaluate(() => hardwareChatter[0].markup), true);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].correctedText), markupRows[0].corrected_text);
     assert.equal(await page.evaluate(() => window.BITS_MESSAGES[0].author), markupRows[0].author);
@@ -266,8 +266,7 @@ try {
     assert.deepEqual(await page.evaluate(() => window.BITS_SEASONAL_PROFILE.notificationMessages),
       ["CUSTOM NOTICE one", "CUSTOM NOTICE two"]);
     await page.evaluate(() => {
-      dismissedActionNotifications = 0;
-      fakeActionNotificationDismiss.click();
+      document.querySelector("#fake-action-notification-dismiss").click();
     });
     await page.waitForFunction(() => !document.querySelector(".fake-action-notification").hidden);
     assert.equal(await page.locator("#fake-action-notification-copy").textContent(), "CUSTOM NOTICE one");
@@ -280,7 +279,7 @@ try {
     });
     assert.equal(await page.locator("#message-author-box").isVisible(), false);
     assert.equal(await page.locator("#typed-author").textContent(), "", "Unattributed scheduled statuses clear the previous attribution");
-    assert.equal(await page.evaluate(() => [activities, shutdownMessages, playingDeadMessages, glitchMessages, hardwareChatter].every((pool) => pool.length > 0)), true);
+    assert.equal(await page.evaluate(() => [activities, shutdownMessages, desktopSystem.playingDeadMessages, desktopSystem.glitchMessages, hardwareChatter].every((pool) => pool.length > 0)), true);
     await page.evaluate(() => {
       const matchMedia = window.matchMedia;
       const motion = document.documentElement.dataset.motion;

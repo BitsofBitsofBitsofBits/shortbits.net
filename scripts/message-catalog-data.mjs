@@ -39,10 +39,10 @@ export function messageCatalogDefaults() {
   };
   add("standard", "initialBootSteps", literal("online/scripts/boot.js", "baseBootSteps", 2));
   add("standard", "bootMessages", literal("boot/scripts/endless-boot.js", "baseFixedMessages", 2));
-  add("standard", "playingDeadMessages", literal("online/scripts/script.js", "basePlayingDeadMessages", 0));
-  add("standard", "glitchMessages", literal("online/scripts/script.js", "baseGlitchMessages", 0));
+  add("standard", "playingDeadMessages", literal("online/scripts/fake-desktop.js", "basePlayingDeadMessages", 4));
+  add("standard", "glitchMessages", literal("online/scripts/fake-desktop.js", "baseGlitchMessages", 4));
   Object.entries(literal("online/scripts/content.js", "baseHardwareJokes", 0, "object"))
     .forEach(([metric, pool]) => add("standard", `monitor.${metric}`, pool));
-  add("standard", "notificationMessages", literal("online/scripts/script.js", "baseNotificationMessages", 0));
+  add("standard", "notificationMessages", literal("online/scripts/fake-desktop.js", "baseNotificationMessages", 4));
   return JSON.parse(JSON.stringify(rows));
 }
