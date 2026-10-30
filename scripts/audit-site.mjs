@@ -37,26 +37,32 @@ if (liveUrl) {
 const server = liveUrl ? null : await startSiteServer(root);
 const origin = liveUrl || server.origin;
 const failures = [];
+const medianLcp = args.includes("--median-lcp");
 try {
   for (const [name, path] of pages) {
     for (const preset of ["mobile", "desktop"]) {
-      try {
-        await auditPage({
-          url: new URL(path, origin).href,
-          preset,
-          outputPath: join(output, `${name}-${preset}.json`),
-          saveAssets: preset === "mobile" && (name === "online" || Boolean(liveUrl)),
-        });
-        console.log(`Audited ${name}-${preset}.`);
-      } catch (error) {
-        failures.push(error.message);
-        console.error(`Lighthouse audit failed: ${error.message}`);
+      for (let sample = 1; sample <= (medianLcp ? 3 : 1); sample++) {
+        try {
+          await auditPage({
+            url: new URL(path, origin).href,
+            preset,
+            outputPath: sample === 1
+              ? join(output, `${name}-${preset}.json`)
+              : join(output, "samples", `${name}-${preset}-sample-${sample}.json`),
+            saveAssets: sample === 1 && preset === "mobile" && (name === "online" || Boolean(liveUrl)),
+          });
+          console.log(`Audited ${name}-${preset}${medianLcp ? ` (sample ${sample}/3)` : ""}.`);
+        } catch (error) {
+          failures.push(error.message);
+          console.error(`Lighthouse audit failed: ${error.message}`);
+        }
       }
     }
   }
   await run([
     fileURLToPath(new URL("./lighthouse-summary.mjs", import.meta.url)), output,
     ...(args.includes("--enforce") ? ["--enforce"] : []),
+    ...(medianLcp ? ["--median-lcp"] : []),
   ]);
   if (failures.length) throw new Error(`Lighthouse could not complete:\n${failures.join("\n")}`);
 } finally {

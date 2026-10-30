@@ -78,15 +78,21 @@ speech output; manual NVDA/VoiceOver testing remains important.
 
 Local and post-deployment Lighthouse audits share `scripts/audit-site.mjs`.
 For live checks, run
-`node scripts/audit-site.mjs --url https://www.shortbits.net --enforce`.
+`node scripts/audit-site.mjs --url https://www.shortbits.net --enforce --median-lcp`.
+The post-deployment audit runs three independent measurements for each page and
+device and enforces the 2.5-second LCP budget against their median. Other budgets
+continue to use the first report. The three-run option increases audit duration;
+local and pre-deployment audits use one measurement unless `--median-lcp` is passed.
 Each page/device audit gets at most three attempts, but only for the observed
 `NO_NAVSTART` trace-recording error or Chrome's `Target.getTargetInfo` missing-session
 crash. Each retry starts a fresh Lighthouse process and waits briefly. Low measured
 scores, page errors, and other failures are not retried. The existing performance
 (90), accessibility/SEO (100), LCP (2.5 seconds), and CLS (0.1) budgets remain enforced.
 Original reports and saved traces are retained under `lighthouse-reports/attempts/`;
-the summary uses only the final reports at the directory root. Missing scores are
-shown as `N/A`, and exhausted runner retries still fail the job. Pre-deployment
+additional measurements and their attempts are retained under `lighthouse-reports/samples/`.
+The summary lists all LCP measurements and their median. Missing or invalid LCP
+samples fail the median audit; other missing scores are shown as `N/A`, and exhausted
+runner retries still fail the job. Pre-deployment
 budgets and the separate deployed-site health checks remain enabled.
 
 `npm run build` requires an empty output directory, copies only public site

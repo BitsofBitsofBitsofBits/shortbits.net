@@ -383,7 +383,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Audit live pages
-        run: node scripts/audit-site.mjs --url https://www.shortbits.net --enforce
+        run: node scripts/audit-site.mjs --url https://www.shortbits.net --enforce --median-lcp
 
       - name: Upload Lighthouse reports
         if: always()
