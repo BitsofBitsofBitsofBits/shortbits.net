@@ -5,6 +5,7 @@ import vm from "node:vm";
 
 const archiveSource = await readFile(new URL("../blog/scripts/blog.js", import.meta.url), "utf8");
 const postSource = await readFile(new URL("../blog/scripts/post.js", import.meta.url), "utf8");
+const contractSource = await readFile(new URL("../shared/scripts/blog-data.js", import.meta.url), "utf8");
 
 class Element {
   constructor(tag = "") {
@@ -26,7 +27,7 @@ class Element {
 async function browserScript(source, { nodes, pages = [], slug = "existing-post", offline = false } = {}) {
   const requests = [];
   const head = new Element("head");
-  vm.runInNewContext(source, {
+  const context = vm.createContext({
     document: {
       querySelector: (selector) => nodes[selector],
       createElement: (tag) => new Element(tag),
@@ -44,6 +45,8 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
       return { ok: true, json: async () => pages.shift() || [] };
     },
   });
+  vm.runInContext(contractSource, context);
+  vm.runInContext(source, context);
   await new Promise((resolve) => setImmediate(resolve));
   return { requests, head };
 }
@@ -68,8 +71,11 @@ test("archive links built posts statically and newer posts through the legacy re
   assert.equal(cards[0].children[0].children[0].href, "/blog/articles/existing-post/");
   assert.equal(cards[1].children[0].children[0].href, "/blog/post.html?slug=brand-new-post");
   assert.equal(requests.length, 1);
+  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,published_at");
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
   assert.match(requests[0].searchParams.get("published_at"), /^lte\./);
+  assert.equal(requests[0].searchParams.get("order"), "published_at.desc,slug.asc");
+  assert.equal(requests[0].searchParams.get("limit"), "500");
   nodes["#blog-search"].value = "identity";
   nodes["#blog-search"].listeners.input();
   assert.equal(cards[0].hidden, false);
@@ -92,6 +98,7 @@ test("archive pagination stops if the service repeats a full page", async () => 
   const { requests } = await browserScript(archiveSource, { nodes, pages: [page, page] });
   assert.equal(requests.length, 2);
   assert.equal(requests[1].searchParams.get("offset"), "500");
+  assert.equal(requests[1].searchParams.get("published_at"), requests[0].searchParams.get("published_at"));
   assert.equal(nodes["#blog-post-list"].children[0], saved);
   assert.match(nodes["#blog-status"].textContent, /latest deployment/);
 });
@@ -124,6 +131,9 @@ test("legacy links preserve unpublished semantics rather than redirecting to sta
   assert.equal(head.children.length, 0);
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
   assert.match(requests[0].searchParams.get("published_at"), /^lte\./);
+  assert.equal(requests[0].searchParams.get("slug"), "eq.existing-post");
+  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,published_at");
+  assert.equal(requests[0].searchParams.get("limit"), "1");
 });
 
 test("legacy published reader renders a live post; malformed slugs make no request", async () => {

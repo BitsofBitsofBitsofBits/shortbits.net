@@ -56,14 +56,7 @@
       const posts = [];
       const seenSlugs = new Set();
       for (;;) {
-        const query = [
-          "site_blog_posts?select=slug,title,excerpt,published_at",
-          "published=eq.true",
-          `published_at=lte.${encodeURIComponent(cutoff)}`,
-          "order=published_at.desc,slug.asc",
-          "limit=500",
-          `offset=${posts.length}`,
-        ].join("&");
+        const query = window.BITS_BLOG_DATA.archive(cutoff, posts.length);
         const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${query}`, {
           headers: { apikey: anonKey },
         });

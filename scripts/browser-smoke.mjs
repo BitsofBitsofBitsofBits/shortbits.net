@@ -143,6 +143,9 @@ try {
         assert.equal(await page.locator("#resume-status").textContent(), "Saved resume is current.");
         assert.equal(await page.locator("#resume-refresh").isDisabled(), true);
       }
+      if (path === "/blog/") {
+        assert.equal(await page.locator("#blog-status").textContent(), "Archive synchronized.");
+      }
       if (path === "/professional/") {
         const shift = await page.evaluate(() => window.__testLayoutShift);
         assert.ok(shift <= 0.1, `${width}px professional CLS ${shift} exceeds 0.1`);
@@ -162,6 +165,14 @@ try {
       }
       console.log(`PASS ${width}px ${path}: accessibility and overflow`);
     }
+    const postRequest = page.waitForRequest(request => new URL(request.url()).pathname.endsWith("/site_blog_posts"));
+    await page.goto(`${server.origin}/blog/post.html?slug=first-lab-notes`, { waitUntil: "networkidle" });
+    const postQuery = new URL((await postRequest).url()).searchParams;
+    assert.equal(postQuery.get("slug"), "eq.first-lab-notes");
+    assert.equal(postQuery.get("published"), "eq.true");
+    assert.match(postQuery.get("published_at"), /^lte\./);
+    assert.equal(await page.locator("#blog-post").isVisible(), true);
+    assert.equal(await page.locator("#blog-post-title").textContent(), "First lab notes");
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#build-link")?.dataset.commit);
     assert.match(await page.locator("#build-link").getAttribute("title"), /^Deployed .* UTC$/);

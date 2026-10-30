@@ -9,6 +9,8 @@ JavaScript and CSS no longer live directly in the repository root.
 ```text
 shared/
   scripts/                 Shared configuration, content, themes, and integrations
+    blog-data.js           Public blog queries shared by live readers and the static build
+    career-data.js         Public resume queries shared by online, professional, and the resume build
     layouts/               Lazy-loaded experimental theme behavior
   styles/                  Shared base styles and generated compact theme CSS
     layouts/               Lazy-loaded theme styles

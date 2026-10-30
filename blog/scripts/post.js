@@ -23,13 +23,7 @@
     }
     try {
       const { url, anonKey } = window.SUPABASE_CONFIG;
-      const query = [
-        "site_blog_posts?select=slug,title,excerpt,body_markdown,published_at",
-        `slug=eq.${encodeURIComponent(slug)}`,
-        "published=eq.true",
-        `published_at=lte.${encodeURIComponent(new Date().toISOString())}`,
-        "limit=1",
-      ].join("&");
+      const query = window.BITS_BLOG_DATA.post(new Date().toISOString(), slug);
       const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${query}`, {
         headers: { apikey: anonKey },
       });

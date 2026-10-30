@@ -64,12 +64,28 @@ try {
   ]) {
     const page = await context.newPage();
     const errors = [];
+    const careerRequests = [];
     page.on("pageerror", error => errors.push(error.message));
+    page.on("request", request => {
+      const url = new URL(request.url());
+      if (url.pathname.includes("/rest/v1/site_resume_")) {
+        url.searchParams.delete("limit");
+        url.searchParams.delete("offset");
+        careerRequests.push(`${url.pathname.split("/").pop()}${url.search}`);
+      }
+    });
     await page.clock.install({ time: new Date("2026-10-31T23:59:30Z") });
     await page.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
     const durations = page.locator(`${selector} .career-period-duration`);
     await durations.first().waitFor();
     await page.locator(`${skillsSelector} > :first-child`).waitFor();
+    const queries = await page.evaluate(() => Object.values(window.CareerData.queries));
+    for (const query of queries) {
+      const expected = new URL(query, "https://example.test/");
+      expected.searchParams.delete("limit");
+      expected.searchParams.delete("offset");
+      assert.ok(careerRequests.includes(`${expected.pathname.slice(1)}${expected.search}`), `${path}: shared career query ${query}`);
+    }
     if (path === "/online/?window=resume") {
       assert.equal(await page.locator(skillsSelector).evaluate(node => node.closest("[data-window]")?.id), "resume-window");
     }

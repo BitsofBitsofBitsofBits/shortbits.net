@@ -26,7 +26,7 @@ test("build preserves page routes and organized assets without shipping reposito
       "online/index.html", "admin/index.html", "boot/index.html", "blog/index.html",
       "nowplaying/index.html", "nowplaying/scripts/presentation.js", "nowplaying/styles/presentation.css",
       "professional/index.html", "professional/resume/index.html",
-      "shared/scripts/supabase-config.js", "shared/styles/theme-base.css",
+      "shared/scripts/supabase-config.js", "shared/scripts/blog-data.js", "shared/styles/theme-base.css",
       "shared/styles/layouts/collection-base.css", "shared/scripts/layouts/runtime.js",
       "shared/images/favicon.png", "shared/images/profile.webp", "home/scripts/chooser.js", "home/styles/chooser.css",
       "online/scripts/startup.js", "online/styles/site.css", "online/scripts/arcade.js",

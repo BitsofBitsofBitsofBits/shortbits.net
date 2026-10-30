@@ -85,8 +85,13 @@ test("public fetch paginates, pins publication cutoff, and fails explicitly", as
   });
   assert.equal(result.length, 2);
   assert.deepEqual(calls.map(({ url }) => url.searchParams.get("offset")), ["0", "1", "2"]);
-  assert.equal(calls[0].url.searchParams.get("published"), "eq.true");
-  assert.equal(calls[0].url.searchParams.get("published_at"), `lte.${now.toISOString()}`);
+  for (const { url } of calls) {
+    assert.equal(url.searchParams.get("published"), "eq.true");
+    assert.equal(url.searchParams.get("published_at"), `lte.${now.toISOString()}`);
+    assert.equal(url.searchParams.get("order"), "published_at.desc,slug.asc");
+    assert.equal(url.searchParams.get("limit"), "500");
+    assert.equal(url.searchParams.get("select"), "slug,title,excerpt,body_markdown,published,published_at,updated_at");
+  }
   assert.equal(calls[0].options.headers.apikey, "sb_publishable_example");
   await assert.rejects(fetchPosts({}, { fetchImpl: async () => ({ ok: false, status: 503 }) }), /HTTP 503/);
   await assert.rejects(fetchPosts({}, { fetchImpl: async () => ({ ok: true, json: async () => ({ error: "bad" }) }) }), /array/);

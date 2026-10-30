@@ -139,25 +139,25 @@ async function requestPublicContent() {
   const [resumeProfiles, resumeItems, educationItems, certificationItems, skillItems, nowProfiles, changelogItems, gameItems, hardwareItems, hardwareOrder] =
     await Promise.all([
       fetchPublicContentTable(
-        "site_resume_profile?select=headline,summary,availability,location,resume_url,updated_at&enabled=eq.true&id=eq.primary",
+        window.CareerData.queries.profile,
       ),
       fetchPublicContentTable(
-        "site_resume_entries?select=position,role,organization,period,summary&enabled=eq.true&order=position.asc",
+        window.CareerData.queries.entries,
       ),
       fetchPublicContentTable(
-        "site_resume_education?select=position,school,credential,period,details&enabled=eq.true&order=position.asc",
+        window.CareerData.queries.education,
       ).catch((error) => {
         console.warn("Unable to load education:", error);
         return [];
       }),
       fetchPublicContentTable(
-        "site_resume_certifications?select=position,name,issuer,issued,credential_id,credential_url&enabled=eq.true&order=position.asc",
+        window.CareerData.queries.certifications,
       ).catch((error) => {
         console.warn("Unable to load certifications:", error);
         return [];
       }),
       fetchPublicContentTable(
-        "site_resume_skills?select=position,category,skills&enabled=eq.true&order=position.asc",
+        window.CareerData.queries.skills,
       ),
       fetchPublicContentTable(
         "site_now?select=headline,summary,building,learning,playing,reading,updated_at&enabled=eq.true&id=eq.primary",

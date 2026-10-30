@@ -3,6 +3,7 @@ import { dirname, resolve, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import vm from "node:vm";
 import publishing from "../shared/scripts/publishing-status.js";
+import blogData from "../shared/scripts/blog-data.js";
 
 export const normalizePosts = publishing.normalizePosts;
 
@@ -93,13 +94,10 @@ export async function publicConfig(root, env = process.env) {
 
 export async function fetchPosts(config, { fetchImpl = fetch, now = new Date() } = {}) {
   const posts = [];
+  const cutoff = now.toISOString();
   for (;;) {
-    const query = new URLSearchParams({
-      select: "slug,title,excerpt,body_markdown,published,published_at,updated_at",
-      published: "eq.true", published_at: `lte.${now.toISOString()}`,
-      order: "published_at.desc,slug.asc", limit: "500", offset: String(posts.length),
-    });
-    const response = await fetchImpl(`${config.url}/rest/v1/site_blog_posts?${query}`, {
+    const query = blogData.build(cutoff, posts.length);
+    const response = await fetchImpl(`${config.url}/rest/v1/${query}`, {
       headers: { apikey: config.anonKey },
       signal: AbortSignal.timeout(30000),
     });
