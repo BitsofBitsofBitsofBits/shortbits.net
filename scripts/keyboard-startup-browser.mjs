@@ -30,6 +30,7 @@ try {
       return url.origin === server.origin ? route.continue() : route.abort();
     });
     const page = await context.newPage();
+    await page.clock.setFixedTime(new Date("2026-01-15T12:00:00Z"));
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     let releaseLauncher;
