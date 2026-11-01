@@ -47,7 +47,12 @@ publish controls are enabled.
 Blog posts are authored as Markdown in the Admin Portal. The shared renderer
 supports headings, emphasis, links, lists, blockquotes, inline code, and fenced
 code blocks, along with images, tables, task lists, highlighting, constrained
-colors, rainbow text, text sizes, and curated font choices. A formatting
+named and hex colors, rainbow text, text sizes, and curated font choices. Use
+`{{color:#ff8800|colored text}}` for a custom color; supported hex formats are
+`#RGB`, `#RGBA`, `#RRGGBB`, and `#RRGGBBAA` (including optional transparency).
+Choose **CUSTOM HEX...** in the toolbar's color menu, enter a hex code, and
+apply it to selected text. Invalid codes are displayed literally when typed
+in Markdown and rejected with an error by the toolbar. A formatting
 toolbar inserts the underlying markup for authors who do not want to write it
 manually. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
 5 MB and require alternative text before insertion. The renderer creates DOM

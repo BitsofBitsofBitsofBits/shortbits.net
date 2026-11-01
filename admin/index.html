@@ -714,8 +714,16 @@
                     <option value="purple">PURPLE</option>
                     <option value="pink">PINK</option>
                     <option value="rainbow">RAINBOW</option>
+                    <option value="custom">CUSTOM HEX...</option>
                   </select>
                 </label>
+                <div id="blog-custom-color" role="group" aria-label="Custom text color" hidden>
+                  <label>Hex color<input id="blog-custom-color-value" type="text" maxlength="9" placeholder="#ff8800" aria-describedby="blog-custom-color-help" spellcheck="false"></label>
+                  <button id="blog-custom-color-apply" type="button">APPLY COLOR</button>
+                  <button id="blog-custom-color-cancel" type="button">CANCEL</button>
+                  <p id="blog-custom-color-help">Use #RGB, #RGBA, #RRGGBB, or #RRGGBBAA. The optional alpha channel controls transparency.</p>
+                  <p id="blog-custom-color-status" role="status" aria-live="polite"></p>
+                </div>
                 <label>
                   <span class="visually-hidden">Font family</span>
                   <select id="blog-format-font" aria-label="Font family">
@@ -758,7 +766,7 @@
               </div>
               <p class="blog-markdown-help">
                 Supports headings, emphasis, links, images, task lists, tables, blockquotes, code, highlighting,
-                colors, rainbow text, sizes, and curated fonts. Raw HTML is displayed as text.
+                named and hex colors (for example, <code>{{color:#ff8800|text}}</code>), rainbow text, sizes, and curated fonts. Raw HTML is displayed as text.
               </p>
               <p id="blog-admin-status" class="form-status" role="status" aria-live="polite"></p>
               <div class="repeatable-entry-actions">

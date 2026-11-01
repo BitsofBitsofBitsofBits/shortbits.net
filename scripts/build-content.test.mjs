@@ -56,6 +56,18 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.doesNotMatch(html, /post\.js|shared\/scripts\/supabase-config\.js| hidden/);
 });
 
+test("static blog articles retain validated hex colors and nested formatting", () => {
+  for (const color of ["#abc", "#abcd", "#a1b2c3", "#a1b2c380"]) {
+    const html = renderArticle({ ...posts[0], body_markdown: `{{color:${color}|**Colored**}}` }, renderer);
+    assert.match(html, /class="blog-text-color-custom"/);
+    assert.ok(html.includes(`style="color:${color}"`), html);
+    assert.match(html, /<strong>Colored<\/strong>/);
+  }
+  const invalid = "{{color:#abc;background:red|Literal}}";
+  assert.ok(renderer.render(invalid).includes(invalid));
+  assert.doesNotMatch(renderer.render(invalid), /style=/);
+});
+
 test("RSS, static archive and sitemap use only published static URLs", () => {
   const feed = renderFeed(posts);
   assert.match(feed, /<rss version="2.0"/);

@@ -2082,6 +2082,7 @@ body.admin-center.ac-panel-open {
 #message-markup-toolbar #message-weight-help,
 #message-markup-toolbar #message-defaults > p,
 #message-custom-font > p,
+#blog-custom-color > p,
 #blog-custom-font > p {
   flex-basis: 100%;
   margin: 4px;
@@ -2112,6 +2113,7 @@ body.admin-center.ac-panel-open {
 }
 
 #message-markup-toolbar #message-custom-font label,
+#blog-custom-color label,
 #blog-custom-font label {
   display: grid;
   gap: 4px;
@@ -2119,11 +2121,13 @@ body.admin-center.ac-panel-open {
 }
 
 #message-custom-font-status,
+#blog-custom-color-status,
 #blog-custom-font-status {
   overflow-wrap: anywhere;
 }
 
-.admin-center #blog-custom-font {
+.admin-center #blog-custom-font,
+.admin-center #blog-custom-color {
   flex-basis: 100%;
   align-items: center;
   min-width: 0;
@@ -2134,6 +2138,7 @@ body.admin-center.ac-panel-open {
 #message-pool-delete[hidden],
 #message-pool-dates[hidden],
 #message-markup-toolbar [hidden],
+#blog-custom-color[hidden],
 #blog-custom-font[hidden] {
   display: none;
 }

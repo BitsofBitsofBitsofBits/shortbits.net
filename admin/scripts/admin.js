@@ -626,6 +626,9 @@ const blogPostMarkdown = document.querySelector("#blog-post-markdown");
 const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
 const blogFormatBlock = document.querySelector("#blog-format-block");
 const blogFormatColor = document.querySelector("#blog-format-color");
+const blogCustomColor = document.querySelector("#blog-custom-color");
+const blogCustomColorValue = document.querySelector("#blog-custom-color-value");
+const blogCustomColorStatus = document.querySelector("#blog-custom-color-status");
 const blogFormatFont = document.querySelector("#blog-format-font");
 for (const [id, label] of Object.entries(window.BITS_MARKDOWN.fonts)) {
   const option = document.createElement("option");
@@ -2784,6 +2787,8 @@ function renderBlogPreview() {
 
 function resetBlogEditor() {
   blogPostForm.reset();
+  blogCustomColor.hidden = true;
+  blogCustomColorStatus.textContent = "";
   document.querySelector("#blog-custom-font").hidden = true;
   document.querySelector("#blog-custom-font-status").textContent = "";
   blogPostForm.elements.id.value = "";
@@ -2794,6 +2799,9 @@ function resetBlogEditor() {
 }
 
 function selectBlogPost(post) {
+  blogCustomColor.hidden = true;
+  blogCustomColorValue.value = "";
+  blogCustomColorStatus.textContent = "";
   document.querySelector("#blog-custom-font").hidden = true;
   document.querySelector("#blog-custom-font-family").value = "";
   document.querySelector("#blog-custom-font-status").textContent = "";
@@ -3040,12 +3048,42 @@ if (adminClient) {
     blogFormatBlock.value = "";
   });
   blogFormatColor.addEventListener("change", () => {
-    if (blogFormatColor.value) {
+    if (blogFormatColor.value === "custom") {
+      blogCustomColor.hidden = false;
+      blogCustomColorStatus.textContent = "";
+      blogCustomColorValue.focus();
+      blogFormatColor.value = "";
+    } else if (blogFormatColor.value) {
+      blogCustomColor.hidden = true;
       wrapBlogSelection(
         `{{color:${blogFormatColor.value}|`,
         "}}",
       );
       blogFormatColor.value = "";
+    }
+  });
+  document.querySelector("#blog-custom-color-apply").addEventListener("click", () => {
+    const color = window.BITS_MARKDOWN.hexColor(blogCustomColorValue.value);
+    if (!color) {
+      blogCustomColorStatus.textContent = "Enter a hex color using #RGB, #RGBA, #RRGGBB, or #RRGGBBAA.";
+      blogCustomColorValue.focus();
+      return;
+    }
+    blogCustomColorStatus.textContent = "";
+    wrapBlogSelection(`{{color:${color}|`, "}}");
+  });
+  document.querySelector("#blog-custom-color-cancel").addEventListener("click", () => {
+    blogCustomColor.hidden = true;
+    blogCustomColorStatus.textContent = "";
+    blogPostMarkdown.focus();
+  });
+  blogCustomColorValue.addEventListener("input", () => {
+    blogCustomColorStatus.textContent = "";
+  });
+  blogCustomColorValue.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.querySelector("#blog-custom-color-apply").click();
     }
   });
   blogFormatFont.addEventListener("change", () => {

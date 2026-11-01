@@ -17,6 +17,13 @@
   const allowedFonts = new Set(Object.keys(fonts));
   const allowedSizes = new Set(["small", "normal", "large", "huge"]);
 
+  function hexColor(value) {
+    if (typeof value !== "string") return null;
+    const trimmed = value.trim();
+    return /^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(trimmed)
+      ? trimmed.toLowerCase() : null;
+  }
+
   function customFontFamily(value) {
     if (typeof value !== "string" || !value.trim() || value.length > 200) return null;
     const families = value.split(",").map(family => family.trim());
@@ -97,6 +104,7 @@
         const type = match[5];
         const rawValue = match[6].trim();
         const value = rawValue.toLowerCase();
+        const hex = type === "color" ? hexColor(rawValue) : null;
         const custom = type === "font" && value.startsWith("custom:")
           ? customFontFamily(rawValue.slice("custom:".length)) : null;
         const balancedEnd = directiveEnd(source, match.index);
@@ -112,13 +120,15 @@
           font: allowedFonts,
           size: allowedSizes,
         };
-        if (!custom && !allowedValues[type].has(value)) {
+        if (!hex && !custom && !allowedValues[type].has(value)) {
           parent.append(document.createTextNode(source.slice(match.index, end)));
           cursor = end;
           continue;
         }
         element = document.createElement("span");
-        element.className = custom ? "blog-text-font-custom" : `blog-text-${type}-${value}`;
+        element.className = hex ? "blog-text-color-custom"
+          : custom ? "blog-text-font-custom" : `blog-text-${type}-${value}`;
+        if (hex) element.style.color = hex;
         if (custom) element.style.fontFamily = custom;
         appendInline(element, content, options);
       } else if (match[8] !== undefined) {
@@ -356,5 +366,5 @@
     return fragment;
   }
 
-  window.BITS_MARKDOWN = Object.freeze({ fonts, customFontFamily, render, renderInline, readingTime });
+  window.BITS_MARKDOWN = Object.freeze({ fonts, hexColor, customFontFamily, render, renderInline, readingTime });
 })();

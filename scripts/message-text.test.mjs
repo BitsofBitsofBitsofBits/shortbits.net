@@ -36,6 +36,35 @@ test("inline message formatting is opt-in, preserving all existing literal punct
   assert.ok(target.textContent.includes("<script>alert(1)</script>"));
 });
 
+test("blog hex colors validate complete codes and preserve nested markup safely", () => {
+  const { document, window } = setup();
+  for (const color of ["#abc", "#AbCd", "#A1B2C3", "#A1B2C380"]) {
+    assert.equal(window.BITS_MARKDOWN.hexColor(` ${color} `), color.toLowerCase());
+    const root = document.createElement("div");
+    root.append(window.BITS_MARKDOWN.render(`{{color:${color}|**Bold** {{size:large|large}}}}`));
+    const span = root.querySelector(".blog-text-color-custom");
+    assert.equal(span.style.color, color.toLowerCase());
+    assert.equal(span.querySelector("strong").textContent, "Bold");
+    assert.equal(span.querySelector(".blog-text-size-large").textContent, "large");
+    assert.equal(span.getAttribute("style"), `color:${color.toLowerCase()}`);
+  }
+  for (const color of ["", "#", "#ab", "#abcde", "#abcdefg", "#123456789", "123456",
+    "#ggg", "#fff;color:red", "#fff!important", "rgb(1,2,3)", "url(https://example.test)",
+    '#fff" onmouseover="evil']) {
+    assert.equal(window.BITS_MARKDOWN.hexColor(color), null, color);
+    const root = document.createElement("div");
+    const markup = `{{color:${color}|**literal**}}`;
+    root.append(window.BITS_MARKDOWN.render(markup));
+    assert.equal(root.textContent, markup);
+    assert.equal(root.querySelector("span,strong"), null);
+  }
+  assert.equal(window.BITS_MARKDOWN.hexColor(null), null);
+  const root = document.createElement("div");
+  root.append(window.BITS_MARKDOWN.render("{{color:red|Red}} {{color:rainbow|Rainbow}}"));
+  assert.equal(root.querySelector(".blog-text-color-red").textContent, "Red");
+  assert.equal(root.querySelector(".blog-text-color-rainbow").textContent, "Rainbow");
+});
+
 test("typewriter rendering compiles once, slices visible graphemes and retains nested formatting while typing and deleting", () => {
   const { window, text, target } = setup();
   let parses = 0;

@@ -23,6 +23,7 @@ export function markdownRenderer(source) {
       this.childNodes = [];
       this.attributes = {};
       this.dataset = {};
+      this.style = {};
     }
     append(...nodes) {
       for (const node of nodes) {
@@ -50,6 +51,11 @@ export function markdownRenderer(source) {
         if (this[key] !== undefined) attributes[key.toLowerCase()] = this[key];
       }
       if (this.className) attributes.class = this.className;
+      if (this.style.color !== undefined) {
+        const color = window.BITS_MARKDOWN.hexColor(this.style.color);
+        if (!color) throw new Error("Unsupported Markdown color.");
+        attributes.style = `color:${color}`;
+      }
       for (const [key, value] of Object.entries(this.dataset)) attributes[`data-${key}`] = value;
       for (const key of ["checked", "disabled"]) if (this[key]) attributes[key] = "";
       const opening = `<${this.tag}${Object.entries(attributes).map(([key, value]) => ` ${key}="${escapeHtml(value)}"`).join("")}>`;
