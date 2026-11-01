@@ -432,6 +432,7 @@ test("staged theme stylesheet and runtime URLs contain exactly one build version
     const nodes = new Map();
     const context = {
       layoutAssetVersion: "layouts-6",
+      isThemePreview: false,
       document: {
         documentElement: { dataset: {} },
         readyState: "complete",
@@ -449,6 +450,11 @@ test("staged theme stylesheet and runtime URLs contain exactly one build version
     vm.runInNewContext(`${staged.slice(start, end)}\nsyncThemeAssets({ id: "pride-transgender", stylesheet: "pride" });`, context);
     assert.equal(nodes.get("bits-theme-stylesheet").href, `/shared/styles/layouts/pride.css?v=${version}`);
     assert.equal(nodes.has("bits-layout-runtime"), false, "Shared Pride CSS does not load experimental layout scripts");
+    nodes.clear();
+    context.isThemePreview = true;
+    vm.runInNewContext(`${staged.slice(start, end)}\nsyncThemeAssets({ id: "terminal", experimental: true });`, context);
+    assert.equal(nodes.get("bits-theme-stylesheet").href, `/shared/styles/layouts/terminal.css?v=${version}`);
+    assert.equal(nodes.has("bits-layout-runtime"), false, "Draft previews load article styling without desktop runtimes");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -477,7 +483,8 @@ for (const [name, preferences] of [
       sessionStorage: { getItem: () => preferences.runtime ? "true" : null },
     };
     const start = themeSource.indexOf('if (document.documentElement.dataset.page === "online")');
-    const end = start + themeSource.slice(start).search(/if\s*\(\s*legacyRgbMode/);
+    const end = themeSource.indexOf("if (!isThemePreview && (", start);
+    assert.ok(end > start, "Performance initialization ends before preference persistence");
     vm.runInNewContext(themeSource.slice(start, end), context);
     const expected = name !== "desktop";
     assert.equal(classes.has("is-performance-lite"), expected);
