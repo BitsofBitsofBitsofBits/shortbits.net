@@ -3098,7 +3098,7 @@ if (adminClient) {
       const { selectionStart: start, selectionEnd: end, value } = blogPostMarkdown;
       const next = `${value.slice(0, start)}${markdown}${value.slice(end)}`;
       if (next.length > blogPostMarkdown.maxLength) {
-        throw new Error("Pasting would exceed the 50,000-character post limit. Paste a smaller section.");
+        throw new Error("Pasting would exceed the 200,000-character post limit. Paste a smaller section.");
       }
       updateBlogMarkdown(next, start + markdown.length);
     } catch (error) {

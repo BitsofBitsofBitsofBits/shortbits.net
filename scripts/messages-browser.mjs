@@ -1159,6 +1159,17 @@ try {
     await page.locator("#blog-post-markdown").fill("");
     await page.locator("#blog-post-markdown").press("Control+v");
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), "**Existing Markdown**\n<br>\nplain");
+    await page.locator("#blog-preview-toggle").click();
+    const acceptedPaste = await page.locator("#blog-post-markdown").evaluate(field => {
+      field.value = "x".repeat(field.maxLength - 9);
+      field.setSelectionRange(field.value.length, field.value.length);
+      const data = new DataTransfer();
+      data.setData("text/html", "<b>Extra</b>");
+      field.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+      return { length: field.value.length, ending: field.value.slice(-9) };
+    });
+    assert.equal(acceptedPaste.length, 200000);
+    assert.equal(acceptedPaste.ending, "**Extra**");
     const rejectedPaste = await page.locator("#blog-post-markdown").evaluate(field => {
       field.value = "x".repeat(field.maxLength);
       field.setSelectionRange(0, 0);
@@ -1170,8 +1181,10 @@ try {
         status: document.querySelector("#blog-admin-status").textContent };
     });
     assert.equal(rejectedPaste.prevented, true);
-    assert.equal(rejectedPaste.value, "x".repeat(50000));
-    assert.match(rejectedPaste.status, /50,000-character post limit/);
+    assert.equal(rejectedPaste.value, "x".repeat(200000));
+    assert.match(rejectedPaste.status, /200,000-character post limit/);
+    await page.locator("#blog-post-markdown").fill("Small draft");
+    await page.locator("#blog-preview-toggle").click();
     await testFormattingShortcuts("#blog-post-markdown", "#blog-markdown-preview",
       [...shortcutCases, { chord: "h", shift: true, before: "==", after: "==", tag: "mark" }]);
     for (const modifier of ["Control", "Meta"]) {

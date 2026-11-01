@@ -31,6 +31,9 @@
   Rich-text paste converts supported formatting into Markdown rather than
   discarding it. Use `<br>` for an explicit line break; other raw HTML stays
   literal. Plain-text paste bypasses conversion.
+  Post bodies support up to 200,000 characters, including Markdown formatting.
+  Apply `20261101120000_increase_blog_post_limit.sql` to raise the database limit
+  alongside the editor limit.
 
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
