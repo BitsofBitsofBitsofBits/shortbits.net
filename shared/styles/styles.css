@@ -5700,10 +5700,8 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .blog-markdown a {
- display: inline-flex;
- min-width: 24px;
- min-height: 24px;
- align-items: center;
+ display: inline;
+ overflow-wrap: anywhere;
  color: var(--accent);
  text-decoration-thickness: 1px;
  text-underline-offset: 3px;

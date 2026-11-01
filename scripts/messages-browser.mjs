@@ -1134,6 +1134,19 @@ try {
     const blogPreview = page.frameLocator("#blog-preview-frame");
     assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), initialPreviewPreferences, "Loading preview does not modify saved preferences");
     assert.equal(await blogPreview.locator("#blog-markdown-preview strong").textContent(), "body");
+    await page.locator("#blog-post-markdown").fill("Before [a linked phrase that is deliberately long enough to wrap across multiple lines in a narrow paragraph](https://example.test/inline) after.");
+    const inlineLink = await blogPreview.locator("#blog-markdown-preview a").evaluate(link => {
+      link.parentElement.style.width = "180px";
+      const range = document.createRange();
+      range.selectNodeContents(link);
+      return { display: getComputedStyle(link).display,
+        lines: new Set(Array.from(range.getClientRects(), rect => Math.round(rect.top))).size,
+        paragraph: link.parentElement.textContent };
+    });
+    assert.equal(inlineLink.display, "inline");
+    assert.ok(inlineLink.lines > 1, "Long links wrap within a paragraph instead of moving as a single box");
+    assert.match(inlineLink.paragraph, /^Before .* after\.$/);
+    await blogPreview.locator("#blog-markdown-preview p").evaluate(paragraph => paragraph.style.removeProperty("width"));
     await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin: server.origin });
     const pastedHtml = '<p><strong>Bold</strong> <span style="font-style:italic;color:rgb(85,57,204)">Color</span><br>Next</p><blockquote><p>Quoted <u>words</u><br>continued</p></blockquote>';
     await page.evaluate(async html => navigator.clipboard.write([new ClipboardItem({
