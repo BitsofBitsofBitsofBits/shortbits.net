@@ -67,8 +67,21 @@ without variants disable that selector. Experimental layouts show article
 styling only. Preview is hidden by default; updates resume with the latest
 unsaved title, excerpt, and body when reopened. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
 5 MB and require alternative text before insertion. The renderer creates DOM
-nodes directly instead of injecting HTML, and raw HTML in a post is displayed
-as text. Draft and future-dated posts remain hidden from anonymous clients
+nodes directly instead of injecting HTML. Only attribute-free `<br>`, `<br/>`,
+and `<br />` tags (case-insensitive) create explicit line breaks; other raw HTML
+is displayed as text, including inside code blocks.
+Pasting rich text into Blog Markdown converts supported HTML formatting to
+Markdown: bold, italics, underline, strike, highlight, inline colors and fonts,
+headings, paragraphs, line breaks, blockquotes, lists, tables, links, and code. Use
+the toolbar's Quote option for selected lines, or prefix a line with `> `.
+Clipboard
+scripts and active content are never executed. External stylesheets and arbitrary
+layouts are not imported; nested lists are flattened and link labels are plain
+text. Images are not uploaded by paste. Use browser plain-text paste
+(usually Ctrl+Shift+V or Command+Shift+V) to bypass conversion. Oversized pastes
+are rejected with an error without changing the draft. Plain-text clipboard
+content, including existing Markdown, is pasted unchanged.
+Draft and future-dated posts remain hidden from anonymous clients
 through row-level security.
 
 ### Formatting keyboard shortcuts

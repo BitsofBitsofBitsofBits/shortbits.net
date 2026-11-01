@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
+    <script src="/admin/scripts/blog-paste.js?v=blog-paste-1" defer></script>
     <script src="/shared/scripts/shortbits.js?v=shortbits-1" defer></script>
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1" defer></script>
     <script src="/shared/scripts/message-text.js?v=messages-1" defer></script>
@@ -773,8 +774,9 @@
               </section>
               <p class="blog-markdown-help">
                 Supports headings, emphasis, links, images, task lists, tables, blockquotes, code, highlighting,
-                named and hex colors (for example, <code>{{color:#ff8800|text}}</code>), rainbow text, sizes, and curated fonts. Raw HTML is displayed as text.
+                named and hex colors (for example, <code>{{color:#ff8800|text}}</code>), rainbow text, sizes, and curated fonts. Use <code>&lt;br&gt;</code> for an explicit line break. Other raw HTML is displayed as text.
               </p>
+              <p class="blog-markdown-help">Pasting rich text converts supported formatting to Markdown, including bold, italics, links, colors, headings, quotes, lists, and tables. To quote selected lines, choose Quote from the text style menu or start a line with <code>&gt; </code>. Use Ctrl+Shift+V (Command+Shift+V on macOS) to paste plain text where supported by your browser. Images are not uploaded by paste.</p>
               <p id="blog-shortcuts-help" class="blog-markdown-help">Keyboard shortcuts while editing Markdown: Ctrl+B bold, Ctrl+I italic, Ctrl+U underline, Ctrl+Shift+X strikethrough, Ctrl+Shift+C inline code, Ctrl+Shift+H highlight, Ctrl+K insert a link (asks for a URL). On macOS use Command instead of Ctrl. Select text first; without a selection, inserts selected placeholder text. Shortcuts apply markup, do not toggle it off, and do not save the draft.</p>
               <p id="blog-admin-status" class="form-status" role="status" aria-live="polite"></p>
               <div class="repeatable-entry-actions">

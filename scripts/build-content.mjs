@@ -51,15 +51,22 @@ export function markdownRenderer(source) {
         if (this[key] !== undefined) attributes[key.toLowerCase()] = this[key];
       }
       if (this.className) attributes.class = this.className;
+      const styles = [];
       if (this.style.color !== undefined) {
         const color = window.BITS_MARKDOWN.hexColor(this.style.color);
         if (!color) throw new Error("Unsupported Markdown color.");
-        attributes.style = `color:${color}`;
+        styles.push(`color:${color}`);
       }
+      if (this.style.fontFamily !== undefined) {
+        const font = window.BITS_MARKDOWN.customFontFamily(this.style.fontFamily);
+        if (!font) throw new Error("Unsupported Markdown font.");
+        styles.push(`font-family:${font}`);
+      }
+      if (styles.length) attributes.style = styles.join(";");
       for (const [key, value] of Object.entries(this.dataset)) attributes[`data-${key}`] = value;
       for (const key of ["checked", "disabled"]) if (this[key]) attributes[key] = "";
       const opening = `<${this.tag}${Object.entries(attributes).map(([key, value]) => ` ${key}="${escapeHtml(value)}"`).join("")}>`;
-      return ["hr", "img", "input"].includes(this.tag) ? opening : `${opening}${content}</${this.tag}>`;
+      return ["br", "hr", "img", "input"].includes(this.tag) ? opening : `${opening}${content}</${this.tag}>`;
     }
   }
   function textNode(value) {

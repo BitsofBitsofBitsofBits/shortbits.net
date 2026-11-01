@@ -1,6 +1,6 @@
 (() => {
   const blockStartPattern = /^(?:#{1,6}\s+|```|>\s?|[-*+]\s+|\d+\.\s+|(?:-{3,}|\*{3,})\s*$|\|.+\|$)/;
-  const inlinePattern = /(!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\{\{(color|font|size):?([^|}]*)\|([^}]+)\}\}|\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`([^`\n]+)`|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\+\+([^+\n]+)\+\+|==([^=\n]+)==|\*([^*\n]+)\*|_([^_\n]+)_|~~([^~\n]+)~~)/g;
+  const inlinePattern = /(!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\{\{(color|font|size):?([^|}]*)\|([^}]+)\}\}|\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`([^`\n]+)`|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\+\+([^+\n]+)\+\+|==([^=\n]+)==|\*([^*\n]+)\*|_([^_\n]+)_|~~([^~\n]+)~~|(<[bB][rR]\s*\/?>))/g;
   const allowedColors = new Set([
     "accent", "red", "orange", "yellow", "green", "cyan", "blue", "purple",
     "pink", "white", "muted", "rainbow",
@@ -73,7 +73,7 @@
       if (match.index < cursor) continue;
       parent.append(document.createTextNode(source.slice(cursor, match.index)));
       let end = match.index + match[0].length;
-      if (options.textOnly && (match[2] !== undefined || match[8] !== undefined)) {
+      if (options.textOnly && (match[2] !== undefined || match[8] !== undefined || match[18] !== undefined)) {
         parent.append(document.createTextNode(match[0]));
         cursor = match.index + match[0].length;
         continue;
@@ -161,6 +161,8 @@
       } else if (match[15] !== undefined || match[16] !== undefined) {
         element = document.createElement("em");
         appendInline(element, match[15] ?? match[16], options);
+      } else if (match[18] !== undefined) {
+        element = document.createElement("br");
       } else {
         element = document.createElement("s");
         appendInline(element, match[17], options);
@@ -241,11 +243,13 @@
         continue;
       }
 
-      if (line.startsWith("```")) {
-        const language = line.slice(3).trim().replace(/[^a-z0-9_-]/gi, "");
+      const fence = /^(`{3,})(.*)$/.exec(line);
+      if (fence) {
+        const language = fence[2].trim().replace(/[^a-z0-9_-]/gi, "");
+        const closingFence = new RegExp(`^\`{${fence[1].length},}\\s*$`);
         const codeLines = [];
         index += 1;
-        while (index < lines.length && !lines[index].startsWith("```")) {
+        while (index < lines.length && !closingFence.test(lines[index])) {
           codeLines.push(lines[index]);
           index += 1;
         }

@@ -68,6 +68,20 @@ test("static blog articles retain validated hex colors and nested formatting", (
   assert.doesNotMatch(renderer.render(invalid), /style=/);
 });
 
+test("static articles serialize explicit breaks without accepting arbitrary HTML", () => {
+  const html = renderer.render('First<br>Second<BR />Third<br onclick="alert(1)">literal\n\n```\n<br>\n```');
+  assert.equal((html.match(/<br>/g) || []).length, 2);
+  assert.doesNotMatch(html, /<\/br>|<br onclick/);
+  assert.match(html, /&lt;br onclick=/);
+  assert.match(html, /<code>&lt;br&gt;<\/code>/);
+});
+
+test("static articles retain imported validated font formatting", () => {
+  const html = renderer.render('{{font:custom:"Arial", sans-serif|Copied font}}');
+  assert.match(html, /style="font-family:&quot;Arial&quot;, sans-serif"/);
+  assert.match(html, /Copied font/);
+});
+
 test("RSS, static archive and sitemap use only published static URLs", () => {
   const feed = renderFeed(posts);
   assert.match(feed, /<rss version="2.0"/);

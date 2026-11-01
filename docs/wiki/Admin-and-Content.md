@@ -28,6 +28,9 @@
   visitor preferences. Experimental desktop layouts show their article styling,
   not their interactive desktop chrome. The preview includes unsaved title,
   excerpt, and Markdown; opening it never saves or publishes a draft.
+  Rich-text paste converts supported formatting into Markdown rather than
+  discarding it. Use `<br>` for an explicit line break; other raw HTML stays
+  literal. Plain-text paste bypasses conversion.
 
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits

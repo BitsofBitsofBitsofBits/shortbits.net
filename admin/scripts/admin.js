@@ -3088,6 +3088,24 @@ if (adminClient) {
   window.BITS_MARKDOWN.bindFormattingShortcuts(blogPostMarkdown,
     Object.fromEntries(["bold", "italic", "underline", "strike", "inline-code", "highlight", "link"]
       .map(format => [format, () => applyBlogFormat(format)])));
+  blogPostMarkdown.addEventListener("paste", (event) => {
+    if (event.defaultPrevented || blogPostMarkdown.disabled || blogPostMarkdown.readOnly) return;
+    const html = event.clipboardData?.getData("text/html");
+    if (!html) return;
+    event.preventDefault();
+    try {
+      const markdown = window.BITS_BLOG_PASTE.fromHtml(html) || event.clipboardData.getData("text/plain");
+      const { selectionStart: start, selectionEnd: end, value } = blogPostMarkdown;
+      const next = `${value.slice(0, start)}${markdown}${value.slice(end)}`;
+      if (next.length > blogPostMarkdown.maxLength) {
+        throw new Error("Pasting would exceed the 50,000-character post limit. Paste a smaller section.");
+      }
+      updateBlogMarkdown(next, start + markdown.length);
+    } catch (error) {
+      console.error("Unable to paste formatted blog text:", error);
+      setAdminStatus(blogAdminStatus, `Formatted paste failed: ${error.message}`, "error");
+    }
+  });
   for (const eventName of ["blur", "input", "select", "keyup", "mouseup"]) {
     blogPostMarkdown.addEventListener(eventName, rememberBlogMarkdownSelection);
   }

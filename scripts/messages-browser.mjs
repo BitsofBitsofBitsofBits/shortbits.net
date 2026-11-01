@@ -1134,6 +1134,44 @@ try {
     const blogPreview = page.frameLocator("#blog-preview-frame");
     assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), initialPreviewPreferences, "Loading preview does not modify saved preferences");
     assert.equal(await blogPreview.locator("#blog-markdown-preview strong").textContent(), "body");
+    await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin: server.origin });
+    const pastedHtml = '<p><strong>Bold</strong> <span style="font-style:italic;color:rgb(85,57,204)">Color</span><br>Next</p><blockquote><p>Quoted <u>words</u><br>continued</p></blockquote>';
+    await page.evaluate(async html => navigator.clipboard.write([new ClipboardItem({
+      "text/html": new Blob([html], { type: "text/html" }),
+      "text/plain": new Blob(["Bold Color\nNext\nQuoted words\ncontinued"], { type: "text/plain" }),
+    })]), pastedHtml);
+    await page.locator("#blog-post-markdown").fill("Before replace after");
+    await page.locator("#blog-post-markdown").evaluate(field => {
+      field.focus();
+      field.setSelectionRange(7, 14);
+    });
+    await page.locator("#blog-post-markdown").press("Control+v");
+    assert.match(await page.locator("#blog-post-markdown").inputValue(), /^Before \*\*Bold\*\*/);
+    assert.match(await page.locator("#blog-post-markdown").inputValue(), / after$/);
+    assert.equal(await blogPreview.locator("#blog-markdown-preview strong").textContent(), "Bold");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom em").textContent(), "Color");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview blockquote u").textContent(), "words");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview br").count(), 2);
+    await page.locator("#blog-post-markdown").fill("");
+    await page.locator("#blog-post-markdown").press("Control+Shift+v");
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Bold Color\nNext\nQuoted words\ncontinued");
+    await page.evaluate(async () => navigator.clipboard.writeText("**Existing Markdown**\n<br>\nplain"));
+    await page.locator("#blog-post-markdown").fill("");
+    await page.locator("#blog-post-markdown").press("Control+v");
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "**Existing Markdown**\n<br>\nplain");
+    const rejectedPaste = await page.locator("#blog-post-markdown").evaluate(field => {
+      field.value = "x".repeat(field.maxLength);
+      field.setSelectionRange(0, 0);
+      const data = new DataTransfer();
+      data.setData("text/html", "<b>Extra</b>");
+      const event = new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true });
+      field.dispatchEvent(event);
+      return { prevented: event.defaultPrevented, value: field.value,
+        status: document.querySelector("#blog-admin-status").textContent };
+    });
+    assert.equal(rejectedPaste.prevented, true);
+    assert.equal(rejectedPaste.value, "x".repeat(50000));
+    assert.match(rejectedPaste.status, /50,000-character post limit/);
     await testFormattingShortcuts("#blog-post-markdown", "#blog-markdown-preview",
       [...shortcutCases, { chord: "h", shift: true, before: "==", after: "==", tag: "mark" }]);
     for (const modifier of ["Control", "Meta"]) {
