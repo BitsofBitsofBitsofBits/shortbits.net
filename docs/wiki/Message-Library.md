@@ -85,6 +85,15 @@
   current target. All actions respect the 2,000-character limit and unsaved-change
   protection. Compact style/color buttons and **Font family** / **Font size**
   dropdowns apply safe markup to the selection; these enable markup automatically.
+  While focused in **Message text** or **Corrected text**, use **Ctrl+B** for
+  bold, **Ctrl+I** for italic, **Ctrl+U** for underline, **Ctrl+Shift+X** for
+  strikethrough, or **Ctrl+Shift+C** for inline code. On macOS replace Ctrl
+  with **Command**. Shortcuts use the same toolbar actions: wrap selected text
+  (or insert selected placeholder words), enable inline markup, and leave the
+  draft unsaved. They do not toggle formatting off or affect the other text field.
+  Formatting preserves the text field's scroll position. Links and highlighting
+  shortcuts are blog-only; plain-text authors and other non-formatting fields
+  keep normal browser keyboard behavior.
   Font, size, and color directives can be nested to combine styles on the same text.
   The controls wrap on smaller screens and follow Admin's light/dark appearance.
   The font dropdown is shared with the blog editor and supports 24 choices:

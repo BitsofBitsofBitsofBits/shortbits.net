@@ -51,7 +51,10 @@ named and hex colors, rainbow text, text sizes, and curated font choices. Use
 `{{color:#ff8800|colored text}}` for a custom color; supported hex formats are
 `#RGB`, `#RGBA`, `#RRGGBB`, and `#RRGGBBAA` (including optional transparency).
 Choose **CUSTOM HEX...** in the toolbar's color menu, enter a hex code, and
-apply it to selected text. Invalid codes are displayed literally when typed
+apply it to selected text. Hex codes may also omit the leading `#`, both in
+the custom-color field and in Markdown. Formatting preserves the editor's
+selection and scroll position, including when using custom-color controls.
+Invalid codes are displayed literally when typed
 in Markdown and rejected with an error by the toolbar. A formatting
 toolbar inserts the underlying markup for authors who do not want to write it
 manually. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
@@ -59,6 +62,37 @@ manually. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
 nodes directly instead of injecting HTML, and raw HTML in a post is displayed
 as text. Draft and future-dated posts remain hidden from anonymous clients
 through row-level security.
+
+### Formatting keyboard shortcuts
+
+Shortcuts work while focused in the Blog **Markdown** field or the Message
+Library's **Message text** / **Corrected text** fields. Use **Ctrl** on
+Windows/Linux and **Command** on macOS. The same hints appear beside each
+editor and in toolbar tooltips.
+
+| Shortcut (Ctrl or Command) | Action | Editors |
+| --- | --- | --- |
+| B | Bold | Blog and messages |
+| I | Emphasis / italic | Blog and messages |
+| U | Underline | Blog and messages |
+| Shift+X | Strikethrough | Blog and messages |
+| Shift+C | Inline code | Blog and messages |
+| Shift+H | Highlight | Blog only |
+| K | Insert a link; prompts for an HTTP/HTTPS URL | Blog only |
+
+Select text to wrap it in formatting markup; with no selection, the editor
+inserts and selects placeholder text. These apply the same actions as the
+toolbar, not formatting-off toggles. Message shortcuts automatically enable
+inline markup, respect the 2,000-character limit, and affect only the focused
+message or correction. Formatting retains the editor's selection and scroll
+position. Shortcuts edit the unsaved draft; they do not save or publish it.
+
+Plain-text fields (résumé summaries, excerpts, authors, contact/guestbook
+forms, and JSON/script fields) do not render inline formatting and therefore
+do not intercept these shortcuts. Unsupported combinations and normal
+copy/paste, select-all, undo/redo, and save shortcuts keep their existing
+browser behavior. Shortcuts are inactive in disabled/read-only fields or
+during input-method composition.
 
 ShortBit records remain private to authenticated Admin sessions. Anonymous
 visitors can resolve only an exact enabled, unexpired alias through the

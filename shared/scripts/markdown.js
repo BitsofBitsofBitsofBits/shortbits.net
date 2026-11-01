@@ -20,8 +20,9 @@
   function hexColor(value) {
     if (typeof value !== "string") return null;
     const trimmed = value.trim();
-    return /^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(trimmed)
-      ? trimmed.toLowerCase() : null;
+    const normalized = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+    return /^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(normalized)
+      ? normalized.toLowerCase() : null;
   }
 
   function customFontFamily(value) {
@@ -366,5 +367,22 @@
     return fragment;
   }
 
-  window.BITS_MARKDOWN = Object.freeze({ fonts, hexColor, customFontFamily, render, renderInline, readingTime });
+  function bindFormattingShortcuts(field, actions) {
+    field.addEventListener("keydown", (event) => {
+      if (event.defaultPrevented || event.isComposing || event.repeat || event.altKey
+        || (!event.ctrlKey && !event.metaKey) || field.disabled || field.readOnly) return;
+      const key = `${event.shiftKey ? "shift+" : ""}${event.key.toLowerCase()}`;
+      const format = {
+        b: "bold", i: "italic", u: "underline", k: "link",
+        "shift+x": "strike", "shift+c": "inline-code", "shift+h": "highlight",
+      }[key];
+      if (!format || !Object.hasOwn(actions, format)) return;
+      event.preventDefault();
+      actions[format]();
+    });
+  }
+
+  window.BITS_MARKDOWN = Object.freeze({
+    fonts, hexColor, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
+  });
 })();

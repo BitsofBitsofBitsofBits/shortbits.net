@@ -574,12 +574,13 @@
   }));
   function insertText({ open = "", close = "", variable } = {}) {
     const target = markupTarget;
+    const { scrollTop, scrollLeft } = target;
     const start = target.selectionStart;
     const end = target.selectionEnd;
     const content = variable ? `%${variable}%` : target.value.slice(start, end) || "words";
     if (target.value.length - (end - start) + open.length + content.length + close.length > target.maxLength) {
       report("The message would exceed 2,000 characters. Shorten it before inserting text or formatting.", "error");
-      target.focus();
+      target.focus({ preventScroll: true });
       return;
     }
     target.setRangeText(open + content + close, start, end, "end");
@@ -589,10 +590,20 @@
     }
     dirty = true;
     previewMessage();
-    target.focus();
+    target.focus({ preventScroll: true });
+    target.scrollTop = scrollTop;
+    target.scrollLeft = scrollLeft;
   }
   const delimiters = { bold: ["**", "**"], italic: ["*", "*"], underline: ["++", "++"],
     strike: ["~~", "~~"], code: ["`", "`"], rainbow: ["{{color:rainbow|", "}}"] };
+  for (const field of [text, correctedText]) {
+    window.BITS_MARKDOWN.bindFormattingShortcuts(field,
+      Object.fromEntries(["bold", "italic", "underline", "strike", "inline-code"].map(format => [format, () => {
+        markupTarget = field;
+        const [open, close] = delimiters[format === "inline-code" ? "code" : format];
+        insertText({ open, close });
+      }])));
+  }
   section.querySelectorAll("[data-message-markup]").forEach((button) => button.addEventListener("click", () => {
     const type = button.dataset.messageMarkup;
     const [open, close] = type === "color" ? [`{{color:${get("markup-color").value}|`, "}}"] : delimiters[type];

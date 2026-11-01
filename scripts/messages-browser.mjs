@@ -359,7 +359,8 @@ try {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     let acceptDialogs = true;
-    page.on("dialog", (dialog) => acceptDialogs ? dialog.accept() : dialog.dismiss());
+    let promptAnswer;
+    page.on("dialog", (dialog) => acceptDialogs ? dialog.accept(promptAnswer) : dialog.dismiss());
     const assertNoOverflow = async (label) => {
       const result = await page.evaluate(() => ({
         viewport: innerWidth, width: document.documentElement.scrollWidth,
@@ -670,6 +671,37 @@ try {
     });
     assert.equal(await page.locator("#message-text").evaluate((field) => document.activeElement === field), true);
     await assertNoOverflow(`${width}px inline message editor must not overflow`);
+    const shortcutCases = [
+      { chord: "b", shift: false, before: "**", after: "**", tag: "strong" },
+      { chord: "i", shift: false, before: "*", after: "*", tag: "em" },
+      { chord: "u", shift: false, before: "++", after: "++", tag: "u" },
+      { chord: "x", shift: true, before: "~~", after: "~~", tag: "s" },
+      { chord: "c", shift: true, before: "`", after: "`", tag: "code" },
+    ];
+    async function testFormattingShortcuts(selector, preview, cases, messages = false) {
+      for (const modifier of ["Control", "Meta"]) {
+        for (const scenario of cases) {
+          const field = page.locator(selector);
+          await field.fill("Before selected after");
+          await field.evaluate(node => { node.focus(); node.setSelectionRange(7, 15); });
+          if (messages) await page.locator("#message-markup").uncheck();
+          await field.press(`${modifier}+${scenario.shift ? "Shift+" : ""}${scenario.chord}`);
+          assert.equal(await field.inputValue(), `Before ${scenario.before}selected${scenario.after} after`);
+          assert.equal(await page.locator(`${preview} ${scenario.tag}`).textContent(), "selected");
+          assert.equal(await field.evaluate(node => node.value.slice(node.selectionStart, node.selectionEnd)), "selected");
+          if (messages) assert.equal(await page.locator("#message-markup").isChecked(), true);
+        }
+      }
+      await page.locator(selector).fill("");
+      await page.locator(selector).press("Control+b");
+      assert.equal(await page.locator(selector).inputValue(), messages ? "**words**" : "**text**");
+    }
+    await testFormattingShortcuts("#message-text", "#message-preview", shortcutCases, true);
+    await page.locator("#message-text").fill("x".repeat(2000));
+    await page.locator("#message-text").press("Control+b");
+    assert.equal((await page.locator("#message-text").inputValue()).length, 2000);
+    assert.equal(await page.locator("#message-library-status").getAttribute("data-state"), "error");
+    await page.locator("#message-markup").uncheck();
     await page.locator("#message-text").fill("Hello visitor!");
     await page.locator("#message-text").evaluate((field) => field.setSelectionRange(6, 13));
     await page.locator('[data-message-variable="currentdate"]').click();
@@ -849,6 +881,8 @@ try {
     await page.locator("#message-save").click();
     await page.waitForFunction((template) => window.__messageRows[0].text === template, liveTemplate);
     await page.locator("#message-mistype").check();
+    await testFormattingShortcuts("#message-corrected-text", "#message-corrected-preview", shortcutCases, true);
+    assert.equal(await page.locator("#message-text").inputValue(), liveTemplate);
     await page.locator("#message-corrected-text").fill("Correction");
     await page.locator("#message-corrected-text").evaluate(field => field.select());
     await page.locator("#message-markup-font").selectOption("custom");
@@ -1070,6 +1104,20 @@ try {
     });
     await page.locator("#blog-post-new").click();
     assert.equal(await page.locator("#blog-custom-font").isVisible(), false);
+    await testFormattingShortcuts("#blog-post-markdown", "#blog-markdown-preview",
+      [...shortcutCases, { chord: "h", shift: true, before: "==", after: "==", tag: "mark" }]);
+    for (const modifier of ["Control", "Meta"]) {
+      await page.locator("#blog-post-markdown").fill("Before selected after");
+      await page.locator("#blog-post-markdown").evaluate(field => { field.focus(); field.setSelectionRange(7, 15); });
+      promptAnswer = "https://example.test/shortcut";
+      await page.locator("#blog-post-markdown").press(`${modifier}+k`);
+      promptAnswer = undefined;
+      assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before [selected](https://example.test/shortcut) after");
+      assert.equal(await page.locator("#blog-markdown-preview a").textContent(), "selected");
+    }
+    await page.locator("#blog-post-form textarea[name=excerpt]").fill("Plain text");
+    await page.locator("#blog-post-form textarea[name=excerpt]").press("Control+b");
+    assert.equal(await page.locator("#blog-post-form textarea[name=excerpt]").inputValue(), "Plain text");
     await page.locator("#blog-post-markdown").fill("Blog font sample");
     await page.locator("#blog-post-markdown").evaluate(field => field.select());
     await page.locator("#blog-format-font").selectOption("custom");
@@ -1093,21 +1141,89 @@ try {
     await page.locator("#blog-custom-color-value").fill("#ggg");
     await page.locator("#blog-custom-color-apply").click();
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before colored text after");
-    assert.match(await page.locator("#blog-custom-color-status").textContent(), /Enter a hex color/);
-    await page.locator("#blog-custom-color-value").fill("#F80");
-    await page.locator("#blog-custom-color-value").press("Enter");
+    assert.match(await page.locator("#blog-custom-color-status").textContent(), /optionally prefixed with #/);
+    await page.locator("#blog-custom-color-value").fill("F80");
+    await page.locator("#blog-custom-color-apply").click();
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before {{color:#f80|colored text}} after");
     assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "colored text");
     assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(255, 136, 0)");
     await assertNoOverflow(`${width}px custom blog color controls`);
+    assert.equal(await page.locator("#blog-custom-color").isVisible(), true);
     await page.locator("#blog-custom-color-cancel").click();
     assert.equal(await page.locator("#blog-custom-color").isVisible(), false);
     assert.equal(await page.locator("#blog-post-markdown").evaluate(field => document.activeElement === field), true);
+    await page.locator("#blog-post-markdown").fill("Before editable text after");
+    await page.locator("#blog-post-markdown").evaluate(field => { field.focus(); field.setSelectionRange(7, 20); });
+    await page.locator("#blog-format-color").selectOption("blue");
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before {{color:blue|editable text}} after");
+    await page.locator("#blog-format-color").selectOption("custom");
+    await page.locator("#blog-custom-color-value").fill("5539CC");
+    await page.locator("#blog-custom-color-apply").click();
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before {{color:blue|{{color:#5539cc|editable text}}}} after");
+    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
+    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(85, 57, 204)");
     await page.locator("#blog-format-color").selectOption("custom");
     await page.evaluate(() => window.BITS_ADMIN_SHELL.showSubsection("blog", "posts"));
     await page.locator("#blog-post-new").click();
     assert.equal(await page.locator("#blog-custom-color").isVisible(), false);
     assert.equal(await page.locator("#blog-custom-color-value").inputValue(), "");
+    const longPost = Array.from({ length: 150 }, (_, index) => `Paragraph ${index}: selected words and more text.`).join("\n\n");
+    const scrollCases = [
+      { selector: '[data-blog-format="bold"]', kind: "button", expected: "**selected words**" },
+      { selector: "#blog-format-color", kind: "select", value: "blue", expected: "{{color:blue|selected words}}" },
+      { selector: "#blog-format-font", kind: "select", value: "serif", expected: "{{font:serif|selected words}}" },
+      { selector: "#blog-format-size", kind: "select", value: "large", expected: "{{size:large|selected words}}" },
+      { selector: "#blog-format-block", kind: "select", value: "quote", expected: "> Paragraph 30:" },
+      { selector: '[data-blog-format="table"]', kind: "button", expected: "| COLUMN 1 | COLUMN 2 |" },
+      { selector: "#blog-custom-color-apply", kind: "custom", expected: "{{color:#5539cc|selected words}}" },
+      { selector: "#blog-post-markdown", kind: "shortcut", value: "b", expected: "**selected words**" },
+    ];
+    for (const scenario of scrollCases) {
+      await page.locator("#blog-post-markdown").fill(longPost);
+      const scroll = await page.evaluate(async ({ selector, kind, value }) => {
+        const field = document.querySelector("#blog-post-markdown");
+        const start = field.value.indexOf("selected words", field.value.indexOf("Paragraph 30:"));
+        field.focus({ preventScroll: true });
+        field.setSelectionRange(start, start + "selected words".length);
+        field.dispatchEvent(new Event("select"));
+        if (kind === "custom") {
+          document.querySelector("#blog-format-color").value = "custom";
+          document.querySelector("#blog-format-color").dispatchEvent(new Event("change"));
+          document.querySelector("#blog-custom-color-value").value = "5539CC";
+        }
+        const control = document.querySelector(selector);
+        control.focus({ preventScroll: true });
+        await new Promise(requestAnimationFrame);
+        field.scrollTop = Math.min(450, field.scrollHeight - field.clientHeight);
+        const ancestors = [];
+        for (let node = field.parentElement; node; node = node.parentElement) {
+          ancestors.push(node);
+        }
+        const before = { top: field.scrollTop, left: field.scrollLeft,
+          ancestors: ancestors.map(node => ({ top: node.scrollTop, left: node.scrollLeft })) };
+        if (kind === "shortcut") {
+          control.dispatchEvent(new KeyboardEvent("keydown", { key: value, ctrlKey: true, cancelable: true }));
+        } else if (kind === "select") {
+          control.value = value;
+          control.dispatchEvent(new Event("change"));
+        } else {
+          control.click();
+        }
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        return { before, after: { top: field.scrollTop, left: field.scrollLeft,
+          ancestors: ancestors.map(node => ({ top: node.scrollTop, left: node.scrollLeft })) },
+          text: field.value, selected: field.value.slice(field.selectionStart, field.selectionEnd),
+          focused: document.activeElement === field };
+      }, scenario);
+      assert.ok(scroll.before.top > 0, `${width}px ${scenario.selector}: genuinely scrolled field`);
+      assert.deepEqual(scroll.after, scroll.before, `${width}px ${scenario.selector}: formatting preserves field and page scroll`);
+      assert.ok(scroll.text.includes(scenario.expected), `${width}px ${scenario.selector}: markup applied`);
+      assert.equal(scroll.focused, true);
+      if (scenario.selector !== "#blog-format-block" && scenario.selector !== '[data-blog-format="table"]') {
+        assert.equal(scroll.selected, "selected words");
+      }
+    }
     assert.deepEqual(errors, []);
     console.log(`PASS ${width}px Admin: all-module subsections, form preservation/validation, inline/add editors and discard protection, page-only bulk CRUD/cancellation/errors/concurrency, pools, timezone, markup/mistype, accessibility`);
     await context.close();

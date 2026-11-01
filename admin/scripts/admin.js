@@ -623,6 +623,7 @@ const blogPostNew = document.querySelector("#blog-post-new");
 const blogAdminStatus = document.querySelector("#blog-admin-status");
 const blogAdminList = document.querySelector("#blog-admin-list");
 const blogPostMarkdown = document.querySelector("#blog-post-markdown");
+let blogPostMarkdownSelection = null;
 const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
 const blogFormatBlock = document.querySelector("#blog-format-block");
 const blogFormatColor = document.querySelector("#blog-format-color");
@@ -2610,15 +2611,27 @@ function toDatetimeLocal(value) {
 }
 
 function updateBlogMarkdown(value, selectionStart, selectionEnd = selectionStart) {
+  const { scrollTop, scrollLeft } = blogPostMarkdown;
   blogPostMarkdown.value = value;
-  blogPostMarkdown.focus();
   blogPostMarkdown.setSelectionRange(selectionStart, selectionEnd);
+  blogPostMarkdown.focus({ preventScroll: true });
+  blogPostMarkdownSelection = { start: selectionStart, end: selectionEnd };
   blogPostMarkdown.dispatchEvent(new Event("input", { bubbles: true }));
+  blogPostMarkdown.scrollTop = scrollTop;
+  blogPostMarkdown.scrollLeft = scrollLeft;
 }
 
-function wrapBlogSelection(before, after = before, placeholder = "text") {
-  const start = blogPostMarkdown.selectionStart;
-  const end = blogPostMarkdown.selectionEnd;
+function rememberBlogMarkdownSelection() {
+  blogPostMarkdownSelection = {
+    start: blogPostMarkdown.selectionStart,
+    end: blogPostMarkdown.selectionEnd,
+  };
+}
+
+function wrapBlogSelection(before, after = before, placeholder = "text", selection = null) {
+  const { start, end } = selection ?? (document.activeElement === blogPostMarkdown
+    ? { start: blogPostMarkdown.selectionStart, end: blogPostMarkdown.selectionEnd }
+    : blogPostMarkdownSelection ?? { start: blogPostMarkdown.selectionStart, end: blogPostMarkdown.selectionEnd });
   const selected = blogPostMarkdown.value.slice(start, end) || placeholder;
   const replacement = `${before}${selected}${after}`;
   const value = `${blogPostMarkdown.value.slice(0, start)}${replacement}${blogPostMarkdown.value.slice(end)}`;
@@ -2787,6 +2800,7 @@ function renderBlogPreview() {
 
 function resetBlogEditor() {
   blogPostForm.reset();
+  blogPostMarkdownSelection = null;
   blogCustomColor.hidden = true;
   blogCustomColorStatus.textContent = "";
   document.querySelector("#blog-custom-font").hidden = true;
@@ -2799,6 +2813,7 @@ function resetBlogEditor() {
 }
 
 function selectBlogPost(post) {
+  blogPostMarkdownSelection = null;
   blogCustomColor.hidden = true;
   blogCustomColorValue.value = "";
   blogCustomColorStatus.textContent = "";
@@ -2976,6 +2991,12 @@ try {
 }
 
 if (adminClient) {
+  window.BITS_MARKDOWN.bindFormattingShortcuts(blogPostMarkdown,
+    Object.fromEntries(["bold", "italic", "underline", "strike", "inline-code", "highlight", "link"]
+      .map(format => [format, () => applyBlogFormat(format)])));
+  for (const eventName of ["blur", "input", "select", "keyup", "mouseup"]) {
+    blogPostMarkdown.addEventListener(eventName, rememberBlogMarkdownSelection);
+  }
   socialLinksForm.addEventListener("submit", async event => {
     event.preventDefault();
     const editor = repeatableEditors.socialLinks;
@@ -3049,12 +3070,14 @@ if (adminClient) {
   });
   blogFormatColor.addEventListener("change", () => {
     if (blogFormatColor.value === "custom") {
+      rememberBlogMarkdownSelection();
       blogCustomColor.hidden = false;
       blogCustomColorStatus.textContent = "";
       blogCustomColorValue.focus();
       blogFormatColor.value = "";
     } else if (blogFormatColor.value) {
       blogCustomColor.hidden = true;
+      rememberBlogMarkdownSelection();
       wrapBlogSelection(
         `{{color:${blogFormatColor.value}|`,
         "}}",
@@ -3065,12 +3088,12 @@ if (adminClient) {
   document.querySelector("#blog-custom-color-apply").addEventListener("click", () => {
     const color = window.BITS_MARKDOWN.hexColor(blogCustomColorValue.value);
     if (!color) {
-      blogCustomColorStatus.textContent = "Enter a hex color using #RGB, #RGBA, #RRGGBB, or #RRGGBBAA.";
+      blogCustomColorStatus.textContent = "Enter RGB, RGBA, RRGGBB, or RRGGBBAA, optionally prefixed with #.";
       blogCustomColorValue.focus();
       return;
     }
     blogCustomColorStatus.textContent = "";
-    wrapBlogSelection(`{{color:${color}|`, "}}");
+    wrapBlogSelection(`{{color:${color}|`, "}}", "text", blogPostMarkdownSelection);
   });
   document.querySelector("#blog-custom-color-cancel").addEventListener("click", () => {
     blogCustomColor.hidden = true;

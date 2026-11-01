@@ -36,6 +36,53 @@ test("inline message formatting is opt-in, preserving all existing literal punct
   assert.ok(target.textContent.includes("<script>alert(1)</script>"));
 });
 
+test("formatting shortcuts match Ctrl/Command chords only in enabled editors with supported actions", () => {
+  const { document, window } = setup();
+  const field = document.createElement("textarea");
+  const actions = [];
+  const chords = [
+    ["b", false, "bold"], ["i", false, "italic"], ["u", false, "underline"],
+    ["k", false, "link"], ["X", true, "strike"], ["C", true, "inline-code"], ["H", true, "highlight"],
+  ];
+  window.BITS_MARKDOWN.bindFormattingShortcuts(field,
+    Object.fromEntries(chords.map(([, , format]) => [format, () => actions.push(format)])));
+  function press(overrides = {}) {
+    const event = new document.defaultView.Event("keydown", { cancelable: true });
+    Object.assign(event, { key: "b", ctrlKey: true, metaKey: false, shiftKey: false,
+      altKey: false, isComposing: false, repeat: false }, overrides);
+    field.dispatchEvent(event);
+    return event.defaultPrevented;
+  }
+  for (const modifier of ["ctrlKey", "metaKey"]) {
+    for (const [key, shiftKey, format] of chords) {
+      assert.equal(press({ key, shiftKey, ctrlKey: false, [modifier]: true }), true);
+      assert.equal(actions.at(-1), format);
+    }
+  }
+  const count = actions.length;
+  for (const overrides of [{ ctrlKey: false }, { altKey: true }, { isComposing: true },
+    { repeat: true }, { shiftKey: true }, { key: "s" }, { key: "z" }, { key: "c" }, { key: "v" }]) {
+    assert.equal(press(overrides), false);
+  }
+  for (const property of ["disabled", "readOnly"]) {
+    field[property] = true;
+    assert.equal(press(), false);
+    field[property] = false;
+  }
+  assert.equal(actions.length, count);
+  const handled = new document.defaultView.Event("keydown", { cancelable: true });
+  Object.assign(handled, { key: "b", ctrlKey: true });
+  handled.preventDefault();
+  field.dispatchEvent(handled);
+  assert.equal(actions.length, count, "Already handled chords must not be applied twice");
+  const restricted = document.createElement("textarea");
+  window.BITS_MARKDOWN.bindFormattingShortcuts(restricted, { bold: () => actions.push("restricted") });
+  const unsupported = new document.defaultView.Event("keydown", { cancelable: true });
+  Object.assign(unsupported, { key: "k", ctrlKey: true });
+  restricted.dispatchEvent(unsupported);
+  assert.equal(unsupported.defaultPrevented, false);
+});
+
 test("blog hex colors validate complete codes and preserve nested markup safely", () => {
   const { document, window } = setup();
   for (const color of ["#abc", "#AbCd", "#A1B2C3", "#A1B2C380"]) {
@@ -48,7 +95,11 @@ test("blog hex colors validate complete codes and preserve nested markup safely"
     assert.equal(span.querySelector(".blog-text-size-large").textContent, "large");
     assert.equal(span.getAttribute("style"), `color:${color.toLowerCase()}`);
   }
-  for (const color of ["", "#", "#ab", "#abcde", "#abcdefg", "#123456789", "123456",
+  for (const color of ["abc", "AbCd", "A1B2C3", "A1B2C380"]) {
+    assert.equal(window.BITS_MARKDOWN.hexColor(color), `#${color.toLowerCase()}`);
+  }
+  for (const color of ["", "#", "#ab", "#abcde", "#abcdefg", "#123456789",
+    "12g456",
     "#ggg", "#fff;color:red", "#fff!important", "rgb(1,2,3)", "url(https://example.test)",
     '#fff" onmouseover="evil']) {
     assert.equal(window.BITS_MARKDOWN.hexColor(color), null, color);
