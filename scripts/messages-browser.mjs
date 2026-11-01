@@ -1140,6 +1140,13 @@ try {
     }));
     assert.ok(Math.abs(blogWidth.width - Math.min(1280, blogWidth.available - 32)) <= 2,
       "Default blog preview uses the wider responsive shell");
+    await page.locator("#blog-post-markdown").fill("Body text fills the panel.\n\n> First line\n> Second line\n>\n> Fourth line");
+    const bodyWidth = await blogPreview.locator("#blog-markdown-preview > p").evaluate(paragraph => ({
+      width: paragraph.getBoundingClientRect().width,
+      available: paragraph.parentElement.getBoundingClientRect().width,
+    }));
+    assert.ok(Math.abs(bodyWidth.width - bodyWidth.available) <= 2, "Article paragraphs fill the entire content width");
+    assert.equal(await blogPreview.locator("blockquote br").count(), 3);
     await page.locator("#blog-post-markdown").fill("Before [a linked phrase that is deliberately long enough to wrap across multiple lines in a narrow paragraph](https://example.test/inline) after.");
     const inlineLink = await blogPreview.locator("#blog-markdown-preview a").evaluate(link => {
       link.parentElement.style.width = "180px";

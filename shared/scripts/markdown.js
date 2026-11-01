@@ -290,7 +290,10 @@
         }
         const quote = document.createElement("blockquote");
         const paragraph = document.createElement("p");
-        appendInline(paragraph, quoteLines.join(" "));
+        quoteLines.forEach((quoteLine, lineIndex) => {
+          if (lineIndex) paragraph.append(document.createElement("br"));
+          appendInline(paragraph, quoteLine);
+        });
         quote.append(paragraph);
         fragment.append(quote);
         continue;

@@ -82,6 +82,12 @@ test("static articles retain imported validated font formatting", () => {
   assert.match(html, /Copied font/);
 });
 
+test("quote lines and blank quote lines retain breaks in static articles", () => {
+  const html = renderer.render("> First **line**\n> Second\n>\n> Fourth\n\nOutside");
+  assert.match(html, /<blockquote><p>First <strong>line<\/strong><br>Second<br><br>Fourth<\/p><\/blockquote>/);
+  assert.match(html, /<p>Outside<\/p>/);
+});
+
 test("RSS, static archive and sitemap use only published static URLs", () => {
   const feed = renderFeed(posts);
   assert.match(feed, /<rss version="2.0"/);

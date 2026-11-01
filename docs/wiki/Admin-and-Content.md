@@ -35,6 +35,9 @@
   The default public blog layout uses up to 1,280px of horizontal space, with
   16px outer gutters on smaller screens; individual theme layouts retain their
   own sizing.
+  Article body text fills the available panel width. Consecutive lines beginning
+  with `> ` keep their line breaks within one quote; use a bare `>` line for a
+  blank line inside the quote.
   Post bodies support up to 200,000 characters, including Markdown formatting.
   Apply `20261101120000_increase_blog_post_limit.sql` to raise the database limit
   alongside the editor limit.

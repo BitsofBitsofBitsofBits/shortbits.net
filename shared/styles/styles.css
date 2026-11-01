@@ -5665,7 +5665,7 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 }
 
 .blog-markdown > * {
- max-width: 72ch;
+ max-width: 100%;
 }
 
 .blog-markdown h2,
