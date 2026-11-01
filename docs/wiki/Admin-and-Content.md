@@ -32,6 +32,9 @@
   discarding it. Use `<br>` for an explicit line break; other raw HTML stays
   literal. Plain-text paste bypasses conversion.
   Links flow inline with surrounding text and wrap across lines when needed.
+  The default public blog layout uses up to 1,280px of horizontal space, with
+  16px outer gutters on smaller screens; individual theme layouts retain their
+  own sizing.
   Post bodies support up to 200,000 characters, including Markdown formatting.
   Apply `20261101120000_increase_blog_post_limit.sql` to raise the database limit
   alongside the editor limit.

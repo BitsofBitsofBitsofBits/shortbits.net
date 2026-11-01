@@ -1134,6 +1134,12 @@ try {
     const blogPreview = page.frameLocator("#blog-preview-frame");
     assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), initialPreviewPreferences, "Loading preview does not modify saved preferences");
     assert.equal(await blogPreview.locator("#blog-markdown-preview strong").textContent(), "body");
+    const blogWidth = await blogPreview.locator(".blog-shell").evaluate(shell => ({
+      width: shell.getBoundingClientRect().width,
+      available: document.documentElement.clientWidth,
+    }));
+    assert.ok(Math.abs(blogWidth.width - Math.min(1280, blogWidth.available - 32)) <= 2,
+      "Default blog preview uses the wider responsive shell");
     await page.locator("#blog-post-markdown").fill("Before [a linked phrase that is deliberately long enough to wrap across multiple lines in a narrow paragraph](https://example.test/inline) after.");
     const inlineLink = await blogPreview.locator("#blog-markdown-preview a").evaluate(link => {
       link.parentElement.style.width = "180px";
