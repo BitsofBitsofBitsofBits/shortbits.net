@@ -22,6 +22,7 @@ function onDate(year, month, day, withBaseMessages = true) {
   const date = new Date(year, month - 1, day, 12);
   const context = {
     window: {},
+    document: { documentElement: { dataset: {} } },
     localStorage: { getItem: () => null },
     Date: class extends Date {
       constructor(...args) { super(...(args.length ? args : [date.getTime()])); }
