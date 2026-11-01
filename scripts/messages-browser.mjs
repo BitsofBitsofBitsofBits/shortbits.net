@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
@@ -300,8 +300,19 @@ try {
   }
   for (const width of [1440, 390]) {
     const context = await browser.newContext({ viewport: { width, height: 1000 } });
-    await context.route("**/*", (route) => {
+    await context.route("**/*", async (route) => {
       const url = new URL(route.request().url());
+      if (url.origin === server.origin && ["/admin/", "/admin/blog-preview.html"].includes(url.pathname)) {
+        const response = await route.fetch();
+        return route.fulfill({
+          response,
+          headers: {
+            ...response.headers(),
+            "x-frame-options": "DENY",
+            "content-security-policy": "default-src 'self'; frame-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://test.example; font-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          },
+        });
+      }
       if (url.pathname === "/shared/scripts/supabase-config.js") return route.fulfill({
         contentType: "text/javascript",
         body: `
@@ -556,7 +567,7 @@ try {
     await page.evaluate((row) => window.__messageRows.push(row), entry(2, "messages", "Regular message 2"));
     await page.locator("#message-reload").click();
     await page.waitForFunction(() => document.querySelectorAll("[data-message-select]").length === 25 && !document.querySelector("#message-new").disabled);
-    await page.addScriptTag({ path: axePath });
+    await page.evaluate(await readFile(axePath, "utf8"));
     for (const route of ["inbox", "guestbook", "resume", "now", "changelog", "messages", "blog", "games", "creators", "hardware", "playlists", "songs", "arcade", "pronouns", "shortbits", "backups"]) {
       await page.evaluate((route) => window.BITS_ADMIN_SHELL.navigate(route), route);
       await page.waitForFunction((route) => window.BITS_ADMIN_SHELL.route === route, route);
@@ -687,7 +698,9 @@ try {
           if (messages) await page.locator("#message-markup").uncheck();
           await field.press(`${modifier}+${scenario.shift ? "Shift+" : ""}${scenario.chord}`);
           assert.equal(await field.inputValue(), `Before ${scenario.before}selected${scenario.after} after`);
-          assert.equal(await page.locator(`${preview} ${scenario.tag}`).textContent(), "selected");
+          const rendered = messages ? page.locator(`${preview} ${scenario.tag}`)
+            : page.frameLocator("#blog-preview-frame").locator(`${preview} ${scenario.tag}`);
+          assert.equal(await rendered.textContent(), "selected");
           assert.equal(await field.evaluate(node => node.value.slice(node.selectionStart, node.selectionEnd)), "selected");
           if (messages) assert.equal(await page.locator("#message-markup").isChecked(), true);
         }
@@ -1104,6 +1117,23 @@ try {
     });
     await page.locator("#blog-post-new").click();
     assert.equal(await page.locator("#blog-custom-font").isVisible(), false);
+    assert.equal(await page.locator("#blog-preview-panel").isVisible(), false);
+    assert.equal(await page.locator("#blog-preview-frame").getAttribute("src"), null);
+    assert.equal(await page.locator("#blog-preview-frame").getAttribute("srcdoc"), null);
+    const initialPreviewPreferences = await page.evaluate(() => ({ ...localStorage }));
+    await page.locator("#blog-post-markdown").fill("Hidden draft **body**");
+    await context.route("**/admin/blog-preview.html", route => route.fulfill({
+      status: 503, body: "Temporarily unavailable",
+    }), { times: 1 });
+    await page.locator("#blog-preview-toggle").click();
+    await page.waitForFunction(() => document.querySelector("#blog-preview-status").textContent.includes("Preview could not load"));
+    assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Hidden draft **body**", "Preview load errors preserve the draft");
+    await page.locator("#blog-preview-toggle").click();
+    await page.locator("#blog-preview-toggle").click();
+    await page.waitForFunction(() => document.querySelector("#blog-preview-theme").options.length > 0);
+    const blogPreview = page.frameLocator("#blog-preview-frame");
+    assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), initialPreviewPreferences, "Loading preview does not modify saved preferences");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview strong").textContent(), "body");
     await testFormattingShortcuts("#blog-post-markdown", "#blog-markdown-preview",
       [...shortcutCases, { chord: "h", shift: true, before: "==", after: "==", tag: "mark" }]);
     for (const modifier of ["Control", "Meta"]) {
@@ -1113,7 +1143,7 @@ try {
       await page.locator("#blog-post-markdown").press(`${modifier}+k`);
       promptAnswer = undefined;
       assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before [selected](https://example.test/shortcut) after");
-      assert.equal(await page.locator("#blog-markdown-preview a").textContent(), "selected");
+      assert.equal(await blogPreview.locator("#blog-markdown-preview a").textContent(), "selected");
     }
     await page.locator("#blog-post-form textarea[name=excerpt]").fill("Plain text");
     await page.locator("#blog-post-form textarea[name=excerpt]").press("Control+b");
@@ -1128,8 +1158,8 @@ try {
     await page.locator("#blog-custom-font-family").fill("Aptos Display, Arial, sans-serif");
     await page.locator("#blog-custom-font-family").press("Enter");
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), `{{font:custom:${customFamily}|Blog font sample}}`);
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-font-custom").textContent(), "Blog font sample");
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-font-custom").evaluate(element => element.style.fontFamily), serializedCustomFamily);
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-font-custom").textContent(), "Blog font sample");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-font-custom").evaluate(element => element.style.fontFamily), serializedCustomFamily);
     await assertNoOverflow(`${width}px custom blog font controls`);
     await page.locator("#blog-custom-font-cancel").click();
     assert.equal(await page.locator("#blog-custom-font").isVisible(), false);
@@ -1145,8 +1175,8 @@ try {
     await page.locator("#blog-custom-color-value").fill("F80");
     await page.locator("#blog-custom-color-apply").click();
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before {{color:#f80|colored text}} after");
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "colored text");
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(255, 136, 0)");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "colored text");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(255, 136, 0)");
     await assertNoOverflow(`${width}px custom blog color controls`);
     assert.equal(await page.locator("#blog-custom-color").isVisible(), true);
     await page.locator("#blog-custom-color-cancel").click();
@@ -1160,14 +1190,95 @@ try {
     await page.locator("#blog-custom-color-value").fill("5539CC");
     await page.locator("#blog-custom-color-apply").click();
     assert.equal(await page.locator("#blog-post-markdown").inputValue(), "Before {{color:blue|{{color:#5539cc|editable text}}}} after");
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
-    assert.equal(await page.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(85, 57, 204)");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(85, 57, 204)");
+    const preferencesBefore = await page.evaluate(() => ({ ...localStorage }));
+    const adminThemeBefore = await page.locator("html").getAttribute("data-interface-theme");
+    await page.locator("#blog-post-form input[name=title]").fill("Unsaved preview title");
+    await page.locator("#blog-post-form textarea[name=excerpt]").fill("Unsaved excerpt");
+    assert.equal(await blogPreview.locator("#blog-preview-title").textContent(), "Unsaved preview title");
+    assert.equal(await blogPreview.locator("#blog-preview-excerpt").textContent(), "Unsaved excerpt");
+    const previewThemes = await page.locator("#blog-preview-theme option").evaluateAll(options => options.map(option => option.value));
+    assert.ok(previewThemes.includes("christmas"), "Out-of-season themes are available in preview");
+    for (const theme of previewThemes) {
+      await page.locator("#blog-preview-theme").selectOption(theme);
+      assert.equal(await blogPreview.locator("html").getAttribute("data-interface-theme"), theme);
+      assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
+      const variants = await page.locator("#blog-preview-variant option").evaluateAll(options => options.map(option => option.value).filter(Boolean));
+      for (const variant of variants) {
+        await page.locator("#blog-preview-variant").selectOption(variant);
+        assert.equal(await blogPreview.locator("html").getAttribute("data-theme-variant"), variant);
+      }
+      const themeStyles = await blogPreview.locator("html").evaluate(root => {
+        const theme = window.BITS_THEME_PREFERENCE.getTheme(root.dataset.interfaceTheme);
+        const stylesheet = document.querySelector("#bits-theme-stylesheet");
+        return { requiresStyles: Boolean(theme.stylesheet || theme.experimental),
+          stylesheet: stylesheet?.getAttribute("href") ?? "",
+          id: typeof theme.stylesheet === "string" ? theme.stylesheet : theme.id };
+      });
+      assert.equal(Boolean(themeStyles.stylesheet), themeStyles.requiresStyles);
+      if (themeStyles.requiresStyles) assert.ok(themeStyles.stylesheet.includes(`/layouts/${themeStyles.id}.css`));
+    }
+    await page.locator("#blog-preview-theme").selectOption("aero-glass");
+    await page.locator("#blog-preview-variant").selectOption("rose");
+    await page.locator("#blog-preview-scheme").selectOption("light");
+    assert.equal(await blogPreview.locator("html").getAttribute("data-theme-variant"), "rose");
+    assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "light");
+    await page.locator("#blog-preview-theme").selectOption("terminal");
+    assert.equal(await page.locator("#blog-preview-scheme").isDisabled(), true);
+    assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "dark");
+    await page.locator("#blog-preview-theme").selectOption("html");
+    assert.equal(await page.locator("#blog-preview-variant").isDisabled(), true);
+    assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "light");
+    assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), preferencesBefore, "Preview does not persist appearance choices");
+    assert.equal(await page.locator("html").getAttribute("data-interface-theme"), adminThemeBefore);
+    assert.equal(await blogPreview.locator("#bits-layout-runtime").count(), 0, "Preview never loads experimental desktop runtimes");
+    await page.locator("#blog-preview-toggle").click();
+    assert.equal(await page.locator("#blog-preview-panel").isVisible(), false);
+    const hiddenPreviewText = await blogPreview.locator("#blog-markdown-preview").textContent();
+    await page.locator("#blog-post-markdown").fill("Changed while hidden");
+    assert.equal(await blogPreview.locator("#blog-markdown-preview").textContent(), hiddenPreviewText);
+    await page.locator("#blog-preview-toggle").click();
+    assert.equal(await blogPreview.locator("#blog-markdown-preview").textContent(), "Changed while hidden");
+    await assertNoOverflow(`${width}px blog themed preview`);
+    const blogViolations = await page.evaluate(async () => (await axe.run(document.querySelector("#blog-post-form"), {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+    })).violations.map(violation => ({ id: violation.id, targets: violation.nodes.map(node => node.target) })));
+    assert.deepEqual(blogViolations, [], `${width}px blog editor accessibility`);
     await page.locator("#blog-format-color").selectOption("custom");
     await page.evaluate(() => window.BITS_ADMIN_SHELL.showSubsection("blog", "posts"));
     await page.locator("#blog-post-new").click();
     assert.equal(await page.locator("#blog-custom-color").isVisible(), false);
     assert.equal(await page.locator("#blog-custom-color-value").inputValue(), "");
+    assert.equal(await page.locator("#blog-preview-panel").isVisible(), false);
     const longPost = Array.from({ length: 150 }, (_, index) => `Paragraph ${index}: selected words and more text.`).join("\n\n");
+    const editorGeometry = await page.locator("#blog-post-markdown").evaluate(field => {
+      const workspace = field.closest(".blog-admin-workspace");
+      return { width: field.getBoundingClientRect().width,
+        workspaceWidth: workspace.getBoundingClientRect().width,
+        resize: getComputedStyle(field).resize,
+        toolbarParent: workspace.querySelector(".blog-format-toolbar").parentElement === workspace };
+    });
+    assert.ok(Math.abs(editorGeometry.width - editorGeometry.workspaceWidth) <= 2, "Textarea takes the full editor width");
+    assert.equal(editorGeometry.resize, "vertical");
+    assert.equal(editorGeometry.toolbarParent, true);
+    await page.locator("#blog-post-markdown").evaluate(field => { field.style.height = "1600px"; });
+    await page.locator(".blog-format-toolbar").evaluate(async toolbar => {
+      toolbar.scrollIntoView({ block: "start" });
+      window.scrollBy(0, 160);
+      await new Promise(requestAnimationFrame);
+    });
+    const sticky = await page.locator(".blog-format-toolbar").evaluate(toolbar => ({
+      top: toolbar.getBoundingClientRect().top, bottom: toolbar.getBoundingClientRect().bottom,
+      position: getComputedStyle(toolbar).position,
+      suiteBottom: document.querySelector(".ac-suitebar").getBoundingClientRect().bottom,
+      editorBottom: document.querySelector("#blog-post-markdown").getBoundingClientRect().bottom,
+      viewport: innerHeight,
+    }));
+    assert.equal(sticky.position, "sticky");
+    assert.ok(Math.abs(sticky.top - sticky.suiteBottom) <= 2, `Toolbar remains below suite bar: ${JSON.stringify(sticky)}`);
+    assert.ok(sticky.bottom < sticky.viewport && sticky.editorBottom > sticky.viewport, "Toolbar visible while scrolling a tall editor");
+    await page.locator("#blog-post-markdown").evaluate(field => { field.style.removeProperty("height"); });
     const scrollCases = [
       { selector: '[data-blog-format="bold"]', kind: "button", expected: "**selected words**" },
       { selector: "#blog-format-color", kind: "select", value: "blue", expected: "{{color:blue|selected words}}" },

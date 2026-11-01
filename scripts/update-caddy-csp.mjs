@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 
 const turnstileOrigin = "https://challenges.cloudflare.com";
 const approvedFrameSources = [
+  "'self'",
   "https://www.youtube-nocookie.com",
   "https://player.vimeo.com",
   "https://open.spotify.com",

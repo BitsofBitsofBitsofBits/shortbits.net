@@ -1,3 +1,4 @@
+const isThemePreview = document.documentElement?.dataset.themePreview === "true";
 const baseInterfaceThemes = [
   { id: "default", name: "DEFAULT", darkColor: "#070b0f", lightColor: "#edf3ef" },
   { id: "html", name: "HTML", darkColor: "#ffffff", lightColor: "#ffffff", schemes: ["light"], stylesheet: true },
@@ -550,7 +551,7 @@ function getSeasonalThemeState(date = new Date()) {
 }
 
 const seasonalThemeState = getSeasonalThemeState();
-const availableSeasonalThemes = themeDebugEnabled
+const availableSeasonalThemes = themeDebugEnabled || isThemePreview
   ? Object.values(seasonalInterfaceThemes)
   : seasonalThemeState.availableThemeIds.map(
     (themeId) => seasonalInterfaceThemes[themeId],
@@ -722,15 +723,16 @@ function resolveColorScheme(theme) {
   return theme?.nativeScheme === "light" ? "light" : "dark";
 }
 
-function applyThemeToDocument(themeId) {
+function applyThemeToDocument(themeId, options = {}) {
   const theme = window.BITS_INTERFACE_THEMES.find((entry) => entry.id === themeId)
     ?? window.BITS_INTERFACE_THEMES[0];
-  const scheme = resolveColorScheme(theme);
+  const scheme = getLockedScheme(theme)
+    || (["dark", "light"].includes(options.scheme) ? options.scheme : resolveColorScheme(theme));
   const root = document.documentElement;
   root.dataset.colorScheme = scheme;
   root.dataset.interfaceTheme = theme.id;
   root.classList.toggle("is-rgb-mode", theme.id === "rgb");
-  const variant = getThemeVariant(theme);
+  const variant = theme.variants?.find(entry => entry.id === options.variant) ?? getThemeVariant(theme);
   if (variant) {
     root.dataset.themeVariant = variant.id;
   } else {
@@ -967,6 +969,7 @@ function buildThemeOptions(formatLabel = (label) => label) {
 }
 
 function getPageId() {
+  if (isThemePreview) return "post";
   const path = window.location?.pathname ?? "/";
   if (path === "/" || path === "/index.html") {
     return "chooser";
@@ -1032,7 +1035,7 @@ function syncThemeAssets(theme) {
       }, { once: true });
     }
   }
-  if (theme.experimental && root.dataset.page !== "nowplaying" && !document.getElementById("bits-layout-runtime")) {
+  if (!isThemePreview && theme.experimental && root.dataset.page !== "nowplaying" && !document.getElementById("bits-layout-runtime")) {
     const runtime = document.createElement("script");
     runtime.src = `/shared/scripts/layouts/runtime.js?v=${layoutAssetVersion}`;
     runtime.id = "bits-layout-runtime";
@@ -1066,7 +1069,7 @@ window.BITS_THEME_PREFERENCE = {
   pickRandom: pickRandomThemeId,
 };
 
-if (typeof window.setTimeout === "function" && window.location?.reload) {
+if (!isThemePreview && typeof window.setTimeout === "function" && window.location?.reload) {
   const now = new Date();
   const nextDay = new Date(
     now.getFullYear(),
@@ -1108,12 +1111,14 @@ if (document.documentElement.dataset.page === "online") {
   document.documentElement.classList.toggle("is-performance-lite", initialPerformanceLite);
   document.documentElement.dataset.performanceProfile = initialPerformanceLite ? "lite" : "full";
 }
-if (
+if (!isThemePreview && (
   legacyRgbMode
   || !storedInterfaceThemeId
   || !baseInterfaceThemes.some((theme) => theme.id === storedInterfaceThemeId)
-) {
+)) {
   localStorage.setItem("bits-interface-theme", savedInterfaceTheme.id);
 }
-localStorage.removeItem("bits-accent");
-localStorage.removeItem("bits-rgb-mode");
+if (!isThemePreview) {
+  localStorage.removeItem("bits-accent");
+  localStorage.removeItem("bits-rgb-mode");
+}

@@ -624,7 +624,13 @@ const blogAdminStatus = document.querySelector("#blog-admin-status");
 const blogAdminList = document.querySelector("#blog-admin-list");
 const blogPostMarkdown = document.querySelector("#blog-post-markdown");
 let blogPostMarkdownSelection = null;
-const blogMarkdownPreview = document.querySelector("#blog-markdown-preview");
+const blogPreviewToggle = document.querySelector("#blog-preview-toggle");
+const blogPreviewPanel = document.querySelector("#blog-preview-panel");
+const blogPreviewFrame = document.querySelector("#blog-preview-frame");
+const blogPreviewTheme = document.querySelector("#blog-preview-theme");
+const blogPreviewVariant = document.querySelector("#blog-preview-variant");
+const blogPreviewScheme = document.querySelector("#blog-preview-scheme");
+const blogPreviewStatus = document.querySelector("#blog-preview-status");
 const blogFormatBlock = document.querySelector("#blog-format-block");
 const blogFormatColor = document.querySelector("#blog-format-color");
 const blogCustomColor = document.querySelector("#blog-custom-color");
@@ -2786,20 +2792,49 @@ async function discardPendingBlogImage() {
 }
 
 function renderBlogPreview() {
-  const markdown = blogPostMarkdown.value;
-  if (!markdown.trim()) {
-    const empty = document.createElement("p");
-    empty.textContent = "Your rendered post will appear here.";
-    blogMarkdownPreview.replaceChildren(empty);
-    return;
+  if (blogPreviewPanel.hidden || !blogPreviewFrame.contentWindow?.BITS_BLOG_PREVIEW) return;
+  blogPreviewFrame.contentWindow.BITS_BLOG_PREVIEW.render({
+    title: blogPostForm.elements.title.value,
+    excerpt: blogPostForm.elements.excerpt.value,
+    markdown: blogPostMarkdown.value,
+    theme: blogPreviewTheme.value,
+    scheme: blogPreviewScheme.value,
+    variant: blogPreviewVariant.value,
+  });
+}
+
+function syncBlogPreviewTheme() {
+  const theme = blogPreviewFrame.contentWindow.BITS_THEME_PREFERENCE.getTheme(blogPreviewTheme.value);
+  blogPreviewVariant.replaceChildren();
+  for (const variant of theme.variants ?? []) {
+    const option = document.createElement("option");
+    option.value = variant.id;
+    option.textContent = variant.name;
+    blogPreviewVariant.append(option);
   }
-  blogMarkdownPreview.replaceChildren(
-    window.BITS_MARKDOWN.render(markdown, { headingOffset: 3 }),
-  );
+  blogPreviewVariant.disabled = !theme.variants?.length;
+  if (blogPreviewVariant.disabled) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No variants";
+    blogPreviewVariant.append(option);
+  }
+  const locked = theme.schemes?.length === 1 ? theme.schemes[0] : "";
+  blogPreviewScheme.disabled = Boolean(locked);
+  if (locked) blogPreviewScheme.value = locked;
+  renderBlogPreview();
+}
+
+function closeBlogPreview() {
+  blogPreviewPanel.hidden = true;
+  blogPreviewToggle.setAttribute("aria-expanded", "false");
+  blogPreviewToggle.textContent = "SHOW PREVIEW";
 }
 
 function resetBlogEditor() {
   blogPostForm.reset();
+  closeBlogPreview();
+  if (blogPreviewFrame.contentWindow?.BITS_BLOG_PREVIEW) syncBlogPreviewTheme();
   blogPostMarkdownSelection = null;
   blogCustomColor.hidden = true;
   blogCustomColorStatus.textContent = "";
@@ -2813,6 +2848,7 @@ function resetBlogEditor() {
 }
 
 function selectBlogPost(post) {
+  closeBlogPreview();
   blogPostMarkdownSelection = null;
   blogCustomColor.hidden = true;
   blogCustomColorValue.value = "";
@@ -2991,6 +3027,64 @@ try {
 }
 
 if (adminClient) {
+  let blogPreviewLoading = false;
+  blogPreviewToggle.addEventListener("click", async () => {
+    if (!blogPreviewPanel.hidden) {
+      closeBlogPreview();
+      return;
+    }
+    blogPreviewPanel.hidden = false;
+    blogPreviewToggle.setAttribute("aria-expanded", "true");
+    blogPreviewToggle.textContent = "HIDE PREVIEW";
+    if (!blogPreviewFrame.hasAttribute("srcdoc")) {
+      if (blogPreviewLoading) return;
+      blogPreviewLoading = true;
+      blogPreviewStatus.textContent = "Loading preview...";
+      blogPreviewTheme.disabled = true;
+      blogPreviewVariant.disabled = true;
+      blogPreviewScheme.disabled = true;
+      try {
+        const response = await fetch("/admin/blog-preview.html", { credentials: "omit" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        blogPreviewFrame.srcdoc = await response.text();
+      } catch (error) {
+        console.error("Unable to load blog preview:", error);
+        setAdminStatus(blogPreviewStatus, "Preview could not load. Close and reopen it to retry; your draft is unchanged.", "error");
+      } finally {
+        blogPreviewLoading = false;
+      }
+    } else {
+      renderBlogPreview();
+    }
+  });
+  blogPreviewFrame.addEventListener("load", () => {
+    if (!blogPreviewFrame.hasAttribute("srcdoc")) return;
+    const previewWindow = blogPreviewFrame.contentWindow;
+    if (!previewWindow.BITS_BLOG_PREVIEW || !previewWindow.BITS_THEME_PREFERENCE) {
+      setAdminStatus(blogPreviewStatus, "Preview could not load. Reload Admin to try again; save or copy your draft first.", "error");
+      return;
+    }
+    blogPreviewTheme.replaceChildren();
+    for (const theme of previewWindow.BITS_INTERFACE_THEMES) {
+      const option = document.createElement("option");
+      option.value = theme.id;
+      option.textContent = theme.name;
+      blogPreviewTheme.append(option);
+    }
+    blogPreviewTheme.value = previewWindow.document.documentElement.dataset.interfaceTheme;
+    blogPreviewScheme.value = previewWindow.document.documentElement.dataset.colorScheme;
+    blogPreviewTheme.disabled = false;
+    setAdminStatus(blogPreviewStatus, "");
+    syncBlogPreviewTheme();
+  });
+  blogPreviewTheme.addEventListener("change", syncBlogPreviewTheme);
+  blogPreviewVariant.addEventListener("change", renderBlogPreview);
+  blogPreviewScheme.addEventListener("change", renderBlogPreview);
+  blogPostForm.addEventListener("input", (event) => {
+    if ([blogPostMarkdown, blogPostForm.elements.title, blogPostForm.elements.excerpt].includes(event.target)) {
+      renderBlogPreview();
+    }
+  });
   window.BITS_MARKDOWN.bindFormattingShortcuts(blogPostMarkdown,
     Object.fromEntries(["bold", "italic", "underline", "strike", "inline-code", "highlight", "link"]
       .map(format => [format, () => applyBlogFormat(format)])));
@@ -3060,7 +3154,6 @@ if (adminClient) {
   refreshButton.addEventListener("click", loadMessages);
   refreshGuestbook.addEventListener("click", loadAdminGuestbook);
   refreshArcadeScores.addEventListener("click", loadAdminArcadeScores);
-  blogPostMarkdown.addEventListener("input", renderBlogPreview);
   document.querySelectorAll("[data-blog-format]").forEach((button) => {
     button.addEventListener("click", () => applyBlogFormat(button.dataset.blogFormat));
   });

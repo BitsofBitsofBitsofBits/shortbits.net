@@ -675,6 +675,11 @@
                 <input name="published" type="checkbox">
                 <span>PUBLISH POST</span>
               </label>
+              <div class="blog-admin-workspace">
+              <div class="blog-editor-heading">
+                <label for="blog-post-markdown">MARKDOWN</label>
+                <button id="blog-preview-toggle" type="button" aria-expanded="false" aria-controls="blog-preview-panel">SHOW PREVIEW</button>
+              </div>
               <div class="blog-format-toolbar" role="toolbar" aria-label="Post formatting">
                 <label>
                   <span class="visually-hidden">Text style</span>
@@ -753,18 +758,19 @@
                   <button id="blog-image-upload" type="button">UPLOAD IMAGE</button>
                 </div>
               </div>
-              <div class="blog-admin-workspace">
-                <label>
-                  <span>MARKDOWN</span>
-                  <textarea id="blog-post-markdown" name="body_markdown" maxlength="50000" aria-describedby="blog-shortcuts-help" required></textarea>
-                </label>
-                <section class="blog-admin-preview" aria-labelledby="blog-preview-heading">
-                  <h3 id="blog-preview-heading">LIVE_PREVIEW</h3>
-                  <div id="blog-markdown-preview" class="blog-markdown">
-                    <p>Your rendered post will appear here.</p>
-                  </div>
-                </section>
+                <textarea id="blog-post-markdown" name="body_markdown" maxlength="50000" aria-describedby="blog-shortcuts-help" required></textarea>
               </div>
+              <section id="blog-preview-panel" class="blog-admin-preview" aria-labelledby="blog-preview-heading" hidden>
+                <h3 id="blog-preview-heading">POST PREVIEW</h3>
+                <div class="blog-preview-controls">
+                  <label>Theme<select id="blog-preview-theme"></select></label>
+                  <label>Variant<select id="blog-preview-variant"></select></label>
+                  <label>Color scheme<select id="blog-preview-scheme"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+                </div>
+                <p id="blog-preview-help">Preview your unsaved post in any site theme, including seasonal themes. These choices do not change Admin appearance or your saved site preferences. Experimental desktop layouts preview their article styling only.</p>
+                <p id="blog-preview-status" role="status" aria-live="polite"></p>
+                <iframe id="blog-preview-frame" title="Themed preview of your unsaved blog post" sandbox="allow-same-origin allow-scripts"></iframe>
+              </section>
               <p class="blog-markdown-help">
                 Supports headings, emphasis, links, images, task lists, tables, blockquotes, code, highlighting,
                 named and hex colors (for example, <code>{{color:#ff8800|text}}</code>), rainbow text, sizes, and curated fonts. Raw HTML is displayed as text.

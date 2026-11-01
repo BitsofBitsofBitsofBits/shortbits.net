@@ -57,7 +57,15 @@ selection and scroll position, including when using custom-color controls.
 Invalid codes are displayed literally when typed
 in Markdown and rejected with an error by the toolbar. A formatting
 toolbar inserts the underlying markup for authors who do not want to write it
-manually. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
+manually. The text area is full-width and vertically resizable; its attached
+toolbar stays visible below the Admin suite bar while scrolling the editor.
+**Show preview** reveals a live article preview below the text area, with
+independent Theme, Variant, and Color scheme selectors. The selectors include
+all public themes and out-of-season themes without changing saved preferences
+or Admin appearance. Single-scheme themes lock their color scheme; themes
+without variants disable that selector. Experimental layouts show article
+styling only. Preview is hidden by default; updates resume with the latest
+unsaved title, excerpt, and body when reopened. Authenticated image uploads accept JPEG, PNG, WebP, or GIF files up to
 5 MB and require alternative text before insertion. The renderer creates DOM
 nodes directly instead of injecting HTML, and raw HTML in a post is displayed
 as text. Draft and future-dated posts remain hidden from anonymous clients

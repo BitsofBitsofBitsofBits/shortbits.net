@@ -1182,6 +1182,113 @@ body.admin-center.ac-panel-open {
   box-shadow: var(--ac-shadow-4);
 }
 
+.admin-center .blog-admin-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--ac-stroke);
+  border-radius: 8px;
+  background: var(--ac-surface);
+}
+
+.blog-editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.admin-center .blog-admin-workspace .blog-format-toolbar {
+  position: sticky;
+  top: 48px;
+  z-index: 10;
+  margin: 0;
+  border: 0;
+  border-block: 1px solid var(--ac-stroke);
+  background: var(--ac-surface);
+  box-shadow: var(--ac-shadow-4);
+}
+
+.admin-center .blog-admin-workspace #blog-post-markdown {
+  display: block;
+  width: 100%;
+  height: 55vh;
+  min-height: 260px;
+  max-height: none;
+  margin: 0;
+  padding: 14px;
+  border: 0;
+  border-radius: 0 0 8px 8px;
+  resize: vertical;
+  line-height: 1.65;
+}
+
+.admin-center #blog-preview-panel {
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding: 16px;
+}
+
+#blog-preview-panel[hidden] {
+  display: none;
+}
+
+.blog-preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 12px;
+}
+
+.blog-preview-controls label {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.blog-preview-controls select {
+  width: 100%;
+  min-width: 0;
+}
+
+#blog-preview-help {
+  color: var(--ac-muted);
+  font-size: 13px;
+}
+
+#blog-preview-frame {
+  display: block;
+  width: 100%;
+  height: 65vh;
+  min-height: 320px;
+  border: 1px solid var(--ac-stroke);
+  border-radius: 4px;
+  background: var(--ac-surface);
+}
+
+@media (max-width: 700px) {
+  .admin-center .blog-admin-workspace .blog-format-toolbar {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .admin-center .blog-admin-workspace .blog-format-toolbar > div {
+    min-width: 0;
+  }
+
+  .admin-center .blog-admin-workspace .blog-format-toolbar select {
+    max-width: 140px;
+  }
+
+  .admin-center #blog-preview-panel {
+    padding: 10px;
+  }
+}
+
 .admin-center .blog-admin-post-button {
   border: 1px solid transparent;
   border-radius: 4px;

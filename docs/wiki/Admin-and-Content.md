@@ -17,8 +17,17 @@
   Light, dark, or system appearance is saved per device
 
 - An accessible public `BLOG.LOG` with draft-aware Supabase publishing,
-  semantic article pages, safe Markdown rendering, and a live Markdown preview
-  in the Admin Portal
+  semantic article pages and safe Markdown rendering. The Admin blog editor
+  uses the full available width, with a vertically resizable text area and an
+  attached formatting toolbar that sticks below the suite bar while scrolling
+  the editor. **Show preview** opens a live, full-width preview below the editor;
+  **Hide preview** restores the writing-only view. Preview is hidden by default
+  and when starting or loading a post. Its **Theme**, **Variant**, and **Color
+  scheme** controls include all public themes, even out-of-season choices, and
+  honor light/dark-only themes. They do not change Admin appearance or saved
+  visitor preferences. Experimental desktop layouts show their article styling,
+  not their interactive desktop chrome. The preview includes unsaved title,
+  excerpt, and Markdown; opening it never saves or publishes a draft.
 
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits

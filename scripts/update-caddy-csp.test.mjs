@@ -20,6 +20,13 @@ test("creates missing directives without widening script permission", () => {
   assert.doesNotMatch(output, /unsafe-inline/);
 });
 
+test("allows the same-origin blog preview while keeping external frame sources constrained", () => {
+  const output = updateCaddyCsp(`header Content-Security-Policy "default-src 'self'; frame-src https://old.example;"`);
+  assert.match(output, /frame-src 'self' https:\/\/www\.youtube-nocookie\.com https:\/\/player\.vimeo\.com https:\/\/open\.spotify\.com https:\/\/challenges\.cloudflare\.com;/);
+  assert.doesNotMatch(output, /frame-src \*|https:\/\/old\.example/);
+  assert.equal(updateCaddyCsp(output), output);
+});
+
 test("rejects Caddyfiles without a quoted CSP instead of silently changing nothing", () => {
   assert.throws(() => updateCaddyCsp("example.test { file_server }"), /does not contain/);
 });

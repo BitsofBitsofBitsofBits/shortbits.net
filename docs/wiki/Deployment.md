@@ -108,6 +108,10 @@ After deploying the static files, the workflow downloads
 `/etc/caddy/Caddyfile`, updates its quoted Content Security Policy with the
 approved YouTube, Vimeo, Spotify, and Cloudflare Turnstile `frame-src` values
 plus the Cloudflare Web Analytics, Turnstile, and Lanyard WebSocket origins.
+The `frame-src` allowlist includes `'self'` for the Admin blog's isolated,
+same-origin draft preview; other frames remain limited to the approved providers.
+The trusted preview HTML is fetched into a sandboxed frame's `srcdoc`; production
+`X-Frame-Options: DENY` and `frame-ancestors 'none'` remain unchanged.
 It enables precompressed Brotli/gzip files and year-long immutable caching
 only for existing CSS/JS with a generated 16-hex asset version. It then
 validates the candidate
