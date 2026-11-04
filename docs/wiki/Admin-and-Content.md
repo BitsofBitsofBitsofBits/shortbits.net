@@ -112,7 +112,11 @@
   It is disabled by default; disabling it hides the entire section while keeping
   the saved draft. Changes appear when Online is reloaded, without rebuilding.
   Apply `supabase/migrations/20261026090000_featured_project.sql` before using
-  the editor. Until then (or if the request fails), the public section stays hidden.
+  the editor. Production builds snapshot the enabled project into Online, so it
+  appears at first paint rather than pushing the media player down after a network
+  request. Live refresh keeps that snapshot visible while loading or on failure;
+  a successful empty response hides it immediately after unpublishing. Without
+  a published snapshot, the section stays hidden until a published project loads.
   Featured-project drafts and publishing state are included in content backups;
   export a fresh backup after applying the migration.
 

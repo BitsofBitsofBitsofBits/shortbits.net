@@ -1,5 +1,5 @@
-import { resolve } from "node:path";
-import { writeFile } from "node:fs/promises";
+import { resolve, dirname } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
 
@@ -10,8 +10,11 @@ const urlIndex = args.indexOf("--url");
 if (urlIndex >= 0 && !args[urlIndex + 1]) throw new Error("--url requires an absolute URL.");
 const outputIndex = args.indexOf("--output");
 if (outputIndex >= 0 && !args[outputIndex + 1]) throw new Error("--output requires a file.");
+const pageIndex = args.indexOf("--page");
+const pageName = pageIndex < 0 ? "online" : args[pageIndex + 1];
+if (!["online", "professional"].includes(pageName)) throw new Error("--page must be online or professional.");
 const server = urlIndex < 0 ? await startSiteServer(resolve(rootIndex < 0 ? ".site-build" : args[rootIndex + 1])) : null;
-const target = new URL(urlIndex < 0 ? `${server.origin}/online/` : args[urlIndex + 1]);
+const target = new URL(urlIndex < 0 ? `${server.origin}/${pageName}/` : args[urlIndex + 1]);
 let browser;
 try {
   browser = await chromium.launch({
@@ -25,10 +28,16 @@ try {
   await client.send("Profiler.enable");
   await client.send("Profiler.start");
   const response = await page.goto(target.href, { waitUntil: "networkidle" });
-  if (!response?.ok()) throw new Error("Unable to load the staged online page for profiling.");
-  await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+  if (!response?.ok()) throw new Error(`Unable to load ${target.href} for profiling.`);
+  if (target.pathname === "/online/") {
+    await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+  }
   const { profile } = await client.send("Profiler.stop");
-  if (outputIndex >= 0) await writeFile(resolve(args[outputIndex + 1]), JSON.stringify(profile));
+  if (outputIndex >= 0) {
+    const output = resolve(args[outputIndex + 1]);
+    await mkdir(dirname(output), { recursive: true });
+    await writeFile(output, JSON.stringify(profile));
+  }
   const self = new Map();
   const totals = new Map();
   const parents = new Map();
@@ -53,7 +62,7 @@ try {
     }))
     .sort((first, second) => second.totalMs - first.totalMs)
     .slice(0, 30);
-  console.log(JSON.stringify({ browser: await browser.version(), cpuSlowdown: 4, startup: summary }, null, 2));
+  console.log(JSON.stringify({ url: target.href, browser: await browser.version(), cpuSlowdown: 4, startup: summary }, null, 2));
 } finally {
   if (browser) await browser.close();
   if (server) await server.close();

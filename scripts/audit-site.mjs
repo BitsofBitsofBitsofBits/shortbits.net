@@ -49,7 +49,7 @@ try {
             outputPath: sample === 1
               ? join(output, `${name}-${preset}.json`)
               : join(output, "samples", `${name}-${preset}-sample-${sample}.json`),
-            saveAssets: sample === 1 && preset === "mobile" && (name === "online" || Boolean(liveUrl)),
+            saveAssets: sample === 1 && preset === "mobile",
           });
           console.log(`Audited ${name}-${preset}${medianLcp ? ` (sample ${sample}/3)` : ""}.`);
         } catch (error) {

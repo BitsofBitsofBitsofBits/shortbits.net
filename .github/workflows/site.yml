@@ -84,6 +84,7 @@ jobs:
           node scripts/desktop-workspaces-browser.mjs --root .site-build
           node scripts/messages-browser.mjs --root .site-build
           node scripts/critical-css-browser.mjs --root .site-build
+          node scripts/page-startup-browser.mjs --root .site-build
 
       - name: Enforce pre-deployment performance budgets
         id: performance
@@ -93,7 +94,9 @@ jobs:
         if: failure() && steps.performance.outcome == 'failure'
         env:
           BITS_BROWSER_CHANNEL: chrome
-        run: node scripts/profile-startup.mjs
+        run: |
+          node scripts/profile-startup.mjs --page online --output lighthouse-reports/profiles/online.cpuprofile
+          node scripts/profile-startup.mjs --page professional --output lighthouse-reports/profiles/professional.cpuprofile
 
       - name: Upload pre-deployment performance reports
         if: always()

@@ -42,6 +42,7 @@ node scripts/pride-themes-browser.mjs --root .site-build
 node scripts/desktop-workspaces-browser.mjs --root .site-build
 node scripts/messages-browser.mjs --root .site-build
 node scripts/critical-css-browser.mjs --root .site-build
+node scripts/page-startup-browser.mjs --root .site-build
 npm run audit
 ```
 
@@ -87,6 +88,13 @@ The post-deployment audit runs three independent measurements for each page and
 device and enforces the 2.5-second LCP budget against their median. Other budgets
 continue to use the first report. The three-run option increases audit duration;
 local and pre-deployment audits use one measurement unless `--median-lcp` is passed.
+All mobile page audits save their trace and DevTools network log, including
+Professional (not only Online). If the pre-deployment performance step fails,
+CI saves CPU profiles for both Online and Professional under
+`lighthouse-reports/profiles/`. To profile either page directly, use
+`node scripts/profile-startup.mjs --page professional --output lighthouse-reports/profiles/professional.cpuprofile`.
+These profiles supplement Lighthouse's simulated mobile metrics; they do not
+replace its thresholds or measurement settings.
 Each page/device audit gets at most three attempts, but only for the observed
 `NO_NAVSTART` trace-recording error or Chrome's `Target.getTargetInfo` missing-session
 crash. Each retry starts a fresh Lighthouse process and waits briefly. Low measured
@@ -98,6 +106,16 @@ The summary lists all LCP measurements and their median. Missing or invalid LCP
 samples fail the median audit; other missing scores are shown as `N/A`, and exhausted
 runner retries still fail the job. Pre-deployment
 budgets and the separate deployed-site health checks remain enabled.
+
+Professional builds inline the complete minified page CSS (with a 128 KiB
+uncompressed guard), consolidate ordered theme initialization, and bundle
+enhancements without changing their order. Enhancement execution follows first
+contentful paint, as on Online, so the static profile remains readable while
+live data loads. Dynamic theme styles remain lazy and existing preferences apply
+before paint. The featured project is also rendered at build time using the same
+safe renderer as live refresh; offline builds use a published fixture.
+`page-startup-browser.mjs` verifies paint without enhancements, stable theme
+hydration, and featured-project refresh, outage, and unpublishing behavior.
 
 `npm run build` requires an empty output directory, copies only public site
 assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS

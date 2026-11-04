@@ -10,6 +10,7 @@ import { buildSocialLinks } from "./build-social-links.mjs";
 import { buildSeo } from "./build-seo.mjs";
 import { parseHTML } from "linkedom";
 import { filterCssForMarkup } from "./build-theme-css.mjs";
+import { buildFeaturedProject } from "./build-featured-project.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export async function filesUnder(directory) {
@@ -135,6 +136,76 @@ export async function optimizeStartup(directory) {
   await writeFile(file, html.replace(pattern, '<script src="/online/scripts/startup.js"></script>'));
 }
 
+export async function optimizeProfessional(directory) {
+  const file = join(directory, "professional", "index.html");
+  let html = await readFile(file, "utf8");
+  const sheets = /<link rel="stylesheet" href="([^"]+)">/g;
+  const imports = [...html.matchAll(sheets)].map(([, href]) => {
+    if (!href.startsWith("/") || href.startsWith("//")) throw new Error("Expected local professional styles.");
+    return `@import ${JSON.stringify(href.split("?")[0].slice(1))};`;
+  }).join("\n");
+  if (!imports) throw new Error("Professional styles are missing.");
+  const css = await build({
+    stdin: { contents: imports, loader: "css", resolveDir: directory },
+    bundle: true, minify: true, write: false,
+    outfile: join(directory, "professional", "styles", "site.css"),
+    target: ["chrome105", "firefox102", "safari15.6"], logLevel: "silent",
+  });
+  if (css.outputFiles.length !== 1 || css.outputFiles[0].contents.length > 128 * 1024) {
+    throw new Error("Professional styles exceed the 128 KiB inline budget.");
+  }
+  let first = true;
+  html = html.replace(sheets, () => {
+    if (!first) return "";
+    first = false;
+    return `<style data-professional-styles>${css.outputFiles[0].text.replace(/<\/style/gi, "<\\/style")}</style>`;
+  });
+  const pattern = /<script src="\/shared\/scripts\/seasonal-calendar\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/shared\/scripts\/accessibility\.js(?:\?[^"]*)?"><\/script>\s*<script src="\/shared\/scripts\/theme-init\.js(?:\?[^"]*)?"><\/script>/;
+  if (!pattern.test(html)) throw new Error("Professional startup scripts are missing or out of order.");
+  const scripts = await Promise.all(["seasonal-calendar.js", "accessibility.js", "theme-init.js"]
+    .map(name => readFile(join(directory, "shared", "scripts", name), "utf8")));
+  const js = await transform(scripts.join("\n;\n"), {
+    loader: "js", minify: true, treeShaking: false,
+    target: ["chrome105", "firefox102", "safari15.6"],
+  });
+  await writeFile(join(directory, "professional", "scripts", "startup.js"), js.code);
+  html = html.replace(pattern, '<script src="/professional/scripts/startup.js"></script>');
+  const deferredPattern = /<script src="([^"]+)" defer><\/script>/g;
+  const deferred = [...html.matchAll(deferredPattern)]
+    .filter(([, src]) => !src.startsWith("/shared/scripts/supabase-config.js"));
+  const runtimeSources = await Promise.all(deferred.map(([, src]) => {
+    if (!src.startsWith("/") || src.startsWith("//")) throw new Error("Expected local professional scripts.");
+    return readFile(join(directory, src.split("?")[0].slice(1)), "utf8");
+  }));
+  const runtime = await transform(`(() => {
+    function start() { ${runtimeSources.join("\n;\n")} }
+    if (typeof PerformanceObserver !== "undefined"
+      && PerformanceObserver.supportedEntryTypes?.includes("paint")) {
+      const observer = new PerformanceObserver(entries => {
+        if (entries.getEntries().some(entry => entry.name === "first-contentful-paint")) {
+          observer.disconnect();
+          start();
+        }
+      });
+      observer.observe({ type: "paint", buffered: true });
+    } else {
+      requestAnimationFrame(() => requestAnimationFrame(start));
+    }
+  })();`, {
+    loader: "js", minify: true, treeShaking: false,
+    target: ["chrome105", "firefox102", "safari15.6"],
+  });
+  await writeFile(join(directory, "professional", "scripts", "runtime.js"), runtime.code);
+  first = true;
+  html = html.replace(deferredPattern, (tag, src) => {
+    if (src.startsWith("/shared/scripts/supabase-config.js")) return tag;
+    if (!first) return "";
+    first = false;
+    return '<script src="/professional/scripts/runtime.js" defer></script>';
+  });
+  await writeFile(file, html);
+}
+
 export async function buildSite(output, contentInput, resumeInput) {
   const destination = resolve(output);
   if (destination === root || root.startsWith(`${destination}\\`) || root.startsWith(`${destination}/`)) {
@@ -163,9 +234,11 @@ export async function buildSite(output, contentInput, resumeInput) {
     input: resumeInput || (contentInput ? join(root, "scripts", "fixtures", "resume-data.json") : undefined),
   });
   await buildSocialLinks(destination, { offline: Boolean(contentInput) });
+  await buildFeaturedProject(destination, { offline: Boolean(contentInput) });
   await buildSeo(destination, await filesUnder(destination));
   await optimizeStyles(destination);
   await optimizeStartup(destination);
+  await optimizeProfessional(destination);
   const version = await versionAssets(destination);
   await compressAssets(destination);
   console.log(`Built static site at ${destination} with asset version ${version}.`);

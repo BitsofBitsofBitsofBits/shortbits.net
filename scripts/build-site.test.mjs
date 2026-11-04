@@ -36,6 +36,14 @@ test("build preserves page routes and organized assets without shipping reposito
       "professional/resume/scripts/resume.js", "not-found/scripts/not-found.js", "useless/scripts/useless.js",
     ]) assert.ok((await stat(join(directory, path))).isFile(), path);
     const portraitSize = (await stat(join(directory, "shared/images/profile.webp"))).size;
+    const professional = await readFile(join(directory, "professional", "index.html"), "utf8");
+    assert.match(professional, /<style data-professional-styles>/);
+    assert.match(professional, /src="\/professional\/scripts\/startup\.js\?v=[a-f0-9]{16}"/);
+    assert.doesNotMatch(professional, /<link rel="stylesheet"|src="\/shared\/scripts\/(?:theme-init|seasonal-calendar|accessibility)\.js/);
+    assert.match(professional, /profile-hero/);
+    const online = await readFile(join(directory, "online", "index.html"), "utf8");
+    assert.match(online, /<h3 id="featured-project-title">Featured project<\/h3>/);
+    assert.doesNotMatch(online, /<section[^>]*id="featured-project-section"[^>]*hidden/);
     const faviconSize = (await stat(join(directory, "shared/images/favicon.png"))).size;
     assert.ok(portraitSize < 30 * 1024 && portraitSize < faviconSize * 0.3,
       "The LCP profile picture stays below 30 KiB and 30% of the original favicon size");
