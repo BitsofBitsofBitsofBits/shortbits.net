@@ -22,6 +22,7 @@ try {
   });
   for (const width of [390, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
+    const blogViews = [];
     await context.route(/cloudflareinsights|challenges\.cloudflare|lanyard\.rest/, (route) => route.abort());
     await context.route("**/rest/v1/**", async (route) => {
       const request = route.request();
@@ -40,6 +41,10 @@ try {
       if (name === "site_blog_posts") data = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"))
         .filter((post) => post.published && Date.parse(post.published_at) <= Date.now());
       if (name === "record_site_analytics" || name === "hardware_watch") data = null;
+      if (name === "get_blog_post_views") {
+        blogViews.push(request.postDataJSON());
+        data = 1;
+      }
       await route.fulfill({ status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(data) });
     });
     await context.route("**/functions/v1/**", (route) => route.fulfill({
@@ -145,6 +150,13 @@ try {
       }
       if (path === "/blog/") {
         assert.equal(await page.locator("#blog-status").textContent(), "Archive synchronized.");
+        assert.equal(blogViews.length, 0, "Archive impressions must not record views");
+      }
+      if (path === "/blog/articles/first-lab-notes/") {
+        assert.equal(await page.locator("#blog-post-views").textContent(), "1 VIEW");
+        assert.equal(blogViews.length, 1);
+        assert.equal(blogViews[0].p_slug, "first-lab-notes");
+        assert.ok(blogViews[0].p_token);
       }
       if (path === "/professional/") {
         const shift = await page.evaluate(() => window.__testLayoutShift);
@@ -173,6 +185,9 @@ try {
     assert.match(postQuery.get("published_at"), /^lte\./);
     assert.equal(await page.locator("#blog-post").isVisible(), true);
     assert.equal(await page.locator("#blog-post-title").textContent(), "First lab notes");
+    assert.equal(await page.locator("#blog-post-views").textContent(), "1 VIEW");
+    assert.equal(blogViews.length, 2);
+    assert.equal(blogViews[1].p_token, blogViews[0].p_token, "Static and live readers share the daily token");
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.querySelector("#build-link")?.dataset.commit);
     assert.match(await page.locator("#build-link").getAttribute("title"), /^Deployed .* UTC$/);

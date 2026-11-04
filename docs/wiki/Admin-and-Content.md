@@ -42,6 +42,30 @@
   Apply `20261101120000_increase_blog_post_limit.sql` to raise the database limit
   alongside the editor limit.
 
+  Published article headers show live, anonymous **views**, on both generated
+  article URLs and the live `post.html?slug=...` reader. No reader account is
+  required. A view is an actual visible article open, not an archive impression
+  or Admin preview. The same browser counts once per post per UTC calendar day;
+  reloads and network retries reuse the same random daily token. Web Locks
+  coordinate token creation across tabs where supported. Other browsers can
+  rarely double-count simultaneous first opens. JavaScript-disabled readers
+  and browser Do Not Track / Global Privacy Control opt-outs are not counted.
+  If local storage is unavailable, totals are still readable but the visit is
+  not counted; a count failure never blocks the article.
+
+  These are approximate readership totals, **not unique people**. Clearing
+  browser storage, private browsing, different devices/browsers, or deliberately
+  generating tokens can add views. No IP, account, fingerprint, or cross-post
+  visitor identifier is stored by this feature; hosting providers may retain
+  ordinary request logs. The browser stores only the latest day/token per opened
+  post. Database receipts are private and removed on the next recording request
+  after their UTC day ends; if recording stops, they remain until recording resumes
+  or an operator removes expired receipts. Counts persist separately and are tied
+  to the post ID, so renaming keeps totals and deleting a post deletes its views.
+  Analytics are not editorial content and are not included in content backups.
+  Drafts/future posts expose no total. An already-deployed static copy can still
+  be read until redeployment, but unpublished posts cannot receive new views.
+
 - GUI controls for adding and removing résumé experiences, featured playlists,
   featured songs, and changelog entries without fixed slot limits
   - **Résumé > Profile** has separate **Headline** and **About** fields. The

@@ -53,7 +53,11 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.equal(schema.dateModified, posts[0].updated_at);
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /<div class="blog-markdown">/);
-  assert.doesNotMatch(html, /post\.js|shared\/scripts\/supabase-config\.js| hidden/);
+  assert.doesNotMatch(html, /post\.js| hidden/);
+  assert.match(html, /data-blog-slug="safe-markdown"/);
+  assert.match(html, /shared\/scripts\/supabase-config\.js/);
+  assert.match(html, /shared\/scripts\/blog-views\.js/);
+  assert.match(html, /id="blog-post-views" role="status"/);
 });
 
 test("static blog articles retain validated hex colors and nested formatting", () => {

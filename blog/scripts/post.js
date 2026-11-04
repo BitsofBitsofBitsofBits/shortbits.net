@@ -50,6 +50,7 @@
       document.head.append(canonical);
       status.hidden = true;
       article.hidden = false;
+      void window.BITS_BLOG_VIEWS.show(post.slug, document.querySelector("#blog-post-views"));
     } catch (error) {
       console.error("Unable to load blog post:", error);
       status.textContent = "This post could not be loaded. Please try again later.";

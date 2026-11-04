@@ -76,6 +76,10 @@ accessible message snapshots, native keys, and window focus at desktop/mobile
 widths. Automated checks cover semantics and keyboard behavior, not actual
 speech output; manual NVDA/VoiceOver testing remains important.
 
+Run `node --test scripts/blog-views.test.mjs scripts/blog-client.test.mjs scripts/build-content.test.mjs`
+for anonymous blog views: database permissions/publication, daily receipt
+deduplication, browser storage/privacy/failure handling, and both reader routes.
+
 Local and post-deployment Lighthouse audits share `scripts/audit-site.mjs`.
 For live checks, run
 `node scripts/audit-site.mjs --url https://www.shortbits.net --enforce --median-lcp`.

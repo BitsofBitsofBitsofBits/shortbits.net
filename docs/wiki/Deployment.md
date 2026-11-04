@@ -69,6 +69,19 @@ even when playback itself still works. An inactive response may have a null sess
 start; playing or paused items must include a valid session timestamp.
 
 Pushing a commit starts validation; it does not apply migrations immediately.
+Anonymous blog views require
+`supabase/migrations/20261104160000_create_blog_views.sql`. Apply it with
+`supabase db push` against the linked project (or let **Apply database migrations**
+run with the configured Supabase secrets), then deploy/rebuild the static site
+so generated articles load the new shared view script. There is no new Edge
+Function, secret, reader account, or Admin setup. Before the migration is applied,
+articles remain readable and show `VIEWS UNAVAILABLE` rather than invented totals.
+The migration creates private count/receipt tables and a restricted
+`get_blog_post_views` RPC; never grant browser roles direct writes to these tables.
+Only published, non-future posts can be incremented, and callers cannot choose
+the total or recording date. Random daily tokens deduplicate honest browsers,
+not abusive clients: this is not bot-resistant or billing-grade analytics.
+
 The Supabase job depends on successful validation and is skipped when validation
 fails. Inspect **Apply database migrations** directly before trying newly added
 database functions. An overall failed run may instead be a later Lighthouse

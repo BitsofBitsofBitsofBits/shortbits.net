@@ -169,18 +169,20 @@ export function renderArticle(post, renderer) {
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
     <script type="application/ld+json">${jsonScript(schema)}</script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/shared/scripts/supabase-config.js" defer></script>
+    <script src="/shared/scripts/blog-views.js?v=blog-views-1" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
   </head>
   <body class="blog-page blog-post-page">
     <a class="skip-link" href="#blog-post">Skip to article</a>
     <main class="blog-shell">
       <nav class="blog-breadcrumbs" aria-label="Breadcrumb"><a href="/online/">HOME</a><span aria-hidden="true">/</span><a href="/blog/">BLOG.LOG</a></nav>
-      <article id="blog-post" class="blog-article">
+      <article id="blog-post" class="blog-article" data-blog-slug="${escapeHtml(post.slug)}">
         <header>
           <p class="system-kicker">BLOG_ENTRY</p>
           <h1>${title}</h1>
           <p class="blog-article-excerpt">${excerpt}</p>
-          <p class="blog-article-meta"><time datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span>${renderer.readingTime(post.body_markdown)} MIN READ</span></p>
+          <p class="blog-article-meta"><time datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span>${renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
         </header>
         <div class="blog-markdown">${renderer.render(post.body_markdown)}</div>
       </article>

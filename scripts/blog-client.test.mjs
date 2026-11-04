@@ -37,6 +37,7 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
       SUPABASE_CONFIG: { url: "https://example.supabase.co", anonKey: "sb_publishable_example" },
       location: { search: `?slug=${slug}` },
       BITS_MARKDOWN: { readingTime: () => 1, render: (text) => ({ textContent: text }) },
+      BITS_BLOG_VIEWS: { show() {} },
     },
     URLSearchParams, console: { error() {} },
     fetch: async (url) => {
