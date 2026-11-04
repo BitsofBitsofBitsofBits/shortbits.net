@@ -79,7 +79,6 @@ try {
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
     const picker = page.locator("#settings-window .theme-picker");
     await picker.locator(":scope > summary").click();
-    await picker.locator('summary:text-is("Essentials")').click();
     await picker.locator('[data-theme="html"]').click();
     await ready(page);
     assert.equal(await page.locator("#interface-theme-select").inputValue(), "html");
