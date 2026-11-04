@@ -116,6 +116,12 @@ before paint. The featured project is also rendered at build time using the same
 safe renderer as live refresh; offline builds use a published fixture.
 `page-startup-browser.mjs` verifies paint without enhancements, stable theme
 hydration, and featured-project refresh, outage, and unpublishing behavior.
+The hidden file explorer waits until it opens before rendering and initializing
+locale-aware sorting; the startup browser check covers that first interaction.
+Generated pages use a 64x64 tab icon with an 8 KiB regression budget rather than
+downloading the full-resolution artwork. The original image remains available
+at its existing URL for content and other uses. The smaller icon preserves the
+artwork and is checked in, so deployment needs no additional image tooling.
 
 `npm run build` requires an empty output directory, copies only public site
 assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS

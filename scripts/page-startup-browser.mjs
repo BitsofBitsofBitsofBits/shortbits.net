@@ -49,6 +49,13 @@ try {
     await page.waitForLoadState("networkidle");
     assert.equal((await page.locator("#media-player").boundingBox()).y, before.y,
       "Identical live project refresh must not move the media player");
+    assert.equal(await page.locator("#filesystem-list > li").count(), 0,
+      "The hidden file explorer must not render or initialize locale sorting during startup");
+    if (width === 1440) {
+      await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("filesystem"));
+      assert.equal(await page.locator("#filesystem-window").isVisible(), true);
+      assert.match(await page.locator("#filesystem-list").textContent(), /readme\.txt/);
+    }
     mode = "offline";
     await page.reload({ waitUntil: "networkidle" });
     assert.equal(await section.isVisible(), true, "Outages retain the deployment snapshot");

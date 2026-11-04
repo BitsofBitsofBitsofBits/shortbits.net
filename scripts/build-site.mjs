@@ -60,6 +60,17 @@ export async function compressAssets(directory) {
   }
 }
 
+export async function optimizeIcons(directory) {
+  for (const file of (await filesUnder(directory)).filter(path => path.endsWith(".html"))) {
+    const source = await readFile(file, "utf8");
+    const updated = source.replaceAll(
+      '<link rel="icon" type="image/png" href="/shared/images/favicon.png">',
+      '<link rel="icon" type="image/png" sizes="64x64" href="/shared/images/favicon-64.png">',
+    );
+    if (updated !== source) await writeFile(file, updated);
+  }
+}
+
 export async function optimizeStyles(directory) {
   const onlinePath = join(directory, "online", "index.html");
   const onlineHtml = await readFile(onlinePath, "utf8");
@@ -236,6 +247,7 @@ export async function buildSite(output, contentInput, resumeInput) {
   await buildSocialLinks(destination, { offline: Boolean(contentInput) });
   await buildFeaturedProject(destination, { offline: Boolean(contentInput) });
   await buildSeo(destination, await filesUnder(destination));
+  await optimizeIcons(destination);
   await optimizeStyles(destination);
   await optimizeStartup(destination);
   await optimizeProfessional(destination);

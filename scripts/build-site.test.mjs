@@ -28,7 +28,7 @@ test("build preserves page routes and organized assets without shipping reposito
       "professional/index.html", "professional/resume/index.html",
       "shared/scripts/supabase-config.js", "shared/scripts/blog-data.js", "shared/styles/theme-base.css",
       "shared/styles/layouts/collection-base.css", "shared/scripts/layouts/runtime.js",
-      "shared/images/favicon.png", "shared/images/profile.webp", "home/scripts/chooser.js", "home/styles/chooser.css",
+      "shared/images/favicon.png", "shared/images/favicon-64.png", "shared/images/profile.webp", "home/scripts/chooser.js", "home/styles/chooser.css",
       "online/scripts/startup.js", "online/styles/site.css", "online/scripts/arcade.js",
       "online/scripts/achievements.js", "online/scripts/cobits.js", "online/scripts/fake-desktop.js",
       "admin/scripts/admin.js", "admin/styles/admin.css", "boot/scripts/endless-boot.js",
@@ -44,9 +44,12 @@ test("build preserves page routes and organized assets without shipping reposito
     const online = await readFile(join(directory, "online", "index.html"), "utf8");
     assert.match(online, /<h3 id="featured-project-title">Featured project<\/h3>/);
     assert.doesNotMatch(online, /<section[^>]*id="featured-project-section"[^>]*hidden/);
-    const faviconSize = (await stat(join(directory, "shared/images/favicon.png"))).size;
-    assert.ok(portraitSize < 30 * 1024 && portraitSize < faviconSize * 0.3,
-      "The LCP profile picture stays below 30 KiB and 30% of the original favicon size");
+    assert.ok(portraitSize < 28 * 1024, "The LCP portrait stays below 28 KiB");
+    const icon = await readFile(join(directory, "shared/images/favicon-64.png"));
+    assert.ok(icon.length < 8 * 1024, "The browser icon stays below 8 KiB");
+    assert.equal(icon.subarray(1, 4).toString(), "PNG");
+    assert.equal(icon.readUInt32BE(16), 64);
+    assert.equal(icon.readUInt32BE(20), 64);
     for (const name of ["scripts", "docs", "supabase", "agents", "extensions", "node_modules", "layouts", "images"]) {
       assert.ok(!entries.some(entry => entry.name === name), `${name} must not be published at the root`);
     }
@@ -61,6 +64,8 @@ test("build preserves page routes and organized assets without shipping reposito
     assert.equal(validateSeo(pages, await readFile(join(directory, "sitemap.xml"), "utf8")), expectedPages);
     for (const page of pages.filter(page => page.html.includes('rel="canonical"')
       && !/<meta[^>]*content="noindex/i.test(page.html))) {
+      assert.match(page.html, /rel="icon"[^>]*sizes="64x64"[^>]*href="\/shared\/images\/favicon-64\.png"/,
+        `${page.path} uses the right-sized tab icon`);
       assert.match(page.html, /data-seo=/, `${page.path} has build-time structured data`);
       assert.match(page.html, /max-image-preview:large/, `${page.path} enables larger search previews`);
     }

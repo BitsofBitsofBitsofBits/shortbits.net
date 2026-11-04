@@ -345,5 +345,3 @@ window.BITS_VIRTUAL_FILESYSTEM = {
     window.BITS_DESKTOP_WINDOWS?.open("filesystem");
   },
 };
-
-renderFilesystemDirectory(explorerDirectory);
