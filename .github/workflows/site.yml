@@ -160,12 +160,12 @@ jobs:
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
         run: |
           if [ -n "$TURNSTILE_SECRET_KEY" ]; then
-            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" TURNSTILE_SECRET_KEY="$TURNSTILE_SECRET_KEY"
+            supabase secrets set --yes --project-ref "$SUPABASE_PROJECT_REF" TURNSTILE_SECRET_KEY="$TURNSTILE_SECRET_KEY"
           else
             echo "TURNSTILE_SECRET_KEY is not set; the contact function will skip the Turnstile check."
           fi
           if [ -n "$RESEND_API_KEY" ] && [ -n "$CONTACT_EMAIL_FROM" ] && [ -n "$CONTACT_EMAIL_TO" ]; then
-            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+            supabase secrets set --yes --project-ref "$SUPABASE_PROJECT_REF" \
               RESEND_API_KEY="$RESEND_API_KEY" \
               CONTACT_EMAIL_FROM="$CONTACT_EMAIL_FROM" \
               CONTACT_EMAIL_TO="$CONTACT_EMAIL_TO"
@@ -173,7 +173,7 @@ jobs:
             echo "::warning::Resend secrets are incomplete; existing Supabase email secrets are unchanged. Configure all three secrets to enable contact emails."
           fi
           if [ -n "$TWITCH_CLIENT_ID" ] && [ -n "$TWITCH_CLIENT_SECRET" ]; then
-            supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+            supabase secrets set --yes --project-ref "$SUPABASE_PROJECT_REF" \
               TWITCH_CLIENT_ID="$TWITCH_CLIENT_ID" \
               TWITCH_CLIENT_SECRET="$TWITCH_CLIENT_SECRET"
           else
@@ -185,6 +185,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy contact-message
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -193,6 +194,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy creator-videos
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -201,6 +203,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy creator-twitch
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -209,6 +212,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy spotify-now-playing
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -217,6 +221,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy youtube-presence
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -226,6 +231,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy hardware-sync
+          --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt
           --use-api
@@ -234,8 +240,8 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         shell: bash
         run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
-          supabase db push --linked --password "$SUPABASE_DB_PASSWORD"
+          supabase link --yes --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+          supabase db push --yes --linked --password "$SUPABASE_DB_PASSWORD"
 
   deploy:
     # Front-end features degrade gracefully, so the site still ships if the Supabase job fails.

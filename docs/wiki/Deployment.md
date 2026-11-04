@@ -35,6 +35,8 @@ The job deploys `contact-message`, `creator-videos`, `creator-twitch`,
 `spotify-now-playing`, `youtube-presence`, and `hardware-sync`, then runs `supabase db push`. When the
 required secrets are missing it logs a warning and skips, and the static
 deploy still runs if the job fails.
+Supabase commands pass `--yes` explicitly so unattended deployments can confirm
+secret synchronization, function deployment, linking, and migrations without a TTY.
 
 The shared Skills editor requires
 `20261028093000_resume_skills.sql` before the production content build.
