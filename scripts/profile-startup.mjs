@@ -1,6 +1,7 @@
 import { resolve, dirname } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
+import { screenEmulationMetrics, userAgents, throttling } from "lighthouse/core/config/constants.js";
 import { startSiteServer } from "./site-server.mjs";
 
 const args = process.argv.slice(2);
@@ -21,10 +22,18 @@ try {
     ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}),
     headless: true,
   });
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobile = screenEmulationMetrics.mobile;
+  const context = await browser.newContext({
+    viewport: { width: mobile.width, height: mobile.height },
+    deviceScaleFactor: mobile.deviceScaleFactor,
+    isMobile: mobile.mobile,
+    hasTouch: true,
+    userAgent: userAgents.mobile,
+  });
   const page = await context.newPage();
   const client = await context.newCDPSession(page);
-  await client.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  const cpuSlowdown = throttling.mobileSlow4G.cpuSlowdownMultiplier;
+  await client.send("Emulation.setCPUThrottlingRate", { rate: cpuSlowdown });
   await client.send("Profiler.enable");
   await client.send("Profiler.start");
   const response = await page.goto(target.href, { waitUntil: "networkidle" });
@@ -62,7 +71,11 @@ try {
     }))
     .sort((first, second) => second.totalMs - first.totalMs)
     .slice(0, 30);
-  console.log(JSON.stringify({ url: target.href, browser: await browser.version(), cpuSlowdown: 4, startup: summary }, null, 2));
+  const temporalAvailable = await page.evaluate(() => typeof Temporal !== "undefined");
+  console.log(JSON.stringify({
+    url: target.href, browser: await browser.version(), cpuSlowdown,
+    screenEmulation: mobile, temporalAvailable, startup: summary,
+  }, null, 2));
 } finally {
   if (browser) await browser.close();
   if (server) await server.close();

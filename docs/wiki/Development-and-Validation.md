@@ -95,6 +95,12 @@ CI saves CPU profiles for both Online and Professional under
 `node scripts/profile-startup.mjs --page professional --output lighthouse-reports/profiles/professional.cpuprofile`.
 These profiles supplement Lighthouse's simulated mobile metrics; they do not
 replace its thresholds or measurement settings.
+For an intermittent live-only failure, run the **Diagnose live startup CPU**
+workflow and select Online or Professional. Its isolated Linux runner captures
+three fresh browser processes, including the first process before other browser
+checks warm that runner. Profiles use Lighthouse's mobile viewport, device scale,
+user agent, and 4x CPU slowdown, but do not simulate its network or replace the
+production performance gate. Raw profiles are retained as `live-startup-cpu`.
 Each page/device audit gets at most three attempts, but only for the observed
 `NO_NAVSTART` trace-recording error or Chrome's `Target.getTargetInfo` missing-session
 crash. Each retry starts a fresh Lighthouse process and waits briefly. Low measured

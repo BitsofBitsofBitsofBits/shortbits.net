@@ -1,0 +1,55 @@
+name: Diagnose live startup CPU
+
+on:
+  workflow_dispatch:
+    inputs:
+      page:
+        description: Live page to profile
+        type: choice
+        required: true
+        default: online
+        options:
+          - online
+          - professional
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pinned diagnostic tools
+        run: npm ci --ignore-scripts
+
+      - name: Capture fresh-process mobile CPU profiles
+        env:
+          BITS_BROWSER_CHANNEL: chrome
+          PROFILE_PAGE: ${{ inputs.page }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for sample in 1 2 3; do
+            node scripts/profile-startup.mjs \
+              --page "$PROFILE_PAGE" \
+              --url "https://www.shortbits.net/$PROFILE_PAGE/" \
+              --output "startup-profiles/$PROFILE_PAGE-$sample.cpuprofile"
+          done
+
+      - name: Upload startup CPU profiles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-startup-cpu
+          path: startup-profiles
+          if-no-files-found: warn
+          retention-days: 14
