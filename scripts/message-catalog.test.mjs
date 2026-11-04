@@ -401,7 +401,7 @@ test("native Temporal avoids locale-format startup while preserving timezone val
   assert.throws(() => app.window.BITS_MESSAGE_CATALOG.validateTimezone("+05:00"), /IANA timezone/);
 });
 
-test("background refresh yields between parsing, applying the complete snapshot, and persisting its cache", async () => {
+test("background refresh separates settings, calendar initialization, catalog loading, application, and caching", async () => {
   const rows = defaults.map((row, index) => index === 0 ? { ...row, text: "YIELDED MESSAGE" } : row);
   const app = setup({ rows });
   const releases = [];
@@ -411,27 +411,55 @@ test("background refresh yields between parsing, applying the complete snapshot,
   assert.equal(releases.length, 1);
   assert.equal(app.window.BITS_MESSAGES[0].text, defaults[0].text);
   assert.equal(app.storage.size, 0);
+  assert.equal(app.calls.some((url) => new URL(url).pathname.endsWith("/site_message_catalog")), false);
   releases[0]();
   await new Promise(setImmediate);
-  assert.equal(app.window.BITS_MESSAGES[0].text, "YIELDED MESSAGE");
   assert.equal(releases.length, 2);
-  assert.equal(app.storage.size, 0);
+  assert.equal(app.calls.some((url) => new URL(url).pathname.endsWith("/site_message_catalog")), false);
+  assert.equal(app.window.BITS_MESSAGES[0].text, defaults[0].text);
   releases[1]();
+  await new Promise(setImmediate);
+  assert.equal(releases.length, 3);
+  assert.equal(app.calls.some((url) => new URL(url).pathname.endsWith("/site_message_catalog")), true);
+  assert.equal(app.window.BITS_MESSAGES[0].text, defaults[0].text);
+  releases[2]();
+  await new Promise(setImmediate);
+  assert.equal(app.window.BITS_MESSAGES[0].text, "YIELDED MESSAGE");
+  assert.equal(releases.length, 4);
+  assert.equal(app.storage.size, 0);
+  releases[3]();
   assert.equal(await refresh, true);
   assert.equal(app.storage.size, 1);
 });
 
-test("older browsers without scheduler.yield use separate timer tasks for refresh application and caching", async () => {
+test("calendar selection uses the current day after yielding across configured midnight", async () => {
+  const pool = datedPool("midnight", { starts_on: "2026-08-10", ends_on: "2026-08-10", schedule: "once" });
+  const app = setup({ date: "2026-08-11T04:59:59Z", timezone: "America/Chicago", pools: [pool] });
+  const releases = [];
+  app.window.scheduler.yield = () => new Promise((resolve) => releases.push(resolve));
+  const refresh = app.window.BITS_MESSAGE_CATALOG.refresh();
+  for (let index = 0; index < 4; index++) {
+    await new Promise(setImmediate);
+    assert.equal(releases.length, index + 1);
+    if (index === 1) app.setDate("2026-08-11T05:00:00Z");
+    releases[index]();
+  }
+  assert.equal(await refresh, true);
+  const requests = app.calls.filter((url) => new URL(url).pathname.endsWith("/site_message_catalog"));
+  assert.ok(requests.length > 0);
+  assert.ok(requests.every((url) => !new URL(url).searchParams.get("profile").includes(pool.id)));
+  assert.equal(app.window.BITS_SEASONAL_PROFILE.ids.includes(pool.id), false);
+});
+
+test("older browsers without scheduler.yield use separate timer tasks for all refresh stages", async () => {
   const app = setup();
   app.window.scheduler = undefined;
   const refresh = app.window.BITS_MESSAGE_CATALOG.refresh();
-  await new Promise(setImmediate);
-  const apply = app.timers.filter((timer) => timer.delay === 0);
-  assert.equal(apply.length, 1);
-  apply[0].callback();
-  await new Promise(setImmediate);
-  const tasks = app.timers.filter((timer) => timer.delay === 0);
-  assert.equal(tasks.length, 2);
-  tasks[1].callback();
+  for (let index = 0; index < 4; index++) {
+    await new Promise(setImmediate);
+    const tasks = app.timers.filter((timer) => timer.delay === 0);
+    assert.equal(tasks.length, index + 1);
+    tasks[index].callback();
+  }
   assert.equal(await refresh, true);
 });

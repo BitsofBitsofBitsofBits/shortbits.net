@@ -230,8 +230,10 @@
         ]);
         if (settings.length !== 1 || settings[0].id !== "primary") throw new Error("The message calendar settings are missing.");
         if (definitions.length >= 1000) throw new Error("Too many pool definitions; at most 999 are supported.");
+        await yieldToBrowser();
         const zone = validateTimezone(settings[0].timezone);
         definitions.forEach(validatePool);
+        await yieldToBrowser();
         const selectionDate = new Date();
         const ids = activeProfiles({ pools: definitions, timezone: zone }, selectionDate);
         const rows = [];

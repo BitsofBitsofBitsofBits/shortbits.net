@@ -207,6 +207,12 @@ than displayed as a successful deployment label.
 The fixed uppercase ASCII theme catalog is sorted without locale initialization.
 Tests verify identical alphabetical ordering across the complete catalog.
 
+Message-catalog refresh yields between settings retrieval, first-use calendar
+validation, catalog retrieval, atomic application, and cache persistence, so
+independent initialization work does not accumulate in one microtask checkpoint.
+Bundled messages remain active until a complete snapshot is ready. Calendar-day
+selection happens after the pre-fetch yields, including across configured midnight.
+
 To compare source and optimized online styles across the theme catalog at
 mobile and desktop widths, run
 `node scripts/style-optimization-browser.mjs --root <build-directory>`.
