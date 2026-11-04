@@ -107,7 +107,7 @@ export async function optimizeStyles(directory) {
     if (!first) return "";
     first = false;
     return `<style data-online-critical>${critical.code.replace(/<\/style/gi, "<\\/style")}</style>`
-      + '<link rel="stylesheet" href="/online/styles/site.css" media="print" data-online-styles>'
+      + '<link rel="stylesheet" href="/online/styles/site.css" media="print" data-online-styles disabled>'
       + '<noscript><link rel="stylesheet" href="/online/styles/site.css"></noscript>';
   }));
 

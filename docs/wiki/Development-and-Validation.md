@@ -122,6 +122,12 @@ Generated pages use a 64x64 tab icon with an 8 KiB regression budget rather than
 downloading the full-resolution artwork. The original image remains available
 at its existing URL for content and other uses. The smaller icon preserves the
 artwork and is checked in, so deployment needs no additional image tooling.
+On Online, the full stylesheet starts disabled (print media alone still
+downloads it). Stylesheet activation and enhancement initialization follow
+first contentful paint and a decoded primary portrait's paint opportunity.
+Pointer/launcher/form actions and explicit window links start initialization immediately and
+retain the existing queued-action replay; a slow image never blocks requested
+controls. Image decode failures are logged and release initialization normally.
 
 `npm run build` requires an empty output directory, copies only public site
 assets, fetches published posts and enabled public career data, generates static content, versions local CSS/JS

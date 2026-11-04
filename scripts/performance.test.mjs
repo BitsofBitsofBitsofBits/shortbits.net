@@ -202,6 +202,8 @@ test("online runtime queues early control clicks until ordered initialization co
   const context = {
     document: {
       documentElement: { dataset: {} },
+      querySelector: selector => selector === ".profile-picture"
+        ? { complete: false, decode: () => new Promise(() => {}) } : null,
       querySelectorAll: () => [{ src: "https://example.test/online/scripts/script.js" }],
       addEventListener: (type, callback) => handlers.set(type, callback),
       removeEventListener: (type) => handlers.delete(type),
@@ -223,11 +225,56 @@ test("online runtime queues early control clicks until ordered initialization co
     preventDefault() {}, stopImmediatePropagation() {},
   });
   assert.equal(activations, 0);
+  assert.equal(scripts.length, 1, "User intent starts controls immediately, without awaiting the portrait");
   frames.shift()();
   frames.shift()();
   scripts[0].listeners.load();
   assert.equal(activations, 1);
   assert.equal(handlers.size, 0);
+});
+
+test("online runtime lets pending/cached primary images paint and still initializes after image failure", async () => {
+  for (const scenario of ["pending", "cached", "failed"]) {
+    const failed = scenario === "failed";
+    const frames = [];
+    const scripts = [];
+    const warnings = [];
+    let resolveImage;
+    let rejectImage;
+    const ready = new Promise((resolve, reject) => { resolveImage = resolve; rejectImage = reject; });
+    const context = {
+      console: { warn: (...args) => warnings.push(args) },
+      document: {
+        documentElement: { dataset: {} },
+        querySelector: selector => selector === ".profile-picture"
+          ? { complete: scenario === "cached", decode: () => ready } : null,
+        querySelectorAll: () => [{ src: "https://example.test/online/scripts/script.js" }],
+        createElement: () => ({
+          listeners: {},
+          addEventListener(type, callback) { this.listeners[type] = callback; },
+        }),
+        head: { append: script => scripts.push(script) },
+      },
+      window: { requestAnimationFrame: callback => frames.push(callback), dispatchEvent() {} },
+      CustomEvent: class { constructor(type) { this.type = type; } },
+    };
+    vm.runInNewContext(runtimeSource, context);
+    frames.shift()();
+    frames.shift()();
+    assert.equal(scripts.length, 0, "Noncritical styles and scripts must not compete with the pending portrait");
+    if (failed) rejectImage(new Error("Image unavailable"));
+    else resolveImage();
+    await Promise.resolve();
+    if (!failed) {
+      frames.shift()();
+      assert.equal(scripts.length, 0, "Decoded image gets a paint opportunity before enhancements");
+      frames.shift()();
+    }
+    assert.equal(warnings.length, failed ? 1 : 0);
+    assert.equal(scripts.length, 1);
+    scripts[0].listeners.load();
+    assert.equal(context.document.documentElement.dataset.runtime, "ready");
+  }
 });
 
 test("pending runtime leaves reading, native controls, and browser shortcuts alone but replays Find a Bit", () => {
@@ -335,7 +382,7 @@ for (const outcome of ["load", "error", "timeout"]) {
     const frames = [], scripts = [], events = [];
     let timeout;
     const stylesheet = {
-      media: "print", sheet: null, listeners: {},
+      media: "print", disabled: true, sheet: null, listeners: {},
       addEventListener(name, callback) { this.listeners[name] = callback; },
     };
     const root = { dataset: {} };
@@ -361,6 +408,7 @@ for (const outcome of ["load", "error", "timeout"]) {
     frames.shift()();
     frames.shift()();
     assert.equal(stylesheet.media, "all");
+    assert.equal(stylesheet.disabled, false);
     assert.equal(scripts.length, 0);
     if (outcome === "load") {
       stylesheet.sheet = {};

@@ -19,9 +19,11 @@ try {
     await context.addInitScript(() => sessionStorage.setItem("bits-boot-seen-v1", "true"));
     let release;
     let mode = "published";
+    let stylesheetRequests = 0;
     const projectReady = new Promise(resolveReady => { release = resolveReady; });
     await context.route("**/*", async route => {
       const url = new URL(route.request().url());
+      if (url.pathname === "/online/styles/site.css") stylesheetRequests += 1;
       if (url.pathname.endsWith("/site_featured_project")) {
         await projectReady;
         return route.fulfill({
@@ -63,6 +65,38 @@ try {
     await page.reload({ waitUntil: "networkidle" });
     assert.equal(await section.isVisible(), false, "Successful unpublishing hides the snapshot");
 
+    for (const intent of ["paint", "keyboard", "linked"]) {
+      let releasePortrait;
+      const portraitReady = new Promise(resolveReady => { releasePortrait = resolveReady; });
+      const holdPortrait = async route => {
+        await portraitReady;
+        return route.continue();
+      };
+      await page.route("**/shared/images/profile.webp", holdPortrait);
+      stylesheetRequests = 0;
+      await page.goto(`${server.origin}/online/${intent === "linked" ? "?window=source" : ""}`, { waitUntil: "domcontentloaded" });
+      await page.waitForFunction(() => document.documentElement.dataset.runtime
+        && performance.getEntriesByName("first-contentful-paint").length > 0);
+      assert.equal(await page.locator("#interface-shell").isVisible(), true);
+      if (intent !== "linked") {
+        assert.equal(await page.locator("[data-online-styles]").evaluate(sheet => sheet.disabled), true,
+          "Full CSS must not compete with the blocked primary portrait");
+        assert.equal(stylesheetRequests, 0, "Full CSS must not download before primary content is ready");
+      }
+      if (intent !== "paint") {
+        if (intent === "keyboard") await page.keyboard.press("Control+k");
+        await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+        assert.equal(await page.locator(".profile-picture").evaluate(image => image.complete), false,
+          "User intent must initialize controls even while the portrait is blocked");
+        if (intent === "linked") assert.equal(await page.locator("#source-window").isVisible(), true);
+      }
+      releasePortrait();
+      await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
+      await page.waitForLoadState("networkidle");
+      assert.equal(stylesheetRequests, 1, "The full stylesheet loads exactly once");
+      await page.unroute("**/shared/images/profile.webp", holdPortrait);
+    }
+
     let runtimeRelease;
     const runtimeReady = new Promise(resolveReady => { runtimeRelease = resolveReady; });
     await page.route("**/professional/scripts/runtime.js*", async route => {
@@ -81,7 +115,7 @@ try {
     assert.equal((await page.locator("#main").boundingBox()).y, mainBefore.y,
       "Theme controls must hydrate without moving the main content");
     assert.deepEqual(errors, []);
-    console.log(`PASS ${width}px: first-paint Professional content, stable theme hydration, featured snapshot, unchanged refresh, outage, and unpublishing`);
+    console.log(`PASS ${width}px: static-first content, stable featured refresh, lazy file explorer, portrait paint, and immediate queued controls`);
     await context.close();
   }
 } finally {

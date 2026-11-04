@@ -6,6 +6,7 @@
   let notice;
   let settled = false;
   let timeout;
+  let requested = false;
   root.dataset.runtime = "pending";
 
   function showNotice(failed = false, message = "Loading controls… Your action is queued.") {
@@ -50,6 +51,7 @@
     }
     if (event.type === "pointerdown") {
       event.stopImmediatePropagation();
+      requestRuntime();
       return;
     }
     event.preventDefault();
@@ -84,6 +86,7 @@
       queued.push(() => (target.isConnected ? target : document).dispatchEvent(new KeyboardEvent("keydown", options)));
     }
     showNotice();
+    requestRuntime();
   }
 
   const eventTypes = ["click", "pointerdown", "keydown", "submit"];
@@ -104,7 +107,8 @@
 
   function startRuntime() {
     const stylesheet = document.querySelector?.("[data-online-styles]");
-    if (stylesheet && stylesheet.media !== "all") {
+    if (stylesheet && (stylesheet.disabled || stylesheet.media !== "all")) {
+      stylesheet.disabled = false;
       stylesheet.media = "all";
       if (!stylesheet.sheet) {
         timeout = window.setTimeout?.(() => {
@@ -151,6 +155,34 @@
     });
   }
 
+  function requestRuntime() {
+    if (requested) return;
+    requested = true;
+    startRuntime();
+  }
+
+  function afterContentPaint() {
+    if (requested) return;
+    if (window.location?.search) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("window") || params.has("windows")) {
+        requestRuntime();
+        return;
+      }
+    }
+    const portrait = document.querySelector?.(".profile-picture");
+    if (!portrait || typeof portrait.decode !== "function") {
+      requestRuntime();
+      return;
+    }
+    portrait.decode().then(() => {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(requestRuntime));
+    }, error => {
+      console.warn("Profile picture could not load; initializing controls without it:", error);
+      requestRuntime();
+    });
+  }
+
   function finishRuntime() {
     if (settled) {
       return;
@@ -182,11 +214,11 @@
     const observer = new PerformanceObserver((entries) => {
       if (entries.getEntries().some((entry) => entry.name === "first-contentful-paint")) {
         observer.disconnect();
-        startRuntime();
+        afterContentPaint();
       }
     });
     observer.observe({ type: "paint", buffered: true });
   } else {
-    window.requestAnimationFrame(() => window.requestAnimationFrame(startRuntime));
+    window.requestAnimationFrame(() => window.requestAnimationFrame(afterContentPaint));
   }
 })();

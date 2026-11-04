@@ -164,7 +164,7 @@ test("consolidates online styles in cascade order and inlines small résumé sty
     const online = await readFile(join(directory, "online", "index.html"), "utf8");
     assert.equal((online.match(/rel="stylesheet"/g) || []).length, 2);
     assert.match(online, /<style data-online-critical>/);
-    assert.match(online, /media="print" data-online-styles/);
+    assert.match(online, /media="print" data-online-styles disabled/);
     assert.match(online, /<noscript><link rel="stylesheet" href="\/online\/styles\/site.css"><\/noscript>/);
     const criticalCss = online.match(/<style data-online-critical>([\s\S]*?)<\/style>/)[1];
     assert.doesNotMatch(criticalCss, /deferred-panel/);
