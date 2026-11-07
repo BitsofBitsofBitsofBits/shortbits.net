@@ -176,7 +176,15 @@ npx --yes supabase@latest db push --linked
 Site statistics use daily aggregate counters updated through restricted
 Supabase functions. The browser counts a daily session once with
 `sessionStorage`, honors Global Privacy Control and Do Not Track, and never
-transmits or stores a visitor identifier.
+transmits or stores a visitor identifier in these Online aggregate events.
+Blog views are separate: `shared/scripts/blog-views.js` stores a random token
+per article and UTC day in `localStorage`, sends it with the slug to
+`get_blog_post_views`, and requests totals without a token under either privacy
+signal. The database keeps aggregate totals and clears earlier-day duplicate
+receipts on new counted views. These claims do not describe hosting/service
+logs. The [public privacy page](https://www.shortbits.net/privacy/) explains all
+three measurement paths, local state, contact handling, and third-party
+requests without requiring visitors to read this Wiki.
 
 `shared/scripts/site-config.js` holds optional public third-party identifiers:
 
@@ -203,8 +211,9 @@ transmits or stores a visitor identifier.
 The contact form posts to the `contact-message` Edge Function, which inserts
 messages with the service role after its spam checks. The
 `20261021030000_protect_contact_messages.sql` migration then revokes direct
-anonymous inserts into `messages`. Until the function is deployed, the browser
-falls back to the previous direct insert.
+anonymous inserts into `messages`. When the function returns 404 and no Turnstile site key is configured, the browser
+can fall back to the previous direct insert (subject to database permissions).
+With the configured Turnstile key it never bypasses verification through this fallback.
 
 ## Spotify request caching
 

@@ -13489,8 +13489,8 @@ html[data-interface-theme="fluent"] .desktop-window {
 
 html[data-interface-theme="fluent"] .link-card:hover,
 html[data-interface-theme="fluent"] .link-card:focus-visible {
-  border-left-color: var(--accent);
-  box-shadow: -3px 0 0 var(--accent);
+  border-left-color: var(--card-accent);
+  box-shadow: -3px 0 0 var(--card-accent);
 }
 
 html[data-interface-theme="midnight-oled"] .shell,

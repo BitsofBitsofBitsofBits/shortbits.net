@@ -69,7 +69,7 @@ try {
     for (const path of [
       "/?choose", "/online/", "/professional/", "/professional/resume/",
       "/projects/", "/projects/homelab/", "/projects/shortbits/", "/blog/",
-      "/blog/articles/first-lab-notes/", "/missing-bits-check",
+      "/blog/articles/first-lab-notes/", "/privacy/", "/missing-bits-check",
     ]) {
       await page.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
       await page.addScriptTag({ path: axePath });
@@ -78,6 +78,13 @@ try {
       })).violations.map((violation) => ({ id: violation.id, nodes: violation.nodes.map((node) => node.target) })));
       assert.deepEqual(violations, [], `${width}px ${path}: accessibility violations`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), `${width}px ${path}: horizontal overflow`);
+      if (path !== "/missing-bits-check") {
+        const navigation = page.locator('nav.public-nav[aria-label="Public sections"]');
+        for (const href of ["/professional/", "/online/", "/projects/", "/blog/", "/?choose", "/privacy/"]) {
+          assert.equal(await navigation.locator(`a[href="${href}"]`).isVisible(), true,
+            `${width}px ${path}: ${href} is discoverable`);
+        }
+      }
       if (path === "/missing-bits-check") {
         assert.equal(await page.locator("#not-found-bits").getAttribute("aria-hidden"), "true");
         assert.ok(await page.locator("#not-found-bits .falling-bit").count() > 0);
@@ -227,6 +234,7 @@ try {
     assert.match(await page.locator("#operator-age").textContent(), /^\d+Y \d+D/);
     await page.goto(`${server.origin}/professional/resume/`, { waitUntil: "networkidle" });
     await page.emulateMedia({ media: "print" });
+    assert.equal(await page.locator(".public-nav").isVisible(), false, "Public navigation stays out of the printed resume");
     const pdf = await page.pdf({ format: "Letter" });
     assert.ok(pdf.length > 1000, "Printable résumé must produce a nonempty PDF");
     await page.emulateMedia({ media: "screen" });
@@ -276,7 +284,7 @@ try {
     assert.ok((await staticResume.pdf({ format: "Letter" })).length > 1000);
     await staticResume.emulateMedia({ media: "screen" });
     await staticResume.goto(`${server.origin}/?choose`);
-    for (const href of ["/projects/", "/blog/", "/professional/resume/"]) {
+    for (const href of ["/professional/", "/online/", "/projects/", "/blog/", "/professional/resume/", "/privacy/"]) {
       assert.equal(await staticResume.locator(`.chooser-resources a[href="${href}"]`).isVisible(), true,
         "Important content is discoverable through static links without JavaScript");
     }
@@ -288,6 +296,10 @@ try {
     assert.equal(await staticResume.locator("#blog-post h1").textContent(), "First lab notes");
     const structured = JSON.parse(await staticResume.locator("script[data-seo]").textContent());
     assert.equal(structured["@graph"].find(item => item["@type"] === "BreadcrumbList").itemListElement.length, 3);
+    await staticResume.locator('.public-nav a[href="/privacy/"]').click();
+    assert.equal(await staticResume.locator("#privacy-content h1").textContent(), "Privacy");
+    await staticResume.locator('.public-nav a[href="/professional/"]').click();
+    assert.equal(await staticResume.locator("#profile-heading").isVisible(), true);
     await noScript.close();
     console.log(`PASS ${width}px immediate resume snapshot, explicit update, offline/partial data, no-JS and print`);
     console.log(`PASS ${width}px crawlable project/blog links and static article structured data without JavaScript`);
@@ -342,6 +354,28 @@ try {
     console.log(`PASS ${width}px explicit startup failure and safe retry`);
     console.log(`PASS ${width}px launcher, linked windows, lazy arcade, résumé PDF`);
     await context.close();
+    for (const choice of ["online", "professional"]) {
+      const remembered = await browser.newContext({
+        viewport: { width, height: 900 },
+        storageState: { cookies: [], origins: [{
+          origin: server.origin, localStorage: [{ name: "bits-site-choice", value: choice }],
+        }] },
+      });
+      await remembered.route(/supabase\.co|cloudflareinsights|challenges\.cloudflare|lanyard\.rest/, route => route.abort());
+      const journey = await remembered.newPage();
+      await journey.goto(`${server.origin}/`, { waitUntil: "domcontentloaded" });
+      await journey.waitForURL(`${server.origin}/${choice}/`);
+      for (const path of ["/blog/", "/projects/", "/privacy/"]) {
+        await journey.goto(`${server.origin}${path}`, { waitUntil: "domcontentloaded" });
+        assert.equal(new URL(journey.url()).pathname, path, "Shared public pages do not force a remembered profile");
+        await journey.locator('.public-nav a[href="/?choose"]').click();
+        await journey.locator("#chooser-heading").waitFor({ state: "visible" });
+        assert.equal(new URL(journey.url()).pathname, "/");
+        assert.equal(await journey.evaluate(() => localStorage.getItem("bits-site-choice")), choice);
+      }
+      await remembered.close();
+      console.log(`PASS ${width}px remembered ${choice}: explicit profile chooser from blog, projects, and privacy`);
+    }
   }
   assert.deepEqual(errors, [], "Uncaught browser errors");
   console.log("Browser smoke checks passed. Third-party verification and live data are mocked; production integration still requires manual verification.");

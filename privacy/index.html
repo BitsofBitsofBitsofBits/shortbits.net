@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How shortbits.net handles contact messages, visitor statistics, local preferences, and requests to third-party services.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#020806">
+    <link rel="canonical" href="https://www.shortbits.net/privacy/">
+    <title>Privacy | shortbits.net</title>
+    <link rel="icon" type="image/png" href="/shared/images/favicon.png">
+    <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
+    <script src="/shared/scripts/accessibility.js?v=accessibility-1"></script>
+    <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
+    <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-134">
+    <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
+    <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
+    <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
+  </head>
+  <body class="blog-page blog-post-page">
+    <a class="skip-link" href="#privacy-content">Skip to privacy information</a>
+    <main class="blog-shell">
+      <nav class="public-nav" aria-label="Public sections">
+        <a href="/professional/">Professional profile</a>
+        <a href="/online/">Online</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/">Blog</a>
+        <a href="/?choose">Choose profile</a>
+        <a href="/privacy/" aria-current="page">Privacy</a>
+      </nav>
+      <article id="privacy-content" class="blog-article">
+        <header>
+          <p class="system-kicker">PUBLIC INFORMATION</p>
+          <h1>Privacy</h1>
+          <p class="blog-article-excerpt">What happens when you browse, customize, or contact shortbits.net, Caleb K Masters's personal website.</p>
+          <p>Last updated: <time datetime="2026-11-07">November 7, 2026</time></p>
+        </header>
+        <div class="blog-markdown">
+          <nav aria-label="Privacy topics">
+            <p><a href="#contact">Contact messages</a> &middot; <a href="#statistics">Statistics</a> &middot; <a href="#preferences">Local preferences</a> &middot; <a href="#services">Other services</a> &middot; <a href="#questions">Questions</a></p>
+          </nav>
+
+          <h2 id="contact">Contact messages and the public guestbook</h2>
+          <p>The Online and Professional contact forms send your name, message, and optional email address over HTTPS to a Supabase service. Accepted messages are saved in a private database for Caleb to review through the signed-in admin area; they are not published as guestbook entries. Please do not include passwords or other sensitive information.</p>
+          <p>When email delivery is configured, Resend receives the name, message, and any email address you supply to send a notification to Caleb's inbox. Your address is used for replies. If you supply an email address, Resend also sends a receipt confirmation to that address; that confirmation does not repeat your name or message. Email delivery can fail independently of storage: the form tells you if your message was saved but email was unavailable.</p>
+          <p>Spam protection uses a hidden form field, message limits, and Cloudflare Turnstile verification. The verification widget can load as the form approaches the screen or receives focus, before you submit. Cloudflare processes verification information, and the server can send it your IP address with the verification token. The contact service also derives a daily salted hash from your IP address for rate limiting rather than storing the raw IP in its rate-limit table.</p>
+          <p>The separate <strong>Online guestbook is public</strong>: its name, message, and submission time are stored in Supabase and entries appear immediately for other visitors to read. Use a nickname and do not post anything you want kept private.</p>
+
+          <h2 id="statistics">Visitor statistics and hosting</h2>
+          <p>The site currently has Cloudflare Web Analytics configured. Its cookieless beacon measures visits and page performance. The site's own loader skips that beacon when your browser sends Global Privacy Control or Do Not Track. Cloudflare still handles normal website requests and security checks; these browser signals do not prevent those requests.</p>
+          <p>The playful Online page also sends daily aggregate counts to Supabase for page loads, sessions, desktop-window opens, and arcade plays. These counting requests contain an event type and, where relevant, a window or game label, not a visitor ID. Temporary browser-tab storage avoids counting the same session and window repeatedly that day.</p>
+          <p>Blog articles use a different counter. A random token for each article and UTC day is saved in your browser's local storage and sent with the article's slug to Supabase, so repeat opens from that browser count once that day. This is an approximate view count, not a count of unique people. It is not an account ID or a shared identifier across articles. Aggregate totals remain, while the server's duplicate-check receipts from earlier days are cleaned up when new counted views arrive.</p>
+          <p>Global Privacy Control and Do Not Track stop the site's Online event counting and blog view recording as well as its analytics loader. Blog pages can still request the existing view total without sending a counting token. These signals do not disable contact verification, public content loading, or third-party media requests.</p>
+          <p>Network requests expose connection information, including your IP address, to the services handling them. Hosting, Cloudflare, Supabase, and email services may maintain operational or security logs under their own policies. The site does not promise that browsing is unlogged or anonymous to those providers.</p>
+
+          <h2 id="preferences">Preferences stored on your device</h2>
+          <p>The site uses local storage to remember your profile choice, theme and color scheme, accessibility settings (such as reduced motion, text size, contrast, and decorative effects), and Online features such as window layouts, achievements, and game progress. These preferences are read on this device; they are not synced to a visitor account. The blog's daily counting tokens described above are the exception that is sent for measurement.</p>
+          <p>Session storage holds temporary state such as the boot-screen status and daily Online counting flags. Local storage normally remains until you clear it; session storage is normally cleared when the browser tab's session ends.</p>
+          <p>To change profiles without following a remembered choice, use <a href="/?choose">Choose profile</a>. You can uncheck <strong>Remember my choice on this device</strong> before selecting a profile to remove that saved choice. Online's Control Panel can reset appearance and accessibility preferences; it does not clear every saved feature. Your browser's site-data controls can clear all local data for shortbits.net, including blog counting tokens and game progress.</p>
+
+          <h2 id="services">Public integrations, images, and external links</h2>
+          <p>Supabase supplies public profile information, projects, blog content, guestbook entries, and live widgets, as well as handling contact messages and counters. Some content is included in the static page; JavaScript may request newer content or refresh live status.</p>
+          <p>Spotify, Discord, and YouTube presence describe <strong>Caleb's activity, not yours</strong>. Spotify data is fetched by a server-side integration using the owner's credentials. Discord status uses a Supabase proxy and a direct Lanyard connection for live changes. YouTube watching status comes from an opt-in extension on the owner's device. Visiting this website does not install that extension, ask you to sign in to those accounts, or share your own listening or viewing history with Caleb.</p>
+          <p>Your browser can still contact third parties to display artwork, avatars, thumbnails, or images in posts and creator feeds, including Spotify artwork hosts and YouTube image hosts. Online and the now-playing page can refresh live status while open. Lanyard receives connection information when its live socket is used.</p>
+          <p>Following social, project, Spotify, YouTube, or Twitch links takes you to another service with its own privacy practices. Shared short links can also redirect to an external destination or display a YouTube, Vimeo, or Spotify embed. An embedded player contacts its provider when loaded, before you necessarily press play; it may use cookies or other storage according to that provider's settings.</p>
+          <p>Provider information: <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, <a href="https://supabase.com/privacy">Supabase</a>, <a href="https://resend.com/legal/privacy-policy">Resend</a>, <a href="https://www.spotify.com/legal/privacy-policy/">Spotify</a>, <a href="https://discord.com/privacy">Discord</a>, <a href="https://policies.google.com/privacy">Google / YouTube</a>, <a href="https://www.twitch.tv/p/en/legal/privacy-notice/">Twitch</a>, and <a href="https://vimeo.com/privacy">Vimeo</a>. Lanyard is a separate public Discord-presence service; see its <a href="https://github.com/Phineas/lanyard">project documentation</a>.</p>
+
+          <h2 id="questions">Storage, removal, and questions</h2>
+          <p>This site does not publish a fixed retention period for contact messages, guestbook entries, email copies, backups, or service logs. Clearing browser data removes local preferences, not messages already submitted or records held by providers.</p>
+          <p>For questions about this page or to request removal of a contact message or guestbook entry, <a href="/professional/#contact">contact Caleb</a> and identify the relevant submission. A request may need clarification before it can be matched to a record. This page explains the current implementation; it is not a guarantee about provider retention or immediate deletion from logs and backups.</p>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

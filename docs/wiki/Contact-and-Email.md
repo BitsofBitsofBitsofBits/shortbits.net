@@ -9,6 +9,13 @@ address as Reply-To; confirmations use the owner's inbox as Reply-To.
 Confirmations contain no visitor-supplied name, links, or message content.
 The existing honeypot, Turnstile, and rate limits apply before storage or email.
 
+Visitor-facing wording is at [Privacy: contact messages](https://www.shortbits.net/privacy/#contact)
+and linked beside both forms and the public guestbook. It distinguishes private
+contact records from immediately public guestbook entries and discloses
+Supabase, Resend, Turnstile, and IP-derived rate limiting. Avoid describing
+messages as visible only to the owner without accounting for service providers
+and email processing; there is no published fixed message retention period.
+
 To enable sending:
 
 1. Add `shortbits.net` in the Resend dashboard and publish its required DNS

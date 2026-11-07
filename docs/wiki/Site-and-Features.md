@@ -10,6 +10,9 @@
 | `/online/` | The playful internet presence (desktop windows, games, Easter eggs) | `online/index.html` |
 | `/nowplaying/` | Live Spotify and YouTube presentation | `nowplaying/` |
 | `/professional/` | Recruiter-facing professional profile | `professional/` |
+| `/projects/` | Project index and static case studies | `projects/` |
+| `/blog/` | Searchable archive and generated articles | `blog/`, `scripts/build-content.mjs` |
+| `/privacy/` | Visitor-facing data handling and privacy information | `privacy/index.html` |
 
 The chooser can remember a visitor's pick in `localStorage` (`bits-site-choice`)
 and redirect on later visits; `/?choose` always shows the menu, and both sites
@@ -20,6 +23,25 @@ Pages reference them with root-absolute paths such as
 `/shared/scripts/theme-init.js`, `/online/scripts/script.js`, and `/shared/images/...`.
 Route-entry HTML stays in place so page URLs and basic static serving still work.
 See [Repository layout](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Repository-Layout).
+
+Public section navigation links directly to Professional profile, Online,
+Projects, Blog, `/?choose`, and Privacy without inferring the visitor's previous
+profile. It is static HTML, so it works without JavaScript; generated blog
+articles and the live post reader use the same destinations. Article breadcrumbs
+return to the chooser rather than treating Online as the only home. Online also
+exposes cross-section links in its File menu. The shared navigation stylesheet
+provides wrapping, keyboard focus indicators, touch targets, and print hiding
+so the printable résumé stays clean.
+
+The [public privacy page](https://www.shortbits.net/privacy/) explains private
+contact storage and conditional Resend delivery, public guestbook entries,
+Cloudflare/Online/blog measurement, local preferences, and visitor-facing
+integration requests. Contact forms, the guestbook, and the now-playing surface
+link to the relevant sections. Keep it aligned with changes to configuration,
+storage, counters, and media integrations; do not infer provider logging or
+retention guarantees from application database behavior. The production build
+copies `privacy/`, adds social/page schema through the SEO pipeline, and retains
+its canonical URL in the sitemap.
 
 ## Public features
 

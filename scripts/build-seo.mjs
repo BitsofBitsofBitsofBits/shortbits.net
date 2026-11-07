@@ -11,6 +11,7 @@ const labels = {
   "/professional/resume/": "Resume",
   "/projects/": "IT & web projects",
   "/blog/": "Technical blog",
+  "/privacy/": "Privacy",
 };
 const jsonScript = (value) => JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
 export const pagePath = (file) => `/${file.replaceAll("\\", "/").replace(/(^|\/)index\.html$/, "$1")}`;

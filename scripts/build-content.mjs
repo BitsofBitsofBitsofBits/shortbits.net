@@ -167,6 +167,7 @@ export function renderArticle(post, renderer) {
     <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
+    <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
     <script type="application/ld+json">${jsonScript(schema)}</script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
@@ -176,7 +177,15 @@ export function renderArticle(post, renderer) {
   <body class="blog-page blog-post-page">
     <a class="skip-link" href="#blog-post">Skip to article</a>
     <main class="blog-shell">
-      <nav class="blog-breadcrumbs" aria-label="Breadcrumb"><a href="/online/">HOME</a><span aria-hidden="true">/</span><a href="/blog/">BLOG.LOG</a></nav>
+      <nav class="public-nav" aria-label="Public sections">
+        <a href="/professional/">Professional profile</a>
+        <a href="/online/">Online</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/" aria-current="location">Blog</a>
+        <a href="/?choose">Choose profile</a>
+        <a href="/privacy/">Privacy</a>
+      </nav>
+      <nav class="blog-breadcrumbs" aria-label="Breadcrumb"><a href="/?choose">PROFILES</a><span aria-hidden="true">/</span><a href="/blog/">BLOG.LOG</a></nav>
       <article id="blog-post" class="blog-article" data-blog-slug="${escapeHtml(post.slug)}">
         <header>
           <p class="system-kicker">BLOG_ENTRY</p>

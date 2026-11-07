@@ -19,12 +19,21 @@
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
+    <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
   </head>
   <body class="blog-page">
     <a class="skip-link" href="#blog-content">Skip to blog posts</a>
     <div class="noise" aria-hidden="true"></div>
     <div class="scanlines" aria-hidden="true"></div>
     <main id="blog-content" class="blog-shell">
+      <nav class="public-nav" aria-label="Public sections">
+        <a href="/professional/">Professional profile</a>
+        <a href="/online/">Online</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/" aria-current="page">Blog</a>
+        <a href="/?choose">Choose profile</a>
+        <a href="/privacy/">Privacy</a>
+      </nav>
       <header class="blog-header">
         <div>
           <p class="system-kicker">PUBLIC_ARCHIVE // LONGER BITS</p>
@@ -32,7 +41,6 @@
           <p>Technical notes and project updates from Caleb K Masters (BitsofBitsofBits): home lab infrastructure, systems administration, automation, and web development.</p>
           <p><a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/projects/">Project case studies</a></p>
         </div>
-        <a href="/online/">&larr; RETURN_HOME</a>
       </header>
       <section aria-labelledby="blog-posts-heading">
         <div class="section-label">

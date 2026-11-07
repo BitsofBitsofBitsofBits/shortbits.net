@@ -16,6 +16,15 @@ function context(extra = {}) {
 }
 const plain = value => JSON.parse(JSON.stringify(value));
 
+test("Fluent social-card hover and keyboard-focus indicators use the individual card color", async () => {
+  const css = await readFile(new URL("../shared/styles/styles.css", import.meta.url), "utf8");
+  const rule = /html\[data-interface-theme="fluent"\] \.link-card:hover,\s*html\[data-interface-theme="fluent"\] \.link-card:focus-visible\s*\{([^}]+)\}/.exec(css);
+  assert.ok(rule);
+  assert.match(rule[1], /border-left-color:\s*var\(--card-accent\)/);
+  assert.match(rule[1], /box-shadow:\s*-3px 0 0 var\(--card-accent\)/);
+  assert.doesNotMatch(rule[1], /var\(--accent\)/);
+});
+
 test("social migration preserves existing links and enforces publication, ownership and safe fields", async () => {
   const db = new PGlite();
   try {

@@ -100,6 +100,7 @@
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" type="application/x-bits-runtime"></script>
     <script src="/online/scripts/online-runtime.js?v=runtime-3" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
+    <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
   </head>
   <body>
     <a class="skip-link" href="#interface-shell">Skip to main content</a>
@@ -440,6 +441,11 @@
             <button type="button" data-window-target="about-window">OPEN ABOUT_ME.TXT</button>
             <button type="button" data-window-target="filesystem-window">OPEN PUBLIC_FILES</button>
             <button type="button" data-window-target="source-window">OPEN SOURCE_BROWSER</button>
+            <a href="/professional/">Professional profile</a>
+            <a href="/projects/">Projects</a>
+            <a href="/blog/">Blog</a>
+            <a href="/?choose">Choose profile</a>
+            <a href="/privacy/">Privacy</a>
           </div>
         </details>
         <details class="app-menu" name="application-menu">
@@ -764,10 +770,11 @@
           </label>
           <div class="contact-actions">
             <p id="contact-status" class="form-status" role="status" aria-live="polite">
-              Messages are encrypted in transit and visible only to the site owner. I probably won't read them all. Or reply at all.
+              Messages are sent over HTTPS and stored privately for Caleb to review. I probably won't read them all. Or reply at all.
             </p>
             <button id="contact-submit" type="submit">&gt; SEND_PACKET</button>
           </div>
+          <p><a href="/privacy/#contact">How your message is handled</a></p>
         </form>
       </section>
 
@@ -790,7 +797,14 @@
         <p>
           © <span id="year"></span> BITS_OF_BITS_OF_BITS
         </p>
-        <p><a class="site-switch-link" href="/projects/">PROJECTS</a> &middot; <a class="site-switch-link" href="/blog/">BLOG</a> &middot; <a class="site-switch-link" href="/?choose">&lt; SWITCH_SITE</a></p>
+        <nav class="public-nav" aria-label="Public sections">
+          <a href="/professional/">Professional profile</a>
+          <a href="/online/" aria-current="page">Online</a>
+          <a href="/projects/">Projects</a>
+          <a href="/blog/">Blog</a>
+          <a href="/?choose">Choose profile</a>
+          <a href="/privacy/">Privacy</a>
+        </nav>
         <p><a class="site-switch-link" href="/admin/">ADMIN</a></p>
       </footer>
     </main>
@@ -1606,7 +1620,7 @@
           </label>
           <div class="guestbook-form-actions">
             <p id="guestbook-form-status" class="form-status" role="status" aria-live="polite">
-              Entries publish immediately. Please deploy responsibly.
+              Entries publish immediately. Please deploy responsibly. <a href="/privacy/#contact">Guestbook privacy</a>.
             </p>
             <button id="guestbook-submit" type="submit">&gt; SIGN_GUESTBOOK</button>
           </div>

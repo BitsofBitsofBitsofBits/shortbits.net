@@ -43,6 +43,41 @@ try {
       assert.equal(await page.locator(selector).nth(1).getAttribute("href"), "https://example.com/edited");
       assert.equal(await page.locator(`${selector} .link-title img`).count(), 0);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2));
+      if (path === "/online/") {
+        await page.locator("#interface-theme-select").selectOption("fluent", { force: true });
+        await page.waitForFunction(() => document.documentElement.dataset.interfaceTheme === "fluent");
+        for (const card of [page.locator(selector).first(), page.locator(selector).nth(1)]) {
+          await page.mouse.move(0, 0);
+          const idleShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+          assert.equal(idleShadow, "none", "Fluent idle cards do not gain the hover indicator");
+          const color = await card.evaluate(element => {
+            const sample = document.createElement("span");
+            sample.style.color = getComputedStyle(element).getPropertyValue("--card-accent");
+            element.append(sample);
+            const value = getComputedStyle(sample).color;
+            sample.remove();
+            return value;
+          });
+          await card.hover();
+          await page.waitForFunction(({ color, href }) => {
+            const element = [...document.querySelectorAll("#link-grid a")].find(link => link.getAttribute("href") === href);
+            const style = getComputedStyle(element);
+            return style.borderLeftColor === color && style.boxShadow.includes(`${color} -3px 0px 0px`);
+          }, { color, href: await card.getAttribute("href") });
+          await page.mouse.move(0, 0);
+          await page.keyboard.press("Tab");
+          await card.focus();
+          assert.equal(await card.evaluate(element => element.matches(":focus-visible")), true);
+          await page.waitForFunction(({ color, href }) => {
+            const element = [...document.querySelectorAll("#link-grid a")].find(link => link.getAttribute("href") === href);
+            const style = getComputedStyle(element);
+            return style.borderLeftColor === color && style.boxShadow.includes(`${color} -3px 0px 0px`);
+          }, { color, href: await card.getAttribute("href") });
+          await card.evaluate(element => element.blur());
+        }
+        await page.locator("#interface-theme-select").selectOption("default", { force: true });
+        console.log(`PASS ${width}px Fluent social-card indicator: individual hover/focus colors and unchanged idle state`);
+      }
       const saved = rows;
       rows = [];
       await page.reload({ waitUntil: "networkidle" });

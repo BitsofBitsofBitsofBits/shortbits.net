@@ -95,6 +95,7 @@
     <script src="/shared/scripts/social-links-profile.js?v=social-1" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
+    <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
   </head>
   <body class="professional-page">
     <a class="profile-skip" href="#main">Skip to content</a>
@@ -128,6 +129,14 @@
         </div>
       </header>
 
+      <nav class="public-nav" aria-label="Public sections">
+        <a href="/professional/" aria-current="page">Professional profile</a>
+        <a href="/online/">Online</a>
+        <a href="/projects/">Projects</a>
+        <a href="/blog/">Blog</a>
+        <a href="/?choose">Choose profile</a>
+        <a href="/privacy/">Privacy</a>
+      </nav>
       <main id="main" tabindex="-1">
         <section class="profile-hero" aria-labelledby="profile-heading">
           <div>
@@ -264,11 +273,11 @@
               <label><span>Name</span><input name="name" type="text" maxlength="100" autocomplete="name" required></label>
               <label><span>Email <em>(optional)</em></span><input name="email" type="email" maxlength="320" autocomplete="email" aria-describedby="profile-email-help"></label>
             </div>
-            <p id="profile-email-help" class="profile-help">Include your email for a confirmation and a reply. Contact emails are sent through Resend.</p>
+            <p id="profile-email-help" class="profile-help">Include your email for a confirmation and a reply. Contact emails are sent through Resend. <a href="/privacy/#contact">How your message is handled</a>.</p>
             <label><span>Message</span><textarea name="message" maxlength="2000" rows="6" required></textarea></label>
             <label class="contact-honeypot" aria-hidden="true"><span>Website</span><input name="website" type="text" tabindex="-1" autocomplete="off"></label>
             <div class="contact-actions">
-              <p id="contact-status" class="form-status" role="status" aria-live="polite">Messages are encrypted in transit and visible only to the site owner.</p>
+              <p id="contact-status" class="form-status" role="status" aria-live="polite">Messages are sent over HTTPS and stored privately for Caleb to review.</p>
               <button id="contact-submit" type="submit" disabled>Send message</button>
             </div>
             <noscript><p>This form requires JavaScript. Please use the social links beside the form instead.</p></noscript>
@@ -277,7 +286,7 @@
       </main>
       <footer class="profile-footer">
         <p>Caleb K Masters <span>/</span> Carbondale, Kansas</p>
-        <nav aria-label="Footer navigation"><span class="profile-socials" data-social-links></span><a href="/online/">Personal site &nearr;</a><a href="/?choose">Switch site</a></nav>
+        <nav aria-label="Footer navigation"><span class="profile-socials" data-social-links></span><a href="/online/">Personal site &nearr;</a><a href="/?choose">Switch site</a><a href="/privacy/">Privacy</a></nav>
       </footer>
     </div>
   </body>

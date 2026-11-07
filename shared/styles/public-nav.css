@@ -1,0 +1,48 @@
+.public-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin: 0 0 20px;
+  font-size: 0.85rem;
+}
+
+.public-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
+.public-nav a[aria-current] {
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+}
+
+.public-nav a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+footer .public-nav {
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.professional-page > .profile-layout > .public-nav {
+  padding: 0 24px;
+}
+
+.resume-page > .public-nav {
+  margin: 0;
+  padding: 4px max(16px, calc((100% - 8.5in) / 2));
+  color: var(--bar-ink);
+  background: var(--bar);
+}
+
+@media print {
+  .public-nav {
+    display: none !important;
+  }
+}

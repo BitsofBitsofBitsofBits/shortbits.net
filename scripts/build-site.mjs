@@ -227,7 +227,7 @@ export async function buildSite(output, contentInput, resumeInput) {
   const themeBuild = spawnSync(process.execPath, [join(root, "scripts", "build-theme-css.mjs")], { stdio: "inherit" });
   if (themeBuild.error) throw themeBuild.error;
   if (themeBuild.status !== 0) throw new Error(`Shared theme CSS generation failed (exit ${themeBuild.status}).`);
-  const directories = new Set(["admin", "blog", "boot", "home", "not-found", "nowplaying", "online", "professional", "projects", "shared", "useless"]);
+  const directories = new Set(["admin", "blog", "boot", "home", "not-found", "nowplaying", "online", "privacy", "professional", "projects", "shared", "useless"]);
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if ((entry.isDirectory() && directories.has(entry.name))
       || (entry.isFile() && (/\.(?:html|css|js)$/.test(entry.name)

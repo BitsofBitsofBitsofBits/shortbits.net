@@ -31,6 +31,10 @@ Changes apply immediately and synchronize between open tabs. Reset Preferences
 clears these choices. Screen-only overrides do not change the printable resume.
 Keyboard access and ordinary focus indicators remain available without opting in.
 
+Fluent social cards use each managed link's color for the left border and thick
+side indicator on hover and keyboard focus, matching the card's own accent
+rather than the global theme accent. Idle card styling is unchanged.
+
 Validate with `node --test scripts/accessibility-preferences.test.mjs` and
 `node scripts/accessibility-preferences-browser.mjs --root .site-build`.
 
