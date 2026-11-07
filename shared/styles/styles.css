@@ -4555,6 +4555,11 @@ body:has(#featured-project-section[hidden]) a[href="#featured-heading"] {
   font-style: normal;
 }
 
+:is(.contact-form, .guestbook-form) a[href^="/privacy/"] {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
 .contact-form input,
 .contact-form textarea,
 .admin-form input,

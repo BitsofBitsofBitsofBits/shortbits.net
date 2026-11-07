@@ -236,6 +236,11 @@
   margin: 24px 0 0;
 }
 
+.presentation-note a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
 .presentation-controls {
   position: fixed;
   z-index: 100;
