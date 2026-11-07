@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A live presentation of Caleb's current Spotify listening and shared YouTube watching, together in one place.">
+    <meta name="description" content="A live presentation of Caleb's Spotify listening, shared YouTube watching, and optional owner-only Jellyfin status.">
     <meta name="author" content="Caleb K Masters">
     <meta name="theme-color" content="#070b0f">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="BitsofBitsofBits">
     <meta property="og:title" content="Now Playing // BitsofBitsofBits">
-    <meta property="og:description" content="Musical bits and watched pixels. Live Spotify and YouTube status.">
+    <meta property="og:description" content="Musical bits and watched pixels. Live Spotify, YouTube, and optional owner-only Jellyfin status.">
     <meta property="og:url" content="https://www.shortbits.net/nowplaying/">
     <meta property="og:image" content="https://www.shortbits.net/shared/images/social-preview.png">
     <meta property="og:image:alt" content="BitsofBitsofBits on a dark technical grid">
@@ -30,6 +30,7 @@
     <script src="/online/scripts/spotify.js?v=spotify-15" defer></script>
     <script src="/online/scripts/discord.js?v=discord-3" defer></script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/online/scripts/jellyfin.js?v=jellyfin-1" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
   </head>
@@ -45,7 +46,7 @@
     </header>
     <main id="main" tabindex="-1">
       <noscript><p class="presentation-notice">JavaScript is required for live playback status. <a href="/online/">Return to the online page.</a></p></noscript>
-      <div id="media-player" class="media-player presentation-grid" data-mode="presentation" aria-label="Live Spotify and YouTube status">
+      <div id="media-player" class="media-player presentation-grid" data-mode="presentation" aria-label="Live listening and owner-shared watching status">
         <article id="spotify-widget" class="spotify-widget presentation-card" aria-labelledby="spotify-heading" data-state="loading">
           <header class="presentation-card-header">
             <h2 id="spotify-heading">SPOTIFY</h2>
@@ -98,14 +99,37 @@
             </div>
           </div>
         </article>
+        <article id="jellyfin-widget" class="spotify-widget jellyfin-widget presentation-card" aria-labelledby="jellyfin-heading" data-state="loading" hidden>
+          <header class="presentation-card-header">
+            <h2 id="jellyfin-heading">JELLYFIN</h2>
+            <span>OWNER'S VIDEO SIGNAL</span>
+          </header>
+          <div class="presentation-artwork">
+            <div class="spotify-placeholder" aria-hidden="true">JF</div>
+          </div>
+          <div class="spotify-copy">
+            <p id="jellyfin-state" class="activity-label" role="status" aria-live="polite">CONNECTING // JELLYFIN</p>
+            <p id="jellyfin-track" class="spotify-track">Locating watched bits...</p>
+            <p id="jellyfin-series" class="spotify-artist"></p>
+            <div class="spotify-timeline" aria-label="Jellyfin playback position">
+              <span id="jellyfin-current-time">0:00</span>
+              <div id="jellyfin-progress" class="spotify-progress" aria-hidden="true"></div>
+              <span id="jellyfin-duration">0:00</span>
+            </div>
+          </div>
+          <div class="presentation-card-footer">
+            <p class="presentation-session"><span>SHARED STATUS</span><strong id="jellyfin-updated">AWAITING SIGNAL</strong></p>
+          </div>
+        </article>
         <nav id="media-navigation" class="media-navigation" aria-label="Switch current media" hidden>
           <button id="media-previous" type="button" aria-label="Previous media source">&#8592;</button>
           <span id="media-selection"></span>
           <button id="media-next" type="button" aria-label="Next media source">&#8594;</button>
         </nav>
         <p id="media-status" class="media-status" role="status" aria-live="polite"></p>
+        <p id="jellyfin-status" class="media-status" role="status" aria-live="polite"></p>
       </div>
-      <p class="presentation-note">A read-only window into public playback. Session clocks include pauses and start at the first server observation, not the start of a song or video. <a href="/privacy/#services">Privacy and live integrations</a>.</p>
+      <p class="presentation-note">A read-only window into public playback. Spotify and YouTube session clocks include pauses and start at the first server observation, not the start of a song or video. Optional Jellyfin sharing shows only the configured owner's account and the age of its latest update, not a session length. <a href="/privacy/#services">Privacy and live integrations</a>.</p>
     </main>
     <div id="presentation-controls" class="presentation-controls" role="group" aria-label="Presentation controls">
       <a href="/online/">BACK TO ONLINE</a>

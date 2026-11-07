@@ -75,6 +75,7 @@ jobs:
           node scripts/creators-browser.mjs --root .site-build
           node scripts/media-player-browser.mjs --root .site-build
           node scripts/nowplaying-browser.mjs --root .site-build
+          node scripts/jellyfin-browser.mjs --root .site-build
           node scripts/youtube-extension-browser.mjs
           node scripts/aero-variants-browser.mjs --root .site-build
           node scripts/theme-collection-browser.mjs --root .site-build
@@ -112,8 +113,10 @@ jobs:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d postgres -f agents/unraid/database.test.sql
 
-      - name: Build Unraid collector image
-        run: docker build --tag shortbits-unraid:test agents/unraid
+      - name: Build local collector images
+        run: |
+          docker build --tag shortbits-unraid:test agents/unraid
+          docker build --tag shortbits-jellyfin:test agents/jellyfin
 
       - name: Scan committed content for secrets
         uses: gitleaks/gitleaks-action@v2
@@ -224,6 +227,28 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         run: >-
           supabase functions deploy youtube-presence
+          --yes
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
+
+      - name: Configure optional Jellyfin collector authentication
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          JELLYFIN_USER_ID: ${{ secrets.JELLYFIN_USER_ID }}
+          JELLYFIN_INGEST_TOKEN: ${{ secrets.JELLYFIN_INGEST_TOKEN }}
+        run: |
+          if [ -n "$JELLYFIN_USER_ID" ] && [ -n "$JELLYFIN_INGEST_TOKEN" ]; then
+            supabase secrets set --yes --project-ref "$SUPABASE_PROJECT_REF" \
+              JELLYFIN_USER_ID="$JELLYFIN_USER_ID" JELLYFIN_INGEST_TOKEN="$JELLYFIN_INGEST_TOKEN"
+          else
+            echo "Jellyfin secrets not supplied; existing private configuration is unchanged."
+          fi
+
+      - name: Deploy Jellyfin presence Edge Function
+        if: steps.credentials.outputs.ready == 'true'
+        run: >-
+          supabase functions deploy jellyfin-presence
           --yes
           --project-ref "$SUPABASE_PROJECT_REF"
           --no-verify-jwt

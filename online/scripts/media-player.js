@@ -1,11 +1,12 @@
 (() => {
   const spotify = document.querySelector("#spotify-widget");
   const youtube = document.querySelector("#youtube-widget");
+  const jellyfin = document.querySelector("#jellyfin-widget");
   const navigation = document.querySelector("#media-navigation");
   const selection = document.querySelector("#media-selection");
   const status = document.querySelector("#media-status");
   const presentation = document.querySelector("#media-player").dataset.mode === "presentation";
-  const state = { spotify: null, youtube: null };
+  const state = { spotify: null, youtube: null, jellyfin: null };
   let selected = "spotify";
   let manualSelection = false;
   let orderSignature = "";
@@ -81,10 +82,11 @@
     orderSignature = signature;
     spotify.hidden = !presentation && selected !== "spotify";
     youtube.hidden = !presentation && selected !== "youtube";
+    if (jellyfin) jellyfin.hidden = jellyfin.dataset.enabled !== "true" || !presentation && selected !== "jellyfin";
     navigation.hidden = presentation || sources.length < 2;
     if (presentation && !state.youtube?.available) renderYoutubeIdle();
-    selection.textContent = `${selected === "youtube" ? "YOUTUBE" : "SPOTIFY"} // ${Math.max(1, sources.indexOf(selected) + 1)} OF ${Math.max(1, sources.length)}`;
-    const missingSession = sources.some(id => state[id].startedAt === null);
+    selection.textContent = `${selected.toUpperCase()} // ${Math.max(1, sources.indexOf(selected) + 1)} OF ${Math.max(1, sources.length)}`;
+    const missingSession = sources.some(id => id !== "jellyfin" && state[id].startedAt === null);
     status.textContent = youtubeError || (missingSession ? "Session timing unavailable; active playback is still prioritized." : "");
     window.dispatchEvent(new CustomEvent("media:youtube", { detail: {
       available: state.youtube?.available ?? false,
@@ -110,6 +112,10 @@
     const startedAt = Date.parse(detail.sessionStartedAt);
     state.spotify = { available: detail.available, isPlaying: detail.isPlaying,
       startedAt: Number.isFinite(startedAt) ? startedAt : null };
+    renderSelection();
+  });
+  window.addEventListener("media:jellyfin", event => {
+    state.jellyfin = { available: event.detail.available, isPlaying: event.detail.isPlaying, startedAt: null };
     renderSelection();
   });
 

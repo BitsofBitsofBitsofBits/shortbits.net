@@ -4,6 +4,28 @@
 
 ## Public configuration and services
 
+### Private Jellyfin watching presence
+
+The optional outbound [Jellyfin collector](https://github.com/BitsofBitsofBitsofBits/shortbits.net/blob/main/agents/jellyfin/README.md)
+keeps the server LAN-only. It filters the exact immutable primary session user
+ID locally before transmission. Authenticated `jellyfin-presence` ingestion
+checks the same `JELLYFIN_USER_ID` and a private `JELLYFIN_INGEST_TOKEN`, then
+stores a single allowlisted report. Both values are private Supabase secrets;
+Jellyfin credentials and its LAN URL remain only on the collector.
+
+Other accounts, additional-user memberships and remote-control access are never
+fallbacks. Missing/invalid owner configuration fails closed. Public reads hide
+owner IDs, item IDs, devices, server addresses, raw sessions and credentials.
+Reports expire after 90 seconds; expired/unavailable status contains no media.
+The browser never requests Jellyfin artwork or playback URLs.
+
+Deploy the new migration/function only with release authorization, provision
+private configuration, and verify the real collector before enabling
+`jellyfinPresenceEnabled` in `shared/scripts/site-config.js` (default false).
+Online includes active Jellyfin in the existing source arrows; `/nowplaying/`
+adds its simultaneous card with update age, not a session-length estimate.
+See the collector README for secure Node/Docker setup and revocation.
+
 ### YouTube watching presence
 
 An opt-in Chromium extension reports playing and paused YouTube videos to

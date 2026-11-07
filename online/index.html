@@ -97,6 +97,7 @@
     <script src="/online/scripts/media-player.js?v=media-1" type="application/x-bits-runtime"></script>
     <script src="/online/scripts/spotify.js?v=spotify-15" type="application/x-bits-runtime"></script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" type="application/x-bits-runtime"></script>
+    <script src="/online/scripts/jellyfin.js?v=jellyfin-1" type="application/x-bits-runtime"></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" type="application/x-bits-runtime"></script>
     <script src="/online/scripts/online-runtime.js?v=runtime-3" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
@@ -676,12 +677,27 @@
           <a id="youtube-video-link" class="spotify-track-link" href="https://www.youtube.com/" target="_blank" rel="noreferrer">OPEN &#8599;</a>
         </div>
       </aside>
+      <aside id="jellyfin-widget" class="spotify-widget jellyfin-widget" aria-label="Owner's Jellyfin watching" data-state="loading" hidden>
+        <div class="spotify-placeholder" aria-hidden="true">JF</div>
+        <div class="spotify-copy">
+          <p id="jellyfin-state" class="activity-label" role="status" aria-live="polite">CONNECTING // JELLYFIN</p>
+          <p id="jellyfin-track" class="spotify-track">Locating watched bits...</p>
+          <p id="jellyfin-series" class="spotify-artist"></p>
+          <div class="spotify-timeline" aria-label="Jellyfin playback position">
+            <span id="jellyfin-current-time">0:00</span>
+            <div id="jellyfin-progress" class="spotify-progress" aria-hidden="true"></div>
+            <span id="jellyfin-duration">0:00</span>
+          </div>
+          <small id="jellyfin-updated">AWAITING SIGNAL</small>
+        </div>
+      </aside>
       <nav id="media-navigation" class="media-navigation" aria-label="Switch current media" hidden>
         <button id="media-previous" type="button" aria-label="Previous media source">&#8592;</button>
         <span id="media-selection" role="status" aria-live="polite"></span>
         <button id="media-next" type="button" aria-label="Next media source">&#8594;</button>
       </nav>
       <p id="media-status" class="media-status" role="status" aria-live="polite"></p>
+      <p id="jellyfin-status" class="media-status" role="status" aria-live="polite"></p>
       <a class="media-presentation-link" href="/nowplaying/">OPEN NOW PLAYING // PRESENTATION &#8599;</a>
       </div>
 

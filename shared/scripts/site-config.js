@@ -4,4 +4,5 @@ window.SITE_CONFIG = Object.freeze({
   cloudflareAnalyticsToken: "abc278e0b47f4f89b18d6ba78df032d0", // gitleaks:allow (public beacon token)
   // Cloudflare dashboard > Turnstile > Add widget > "Site Key". The matching Secret Key belongs in GitHub secrets.
   turnstileSiteKey: "0x4AAAAAAFekKmeFCUNfAXEN",
+  jellyfinPresenceEnabled: false,
 });

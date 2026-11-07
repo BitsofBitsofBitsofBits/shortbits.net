@@ -1,0 +1,8 @@
+{
+  "jellyfinUrl": "http://YOUR_PRIVATE_JELLYFIN_HOST:8096/",
+  "jellyfinApiKey": "REPLACE_LOCALLY",
+  "jellyfinUserId": "REPLACE_WITH_IMMUTABLE_USER_ID",
+  "supabaseUrl": "https://YOUR_PROJECT.supabase.co/",
+  "supabaseKey": "REPLACE_WITH_PUBLIC_PUBLISHABLE_KEY",
+  "deviceToken": "REPLACE_WITH_PRIVATE_INGEST_TOKEN"
+}

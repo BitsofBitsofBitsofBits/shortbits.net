@@ -72,6 +72,20 @@
   gap: clamp(16px, 2vw, 32px);
 }
 
+#media-player.presentation-grid:has(#jellyfin-widget[data-enabled="true"]) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nowplaying-page #media-player .presentation-card[hidden] {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  #media-player.presentation-grid:has(#jellyfin-widget[data-enabled="true"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .nowplaying-page #media-player .presentation-card {
   --spotify-accent: color-mix(in srgb, var(--accent) 35%, var(--ink));
   display: grid;
@@ -219,7 +233,7 @@
   opacity: 0.55;
 }
 
-.nowplaying-page #media-status {
+.nowplaying-page :is(#media-status, #jellyfin-status) {
   grid-column: 1 / -1;
   margin: 0;
   font-size: 0.75rem;

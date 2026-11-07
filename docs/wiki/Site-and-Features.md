@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `/` | Themed boot-menu chooser between the two sites | `index.html`, `home/scripts/chooser.js`, `home/styles/chooser.css` |
 | `/online/` | The playful internet presence (desktop windows, games, Easter eggs) | `online/index.html` |
-| `/nowplaying/` | Live Spotify and YouTube presentation | `nowplaying/` |
+| `/nowplaying/` | Live media presentation, including optional owner-only Jellyfin | `nowplaying/` |
 | `/professional/` | Recruiter-facing professional profile | `professional/` |
 | `/projects/` | Project index and static case studies | `projects/` |
 | `/blog/` | Searchable archive and generated articles | `blog/`, `scripts/build-content.mjs` |
@@ -99,16 +99,21 @@ its canonical URL in the sitemap.
   avoid transferring the full favicon asset for the page's largest-contentful paint.
   The portrait carries visible credit to **Kay (@galacticcookie)**.
 
-- Spotify now-playing and opt-in YouTube watching presence share the player
+- Spotify now-playing, opt-in YouTube watching and optional owner-only Jellyfin share the player
   area. Arrow controls switch sources; playing media takes priority over paused
   media, then the earlier continuous listening/watching session appears first.
   YouTube reporting uses a locally installed Chromium extension, starts off by
   default, and expires within 90 seconds without updates. See the
   [setup guide](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/YouTube-Presence).
+  Jellyfin uses a private-network outbound collector with exact immutable account
+  filtering and authenticated ingestion. It defaults off until privately
+  configured and explicitly enabled; it never loads private-server artwork or
+  playback URLs. See [Jellyfin setup](https://github.com/BitsofBitsofBitsofBits/shortbits.net/blob/main/agents/jellyfin/README.md).
 
-- `/nowplaying/` presents both playback statuses simultaneously: side by side
+- `/nowplaying/` presents enabled playback statuses simultaneously: side by side
   on desktop, stacked on mobile, with large artwork, playback timelines, and
-  continuous server-observed session lengths (including pauses). It inherits
+  continuous server-observed Spotify/YouTube session lengths (including pauses).
+  Jellyfin shows the latest report's age instead of an estimated session length. It inherits
   the site's theme/color preferences without mounting desktop or parody-layout
   chrome. Presentation controls support fullscreen (`F`, or Escape to leave),
   optional four-second auto-hide, and theme/color selection. Pointer activity

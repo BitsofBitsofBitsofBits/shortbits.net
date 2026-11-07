@@ -10,4 +10,5 @@ node_modules/
 lighthouse-reports/
 supabase/.temp/
 agents/unraid/config.json
+agents/jellyfin/config.json
 bitsofbits-achievements.json
