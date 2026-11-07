@@ -148,7 +148,7 @@ try {
         await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount === 0);
       }
       if (path === "/online/") {
-        const adminLink = page.locator("#interface-shell > footer > p:last-child a");
+        const adminLink = page.locator("#interface-shell > footer > nav.public-nav a").last();
         assert.equal(await adminLink.textContent(), "ADMIN");
         assert.equal(await adminLink.getAttribute("href"), "/admin/");
         const picture = page.locator(".profile-picture");

@@ -55,7 +55,8 @@ test("Online keeps the native File commands and compact footer navigation hooks"
     ["about-window", "filesystem-window", "source-window"]);
   const nav = document.querySelector("#interface-shell > footer .online-public-nav");
   assert.ok(nav);
-  assert.equal(nav.querySelectorAll("a.site-switch-link").length, 6);
+  assert.equal(nav.querySelectorAll("a.site-switch-link").length, 7);
+  assert.equal(nav.lastElementChild.getAttribute("href"), "/admin/");
 });
 
 test("privacy is indexable, included in the build and sitemap, and discloses the distinct data paths", async () => {
