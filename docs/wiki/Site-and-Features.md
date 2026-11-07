@@ -28,8 +28,10 @@ Public section navigation links directly to Professional profile, Online,
 Projects, Blog, `/?choose`, and Privacy without inferring the visitor's previous
 profile. It is static HTML, so it works without JavaScript; generated blog
 articles and the live post reader use the same destinations. Article breadcrumbs
-return to the chooser rather than treating Online as the only home. Online also
-exposes cross-section links in its File menu. The shared navigation stylesheet
+return to the chooser rather than treating Online as the only home. Online keeps
+its original three-command File menu and exposes public section links as compact
+accent-colored footer navigation, inheriting the footer typography rather than
+the larger article-page navigation. The shared navigation stylesheet
 provides wrapping, keyboard focus indicators, touch targets, and print hiding
 so the printable résumé stays clean.
 

@@ -85,6 +85,46 @@ try {
             `${width}px ${path}: ${href} is discoverable`);
         }
       }
+      if (path === "/online/") {
+        const chrome = await page.evaluate(() => {
+          const footer = document.querySelector("#interface-shell > footer");
+          const nav = footer.querySelector(".online-public-nav");
+          const style = getComputedStyle(nav);
+          return {
+            footerHeight: footer.getBoundingClientRect().height,
+            footerFont: getComputedStyle(footer).fontSize,
+            navFont: style.fontSize,
+            navMargin: style.margin,
+            linkHeights: [...nav.querySelectorAll("a")].map(link => link.getBoundingClientRect().height),
+            commands: [...document.querySelector("#app-menu-bar .app-menu-popup").children]
+              .map(command => command.getAttribute("data-window-target")),
+          };
+        });
+        assert.equal(chrome.navFont, chrome.footerFont, "Online navigation inherits the compact footer typography");
+        assert.equal(chrome.navMargin, "0px", "Article navigation spacing must not inflate the Online footer");
+        assert.ok(chrome.footerHeight <= (width > 900 ? 64 : 150), `${width}px Online footer is ${chrome.footerHeight}px tall`);
+        assert.ok(chrome.linkHeights.every(height => height >= 24), "Compact footer links retain accessible target height");
+        assert.deepEqual(chrome.commands, ["about-window", "filesystem-window", "source-window"],
+          "Online File menu retains its three native commands");
+        const profileLink = page.locator(".online-public-nav a").first();
+        await profileLink.focus();
+        await page.keyboard.press("Tab");
+        assert.equal(await page.evaluate(() => document.activeElement.getAttribute("href")), "/online/",
+          "Compact public navigation remains keyboard navigable");
+        assert.equal(await page.evaluate(() => document.activeElement.matches(":focus-visible")
+          && getComputedStyle(document.activeElement).outlineStyle !== "none"), true,
+        "Compact navigation retains a visible keyboard focus indicator");
+        const largeTargets = await page.evaluate(() => {
+          const previous = document.documentElement.dataset.largeControls;
+          document.documentElement.dataset.largeControls = "on";
+          const heights = [...document.querySelectorAll(".online-public-nav a")]
+            .map(link => link.getBoundingClientRect().height);
+          if (previous === undefined) delete document.documentElement.dataset.largeControls;
+          else document.documentElement.dataset.largeControls = previous;
+          return heights;
+        });
+        assert.ok(largeTargets.every(height => height >= 44), "Larger-controls preference still expands compact navigation");
+      }
       if (path === "/missing-bits-check") {
         assert.equal(await page.locator("#not-found-bits").getAttribute("aria-hidden"), "true");
         assert.ok(await page.locator("#not-found-bits .falling-bit").count() > 0);
