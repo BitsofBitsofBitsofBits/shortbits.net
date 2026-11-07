@@ -101,6 +101,9 @@ try {
         await page.waitForFunction(() => document.querySelector("#not-found-bits").childElementCount === 0);
       }
       if (path === "/online/") {
+        const adminLink = page.locator("#interface-shell > footer > p:last-child a");
+        assert.equal(await adminLink.textContent(), "ADMIN");
+        assert.equal(await adminLink.getAttribute("href"), "/admin/");
         const picture = page.locator(".profile-picture");
         assert.ok(await picture.evaluate(img => img.complete && img.naturalWidth > 0), "Profile picture loads");
         assert.equal(await picture.getAttribute("src"), "/shared/images/profile.webp");
