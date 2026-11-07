@@ -32,6 +32,10 @@ the next report, not automatically deleted, and no history is accumulated.
 
 ## Private configuration
 
+For Docker/Unraid, use the [host setup below](#unraid--docker-host-setup) to create
+the protected mounted file and token instead of steps 3 and 6's PowerShell
+commands. The field definitions and backend secret names are the same.
+
 1. Create a dedicated Jellyfin API key privately in its Dashboard. Jellyfin API
    keys can access server-wide data; keep this key on the collector only.
    The collector performs GET requests, never playback/control commands.
@@ -91,21 +95,197 @@ Logs contain only fixed diagnostic codes and `REPORT_OK`, not titles, addresses,
 user IDs, tokens or raw records. `REPORT_OK` confirms that the report was accepted,
 not that something is playing. Stop the process to stop updates.
 
-An optional Docker image follows the existing Unraid collector's non-root,
-read-only pattern. Build with this directory as the context. Mount the protected
-configuration directory read-only at `/config`; allow the container's non-root
-user to read it. No privileged mode, host networking or inbound port is needed:
+## Unraid / Docker host setup
+
+These are preparation instructions, not an installation or release already
+performed. Run them only after approving installation on the chosen host.
+**Starting the collector without `--check` publishes watching status through
+the public backend, even while the website's display flag is false.** Backend
+deployment, private secret configuration, and starting public reporting each
+need authorization; the flag is a display switch, not an access-control boundary.
+
+The commands below run in the **Unraid Linux terminal**, not PowerShell. They
+use `/mnt/user/appdata/shortbits-jellyfin` for a fresh installation. On another
+Docker host, substitute an appropriate protected absolute directory. If that
+directory, its config file, or a container named `shortbits-jellyfin` already
+exists, stop and review it rather than overwriting or replacing an installation.
+
+### Obtain approved source and build locally
+
+The release coordinator must first publish the approved source revision.
+Unpublished review commits cannot be downloaded from GitHub, and the existing
+production branch may not contain this collector yet. Use the full **published,
+approved commit SHA** supplied for installation, not a moving `main` download.
 
 ```bash
-docker build --tag shortbits-jellyfin:local agents/jellyfin
+APPROVED_SOURCE_SHA=REPLACE_WITH_APPROVED_PUBLISHED_40_CHARACTER_SHA
+mkdir -p /mnt/user/appdata/shortbits-jellyfin/source
+curl --fail --location --proto '=https' --proto-redir '=https' \
+  "https://github.com/BitsofBitsofBitsofBits/shortbits.net/archive/${APPROVED_SOURCE_SHA}.tar.gz" \
+  --output /mnt/user/appdata/shortbits-jellyfin/source.tar.gz
+```
+
+Only continue if that download succeeds. Extract into the new source directory
+and build with the collector directory as the context:
+
+```bash
+tar -xzf /mnt/user/appdata/shortbits-jellyfin/source.tar.gz \
+  --strip-components=1 -C /mnt/user/appdata/shortbits-jellyfin/source
+docker build --pull --tag shortbits-jellyfin:local \
+  /mnt/user/appdata/shortbits-jellyfin/source/agents/jellyfin
+```
+
+The image includes only `collector.mjs`, not local config or secrets. A local
+image build is not proof of Jellyfin connectivity or deployed ingestion.
+
+### Create protected configuration without printing tokens
+
+Unraid's root terminal can create a directory readable by the image's non-root
+user/group 1000. Do not use broad recursive permission changes or store this
+file in a public share:
+
+```bash
+install -d -m 750 -o 0 -g 1000 /mnt/user/appdata/shortbits-jellyfin/config
+```
+
+Use the already-built image for one-time initialization; no host Node install
+is needed. Only this initialization mount is writable. The command generates
+the token directly into a new protected file, prints no secrets, and refuses
+to overwrite an existing `config.json`:
+
+```bash
+docker run --rm --user 0:1000 --network none --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --entrypoint node \
+  --mount type=bind,src=/mnt/user/appdata/shortbits-jellyfin/config,dst=/config \
+  --mount type=bind,src=/mnt/user/appdata/shortbits-jellyfin/source/agents/jellyfin/config.example.json,dst=/template/config.example.json,readonly \
+  shortbits-jellyfin:local -e 'const fs=require("node:fs"),crypto=require("node:crypto");const config=JSON.parse(fs.readFileSync("/template/config.example.json","utf8"));config.deviceToken="sbjf_"+crypto.randomBytes(32).toString("hex");fs.writeFileSync("/config/config.json",JSON.stringify(config,null,2),{flag:"wx",mode:0o640});fs.chmodSync("/config/config.json",0o640);'
+```
+
+Open the file privately with the host's editor, for example:
+
+```bash
+nano /mnt/user/appdata/shortbits-jellyfin/config/config.json
+```
+
+Fill the values described in **Private configuration** above. Leave the
+generated `deviceToken` in place. Use the Jellyfin LAN address/certificate
+hostname or an existing private Docker-network name reachable from this
+container. **Do not use `localhost`: it refers to the collector itself.**
+Copy the site's public Supabase URL/key from the downloaded
+`shared/scripts/supabase-config.js`; these are public values, not secrets.
+
+Do not put Jellyfin credentials or the collector token in Unraid
+environment-variable fields, `docker -e`, command
+arguments, screenshots, chat, or source control. The protected bind-mounted
+file is the secret-entry mechanism; `SHORTBITS_CONFIG`, if used, contains only
+its path. Protect backups of this directory too.
+
+### Check private connectivity without publishing
+
+This uses the image's normal non-root user and a read-only config mount:
+
+```bash
 docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges \
-  --mount type=bind,src=/YOUR_PRIVATE_CONFIG_DIRECTORY,dst=/config,readonly \
+  --mount type=bind,src=/mnt/user/appdata/shortbits-jellyfin/config,dst=/config,readonly \
   shortbits-jellyfin:local --check
 ```
 
-Use the same mount/hardening to run persistently, with a restart policy and
-bounded logs as in the Unraid collector. A real installation and local-network
-check are still required; building the image does not verify your Jellyfin server.
+Expect `CHECK_OK` with your own account playing a known video. This does not
+contact Supabase, publish anything, or prove backend authentication. Privately
+confirm the account ID belongs to you; passing `--check` cannot identify the
+human owner for you.
+
+If the default bridge cannot reach Jellyfin, review existing private Docker
+network routing/DNS and Unraid host-access restrictions. If an appropriate
+existing private network is approved, use `--network YOUR_EXISTING_PRIVATE_NETWORK`
+consistently for both checking and running. A valid certificate hostname may
+need an approved `--add-host CERTIFICATE_HOSTNAME:LAN_IP` mapping. Do not add
+public ports, privileged mode, host networking, or insecure TLS flags to bypass
+a failed check.
+
+### Start only after backend and public-reporting approval
+
+Required backend prerequisites are:
+
+- The approved migration `20261107090000_jellyfin_presence.sql` and
+  `jellyfin-presence` Edge Function have deployed successfully.
+- Private `JELLYFIN_USER_ID` and `JELLYFIN_INGEST_TOKEN` match the protected
+  collector file. Enter them in Supabase Dashboard secrets fields only after
+  approving this configuration change; keep optional matching GitHub Supabase
+  environment secrets consistent. Jellyfin's API key and LAN address remain
+  local only.
+- The site's normal Supabase service credentials are available to the function;
+  the collector uses only the public publishable/anon key.
+- Public reporting is authorized. Missing configuration should return HTTP 503,
+  not another account's activity. Keep the website flag off until reporting and
+  real owner-only behavior are verified.
+
+After those prerequisites and a successful local check, the authorized
+persistent container can be started:
+
+```bash
+docker run -d --name shortbits-jellyfin --restart unless-stopped \
+  --read-only --cap-drop ALL --security-opt no-new-privileges \
+  --log-driver json-file --log-opt max-size=1m --log-opt max-file=2 \
+  --mount type=bind,src=/mnt/user/appdata/shortbits-jellyfin/config,dst=/config,readonly \
+  shortbits-jellyfin:local
+docker logs --tail 20 shortbits-jellyfin
+```
+
+Expect fixed codes and `REPORT_OK`. Keep any network/host mapping identical to
+the successful check. Do not rerun this command against an existing container.
+
+For Unraid's **Add Container** interface, the equivalent settings are:
+
+| Field | Value |
+| --- | --- |
+| Name | `shortbits-jellyfin` |
+| Repository | The locally built `shortbits-jellyfin:local` |
+| Network | Bridge, or the approved existing private network used for `--check` |
+| Privileged | Off |
+| Path mapping | Protected host config directory to `/config`, **Read Only** |
+| Extra parameters | `--read-only --cap-drop ALL --security-opt no-new-privileges --log-driver json-file --log-opt max-size=1m --log-opt max-file=2` |
+| Ports / devices / Docker socket | None |
+| Secret environment variables | None |
+| Autostart | Enable only after authorized reporting and verification |
+
+Do not create both a terminal-started container and a second GUI-managed one.
+The configuration is a mounted file, not baked into the image. Building,
+installing and running on the real host remain unverified until performed.
+
+### Real owner-only verification
+
+Perform these observations only after public reporting is authorized. Check the
+public `jellyfin-presence` endpoint directly first while the website flag is off;
+then enable the flag through a separately approved site update.
+The endpoint is
+`https://YOUR_PROJECT.supabase.co/functions/v1/jellyfin-presence`, using the
+configured public Supabase project URL, not the Jellyfin LAN URL.
+
+| Observation | Required result |
+| --- | --- |
+| Your account plays A while another account plays newer B | Only A appears; no other user/device/server identifiers |
+| Your account pauses A while the other account keeps playing B | A is paused, its position stops advancing; B never substitutes |
+| Your account stops while another account continues B | Idle, with no title from B |
+| Two of your sessions are active | Playing beats paused, then newest owner check-in; foreign sessions are ignored |
+| Collector stops | Within about 90 seconds plus refresh allowance, status expires and title/episode details clear |
+| Collector resumes | Current owner status recovers |
+| Jellyfin becomes unreachable during a separately approved outage test | Unavailable with no media, then recovery when reachable |
+
+With approval to stop/restart this installed collector, use only its named
+container:
+
+```bash
+docker stop shortbits-jellyfin
+docker start shortbits-jellyfin
+```
+
+Observe expiry before restarting; allow up to two minutes for refresh/timer
+effects. Do not alter live secrets, disable another user's account, or disrupt
+Jellyfin networking to test failures without separate approval. Missing IDs,
+foreign reports, token rotation and malformed data already have automated
+coverage; the live observations above are still required before claiming
+owner-only sharing works on your server.
 
 ## Enable, verify and revoke
 

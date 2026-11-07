@@ -24,7 +24,11 @@ private configuration, and verify the real collector before enabling
 `jellyfinPresenceEnabled` in `shared/scripts/site-config.js` (default false).
 Online includes active Jellyfin in the existing source arrows; `/nowplaying/`
 adds its simultaneous card with update age, not a session-length estimate.
-See the collector README for secure Node/Docker setup and revocation.
+See the collector README for secure Node setup and revocation, and its
+[Unraid / Docker host setup](https://github.com/BitsofBitsofBitsofBits/shortbits.net/blob/main/agents/jellyfin/README.md#unraid--docker-host-setup)
+for protected config mounts, local-only checks and deployment prerequisites.
+The display flag is not an access-control boundary: starting the collector
+publishes through the public backend even if the website card is disabled.
 
 ### YouTube watching presence
 
