@@ -59,6 +59,9 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.match(html, /shared\/scripts\/supabase-config\.js/);
   assert.match(html, /shared\/scripts\/blog-views\.js/);
   assert.match(html, /id="blog-post-views" role="status"/);
+  assert.match(html, /\/blog\/scripts\/theme-settings\.js/);
+  assert.match(html, /\/blog\/styles\/theme-settings\.css/);
+  assert.doesNotMatch(html, /\/online\/scripts\//);
 });
 
 test("static blog articles retain validated hex colors and nested formatting", () => {
