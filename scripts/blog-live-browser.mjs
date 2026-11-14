@@ -99,8 +99,11 @@ try {
     await page.locator('#blog-post-list a[href="/blog/post.html?slug=due-scheduled-post"]').waitFor();
     await page.locator("#blog-search").fill("first lab");
     assert.equal(await page.locator("#blog-post-list article:visible").count(), 1);
-    await page.locator('#blog-post-list a').click();
-    await page.waitForFunction(() => !document.querySelector("#blog-post").hidden);
+    await Promise.all([
+      page.waitForURL(`${server.origin}/blog/post.html?slug=due-scheduled-post`),
+      page.locator('#blog-post-list a').click(),
+    ]);
+    await page.locator("#blog-post").waitFor({ state: "visible" });
     assert.equal(await page.locator("#blog-post-title").textContent(), fixture.title);
     rows[0] = { ...rows[0], title: "Timer refresh", body_markdown: "Timer refreshed body." };
     await page.clock.fastForward(60001);
