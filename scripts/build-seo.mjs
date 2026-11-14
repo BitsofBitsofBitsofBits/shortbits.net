@@ -10,7 +10,7 @@ const labels = {
   "/professional/": "Professional profile",
   "/professional/resume/": "Resume",
   "/projects/": "IT & web projects",
-  "/blog/": "Technical blog",
+  "/blog/": "Personal blog",
   "/privacy/": "Privacy",
 };
 const jsonScript = (value) => JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");

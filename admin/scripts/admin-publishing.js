@@ -33,18 +33,19 @@
       if (request !== sequence) return;
       const pending = result.added.length + result.changed.length + result.removed.length;
       report(pending
-        ? `Deployment needed: ${result.added.length} new, ${result.changed.length} changed, ${result.removed.length} removed article(s).`
-        : "In sync: saved public posts match the deployed blog snapshot.", pending ? "warning" : "success");
+        ? `Static refresh needed: ${result.added.length} new, ${result.changed.length} changed, ${result.removed.length} removed article(s). Browser readers use live saved posts.`
+        : "In sync: saved public posts match the deployed blog snapshot. Browser readers also check live saved posts.", pending ? "warning" : "success");
       const lines = [
         `Static snapshot generated ${new Date(deployed.generatedAt).toLocaleString()}. Compared saved data at ${now.toLocaleString()}. Unsaved edits are not included.`,
+        "Deployment refreshes initial HTML, no-JavaScript copies, RSS, sitemap, and social/search previews. It is not required for browser readers to load saved public edits. Existing static copies can still be read without JavaScript or during an outage until deployment removes them.",
       ];
-      for (const [key, label] of [["added", "New"], ["changed", "Changed"], ["removed", "Still public until deployment removes them"]]) {
+      for (const [key, label] of [["added", "New"], ["changed", "Changed"], ["removed", "Static copies remain public until deployment removes them"]]) {
         if (result[key].length) lines.push(`${label}: ${result[key].slice(0, 20).join(", ")}${result[key].length > 20 ? " (and more)" : ""}.`);
       }
       const scheduled = posts.filter((post) => post.published && Date.parse(post.published_at) > now.getTime())
         .sort((a, b) => Date.parse(a.published_at) - Date.parse(b.published_at));
       if (scheduled.length) {
-        lines.push(`${scheduled.length} scheduled post(s); next publication ${new Date(scheduled[0].published_at).toLocaleString()}. Check again and deploy after that time to include them in static pages and RSS.`);
+        lines.push(`${scheduled.length} scheduled post(s); next publication ${new Date(scheduled[0].published_at).toLocaleString()}. Browser readers include them on their next live check after that time. Deploy afterward to include them in static pages and RSS.`);
       }
       for (const line of lines) {
         const item = document.createElement("li");

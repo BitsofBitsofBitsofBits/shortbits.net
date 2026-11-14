@@ -40,8 +40,11 @@ try {
       }];
       if (name === "site_resume_skills") data = resumeFixture.skills;
       if (name === "site_featured_project") data = [featuredFixture];
-      if (name === "site_blog_posts") data = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"))
-        .filter((post) => post.published && Date.parse(post.published_at) <= Date.now());
+      if (name === "site_blog_posts") {
+        const slug = new URL(request.url()).searchParams.get("slug")?.slice(3);
+        data = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"))
+          .filter((post) => post.published && Date.parse(post.published_at) <= Date.now() && (!slug || post.slug === slug));
+      }
       if (name === "record_site_analytics" || name === "hardware_watch") data = null;
       if (name === "get_blog_post_views") {
         blogViews.push(request.postDataJSON());
@@ -362,7 +365,7 @@ try {
     pendingPosts.push({ ...savedPosts[0], slug: "new-browser-post" });
     await page.evaluate((posts) => window.BITS_PUBLISHING_UI.update(posts), pendingPosts);
     assert.match(await page.locator("#blog-deployment-status").textContent(), /1 new, 1 changed, 1 removed/);
-    assert.match(await page.locator("#blog-deployment-details").textContent(), /Still public until deployment removes them: safe-markdown/);
+    assert.match(await page.locator("#blog-deployment-details").textContent(), /Static copies remain public until deployment removes them: safe-markdown/);
     assert.match(await page.locator("#blog-deployment-details").textContent(), /scheduled post/);
     await page.addScriptTag({ path: axePath });
     const publishingViolations = await page.evaluate(async () => (

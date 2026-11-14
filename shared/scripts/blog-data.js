@@ -1,7 +1,7 @@
 ((root) => {
   const table = "site_blog_posts";
   const archiveFields = "slug,title,excerpt,published_at";
-  const postFields = "slug,title,excerpt,body_markdown,published_at";
+  const postFields = "slug,title,excerpt,body_markdown,published_at,updated_at";
   const buildFields = "slug,title,excerpt,body_markdown,published,published_at,updated_at";
   const order = "published_at.desc,slug.asc";
 

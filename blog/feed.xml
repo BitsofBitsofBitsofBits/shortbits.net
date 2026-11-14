@@ -3,7 +3,7 @@
   <channel>
     <title>BitsofBitsofBits // BLOG.LOG</title>
     <link>https://www.shortbits.net/blog/</link>
-    <description>Dispatches and project notes from BitsofBitsofBits.</description>
+    <description>Personal thoughts, project ideas, and whatever else is on my mind. A blog by Caleb K Masters (BitsofBitsofBits).</description>
     <language>en</language>
     <atom:link href="https://www.shortbits.net/blog/feed.xml" rel="self" type="application/rss+xml"/>
   </channel>

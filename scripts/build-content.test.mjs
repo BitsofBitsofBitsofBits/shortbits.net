@@ -42,18 +42,19 @@ test("reuses browser Markdown blocks and safely escapes HTML and attributes", ()
 
 test("article has server-readable content, canonical social metadata and safe JSON-LD", () => {
   const html = renderArticle(posts[0], renderer);
-  assert.match(html, /<h1>Escaping &lt;markup&gt; &amp; &quot;quotes&quot;<\/h1>/);
+  assert.match(html, /<h1 id="blog-post-title">Escaping &lt;markup&gt; &amp; &quot;quotes&quot;<\/h1>/);
   assert.match(html, /rel="canonical" href="https:\/\/www.shortbits.net\/blog\/articles\/safe-markdown\/"/);
   assert.match(html, /property="og:type" content="article"/);
   assert.match(html, /name="twitter:card"/);
-  const schema = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
+  const schema = JSON.parse(/<script type="application\/ld\+json" data-blog-schema>([\s\S]*?)<\/script>/.exec(html)[1]);
   assert.equal(schema["@type"], "BlogPosting");
   assert.equal(schema.headline, posts[0].title);
   assert.equal(schema.description, posts[0].excerpt);
   assert.equal(schema.dateModified, posts[0].updated_at);
   assert.doesNotMatch(html, /<script>alert/);
-  assert.match(html, /<div class="blog-markdown">/);
-  assert.doesNotMatch(html, /post\.js| hidden/);
+  assert.match(html, /<div id="blog-post-body" class="blog-markdown">/);
+  assert.match(html, /\/blog\/scripts\/post\.js/);
+  assert.match(html, /<article id="blog-post" class="blog-article" data-blog-slug="safe-markdown">/);
   assert.match(html, /data-blog-slug="safe-markdown"/);
   assert.match(html, /shared\/scripts\/supabase-config\.js/);
   assert.match(html, /shared\/scripts\/blog-views\.js/);
@@ -148,7 +149,7 @@ test("build writes persistent outputs, removes stale articles, and never overwri
     });
     assert.equal(networkCalls, 0);
     const article = await readFile(join(output, "blog", "articles", "safe-markdown", "index.html"), "utf8");
-    assert.match(article, /<h1>/);
+    assert.match(article, /<h1 id="blog-post-title">/);
     await assert.rejects(access(join(output, "blog", "articles", "removed-post")));
     await assert.rejects(access(join(output, "blog", "articles", "private-draft")));
     const archive = await readFile(join(output, "blog", "index.html"), "utf8");

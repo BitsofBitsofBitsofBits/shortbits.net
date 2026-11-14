@@ -3387,7 +3387,7 @@ if (adminClient) {
     await loadBlogPosts(data.id);
     setAdminStatus(
       blogAdminStatus,
-      published ? "Post published." : "Draft saved.",
+      published ? "Post saved. Browser readers load it live when its publish time is due; static snapshots update on deployment." : "Draft saved. Any previous public version is hidden after a successful live check; deploy to remove static copies.",
       "success",
     );
   });
@@ -3415,7 +3415,7 @@ if (adminClient) {
     }
     resetBlogEditor();
     await loadBlogPosts();
-    setAdminStatus(blogAdminStatus, "Post deleted.", "success");
+    setAdminStatus(blogAdminStatus, "Post deleted. Browser readers hide it after a successful live check; deploy to remove static copies and RSS entries.", "success");
   });
   arcadeSettingsForm.addEventListener("submit", async (event) => {
     event.preventDefault();

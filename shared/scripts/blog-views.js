@@ -53,5 +53,7 @@
 
   window.BITS_BLOG_VIEWS = Object.freeze({ show });
   const article = document.querySelector("[data-blog-slug]");
-  if (article) void show(article.dataset.blogSlug, document.querySelector("#blog-post-views"));
+  if (article && !document.querySelector("#blog-post-status")) {
+    void show(article.dataset.blogSlug, document.querySelector("#blog-post-views"));
+  }
 })();

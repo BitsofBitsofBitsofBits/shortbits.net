@@ -9558,6 +9558,14 @@ body.is-black-screen-staging .binary-rain {
   --notice-color: #b99aff;
 }
 
+:root[data-color-scheme="light"] :is(.notifications-list li, .notification-toast)[data-type="achievement"] {
+  --notice-color: #6840a4;
+}
+
+:root[data-color-scheme="light"] :is(.notifications-list li, .notification-toast)[data-type="success"] {
+  --notice-color: #17683a;
+}
+
 .notifications-list li.is-unread {
   box-shadow: inset 4px 0 18px rgba(var(--accent-rgb), 0.12);
 }

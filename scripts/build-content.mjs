@@ -168,10 +168,13 @@ export function renderArticle(post, renderer) {
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
     <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">
-    <script type="application/ld+json">${jsonScript(schema)}</script>
+    <script type="application/ld+json" data-blog-schema>${jsonScript(schema)}</script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
+    <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
+    <script src="/shared/scripts/blog-data.js?v=blog-data-1" defer></script>
     <script src="/shared/scripts/blog-views.js?v=blog-views-1" defer></script>
+    <script src="/blog/scripts/post.js?v=blog-3" defer></script>
     <script src="/shared/scripts/cf-analytics.js?v=cf-analytics-2" defer></script>
   </head>
   <body class="blog-page blog-post-page">
@@ -186,14 +189,15 @@ export function renderArticle(post, renderer) {
         <a href="/privacy/">Privacy</a>
       </nav>
       <nav class="blog-breadcrumbs" aria-label="Breadcrumb"><a href="/?choose">PROFILES</a><span aria-hidden="true">/</span><a href="/blog/">BLOG.LOG</a></nav>
+      <p id="blog-post-status" class="blog-status" role="status" aria-live="polite" hidden></p>
       <article id="blog-post" class="blog-article" data-blog-slug="${escapeHtml(post.slug)}">
         <header>
           <p class="system-kicker">BLOG_ENTRY</p>
-          <h1>${title}</h1>
-          <p class="blog-article-excerpt">${excerpt}</p>
-          <p class="blog-article-meta"><time datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span>${renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
+          <h1 id="blog-post-title">${title}</h1>
+          <p id="blog-post-excerpt" class="blog-article-excerpt">${excerpt}</p>
+          <p class="blog-article-meta"><time id="blog-post-date" datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span id="blog-post-reading-time">${renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
         </header>
-        <div class="blog-markdown">${renderer.render(post.body_markdown)}</div>
+        <div id="blog-post-body" class="blog-markdown">${renderer.render(post.body_markdown)}</div>
       </article>
       <footer><p><a href="/blog/">All posts</a> &middot; <a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/professional/">Professional profile</a></p></footer>
     </main>
@@ -208,7 +212,7 @@ export function renderFeed(posts) {
   <channel>
     <title>BitsofBitsofBits // BLOG.LOG</title>
     <link>${siteUrl}/blog/</link>
-    <description>Dispatches and project notes from BitsofBitsofBits.</description>
+    <description>Personal thoughts, project ideas, and whatever else is on my mind. A blog by Caleb K Masters (BitsofBitsofBits).</description>
     <language>en</language>
     <atom:link href="${siteUrl}/blog/feed.xml" rel="self" type="application/rss+xml"/>
 ${posts.map((post) => `    <item>

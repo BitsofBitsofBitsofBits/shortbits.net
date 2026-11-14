@@ -67,6 +67,7 @@ jobs:
           BITS_BROWSER_CHANNEL: chrome
         run: |
           npm run test:browser
+          node scripts/blog-live-browser.mjs --root .site-build
           node scripts/resume-browser.mjs --root .site-build
           node scripts/career-dates-browser.mjs --root .site-build
           node scripts/social-links-browser.mjs --root .site-build

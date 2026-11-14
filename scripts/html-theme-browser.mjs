@@ -74,6 +74,12 @@ try {
       throw new Error(`Online runtime failed to start: ${JSON.stringify(errors)}`, { cause: error });
     }
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
+    await page.evaluate(() => window.BITS_NOTIFICATIONS.notify({
+      title: "Dark achievement", message: "Dark-theme notification colors are preserved.", type: "achievement",
+    }));
+    assert.equal(await page.locator('.notification-toast[data-type="achievement"] span').first()
+      .evaluate(node => getComputedStyle(node).color), "rgb(185, 154, 255)");
+    await audit(page, `${width}px dark achievement toast`, "#notification-toasts");
     assert.equal(await page.evaluate(() => performance.getEntriesByType("resource")
       .filter(entry => entry.name.includes("/layouts/html.css")).length), 0, "Default does not download the HTML skin");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
@@ -134,6 +140,14 @@ try {
     await page.emulateMedia({ forcedColors: "none" });
     const clock = await page.locator("#youtube-current-time").textContent();
     await page.waitForFunction(previous => document.querySelector("#youtube-current-time").textContent !== previous, clock);
+    await page.evaluate(() => {
+      for (const type of ["achievement", "success", "warning"]) window.BITS_NOTIFICATIONS.notify({
+        title: `HTML ${type}`, message: "Readable notification on a light surface.", type,
+      });
+    });
+    assert.equal(await page.locator('.notification-toast[data-type="achievement"] span').first()
+      .evaluate(node => getComputedStyle(node).color), "rgb(104, 64, 164)");
+    await audit(page, `${width}px HTML notification toasts`, "#notification-toasts");
     await audit(page, `${width}px Online`);
     if (screenshots) await page.screenshot({ path: join(screenshots, `html-online-${width}.png`), fullPage: true });
     await page.locator('#contact-form input[name="name"]').fill("HTML visitor");

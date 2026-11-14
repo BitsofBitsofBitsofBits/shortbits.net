@@ -4,11 +4,11 @@
 
 - The Admin blog editor compares saved posts with `/blog/content-manifest.json`,
   generated from the same public posts as static articles, RSS, and the sitemap.
-  It shows new/changed articles, articles still public until deployment removes
-  them, and future scheduled posts. **Check deployment status** reloads saved
+  It shows new/changed static articles, static copies awaiting removal, and
+  future scheduled posts. **Check static snapshot status** reloads saved
   database content and bypasses the snapshot cache; saves and deletions also
   refresh the comparison. Unsaved edits are excluded. Scheduled posts require
-  another check and a deployment after their publication time. Missing or
+  another check and a deployment after their publication time for static files. Missing or
   invalid snapshots show an explicit unavailable state, never "in sync."
   The public manifest contains only public slugs and SHA-256 fingerprints, not
   drafts, future post content, or admin credentials. This status does not trigger
@@ -22,12 +22,21 @@
 - Online enhancements initialize after the first contentful paint. Early
   controls queue with loading feedback; failed initialization shows an explicit
   retry action instead of leaving apparently functional but inactive controls.
-- Deployment generates static blog articles, article-specific metadata,
-  `/blog/feed.xml`, archive cards, and sitemap entries from published Supabase
-  posts. Newly published posts use the live legacy reader until the next deploy.
-  Edits, scheduling, deletion, and unpublishing require another deploy to update
-  static copies and RSS. Do not treat unpublishing alone as immediate removal of
-  previously deployed public content.
+- Browser blog archives and article readers reconcile with public Supabase data
+  on load, on return to the page, and every minute while visible. Edits and
+  same-slug deletion/recreation update without deployment; new and due scheduled
+  posts appear in the live archive, using the live reader until a static route
+  exists. A successful empty article response hides deleted, unpublished, or
+  future-scheduled content instead of restoring the deployed copy. Backend errors
+  show an explicit stale-content warning and retry; an already hidden article
+  stays hidden during an outage.
+- Deployment still generates initial article HTML, article-specific metadata,
+  `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
+  for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do
+  not become live. Deploy to refresh these artifacts or remove previously
+  deployed content from them. Static copies may remain accessible without
+  JavaScript or during an outage; unpublishing alone is not immediate removal
+  of previously public content. Client reconciliation does not change HTTP status.
 - The Admin center's **Content backups** page exports 15 editorial tables,
   including creators, message catalogs, and drafts. Restore validates the complete schema and runs atomically
   under existing authenticated permissions. A safety backup downloads first.

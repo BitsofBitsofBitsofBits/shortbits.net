@@ -62,7 +62,7 @@ test("blog RPC deduplicates daily receipts, counts atomically, and restricts acc
   }
 });
 
-function browser({ storage = new Map(), privacy = {}, hidden = false, fail = false, result = 1, blockedStorage = false, staticSlug = null } = {}) {
+function browser({ storage = new Map(), privacy = {}, hidden = false, fail = false, result = 1, blockedStorage = false, staticSlug = null, liveReader = false } = {}) {
   const requests = [];
   const errors = [];
   const listeners = new Map();
@@ -70,7 +70,8 @@ function browser({ storage = new Map(), privacy = {}, hidden = false, fail = fal
   const document = {
     hidden,
     querySelector: selector => selector === "[data-blog-slug]"
-      ? (staticSlug ? { dataset: { blogSlug: staticSlug } } : null) : element,
+      ? (staticSlug ? { dataset: { blogSlug: staticSlug } } : null)
+      : selector === "#blog-post-status" ? (liveReader ? {} : null) : element,
     addEventListener: (event, callback) => listeners.set(event, callback),
     removeEventListener: event => listeners.delete(event),
   };
@@ -155,6 +156,11 @@ test("only visible article opens count; archives do not auto-track; static artic
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(article.requests.length, 1);
   assert.equal(article.requests[0].body.p_slug, "live-post");
+  const reconciledArticle = browser({ staticSlug: "live-post", liveReader: true });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(reconciledArticle.requests.length, 0, "Live readers count only after confirming publication");
+  await reconciledArticle.show("live-post");
+  assert.equal(reconciledArticle.requests.length, 1);
   await archive.show("../invalid");
   assert.equal(archive.requests.length, 0);
 });

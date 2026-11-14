@@ -637,9 +637,9 @@
             <h2 id="blog-editor-heading">BLOG.LOG</h2>
             <span>MARKDOWN PUBLISHING CONSOLE</span>
           </div>
-          <p class="admin-subtitle" data-admin-view="publishing" data-admin-view-label="Publishing status">Publishing saves to the live database; it does not trigger a site rebuild. New posts remain readable through the live blog archive and legacy post links. Run a deployment to generate or refresh static articles, search-engine metadata, the RSS feed, and sitemap. Scheduled posts enter those files only on a deployment after their publish time. Unpublishing or deleting a post hides it from live queries immediately, but its existing static page and feed entry remain public until the next deployment removes them.</p>
+          <p class="admin-subtitle" data-admin-view="publishing" data-admin-view-label="Publishing status">Publishing saves to the live database. Browser readers check for current public posts on load, on return to the page, and every minute while visible; edits and same-slug recreations do not need a deployment. New posts appear in the live archive through the live reader until their static route is generated. Deletions, unpublishing, and future scheduling hide an article after a successful live check. Run a deployment to refresh initial HTML, no-JavaScript copies, search/social previews, the RSS feed, and sitemap. Those static copies remain public without JavaScript or during an outage until deployment removes them; this is not immediate removal of previously public content.</p>
           <div class="repeatable-admin-actions" data-admin-view="publishing" data-admin-view-label="Publishing status">
-            <button id="blog-deployment-refresh" type="button" disabled>Check deployment status</button>
+            <button id="blog-deployment-refresh" type="button" disabled>Check static snapshot status</button>
             <a href="https://github.com/BitsofBitsofBitsofBits/shortbits.net/actions/workflows/site.yml" target="_blank" rel="noopener noreferrer">Deployment workflow</a>
           </div>
           <p id="blog-deployment-status" class="form-status" role="status" aria-live="polite" data-admin-view="publishing" data-admin-view-label="Publishing status">Sign in to compare saved posts with the deployed site.</p>
