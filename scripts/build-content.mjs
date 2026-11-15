@@ -167,6 +167,7 @@ export function renderArticle(post, renderer) {
     <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/blog/styles/theme-settings.css">
+    <script src="/shared/scripts/theme-picker.js?v=picker-1" defer></script>
     <script src="/blog/scripts/theme-settings.js" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
     <link rel="stylesheet" href="/shared/styles/public-nav.css?v=public-nav-1">

@@ -33,6 +33,8 @@
 - **Theme settings** in the top navigation on the blog archive and both article
   readers opens a popup sharing the site's saved theme, color mode, and
   per-theme variants. Close it with **Close**, Escape, or a click outside.
+  The nested family picker matches the main site's menu (Windows, macOS,
+  palettes, and other families), with variants inside each theme.
   Color mode and variant
   controls appear only where supported; seasonal availability follows the
   shared theme picker. These controls do not load the Online desktop runtime.

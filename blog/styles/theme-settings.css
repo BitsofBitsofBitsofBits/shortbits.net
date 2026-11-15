@@ -64,6 +64,11 @@
   gap: 8px;
 }
 
+.blog-theme-controls .theme-picker {
+  flex: 1 1 100%;
+  font-size: 1rem;
+}
+
 .blog-theme-controls select {
   box-sizing: border-box;
   width: 100%;

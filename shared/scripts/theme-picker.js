@@ -7,6 +7,7 @@
     const picker = document.createElement("details");
     picker.className = "theme-picker";
     const summary = document.createElement("summary");
+    if (select.autofocus) summary.setAttribute("autofocus", "");
     const list = document.createElement("div");
     list.className = "theme-picker-list";
     list.setAttribute("role", "group");

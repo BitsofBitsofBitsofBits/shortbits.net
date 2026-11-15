@@ -49,6 +49,7 @@
   });
   preference.bindColorSchemeSelect(scheme);
   preference.bindVariantSelect(variant);
+  window.BITS_THEME_PICKER.bind(theme, variant);
   window.addEventListener("bits:theme-applied", sync);
   window.addEventListener("storage", (event) => {
     if (event.key === null || ["bits-interface-theme", preference.choiceKey, preference.dismissalKey].includes(event.key)) {
