@@ -9,6 +9,21 @@ import { fileURLToPath } from "node:url";
 import { buildSite, filesUnder, versionAssets, compressAssets, optimizeStyles, optimizeStartup } from "./build-site.mjs";
 import { pagePath, validateSeo } from "./build-seo.mjs";
 import { writeSiteVerification } from "./write-site-verification.mjs";
+import { filterCssForMarkup } from "./build-theme-css.mjs";
+
+test("compact pages retain dynamic shared family-picker styles without desktop menus", () => {
+  const css = filterCssForMarkup(
+    ".theme-picker > summary { padding: 10px; }\n.theme-picker-list { overflow: auto; }\n"
+    + ".theme-picker-choice { min-height: 44px; }\n.theme-picker-native { display: none; }\n"
+    + ".app-menu-popup .theme-picker { width: 340px; }",
+    "<main></main>",
+  );
+  assert.match(css, /\.theme-picker > summary/);
+  assert.match(css, /\.theme-picker-list/);
+  assert.match(css, /\.theme-picker-choice/);
+  assert.match(css, /\.theme-picker-native/);
+  assert.doesNotMatch(css, /\.app-menu-popup/);
+});
 
 test("build preserves page routes and organized assets without shipping repository tooling", async () => {
   const directory = await mkdtemp(join(tmpdir(), "shortbits-layout-"));

@@ -1250,6 +1250,10 @@ body.admin-center.ac-panel-open {
   min-width: 0;
 }
 
+.blog-preview-controls .theme-picker {
+  flex: 1 1 100%;
+}
+
 .blog-preview-controls select {
   width: 100%;
   min-width: 0;

@@ -1,8 +1,7 @@
 (() => {
   let pickerIndex = 0;
 
-  function bind(select, variantSelect) {
-    const preference = window.BITS_THEME_PREFERENCE;
+  function bind(select, variantSelect, { preference = window.BITS_THEME_PREFERENCE, scope = window } = {}) {
     const id = `theme-picker-${++pickerIndex}`;
     const picker = document.createElement("details");
     picker.className = "theme-picker";
@@ -67,8 +66,11 @@
     }
 
     function sync() {
-      const themeId = document.documentElement.dataset.interfaceTheme;
-      const variant = preference.getVariant(themeId);
+      const root = scope.document.documentElement;
+      const themeId = root.dataset.interfaceTheme;
+      const variant = preference.getTheme(themeId)?.variants?.find(variant => variant.id === root.dataset.themeVariant)
+        ?? preference.getVariant(themeId);
+      select.value = themeId;
       summary.textContent = `${labels.get(themeId)}${variant ? ` / ${variant.name}` : ""}`;
       summary.setAttribute("aria-label", `Choose theme. Current: ${summary.textContent}`);
       for (const button of buttons) {
@@ -96,10 +98,11 @@
     select.closest("label").classList.add("theme-picker-native");
     variantSelect.closest("label").classList.add("theme-picker-native");
     select.closest("label").before(picker);
-    window.addEventListener("bits:theme-applied", sync);
+    scope.addEventListener("bits:theme-applied", sync);
     select.addEventListener("change", sync);
     variantSelect.addEventListener("change", sync);
     sync();
+    return picker;
   }
 
   window.BITS_THEME_PICKER = { bind };

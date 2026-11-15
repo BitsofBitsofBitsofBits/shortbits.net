@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
+import { chooseTheme, openThemePicker } from "./theme-picker-helpers.mjs";
 
 const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
@@ -76,6 +77,92 @@ try {
     assert.deepEqual(errors, []);
     console.log(`PASS ${width}px nested theme selection, persistence, synchronization, keyboard, accessibility and overflow`);
     await context.close();
+    for (const path of ["/professional/", "/boot/", "/nowplaying/"]) {
+      const standalone = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
+      await standalone.route("**/*", route => new URL(route.request().url()).origin === server.origin
+        ? route.continue() : route.abort());
+      const publicPage = await standalone.newPage();
+      const standaloneErrors = [];
+      publicPage.on("pageerror", error => standaloneErrors.push(error.message));
+      const revealControls = async () => {
+        if (path === "/boot/") await publicPage.locator("#endless-boot-settings-toggle").click();
+        if (path === "/nowplaying/") {
+          await publicPage.mouse.move(20, 20);
+          await publicPage.locator("#presentation-auto-hide").uncheck();
+        }
+      };
+      await publicPage.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
+      await revealControls();
+      const picker = publicPage.locator(".theme-picker");
+      await picker.waitFor({ state: "visible" });
+      assert.equal(await publicPage.locator(".theme-picker-native select").first().isVisible(), false);
+      await openThemePicker(picker);
+      assert.deepEqual(await picker.locator(".theme-picker-list > details > summary").allTextContents(),
+        await publicPage.evaluate(() => BITS_THEME_PREFERENCE.getGroups().map(group => group.name)));
+      await chooseTheme(publicPage, picker, "aqua", "graphite");
+      await publicPage.waitForFunction(() => document.documentElement.dataset.interfaceTheme === "aqua"
+        && document.documentElement.dataset.themeVariant === "graphite");
+      assert.match(await picker.locator(":scope > summary").textContent(), /macOS \/ AQUA \/ GRAPHITE/);
+      await publicPage.reload({ waitUntil: "networkidle" });
+      await revealControls();
+      assert.match(await picker.locator(":scope > summary").textContent(), /macOS \/ AQUA \/ GRAPHITE/);
+      await publicPage.goto(`${server.origin}/blog/`, { waitUntil: "networkidle" });
+      assert.equal(await publicPage.evaluate(() => document.documentElement.dataset.interfaceTheme), "aqua",
+        "Standalone selection carries to the blog");
+      assert.equal(await publicPage.evaluate(() => document.documentElement.dataset.themeVariant), "graphite");
+      await publicPage.goto(`${server.origin}${path}`, { waitUntil: "networkidle" });
+      await revealControls();
+      const peer = await standalone.newPage();
+      await peer.goto(`${server.origin}/professional/`, { waitUntil: "networkidle" });
+      await chooseTheme(peer, peer.locator(".theme-picker"), "terminal");
+      await publicPage.waitForFunction(() => document.documentElement.dataset.interfaceTheme === "terminal");
+      assert.match(await picker.locator(":scope > summary").textContent(), /Terminals & retro computers \/ TERMINAL/);
+      await peer.close();
+      await publicPage.addScriptTag({ path: axePath });
+      const schemeSelect = publicPage.locator(path === "/professional/" ? "#profile-scheme-select"
+        : path === "/boot/" ? "#endless-boot-scheme" : "#presentation-scheme");
+      for (const [theme, variant] of [["default", null], ["aero-glass", "vista"], ["macos", null]]) {
+        await chooseTheme(publicPage, picker, theme, variant);
+        await publicPage.waitForFunction(id => {
+          const theme = BITS_THEME_PREFERENCE.getTheme(id);
+          return document.documentElement.dataset.interfaceTheme === id
+            && (!(theme.stylesheet || theme.experimental) || Boolean(document.querySelector("#bits-theme-stylesheet")?.sheet));
+        }, theme);
+        for (const scheme of ["dark", "light"]) {
+          await schemeSelect.selectOption(scheme);
+          await openThemePicker(picker);
+          await publicPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          await publicPage.waitForFunction(() => document.getAnimations().every(animation =>
+            animation.playState !== "running" && !animation.pending));
+          const issues = await publicPage.evaluate(async () => (await axe.run(document.querySelector(".theme-picker"), {
+            runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+          })).violations.map(issue => ({ id: issue.id, nodes: issue.nodes.map(node => node.target) })));
+          assert.deepEqual(issues, [], `${path} ${theme} ${scheme} expanded family picker remains accessible`);
+        }
+      }
+      assert.ok(await picker.evaluate(element => element.scrollWidth <= element.clientWidth + 1),
+        `${path} expanded menu fits its container`);
+      assert.ok(await publicPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+        `${path} does not overflow the viewport`);
+      await picker.locator(":scope > summary").focus();
+      await publicPage.keyboard.press("Escape");
+      assert.equal(await picker.getAttribute("open"), null);
+      if (path === "/nowplaying/") {
+        await publicPage.keyboard.press("f");
+        assert.equal(await publicPage.evaluate(() => document.fullscreenElement), null,
+          "Family-picker keyboard input does not trigger fullscreen");
+      } else {
+        await publicPage.locator(path === "/boot/" ? "#endless-boot-theme-random" : ".profile-theme-random").click();
+        assert.equal(await publicPage.locator(".theme-picker-native select").first().inputValue(),
+          await publicPage.evaluate(() => document.documentElement.dataset.interfaceTheme),
+          "Random selection stays synchronized with the family menu");
+      }
+      assert.equal(await publicPage.evaluate(() => Boolean(window.BITS_DESKTOP_WINDOWS)), false,
+        "Standalone family controls do not load the Online desktop runtime");
+      assert.deepEqual(standaloneErrors, []);
+      console.log(`PASS ${width}px ${path} shared family selection, variants, persistence, keyboard, accessibility and overflow`);
+      await standalone.close();
+    }
   }
 } finally {
   await browser?.close();

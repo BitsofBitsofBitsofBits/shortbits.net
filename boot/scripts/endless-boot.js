@@ -1419,6 +1419,7 @@
     themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
     window.BITS_THEME_PREFERENCE?.bindColorSchemeSelect(schemeSelect);
     window.BITS_THEME_PREFERENCE?.bindVariantSelect?.(document.querySelector("#endless-boot-variant"));
+    window.BITS_THEME_PICKER.bind(themeSelect, document.querySelector("#endless-boot-variant"));
     randomThemeButton?.addEventListener("click", () => {
       const themeId = window.BITS_THEME_PREFERENCE?.pickRandom();
       if (themeId) {

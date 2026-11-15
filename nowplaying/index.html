@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="/online/styles/media-player.css?v=media-1">
     <link rel="stylesheet" href="/nowplaying/styles/presentation.css?v=presentation-1">
     <script src="/shared/scripts/supabase-config.js" defer></script>
+    <script src="/shared/scripts/theme-picker.js?v=picker-1" defer></script>
     <script src="/nowplaying/scripts/presentation.js?v=presentation-1" defer></script>
     <script src="/online/scripts/media-player.js?v=media-1" defer></script>
     <script src="/online/scripts/spotify.js?v=spotify-15" defer></script>
@@ -135,6 +136,7 @@
       <a href="/online/">BACK TO ONLINE</a>
       <label>THEME <select id="presentation-theme" aria-label="Presentation theme"></select></label>
       <label>COLORS <select id="presentation-scheme" aria-label="Presentation color scheme"></select></label>
+      <label hidden>VARIANT <select id="presentation-variant" aria-label="Presentation theme variant"></select></label>
       <label class="presentation-auto-hide"><input id="presentation-auto-hide" type="checkbox" checked> AUTO-HIDE CONTROLS</label>
       <button id="presentation-fullscreen" type="button" aria-pressed="false" aria-keyshortcuts="F">ENTER FULLSCREEN</button>
       <p id="presentation-control-status" role="status" aria-live="polite">Press F for fullscreen. Move the pointer or press Tab to show controls.</p>

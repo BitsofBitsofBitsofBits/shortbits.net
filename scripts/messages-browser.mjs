@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { chooseTheme } from "./theme-picker-helpers.mjs";
 import { createRequire } from "node:module";
 import { mkdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -1270,6 +1271,9 @@ try {
     assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
     assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").evaluate(element => getComputedStyle(element).color), "rgb(85, 57, 204)");
     const preferencesBefore = await page.evaluate(() => ({ ...localStorage }));
+    const previewPicker = page.locator("#blog-preview-panel .theme-picker");
+    assert.equal(await page.locator("#blog-preview-theme").isVisible(), false);
+    assert.equal(await page.locator("#blog-preview-variant").isVisible(), false);
     const adminThemeBefore = await page.locator("html").getAttribute("data-interface-theme");
     await page.locator("#blog-post-form input[name=title]").fill("Unsaved preview title");
     await page.locator("#blog-post-form textarea[name=excerpt]").fill("Unsaved excerpt");
@@ -1278,12 +1282,12 @@ try {
     const previewThemes = await page.locator("#blog-preview-theme option").evaluateAll(options => options.map(option => option.value));
     assert.ok(previewThemes.includes("christmas"), "Out-of-season themes are available in preview");
     for (const theme of previewThemes) {
-      await page.locator("#blog-preview-theme").selectOption(theme);
+      await page.locator("#blog-preview-theme").selectOption(theme, { force: true });
       assert.equal(await blogPreview.locator("html").getAttribute("data-interface-theme"), theme);
       assert.equal(await blogPreview.locator("#blog-markdown-preview .blog-text-color-custom").textContent(), "editable text");
       const variants = await page.locator("#blog-preview-variant option").evaluateAll(options => options.map(option => option.value).filter(Boolean));
       for (const variant of variants) {
-        await page.locator("#blog-preview-variant").selectOption(variant);
+        await page.locator("#blog-preview-variant").selectOption(variant, { force: true });
         assert.equal(await blogPreview.locator("html").getAttribute("data-theme-variant"), variant);
       }
       const themeStyles = await blogPreview.locator("html").evaluate(root => {
@@ -1296,15 +1300,15 @@ try {
       assert.equal(Boolean(themeStyles.stylesheet), themeStyles.requiresStyles);
       if (themeStyles.requiresStyles) assert.ok(themeStyles.stylesheet.includes(`/layouts/${themeStyles.id}.css`));
     }
-    await page.locator("#blog-preview-theme").selectOption("aero-glass");
-    await page.locator("#blog-preview-variant").selectOption("rose");
+    await chooseTheme(page, previewPicker, "aero-glass", "rose");
+    assert.match(await previewPicker.locator(":scope > summary").textContent(), /Windows \/ AERO GLASS \/ ROSE/);
     await page.locator("#blog-preview-scheme").selectOption("light");
     assert.equal(await blogPreview.locator("html").getAttribute("data-theme-variant"), "rose");
     assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "light");
-    await page.locator("#blog-preview-theme").selectOption("terminal");
+    await chooseTheme(page, previewPicker, "terminal");
     assert.equal(await page.locator("#blog-preview-scheme").isDisabled(), true);
     assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "dark");
-    await page.locator("#blog-preview-theme").selectOption("html");
+    await chooseTheme(page, previewPicker, "html");
     assert.equal(await page.locator("#blog-preview-variant").isDisabled(), true);
     assert.equal(await blogPreview.locator("html").getAttribute("data-color-scheme"), "light");
     assert.deepEqual(await page.evaluate(() => ({ ...localStorage })), preferencesBefore, "Preview does not persist appearance choices");

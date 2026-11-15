@@ -165,7 +165,7 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
 .profile-header-tools {
   display: grid;
   width: min(640px, 100%);
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) minmax(0, 1.2fr) auto;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) auto;
   gap: 16px 12px;
 }
 
@@ -182,7 +182,7 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
   font-size: 0.7rem;
 }
 
-.profile-theme-picker[hidden] {
+.profile-theme-picker[hidden]:not(.theme-picker-native) {
   display: grid !important;
   visibility: hidden;
 }
@@ -249,6 +249,7 @@ html[data-interface-theme="aero-glass"] .professional-page::before {
 }
 
 .profile-header nav,
+.profile-header .theme-picker,
 .profile-footer,
 .profile-socials {
   font-size: 0.75rem;

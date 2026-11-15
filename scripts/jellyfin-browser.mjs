@@ -79,7 +79,7 @@ try {
     if (output) await page.screenshot({ path: join(output, `jellyfin-mocked-preview-${width}.png`), fullPage: true });
     await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important}" });
     for (const theme of ["default", "fluent", "windows-95", "frutiger-eco"]) {
-      await page.locator("#presentation-theme").selectOption(theme);
+      await page.locator("#presentation-theme").selectOption(theme, { force: true });
       await page.waitForFunction(id => {
         const theme = window.BITS_INTERFACE_THEMES.find(theme => theme.id === id);
         const sheet = document.querySelector("#bits-theme-stylesheet");

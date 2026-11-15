@@ -111,7 +111,7 @@ try {
     const mainBefore = await page.locator("#main").boundingBox();
     runtimeRelease();
     await page.waitForLoadState("networkidle");
-    assert.equal(await page.locator("#profile-theme-select").isVisible(), true);
+    assert.equal(await page.locator(".profile-header-tools > .theme-picker").isVisible(), true);
     assert.equal((await page.locator("#main").boundingBox()).y, mainBefore.y,
       "Theme controls must hydrate without moving the main content");
     assert.deepEqual(errors, []);

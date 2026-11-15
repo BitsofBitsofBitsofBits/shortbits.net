@@ -16,7 +16,10 @@ export async function buildThemeCss() {
 }
 
 export function filterCssForMarkup(source, markup) {
-  const classes = new Set(["is-rgb-mode", "is-performance-lite", "is-page-hidden"]);
+  const classes = new Set([
+    "is-rgb-mode", "is-performance-lite", "is-page-hidden",
+    "theme-picker", "theme-picker-native", "theme-picker-list", "theme-picker-branch", "theme-picker-choice",
+  ]);
   const ids = new Set();
   for (const [, value] of markup.matchAll(/\bclass="([^"]*)"/g)) {
     value.split(/\s+/).forEach((name) => classes.add(name));

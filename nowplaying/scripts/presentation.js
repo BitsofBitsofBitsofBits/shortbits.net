@@ -93,7 +93,7 @@
   document.addEventListener("fullscreenchange", syncFullscreen);
   document.addEventListener("keydown", event => {
     if (event.key.toLowerCase() !== "f" || event.repeat || event.altKey || event.ctrlKey || event.metaKey
-      || event.target instanceof Element && event.target.closest("input, select, textarea, [contenteditable]")) return;
+      || event.target instanceof Element && event.target.closest("input, select, textarea, [contenteditable], .theme-picker")) return;
     event.preventDefault();
     toggleFullscreen();
   });
@@ -113,6 +113,9 @@
     preference.apply(theme.value);
   });
   preference.bindColorSchemeSelect(scheme);
+  const variant = document.querySelector("#presentation-variant");
+  preference.bindVariantSelect(variant);
+  window.BITS_THEME_PICKER.bind(theme, variant);
   window.addEventListener("bits:theme-applied", () => {
     theme.value = document.documentElement.dataset.interfaceTheme;
   });

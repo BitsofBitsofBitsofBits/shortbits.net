@@ -3028,6 +3028,7 @@ try {
 
 if (adminClient) {
   let blogPreviewLoading = false;
+  let blogPreviewPickerBound = false;
   blogPreviewToggle.addEventListener("click", async () => {
     if (!blogPreviewPanel.hidden) {
       closeBlogPreview();
@@ -3076,6 +3077,13 @@ if (adminClient) {
     blogPreviewTheme.disabled = false;
     setAdminStatus(blogPreviewStatus, "");
     syncBlogPreviewTheme();
+    if (!blogPreviewPickerBound) {
+      window.BITS_THEME_PICKER.bind(blogPreviewTheme, blogPreviewVariant, {
+        preference: previewWindow.BITS_THEME_PREFERENCE,
+        scope: previewWindow,
+      });
+      blogPreviewPickerBound = true;
+    }
   });
   blogPreviewTheme.addEventListener("change", syncBlogPreviewTheme);
   blogPreviewVariant.addEventListener("change", renderBlogPreview);

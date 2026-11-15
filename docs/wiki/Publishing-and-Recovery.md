@@ -38,6 +38,10 @@
   Color mode and variant
   controls appear only where supported; seasonal availability follows the
   shared theme picker. These controls do not load the Online desktop runtime.
+- Professional, Now Playing, and Endless Boot theme controls use the same nested
+  family picker as Online and the blog. The Admin draft preview also uses it,
+  with preview-only appearance choices that never change saved site preferences
+  or Admin appearance.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do

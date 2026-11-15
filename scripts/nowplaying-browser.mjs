@@ -143,7 +143,7 @@ try {
     assert.equal(await page.locator("body").evaluate(body => body.classList.contains("presentation-controls-hidden")), true);
     await page.keyboard.press("Tab");
     assert.equal(await page.locator("body").evaluate(body => body.classList.contains("presentation-controls-hidden")), false);
-    await page.locator("#presentation-theme").focus();
+    await page.locator("#presentation-controls .theme-picker > summary").focus();
     await page.clock.fastForward(4200);
     assert.equal(await page.locator("body").evaluate(body => body.classList.contains("presentation-controls-hidden")), false,
       "Keyboard-focused controls are never hidden");
@@ -159,7 +159,7 @@ try {
     await page.keyboard.press("f");
     await page.waitForFunction(() => !document.fullscreenElement);
     assert.equal(await fullscreen.getAttribute("aria-pressed"), "false");
-    await page.locator("#presentation-theme").focus();
+    await page.locator("#presentation-controls .theme-picker > summary").focus();
     await page.keyboard.press("f");
     assert.equal(await page.evaluate(() => Boolean(document.fullscreenElement)), false, "Typing in controls does not toggle fullscreen");
     await page.evaluate(() => {
@@ -170,7 +170,7 @@ try {
     assert.equal(await fullscreen.isDisabled(), false, "A denied fullscreen request leaves controls usable");
 
     for (const theme of ["default", "nord", "youtube", "google", "aero-glass", "terminal", "default"]) {
-      await page.locator("#presentation-theme").selectOption(theme);
+      await page.locator("#presentation-theme").selectOption(theme, { force: true });
       await page.waitForFunction(theme => {
         const sheet = document.querySelector("#bits-theme-stylesheet");
         return document.documentElement.dataset.interfaceTheme === theme
@@ -188,7 +188,7 @@ try {
     });
     await page.waitForFunction(() => document.documentElement.dataset.interfaceTheme === "nord");
     assert.equal(await page.locator("#presentation-theme").inputValue(), "nord", "Theme changes from other pages stay synchronized");
-    await page.locator("#presentation-theme").selectOption("default");
+    await page.locator("#presentation-theme").selectOption("default", { force: true });
     await page.locator("#presentation-scheme").selectOption("light");
     await page.waitForFunction(() => document.documentElement.dataset.colorScheme === "light");
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));

@@ -10475,7 +10475,7 @@ html[data-interface-theme="new-year"] .endless-boot-progress span {
 .endless-boot-settings-panel {
   grid-column: 1 / -1;
   display: grid;
-  width: min(210px, calc(100vw - 24px));
+  width: min(340px, calc(100vw - 24px));
   gap: 8px;
   padding: 10px;
   border: 1px solid var(--accent);

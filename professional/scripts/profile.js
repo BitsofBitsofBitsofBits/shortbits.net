@@ -55,6 +55,13 @@
       document.querySelector("#profile-variant-select"),
       (label) => label.split(" ").map((word) => (word.startsWith("(") ? word.charAt(0) + word.charAt(1) + word.slice(2).toLowerCase() : word.charAt(0) + word.slice(1).toLowerCase())).join(" "),
     );
+    window.BITS_THEME_PICKER.bind(themeSelect, document.querySelector("#profile-variant-select"));
+    window.addEventListener("storage", event => {
+      const preference = window.BITS_THEME_PREFERENCE;
+      if (event.key === null || ["bits-interface-theme", preference.choiceKey, preference.dismissalKey].includes(event.key)) {
+        preference.apply(preference.resolve());
+      }
+    });
   }
   if (window.BITS_THEME_PREFERENCE?.pickRandom && randomButton) {
     randomButton.hidden = false;
