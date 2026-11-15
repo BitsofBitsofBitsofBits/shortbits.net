@@ -46,9 +46,18 @@ try {
   async function openPicker(page) {
     const picker = page.locator(".blog-theme-settings .theme-picker");
     if (await picker.getAttribute("open") === null) {
-      await picker.locator(":scope > summary").click();
-      await page.waitForFunction(() => [...document.querySelectorAll(".theme-picker-branch")]
-        .every(branch => branch.open === Boolean(branch.querySelector('[aria-pressed="true"]'))));
+      await Promise.all([
+        page.evaluate(() => new Promise(resolve => {
+          const picker = document.querySelector(".blog-theme-settings .theme-picker");
+          const opened = event => {
+            if (event.target !== picker || !picker.open) return;
+            picker.removeEventListener("toggle", opened);
+            resolve();
+          };
+          picker.addEventListener("toggle", opened);
+        })),
+        picker.locator(":scope > summary").click(),
+      ]);
     }
     return picker;
   }
