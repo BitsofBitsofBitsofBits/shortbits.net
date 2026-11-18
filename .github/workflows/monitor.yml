@@ -102,6 +102,11 @@ jobs:
             systemctl show caddy --property=ExecStart --value | grep -oE -- '--(config|adapter)[ =][^ ;}]+' || true
           fi
           if command -v sudo >/dev/null; then
+            if sudo -n -l -- /usr/bin/install -m 644 /tmp/Caddyfile.candidate /etc/caddy/Caddyfile >/dev/null 2>&1; then
+              echo 'Privileged candidate install grant: available'
+            else
+              echo 'Privileged candidate install grant: unavailable'
+            fi
             if sudo -n test -w /etc/caddy/Caddyfile 2>/dev/null; then
               echo 'Privileged config write check: available'
             else
