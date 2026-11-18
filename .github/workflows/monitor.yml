@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17,47 * * * *"
   workflow_dispatch:
+    inputs:
+      inspect-caddy-startup:
+        description: Read-only Caddy startup and persistence diagnostics
+        type: boolean
+        default: false
   workflow_call:
     secrets:
       DEPLOY_SSH_KEY:
@@ -65,8 +70,51 @@ jobs:
           SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
         run: ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p "$SSH_PORT" -- "$SSH_TARGET" 'command -v curl >/dev/null && curl --version | head -n 1'
 
+      - name: Inspect Caddy startup without changing the host
+        if: inputs.inspect-caddy-startup == true
+        env:
+          SSH_TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -p "$SSH_PORT" -- "$SSH_TARGET" 'sh -s' <<'DIAGNOSTICS'
+          set -eu
+          printf 'Deployment uid: '; id -u
+          printf 'PID 1 executable: '; cat /proc/1/comm
+          printf 'Caddy version: '; caddy version
+          printf 'Configuration resolved path: '; readlink -f /etc/caddy/Caddyfile
+          stat -c 'Config mode=%a uid=%u gid=%g type=%F' /etc/caddy/Caddyfile
+          if test -w /etc/caddy/Caddyfile; then echo 'Config writable: yes'; else echo 'Config writable: no'; fi
+          if test -w /etc/caddy; then echo 'Config directory writable: yes'; else echo 'Config directory writable: no'; fi
+          printf 'Config checksum: '; sha256sum /etc/caddy/Caddyfile | cut -d ' ' -f 1
+          if command -v findmnt >/dev/null; then
+            findmnt -n -T /etc/caddy/Caddyfile -o TARGET,FSTYPE
+            findmnt -n -T /etc/caddy/Caddyfile -o OPTIONS | tr ',' '\n' | grep -Ex 'ro|rw'
+          fi
+          if command -v pgrep >/dev/null; then
+            for pid in $(pgrep -x caddy); do
+              printf 'Running Caddy config arguments: '
+              tr '\0' '\n' < "/proc/$pid/cmdline" | awk 'previous == "--config" || previous == "--adapter" { print previous, $0 } { previous = $0 }'
+            done
+          fi
+          if command -v systemctl >/dev/null; then
+            systemctl is-active caddy || true
+            systemctl show caddy --property=FragmentPath --property=DropInPaths --property=User || true
+            systemctl show caddy --property=ExecStart --value | grep -oE -- '--(config|adapter)[ =][^ ;}]+' || true
+          fi
+          if command -v sudo >/dev/null; then
+            if sudo -n test -w /etc/caddy/Caddyfile 2>/dev/null; then
+              echo 'Privileged config write check: available'
+            else
+              echo 'Privileged config write check: unavailable (not granted or not writable)'
+            fi
+          else
+            echo 'Privileged config write check: sudo unavailable'
+          fi
+          DIAGNOSTICS
+
       - name: Check public pages and integrations
         id: health
+        if: inputs.inspect-caddy-startup != true
         env:
           SITE_EXPECTED_COMMIT: ${{ inputs.expected-commit }}
           SITE_MONITOR_SSH_TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
@@ -74,7 +122,7 @@ jobs:
         run: node scripts/monitor-site.mjs --output health-report.json --ssh
 
       - name: Publish health summary
-        if: always()
+        if: always() && inputs.inspect-caddy-startup != true
         shell: bash
         run: |
           if [ -f health-report.json.md ]; then
@@ -84,7 +132,7 @@ jobs:
           fi
 
       - name: Update outage issue or close it on recovery
-        if: always()
+        if: always() && inputs.inspect-caddy-startup != true
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -114,7 +162,7 @@ jobs:
           fi
 
       - name: Retain sanitized health report
-        if: always()
+        if: always() && inputs.inspect-caddy-startup != true
         uses: actions/upload-artifact@v4
         with:
           name: public-site-health
