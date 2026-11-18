@@ -129,12 +129,42 @@ The trusted preview HTML is fetched into a sandboxed frame's `srcdoc`; productio
 `X-Frame-Options: DENY` and `frame-ancestors 'none'` remain unchanged.
 It enables precompressed Brotli/gzip files and year-long immutable caching
 only for existing CSS/JS with a generated 16-hex asset version. It then
-validates the candidate
-configuration, installs it, and reloads Caddy. A failed reload restores the
-original Caddyfile automatically. The deployment user therefore needs narrowly
-scoped passwordless `sudo` access to `caddy validate`,
-`install /tmp/Caddyfile.* /etc/caddy/Caddyfile`, and
-`systemctl reload caddy`.
+validates the candidate configuration, backs up the original in a uniquely named
+`/tmp/Caddyfile.pre-deploy.*` recovery file, and verifies that the startup file
+has not changed since it was read. It must persist and byte-compare the candidate
+at `/etc/caddy/Caddyfile` before reloading **that saved file**. An unwritable or
+mismatched file fails deployment explicitly; a runtime-only Caddy admin API
+reload is not a successful deployment. A failed reload restores and reloads
+the original saved configuration; recovery failures are reported explicitly.
+The deployment account must have authorized write access to the actual startup
+file and permission to validate/reload Caddy. The workflow does not grant itself
+privileges or assume passwordless sudo is available.
+
+### Recovery after a restart restores an old policy
+
+If pages load but contact verification reports that it cannot load, inspect the
+browser's CSP errors and the live `Content-Security-Policy` header. Both
+`script-src` and `frame-src` must allow `https://challenges.cloudflare.com`.
+Do not disable CSP or Turnstile. A previous runtime-only reload can work until
+Caddy restarts and reads an older startup file. Re-deploying with another
+runtime-only reload does not repair this condition.
+
+The manual monitor's **Read-only Caddy startup and persistence diagnostics**
+option inspects the actual running `--config` argument, systemd service source,
+resolved file, ownership, write access and narrowly scoped install permission
+through existing deployment SSH credentials. It does not print the Caddyfile,
+reload services, submit contacts, or change outage issues.
+
+A privileged operator must verify the service's real startup path (including
+any container bind mount), back up that specific file, generate a candidate
+using `scripts/update-caddy-csp.mjs` from the trusted checkout, validate it with
+`caddy validate --config <candidate> --adapter caddyfile`, install it at the
+startup path, byte-compare the saved file with the candidate, then reload from
+the saved path. Preserve unrelated configuration. Resolve deployment write
+access deliberately with least privilege; do not make the configuration
+world-writable or grant unrestricted sudo. If the secured deployment account
+cannot persist the file, stop for this operator action rather than attempting
+another access route.
 
 The Caddy updater accepts one unambiguous top-level shortbits.net site with a
 root, quoted CSP, and a simple file server. It rejects unsupported custom routing
