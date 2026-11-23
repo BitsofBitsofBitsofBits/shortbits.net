@@ -56,3 +56,21 @@ test("formatted line breaks survive structured editing and both public renderers
   const rich = envelope([{ type: "paragraph", content: [text("First", [{ type: "bold" }]), { type: "hardBreak", marks: [{ type: "bold" }] }, text("Second", [{ type: "bold" }])] }]);
   assert.match(markdownRenderer(markdown, source).renderPost({ body_markdown: "", body_rich: rich }), /<strong><br><\/strong>/);
 });
+test("editor link titles accept nullable defaults and render safely in live and static articles", () => {
+  for (const title of [null, 'Read "this" <safely>']) {
+    const rich = envelope([{ type: "paragraph", content: [text("Shown", [{ type: "link", attrs: {
+      href: "https://example.com", target: "_blank", rel: "noopener noreferrer nofollow", class: null, title,
+    } }])] }]);
+    const body = document.createElement("div"); body.append(api.render(rich));
+    const staticHTML = markdownRenderer(markdown, source).renderPost({ body_markdown: "", body_rich: rich });
+    for (const html of [body.innerHTML, staticHTML]) {
+      const parsed = parseHTML(`<html><body>${html}</body></html>`).document;
+      assert.equal(parsed.querySelector("a").getAttribute("title"), title);
+      assert.equal(parsed.querySelector("a").textContent, "Shown");
+      assert.equal(parsed.querySelector("safely"), null);
+    }
+  }
+  for (const title of [42, {}, "x".repeat(2001)]) assert.throws(() => api.validate(envelope([
+    { type: "paragraph", content: [text("Shown", [{ type: "link", attrs: { href: "https://example.com", title } }])] },
+  ])), /Invalid link title/);
+});

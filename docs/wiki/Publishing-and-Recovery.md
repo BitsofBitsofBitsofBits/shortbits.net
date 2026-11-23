@@ -8,10 +8,14 @@
   Save explicitly (or Ctrl/Cmd+S); writing is not automatic publication.
   Appearance choices are preview-only. Unsaved navigation prompts and conditional
   updates protect drafts against accidental loss and competing edits.
-  The compact toolbar keeps common text editing visible; **Format** opens
-  advanced text, structure, table and legacy-source controls. **Theme settings**
-  opens the shared family/variant selector in a popup. Close either with Close,
-  Escape or a backdrop click; keyboard focus returns to its trigger.
+  The toolbar keeps Strike, Highlight and the Font dropdown directly visible.
+  **Structure** contains lists, tables and legacy-source controls; **Style**
+  contains color, size and inline code. These are non-modal dropdowns, closed
+  by a selection, Escape, clicking outside or tabbing out. Escape returns focus
+  to the dropdown trigger. **Theme settings** still opens the preview-only
+  family/variant popup, dismissed with Close, Escape or a backdrop click.
+  **Link** separates the displayed text from the destination, prefills selected
+  text or an existing link, and preserves text formatting when only its URL changes.
 - Existing Markdown is not converted by the database migration. On opening an
   old post, its exact source remains in a protected editable section.
   **Import original Markdown** adopts visual content only if a rendered-structure

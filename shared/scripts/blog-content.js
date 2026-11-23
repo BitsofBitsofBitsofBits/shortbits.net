@@ -8,7 +8,7 @@
   const attrs = {
     heading: ["level"], orderedList: ["start", "type"], taskItem: ["checked"], codeBlock: ["language"],
     tableCell: ["colspan", "rowspan", "colwidth", "align"], tableHeader: ["colspan", "rowspan", "colwidth", "align"],
-    image: ["src", "alt", "caption"], legacyMarkdown: ["source"], link: ["href", "target", "rel", "class"],
+    image: ["src", "alt", "caption"], legacyMarkdown: ["source"], link: ["href", "target", "rel", "class", "title"],
     style: ["color", "font", "size"],
   };
   function url(value, image = false) {
@@ -73,7 +73,10 @@
         if (!markNames.has(mark.type) || used.has(mark.type)) throw new Error("Unsupported article mark.");
         used.add(mark.type);
         keys(mark.attrs ?? {}, attrs[mark.type] ?? []);
-        if (mark.type === "link") url(mark.attrs?.href);
+        if (mark.type === "link") {
+          url(mark.attrs?.href);
+          if (mark.attrs.title != null && (typeof mark.attrs.title !== "string" || mark.attrs.title.length > 2000)) throw new Error("Invalid link title.");
+        }
         if (mark.type === "style") {
           for (const [key, v] of Object.entries(mark.attrs ?? {})) {
             if (v === null) continue;
@@ -100,7 +103,10 @@
         for (const mark of node.marks ?? []) {
           const tags = { bold: "strong", italic: "em", underline: "u", strike: "s", code: "code", highlight: "mark", link: "a", style: "span" };
           const wrapper = document.createElement(tags[mark.type]);
-          if (mark.type === "link") { wrapper.href = url(mark.attrs.href); wrapper.rel = "noreferrer"; }
+          if (mark.type === "link") {
+            wrapper.href = url(mark.attrs.href); wrapper.rel = "noreferrer";
+            if (mark.attrs.title != null) wrapper.title = mark.attrs.title;
+          }
           if (mark.type === "style") {
             const style = mark.attrs ?? {};
             const classes = [];

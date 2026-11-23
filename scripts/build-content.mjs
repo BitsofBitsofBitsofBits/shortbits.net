@@ -47,7 +47,7 @@ export function markdownRenderer(source, richSource) {
       const content = this.childNodes.join("");
       if (!this.tag) return content;
       const attributes = { ...this.attributes };
-      for (const key of ["href", "src", "alt", "loading", "decoding", "referrerPolicy", "target", "rel", "scope", "type", "tabIndex"]) {
+      for (const key of ["href", "src", "alt", "loading", "decoding", "referrerPolicy", "target", "rel", "title", "scope", "type", "tabIndex"]) {
         if (this[key] !== undefined) attributes[key.toLowerCase()] = this[key];
       }
       if (this.className) attributes.class = this.className;

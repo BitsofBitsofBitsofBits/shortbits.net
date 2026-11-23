@@ -11,8 +11,8 @@ const status = document.querySelector("#writer-status");
 const workspace = document.querySelector("#writer-workspace");
 const save = document.querySelector("#writer-save");
 const dialog = document.querySelector("#writer-dialog");
-const formatDialog = document.querySelector("#writer-format-dialog");
 const value = document.querySelector("#writer-value");
+const linkText = document.querySelector("#writer-link-text");
 const source = document.querySelector("#writer-source");
 let client, editor, authorized = false, busy = false, id = "", version = null, original = "", baseline = "", mode = "";
 let detailBusy = false;
@@ -26,14 +26,37 @@ function snapshot() {
   return JSON.stringify([editor?.getJSON(), ...["title", "slug", "excerpt", "published_at"].map(key => form.elements[key].value), form.elements.published.checked]);
 }
 const dirty = () => authorized && baseline && snapshot() !== baseline;
-for (const kind of ["theme", "format"]) {
-  const popup = document.querySelector(`#writer-${kind}-dialog`);
-  const trigger = document.querySelector(`#writer-${kind}-open`);
+function closeDropdowns() {
+  for (const menu of document.querySelectorAll(".writer-dropdown[open]")) menu.open = false;
+}
+for (const menu of document.querySelectorAll(".writer-dropdown")) {
+  menu.addEventListener("toggle", () => {
+    if (menu.open) for (const other of document.querySelectorAll(".writer-dropdown[open]")) if (other !== menu) other.open = false;
+  });
+}
+document.addEventListener("pointerdown", event => {
+  for (const menu of document.querySelectorAll(".writer-dropdown[open]")) if (!menu.contains(event.target)) menu.open = false;
+});
+document.addEventListener("focusin", event => {
+  for (const menu of document.querySelectorAll(".writer-dropdown[open]")) if (!menu.contains(event.target)) menu.open = false;
+});
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  const menu = document.querySelector(".writer-dropdown[open]");
+  if (!menu) return;
+  event.preventDefault();
+  menu.open = false;
+  menu.querySelector("summary").focus();
+});
+{
+  const popup = document.querySelector("#writer-theme-dialog");
+  const trigger = document.querySelector("#writer-theme-open");
   trigger.addEventListener("click", () => {
     if (!authorized) return;
+    closeDropdowns();
     popup.showModal();
     trigger.setAttribute("aria-expanded", "true");
-    (popup.querySelector(".theme-picker > summary") || popup.querySelector("[data-command]") || popup.querySelector("button")).focus();
+    (popup.querySelector(".theme-picker > summary") || popup.querySelector("button")).focus();
   });
   popup.querySelector("[data-writer-close]").addEventListener("click", () => popup.close());
   popup.addEventListener("close", () => trigger.setAttribute("aria-expanded", "false"));
@@ -103,6 +126,7 @@ const Style = Mark.create({
 const Highlight = Mark.create({ name: "highlight", parseHTML: () => [{ tag: "mark" }], renderHTML: () => ["mark", {}, 0] });
 function updateToolbar() {
   for (const button of document.querySelectorAll("[data-command][aria-pressed]")) button.setAttribute("aria-pressed", String(editor.isActive(button.dataset.command)));
+  for (const kind of ["color", "font", "size"]) document.querySelector(`#writer-${kind}`).value = editor.getAttributes("style")[kind] || "";
 }
 document.addEventListener("keydown", event => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s" && authorized) { event.preventDefault(); form.requestSubmit(); }
@@ -123,8 +147,10 @@ function load(post) {
   report(original && !post.body_rich ? "Original Markdown preserved. Import explicitly or edit its protected source; nothing has been converted or saved." : "Ready to write. Changes are not saved automatically.");
 }
 function showDialog(kind) {
-  formatDialog.close();
-  mode = kind; value.value = ""; source.value = "";
+  closeDropdowns();
+  mode = kind; value.value = ""; source.value = ""; linkText.value = "";
+  document.querySelector("#writer-link-text-label").hidden = kind !== "link";
+  document.querySelector("#writer-value-title").textContent = kind === "link" ? "Link" : "Image URL";
   document.querySelector("#writer-dialog-error").textContent = "";
   document.querySelector("#writer-alt").value = "";
   document.querySelector("#writer-caption").value = "";
@@ -134,13 +160,20 @@ function showDialog(kind) {
   for (const name of ["value", "alt", "caption", "source"]) document.querySelector(`#writer-${name}-label`).hidden =
     name === "source" ? kind !== "legacy" : name === "value" ? kind === "legacy" : kind !== "image";
   document.querySelector("#writer-dialog-title").textContent = kind === "legacy" ? "Edit protected original Markdown" : kind === "image" ? "Insert accessible image" : "Insert link";
+  if (kind === "link") {
+    if (editor.state.selection.node?.type.name === "legacyMarkdown") { report("Select editable text, not a protected Markdown section.", true); return; }
+    if (editor.isActive("link")) editor.chain().extendMarkRange("link").run();
+    value.value = editor.getAttributes("link").href || "";
+    const { from, to } = editor.state.selection;
+    linkText.value = editor.state.doc.textBetween(from, to, " ");
+  }
   if (kind === "legacy") {
     const node = editor.state.selection.node;
     if (node?.type.name !== "legacyMarkdown") { report("Select the protected Markdown section first.", true); return; }
     source.value = node.attrs.source;
   }
   dialog.showModal();
-  (kind === "legacy" ? source : value).focus();
+  (kind === "legacy" ? source : kind === "link" ? linkText : value).focus();
 }
 function semantic(node) {
   if (node.nodeType === 3) return ["text", node.textContent];
@@ -192,6 +225,7 @@ async function initialize() {
     client.auth.onAuthStateChange(event => {
       if (event !== "SIGNED_OUT") return;
       for (const popup of document.querySelectorAll(".writer-popup[open]")) popup.close();
+      closeDropdowns();
       authorized = false; workspace.hidden = true; editor.destroy(); editor = null; original = ""; baseline = "";
       report("Signed out. Sign in through Admin to continue.");
     });
@@ -226,7 +260,7 @@ for (const button of document.querySelectorAll("[data-command]")) {
       bulletList: "toggleBulletList", orderedList: "toggleOrderedList", taskList: "toggleTaskList", blockquote: "toggleBlockquote", codeBlock: "toggleCodeBlock", undo: "undo", redo: "redo" };
     const command = button.dataset.command;
     if (!authorized) return;
-    formatDialog.close();
+    closeDropdowns();
     if (command === "heading") editor.chain().focus().toggleHeading({ level: 2 }).run();
     else if (command === "highlight") editor.chain().focus().toggleMark("highlight").run();
     else if (command === "table") editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
@@ -252,8 +286,11 @@ document.querySelector("#writer-dialog-form").addEventListener("submit", async e
       editor.chain().focus().updateAttributes("legacyMarkdown", { source: source.value }).run();
     } else if (mode === "link") {
       const href = content.url(value.value.trim());
-      if (editor.state.selection.empty) editor.chain().focus().insertContent({ type: "text", text: href, marks: [{ type: "link", attrs: { href } }] }).run();
-      else editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+      if (!linkText.value.trim()) throw new Error("Enter the text shown for this link.");
+      const { from, to } = editor.state.selection;
+      if (!editor.state.selection.empty && editor.state.doc.textBetween(from, to, " ") === linkText.value) {
+        editor.chain().focus().setLink({ href }).run();
+      } else editor.chain().focus().insertContent({ type: "text", text: linkText.value, marks: [{ type: "link", attrs: { href } }] }).run();
     }
     else {
       const alt = document.querySelector("#writer-alt").value.trim();
@@ -280,11 +317,12 @@ document.querySelector("#writer-dialog-form").addEventListener("submit", async e
 for (const kind of ["color", "font", "size"]) {
   document.querySelector(`#writer-${kind}`).addEventListener("change", event => {
     if (!authorized) return;
-    editor.chain().setMark("style", { ...editor.getAttributes("style"), [kind]: event.target.value || null }).run();
+    closeDropdowns();
+    editor.chain().focus().setMark("style", { ...editor.getAttributes("style"), [kind]: event.target.value || null }).run();
   });
 }
 document.querySelector("#writer-import").addEventListener("click", () => {
-  formatDialog.close();
+  closeDropdowns();
   if (!authorized || !original.trim()) { report("There is no original Markdown to import.", true); return; }
   const previous = editor.getJSON();
   if (previous.content.some(n => n.type !== "legacyMarkdown" && !(n.type === "paragraph" && !n.content?.length))) {

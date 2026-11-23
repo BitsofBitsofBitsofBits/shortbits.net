@@ -60,10 +60,19 @@ try {
       return url.origin === server.origin ? route.continue() : route.abort();
     });
     const page = await context.newPage();
+    const waitForSaved = async () => {
+      await page.waitForFunction(() => {
+        const status = document.querySelector("#writer-status");
+        return status.dataset.state === "error" || status.textContent === "Draft saved. It is not published.";
+      });
+      assert.equal(await page.locator("#writer-status").textContent(), "Draft saved. It is not published.");
+    };
     const formatCommand = async name => {
-      await page.getByRole("button", { name: "Format", exact: true }).click();
-      await page.getByRole("button", { name, exact: true }).click();
-      assert.equal(await page.locator("#writer-format-dialog").isVisible(), false);
+      const button = page.getByRole("button", { name, exact: true, includeHidden: true });
+      const menu = await button.evaluate(node => node.closest(".writer-dropdown")?.id);
+      if (menu) await page.locator(`#${menu} > summary`).click();
+      await button.click();
+      if (menu) assert.equal(await page.locator(`#${menu}`).evaluate(node => node.open), false);
     };
     const assertCompact = async () => {
       const layout = await page.evaluate(() => {
@@ -78,9 +87,9 @@ try {
       });
       assert.ok(layout.header <= (width > 600 ? 64 : 110), JSON.stringify(layout));
       assert.ok(layout.settings <= (width > 800 ? 100 : 150), JSON.stringify(layout));
-      assert.ok(layout.toolbar <= (width > 600 ? 64 : 120), JSON.stringify(layout));
-      assert.ok(layout.rows <= (width > 600 ? 1 : 2), JSON.stringify(layout));
-      assert.ok(layout.articleTop < (width > 600 ? 250 : 400), JSON.stringify(layout));
+      assert.ok(layout.toolbar <= (width > 600 ? 64 : 176), JSON.stringify(layout));
+      assert.ok(layout.rows <= (width > 600 ? 1 : 3), JSON.stringify(layout));
+      assert.ok(layout.articleTop < (width > 600 ? 250 : 455), JSON.stringify(layout));
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       return layout;
     };
@@ -95,9 +104,8 @@ try {
     await page.keyboard.type("New visual text");
     await page.keyboard.press("Control+Shift+ArrowLeft");
     await formatCommand("Highlight");
-    await page.getByRole("button", { name: "Format", exact: true }).click();
+    await formatCommand("Strikethrough");
     await page.selectOption("#writer-font", "serif");
-    await page.keyboard.press("Escape");
     await page.keyboard.press("Control+s");
     await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => window.__fixture.saves[0].body_markdown), "# Preserved\n\nHello **writer**.");
@@ -105,10 +113,54 @@ try {
     assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.saves[0].body_rich)), /"font":"serif"/);
     assert.equal(await page.evaluate(() => window.__fixture.saves[0].published), false);
     assert.match(await page.locator(".tiptap").textContent(), /New visual text/);
+    await page.getByRole("button", { name: "Link", exact: true }).click();
+    assert.equal(await page.getByRole("textbox", { name: "Text shown", exact: true }).inputValue(), "text");
+    await page.getByRole("textbox", { name: "Link", exact: true }).fill("javascript:alert(1)");
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    await page.locator("#writer-dialog-error").filter({ hasText: "Unsafe article URL." }).waitFor();
+    await page.getByRole("textbox", { name: "Link", exact: true }).fill("https://example.com/original");
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    await page.locator('.tiptap a[href="https://example.com/original"]').click();
+    await page.getByRole("button", { name: "Link", exact: true }).click();
+    assert.equal(await page.getByRole("textbox", { name: "Text shown", exact: true }).inputValue(), "text");
+    assert.equal(await page.getByRole("textbox", { name: "Link", exact: true }).inputValue(), "https://example.com/original");
+    await page.getByRole("textbox", { name: "Link", exact: true }).fill("https://example.com/revised");
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    await page.getByRole("button", { name: "Save post", exact: true }).click();
+    await waitForSaved();
+    const marks = await page.evaluate(() => {
+      const nodes = [];
+      function visit(node) { if (node.text === "text") nodes.push(node); node.content?.forEach(visit); }
+      visit(window.__fixture.row.body_rich.doc);
+      return nodes[0].marks.map(mark => mark.type);
+    });
+    for (const mark of ["link", "style", "strike", "highlight"]) assert.ok(marks.includes(mark), `URL edits preserve ${mark}`);
+    await page.locator('.tiptap a[href="https://example.com/revised"]').click();
+    await page.getByRole("button", { name: "Link", exact: true }).click();
+    await page.getByRole("textbox", { name: "Text shown", exact: true }).fill("Read more");
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-link-dialog-${width}.png`), fullPage: true });
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    await page.getByRole("textbox", { name: "Article body", exact: true }).click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.press("Enter");
+    await page.getByRole("button", { name: "Link", exact: true }).click();
+    await page.getByRole("textbox", { name: "Link", exact: true }).fill("https://example.com/new");
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    await page.locator("#writer-dialog-error").filter({ hasText: "Enter the text shown" }).waitFor();
+    await page.getByRole("textbox", { name: "Text shown", exact: true }).fill("<em>Literal text</em>");
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    assert.equal(await page.locator('.tiptap a[href="https://example.com/new"]').textContent(), "<em>Literal text</em>");
+    assert.equal(await page.locator('.tiptap a[href="https://example.com/new"] em').count(), 0);
+    await page.getByRole("button", { name: "Save post", exact: true }).click();
+    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    await page.reload();
+    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    assert.equal(await page.locator('.tiptap a[href="https://example.com/revised"]').textContent(), "Read more");
+    assert.equal(await page.locator('.tiptap a[href="https://example.com/new"]').textContent(), "<em>Literal text</em>");
     publishedFixture = await page.evaluate(() => ({ ...window.__fixture.row, published: true, published_at: "2026-11-01T00:00:00Z" }));
     const reader = await context.newPage();
     await reader.goto(`${server.origin}/blog/post.html?slug=fixture-post`);
-    await reader.locator("#blog-post-body").filter({ hasText: "New visual text" }).waitFor();
+    await reader.locator("#blog-post-body").filter({ hasText: "Read more" }).waitFor();
     publishedFixture.body_rich = { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Updated live rich body" }] }] } };
     await reader.evaluate(() => window.dispatchEvent(new Event("focus")));
     await reader.getByText("Updated live rich body", { exact: true }).waitFor();
@@ -178,14 +230,25 @@ try {
     assert.deepEqual(issues.filter(v => ["serious", "critical"].includes(v.impact)), []);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `No horizontal overflow at ${width}`);
     const baselineLayout = await assertCompact();
-    await page.getByRole("button", { name: "Format", exact: true }).click();
-    for (let i = 0; i < 5; i++) {
-      await page.keyboard.press("Tab");
-      assert.equal(await page.locator("#writer-format-dialog").evaluate(node => node.contains(document.activeElement)), true);
-    }
+    await page.locator("#writer-structure > summary").focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Tab");
+    assert.equal(await page.getByRole("button", { name: "Heading", exact: true }).evaluate(node => node === document.activeElement), true);
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-format-popup-${width}.png`), fullPage: true });
     await page.keyboard.press("Escape");
-    assert.equal(await page.locator("#writer-format-open").evaluate(node => node === document.activeElement), true);
+    assert.equal(await page.locator("#writer-structure").evaluate(node => node.open), false);
+    assert.equal(await page.locator("#writer-structure > summary").evaluate(node => node === document.activeElement), true);
+    await page.locator("#writer-structure > summary").click();
+    await page.locator("#writer-style > summary").click();
+    assert.equal(await page.locator("#writer-structure").evaluate(node => node.open), false);
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-style-dropdown-${width}.png`), fullPage: true });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    for (let i = 0; i < 4; i++) await page.keyboard.press("Tab");
+    assert.equal(await page.locator("#writer-style").evaluate(node => node.open), false);
+    assert.equal(await page.getByRole("button", { name: "Undo", exact: true }).evaluate(node => node === document.activeElement), true);
+    await page.locator("#writer-structure > summary").click();
+    await page.locator(".writer-header h1").click();
+    assert.equal(await page.locator("#writer-structure").evaluate(node => node.open), false);
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-${width}.png`), fullPage: true });
     await page.getByRole("button", { name: "Theme settings", exact: true }).click();
     await chooseTheme(page, page.locator(".theme-picker"), "aero-glass", "rose");
