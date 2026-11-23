@@ -40,7 +40,7 @@ try {
       }];
       if (name === "site_resume_skills") data = resumeFixture.skills;
       if (name === "site_featured_project") data = [featuredFixture];
-      if (name === "site_blog_posts") {
+      if (name === "site_blog_public_posts") {
         const slug = new URL(request.url()).searchParams.get("slug")?.slice(3);
         data = JSON.parse(await readFile(new URL("./fixtures/blog-posts.json", import.meta.url), "utf8"))
           .filter((post) => post.published && Date.parse(post.published_at) <= Date.now() && (!slug || post.slug === slug));
@@ -232,12 +232,12 @@ try {
       }
       console.log(`PASS ${width}px ${path}: accessibility and overflow`);
     }
-    const postRequest = page.waitForRequest(request => new URL(request.url()).pathname.endsWith("/site_blog_posts"));
+    const postRequest = page.waitForRequest(request => new URL(request.url()).pathname.endsWith("/site_blog_public_posts"));
     await page.goto(`${server.origin}/blog/post.html?slug=first-lab-notes`, { waitUntil: "networkidle" });
     const postQuery = new URL((await postRequest).url()).searchParams;
     assert.equal(postQuery.get("slug"), "eq.first-lab-notes");
     assert.equal(postQuery.get("published"), "eq.true");
-    assert.match(postQuery.get("published_at"), /^lte\./);
+    assert.equal(postQuery.get("published_at"), null, "The live projection uses server eligibility, not a second browser-clock cutoff");
     assert.equal(await page.locator("#blog-post").isVisible(), true);
     assert.equal(await page.locator("#blog-post-title").textContent(), "First lab notes");
     assert.equal(await page.locator("#blog-post-views").textContent(), "1 VIEW");

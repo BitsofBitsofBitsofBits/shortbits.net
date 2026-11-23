@@ -12,7 +12,7 @@ function backup() {
   for (const table of ["pronoun_profiles", "site_now", "site_resume_profile", "site_message_settings"]) tablesData[table] = [{ id: "primary" }];
   return { format: "shortbits-content", version: 1, exportedAt: "2026-10-22T21:00:00Z", tables: tablesData };
 }
-test("accepts complete versioned editorial backups without private tables", () => {
+test("accepts complete editorial backups while excluding unrelated private operational tables", () => {
   assert.equal(validate(backup()), 4);
   assert.ok(tables.includes("site_creators"));
   assert.ok(tables.includes("site_featured_project"));
@@ -22,6 +22,16 @@ test("accepts complete versioned editorial backups without private tables", () =
   assert.ok(tables.includes("site_resume_skills"));
   assert.ok(tables.includes("site_social_links"));
   for (const name of ["messages", "site_hardware_devices", "site_short_links", "arcade_scores"]) assert.ok(!tables.includes(name));
+});
+test("private draft/history and approved snapshots validate rich content before restore", () => {
+  for (const table of ["site_blog_drafts", "site_blog_draft_history", "site_blog_approved_revisions"]) {
+    const value = backup();
+    const body_rich = { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Private body" }] }] } };
+    value.tables[table] = [table === "site_blog_approved_revisions" ? { body_rich } : { snapshot: { body_rich } }];
+    assert.equal(validate(value), 5);
+    body_rich.doc.content = [{ type: "html" }];
+    assert.throws(() => validate(value), /nesting|Unsupported/);
+  }
 });
 test("rejects incomplete, unknown, malformed, and oversized content", () => {
   const cases = [

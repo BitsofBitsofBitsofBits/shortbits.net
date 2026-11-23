@@ -626,6 +626,10 @@ const blogPostMarkdown = document.querySelector("#blog-post-markdown");
 let blogPostMarkdownSelection = null;
 let currentBlogRich = null;
 let currentBlogVersion = null;
+let currentBlogState = null;
+let blogOperationBusy = false;
+let blogAuthEpoch = 0;
+let blogLoadedTime = "", blogLoadedTimeValue = "";
 const blogPreviewToggle = document.querySelector("#blog-preview-toggle");
 const blogPreviewPanel = document.querySelector("#blog-preview-panel");
 const blogPreviewFrame = document.querySelector("#blog-preview-frame");
@@ -2837,6 +2841,8 @@ function closeBlogPreview() {
 function resetBlogEditor() {
   currentBlogRich = null;
   currentBlogVersion = null;
+  currentBlogState = null;
+  blogLoadedTime = ""; blogLoadedTimeValue = "";
   blogPostMarkdown.required = true;
   blogPostMarkdown.readOnly = false;
   document.querySelector(".blog-admin-workspace").hidden = false;
@@ -2850,6 +2856,8 @@ function resetBlogEditor() {
   document.querySelector("#blog-custom-font-status").textContent = "";
   blogPostForm.elements.id.value = "";
   blogPostDelete.disabled = true;
+  document.querySelector("#blog-post-unpublish").disabled = true;
+  document.querySelector("#blog-publication-state").textContent = "PRIVATE DRAFT";
   renderBlogPreview();
   setAdminStatus(blogAdminStatus, "Ready for a new post.");
   blogPostForm.elements.title.focus();
@@ -2857,7 +2865,8 @@ function resetBlogEditor() {
 
 function selectBlogPost(post) {
   currentBlogRich = post.body_rich ?? null;
-  currentBlogVersion = post.updated_at;
+  currentBlogState = post.editor_state;
+  currentBlogVersion = currentBlogState.version;
   blogPostMarkdown.required = !currentBlogRich;
   blogPostMarkdown.readOnly = Boolean(currentBlogRich);
   document.querySelector(".blog-admin-workspace").hidden = Boolean(currentBlogRich);
@@ -2877,13 +2886,15 @@ function selectBlogPost(post) {
   blogPostForm.elements.slug.value = post.slug;
   blogPostForm.elements.excerpt.value = post.excerpt;
   blogPostForm.elements.body_markdown.value = post.body_markdown;
-  blogPostForm.elements.published.checked = post.published;
   blogPostForm.elements.published_at.value = toDatetimeLocal(post.published_at);
+  blogLoadedTime = post.published_at || ""; blogLoadedTimeValue = blogPostForm.elements.published_at.value;
+  document.querySelector("#blog-publication-state").textContent = post.published ? "LIVE ARTICLE — EDITS SAVE PRIVATELY" : currentBlogState.scheduled_at ? "SCHEDULED REVISION" : "PRIVATE DRAFT";
+  document.querySelector("#blog-post-unpublish").disabled = !post.published && !currentBlogState.scheduled_at;
   blogPostDelete.disabled = false;
   renderBlogPreview();
   setAdminStatus(
     blogAdminStatus,
-    `${post.published ? "Published" : "Draft"} post loaded.`,
+    `${post.published ? "Live article with private working draft" : "Private draft"} loaded. Save draft never changes public content.`,
     "success",
   );
 }
@@ -2894,9 +2905,10 @@ function createBlogPostButton(post) {
   const metadata = document.createElement("span");
   button.type = "button";
   button.className = "blog-admin-post-button";
-  title.textContent = post.title;
+  title.textContent = post.title || "Untitled draft";
   metadata.textContent = [
-    post.published ? "PUBLISHED" : "DRAFT",
+    post.published ? "LIVE" : post.editor_state.scheduled_at ? "SCHEDULED" : "PRIVATE DRAFT",
+    post.editor_state.has_unpublished_changes ? "PRIVATE CHANGES" : "",
     post.published_at
       ? new Date(post.published_at).toLocaleDateString()
       : "NO DATE",
@@ -2907,18 +2919,29 @@ function createBlogPostButton(post) {
 }
 
 let blogPostsLoadSequence = 0;
+function blogEditorPost(state) {
+  return { ...state.snapshot, id: state.draft_id, published: Boolean(state.live?.published), editor_state: state };
+}
 async function loadBlogPosts(preferredId = "") {
   const request = ++blogPostsLoadSequence;
   setAdminStatus(blogAdminStatus, "Loading blog posts...");
   window.BITS_PUBLISHING_UI.clear("Loading saved posts before comparing deployment status...");
-  const data = [];
+  const { data: entries, error: entriesError } = await adminClient.rpc("list_blog_editor_entries");
+  if (request !== blogPostsLoadSequence) return false;
+  if (entriesError || !Array.isArray(entries)) {
+    setAdminStatus(blogAdminStatus, `Private drafts failed to load: ${entriesError?.message || "Unconfirmed server response"}`, "error");
+    window.BITS_PUBLISHING_UI.clear("Private drafts could not load; deployment comparison is unavailable.", "error", true);
+    return false;
+  }
+  const data = entries.map(blogEditorPost);
+  const publicData = [];
   for (;;) {
     const { data: page, error } = await adminClient
-      .from("site_blog_posts")
+      .from("site_blog_public_posts")
       .select("id, slug, title, excerpt, body_markdown, body_rich, published, published_at, created_at, updated_at")
       .order("updated_at", { ascending: false })
       .order("id")
-      .range(data.length, data.length + 499);
+      .range(publicData.length, publicData.length + 499);
     if (request !== blogPostsLoadSequence) return false;
     if (error) {
       console.error("Unable to load blog posts:", error);
@@ -2926,10 +2949,10 @@ async function loadBlogPosts(preferredId = "") {
       window.BITS_PUBLISHING_UI.clear(`Cannot compare deployment status: blog posts failed to load. ${error.message}`, "error", true);
       return false;
     }
-    data.push(...page);
+    publicData.push(...page);
     if (page.length < 500) break;
   }
-  void window.BITS_PUBLISHING_UI.update(data);
+  void window.BITS_PUBLISHING_UI.update(publicData);
 
   blogAdminList.replaceChildren(...data.map(createBlogPostButton));
   if (data.length === 0) {
@@ -2993,6 +3016,7 @@ function updateAdminGreeting() {
 }
 
 async function showInbox() {
+  blogAuthEpoch++;
   loginView.hidden = true;
   inboxView.hidden = false;
   updateAdminGreeting();
@@ -3019,6 +3043,9 @@ async function showInbox() {
 }
 
 function showLogin() {
+  blogAuthEpoch++;
+  currentBlogState = null; currentBlogVersion = null; currentBlogRich = null;
+  blogPostForm.reset(); blogAdminList.replaceChildren(); closeBlogPreview();
   blogPostsLoadSequence += 1;
   window.BITS_PUBLISHING_UI.clear();
   inboxView.hidden = true;
@@ -3057,9 +3084,8 @@ if (adminClient) {
       excerpt: blogPostForm.elements.excerpt.value,
       body_markdown: blogPostMarkdown.value,
       body_rich: currentBlogRich,
-      published: blogPostForm.elements.published.checked,
-      published_at: date ? new Date(date).toISOString() : null,
-      updated_at: currentBlogVersion,
+      published_at: date === blogLoadedTimeValue ? blogLoadedTime || null : date ? new Date(date).toISOString() : null,
+      draft_version: currentBlogVersion,
     };
     const receive = event => {
       if (event.origin !== location.origin || event.source !== writer || event.data?.channel !== channel) return;
@@ -3068,6 +3094,10 @@ if (adminClient) {
         window.removeEventListener("message", receive);
         if (initial === fingerprint()) void loadBlogPosts(event.data.id);
         else setAdminStatus(blogAdminStatus, "The visual writer saved a post. Your separate Admin edits were preserved; reload the post when ready.", "success");
+      }
+      if (event.data.type === "bits:writer-draft-saved") {
+        if (initial === fingerprint()) void loadBlogPosts(event.data.id);
+        else setAdminStatus(blogAdminStatus, "The writer saved a private draft. Your separate Admin edits remain here; reload before saving them.", "success");
       }
     };
     window.addEventListener("message", receive);
@@ -3370,92 +3400,95 @@ if (adminClient) {
     }
   });
   blogPostNew.addEventListener("click", resetBlogEditor);
-  blogPostForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const formData = new FormData(blogPostForm);
-    const id = String(formData.get("id") ?? "");
-    const title = String(formData.get("title") ?? "").trim();
-    const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
-    const excerpt = String(formData.get("excerpt") ?? "").trim();
-    const bodyMarkdown = String(formData.get("body_markdown") ?? "").trim();
-    const published = formData.has("published");
-    const publishedAtInput = String(formData.get("published_at") ?? "").trim();
-
-    if (!blogSlugPattern.test(slug) || slug.length < 3 || slug.length > 100) {
-      setAdminStatus(
-        blogAdminStatus,
-        "Slug must be 3-100 lowercase letters or numbers separated by hyphens.",
-        "error",
-      );
-      return;
-    }
-    if (!title || !excerpt || (!bodyMarkdown && !currentBlogRich)) {
-      setAdminStatus(
-        blogAdminStatus,
-        "Title, excerpt, and Markdown body are required.",
-        "error",
-      );
-      return;
-    }
-
-    let publishedAt = null;
-    if (publishedAtInput) {
-      const parsedDate = new Date(publishedAtInput);
-      if (Number.isNaN(parsedDate.getTime())) {
-        setAdminStatus(blogAdminStatus, "Publish date is invalid.", "error");
-        return;
-      }
-      publishedAt = parsedDate.toISOString();
-    } else if (published) {
-      publishedAt = new Date().toISOString();
-    }
-
-    const payload = {
-      title,
-      slug,
-      excerpt,
-      body_markdown: currentBlogRich ? blogPostMarkdown.value : bodyMarkdown,
-      published,
-      published_at: publishedAt,
-      updated_at: new Date().toISOString(),
+  function adminDraftSnapshot() {
+    const date = blogPostForm.elements.published_at.value;
+    return {
+      title: blogPostForm.elements.title.value,
+      slug: blogPostForm.elements.slug.value.trim().toLowerCase(),
+      excerpt: blogPostForm.elements.excerpt.value,
+      body_markdown: blogPostMarkdown.value,
+      body_rich: currentBlogRich,
+      published_at: date === blogLoadedTimeValue ? blogLoadedTime || null : date ? new Date(date).toISOString() : null,
     };
-    blogPostSave.disabled = true;
-    blogPostSave.textContent = "> SAVING...";
-    setAdminStatus(blogAdminStatus, "Writing blog post...");
-    const query = id
-      ? adminClient.from("site_blog_posts").update(payload).eq("id", id)
-      : adminClient.from("site_blog_posts").insert(payload);
-    const { data, error } = await query.select("id").single();
-    blogPostSave.disabled = false;
-    blogPostSave.textContent = "> SAVE_POST";
-
-    if (error) {
-      console.error("Unable to save blog post:", error);
-      const message = error.code === "23505"
-        ? "Another post already uses that slug."
-        : `Blog post save failed: ${error.message}`;
-      setAdminStatus(blogAdminStatus, message, "error");
-      return;
+  }
+  async function blogRpc(name, args, epoch) {
+    const { data, error } = await adminClient.rpc(name, args);
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    if (epoch !== blogAuthEpoch) throw new Error("Your Admin session changed. Reopen the saved draft after signing in.");
+    return data;
+  }
+  async function saveAdminDraft(epoch) {
+    const submitted = adminDraftSnapshot();
+    if (submitted.body_rich) window.BITS_BLOG_CONTENT.validate(submitted.body_rich);
+    if (!currentBlogState) {
+      currentBlogState = await blogRpc("load_blog_draft", { p_id: blogPostForm.elements.id.value || null }, epoch);
     }
-    await loadBlogPosts(data.id);
-    setAdminStatus(
-      blogAdminStatus,
-      published ? "Post saved. Browser readers load it live when its publish time is due; static snapshots update on deployment." : "Draft saved. Any previous public version is hidden after a successful live check; deploy to remove static copies.",
-      "success",
-    );
+    const requestId = crypto.randomUUID();
+    const state = await blogRpc("save_blog_draft", {
+      p_id: currentBlogState.draft_id, p_expected_version: currentBlogVersion,
+      p_base_public_version: currentBlogState.base_public_version, p_snapshot: submitted,
+      p_request_id: requestId, p_checkpoint: true,
+    }, epoch);
+    if (state?.request_id !== requestId || !state.version || state.draft_id !== currentBlogState.draft_id) throw new Error("Draft save could not be confirmed. Reload the latest private draft before retrying.");
+    currentBlogState = state; currentBlogVersion = state.version;
+    const unchanged = JSON.stringify(submitted) === JSON.stringify(adminDraftSnapshot());
+    if (unchanged) selectBlogPost(blogEditorPost(state));
+    await loadBlogPosts();
+    return { state, unchanged };
+  }
+  function blogButtonsBusy(busy) {
+    blogOperationBusy = busy; blogPostSave.disabled = busy;
+    document.querySelector("#blog-post-publish").disabled = busy;
+    document.querySelector("#blog-post-unpublish").disabled = busy || (!currentBlogState?.live?.published && !currentBlogState?.scheduled_at);
+  }
+  blogPostForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (blogOperationBusy) return;
+    const epoch = blogAuthEpoch;
+    try {
+      blogButtonsBusy(true); setAdminStatus(blogAdminStatus, "Saving private draft...");
+      const saved = await saveAdminDraft(epoch);
+      setAdminStatus(blogAdminStatus, saved.unchanged ? "Private draft saved. Public content is unchanged." : "Private draft saved. Your newer Admin edits remain unsaved.", "success");
+    } catch (error) { setAdminStatus(blogAdminStatus, `Draft save failed: ${error.message}. Reload the latest draft before retrying an interrupted save.`, "error"); }
+    finally { blogButtonsBusy(false); }
   });
+  for (const [buttonId, operation] of [["blog-post-publish", "publish_blog_draft"], ["blog-post-unpublish", "unpublish_blog_draft"]]) {
+    document.querySelector(`#${buttonId}`).addEventListener("click", async () => {
+      if (blogOperationBusy) return;
+      const epoch = blogAuthEpoch;
+      try {
+        blogButtonsBusy(true);
+        const saved = await saveAdminDraft(epoch);
+        if (!saved.unchanged) throw new Error("Newer local edits remain unsaved. Save them before changing publication.");
+        const current = await blogRpc("load_blog_draft", { p_id: saved.state.draft_id }, epoch);
+        const drift = Boolean(current.live) && current.base_public_version !== current.live.updated_at;
+        const message = operation === "unpublish_blog_draft" ? "Unpublish this article and cancel any approved schedule? The private draft and history are retained."
+          : drift ? "The live article changed since this draft started. Publish this whole draft over the current live article?"
+          : "Publish this saved revision? A future publication time schedules it; any current live article remains visible until then.";
+        if (!window.confirm(message)) return;
+        const requestId = crypto.randomUUID();
+        const args = { p_id: saved.state.draft_id, p_expected_version: saved.state.version, p_request_id: requestId };
+        if (operation === "publish_blog_draft") Object.assign(args, { p_expected_public_version: current.live?.updated_at || null, p_accept_live_change: drift });
+        const state = await blogRpc(operation, args, epoch);
+        if (state?.request_id !== requestId || !state.version) throw new Error("Publication response could not be confirmed. Reload the latest draft.");
+        currentBlogState = state; currentBlogVersion = state.version;
+        await loadBlogPosts();
+        if (JSON.stringify(adminDraftSnapshot()) === JSON.stringify(saved.state.snapshot)) selectBlogPost(blogEditorPost(state));
+        setAdminStatus(blogAdminStatus, operation === "unpublish_blog_draft" ? "Article unpublished. Private draft and history retained." : state.scheduled_at ? "Revision scheduled. Current live content stays visible until due." : "Revision published to live readers.", "success");
+      } catch (error) { setAdminStatus(blogAdminStatus, `Publication failed: ${error.message}. Reload the latest private draft if the response was interrupted.`, "error"); }
+      finally { blogButtonsBusy(false); }
+    });
+  }
   blogPostDelete.addEventListener("click", async () => {
     const id = blogPostForm.elements.id.value;
     const title = blogPostForm.elements.title.value.trim();
-    if (!id || !window.confirm(`Delete "${title}" permanently?`)) {
+    if (!id || !window.confirm(`Delete "${title}", its private draft, retained history and approved schedule permanently?`)) {
       return;
     }
     blogPostDelete.disabled = true;
     setAdminStatus(blogAdminStatus, "Deleting blog post...");
-    const { error } = await adminClient
-      .from("site_blog_posts")
-      .delete()
-      .eq("id", id);
+    const { error } = currentBlogState?.post_id ? await adminClient.from("site_blog_posts").delete().eq("id", currentBlogState.post_id)
+      : await adminClient.rpc("delete_blog_draft", { p_id: id, p_expected_version: currentBlogVersion });
     if (error) {
       console.error("Unable to delete blog post:", error);
       blogPostDelete.disabled = false;

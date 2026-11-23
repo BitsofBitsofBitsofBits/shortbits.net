@@ -24,10 +24,9 @@ try {
       const json = body => route.fulfill({
         contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(body),
       });
-      if (url.pathname.endsWith("/site_blog_posts")) {
+      if (url.pathname.endsWith("/site_blog_public_posts")) {
         const slug = url.searchParams.get("slug")?.slice(3);
-        const cutoff = Date.parse(url.searchParams.get("published_at").slice(4));
-        return json(fixtures.filter(post => post.published && Date.parse(post.published_at) <= cutoff && (!slug || post.slug === slug)));
+        return json(fixtures.filter(post => post.published && Date.parse(post.published_at) <= Date.now() && (!slug || post.slug === slug)));
       }
       if (url.pathname.endsWith("/get_blog_post_views")) return json(1);
       if (url.pathname.includes("/rest/v1/")) return json([]);

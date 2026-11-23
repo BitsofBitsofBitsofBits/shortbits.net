@@ -1,14 +1,14 @@
 {
-  "release_id": "changelog-publisher-v1",
-  "version": "2.0.1",
+  "release_id": "blog-private-drafts-v1",
+  "version": "2.0.2",
   "notes": [
     {
-      "title": "Blog writer headings, colors and links",
-      "summary": "Expanded the themed visual writer with Header (H1), Heading 2-6 and Paragraph controls, a built-in custom-color picker and rainbow/common presets. Compact Structure and Style dropdowns keep formatting accessible, with direct font, strike and highlight controls. Links now separate displayed text from the destination; saving and reloading preserve formatting and existing content."
+      "title": "Private autosaved blog drafts and version history",
+      "summary": "The visual writer autosaves private working drafts, including revisions to already-published articles. Live content and metadata change only through explicit publication. Private history keeps the latest 100 checkpoints, every five minutes and on manual saves, publishing and restores, with preview and restore-to-draft controls."
     },
     {
-      "title": "Reviewed deployment changelog publishing",
-      "summary": "Added an opt-in publisher for reviewed, grouped release notes after verified deployments. A dedicated changelog-only credential protects publication, the endpoint verifies the live site revision, and an atomic release ledger prevents retries from duplicating entries. Existing changelog history and Admin drafts are preserved; version bumps remain deliberately reviewed."
+      "title": "Safer draft recovery and scheduled revisions",
+      "summary": "Serialized saves, version tokens and retry receipts protect drafts against uncertain saves and competing tabs. Approved scheduled updates leave the current article live until due; later draft edits and history restores do not change that approved revision. Admin backups include private draft history and schedules, while static SEO snapshots, RSS and sitemap still refresh on deployment."
     }
   ]
 }

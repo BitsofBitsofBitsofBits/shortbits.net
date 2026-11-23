@@ -5,8 +5,9 @@ import vm from "node:vm";
 
 const source = await readFile(new URL("../admin/scripts/admin.js", import.meta.url), "utf8");
 const loader = source.slice(source.indexOf("let blogPostsLoadSequence ="), source.indexOf("\nasync function loadShortLinks"));
-function setup(pages) {
+function setup(pages, entries = []) {
   const snapshots = [];
+  const listed = [];
   const ranges = [];
   const reports = [];
   const context = {
@@ -15,17 +16,18 @@ function setup(pages) {
     document: { createElement: () => ({}) },
     blogAdminStatus: {},
     blogAdminList: { replaceChildren: () => {}, append: () => {} },
-    createBlogPostButton: (post) => post,
+    createBlogPostButton: (post) => { listed.push(post); return post; },
     selectBlogPost: () => {},
     setAdminStatus: () => {},
     adminClient: {
-      from() { return this; }, select() { return this; }, order() { return this; },
+      async rpc(name) { assert.equal(name, "list_blog_editor_entries"); return { data: entries }; },
+      from(table) { assert.equal(table, "site_blog_public_posts"); return this; }, select() { return this; }, order() { return this; },
       range(start, end) { ranges.push([start, end]); return pages.shift(); },
     },
   };
   vm.createContext(context);
   vm.runInContext(loader, context);
-  return { context, snapshots, ranges, reports };
+  return { context, snapshots, listed, ranges, reports };
 }
 test("admin compares every saved post, including paginated entries", async () => {
   const first = Array.from({ length: 500 }, (_, id) => ({ id: String(id), slug: `post-${id}` }));
@@ -50,9 +52,21 @@ test("late loads cannot replace a newer saved-post comparison", async () => {
     { data: [{ id: "new", slug: "new-post" }] },
   ]);
   const older = state.context.loadBlogPosts();
+  await new Promise(resolve => setImmediate(resolve));
   assert.equal(await state.context.loadBlogPosts(), true);
   release({ data: [{ id: "old", slug: "old-post" }] });
   assert.equal(await older, false);
   assert.equal(state.snapshots.length, 1);
   assert.equal(state.snapshots[0][0].slug, "new-post");
+});
+test("private working revisions are listed but never compared against the public manifest", async () => {
+  const published = { id: "post", slug: "public-slug", title: "Published title" };
+  const state = setup([{ data: [published] }], [{
+    draft_id: "post", snapshot: { slug: "private-slug", title: "Private edited title" }, live: published,
+  }]);
+  assert.equal(await state.context.loadBlogPosts(), true);
+  assert.equal(state.listed[0].title, "Private edited title");
+  assert.equal(state.listed[0].slug, "private-slug");
+  assert.equal(state.snapshots[0][0].title, "Published title");
+  assert.equal(state.snapshots[0][0].slug, "public-slug");
 });

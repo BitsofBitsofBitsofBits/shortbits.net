@@ -654,9 +654,9 @@
               </div>
               <div id="blog-admin-list" class="blog-admin-list"></div>
             </aside>
-            <form id="blog-post-form" class="admin-form blog-admin-form" data-admin-view="editor" data-admin-view-label="Editor">
+            <form id="blog-post-form" class="admin-form blog-admin-form" data-admin-view="editor" data-admin-view-label="Editor" novalidate>
               <button id="blog-writer-open" type="button">OPEN VISUAL WRITER</button>
-              <p id="blog-writer-help">Write directly in a themed article page. Saving and publication remain explicit.</p>
+              <p id="blog-writer-help">The visual writer autosaves private drafts and keeps version history. Publishing remains explicit. This Markdown form saves private drafts manually.</p>
               <input name="id" type="hidden">
               <div class="content-admin-profile-grid">
                 <label>
@@ -676,10 +676,7 @@
                 <span>EXCERPT</span>
                 <textarea name="excerpt" maxlength="500" required></textarea>
               </label>
-              <label class="admin-checkbox">
-                <input name="published" type="checkbox">
-                <span>PUBLISH POST</span>
-              </label>
+              <output id="blog-publication-state">PRIVATE DRAFT</output>
               <div class="blog-admin-workspace">
               <div class="blog-editor-heading">
                 <label for="blog-post-markdown">MARKDOWN</label>
@@ -785,7 +782,9 @@
               <p id="blog-admin-status" class="form-status" role="status" aria-live="polite"></p>
               <div class="repeatable-entry-actions">
                 <button id="blog-post-delete" class="repeatable-entry-remove" type="button" disabled>DELETE</button>
-                <button id="blog-post-save" type="submit">&gt; SAVE_POST</button>
+                <button id="blog-post-save" type="submit">&gt; SAVE_DRAFT</button>
+                <button id="blog-post-publish" type="button">PUBLISH REVISION</button>
+                <button id="blog-post-unpublish" type="button" disabled>UNPUBLISH</button>
               </div>
             </form>
           </div>

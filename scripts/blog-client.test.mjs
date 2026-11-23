@@ -89,7 +89,7 @@ test("archive links built posts statically and newer posts through the legacy re
   assert.equal(requests.length, 1);
   assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,published_at");
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
-  assert.match(requests[0].searchParams.get("published_at"), /^lte\./);
+  assert.equal(requests[0].searchParams.get("published_at"), null, "Database-time eligibility must not be overridden by a skewed client clock");
   assert.equal(requests[0].searchParams.get("order"), "published_at.desc,slug.asc");
   assert.equal(requests[0].searchParams.get("limit"), "500");
   nodes["#blog-search"].value = "identity";
@@ -146,7 +146,7 @@ test("legacy links preserve unpublished semantics rather than redirecting to sta
   assert.match(nodes["#blog-post-status"].textContent, /does not exist or is not published/);
   assert.equal(head.children.filter((element) => element.rel === "canonical").length, 0);
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
-  assert.match(requests[0].searchParams.get("published_at"), /^lte\./);
+  assert.equal(requests[0].searchParams.get("published_at"), null, "Database-time eligibility must not be overridden by a skewed client clock");
   assert.equal(requests[0].searchParams.get("slug"), "eq.existing-post");
   assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published_at,updated_at");
   assert.equal(requests[0].searchParams.get("limit"), "1");

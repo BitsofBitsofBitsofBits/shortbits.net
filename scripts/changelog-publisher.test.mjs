@@ -163,7 +163,7 @@ test("client sends only the scoped credential and reviewed notes with GitHub con
     assert.ok(!JSON.stringify(options).includes("never-send-this"));
     return Response.json(result(input));
   } });
-  assert.equal(published.release_id, "changelog-publisher-v1");
+  assert.equal(published.release_id, reviewed.release_id);
 });
 
 test("client refuses misconfiguration, unsafe endpoints, invalid context, upstream and response failures", async () => {

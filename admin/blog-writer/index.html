@@ -24,17 +24,19 @@
   <header class="writer-header">
     <a href="/admin/">Back to Admin</a>
     <h1>Blog writer</h1>
+    <button type="button" id="writer-history-open" aria-haspopup="dialog" aria-controls="writer-history-dialog" aria-expanded="false">History</button>
+    <button id="writer-theme-open" type="button" aria-label="Theme settings" aria-haspopup="dialog" aria-controls="writer-theme-dialog" aria-expanded="false">Theme</button>
     <p id="writer-status" role="status" aria-live="polite">Checking your session...</p>
   </header>
   <main id="writer-workspace" hidden>
-    <form id="writer-form">
+    <form id="writer-form" novalidate>
       <aside class="writer-settings" aria-label="Article settings">
-        <label>Slug<input name="slug" required minlength="3" maxlength="100" pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
+        <label>Slug<input name="slug" maxlength="100"></label>
         <label>Publish time<input name="published_at" type="datetime-local"></label>
-        <label class="writer-published" title="Saving updates the live post when its publish time is due"><input name="published" type="checkbox"> Published</label>
-        <button id="writer-save" type="submit">Save post</button>
-        <button id="writer-theme-open" type="button" aria-label="Theme settings" aria-haspopup="dialog" aria-controls="writer-theme-dialog" aria-expanded="false">Theme</button>
+        <output id="writer-publication-state">Private draft</output>
+        <div class="writer-actions"><button id="writer-save" type="submit">Save draft</button><button id="writer-publish" type="button">Publish revision</button></div>
       </aside>
+      <div id="writer-recovery" hidden><button type="button" id="writer-retry">Retry save</button><button type="button" id="writer-reload">Reload latest draft</button><span>Local changes stay in this tab until saved or explicitly discarded.</span></div>
       <div class="writer-toolbar" role="toolbar" aria-label="Article formatting">
         <button type="button" data-command="bold" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
         <button type="button" data-command="italic" aria-label="Italic" aria-pressed="false"><em>I</em></button>
@@ -84,13 +86,21 @@
         <button type="button" id="writer-image">Image</button>
       </div>
       <article class="blog-shell blog-article writer-article">
-        <label class="writer-title-label">Title<input id="writer-title" name="title" required maxlength="160" placeholder="Your title"></label>
-        <label>Excerpt<textarea name="excerpt" required maxlength="500" placeholder="A short introduction"></textarea></label>
+        <label class="writer-title-label">Title<input id="writer-title" name="title" maxlength="160" placeholder="Your title"></label>
+        <label>Excerpt<textarea name="excerpt" maxlength="500" placeholder="A short introduction"></textarea></label>
         <div id="writer-body" class="blog-markdown" aria-describedby="writer-help"></div>
-        <p id="writer-help">Write directly in the article. Ctrl/Command+B and I format text; Ctrl/Command+S saves. Saving is explicit; writing does not publish automatically. Protected legacy sections keep their original source. RSS, sitemap and no-JavaScript snapshots still refresh on deployment.</p>
+        <p id="writer-help">Changes autosave to a private draft after a typing pause. Ctrl/Command+S saves a checkpoint. Only Publish revision changes the live article; a future publish time schedules the chosen revision. History keeps the latest 100 checkpoints, every 5 minutes and on manual saves, publishing and restores. Protected legacy sections keep their original source. RSS, sitemap and no-JavaScript snapshots still refresh on deployment.</p>
       </article>
     </form>
   </main>
+  <dialog id="writer-history-dialog" class="writer-popup writer-history" aria-labelledby="writer-history-title">
+    <div class="writer-popup-heading"><h2 id="writer-history-title">Private version history</h2><button type="button" id="writer-history-close">Close</button></div>
+    <p>Restoring creates a private draft revision, never a publication. The latest draft is saved continuously; history checkpoints are less frequent. Restoring does not cancel an approved scheduled revision.</p>
+    <p id="writer-history-status" role="status" aria-live="polite"></p>
+    <div class="writer-history-layout"><div id="writer-history-list" role="group" aria-label="Saved revisions"></div><article id="writer-history-preview" class="blog-markdown" aria-label="Revision preview"></article></div>
+    <button type="button" id="writer-history-restore" disabled>Restore to draft</button>
+    <button type="button" id="writer-cancel-schedule" hidden>Cancel scheduled revision</button>
+  </dialog>
   <dialog id="writer-theme-dialog" class="writer-popup" aria-labelledby="writer-theme-title">
     <div class="writer-popup-heading"><h2 id="writer-theme-title">Theme settings</h2><button type="button" data-writer-close>Close</button></div>
     <label>Theme<select id="writer-theme"></select></label>

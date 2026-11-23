@@ -5,7 +5,12 @@
 - **Open visual writer** in Admin opens an independently authenticated, themed
   article-writing page. Formatting, lists, checklists, tables, links, accessible
   images and protected legacy sections are saved as versioned rich-text JSON.
-  Save explicitly (or Ctrl/Cmd+S); writing is not automatic publication.
+  Private save attempts run after a two-second typing pause or ten seconds of
+  continuous editing, including
+  incomplete titles, slugs and bodies. **Save draft** or Ctrl/Cmd+S makes a
+  checkpoint. Only **Publish revision** promotes the saved revision; publication
+  still requires a complete valid article. Editing a published article never
+  changes its live body, title, slug, excerpt or date through autosaving.
   Appearance choices are preview-only. Unsaved navigation prompts and conditional
   updates protect drafts against accidental loss and competing edits.
   The toolbar keeps Strike, Highlight and the Font dropdown directly visible.
@@ -25,6 +30,28 @@
   selected text or subsequent typing. Picking or dismissing without applying
   does not change the article. The picker chooses RGB colors; existing saved
   hex colors, including transparency, remain unchanged unless replaced explicitly.
+- **History** previews private earlier revisions and **Restore to draft** creates
+  a new private revision without publishing or cancelling an approved schedule.
+  The latest draft head saves continuously; history keeps the newest **100
+  checkpoints per article**, every **five minutes** and on manual saves,
+  publishing and restores. Older checkpoints are pruned under that retention
+  policy. Restoring checkpoints preserves current edits in history first.
+  Saving/saved/error/conflict messages distinguish durable saves from local
+  changes. Writes are serialized with UUID version tokens and retry receipts.
+  A conflicting tab pauses autosaving instead of overwriting newer changes;
+  reload the latest draft only after explicitly discarding local edits.
+  Network/uncertain autosaves retry the same request with **Retry save**.
+  Interrupted publication/restoration must be checked by reloading, not assumed
+  successful. All textual draft/history access requires authenticated editorial
+  permission. Uploaded images still use the existing public image bucket.
+- The legacy Admin Markdown form now saves private drafts manually and has
+  separate **Publish revision** / **Unpublish** actions. Rich bodies remain
+  editable in the visual writer. A future publication time approves a frozen
+  revision: an already-live article stays visible until that revision becomes
+  due, even if its working draft changes afterward. **History > Cancel scheduled
+  revision** cancels approval without hiding the currently live article.
+  Deleting an article also permanently deletes its private draft, retained
+  history and approved schedule; unpublishing retains its draft/history.
 - Existing Markdown is not converted by the database migration. On opening an
   old post, its exact source remains in a protected editable section.
   **Import original Markdown** adopts visual content only if a rendered-structure
@@ -50,10 +77,26 @@
   remain deployed, download a fresh exact-schema backup, then release the rich
   readers and writer. Production deployment requires the Supabase migration job
   to succeed; missing credentials or migration failures must not ship the site.
-- The Admin blog editor compares saved posts with `/blog/content-manifest.json`,
+- **Private-draft release order (not yet deployed):** obtain a fresh private
+  pre-migration database backup, then apply
+  `20261123150000_private_blog_drafts.sql`, establish a fresh exact-schema
+  private backup, and deploy the matching writer, Admin, public query contract
+  and generator together. No post backfill or automatic publication occurs.
+  The migration revokes legacy direct INSERT/UPDATE publication writes; old
+  already-open editors fail closed until reopened on the compatible code.
+  RPCs permit only scoped authenticated editorial operations.
+  `site_blog_public_posts` is a security-invoker public projection of eligible
+  base articles and due explicitly approved revisions, never working drafts or
+  history. No cron or additional hosting service is required.
+  Browser eligibility uses database time so clock skew cannot hide a due replacement.
+  A code rollback must retain compatible RPCs/public readers, or use a reviewed full recovery;
+  restoring old direct writer writes would break draft/live separation.
+- The Admin blog editor compares **current public publications**, not private
+  working drafts, with `/blog/content-manifest.json`,
   generated from the same public posts as static articles, RSS, and the sitemap.
-  It shows new/changed static articles, static copies awaiting removal, and
-  future scheduled posts. **Check static snapshot status** reloads saved
+  It shows new/changed static articles and static copies awaiting removal.
+  The editor separately labels private changes and approved schedules.
+  **Check static snapshot status** reloads saved
   database content and bypasses the snapshot cache; saves and deletions also
   refresh the comparison. Unsaved edits are excluded. Scheduled posts require
   another check and a deployment after their publication time for static files. Missing or
@@ -97,12 +140,20 @@
   deployed content from them. Static copies may remain accessible without
   JavaScript or during an outage; unpublishing alone is not immediate removal
   of previously public content. Client reconciliation does not change HTTP status.
-- The Admin center's **Content backups** page exports 15 editorial tables,
-  including creators, message catalogs, and drafts. Restore validates the complete schema and runs atomically
-  under existing authenticated permissions. A safety backup downloads first.
+- The Admin center's **Content backups** page exports 23 editorial tables,
+  including private draft heads, retained revision history and approved future
+  publications. Restore validates the complete schema and runs atomically
+  under authenticated editorial permission, with fixed-table privileged writes.
+  It restores dependencies in order and rotates draft concurrency tokens so
+  older tabs cannot overwrite restored content. A safety backup downloads first.
   The backup, creator, and message-catalog migrations must be deployed before these actions work.
-  Export a new backup after schema updates; older 13/14-table backups do not
+  Export a new backup after schema updates; older backups do not
   match the current schema and are rejected rather than silently clearing new content.
+  Admin restore remains bounded to **10 MiB / 10,000 rows**; history can exceed
+  these bounds. Oversized exports/restores report an explicit limitation, never
+  omit checkpoints or claim a truncated backup is complete. Use the supported
+  private full-database backup/recovery path for larger datasets, including the
+  operational changelog ledger, and keep Storage backups separately.
 - Backups exclude private messages, guestbook entries, leaderboards, analytics,
   short links, device credentials, live telemetry, and image binaries. Keep
   backups private, retain separate Supabase database/Storage backups, and reload

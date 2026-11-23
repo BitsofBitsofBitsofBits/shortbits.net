@@ -1,6 +1,6 @@
 (() => {
   const tables = [
-    "pronoun_profiles", "site_blog_posts", "site_changelog", "site_creators", "site_favorite_games", "site_featured_project",
+    "pronoun_profiles", "site_blog_approved_revisions", "site_blog_draft_history", "site_blog_drafts", "site_blog_posts", "site_changelog", "site_creators", "site_favorite_games", "site_featured_project",
     "site_hardware", "site_hardware_machine_order", "site_message_catalog", "site_message_pools",
     "site_message_settings", "site_now",
     "site_resume_certifications", "site_resume_education", "site_resume_entries",
@@ -24,8 +24,12 @@
       count += rows.length;
     }
     if (count > 10000) throw new Error("The backup exceeds 10,000 rows.");
-    for (const post of backup.tables.site_blog_posts) {
+    for (const post of [...backup.tables.site_blog_posts, ...backup.tables.site_blog_approved_revisions]) {
       if (post.body_rich != null) window.BITS_BLOG_CONTENT.validate(post.body_rich);
+    }
+    for (const row of [...backup.tables.site_blog_drafts, ...backup.tables.site_blog_draft_history]) {
+      if (!row.snapshot || typeof row.snapshot !== "object" || Array.isArray(row.snapshot)) throw new Error("A private blog revision is missing its snapshot.");
+      if (row.snapshot.body_rich != null) window.BITS_BLOG_CONTENT.validate(row.snapshot.body_rich);
     }
     for (const table of ["pronoun_profiles", "site_now", "site_resume_profile", "site_message_settings"]) {
       if (backup.tables[table].length !== 1 || backup.tables[table][0].id !== "primary") {
@@ -73,8 +77,11 @@
     updateControls();
     report("Exporting editorial content...");
     try {
-      download(await exportContent(), "shortbits-content");
-      report("Content backup downloaded. Store it privately; drafts are included.", "success");
+      const backup = await exportContent();
+      download(backup, "shortbits-content");
+      const tooLarge = new Blob([JSON.stringify(backup, null, 2)]).size > 10 * 1024 * 1024;
+      report(tooLarge ? "Complete private export downloaded, but it exceeds the Admin 10 MB restore limit. Use a private database backup for recovery."
+        : "Content backup downloaded. Store it privately; draft heads, retained history and approved schedules are included.", tooLarge ? "error" : "success");
     } catch (error) {
       console.error("Content backup failed:", error);
       report(error.message, "error");

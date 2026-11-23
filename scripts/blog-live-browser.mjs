@@ -25,6 +25,7 @@ try {
       body_markdown: "## Live edit\n\n**Current body**, not the deployment snapshot.\n\n<script>window.unsafe = true</script>" }];
     let failure = false;
     let malformed = false;
+    let serverNow = Date.parse("2026-11-14T12:00:00Z");
     const requests = [];
     await context.route("**/*", route => {
       const request = route.request();
@@ -32,13 +33,12 @@ try {
       const json = (body, status = 200) => route.fulfill({
         status, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(body),
       });
-      if (url.pathname.endsWith("/site_blog_posts")) {
+      if (url.pathname.endsWith("/site_blog_public_posts")) {
         requests.push(url);
         if (failure) return json({ message: "Backend unavailable" }, 503);
         if (malformed) return json({ message: "Unexpected response" });
-        const cutoff = Date.parse(url.searchParams.get("published_at").slice(4));
         const slug = url.searchParams.get("slug")?.slice(3);
-        return json(rows.filter(post => post.published && Date.parse(post.published_at) <= cutoff && (!slug || post.slug === slug)));
+        return json(rows.filter(post => post.published && Date.parse(post.published_at) <= serverNow && (!slug || post.slug === slug)));
       }
       if (url.pathname.endsWith("/get_blog_post_views")) return json(1);
       return url.origin === server.origin ? route.continue() : route.abort();
@@ -65,7 +65,7 @@ try {
     if (shots) await page.screenshot({ path: join(shots, `live-blog-${width}.png`), fullPage: true });
 
     const refresh = async () => {
-      const response = page.waitForResponse(response => new URL(response.url()).pathname.endsWith("/site_blog_posts"));
+      const response = page.waitForResponse(response => new URL(response.url()).pathname.endsWith("/site_blog_public_posts"));
       await page.evaluate(() => window.dispatchEvent(new Event("focus")));
       await response;
     };
@@ -95,6 +95,7 @@ try {
     rows = [{ ...fixture, slug: "due-scheduled-post", published_at: "2026-11-14T12:00:30Z" }];
     await page.goto(`${server.origin}/blog/`, { waitUntil: "networkidle" });
     assert.equal(await page.locator("#blog-post-list article").count(), 0, "Future records are excluded");
+    serverNow += 60001;
     await page.clock.fastForward(60001);
     await page.locator('#blog-post-list a[href="/blog/post.html?slug=due-scheduled-post"]').waitFor();
     await page.locator("#blog-search").fill("first lab");
@@ -106,6 +107,7 @@ try {
     await page.locator("#blog-post").waitFor({ state: "visible" });
     assert.equal(await page.locator("#blog-post-title").textContent(), fixture.title);
     rows[0] = { ...rows[0], title: "Timer refresh", body_markdown: "Timer refreshed body." };
+    serverNow += 60001;
     await page.clock.fastForward(60001);
     await page.waitForFunction(() => document.querySelector("#blog-post-title").textContent === "Timer refresh");
 

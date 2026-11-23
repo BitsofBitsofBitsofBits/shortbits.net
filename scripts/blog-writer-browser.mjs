@@ -20,10 +20,25 @@ try {
     await context.addInitScript(() => {
       window.__fixture = {
         row: { id: "fixture", slug: "fixture-post", title: "Fixture article", excerpt: "Private local fixture", body_markdown: "# Preserved\n\nHello **writer**.", body_rich: null, published: false, published_at: null, updated_at: "2026-11-23T00:00:00Z" },
-        denied: false, fail: false, saves: [], fetches: 0,
+        denied: false, fail: false, saves: [], fetches: 0, history: [], revision: 0,
       };
       const saved = sessionStorage.getItem("writer-fixture-row");
       if (saved) window.__fixture.row = JSON.parse(saved);
+      window.__fixture.live = structuredClone(window.__fixture.row);
+      const snapshot = () => Object.fromEntries(["title", "slug", "excerpt", "body_markdown", "body_rich", "published_at"].map(key => [key, window.__fixture.row[key] ?? (key === "body_rich" || key === "published_at" ? null : "")]));
+      const state = () => ({
+        draft_id: window.__fixture.row.id, post_id: window.__fixture.row.id,
+        version: window.__fixture.row.draft_version || null, revision: window.__fixture.revision,
+        snapshot: snapshot(), base_public_version: window.__fixture.row.updated_at,
+        live: { ...window.__fixture.live }, scheduled_at: window.__fixture.scheduled_at || null, has_unpublished_changes: true,
+      });
+      const persist = (payload, requestId, reason) => {
+        const f = window.__fixture; f.revision++;
+        f.row = { ...f.row, ...structuredClone(payload), draft_version: crypto.randomUUID() };
+        if (reason) f.history.unshift({ id: crypto.randomUUID(), revision: f.revision, created_at: new Date().toISOString(), reason, title: payload.title, snapshot: structuredClone(payload) });
+        sessionStorage.setItem("writer-fixture-row", JSON.stringify(f.row));
+        return { data: { ...state(), request_id: requestId } };
+      };
       window.__writerClient = {
         storage: { from: () => ({ upload: async () => ({ error: { message: "Fixture upload denied" } }) }) },
         auth: {
@@ -31,11 +46,38 @@ try {
           getUser: async () => ({ data: { user: { id: "local-fixture" } } }),
           onAuthStateChange: callback => { window.__signOut = () => callback("SIGNED_OUT"); },
         },
+        rpc(name, args = {}) {
+          const promise = (async () => {
+            const f = window.__fixture;
+            if (name === "load_blog_draft") { f.fetches++; return { data: state() }; }
+            if (name === "list_blog_editor_entries") return { data: [state()] };
+            if (name === "list_blog_draft_history") return { data: structuredClone(f.history) };
+            if (name === "get_blog_draft_revision") return { data: structuredClone(f.history.find(row => row.id === args.p_revision_id)) };
+            if (f.fail || args.p_expected_version !== (f.row.draft_version || null)) return { error: { message: "Fixture conflict", code: "40001" } };
+            if (name === "save_blog_draft") {
+              f.saves.push(structuredClone(args.p_snapshot));
+              return persist(args.p_snapshot, args.p_request_id, args.p_checkpoint || !f.history.length ? "manual" : null);
+            }
+            if (name === "restore_blog_draft_revision") return persist(f.history.find(row => row.id === args.p_revision_id).snapshot, args.p_request_id, "restore");
+            if (name === "publish_blog_draft") {
+              if (args.p_expected_public_version !== f.live.updated_at) return { error: { code: "40001", message: "Live version conflict" } };
+              if (Date.parse(f.row.published_at) > Date.now()) f.scheduled_at = f.row.published_at;
+              else f.live = { ...f.row, published: true, published_at: f.row.published_at || new Date().toISOString() };
+              return persist(snapshot(), args.p_request_id, "publish");
+            }
+            if (name === "cancel_blog_draft_schedule") { f.scheduled_at = null; return persist(snapshot(), args.p_request_id, "manual"); }
+            if (name === "unpublish_blog_draft") { f.live.published = false; return persist(snapshot(), args.p_request_id, "manual"); }
+            throw new Error(`Unexpected fixture RPC: ${name}`);
+          })();
+          promise.abortSignal = () => promise;
+          return promise;
+        },
         from() {
           window.__fixture.fetches++;
           let payload;
           return {
-            select() { return this; }, eq() { return this; },
+            select() { return this; }, eq() { return this; }, order() { return this; },
+            async range() { return { data: window.__fixture.live.published ? [window.__fixture.live] : [] }; },
             update(value) { payload = value; return this; }, insert(value) { payload = value; return this; },
             async single() {
               if (window.__fixture.fail) return { error: { message: "Fixture conflict", code: "PGRST116" } };
@@ -53,7 +95,7 @@ try {
     await context.route("**/*", route => {
       const url = new URL(route.request().url());
       if (url.hostname === "cdn.jsdelivr.net") return route.fulfill({ contentType: "application/javascript", body: "window.supabase={createClient:()=>window.__writerClient};" });
-      if (url.pathname.endsWith("/rest/v1/site_blog_posts")) return route.fulfill({
+      if (url.pathname.endsWith("/rest/v1/site_blog_public_posts")) return route.fulfill({
         contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify(publishedFixture ? [publishedFixture] : []),
       });
@@ -63,9 +105,9 @@ try {
     const waitForSaved = async () => {
       await page.waitForFunction(() => {
         const status = document.querySelector("#writer-status");
-        return status.dataset.state === "error" || status.textContent === "Draft saved. It is not published.";
+        return status.dataset.state === "error" || status.textContent === "Private draft saved. The live article is unchanged.";
       });
-      assert.equal(await page.locator("#writer-status").textContent(), "Draft saved. It is not published.");
+      assert.equal(await page.locator("#writer-status").textContent(), "Private draft saved. The live article is unchanged.");
     };
     const formatCommand = async name => {
       const button = page.getByRole("button", { name, exact: true, includeHidden: true });
@@ -97,7 +139,7 @@ try {
     await page.goto(`${server.origin}/admin/blog-writer/?post=fixture`);
     await page.getByText("Original Markdown preserved.", { exact: false }).first().waitFor();
     await formatCommand("Import original Markdown");
-    await page.getByText("Formatted copy imported.", { exact: false }).waitFor();
+    await page.getByText("Formatted copy imported into the private draft.", { exact: false }).waitFor();
     await page.getByRole("textbox", { name: "Article body", exact: true }).click();
     await page.keyboard.press("Control+End");
     await page.keyboard.press("Enter");
@@ -107,11 +149,11 @@ try {
     await formatCommand("Strikethrough");
     await page.selectOption("#writer-font", "serif");
     await page.keyboard.press("Control+s");
-    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    await waitForSaved();
     assert.equal(await page.evaluate(() => window.__fixture.saves[0].body_markdown), "# Preserved\n\nHello **writer**.");
     assert.equal(await page.evaluate(() => window.__fixture.saves[0].body_rich.version), 1);
     assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.saves[0].body_rich)), /"font":"serif"/);
-    assert.equal(await page.evaluate(() => window.__fixture.saves[0].published), false);
+    assert.equal(await page.evaluate(() => Object.hasOwn(window.__fixture.saves.at(-1), "published")), false);
     assert.match(await page.locator(".tiptap").textContent(), /New visual text/);
     await page.getByRole("button", { name: "Link", exact: true }).click();
     assert.equal(await page.getByRole("textbox", { name: "Text shown", exact: true }).inputValue(), "text");
@@ -126,7 +168,7 @@ try {
     assert.equal(await page.getByRole("textbox", { name: "Link", exact: true }).inputValue(), "https://example.com/original");
     await page.getByRole("textbox", { name: "Link", exact: true }).fill("https://example.com/revised");
     await page.getByRole("button", { name: "Apply", exact: true }).click();
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
     await waitForSaved();
     const marks = await page.evaluate(() => {
       const nodes = [];
@@ -151,10 +193,10 @@ try {
     await page.getByRole("button", { name: "Apply", exact: true }).click();
     assert.equal(await page.locator('.tiptap a[href="https://example.com/new"]').textContent(), "<em>Literal text</em>");
     assert.equal(await page.locator('.tiptap a[href="https://example.com/new"] em').count(), 0);
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
-    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await waitForSaved();
     await page.reload();
-    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    await page.getByText("Autosave ready.", { exact: false }).waitFor();
     assert.equal(await page.locator('.tiptap a[href="https://example.com/revised"]').textContent(), "Read more");
     assert.equal(await page.locator('.tiptap a[href="https://example.com/new"]').textContent(), "<em>Literal text</em>");
     publishedFixture = await page.evaluate(() => ({ ...window.__fixture.row, published: true, published_at: "2026-11-01T00:00:00Z" }));
@@ -217,7 +259,7 @@ try {
     assert.ok(savedColor.marks.some(mark => mark.type === "bold"));
     assert.deepEqual(savedColor.marks.find(mark => mark.type === "style").attrs, { color: "#123456", font: "serif", size: null });
     await page.reload();
-    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    await page.getByText("Autosave ready.", { exact: false }).waitFor();
     await coloredText.click();
     await page.locator("#writer-style > summary").click();
     assert.equal(await page.locator("#writer-color").inputValue(), "custom");
@@ -239,7 +281,7 @@ try {
         sessionStorage.setItem("writer-fixture-row", JSON.stringify(window.__fixture.row));
       }, savedHex);
       await page.reload();
-      await page.getByText("Ready to write.", { exact: false }).waitFor();
+      await page.getByText("Autosave ready.", { exact: false }).waitFor();
       await coloredText.click();
       await page.locator("#writer-style > summary").click();
       assert.equal(await picker.inputValue(), pickerHex);
@@ -285,7 +327,7 @@ try {
     assert.deepEqual(headings.map(node => node.attrs.level), [1, 2, 3, 4, 5, 6]);
     for (const heading of headings) assert.equal(heading.content[0].marks.find(mark => mark.type === "style").attrs.font, "serif");
     await page.reload();
-    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    await page.getByText("Autosave ready.", { exact: false }).waitFor();
     for (const level of [1, 2, 3, 4, 5, 6]) {
       await page.locator(`.tiptap h${level}`).filter({ hasText: `Heading fixture ${level}` }).click();
       assert.equal(await page.locator("#writer-heading").inputValue(), String(level));
@@ -307,8 +349,8 @@ try {
     await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
     await page.keyboard.type("Table fixture");
     await formatCommand("Add row");
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
-    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await waitForSaved();
     assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.row.body_rich)), /taskItem/);
     assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.row.body_rich)), /tableRow/);
     const taskLayout = await page.locator('.tiptap [data-type="taskItem"]').first().evaluate(item => {
@@ -327,20 +369,47 @@ try {
     await page.getByRole("button", { name: "Apply", exact: true }).click();
     await page.locator("#writer-dialog-error").filter({ hasText: "Image upload failed: Fixture upload denied" }).waitFor();
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await page.evaluate(() => { window.__fixture.live = { ...structuredClone(window.__fixture.row), published: true, published_at: "2026-11-01T00:00:00Z" }; });
+    const beforePrivateEdit = await page.evaluate(() => structuredClone(window.__fixture.live));
+    await page.getByRole("textbox", { name: "Title", exact: true }).fill("Private autosaved revision");
+    await waitForSaved();
+    assert.deepEqual(await page.evaluate(() => window.__fixture.live), beforePrivateEdit, "Autosave leaves all live content and metadata unchanged");
+    assert.equal(await page.evaluate(() => window.__fixture.row.title), "Private autosaved revision");
+    await page.getByRole("button", { name: "History", exact: true }).click();
+    await page.locator("#writer-history-list button").first().click();
+    await page.getByText("Preview only. Restore to draft does not publish.", { exact: true }).waitFor();
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-private-history-${width}.png`), fullPage: true });
+    await page.getByRole("button", { name: "Restore to draft", exact: true }).click();
+    await page.getByText("Revision restored to the private draft.", { exact: false }).waitFor();
+    assert.deepEqual(await page.evaluate(() => window.__fixture.live), beforePrivateEdit, "Restore leaves the live article unchanged");
+    assert.equal(await page.getByRole("textbox", { name: "Title", exact: true }).inputValue(), beforePrivateEdit.title);
+    await page.getByRole("textbox", { name: "Title", exact: true }).fill("Explicitly published revision");
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("button", { name: "Publish revision", exact: true }).click();
+    await page.getByText("Revision published. Live readers use this version.", { exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => window.__fixture.live.title), "Explicitly published revision");
+    await page.getByRole("button", { name: "History", exact: true }).click();
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.querySelector("#writer-history-dialog").open);
+    assert.equal(await page.locator("#writer-history-open").evaluate(node => node === document.activeElement), true);
     await page.evaluate(() => { window.__fixture.fail = true; });
     await page.getByRole("textbox", { name: "Title", exact: true }).fill("Unsaved title");
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
-    await page.getByText("Save failed: Fixture conflict", { exact: false }).waitFor();
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await page.getByText("Draft save failed: Fixture conflict", { exact: false }).waitFor();
     assert.equal(await page.getByRole("textbox", { name: "Title", exact: true }).inputValue(), "Unsaved title");
     page.once("dialog", async dialog => { assert.equal(dialog.type(), "confirm"); await dialog.dismiss(); });
     await page.getByRole("link", { name: "Back to Admin", exact: true }).click();
     assert.match(page.url(), /blog-writer/);
     assert.equal(await page.getByRole("textbox", { name: "Title", exact: true }).inputValue(), "Unsaved title");
     await page.evaluate(() => { window.__fixture.fail = false; });
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
-    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    page.once("dialog", dialog => dialog.accept());
+    await page.getByRole("button", { name: "Reload latest draft", exact: true }).click();
+    await page.getByText("Autosave ready.", { exact: false }).waitFor();
+    await page.getByRole("textbox", { name: "Title", exact: true }).fill("Unsaved title");
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await waitForSaved();
     await page.reload();
-    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    await page.getByText("Autosave ready.", { exact: false }).waitFor();
     assert.equal(await page.getByRole("textbox", { name: "Title", exact: true }).inputValue(), "Unsaved title");
     await page.getByRole("button", { name: "Theme settings", exact: true }).click();
     const preferences = await page.evaluate(() => JSON.stringify(localStorage));
@@ -405,8 +474,8 @@ try {
     await page.getByText("Original Markdown preserved.", { exact: false }).first().waitFor();
     await formatCommand("Import original Markdown");
     await page.getByText("Some original formatting cannot be imported exactly.", { exact: false }).waitFor();
-    await page.getByRole("button", { name: "Save post", exact: true }).click();
-    await page.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await waitForSaved();
     assert.equal(await page.evaluate(() => window.__fixture.row.body_rich.doc.content[0].attrs.source), "{{font:display|Keep my custom font}}");
     assert.equal(await page.evaluate(() => window.__fixture.row.body_markdown), "{{font:display|Keep my custom font}}");
     const parent = await context.newPage();
@@ -421,14 +490,14 @@ try {
     assert.deepEqual(errors, []);
     assert.equal(await parent.evaluate(() => Boolean(adminClient)), true);
     const [popup] = await Promise.all([parent.waitForEvent("popup"), parent.locator("#blog-writer-open").click()]);
-    await popup.getByText("Original Markdown preserved.", { exact: false }).first().waitFor();
+    await popup.waitForFunction(() => document.querySelector("#writer-title")?.value === "Unsaved Admin title");
     assert.equal(await popup.getByRole("textbox", { name: "Title", exact: true }).inputValue(), "Unsaved Admin title");
     assert.match(await popup.locator(".writer-legacy-block").textContent(), /Unsaved Admin source/);
     assert.doesNotMatch(popup.url(), /Unsaved|Transferred|source/);
     await parent.locator('#blog-post-form [name="title"]').fill("Newer independent Admin edits");
-    await popup.getByRole("button", { name: "Save post", exact: true }).click();
-    await popup.getByText("Draft saved. It is not published.", { exact: true }).waitFor();
-    await parent.getByText("Your separate Admin edits were preserved", { exact: false }).waitFor();
+    await popup.getByRole("button", { name: "Save draft", exact: true }).click();
+    await popup.getByText("Private draft saved. The live article is unchanged.", { exact: true }).waitFor();
+    await parent.getByText("Your separate Admin edits remain here", { exact: false }).waitFor();
     assert.equal(await parent.locator('#blog-post-form [name="title"]').inputValue(), "Newer independent Admin edits");
     await popup.close(); await parent.close();
     await context.close();
