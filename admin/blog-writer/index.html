@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-theme-preview="true">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Write a blog post // BitsofBitsofBits</title>
+  <link rel="icon" type="image/png" href="/shared/images/favicon.png">
+  <script src="/shared/scripts/seasonal-calendar.js"></script>
+  <script src="/shared/scripts/accessibility.js"></script>
+  <link rel="stylesheet" href="/shared/styles/styles.css">
+  <script src="/shared/scripts/theme-init.js"></script>
+  <link rel="stylesheet" href="/shared/styles/accessibility.css">
+  <link rel="stylesheet" href="/admin/styles/blog-writer.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="/shared/scripts/supabase-config.js" defer></script>
+  <script src="/shared/scripts/markdown.js" defer></script>
+  <script src="/shared/scripts/blog-content.js" defer></script>
+  <script src="/shared/scripts/theme-picker.js" defer></script>
+  <script src="/admin/scripts/blog-writer.js" defer></script>
+</head>
+<body class="blog-page blog-post-page">
+  <a class="writer-skip" href="#writer-body">Skip to article</a>
+  <header class="writer-header">
+    <a href="/admin/">Back to Admin</a>
+    <h1>Blog writer</h1>
+    <p id="writer-status" role="status" aria-live="polite">Checking your session...</p>
+  </header>
+  <main id="writer-workspace" hidden>
+    <form id="writer-form">
+      <aside class="writer-settings" aria-label="Article settings">
+        <label>Slug<input name="slug" required minlength="3" maxlength="100" pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
+        <label>Publish time<input name="published_at" type="datetime-local"></label>
+        <label class="writer-published" title="Saving updates the live post when its publish time is due"><input name="published" type="checkbox"> Published</label>
+        <button id="writer-save" type="submit">Save post</button>
+        <button id="writer-theme-open" type="button" aria-label="Theme settings" aria-haspopup="dialog" aria-controls="writer-theme-dialog" aria-expanded="false">Theme</button>
+      </aside>
+      <div class="writer-toolbar" role="toolbar" aria-label="Article formatting">
+        <button type="button" data-command="bold" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
+        <button type="button" data-command="italic" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+        <button type="button" data-command="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+        <button type="button" data-command="undo">Undo</button>
+        <button type="button" data-command="redo">Redo</button>
+        <button type="button" id="writer-link">Link</button>
+        <button type="button" id="writer-image">Image</button>
+        <button id="writer-format-open" type="button" aria-haspopup="dialog" aria-controls="writer-format-dialog" aria-expanded="false">Format</button>
+      </div>
+      <article class="blog-shell blog-article writer-article">
+        <label class="writer-title-label">Title<input id="writer-title" name="title" required maxlength="160" placeholder="Your title"></label>
+        <label>Excerpt<textarea name="excerpt" required maxlength="500" placeholder="A short introduction"></textarea></label>
+        <div id="writer-body" class="blog-markdown" aria-describedby="writer-help"></div>
+        <p id="writer-help">Write directly in the article. Ctrl/Command+B and I format text; Ctrl/Command+S saves. Saving is explicit; writing does not publish automatically. Protected legacy sections keep their original source. RSS, sitemap and no-JavaScript snapshots still refresh on deployment.</p>
+      </article>
+    </form>
+  </main>
+  <dialog id="writer-theme-dialog" class="writer-popup" aria-labelledby="writer-theme-title">
+    <div class="writer-popup-heading"><h2 id="writer-theme-title">Theme settings</h2><button type="button" data-writer-close>Close</button></div>
+    <label>Theme<select id="writer-theme"></select></label>
+    <label>Variant<select id="writer-variant"></select></label>
+    <label>Color mode<select id="writer-scheme"></select></label>
+    <p>Preview only. Your saved site preferences and Admin appearance stay unchanged.</p>
+  </dialog>
+  <dialog id="writer-format-dialog" class="writer-popup" aria-labelledby="writer-format-title">
+    <div class="writer-popup-heading"><h2 id="writer-format-title">Format</h2><button type="button" data-writer-close>Close</button></div>
+    <div class="writer-format-grid" role="group" aria-label="Text formatting">
+      <button type="button" data-command="strike" aria-label="Strikethrough" aria-pressed="false"><s>Strike</s></button>
+      <button type="button" data-command="code" aria-label="Inline code" aria-pressed="false">Inline code</button>
+      <button type="button" data-command="highlight" aria-label="Highlight" aria-pressed="false">Highlight</button>
+      <label>Color<select id="writer-color"><option value="">Theme default</option><option value="accent">Accent</option><option value="red">Red</option><option value="blue">Blue</option><option value="purple">Purple</option><option value="rainbow">Rainbow</option><option value="#ff8800">Orange</option></select></label>
+      <label>Font<select id="writer-font"><option value="">Theme default</option><option value="serif">Serif</option><option value="sans-serif">Sans serif</option><option value="monospace">Monospace</option></select></label>
+      <label>Size<select id="writer-size"><option value="">Theme default</option><option value="small">Small</option><option value="large">Large</option><option value="huge">Huge</option></select></label>
+    </div>
+    <h3>Structure</h3>
+    <div class="writer-format-grid" role="group" aria-label="Article structure">
+      <button type="button" data-command="heading">Heading</button>
+      <button type="button" data-command="bulletList">List</button>
+      <button type="button" data-command="orderedList">Numbered list</button>
+      <button type="button" data-command="taskList">Checklist</button>
+      <button type="button" data-command="blockquote">Quote</button>
+      <button type="button" data-command="codeBlock">Code block</button>
+      <button type="button" data-command="table">Table</button>
+      <button type="button" data-command="addRowAfter">Add row</button>
+      <button type="button" data-command="addColumnAfter">Add column</button>
+      <button type="button" data-command="deleteTable">Remove table</button>
+    </div>
+    <h3>Legacy source</h3>
+    <div class="writer-format-grid">
+      <button type="button" id="writer-import">Import original Markdown</button>
+      <button type="button" id="writer-legacy">Edit protected Markdown</button>
+    </div>
+  </dialog>
+  <dialog id="writer-dialog" class="writer-popup" aria-labelledby="writer-dialog-title">
+    <form id="writer-dialog-form">
+      <h2 id="writer-dialog-title">Edit article detail</h2>
+      <label id="writer-value-label">Value<input id="writer-value" maxlength="2000"></label>
+      <label id="writer-alt-label" hidden>Image alt text<input id="writer-alt" maxlength="1000"></label>
+      <label id="writer-caption-label" hidden>Caption<input id="writer-caption" maxlength="2000"></label>
+      <label id="writer-file-label" hidden>Or upload an image<input id="writer-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>
+      <p id="writer-upload-help" hidden>Uploads use the existing public blog-images bucket, even for drafts. Removing an image from an article does not delete its stored file. Limit: 5 MB.</p>
+      <label id="writer-source-label" hidden>Original Markdown<textarea id="writer-source" maxlength="200000"></textarea></label>
+      <p id="writer-dialog-error" role="alert"></p>
+      <button type="submit">Apply</button><button id="writer-cancel" type="button">Cancel</button>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -43,6 +43,7 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
       SUPABASE_CONFIG: { url: "https://example.supabase.co", anonKey: "sb_publishable_example" },
       location: { search: `?slug=${slug}` },
       BITS_MARKDOWN: { readingTime: () => 1, render: (text) => ({ textContent: text }) },
+      BITS_BLOG_CONTENT: { readingTime: () => 1, renderPost: post => ({ textContent: post.body_markdown }) },
       BITS_BLOG_VIEWS: { show() {} },
       addEventListener: (event, listener) => { listeners[event] = listener; },
       setInterval: (listener, delay) => { timers.push({ listener, delay }); },
@@ -147,7 +148,7 @@ test("legacy links preserve unpublished semantics rather than redirecting to sta
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
   assert.match(requests[0].searchParams.get("published_at"), /^lte\./);
   assert.equal(requests[0].searchParams.get("slug"), "eq.existing-post");
-  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,published_at,updated_at");
+  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published_at,updated_at");
   assert.equal(requests[0].searchParams.get("limit"), "1");
 });
 

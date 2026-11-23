@@ -2,6 +2,41 @@
 
 [Wiki home](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki) | [Source repository](https://github.com/BitsofBitsofBitsofBits/shortbits.net)
 
+- **Open visual writer** in Admin opens an independently authenticated, themed
+  article-writing page. Formatting, lists, checklists, tables, links, accessible
+  images and protected legacy sections are saved as versioned rich-text JSON.
+  Save explicitly (or Ctrl/Cmd+S); writing is not automatic publication.
+  Appearance choices are preview-only. Unsaved navigation prompts and conditional
+  updates protect drafts against accidental loss and competing edits.
+  The compact toolbar keeps common text editing visible; **Format** opens
+  advanced text, structure, table and legacy-source controls. **Theme settings**
+  opens the shared family/variant selector in a popup. Close either with Close,
+  Escape or a backdrop click; keyboard focus returns to its trigger.
+- Existing Markdown is not converted by the database migration. On opening an
+  old post, its exact source remains in a protected editable section.
+  **Import original Markdown** adopts visual content only if a rendered-structure
+  comparison confirms the supported formatting survives; otherwise the original
+  stays protected with an explanation. The original `body_markdown` remains
+  retained when saving rich content. Protected source edits are explicit.
+  Rich posts' bodies must be edited in the visual writer, not the old textarea.
+- **Rich-writer release order:** privately back up the database/content first;
+  apply `20261123094500_blog_rich_content.sql`; export a fresh exact-schema content
+  backup; then deploy the matching public readers, generator, Admin and locally
+  bundled writer together. The new queries require the added column. Do not
+  convert real posts before the compatible readers are deployed. No backfill is
+  performed. Old readers cannot display newly rich-only bodies; code rollback
+  after rich saves requires compatible readers or an explicit content recovery.
+  Old exact-schema content backups lack `body_rich` and are rejected after the
+  migration; retain pre-migration backups privately for database-level recovery.
+  The browser/build strictly validate supported rich nodes and safe URLs; the
+  database checks the versioned envelope and size, not recursive editor semantics.
+  Image binaries remain separate Storage backups, as before.
+  The documented private editorial backup path is Admin's **Content backups**
+  download; keep it privately, never in public workflow artifacts. For the first
+  rich-writer release, stage the additive migration while the old readers/writer
+  remain deployed, download a fresh exact-schema backup, then release the rich
+  readers and writer. Production deployment requires the Supabase migration job
+  to succeed; missing credentials or migration failures must not ship the site.
 - The Admin blog editor compares saved posts with `/blog/content-manifest.json`,
   generated from the same public posts as static articles, RSS, and the sitemap.
   It shows new/changed static articles, static copies awaiting removal, and

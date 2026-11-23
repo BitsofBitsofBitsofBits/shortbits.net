@@ -24,6 +24,9 @@
       count += rows.length;
     }
     if (count > 10000) throw new Error("The backup exceeds 10,000 rows.");
+    for (const post of backup.tables.site_blog_posts) {
+      if (post.body_rich != null) window.BITS_BLOG_CONTENT.validate(post.body_rich);
+    }
     for (const table of ["pronoun_profiles", "site_now", "site_resume_profile", "site_message_settings"]) {
       if (backup.tables[table].length !== 1 || backup.tables[table][0].id !== "primary") {
         throw new Error(`Missing primary record in ${table}.`);

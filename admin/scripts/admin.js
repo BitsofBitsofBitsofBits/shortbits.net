@@ -624,6 +624,8 @@ const blogAdminStatus = document.querySelector("#blog-admin-status");
 const blogAdminList = document.querySelector("#blog-admin-list");
 const blogPostMarkdown = document.querySelector("#blog-post-markdown");
 let blogPostMarkdownSelection = null;
+let currentBlogRich = null;
+let currentBlogVersion = null;
 const blogPreviewToggle = document.querySelector("#blog-preview-toggle");
 const blogPreviewPanel = document.querySelector("#blog-preview-panel");
 const blogPreviewFrame = document.querySelector("#blog-preview-frame");
@@ -2797,6 +2799,7 @@ function renderBlogPreview() {
     title: blogPostForm.elements.title.value,
     excerpt: blogPostForm.elements.excerpt.value,
     markdown: blogPostMarkdown.value,
+    rich: currentBlogRich,
     theme: blogPreviewTheme.value,
     scheme: blogPreviewScheme.value,
     variant: blogPreviewVariant.value,
@@ -2832,6 +2835,11 @@ function closeBlogPreview() {
 }
 
 function resetBlogEditor() {
+  currentBlogRich = null;
+  currentBlogVersion = null;
+  blogPostMarkdown.required = true;
+  blogPostMarkdown.readOnly = false;
+  document.querySelector(".blog-admin-workspace").hidden = false;
   blogPostForm.reset();
   closeBlogPreview();
   if (blogPreviewFrame.contentWindow?.BITS_BLOG_PREVIEW) syncBlogPreviewTheme();
@@ -2848,6 +2856,14 @@ function resetBlogEditor() {
 }
 
 function selectBlogPost(post) {
+  currentBlogRich = post.body_rich ?? null;
+  currentBlogVersion = post.updated_at;
+  blogPostMarkdown.required = !currentBlogRich;
+  blogPostMarkdown.readOnly = Boolean(currentBlogRich);
+  document.querySelector(".blog-admin-workspace").hidden = Boolean(currentBlogRich);
+  document.querySelector("#blog-writer-help").textContent = currentBlogRich
+    ? "This post uses rich-text storage. Open the visual writer to edit its body; original Markdown is retained."
+    : "Write directly in a themed article page. Original Markdown stays protected until you explicitly import it.";
   closeBlogPreview();
   blogPostMarkdownSelection = null;
   blogCustomColor.hidden = true;
@@ -2899,7 +2915,7 @@ async function loadBlogPosts(preferredId = "") {
   for (;;) {
     const { data: page, error } = await adminClient
       .from("site_blog_posts")
-      .select("id, slug, title, excerpt, body_markdown, published, published_at, created_at, updated_at")
+      .select("id, slug, title, excerpt, body_markdown, body_rich, published, published_at, created_at, updated_at")
       .order("updated_at", { ascending: false })
       .order("id")
       .range(data.length, data.length + 499);
@@ -3027,6 +3043,35 @@ try {
 }
 
 if (adminClient) {
+  document.querySelector("#blog-writer-open").addEventListener("click", () => {
+    const fingerprint = () => JSON.stringify([...new FormData(blogPostForm)]);
+    const initial = fingerprint();
+    const channel = crypto.randomUUID();
+    const writer = window.open(`/admin/blog-writer/?channel=${encodeURIComponent(channel)}`, "_blank");
+    if (!writer) { setAdminStatus(blogAdminStatus, "Allow the writer window to open, then try again. Your draft is unchanged.", "error"); return; }
+    const date = blogPostForm.elements.published_at.value;
+    const post = {
+      id: blogPostForm.elements.id.value,
+      title: blogPostForm.elements.title.value,
+      slug: blogPostForm.elements.slug.value,
+      excerpt: blogPostForm.elements.excerpt.value,
+      body_markdown: blogPostMarkdown.value,
+      body_rich: currentBlogRich,
+      published: blogPostForm.elements.published.checked,
+      published_at: date ? new Date(date).toISOString() : null,
+      updated_at: currentBlogVersion,
+    };
+    const receive = event => {
+      if (event.origin !== location.origin || event.source !== writer || event.data?.channel !== channel) return;
+      if (event.data.type === "bits:writer-ready") writer.postMessage({ type: "bits:writer-draft", channel, post }, location.origin);
+      if (event.data.type === "bits:writer-saved") {
+        window.removeEventListener("message", receive);
+        if (initial === fingerprint()) void loadBlogPosts(event.data.id);
+        else setAdminStatus(blogAdminStatus, "The visual writer saved a post. Your separate Admin edits were preserved; reload the post when ready.", "success");
+      }
+    };
+    window.addEventListener("message", receive);
+  });
   let blogPreviewLoading = false;
   let blogPreviewPickerBound = false;
   blogPreviewToggle.addEventListener("click", async () => {
@@ -3344,7 +3389,7 @@ if (adminClient) {
       );
       return;
     }
-    if (!title || !excerpt || !bodyMarkdown) {
+    if (!title || !excerpt || (!bodyMarkdown && !currentBlogRich)) {
       setAdminStatus(
         blogAdminStatus,
         "Title, excerpt, and Markdown body are required.",
@@ -3369,7 +3414,7 @@ if (adminClient) {
       title,
       slug,
       excerpt,
-      body_markdown: bodyMarkdown,
+      body_markdown: currentBlogRich ? blogPostMarkdown.value : bodyMarkdown,
       published,
       published_at: publishedAt,
       updated_at: new Date().toISOString(),

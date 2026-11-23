@@ -44,6 +44,13 @@ test("scheduled posts become deployment differences only after publication time"
   const due = await publishing.snapshot([scheduled], new Date("2026-10-23T00:00:00Z"));
   assert.deepEqual(publishing.compare(due, deployed).added, ["scheduled"]);
 });
+test("rich-only changes affect fingerprints while null rich content preserves legacy fingerprints", async () => {
+  const legacy = await publishing.snapshot(fixtures, now);
+  assert.deepEqual(await publishing.snapshot(fixtures.map(post => ({ ...post, body_rich: null })), now), legacy);
+  const rich = { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Visual content" }] }] } };
+  const changed = fixtures.map((post, index) => index ? post : { ...post, body_rich: rich });
+  assert.deepEqual(publishing.compare(await publishing.snapshot(changed, now), legacy).changed, [fixtures[0].slug]);
+});
 
 test("missing or malformed deployed snapshots never appear synchronized", async () => {
   const manifest = await publishing.snapshot(fixtures, now);

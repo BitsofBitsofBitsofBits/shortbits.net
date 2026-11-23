@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
+    <script src="/shared/scripts/blog-content.js" defer></script>
     <script src="/admin/scripts/blog-paste.js?v=blog-paste-1" defer></script>
     <script src="/shared/scripts/shortbits.js?v=shortbits-1" defer></script>
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1" defer></script>
@@ -654,6 +655,8 @@
               <div id="blog-admin-list" class="blog-admin-list"></div>
             </aside>
             <form id="blog-post-form" class="admin-form blog-admin-form" data-admin-view="editor" data-admin-view-label="Editor">
+              <button id="blog-writer-open" type="button">OPEN VISUAL WRITER</button>
+              <p id="blog-writer-help">Write directly in a themed article page. Saving and publication remain explicit.</p>
               <input name="id" type="hidden">
               <div class="content-admin-profile-grid">
                 <label>

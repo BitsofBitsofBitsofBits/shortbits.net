@@ -16,7 +16,7 @@ export const articlePath = (slug) => `/blog/articles/${slug}/`;
 
 // Run the browser's renderer unchanged against a text-only DOM adapter. No
 // innerHTML, event handlers, or arbitrary attributes are accepted by this DOM.
-export function markdownRenderer(source) {
+export function markdownRenderer(source, richSource) {
   class Node {
     constructor(tag = "") {
       this.tag = tag;
@@ -35,7 +35,7 @@ export function markdownRenderer(source) {
       }
     }
     setAttribute(name, value) {
-      if (!["role", "aria-label"].includes(name)) throw new Error(`Unsupported Markdown attribute: ${name}`);
+      if (!["role", "aria-label", "start", "colspan", "rowspan", "align"].includes(name)) throw new Error(`Unsupported Markdown attribute: ${name}`);
       this.attributes[name] = value;
     }
     set textContent(value) { this.childNodes = [textNode(value)]; }
@@ -75,17 +75,21 @@ export function markdownRenderer(source) {
     return node;
   }
   const window = { location: { origin: siteUrl } };
-  vm.runInNewContext(source, {
+  const context = vm.createContext({
     window, URL,
     document: {
       createElement: (tag) => new Node(tag),
       createTextNode: textNode,
       createDocumentFragment: () => new Node(),
     },
-  }, { timeout: 1000, filename: "shared/scripts/markdown.js" });
+  });
+  vm.runInContext(source, context, { timeout: 1000, filename: "shared/scripts/markdown.js" });
+  if (richSource) vm.runInContext(richSource, context, { timeout: 1000, filename: "shared/scripts/blog-content.js" });
   return {
     render: (markdown) => String(window.BITS_MARKDOWN.render(markdown)),
     readingTime: window.BITS_MARKDOWN.readingTime,
+    renderPost: post => post.body_rich ? String(window.BITS_BLOG_CONTENT.render(post.body_rich)) : String(window.BITS_MARKDOWN.render(post.body_markdown)),
+    postReadingTime: post => post.body_rich ? window.BITS_BLOG_CONTENT.readingTime(post) : window.BITS_MARKDOWN.readingTime(post.body_markdown),
   };
 }
 
@@ -174,6 +178,7 @@ export function renderArticle(post, renderer) {
     <script type="application/ld+json" data-blog-schema>${jsonScript(schema)}</script>
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
+    <script src="/shared/scripts/blog-content.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/blog-data.js?v=blog-data-1" defer></script>
     <script src="/shared/scripts/blog-views.js?v=blog-views-1" defer></script>
@@ -198,9 +203,9 @@ export function renderArticle(post, renderer) {
           <p class="system-kicker">BLOG_ENTRY</p>
           <h1 id="blog-post-title">${title}</h1>
           <p id="blog-post-excerpt" class="blog-article-excerpt">${excerpt}</p>
-          <p class="blog-article-meta"><time id="blog-post-date" datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span id="blog-post-reading-time">${renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
+          <p class="blog-article-meta"><time id="blog-post-date" datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span id="blog-post-reading-time">${renderer.postReadingTime ? renderer.postReadingTime(post) : renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
         </header>
-        <div id="blog-post-body" class="blog-markdown">${renderer.render(post.body_markdown)}</div>
+        <div id="blog-post-body" class="blog-markdown">${renderer.renderPost ? renderer.renderPost(post) : renderer.render(post.body_markdown)}</div>
       </article>
       <footer><p><a href="/blog/">All posts</a> &middot; <a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/professional/">Professional profile</a></p></footer>
     </main>
@@ -249,7 +254,7 @@ export async function buildContent({ root = defaultRoot, input, env = process.en
   const posts = input
     ? normalizePosts(JSON.parse(await readFile(resolve(input), "utf8")), now)
     : await fetchPosts(await publicConfig(root, env), { fetchImpl, now });
-  const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"));
+  const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"), await readFile(join(root, "shared/scripts/blog-content.js"), "utf8"));
   const articles = posts.map((post) => [post.slug, renderArticle(post, renderer)]);
   const manifest = await publishing.snapshot(posts, now);
   const archiveFile = join(root, "blog", "index.html");

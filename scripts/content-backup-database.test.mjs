@@ -38,6 +38,8 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("alter table site_resume_entries add position integer default 1, add technologies text, add enabled boolean default false");
     await db.exec(await readFile(new URL("../supabase/migrations/20261028093000_resume_skills.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../supabase/migrations/20261028180000_social_links.sql", import.meta.url), "utf8"));
+    await db.exec("alter table site_blog_posts add body_markdown text not null default 'Original Markdown' constraint site_blog_posts_body_markdown_check check (char_length(body_markdown) between 1 and 200000)");
+    await db.exec(await readFile(new URL("../supabase/migrations/20261123094500_blog_rich_content.sql", import.meta.url), "utf8"));
     await db.exec("set role anon");
     await assert.rejects(db.query("select public.export_site_content()"), /permission denied/);
     await assert.rejects(db.query("select public.restore_site_content('{}'::jsonb)"), /permission denied/);
@@ -49,12 +51,16 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     await db.exec("insert into site_message_catalog (position,profile,category,text) values (2,'custom-backup','messages','Custom backup message')");
     await db.exec("insert into site_message_pools(id,title,schedule,mode,enabled) values ('easter','Backup Easter','automatic','exclusive',false)");
     await db.exec("update site_message_settings set timezone = 'America/New_York'");
+    const rich = { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Rich fixture" }] }] } };
+    await db.query("update site_blog_posts set body_rich=$1::jsonb", [JSON.stringify(rich)]);
     const exported = (await db.query("select public.export_site_content() as backup")).rows[0].backup;
     assert.equal(Object.keys(exported.tables).length, names.length + 7);
     assert.equal(exported.tables.site_social_links.length, 11);
     assert.equal(exported.tables.site_resume_skills.length, 6);
     assert.equal(exported.tables.site_featured_project[0].enabled, false);
     assert.equal(exported.tables.site_creators[0].title, "Original creator");
+    assert.deepEqual(exported.tables.site_blog_posts[0].body_rich, rich);
+    assert.equal(exported.tables.site_blog_posts[0].body_markdown, "Original Markdown");
     assert.ok(!("messages" in exported.tables));
     assert.equal(exported.tables.site_message_catalog[0].text, "Private message draft");
     assert.equal(exported.tables.site_message_catalog[0].markup, true);
@@ -80,6 +86,10 @@ test("content backup RPCs enforce permissions, exact schemas, and atomic restora
     assert.equal((await db.query("select text from site_message_catalog where profile = 'custom-backup'")).rows[0].text, "Custom backup message");
     assert.equal((await db.query("select timezone from site_message_settings")).rows[0].timezone, "America/New_York");
     assert.equal((await db.query("select body from site_blog_posts")).rows[0].body, "original");
+    assert.deepEqual((await db.query("select body_rich from site_blog_posts")).rows[0].body_rich, rich);
+    const oldBlogSchema = structuredClone(exported);
+    delete oldBlogSchema.tables.site_blog_posts[0].body_rich;
+    await assert.rejects(db.query("select public.restore_site_content($1::jsonb)", [JSON.stringify(oldBlogSchema)]), /schema does not match/);
     assert.equal((await db.query("select title from site_creators")).rows[0].title, "Original creator");
     assert.equal((await db.query("select text from site_message_catalog")).rows[0].text, "Private message draft");
     assert.equal((await db.query("select markup from site_message_catalog")).rows[0].markup, true);

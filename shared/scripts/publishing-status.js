@@ -13,9 +13,10 @@
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug) || post.slug.length > 100 || slugs.has(post.slug)) {
         throw new Error("Content build: invalid or duplicate post slug.");
       }
-      for (const key of ["title", "excerpt", "body_markdown"]) {
+      for (const key of ["title", "excerpt"]) {
         if (typeof post[key] !== "string" || !post[key].trim()) throw new Error(`Content build: invalid post ${key}.`);
       }
+      if (typeof post.body_markdown !== "string" || (!post.body_rich && !post.body_markdown.trim())) throw new Error("Content build: invalid post body.");
       slugs.add(post.slug);
       return post;
     }).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at) || a.slug.localeCompare(b.slug));
@@ -27,6 +28,7 @@
         post.slug, post.title, post.excerpt, post.body_markdown,
         new Date(post.published_at).toISOString(),
         Number.isFinite(Date.parse(post.updated_at)) ? new Date(post.updated_at).toISOString() : null,
+        ...(post.body_rich ? [post.body_rich] : []),
       ]);
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(content));
       return {

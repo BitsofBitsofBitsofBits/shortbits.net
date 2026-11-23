@@ -69,6 +69,7 @@ jobs:
           npm run test:browser
           node scripts/blog-live-browser.mjs --root .site-build
           node scripts/blog-themes-browser.mjs --root .site-build
+          node scripts/blog-writer-browser.mjs --root .site-build
           node scripts/resume-browser.mjs --root .site-build
           node scripts/career-dates-browser.mjs --root .site-build
           node scripts/social-links-browser.mjs --root .site-build

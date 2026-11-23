@@ -91,14 +91,16 @@
         report("That post does not exist or is not published.");
         return;
       }
-      if (post.slug !== slug || ["title", "excerpt", "body_markdown"].some((key) => typeof post[key] !== "string" || !post[key].trim())
+      if (post.slug !== slug || ["title", "excerpt"].some((key) => typeof post[key] !== "string" || !post[key].trim())
+        || typeof post.body_markdown !== "string" || (!post.body_rich && !post.body_markdown.trim())
         || !Number.isFinite(Date.parse(post.published_at))) {
         throw new Error("Invalid post response.");
       }
-      if (post.body_markdown !== lastBodyMarkdown) {
-        const rendered = window.BITS_MARKDOWN.render(post.body_markdown);
+      const contentKey = JSON.stringify([post.body_markdown, post.body_rich ?? null]);
+      if (contentKey !== lastBodyMarkdown) {
+        const rendered = window.BITS_BLOG_CONTENT.renderPost(post);
         body.replaceChildren(rendered);
-        lastBodyMarkdown = post.body_markdown;
+        lastBodyMarkdown = contentKey;
       }
       title.textContent = post.title;
       excerpt.textContent = post.excerpt;
@@ -106,7 +108,7 @@
       date.textContent = new Date(post.published_at).toLocaleDateString(undefined, {
         day: "numeric", month: "long", year: "numeric",
       });
-      readingTime.textContent = `${window.BITS_MARKDOWN.readingTime(post.body_markdown)} MIN READ`;
+      readingTime.textContent = `${window.BITS_BLOG_CONTENT.readingTime(post)} MIN READ`;
       updateMetadata(post);
       if (!document.querySelector('link[rel="canonical"]')) {
         const canonical = document.createElement("link");

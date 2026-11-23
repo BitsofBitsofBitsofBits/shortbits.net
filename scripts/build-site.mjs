@@ -11,6 +11,7 @@ import { buildSeo } from "./build-seo.mjs";
 import { parseHTML } from "linkedom";
 import { filterCssForMarkup } from "./build-theme-css.mjs";
 import { buildFeaturedProject } from "./build-featured-project.mjs";
+import { buildBlogWriter } from "./build-blog-writer.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export async function filesUnder(directory) {
@@ -224,6 +225,7 @@ export async function buildSite(output, contentInput, resumeInput) {
   }
   await mkdir(destination, { recursive: true });
   if ((await readdir(destination)).length) throw new Error("Build output must be an empty directory.");
+  await buildBlogWriter();
   const themeBuild = spawnSync(process.execPath, [join(root, "scripts", "build-theme-css.mjs")], { stdio: "inherit" });
   if (themeBuild.error) throw themeBuild.error;
   if (themeBuild.status !== 0) throw new Error(`Shared theme CSS generation failed (exit ${themeBuild.status}).`);

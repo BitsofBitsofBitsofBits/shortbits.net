@@ -12,6 +12,11 @@
     "audit": "node scripts/audit-site.mjs --enforce"
   },
   "devDependencies": {
+    "@tiptap/core": "3.35.0",
+    "@tiptap/starter-kit": "3.35.0",
+    "@tiptap/extension-table": "3.35.0",
+    "@tiptap/extension-task-list": "3.35.0",
+    "@tiptap/extension-task-item": "3.35.0",
     "@electric-sql/pglite": "0.5.11",
     "axe-core": "4.11.0",
     "esbuild": "0.28.2",

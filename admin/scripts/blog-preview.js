@@ -1,11 +1,11 @@
 (() => {
   const body = document.querySelector("#blog-markdown-preview");
   window.BITS_BLOG_PREVIEW = Object.freeze({
-    render({ title, excerpt, markdown, theme, scheme, variant }) {
+    render({ title, excerpt, markdown, rich, theme, scheme, variant }) {
       document.querySelector("#blog-preview-title").textContent = title.trim() || "Untitled post";
       document.querySelector("#blog-preview-excerpt").textContent = excerpt;
-      if (markdown.trim()) {
-        body.replaceChildren(window.BITS_MARKDOWN.render(markdown));
+      if (rich || markdown.trim()) {
+        body.replaceChildren(window.BITS_BLOG_CONTENT.renderPost({ body_markdown: markdown, body_rich: rich }));
       } else {
         const empty = document.createElement("p");
         empty.textContent = "Your rendered post will appear here.";

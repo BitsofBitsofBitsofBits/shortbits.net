@@ -13,7 +13,7 @@ const fixturePath = join(root, "scripts", "fixtures", "blog-posts.json");
 const fixtures = JSON.parse(await readFile(fixturePath, "utf8"));
 const now = new Date("2026-10-22T12:00:00Z");
 const posts = normalizePosts(fixtures, now);
-const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"));
+const renderer = markdownRenderer(await readFile(join(root, "shared/scripts/markdown.js"), "utf8"), await readFile(join(root, "shared/scripts/blog-content.js"), "utf8"));
 
 test("publication rules exclude drafts and future posts and reject malformed data", () => {
   assert.deepEqual(posts.map((post) => post.slug), ["safe-markdown", "first-lab-notes"]);
@@ -63,6 +63,13 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.match(html, /\/shared\/scripts\/theme-picker\.js/);
   assert.match(html, /\/blog\/styles\/theme-settings\.css/);
   assert.doesNotMatch(html, /\/online\/scripts\//);
+});
+test("generated rich articles render the primary structured body instead of retained original Markdown", () => {
+  const body_rich = { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Visual version", marks: [{ type: "highlight" }] }] }] } };
+  const html = renderArticle({ ...posts[0], body_markdown: "Retained source not current body", body_rich }, renderer);
+  assert.match(html, /<mark>Visual version<\/mark>/);
+  assert.doesNotMatch(html, /Retained source not current body/);
+  assert.match(html, /shared\/scripts\/blog-content\.js/);
 });
 
 test("static blog articles retain validated hex colors and nested formatting", () => {
@@ -131,7 +138,7 @@ test("public fetch paginates, pins publication cutoff, and fails explicitly", as
     assert.equal(url.searchParams.get("published_at"), `lte.${now.toISOString()}`);
     assert.equal(url.searchParams.get("order"), "published_at.desc,slug.asc");
     assert.equal(url.searchParams.get("limit"), "500");
-    assert.equal(url.searchParams.get("select"), "slug,title,excerpt,body_markdown,published,published_at,updated_at");
+    assert.equal(url.searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published,published_at,updated_at");
   }
   assert.equal(calls[0].options.headers.apikey, "sb_publishable_example");
   await assert.rejects(fetchPosts({}, { fetchImpl: async () => ({ ok: false, status: 503 }) }), /HTTP 503/);
@@ -142,7 +149,7 @@ test("build writes persistent outputs, removes stale articles, and never overwri
   const output = join(root, `.content-test-${process.pid}`);
   await mkdir(join(output, "blog", "articles", "removed-post"), { recursive: true });
   try {
-    for (const file of ["shared/scripts/markdown.js", "shared/scripts/supabase-config.js", "sitemap.xml", join("blog", "index.html")]) {
+    for (const file of ["shared/scripts/markdown.js", "shared/scripts/blog-content.js", "shared/scripts/supabase-config.js", "sitemap.xml", join("blog", "index.html")]) {
       await cp(join(root, file), join(output, file));
     }
     await writeFile(join(output, "blog", "articles", "removed-post", "index.html"), "old article");

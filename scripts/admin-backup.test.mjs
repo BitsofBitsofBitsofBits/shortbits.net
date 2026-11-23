@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const context = { window: {}, document: { querySelector: () => null } };
+vm.runInNewContext(readFileSync(new URL("../shared/scripts/blog-content.js", import.meta.url), "utf8"), { ...context, URL });
 vm.runInNewContext(readFileSync(new URL("../admin/scripts/admin-backup.js", import.meta.url), "utf8"), context);
 const { tables, validate } = context.window.BITS_CONTENT_BACKUP;
 function backup() {
@@ -37,4 +38,12 @@ test("rejects incomplete, unknown, malformed, and oversized content", () => {
     change(value);
     assert.throws(() => validate(value));
   }
+});
+test("rich backups retain original source and reject unsupported structured content before restoration", () => {
+  const value = backup();
+  value.tables.site_blog_posts = [{ body_markdown: "Keep original", body_rich: { version: 1, doc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Rich body" }] }] } } }];
+  assert.equal(validate(value), 5);
+  assert.equal(value.tables.site_blog_posts[0].body_markdown, "Keep original");
+  value.tables.site_blog_posts[0].body_rich.doc.content = [{ type: "html" }];
+  assert.throws(() => validate(value), /nesting|Unsupported/);
 });
