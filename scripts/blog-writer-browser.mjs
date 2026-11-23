@@ -172,6 +172,132 @@ try {
     await page.getByRole("textbox", { name: "Article body", exact: true }).click();
     await page.keyboard.press("Control+End");
     await page.keyboard.press("Enter");
+    await page.keyboard.type("Custom color fixture");
+    await page.keyboard.press("Control+Shift+ArrowLeft");
+    await formatCommand("Bold");
+    await page.selectOption("#writer-font", "serif");
+    const coloredText = page.locator(".tiptap span").filter({ hasText: /^fixture$/ });
+    for (const [color, rendered] of [
+      ["red", "blog-text-color-red"], ["#ff8800", "rgb(255, 136, 0)"],
+      ["yellow", "blog-text-color-yellow"], ["green", "blog-text-color-green"],
+      ["blue", "blog-text-color-blue"], ["#4b0082", "rgb(75, 0, 130)"],
+      ["#8f00ff", "rgb(143, 0, 255)"], ["purple", "blog-text-color-purple"],
+      ["rainbow", "blog-text-color-rainbow"],
+    ]) {
+      await page.locator("#writer-style > summary").click();
+      await page.selectOption("#writer-color", color);
+      assert.equal(await page.locator("#writer-style").evaluate(node => node.open), false);
+      assert.equal(await coloredText.evaluate(node => node.style.color || node.className), rendered);
+    }
+    const beforePicker = await page.locator(".tiptap").innerHTML();
+    await page.locator("#writer-style > summary").click();
+    await page.selectOption("#writer-color", "custom");
+    const picker = page.getByLabel("Custom text color", { exact: true });
+    assert.equal(await picker.evaluate(node => node.type), "color");
+    assert.equal(await picker.evaluate(node => node === document.activeElement), true);
+    await picker.fill("#123456");
+    assert.equal(await page.locator(".tiptap").innerHTML(), beforePicker);
+    if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-custom-color-${width}.png`), fullPage: true });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    await page.keyboard.press("Escape");
+    assert.equal(await page.locator(".tiptap").innerHTML(), beforePicker);
+    assert.equal(await page.locator("#writer-style > summary").evaluate(node => node === document.activeElement), true);
+    await page.locator("#writer-style > summary").click();
+    await page.getByRole("button", { name: "Apply color", exact: true }).click();
+    assert.equal(await page.locator("#writer-style").evaluate(node => node.open), false);
+    assert.equal(await coloredText.evaluate(node => node.style.color), "rgb(18, 52, 86)");
+    await page.keyboard.press("Control+s");
+    await waitForSaved();
+    const savedColor = await page.evaluate(() => {
+      const nodes = [];
+      function visit(node) { if (node.text === "fixture") nodes.push(node); node.content?.forEach(visit); }
+      visit(window.__fixture.row.body_rich.doc);
+      return nodes[0];
+    });
+    assert.ok(savedColor.marks.some(mark => mark.type === "bold"));
+    assert.deepEqual(savedColor.marks.find(mark => mark.type === "style").attrs, { color: "#123456", font: "serif", size: null });
+    await page.reload();
+    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    await coloredText.click();
+    await page.locator("#writer-style > summary").click();
+    assert.equal(await page.locator("#writer-color").inputValue(), "custom");
+    assert.equal(await picker.inputValue(), "#123456");
+    await page.keyboard.press("Escape");
+    publishedFixture = await page.evaluate(() => ({ ...window.__fixture.row, published: true, published_at: "2026-11-01T00:00:00Z" }));
+    const colorReader = await context.newPage();
+    await colorReader.goto(`${server.origin}/blog/post.html?slug=fixture-post`);
+    await colorReader.locator("#blog-post-body").filter({ hasText: "Custom color fixture" }).waitFor();
+    assert.equal(await colorReader.locator("#blog-post-body span").filter({ hasText: /^fixture$/ }).evaluate(node => node.style.color), "rgb(18, 52, 86)");
+    await colorReader.close();
+    for (const [savedHex, pickerHex] of [["#1234", "#112233"], ["#ABCDEF77", "#abcdef"]]) {
+      await page.evaluate(hex => {
+        function visit(node) {
+          if (node.text === "fixture") node.marks.find(mark => mark.type === "style").attrs.color = hex;
+          node.content?.forEach(visit);
+        }
+        visit(window.__fixture.row.body_rich.doc);
+        sessionStorage.setItem("writer-fixture-row", JSON.stringify(window.__fixture.row));
+      }, savedHex);
+      await page.reload();
+      await page.getByText("Ready to write.", { exact: false }).waitFor();
+      await coloredText.click();
+      await page.locator("#writer-style > summary").click();
+      assert.equal(await picker.inputValue(), pickerHex);
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("Control+s");
+      await waitForSaved();
+      assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.row.body_rich)), new RegExp(`"color":"${savedHex}"`));
+    }
+    await page.locator("#writer-style > summary").click();
+    await picker.fill("#123456");
+    await page.getByRole("button", { name: "Apply color", exact: true }).click();
+    await page.getByRole("textbox", { name: "Article body", exact: true }).click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.press("Enter");
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+      await page.keyboard.type(`Heading fixture ${level}`);
+      await page.locator("#writer-structure > summary").click();
+      await page.selectOption("#writer-heading", String(level));
+      await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
+      assert.equal(await page.locator("#writer-structure").evaluate(node => node.open), false);
+      assert.equal(await page.locator(`.tiptap h${level}`).filter({ hasText: `Heading fixture ${level}` }).count(), 1,
+        `H${level}: ${await page.locator(".tiptap").innerHTML()}`);
+      assert.equal(await page.locator("#writer-heading").inputValue(), String(level));
+      await page.locator("#writer-structure > summary").click();
+      await page.selectOption("#writer-heading", String(level));
+      await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
+      assert.equal(await page.locator(`.tiptap h${level}`).filter({ hasText: `Heading fixture ${level}` }).count(), 1);
+      await page.keyboard.press("End");
+      await page.keyboard.press("Enter");
+    }
+    await page.keyboard.type("Paragraph fixture");
+    await page.locator("#writer-structure > summary").click();
+    await page.selectOption("#writer-heading", "6");
+    await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
+    await page.locator("#writer-structure > summary").click();
+    await page.selectOption("#writer-heading", "");
+    await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
+    assert.equal(await page.locator(".tiptap p").filter({ hasText: "Paragraph fixture" }).count(), 1);
+    await page.keyboard.press("Control+s");
+    await waitForSaved();
+    const headings = await page.evaluate(() => window.__fixture.row.body_rich.doc.content.filter(node =>
+      node.type === "heading" && node.content?.some(child => child.text?.startsWith("Heading fixture"))));
+    assert.deepEqual(headings.map(node => node.attrs.level), [1, 2, 3, 4, 5, 6]);
+    for (const heading of headings) assert.equal(heading.content[0].marks.find(mark => mark.type === "style").attrs.font, "serif");
+    await page.reload();
+    await page.getByText("Ready to write.", { exact: false }).waitFor();
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+      await page.locator(`.tiptap h${level}`).filter({ hasText: `Heading fixture ${level}` }).click();
+      assert.equal(await page.locator("#writer-heading").inputValue(), String(level));
+    }
+    publishedFixture = await page.evaluate(() => ({ ...window.__fixture.row, published: true, published_at: "2026-11-01T00:00:00Z" }));
+    const headingReader = await context.newPage();
+    await headingReader.goto(`${server.origin}/blog/post.html?slug=fixture-post`);
+    for (const level of [1, 2, 3, 4, 5, 6]) await headingReader.locator("#blog-post-body").getByRole("heading", { level, name: `Heading fixture ${level}`, exact: true }).waitFor();
+    await headingReader.close();
+    await page.getByRole("textbox", { name: "Article body", exact: true }).click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.press("Enter");
     await formatCommand("Checklist");
     await page.waitForFunction(() => document.activeElement?.classList.contains("tiptap"));
     await page.keyboard.type("Task fixture");
@@ -233,7 +359,7 @@ try {
     await page.locator("#writer-structure > summary").focus();
     await page.keyboard.press("Enter");
     await page.keyboard.press("Tab");
-    assert.equal(await page.getByRole("button", { name: "Heading", exact: true }).evaluate(node => node === document.activeElement), true);
+    assert.equal(await page.getByRole("combobox", { name: "Heading level", exact: true }).evaluate(node => node === document.activeElement), true);
     if (screenshots) await page.screenshot({ path: resolve(screenshots, `writer-format-popup-${width}.png`), fullPage: true });
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("#writer-structure").evaluate(node => node.open), false);

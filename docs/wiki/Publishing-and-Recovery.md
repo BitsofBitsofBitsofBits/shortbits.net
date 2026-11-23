@@ -12,10 +12,19 @@
   **Structure** contains lists, tables and legacy-source controls; **Style**
   contains color, size and inline code. These are non-modal dropdowns, closed
   by a selection, Escape, clicking outside or tabbing out. Escape returns focus
-  to the dropdown trigger. **Theme settings** still opens the preview-only
+  to the dropdown trigger.
+  **Structure > Heading level** offers Paragraph and all supported levels:
+  Header (H1), Heading 2 (H2), Heading 3 (H3), Heading 4 (H4), Heading 5 (H5)
+  and Heading 6 (H6). It reflects the current block and preserves inline formatting.
+  **Theme settings** still opens the preview-only
   family/variant popup, dismissed with Close, Escape or a backdrop click.
   **Link** separates the displayed text from the destination, prefills selected
   text or an existing link, and preserves text formatting when only its URL changes.
+  **Style > Color** includes rainbow-spectrum presets and **Custom color**.
+  Choose a swatch with the built-in picker, then **Apply color** to format the
+  selected text or subsequent typing. Picking or dismissing without applying
+  does not change the article. The picker chooses RGB colors; existing saved
+  hex colors, including transparency, remain unchanged unless replaced explicitly.
 - Existing Markdown is not converted by the database migration. On opening an
   old post, its exact source remains in a protected editable section.
   **Import original Markdown** adopts visual content only if a rendered-structure

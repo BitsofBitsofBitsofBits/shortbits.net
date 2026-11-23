@@ -20,6 +20,10 @@
 .writer-dropdown:not([open]) > .writer-dropdown-panel { display: none; }
 .writer-dropdown-panel label { display: grid; gap: 6px; min-width: 0; }
 .writer-dropdown-panel select { width: 100%; min-height: 44px; color: var(--ink); background: var(--panel-2); font: inherit; }
+.writer-custom-color { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: end; gap: 6px; }
+.writer-custom-color[hidden] { display: none; }
+.writer-custom-color label { flex: 1 1 140px; }
+.writer-custom-color input { box-sizing: border-box; width: 100%; height: 44px; padding: 4px; background: var(--panel-2); border: 1px solid var(--border-strong); cursor: pointer; }
 .writer-dropdown-panel h3 { margin: 12px 0 8px; font-size: 1rem; color: var(--ink); }
 .writer-article { margin-block: 16px; }
 .writer-article label { display: grid; gap: 8px; margin-block: 20px; }

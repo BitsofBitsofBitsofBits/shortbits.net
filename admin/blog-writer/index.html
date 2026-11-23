@@ -45,7 +45,7 @@
           <summary>Structure</summary>
           <div class="writer-dropdown-panel">
             <div class="writer-format-grid" role="group" aria-label="Article structure">
-              <button type="button" data-command="heading">Heading</button>
+              <label>Heading level<select id="writer-heading"><option value="">Paragraph</option><option value="1">Header (H1)</option><option value="2">Heading 2 (H2)</option><option value="3">Heading 3 (H3)</option><option value="4">Heading 4 (H4)</option><option value="5">Heading 5 (H5)</option><option value="6">Heading 6 (H6)</option></select></label>
               <button type="button" data-command="bulletList">List</button>
               <button type="button" data-command="orderedList">Numbered list</button>
               <button type="button" data-command="taskList">Checklist</button>
@@ -69,8 +69,12 @@
           <div class="writer-dropdown-panel">
             <div class="writer-format-grid" role="group" aria-label="Text formatting">
               <button type="button" data-command="code" aria-label="Inline code" aria-pressed="false">Inline code</button>
-              <label>Color<select id="writer-color"><option value="">Theme default</option><option value="accent">Accent</option><option value="red">Red</option><option value="blue">Blue</option><option value="purple">Purple</option><option value="rainbow">Rainbow</option><option value="#ff8800">Orange</option></select></label>
+              <label>Color<select id="writer-color"><option value="">Theme default</option><option value="accent">Accent</option><option value="red">Red</option><option value="#ff8800">Orange</option><option value="yellow">Yellow</option><option value="green">Green</option><option value="blue">Blue</option><option value="#4b0082">Indigo</option><option value="#8f00ff">Violet</option><option value="purple">Purple</option><option value="cyan">Cyan</option><option value="pink">Pink</option><option value="white">White</option><option value="muted">Muted</option><option value="rainbow">Rainbow</option><option value="custom">Custom color...</option></select></label>
               <label>Size<select id="writer-size"><option value="">Theme default</option><option value="small">Small</option><option value="large">Large</option><option value="huge">Huge</option></select></label>
+              <div id="writer-custom-color-controls" class="writer-custom-color" hidden>
+                <label>Custom text color<input type="color" id="writer-custom-color" value="#ff8800"></label>
+                <button type="button" id="writer-custom-color-apply">Apply color</button>
+              </div>
             </div>
           </div>
         </details>

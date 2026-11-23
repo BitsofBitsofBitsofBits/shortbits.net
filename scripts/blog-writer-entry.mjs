@@ -14,6 +14,10 @@ const dialog = document.querySelector("#writer-dialog");
 const value = document.querySelector("#writer-value");
 const linkText = document.querySelector("#writer-link-text");
 const source = document.querySelector("#writer-source");
+const colorSelect = document.querySelector("#writer-color");
+const customColorControls = document.querySelector("#writer-custom-color-controls");
+const customColor = document.querySelector("#writer-custom-color");
+const headingSelect = document.querySelector("#writer-heading");
 let client, editor, authorized = false, busy = false, id = "", version = null, original = "", baseline = "", mode = "";
 let detailBusy = false;
 const channel = new URLSearchParams(location.search).get("channel");
@@ -126,7 +130,18 @@ const Style = Mark.create({
 const Highlight = Mark.create({ name: "highlight", parseHTML: () => [{ tag: "mark" }], renderHTML: () => ["mark", {}, 0] });
 function updateToolbar() {
   for (const button of document.querySelectorAll("[data-command][aria-pressed]")) button.setAttribute("aria-pressed", String(editor.isActive(button.dataset.command)));
-  for (const kind of ["color", "font", "size"]) document.querySelector(`#writer-${kind}`).value = editor.getAttributes("style")[kind] || "";
+  headingSelect.value = editor.isActive("heading") ? String(editor.getAttributes("heading").level) : "";
+  const style = editor.getAttributes("style");
+  for (const kind of ["font", "size"]) document.querySelector(`#writer-${kind}`).value = style[kind] || "";
+  const color = style.color || "";
+  const hex = markdown.hexColor(color);
+  const preset = [...colorSelect.options].find(option => option.value.toLowerCase() === color.toLowerCase());
+  colorSelect.value = preset?.value || (hex ? "custom" : "");
+  customColorControls.hidden = colorSelect.value !== "custom";
+  if (hex) {
+    const digits = hex.slice(1);
+    customColor.value = `#${digits.length <= 4 ? [...digits.slice(0, 3)].map(digit => digit + digit).join("") : digits.slice(0, 6)}`;
+  }
 }
 document.addEventListener("keydown", event => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s" && authorized) { event.preventDefault(); form.requestSubmit(); }
@@ -261,14 +276,33 @@ for (const button of document.querySelectorAll("[data-command]")) {
     const command = button.dataset.command;
     if (!authorized) return;
     closeDropdowns();
-    if (command === "heading") editor.chain().focus().toggleHeading({ level: 2 }).run();
-    else if (command === "highlight") editor.chain().focus().toggleMark("highlight").run();
+    if (command === "highlight") editor.chain().focus().toggleMark("highlight").run();
     else if (command === "table") editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
     else if (["addRowAfter", "addColumnAfter", "deleteTable"].includes(command)) editor.chain().focus()[command]().run();
     else editor.chain().focus()[commands[command]]().run();
     updateToolbar();
   });
 }
+headingSelect.addEventListener("change", () => {
+  if (!authorized) return;
+  const selected = headingSelect.value;
+  closeDropdowns();
+  if (editor.state.selection.node?.type.name === "legacyMarkdown") {
+    report("Select editable article text, not a protected Markdown section.", true);
+    updateToolbar();
+    return;
+  }
+  const level = Number(selected);
+  if (selected && (!Number.isInteger(level) || level < 1 || level > 6)) {
+    report("Choose a supported heading level.", true);
+    updateToolbar();
+    return;
+  }
+  const chain = editor.chain().focus();
+  const applied = (selected ? chain.setHeading({ level }) : chain.setParagraph()).run();
+  updateToolbar();
+  if (!applied) report("Place the cursor in editable article text to change its heading.", true);
+});
 document.querySelector("#writer-link").addEventListener("click", () => showDialog("link"));
 document.querySelector("#writer-image").addEventListener("click", () => showDialog("image"));
 document.querySelector("#writer-legacy").addEventListener("click", () => showDialog("legacy"));
@@ -317,10 +351,22 @@ document.querySelector("#writer-dialog-form").addEventListener("submit", async e
 for (const kind of ["color", "font", "size"]) {
   document.querySelector(`#writer-${kind}`).addEventListener("change", event => {
     if (!authorized) return;
+    if (kind === "color" && event.target.value === "custom") {
+      customColorControls.hidden = false;
+      customColor.focus();
+      return;
+    }
     closeDropdowns();
     editor.chain().focus().setMark("style", { ...editor.getAttributes("style"), [kind]: event.target.value || null }).run();
   });
 }
+document.querySelector("#writer-custom-color-apply").addEventListener("click", () => {
+  if (!authorized) return;
+  const color = markdown.hexColor(customColor.value);
+  if (!color) { report("Choose a valid custom color.", true); return; }
+  closeDropdowns();
+  editor.chain().focus().setMark("style", { ...editor.getAttributes("style"), color }).run();
+});
 document.querySelector("#writer-import").addEventListener("click", () => {
   closeDropdowns();
   if (!authorized || !original.trim()) { report("There is no original Markdown to import.", true); return; }
