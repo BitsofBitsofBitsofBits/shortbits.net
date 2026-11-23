@@ -5,9 +5,9 @@
   <path fill="#008026" d="M0 360h1200v120H0z"/>
   <path fill="#004dff" d="M0 480h1200v120H0z"/>
   <path fill="#750787" d="M0 600h1200v120H0z"/>
-  <path fill="#000" d="m0 0 480 360L0 720z"/>
-  <path fill="#784f17" d="m0 0 384 360L0 720z"/>
-  <path fill="#5bcefa" d="m0 0 288 360L0 720z"/>
-  <path fill="#f5a9b8" d="m0 0 192 360L0 720z"/>
-  <path fill="#fff" d="m0 0 96 360L0 720z"/>
+  <path fill="#000" d="M0 0h180l360 360-360 360H0z"/>
+  <path fill="#784f17" d="M0 0h108l360 360-360 360H0z"/>
+  <path fill="#5bcefa" d="M0 0h36l360 360-360 360H0z"/>
+  <path fill="#f5a9b8" d="M0 36l324 324L0 684z"/>
+  <path fill="#fff" d="M0 108l252 252L0 612z"/>
 </svg>

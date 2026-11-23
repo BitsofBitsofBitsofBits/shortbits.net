@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { chromium } from "playwright";
 import { resolve } from "node:path";
+import { mkdir } from "node:fs/promises";
 import { startSiteServer } from "./site-server.mjs";
 
 const args = process.argv.slice(2);
 const rootIndex = args.indexOf("--root");
+const screenshotsIndex = args.indexOf("--screenshots");
+const screenshots = screenshotsIndex < 0 ? null : resolve(args[screenshotsIndex + 1]);
+if (screenshots) await mkdir(screenshots, { recursive: true });
 const server = await startSiteServer(resolve(rootIndex < 0 ? "." : args[rootIndex + 1]));
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 const rows = ["messages", "activities"].map((category, position) => ({
@@ -21,6 +25,60 @@ async function ready(page, id) {
       && sheet?.href.includes("/layouts/pride.css?") && sheet.sheet;
   }, id);
   await settle(page);
+}
+const arrowThemes = new Set(["pride", "pride-demisexual", "pride-demiromantic"]);
+async function checkChevron(page, theme, scheme) {
+  const geometry = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const height = Math.min(innerHeight, innerWidth * 0.8);
+    return {
+      height, width: innerWidth, viewportHeight: innerHeight,
+      image: body.backgroundImage, size: body.backgroundSize.split(",")[1].trim(),
+      position: body.backgroundPosition.split(",")[1].trim(), repeat: body.backgroundRepeat,
+    };
+  });
+  assert.match(geometry.image, new RegExp(`/flags/${theme === "pride" ? "progress" : "demi"}-chevron\\.svg`));
+  assert.equal(geometry.size, `auto ${geometry.height}px`, "Only height is specified: SVG aspect ratio stays intact");
+  assert.equal(geometry.position, `0% ${(geometry.viewportHeight - geometry.height) / 2}px`,
+    "Artwork is centered in the first viewport, not the document");
+  assert.ok(geometry.repeat.split(",").every(value => value.trim() === "no-repeat"), "No repeated arrow tiles");
+  const tip = geometry.height * (theme === "pride" ? 0.75 : 0.5);
+  assert.ok(tip <= geometry.width * 0.6 + 0.01, "The whole arrow fits even on tall portrait screens");
+
+  const preview = await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+  try {
+    const screenshot = await page.screenshot();
+    const pixels = await page.evaluate(async ({ data, height, theme }) => {
+      const image = new Image();
+      image.src = `data:image/png;base64,${data}`;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0);
+      const bands = theme === "pride"
+        ? [[126, [255, 255, 255]], [288, [245, 169, 184]], [360, [91, 206, 250]],
+          [432, [120, 79, 23]], [504, [0, 0, 0]]]
+        : [[180, [0, 0, 0]]];
+      return [-height / 8, 0, height / 8].flatMap(offset => bands.map(([x, color]) => ({
+        color,
+        pixel: [...ctx.getImageData(Math.floor(x * height / 720 - Math.abs(offset)),
+          Math.floor(innerHeight / 2 + offset), 1, 1).data],
+      })));
+    }, { data: screenshot.toString("base64"), height: geometry.height, theme });
+    const neutral = scheme === "dark" ? [16, 15, 24] : [250, 248, 252];
+    for (const { color, pixel } of pixels) {
+      for (let channel = 0; channel < 3; channel++) {
+        const expected = neutral[channel] * 0.94 + color[channel] * 0.06;
+        assert.ok(Math.abs(pixel[channel] - expected) <= 2,
+          `${theme}/${scheme}: parallel, symmetric flag bands blend at 6% opacity (${pixel} vs ${color})`);
+      }
+      assert.equal(pixel[3], 255, "Background composites onto the neutral page");
+    }
+  } finally {
+    await preview.evaluate(style => style.remove());
+  }
 }
 let browser;
 try {
@@ -87,6 +145,13 @@ try {
         assert.equal(colors.bg, scheme === "dark" ? "#100f18" : "#faf8fc");
         assert.match(colors.flag, /gradient|progress-pride\.svg/);
         assert.notEqual(colors.swatch, "none", "Active flag is visible in the header");
+        if (arrowThemes.has(theme)) await checkChevron(page, theme, scheme);
+        if (screenshots && arrowThemes.has(theme)) {
+          await page.screenshot({ path: resolve(screenshots, `${theme}-${scheme}-${width}.png`) });
+          const preview = await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+          await page.screenshot({ path: resolve(screenshots, `${theme}-${scheme}-${width}-background.png`) });
+          await preview.evaluate(style => style.remove());
+        }
         accents.add(colors.accent);
         const violations = await page.evaluate(async () => (await axe.run(document, {
           runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
@@ -111,14 +176,43 @@ try {
     assert.ok(flag?.width > 0 && flag.height > 0, "The original Progress Pride flag SVG loads");
     await page.evaluate(() => { document.documentElement.dataset.effects = "off"; });
     assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body, "::before").display), "none");
+    assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundImage), "none");
     await page.evaluate(() => {
       document.documentElement.dataset.effects = "on";
       document.documentElement.dataset.contrast = "high";
     });
     assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body, "::before").display), "none");
+    assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundImage), "none");
+    await page.evaluate(() => { document.documentElement.dataset.contrast = "default"; });
     await page.emulateMedia({ forcedColors: "active" });
     assert.equal(await page.locator(".system-bar").evaluate(bar => getComputedStyle(bar, "::after").display), "none");
+    assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundImage), "none");
     await page.emulateMedia({ forcedColors: "none" });
+    for (const theme of arrowThemes) {
+      await page.evaluate(theme => window.BITS_THEME_PREFERENCE.apply(theme), theme);
+      await ready(page, theme);
+      for (const preference of ["effects", "contrast"]) {
+        await page.evaluate(preference => { document.documentElement.dataset[preference] = preference === "effects" ? "off" : "high"; }, preference);
+        assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundImage), "none",
+          `${theme}: ${preference} removes the image background`);
+        await page.evaluate(preference => { document.documentElement.dataset[preference] = preference === "effects" ? "on" : "default"; }, preference);
+      }
+      await page.emulateMedia({ forcedColors: "active" });
+      assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundImage), "none",
+        `${theme}: forced colors removes the image background`);
+      await page.emulateMedia({ forcedColors: "none" });
+    }
+    if (width === 1440) {
+      for (const viewport of [{ width: 1920, height: 1080 }, { width: 844, height: 390 }]) {
+        await page.setViewportSize(viewport);
+        for (const theme of arrowThemes) {
+          await page.evaluate(theme => window.BITS_THEME_PREFERENCE.apply(theme), theme);
+          await ready(page, theme);
+          await checkChevron(page, theme, "light");
+        }
+      }
+      await page.setViewportSize({ width, height: 1000 });
+    }
     await page.evaluate(() => {
       document.documentElement.dataset.contrast = "default";
       window.BITS_THEME_PREFERENCE.select("pride-non-binary");

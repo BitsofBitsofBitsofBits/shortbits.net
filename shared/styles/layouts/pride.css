@@ -63,6 +63,20 @@
 
 :root[data-interface-theme="pride"] {
   --pride-flag: url("/shared/images/flags/progress-pride.svg");
+  --pride-chevron: url("/shared/images/flags/progress-chevron.svg");
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme="pride-demisexual"], [data-interface-theme="pride-demiromantic"]) {
+  --pride-chevron-height: min(100vh, 80vw);
+  --body-background:
+    linear-gradient(color-mix(in srgb, var(--bg) 94%, transparent), color-mix(in srgb, var(--bg) 94%, transparent)),
+    var(--pride-chevron), linear-gradient(180deg, var(--pride-stripes)), var(--bg);
+  --body-background-size: auto, auto var(--pride-chevron-height), 100% 100vh, auto;
+}
+
+:root:is([data-interface-theme="pride"], [data-interface-theme="pride-demisexual"], [data-interface-theme="pride-demiromantic"]) body {
+  background-position: 0 0, left calc((100vh - var(--pride-chevron-height)) / 2), 0 0;
+  background-repeat: no-repeat;
 }
 
 :root[data-interface-theme="pride-non-binary"] {
@@ -146,6 +160,7 @@
   --pride-stripes: #fff 0% 40%, #800080 40% 60%, #a3a3a3 60% 100%;
   --pride-flag: conic-gradient(from 225deg at 40% 50%, #000 0deg 90deg, transparent 90deg),
     linear-gradient(180deg, var(--pride-stripes));
+  --pride-chevron: url("/shared/images/flags/demi-chevron.svg");
 }
 
 :root[data-interface-theme="pride-demiromantic"] {
@@ -153,6 +168,7 @@
   --pride-stripes: #fff 0% 40%, #3da542 40% 60%, #a3a3a3 60% 100%;
   --pride-flag: conic-gradient(from 225deg at 40% 50%, #000 0deg 90deg, transparent 90deg),
     linear-gradient(180deg, var(--pride-stripes));
+  --pride-chevron: url("/shared/images/flags/demi-chevron.svg");
 }
 
 :root[data-interface-theme="pride-lgbtq"] {
@@ -186,6 +202,10 @@
 }
 
 @media (forced-colors: active) {
+  :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) {
+    --body-background: var(--bg);
+  }
+
   :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) body::before,
   :root:is([data-interface-theme="pride"], [data-interface-theme^="pride-"]) :is(.profile-brand, .chooser-bar, .system-bar, .presentation-brand)::after {
     display: none;

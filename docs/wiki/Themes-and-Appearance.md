@@ -71,6 +71,13 @@ Validate with `node --test scripts/accessibility-preferences.test.mjs` and
   with distinct flag colors, a decorative header flag, a static color ribbon,
   and subtle flag backgrounds. The Progress Pride flag includes its
   black/brown/trans chevrons; Intersex uses a purple ring on yellow.
+  Progress Pride and the two demi backgrounds use local transparent SVG
+  chevrons over their existing stripes, under a 94% neutral scrim.
+  Chevron edges retain their original angles and band widths. Artwork is
+  anchored to the left and centered in the first viewport, with its height
+  capped at 80% of viewport width on portrait screens rather than stretched
+  to fill them. The background is decorative, not a full-bleed flag replica;
+  header flags retain their compact flag presentation.
   Dark/light modes keep text on readable neutral surfaces rather than
   placing it directly on flag stripes. Selection persists across public
   pages, including `/nowplaying/`, without experimental layout chrome.
@@ -78,7 +85,8 @@ Validate with `node --test scripts/accessibility-preferences.test.mjs` and
   decorative flags, and no new motion or external images are introduced.
   Run `node scripts/pride-themes-browser.mjs --root .site-build` to validate
   every palette, both schemes, desktop/mobile layout, picker grouping,
-  persistence, lazy loading, and accessibility.
+  persistence, lazy loading, and accessibility. Add `--screenshots <directory>`
+  to save page and unobstructed-background previews of the three arrow themes.
 
 - Online's View menu and Control Panel use expandable theme families with
   subthemes and variants. For example, **macOS > Aqua > Graphite** or
