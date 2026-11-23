@@ -143,7 +143,8 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::SUPABASE_ACCESS_TOKEN or SUPABASE_DB_PASSWORD is not set; skipping database migrations and Edge Function deploys."
+            echo "::error::Required Supabase release credentials are missing; database migrations cannot be verified."
+            exit 1
           fi
 
       - name: Check out repository
@@ -274,10 +275,11 @@ jobs:
           supabase db push --yes --linked --password "$SUPABASE_DB_PASSWORD"
 
   deploy:
-    # Front-end features degrade gracefully, so the site still ships if the Supabase job fails.
+    # The rich blog reader requires the matching database schema before release.
     if: >-
       always()
       && needs.validate.result == 'success'
+      && needs.supabase.result == 'success'
       && github.event_name != 'pull_request'
       && github.ref == 'refs/heads/main'
     needs: [validate, supabase]
