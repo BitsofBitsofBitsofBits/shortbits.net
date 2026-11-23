@@ -22,6 +22,7 @@ terminal-inspired personal website of BitsofBitsofBits.
 | [Search visibility and SEO](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Search-and-SEO) | Canonical URLs, static search metadata, indexing checks, and Google/Bing owner setup. |
 | [Monitoring](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Monitoring) | Read-only production probes, SSH transport, outage issues, and monitoring limitations. |
 | [Publishing and recovery](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Publishing-and-Recovery) | Static publishing status, discovery, backups, restoration, and recovery behavior. |
+| [Automatic changelog publishing](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Automatic-Changelog-Publishing) | Opt-in release notes, scoped credentials, duplicate prevention, version policy, and private recovery metadata. |
 | [Development and validation](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Development-and-Validation) | Local serving, builds, browser checks, Lighthouse budgets, and startup profiling. |
 
 ## Where to start

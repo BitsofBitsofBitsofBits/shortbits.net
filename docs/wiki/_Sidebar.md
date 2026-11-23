@@ -15,6 +15,7 @@
 - [Search visibility and SEO](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Search-and-SEO)
 - [Monitoring](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Monitoring)
 - [Publishing and recovery](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Publishing-and-Recovery)
+- [Automatic changelog publishing](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Automatic-Changelog-Publishing)
 - [Development and validation](https://github.com/BitsofBitsofBitsofBits/shortbits.net/wiki/Development-and-Validation)
 
 [Visit the site](https://www.shortbits.net/) | [Repository](https://github.com/BitsofBitsofBitsofBits/shortbits.net)

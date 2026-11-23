@@ -268,12 +268,34 @@ jobs:
           --no-verify-jwt
           --use-api
 
+      - name: Configure optional changelog publisher authentication
+        if: steps.credentials.outputs.ready == 'true' && vars.CHANGELOG_AUTO_PUBLISH_ENABLED == 'true'
+        env:
+          CHANGELOG_PUBLISH_TOKEN_SHA256: ${{ secrets.CHANGELOG_PUBLISH_TOKEN_SHA256 }}
+        shell: bash
+        run: |
+          if ! [[ "$CHANGELOG_PUBLISH_TOKEN_SHA256" =~ ^[a-f0-9]{64}$ ]]; then
+            echo "::error::Required changelog publisher token hash is missing or invalid."
+            exit 1
+          fi
+          supabase secrets set --yes --project-ref "$SUPABASE_PROJECT_REF" \
+            CHANGELOG_PUBLISH_TOKEN_SHA256="$CHANGELOG_PUBLISH_TOKEN_SHA256"
+
       - name: Apply database migrations
         if: steps.credentials.outputs.ready == 'true'
         shell: bash
         run: |
           supabase link --yes --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
           supabase db push --yes --linked --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Deploy optional changelog publisher
+        if: steps.credentials.outputs.ready == 'true' && vars.CHANGELOG_AUTO_PUBLISH_ENABLED == 'true'
+        run: >-
+          supabase functions deploy changelog-publish
+          --yes
+          --project-ref "$SUPABASE_PROJECT_REF"
+          --no-verify-jwt
+          --use-api
 
   deploy:
     # The rich blog reader requires the matching database schema before release.
@@ -431,3 +453,32 @@ jobs:
           name: lighthouse-reports
           path: lighthouse-reports
           retention-days: 14
+
+  publish-changelog:
+    if: >-
+      always()
+      && github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
+      && vars.CHANGELOG_AUTO_PUBLISH_ENABLED == 'true'
+      && needs.validate.result == 'success'
+      && needs.supabase.result == 'success'
+      && needs.deploy.result == 'success'
+      && needs.health.result == 'success'
+      && needs.lighthouse.result == 'success'
+    needs: [validate, supabase, deploy, health, lighthouse]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out reviewed release notes
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Publish verified changelog release
+        env:
+          CHANGELOG_PUBLISH_URL: https://arjwrycitgobvlodmkeo.supabase.co/functions/v1/changelog-publish
+          CHANGELOG_PUBLISH_TOKEN: ${{ secrets.CHANGELOG_PUBLISH_TOKEN }}
+        run: node scripts/publish-changelog.mjs --file releases/changelog.json
