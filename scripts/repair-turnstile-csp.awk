@@ -32,6 +32,7 @@ function fail(message) {
     sub(/[ \t]+$/, "", trimmed)
     tokens = split(trimmed, sources, /[ \t]+/)
     name = tolower(sources[1])
+    if (name == "script-src-elem") fail("Explicit script-src-elem requires operator review.")
     if (name == "script-src" || name == "frame-src") {
       if (name == "script-src") scripts++
       else frames++

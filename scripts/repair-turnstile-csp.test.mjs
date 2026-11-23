@@ -45,6 +45,7 @@ for (const [name, input] of [
   ["missing script directive", source.replace("script-src", "script-src-elem")],
   ["duplicate frame directive", source.replace("connect-src", "frame-src")],
   ["none directive", source.replace("script-src 'self'", "script-src 'none'")],
+  ["explicit script element policy", source.replace("connect-src", "script-src-elem")],
   ["unquoted policy", "header Content-Security-Policy default-src 'self'\n"],
   ["multiline policy", 'header Content-Security-Policy "script-src \'self\';\nframe-src \'self\';"\n'],
   ["no policy", 'respond "hello"\n'],
