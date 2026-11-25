@@ -26,6 +26,7 @@
   **Link** separates the displayed text from the destination, prefills selected
   text or an existing link, and preserves text formatting when only its URL changes.
   **Style > Color** includes rainbow-spectrum presets and **Custom color**.
+  Both editors include **Blurple** with the fixed color `#553fff`.
   Choose a swatch with the built-in picker or enter a **Hex color**, then **Apply color** to format the
   selected text or subsequent typing. Picking or dismissing without applying
   does not change the article. Both the visual writer and legacy Markdown editor

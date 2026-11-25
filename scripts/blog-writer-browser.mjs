@@ -222,7 +222,7 @@ try {
     for (const [color, rendered] of [
       ["red", "blog-text-color-red"], ["#ff8800", "rgb(255, 136, 0)"],
       ["yellow", "blog-text-color-yellow"], ["green", "blog-text-color-green"],
-      ["blue", "blog-text-color-blue"], ["#4b0082", "rgb(75, 0, 130)"],
+      ["blue", "blog-text-color-blue"], ["#553fff", "rgb(85, 63, 255)"], ["#4b0082", "rgb(75, 0, 130)"],
       ["#8f00ff", "rgb(143, 0, 255)"], ["purple", "blog-text-color-purple"],
       ["rainbow", "blog-text-color-rainbow"],
     ]) {

@@ -114,6 +114,10 @@ try {
   const markdown = admin.locator("#blog-post-markdown");
   await markdown.fill("Before selected words after");
   await markdown.evaluate(field => { field.focus(); field.setSelectionRange(7, 21); });
+  await admin.locator("#blog-format-color").selectOption("#553fff");
+  assert.equal(await markdown.inputValue(), "Before {{color:#553fff|selected words}} after");
+  await markdown.fill("Before selected words after");
+  await markdown.evaluate(field => { field.focus(); field.setSelectionRange(7, 21); });
   await admin.locator("#blog-format-color").selectOption("custom");
   const hex = admin.locator("#blog-custom-color-value");
   const picker = admin.getByLabel("Color picker", { exact: true });
