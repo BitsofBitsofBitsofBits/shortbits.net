@@ -18,6 +18,10 @@ const source = document.querySelector("#writer-source");
 const colorSelect = document.querySelector("#writer-color");
 const customColorControls = document.querySelector("#writer-custom-color-controls");
 const customColor = document.querySelector("#writer-custom-color");
+const customColorHex = document.querySelector("#writer-custom-color-hex");
+const customColorError = document.querySelector("#writer-custom-color-error");
+const syncCustomColor = window.BITS_MARKDOWN.bindHexColorInputs(customColor, customColorHex);
+customColorHex.addEventListener("input", () => { customColorError.textContent = ""; });
 const headingSelect = document.querySelector("#writer-heading");
 let client, editor, authorized = false, busy = false, id = "", version = null, original = "", baseline = "", mode = "";
 let detailBusy = false;
@@ -203,8 +207,8 @@ function updateToolbar() {
   colorSelect.value = preset?.value || (hex ? "custom" : "");
   customColorControls.hidden = colorSelect.value !== "custom";
   if (hex) {
-    const digits = hex.slice(1);
-    customColor.value = `#${digits.length <= 4 ? [...digits.slice(0, 3)].map(digit => digit + digit).join("") : digits.slice(0, 6)}`;
+    customColorHex.value = hex;
+    syncCustomColor();
   }
 }
 document.addEventListener("keydown", event => {
@@ -438,10 +442,21 @@ for (const kind of ["color", "font", "size"]) {
 }
 document.querySelector("#writer-custom-color-apply").addEventListener("click", () => {
   if (!authorized) return;
-  const color = markdown.hexColor(customColor.value);
-  if (!color) { report("Choose a valid custom color.", true); return; }
+  const color = markdown.hexColor(customColorHex.value);
+  if (!color) {
+    customColorError.textContent = "Enter RGB, RGBA, RRGGBB or RRGGBBAA, optionally prefixed with #.";
+    customColorHex.focus();
+    return;
+  }
+  customColorError.textContent = "";
   closeDropdowns();
   editor.chain().focus().setMark("style", { ...editor.getAttributes("style"), color }).run();
+});
+customColorHex.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.querySelector("#writer-custom-color-apply").click();
+  }
 });
 document.querySelector("#writer-import").addEventListener("click", () => {
   closeDropdowns();

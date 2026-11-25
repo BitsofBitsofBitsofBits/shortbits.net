@@ -726,10 +726,11 @@
                   </select>
                 </label>
                 <div id="blog-custom-color" role="group" aria-label="Custom text color" hidden>
+                  <label>Color picker<input id="blog-custom-color-picker" type="color" value="#ff8800" aria-describedby="blog-custom-color-help"></label>
                   <label>Hex color<input id="blog-custom-color-value" type="text" maxlength="9" placeholder="ff8800 or #ff8800" aria-describedby="blog-custom-color-help" spellcheck="false"></label>
                   <button id="blog-custom-color-apply" type="button">APPLY COLOR</button>
                   <button id="blog-custom-color-cancel" type="button">CANCEL</button>
-                  <p id="blog-custom-color-help">Enter RGB, RGBA, RRGGBB, or RRGGBBAA, with or without #. The optional alpha channel controls transparency.</p>
+                  <p id="blog-custom-color-help">Enter RGB, RGBA, RRGGBB, or RRGGBBAA, with or without #. The optional alpha channel controls transparency. The picker changes RGB while preserving Hex alpha.</p>
                   <p id="blog-custom-color-status" role="status" aria-live="polite"></p>
                 </div>
                 <label>

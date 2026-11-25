@@ -641,6 +641,8 @@ const blogFormatBlock = document.querySelector("#blog-format-block");
 const blogFormatColor = document.querySelector("#blog-format-color");
 const blogCustomColor = document.querySelector("#blog-custom-color");
 const blogCustomColorValue = document.querySelector("#blog-custom-color-value");
+const blogCustomColorPicker = document.querySelector("#blog-custom-color-picker");
+window.BITS_MARKDOWN.bindHexColorInputs(blogCustomColorPicker, blogCustomColorValue);
 const blogCustomColorStatus = document.querySelector("#blog-custom-color-status");
 const blogFormatFont = document.querySelector("#blog-format-font");
 for (const [id, label] of Object.entries(window.BITS_MARKDOWN.fonts)) {

@@ -3,6 +3,10 @@
   "version": "2.0.2",
   "notes": [
     {
+      "title": "Hex color entry in both blog editors",
+      "summary": "The visual writer and Markdown editor pair a built-in color picker with editable Hex values. Short and full RGB/alpha Hex values apply directly, invalid input leaves content unchanged, and picker changes preserve the chosen transparency."
+    },
+    {
       "title": "Private autosaved blog drafts and version history",
       "summary": "The visual writer autosaves private working drafts, including revisions to already-published articles. Live content and metadata change only through explicit publication. Private history keeps the latest 100 checkpoints, every five minutes and on manual saves, publishing and restores, with preview and restore-to-draft controls."
     },

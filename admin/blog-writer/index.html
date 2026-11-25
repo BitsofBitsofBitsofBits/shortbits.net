@@ -75,7 +75,10 @@
               <label>Size<select id="writer-size"><option value="">Theme default</option><option value="small">Small</option><option value="large">Large</option><option value="huge">Huge</option></select></label>
               <div id="writer-custom-color-controls" class="writer-custom-color" hidden>
                 <label>Custom text color<input type="color" id="writer-custom-color" value="#ff8800"></label>
+                <label>Hex color<input type="text" id="writer-custom-color-hex" value="#ff8800" maxlength="9" spellcheck="false" aria-describedby="writer-custom-color-help writer-custom-color-error"></label>
                 <button type="button" id="writer-custom-color-apply">Apply color</button>
+                <p id="writer-custom-color-help">RGB, RGBA, RRGGBB or RRGGBBAA, with or without #. The picker changes RGB while preserving Hex alpha.</p>
+                <p id="writer-custom-color-error" role="status" aria-live="polite"></p>
               </div>
             </div>
           </div>

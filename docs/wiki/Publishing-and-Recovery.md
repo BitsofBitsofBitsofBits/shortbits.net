@@ -26,10 +26,12 @@
   **Link** separates the displayed text from the destination, prefills selected
   text or an existing link, and preserves text formatting when only its URL changes.
   **Style > Color** includes rainbow-spectrum presets and **Custom color**.
-  Choose a swatch with the built-in picker, then **Apply color** to format the
+  Choose a swatch with the built-in picker or enter a **Hex color**, then **Apply color** to format the
   selected text or subsequent typing. Picking or dismissing without applying
-  does not change the article. The picker chooses RGB colors; existing saved
-  hex colors, including transparency, remain unchanged unless replaced explicitly.
+  does not change the article. Both the visual writer and legacy Markdown editor
+  accept RGB, RGBA, RRGGBB and RRGGBBAA Hex values, with or without `#`.
+  Valid Hex values synchronize the picker; changing the picker preserves any
+  Hex alpha channel. Invalid input displays an error without changing content.
 - **History** previews private earlier revisions and **Restore to draft** creates
   a new private revision without publishing or cancelling an approved schedule.
   The latest draft head saves continuously; history keeps the newest **100

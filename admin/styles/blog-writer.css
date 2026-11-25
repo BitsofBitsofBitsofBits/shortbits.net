@@ -35,6 +35,8 @@
 .writer-custom-color[hidden] { display: none; }
 .writer-custom-color label { flex: 1 1 140px; }
 .writer-custom-color input { box-sizing: border-box; width: 100%; height: 44px; padding: 4px; background: var(--panel-2); border: 1px solid var(--border-strong); cursor: pointer; }
+.writer-custom-color input[type="text"] { color: var(--text); cursor: text; padding: 8px; }
+.writer-custom-color p { flex-basis: 100%; margin: 0; font-size: 12px; }
 .writer-dropdown-panel h3 { margin: 12px 0 8px; font-size: 1rem; color: var(--ink); }
 .writer-article { margin-block: 16px; }
 .writer-article label { display: grid; gap: 8px; margin-block: 20px; }

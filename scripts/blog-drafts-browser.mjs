@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 import { database } from "./blog-drafts-db-helper.mjs";
@@ -10,6 +11,9 @@ await db.exec(`reset role; insert into public.site_blog_posts (id,slug,title,exc
   values ('${postId}','still-live','Still live','Synthetic browser fixture','# Original\\n\\nPublished body.',true,'2026-11-01'); set role authenticated;`);
 const server = await startSiteServer(resolve("."));
 const browser = await chromium.launch({ headless: true });
+const screenshotIndex = process.argv.indexOf("--screenshots");
+const screenshots = screenshotIndex < 0 ? null : resolve(process.argv[screenshotIndex + 1]);
+if (screenshots) await mkdir(screenshots, { recursive: true });
 const signatures = {
   load_blog_draft: [["p_id", "uuid"]],
   save_blog_draft: [["p_id", "uuid"], ["p_expected_version", "uuid"], ["p_base_public_version", "timestamptz"], ["p_snapshot", "jsonb"], ["p_request_id", "uuid"], ["p_checkpoint", "boolean"]],
@@ -102,6 +106,41 @@ try {
     for (let node = form; node && node !== document.body; node = node.parentElement) { node.hidden = false; node.inert = false; }
     selectBlogPost(blogEditorPost((await window.__databaseRpc("load_blog_draft", { p_id: id })).data));
   }, postId);
+  await admin.evaluate(async () => {
+    const state = (await window.__databaseRpc("load_blog_draft", {})).data;
+    window.__hexDraftId = state.draft_id;
+    selectBlogPost(blogEditorPost(state));
+  });
+  const markdown = admin.locator("#blog-post-markdown");
+  await markdown.fill("Before selected words after");
+  await markdown.evaluate(field => { field.focus(); field.setSelectionRange(7, 21); });
+  await admin.locator("#blog-format-color").selectOption("custom");
+  const hex = admin.locator("#blog-custom-color-value");
+  const picker = admin.getByLabel("Color picker", { exact: true });
+  await hex.fill("invalid");
+  await admin.locator("#blog-custom-color-apply").click();
+  assert.match(await admin.locator("#blog-custom-color-status").textContent(), /Enter RGB/);
+  assert.equal(await markdown.inputValue(), "Before selected words after");
+  await hex.fill("AbCd");
+  assert.equal(await picker.inputValue(), "#aabbcc");
+  for (const width of [1440, 390]) {
+    await admin.setViewportSize({ width, height: 1000 });
+    assert.ok(await admin.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `Markdown Hex controls overflow at ${width}px`);
+    if (screenshots) await admin.screenshot({ path: resolve(screenshots, `markdown-hex-${width}.png`), fullPage: true });
+  }
+  await admin.setViewportSize({ width: 1440, height: 1000 });
+  await picker.fill("#123456");
+  assert.equal(await hex.inputValue(), "#123456dd");
+  await hex.press("Enter");
+  assert.equal(await markdown.inputValue(), "Before {{color:#123456dd|selected words}} after");
+  assert.equal(await markdown.evaluate(field => field.value.slice(field.selectionStart, field.selectionEnd)), "selected words");
+  await admin.locator('#blog-post-form [name="title"]').fill("Private Hex Markdown fixture");
+  await admin.locator("#blog-post-save").click();
+  await admin.getByText("Private draft saved. Public content is unchanged.", { exact: true }).waitFor();
+  assert.equal(await admin.evaluate(async () => (await window.__databaseRpc("load_blog_draft", { p_id: window.__hexDraftId })).data.snapshot.body_markdown),
+    "Before {{color:#123456dd|selected words}} after");
+  assert.equal((await publicRows())[0].title, "Explicit SQL-backed publication");
+  await admin.evaluate(async id => selectBlogPost(blogEditorPost((await window.__databaseRpc("load_blog_draft", { p_id: id })).data)), postId);
   await admin.locator('#blog-post-form [name="title"]').fill("Private legacy Admin edit");
   await admin.locator("#blog-post-save").click();
   await admin.getByText("Private draft saved. Public content is unchanged.", { exact: true }).waitFor();

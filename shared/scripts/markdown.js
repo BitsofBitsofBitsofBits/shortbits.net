@@ -25,6 +25,24 @@
       ? normalized.toLowerCase() : null;
   }
 
+  function bindHexColorInputs(picker, field) {
+    const sync = () => {
+      const hex = hexColor(field.value);
+      if (!hex) return;
+      const digits = hex.slice(1);
+      picker.value = `#${digits.length <= 4 ? [...digits.slice(0, 3)].map(digit => digit + digit).join("") : digits.slice(0, 6)}`;
+    };
+    field.addEventListener("input", sync);
+    picker.addEventListener("input", () => {
+      const hex = hexColor(field.value);
+      const alpha = hex?.length === 5 ? hex.slice(-1).repeat(2) : hex?.length === 9 ? hex.slice(-2) : "";
+      field.value = picker.value + alpha;
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    sync();
+    return sync;
+  }
+
   function customFontFamily(value) {
     if (typeof value !== "string" || !value.trim() || value.length > 200) return null;
     const families = value.split(",").map(family => family.trim());
@@ -390,6 +408,6 @@
   }
 
   window.BITS_MARKDOWN = Object.freeze({
-    fonts, hexColor, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
+    fonts, hexColor, bindHexColorInputs, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
   });
 })();

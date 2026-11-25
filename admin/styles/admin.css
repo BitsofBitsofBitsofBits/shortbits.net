@@ -2237,6 +2237,13 @@ body.admin-center.ac-panel-open {
   overflow-wrap: anywhere;
 }
 
+#blog-custom-color-picker {
+  width: 100%;
+  height: 44px;
+  padding: 4px;
+  cursor: pointer;
+}
+
 .admin-center #blog-custom-font,
 .admin-center #blog-custom-color {
   flex-basis: 100%;
