@@ -80,11 +80,16 @@
   remain deployed, download a fresh exact-schema backup, then release the rich
   readers and writer. Production deployment requires the Supabase migration job
   to succeed; missing credentials or migration failures must not ship the site.
-- **Private-draft release order (not yet deployed):** obtain a fresh private
+- **Private-draft release order:** obtain a fresh private
   pre-migration database backup, then apply
   `20261123150000_private_blog_drafts.sql`, establish a fresh exact-schema
   private backup, and deploy the matching writer, Admin, public query contract
   and generator together. No post backfill or automatic publication occurs.
+  The production environment variable
+  `BLOG_PRIVATE_DRAFT_SCHEMA_BACKUP_CONFIRMED=true` unlocks frontend deployment
+  only after that post-migration private backup/recovery readiness is confirmed.
+  Until then, the workflow applies migrations but fails closed before deploying
+  frontend files. Retain this one-time confirmation for compatible future releases.
   The migration revokes legacy direct INSERT/UPDATE publication writes; old
   already-open editors fail closed until reopened on the compatible code.
   RPCs permit only scoped authenticated editorial operations.

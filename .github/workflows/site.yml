@@ -312,6 +312,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Verify private draft schema backup readiness
+        env:
+          BLOG_PRIVATE_DRAFT_SCHEMA_BACKUP_CONFIRMED: ${{ vars.BLOG_PRIVATE_DRAFT_SCHEMA_BACKUP_CONFIRMED }}
+        shell: bash
+        run: |
+          if [ "$BLOG_PRIVATE_DRAFT_SCHEMA_BACKUP_CONFIRMED" != "true" ]; then
+            echo "::error::Private draft migration requires a fresh private exact-schema backup before frontend deployment. Confirm recovery readiness, then set the production environment variable BLOG_PRIVATE_DRAFT_SCHEMA_BACKUP_CONFIRMED=true."
+            exit 1
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
