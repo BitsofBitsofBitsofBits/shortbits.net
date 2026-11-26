@@ -141,6 +141,14 @@
   family picker as Online and the blog. The Admin draft preview also uses it,
   with preview-only appearance choices that never change saved site preferences
   or Admin appearance.
+- Public articles include a **Table of Contents** above the body when content
+  headings exist. It starts collapsed and uses nested bullet links for heading
+  hierarchy, excluding the article title and interface headings. Markdown and
+  rich content share deterministic unique section anchors, including duplicate
+  headings. Live body refreshes replace the navigation along with the body;
+  unchanged refreshes preserve its disclosure state. Generated articles include
+  working disclosure and jump links without JavaScript. Articles without content
+  headings omit the disclosure, and print output omits navigation.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do

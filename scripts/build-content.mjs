@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import vm from "node:vm";
 import publishing from "../shared/scripts/publishing-status.js";
 import blogData from "../shared/scripts/blog-data.js";
+import blogToc from "../shared/scripts/blog-toc.js";
 
 export const normalizePosts = publishing.normalizePosts;
 
@@ -39,6 +40,8 @@ export function markdownRenderer(source, richSource) {
       this.attributes[name] = value;
     }
     set textContent(value) { this.childNodes = [textNode(value)]; }
+    get textContent() { return "text" in this ? this.text : this.childNodes.map(node => node.textContent).join(""); }
+    get tagName() { return this.tag.toUpperCase(); }
     get children() { return this.childNodes.filter((node) => Boolean(node.tag)); }
     get firstElementChild() { return this.children[0]; }
     get classList() { return { contains: (name) => (this.className || "").split(/\s+/).includes(name) }; }
@@ -47,7 +50,7 @@ export function markdownRenderer(source, richSource) {
       const content = this.childNodes.join("");
       if (!this.tag) return content;
       const attributes = { ...this.attributes };
-      for (const key of ["href", "src", "alt", "loading", "decoding", "referrerPolicy", "target", "rel", "title", "scope", "type", "tabIndex"]) {
+      for (const key of ["id", "href", "src", "alt", "loading", "decoding", "referrerPolicy", "target", "rel", "title", "scope", "type", "tabIndex"]) {
         if (this[key] !== undefined) attributes[key.toLowerCase()] = this[key];
       }
       if (this.className) attributes.class = this.className;
@@ -75,20 +78,27 @@ export function markdownRenderer(source, richSource) {
     return node;
   }
   const window = { location: { origin: siteUrl } };
+  const document = {
+    createElement: (tag) => new Node(tag),
+    createTextNode: textNode,
+    createDocumentFragment: () => new Node(),
+  };
   const context = vm.createContext({
     window, URL,
-    document: {
-      createElement: (tag) => new Node(tag),
-      createTextNode: textNode,
-      createDocumentFragment: () => new Node(),
-    },
+    document,
   });
   vm.runInContext(source, context, { timeout: 1000, filename: "shared/scripts/markdown.js" });
   if (richSource) vm.runInContext(richSource, context, { timeout: 1000, filename: "shared/scripts/blog-content.js" });
+  const renderPost = post => post.body_rich ? window.BITS_BLOG_CONTENT.render(post.body_rich) : window.BITS_MARKDOWN.render(post.body_markdown);
   return {
     render: (markdown) => String(window.BITS_MARKDOWN.render(markdown)),
     readingTime: window.BITS_MARKDOWN.readingTime,
-    renderPost: post => post.body_rich ? String(window.BITS_BLOG_CONTENT.render(post.body_rich)) : String(window.BITS_MARKDOWN.render(post.body_markdown)),
+    renderPost: post => String(renderPost(post)),
+    renderArticleContent: post => {
+      const body = renderPost(post);
+      const toc = blogToc.render(body, document);
+      return { body: String(body), toc: toc ? String(toc) : "" };
+    },
     postReadingTime: post => post.body_rich ? window.BITS_BLOG_CONTENT.readingTime(post) : window.BITS_MARKDOWN.readingTime(post.body_markdown),
   };
 }
@@ -131,6 +141,7 @@ const dateLabel = (value) => new Date(value).toLocaleDateString("en-US", { day: 
 const jsonScript = (value) => JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
 
 export function renderArticle(post, renderer) {
+  const content = renderer.renderArticleContent(post);
   const url = siteUrl + articlePath(post.slug);
   const title = escapeHtml(post.title);
   const excerpt = escapeHtml(post.excerpt);
@@ -171,6 +182,7 @@ export function renderArticle(post, renderer) {
     <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/blog/styles/theme-settings.css">
+    <link rel="stylesheet" href="/blog/styles/article-toc.css">
     <script src="/shared/scripts/theme-picker.js?v=picker-1" defer></script>
     <script src="/blog/scripts/theme-settings.js" defer></script>
     <link rel="stylesheet" href="/shared/styles/accessibility.css?v=accessibility-1">
@@ -179,6 +191,7 @@ export function renderArticle(post, renderer) {
     <script src="/shared/scripts/site-config.js?v=site-config-3" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
     <script src="/shared/scripts/blog-content.js" defer></script>
+    <script src="/shared/scripts/blog-toc.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/blog-data.js?v=blog-data-1" defer></script>
     <script src="/shared/scripts/blog-views.js?v=blog-views-1" defer></script>
@@ -205,7 +218,8 @@ export function renderArticle(post, renderer) {
           <p id="blog-post-excerpt" class="blog-article-excerpt">${excerpt}</p>
           <p class="blog-article-meta"><time id="blog-post-date" datetime="${escapeHtml(post.published_at)}">${dateLabel(post.published_at)}</time><span aria-hidden="true">//</span><span id="blog-post-reading-time">${renderer.postReadingTime ? renderer.postReadingTime(post) : renderer.readingTime(post.body_markdown)} MIN READ</span><span id="blog-post-views" role="status"></span></p>
         </header>
-        <div id="blog-post-body" class="blog-markdown">${renderer.renderPost ? renderer.renderPost(post) : renderer.render(post.body_markdown)}</div>
+        <div id="blog-post-toc">${content.toc}</div>
+        <div id="blog-post-body" class="blog-markdown">${content.body}</div>
       </article>
       <footer><p><a href="/blog/">All posts</a> &middot; <a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/professional/">Professional profile</a></p></footer>
     </main>

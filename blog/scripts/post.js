@@ -6,6 +6,7 @@
   const date = document.querySelector("#blog-post-date");
   const readingTime = document.querySelector("#blog-post-reading-time");
   const body = document.querySelector("#blog-post-body");
+  const contents = document.querySelector("#blog-post-toc");
   const slug = article.dataset.blogSlug || new URLSearchParams(window.location.search).get("slug")?.trim();
   const schema = document.querySelector("[data-blog-schema]");
   const initialSchema = schema ? JSON.parse(schema.textContent) : null;
@@ -83,6 +84,7 @@
         hasContent = false;
         viewsLoaded = false;
         body.replaceChildren();
+        contents.replaceChildren();
         lastBodyMarkdown = null;
         title.textContent = "";
         excerpt.textContent = "";
@@ -99,6 +101,9 @@
       const contentKey = JSON.stringify([post.body_markdown, post.body_rich ?? null]);
       if (contentKey !== lastBodyMarkdown) {
         const rendered = window.BITS_BLOG_CONTENT.renderPost(post);
+        const toc = window.BITS_BLOG_TOC.render(rendered);
+        if (toc) toc.open = Boolean(contents.firstElementChild?.open);
+        contents.replaceChildren(...(toc ? [toc] : []));
         body.replaceChildren(rendered);
         lastBodyMarkdown = contentKey;
       }

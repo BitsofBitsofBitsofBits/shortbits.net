@@ -185,6 +185,19 @@ try {
       if (index) {
         await page.waitForFunction(() => !document.querySelector("#blog-post").hidden);
         assert.equal(await page.locator("#blog-post-title").textContent(), "First lab notes", "Live publishing remains functional");
+        const toc = page.locator("#blog-post-toc details");
+        assert.equal(await toc.evaluate(node => node.open), false);
+        await page.getByRole("button", { name: "Close theme settings" }).click();
+        await toc.locator("summary").press("Enter");
+        assert.ok(await toc.locator("a").count());
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+        await page.addScriptTag({ path: axePath });
+        assert.deepEqual(await page.evaluate(async () => (await axe.run(document.querySelector("#blog-post-toc"), {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
+        })).violations.map(issue => issue.id)), [], `${width}px ${path} expanded TOC is accessible`);
+        if (shots) await page.screenshot({ path: join(shots, `toc-themes-${index}-${width}.png`), fullPage: true });
+        await toc.locator("summary").press("Enter");
+        await page.getByRole("button", { name: "Theme settings", exact: true }).click();
       }
       await audit(page, `${width}px ${path} persisted settings`);
       if (shots) {
@@ -197,6 +210,7 @@ try {
       }
       await page.emulateMedia({ media: "print" });
       assert.equal(await page.locator("[data-blog-theme-settings]").isVisible(), false, "Controls stay out of print");
+      assert.equal(await page.locator("#blog-post-toc details").isVisible(), false, "TOC stays out of print");
       await page.emulateMedia({ media: "screen" });
     }
     await page.goto(`${server.origin}/professional/`, { waitUntil: "networkidle" });

@@ -22,7 +22,7 @@ try {
   for (const width of [390, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
     let rows = [{ ...fixture, title: "Edited live title", excerpt: "Edited live summary",
-      body_markdown: "## Live edit\n\n**Current body**, not the deployment snapshot.\n\n<script>window.unsafe = true</script>" }];
+      body_markdown: "# Overview\n\n## Live edit\n\n**Current body**, not the deployment snapshot.\n\n### Details\n\nMore details.\n\n## Live edit\n\nDuplicate heading.\n\n## Live edit 2\n\n<script>window.unsafe = true</script>" }];
     let failure = false;
     let malformed = false;
     let serverNow = Date.parse("2026-11-14T12:00:00Z");
@@ -58,6 +58,21 @@ try {
     assert.equal(await page.locator("script[data-seo]").evaluate(node =>
       JSON.parse(node.textContent)["@graph"].find(entry => entry["@type"] === "WebPage").description), "Edited live summary");
     assert.equal(requests[0].searchParams.get("slug"), "eq.first-lab-notes");
+    const toc = page.locator("#blog-post-toc details");
+    assert.equal(await toc.count(), 1);
+    assert.equal(await toc.evaluate(node => node.open), false);
+    if (shots) await page.screenshot({ path: join(shots, `toc-collapsed-${width}.png`), fullPage: true });
+    assert.deepEqual(await toc.locator("a").allTextContents(), ["Overview", "Live edit", "Details", "Live edit", "Live edit 2"]);
+    assert.equal(await toc.locator('a[href="#blog-heading-live-edit-2-2"]').count(), 1);
+    await toc.locator("summary").press("Enter");
+    assert.equal(await toc.evaluate(node => node.open), true);
+    const firstHeadingIds = await page.locator("#blog-post-body :is(h1,h2,h3,h4,h5,h6)").evaluateAll(nodes => nodes.map(node => node.id));
+    assert.equal(new Set(firstHeadingIds).size, firstHeadingIds.length);
+    await toc.locator('a[href="#blog-heading-details"]').focus();
+    await page.keyboard.press("Enter");
+    assert.equal(new URL(page.url()).hash, "#blog-heading-details");
+    assert.ok(await page.locator("#blog-heading-details").evaluate(node => node.getBoundingClientRect().top >= 0));
+    await toc.locator("summary").scrollIntoViewIfNeeded();
     await page.addScriptTag({ path: axePath });
     assert.deepEqual(await page.evaluate(async () => (await axe.run(document, {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] },
@@ -69,10 +84,29 @@ try {
       await page.evaluate(() => window.dispatchEvent(new Event("focus")));
       await response;
     };
+    await toc.evaluate(node => { window.__previousToc = node; });
+    await refresh();
+    assert.equal(await toc.evaluate(node => node === window.__previousToc && node.open), true, "Unchanged refresh preserves the disclosure and node");
+    rows[0] = { ...rows[0], body_rich: { version: 1, doc: { type: "doc", content: [
+      { type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "Rich overview" }] },
+      { type: "heading", attrs: { level: 3 }, content: [{ type: "text", text: "Rich child" }] },
+      { type: "heading", attrs: { level: 6 }, content: [{ type: "text", text: "Rich deepest" }] },
+      { type: "paragraph", content: [{ type: "text", text: "Live rich body" }] },
+    ] } } };
+    await refresh();
+    await toc.locator('a[href="#blog-heading-rich-deepest"]').waitFor();
+    assert.deepEqual(await toc.locator("a").allTextContents(), ["Rich overview", "Rich child", "Rich deepest"]);
+    assert.equal(await toc.evaluate(node => node.open), true, "Changed content preserves an explicitly opened disclosure");
+    if (shots) await page.screenshot({ path: join(shots, `toc-rich-${width}.png`), fullPage: true });
+    assert.equal(await page.locator("#blog-heading-details").count(), 0);
+    rows[0] = { ...rows[0], body_rich: null, body_markdown: "No body headings remain." };
+    await refresh();
+    await toc.waitFor({ state: "detached" });
     rows = [];
     await refresh();
     await page.locator("#blog-post[hidden]").waitFor({ state: "attached" });
     assert.equal(await page.locator("#blog-post-body").textContent(), "");
+    assert.equal(await page.locator("#blog-post-toc").textContent(), "");
     assert.match(await page.locator("#blog-post-status").textContent(), /does not exist or is not published/);
     assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, follow");
     assert.equal(await page.locator("[data-blog-schema]").textContent(), "null");
@@ -106,6 +140,7 @@ try {
     ]);
     await page.locator("#blog-post").waitFor({ state: "visible" });
     assert.equal(await page.locator("#blog-post-title").textContent(), fixture.title);
+    assert.equal(await page.locator("#blog-post-toc details").evaluate(node => node.open), false, "Legacy live readers also start collapsed");
     rows[0] = { ...rows[0], title: "Timer refresh", body_markdown: "Timer refreshed body." };
     serverNow += 60001;
     await page.clock.fastForward(60001);
@@ -122,7 +157,7 @@ try {
     assert.deepEqual(errors, []);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2));
     await context.close();
-    console.log(`PASS ${width}px live blog: edits, safe Markdown, metadata, deletion/unpublishing, recreation, outage, due scheduling, polling, and new-post routing`);
+    console.log(`PASS ${width}px live blog: collapsed hierarchical TOC, keyboard jumps, unique anchors, Markdown/rich refresh, empty-heading cleanup, edits, safe Markdown, metadata, deletion/unpublishing, recreation, outage, due scheduling, polling, and new-post routing`);
   }
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
@@ -130,9 +165,20 @@ try {
   assert.equal(await page.locator("#blog-post").isVisible(), true);
   assert.equal(await page.locator("#blog-post-title").textContent(), fixture.title);
   assert.match(await page.locator("#blog-post-body").textContent(), /./);
+  const contents = page.locator("#blog-post-toc details");
+  assert.equal(await contents.evaluate(node => node.open), false);
+  await contents.locator("summary").press("Enter");
+  const firstLink = contents.locator("a").first();
+  const href = await firstLink.getAttribute("href");
+  await firstLink.focus();
+  await page.keyboard.press("Enter");
+  assert.equal(new URL(page.url()).hash, href);
+  assert.ok(await page.locator(href).evaluate(node => node.getBoundingClientRect().top >= 0));
+  await page.emulateMedia({ media: "print" });
+  assert.equal(await contents.isVisible(), false);
   assert.equal(await page.locator("[data-blog-schema]").evaluate(node => JSON.parse(node.textContent).headline), fixture.title);
   await context.close();
-  console.log("PASS no-JavaScript static article and structured-data fallback");
+  console.log("PASS no-JavaScript static article, collapsed TOC/keyboard jumps, print omission and structured-data fallback");
 } finally {
   await browser?.close();
   await server.close();

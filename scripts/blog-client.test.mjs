@@ -44,6 +44,7 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
       location: { search: `?slug=${slug}` },
       BITS_MARKDOWN: { readingTime: () => 1, render: (text) => ({ textContent: text }) },
       BITS_BLOG_CONTENT: { readingTime: () => 1, renderPost: post => ({ textContent: post.body_markdown }) },
+      BITS_BLOG_TOC: { render: () => null },
       BITS_BLOG_VIEWS: { show() {} },
       addEventListener: (event, listener) => { listeners[event] = listener; },
       setInterval: (listener, delay) => { timers.push({ listener, delay }); },
@@ -133,7 +134,7 @@ test("archive preserves and searches deployment content when live fetch fails", 
 function postNodes() {
   const nodes = Object.fromEntries([
     "#blog-post", "#blog-post-status", "#blog-post-title", "#blog-post-excerpt",
-    "#blog-post-date", "#blog-post-reading-time", "#blog-post-body", "#blog-post-views",
+    "#blog-post-date", "#blog-post-reading-time", "#blog-post-body", "#blog-post-views", "#blog-post-toc",
   ].map((selector) => [selector, new Element()]));
   nodes["#blog-post"].hidden = true;
   return nodes;

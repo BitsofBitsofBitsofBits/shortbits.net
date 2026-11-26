@@ -1,18 +1,10 @@
 {
-  "release_id": "blog-private-drafts-v1",
-  "version": "2.0.2",
+  "release_id": "blog-table-of-contents-v1",
+  "version": "2.0.3",
   "notes": [
     {
-      "title": "Hex color entry in both blog editors",
-      "summary": "The visual writer and Markdown editor pair a built-in color picker with editable Hex values and a Blurple (#553fff) preset. Short and full RGB/alpha Hex values apply directly, invalid input leaves content unchanged, and picker changes preserve the chosen transparency."
-    },
-    {
-      "title": "Private autosaved blog drafts and version history",
-      "summary": "The visual writer autosaves private working drafts, including revisions to already-published articles. Live content and metadata change only through explicit publication. Private history keeps the latest 100 checkpoints, every five minutes and on manual saves, publishing and restores, with preview and restore-to-draft controls."
-    },
-    {
-      "title": "Safer draft recovery and scheduled revisions",
-      "summary": "Serialized saves, version tokens and retry receipts protect drafts against uncertain saves and competing tabs. Approved scheduled updates leave the current article live until due; later draft edits and history restores do not change that approved revision. Admin backups include private draft history and schedules, while static SEO snapshots, RSS and sitemap still refresh on deployment."
+      "title": "Collapsible blog Table of Contents",
+      "summary": "Public articles include a collapsed heading jump list with nested bullets for headings and subheadings. Markdown and rich articles share unique section links, live changes refresh the list, and generated articles retain navigation without JavaScript."
     }
   ]
 }
