@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { chooseTheme } from "./theme-picker-helpers.mjs";
 import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 import { resolve, join } from "node:path";
@@ -84,8 +85,7 @@ try {
       .filter(entry => entry.name.includes("/layouts/html.css")).length), 0, "Default does not download the HTML skin");
     await page.evaluate(() => window.BITS_DESKTOP_WINDOWS.open("settings"));
     const picker = page.locator("#settings-window .theme-picker");
-    await picker.locator(":scope > summary").click();
-    await picker.locator('[data-theme="html"]').click();
+    await chooseTheme(page, picker, "html");
     await ready(page);
     assert.equal(await page.locator("#interface-theme-select").inputValue(), "html");
     assert.equal(await page.locator("#settings-scheme").isVisible(), false, "HTML intentionally locks to light mode");
