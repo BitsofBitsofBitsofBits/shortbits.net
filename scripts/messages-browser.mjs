@@ -80,6 +80,8 @@ try {
       return url.origin === server.origin ? route.continue() : route.abort();
     });
     const page = await context.newPage();
+    // Keep standard-message fixtures independent of automatic holiday pools.
+    await page.clock.setFixedTime(new Date("2026-11-20T12:00:00Z"));
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${server.origin}/online/`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => document.documentElement.dataset.runtime === "ready");
@@ -151,6 +153,7 @@ try {
     assert.ok((await page.locator("#typed-text").textContent()).includes(new URL(server.origin).hostname));
     assert.equal(await page.locator("#typed-text .blog-text-color-red").textContent(), "red");
     assert.equal(await page.locator("#message-author-box").isVisible(), true);
+    await page.waitForFunction(() => document.querySelector("#typed-author").textContent === "Test author 👩‍💻");
     assert.equal(await page.locator("#typed-author").textContent(), "Test author 👩‍💻");
     await page.addScriptTag({ path: axePath });
     const quoteViolations = await page.evaluate(async () => (await axe.run(document.querySelector(".profile"), {
