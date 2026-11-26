@@ -100,7 +100,7 @@
       }
       const contentKey = JSON.stringify([post.body_markdown, post.body_rich ?? null]);
       if (contentKey !== lastBodyMarkdown) {
-        const rendered = window.BITS_BLOG_CONTENT.renderPost(post);
+        const rendered = window.BITS_BLOG_CONTENT.renderPost(post, { readableColors: true });
         const toc = window.BITS_BLOG_TOC.render(rendered);
         if (toc) toc.open = Boolean(contents.firstElementChild?.open);
         contents.replaceChildren(...(toc ? [toc] : []));

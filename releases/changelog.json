@@ -1,10 +1,14 @@
 {
-  "release_id": "blog-table-of-contents-v1",
-  "version": "2.0.3",
+  "release_id": "blog-color-readability-v1",
+  "version": "2.0.4",
   "notes": [
     {
-      "title": "Collapsible blog Table of Contents",
-      "summary": "Public articles include a collapsed heading jump list with nested bullets for headings and subheadings. Markdown and rich articles share unique section links, live changes refresh the list, and generated articles retain navigation without JavaScript."
+      "title": "Readable blog colors without changing saved content",
+      "summary": "Markdown and rich articles display custom Hex colors on contrast-safe backings, preserve Blurple's exact hue and linked author colors, and keep rainbow text readable. Display-only alpha correction leaves saved colors, private drafts and history unchanged; generated and live article readers share the same presentation."
+    },
+    {
+      "title": "Blog theme and navigation contrast",
+      "summary": "Article headings, links, metadata, Table of Contents and keyboard focus use readable theme colors. Appearance controls and iPod reading surfaces receive targeted contrast fixes while decorative page overlays remain behind the article."
     }
   ]
 }

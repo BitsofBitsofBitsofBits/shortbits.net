@@ -25,6 +25,40 @@
       ? normalized.toLowerCase() : null;
   }
 
+  function readableHexColor(value) {
+    const original = hexColor(value);
+    if (!original) throw new Error("Invalid text color.");
+    let digits = original.slice(1);
+    if (digits.length <= 4) digits = [...digits].map(digit => digit.repeat(2)).join("");
+    const rgb = digits.slice(0, 6).match(/../g).map(channel => Number.parseInt(channel, 16));
+    const alpha = digits.length === 8 ? Number.parseInt(digits.slice(6), 16) / 255 : 1;
+    const luminance = channels => channels.map(channel => channel / 255)
+      .map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+      .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const contrast = (back, opacity) => {
+      const front = luminance(rgb.map(channel => channel * opacity + back * (1 - opacity)));
+      return back ? 1.05 / (front + 0.05) : (front + 0.05) / 0.05;
+    };
+    // Leave headroom for 8-bit alpha and browser color rounding.
+    const minimum = 4.55;
+    const choices = [0, 255].filter(back => contrast(back, 1) >= minimum).map(back => {
+      let low = alpha, high = 1;
+      if (contrast(back, alpha) >= minimum) return { back, alpha };
+      for (let index = 0; index < 24; index++) {
+        const middle = (low + high) / 2;
+        if (contrast(back, middle) >= minimum) high = middle;
+        else low = middle;
+      }
+      return { back, alpha: Math.ceil(high * 255) / 255 };
+    }).sort((a, b) => a.alpha - b.alpha || contrast(b.back, b.alpha) - contrast(a.back, a.alpha));
+    const choice = choices[0];
+    return {
+      original,
+      color: choice.alpha === alpha ? original : `#${digits.slice(0, 6)}${Math.round(choice.alpha * 255).toString(16).padStart(2, "0")}`,
+      background: choice.back ? "#ffffff" : "#000000",
+    };
+  }
+
   function bindHexColorInputs(picker, field) {
     const sync = () => {
       const hex = hexColor(field.value);
@@ -147,9 +181,25 @@
         element = document.createElement("span");
         element.className = hex ? "blog-text-color-custom"
           : custom ? "blog-text-font-custom" : `blog-text-${type}-${value}`;
-        if (hex) element.style.color = hex;
+        if (hex) {
+          element.style.color = hex;
+          if (options.readableColors) {
+            const presentation = readableHexColor(hex);
+            element.className += " blog-color-readable";
+            element.style.color = presentation.color;
+            element.style.backgroundColor = presentation.background;
+            element.dataset.color = presentation.original;
+          }
+        }
+        if (options.readableColors && type === "color" && value === "accent") element.className += " blog-color-readable-accent";
         if (custom) element.style.fontFamily = custom;
         appendInline(element, content, options);
+        if (options.readableColors && type === "color" && value === "rainbow") {
+          const surface = document.createElement("span");
+          surface.className = "blog-rainbow-surface";
+          surface.append(element);
+          element = surface;
+        }
       } else if (match[8] !== undefined) {
         const href = safeLink(match[9]);
         if (!href) {
@@ -200,7 +250,7 @@
     return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
   }
 
-  function renderTable(lines, startIndex) {
+  function renderTable(lines, startIndex, options) {
     const headers = splitTableRow(lines[startIndex]);
     const table = document.createElement("table");
     const head = document.createElement("thead");
@@ -208,7 +258,7 @@
     headers.forEach((header) => {
       const cell = document.createElement("th");
       cell.scope = "col";
-      appendInline(cell, header);
+      appendInline(cell, header, options);
       headRow.append(cell);
     });
     head.append(headRow);
@@ -219,7 +269,7 @@
       const row = document.createElement("tr");
       splitTableRow(lines[index]).forEach((value) => {
         const cell = document.createElement("td");
-        appendInline(cell, value);
+        appendInline(cell, value, options);
         row.append(cell);
       });
       body.append(row);
@@ -255,7 +305,7 @@
         && index + 1 < lines.length
         && isTableDivider(lines[index + 1])
       ) {
-        const table = renderTable(lines, index);
+        const table = renderTable(lines, index, options);
         fragment.append(table.element);
         index = table.nextIndex;
         continue;
@@ -288,7 +338,7 @@
       if (headingMatch) {
         const level = Math.min(6, headingMatch[1].length + headingOffset);
         const heading = document.createElement(`h${level}`);
-        appendInline(heading, headingMatch[2].trim());
+        appendInline(heading, headingMatch[2].trim(), options);
         fragment.append(heading);
         index += 1;
         continue;
@@ -310,7 +360,7 @@
         const paragraph = document.createElement("p");
         quoteLines.forEach((quoteLine, lineIndex) => {
           if (lineIndex) paragraph.append(document.createElement("br"));
-          appendInline(paragraph, quoteLine);
+          appendInline(paragraph, quoteLine, options);
         });
         quote.append(paragraph);
         fragment.append(quote);
@@ -338,9 +388,9 @@
             checkbox.disabled = true;
             checkbox.setAttribute("aria-label", checkbox.checked ? "Completed" : "Not completed");
             item.append(checkbox);
-            appendInline(item, taskMatch[2]);
+            appendInline(item, taskMatch[2], options);
           } else {
-            appendInline(item, itemMatch[1]);
+            appendInline(item, itemMatch[1], options);
           }
           list.append(item);
           index += 1;
@@ -363,7 +413,7 @@
         index += 1;
       }
       const paragraph = document.createElement("p");
-      appendInline(paragraph, paragraphLines.join(" "));
+      appendInline(paragraph, paragraphLines.join(" "), options);
       if (
         paragraph.childNodes.length === 1
         && paragraph.firstElementChild?.classList.contains("blog-markdown-image")
@@ -408,6 +458,6 @@
   }
 
   window.BITS_MARKDOWN = Object.freeze({
-    fonts, hexColor, bindHexColorInputs, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
+    fonts, hexColor, readableHexColor, bindHexColorInputs, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
   });
 })();

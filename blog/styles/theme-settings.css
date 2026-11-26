@@ -4,8 +4,9 @@
   min-height: 44px;
   padding: 0;
   border: 0;
-  color: inherit;
-  background: transparent;
+  color: inherit !important;
+  background: transparent !important;
+  box-shadow: none !important;
   font: inherit;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -83,8 +84,18 @@
 
 .public-nav .blog-theme-trigger:focus-visible,
 .blog-theme-settings :is(button, select):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
+}
+
+html:is([data-interface-theme="aqua"], [data-interface-theme="atari"], [data-interface-theme="winamp"], [data-interface-theme="tokyo-night"]) .blog-theme-settings,
+html:is([data-interface-theme="aqua"], [data-interface-theme="atari"], [data-interface-theme="winamp"], [data-interface-theme="tokyo-night"]) .blog-theme-settings :is(button, select, summary, .theme-picker-list) {
+  color: var(--ink) !important;
+  background: var(--panel) !important;
+}
+
+.blog-theme-settings .theme-picker-choice[aria-pressed="true"] {
+  border-color: var(--ink);
 }
 
 @media print {

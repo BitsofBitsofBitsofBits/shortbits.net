@@ -149,6 +149,17 @@
   unchanged refreshes preserve its disclosure state. Generated articles include
   working disclosure and jump links without JavaScript. Articles without content
   headings omit the disclosure, and print output omits navigation.
+- Public Markdown and rich readers give custom Hex text a small black or white
+  backing, preserving its RGB hue, including Blurple's exact `#553fff`.
+  Transparent Hex colors increase display alpha only when needed for normal-text
+  AA contrast; the original value remains in the public document's `data-color`
+  attribute. Stored articles, private drafts/history and editor/import colors
+  are unchanged. Rainbow text keeps its gradient on a dark backing; linked
+  formatting inherits the enclosing author's color instead of the theme link
+  color. Headings, links, metadata and focus indicators use readable theme ink,
+  and decorative page overlays stay behind the reading surface.
+  The same color presentation is generated in initial article HTML and used
+  for live replacements, so custom-color backings do not require JavaScript.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do

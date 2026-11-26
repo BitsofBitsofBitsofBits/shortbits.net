@@ -75,8 +75,9 @@ test("generated rich articles render the primary structured body instead of reta
 test("static blog articles retain validated hex colors and nested formatting", () => {
   for (const color of ["#abc", "#abcd", "#a1b2c3", "#a1b2c380"]) {
     const html = renderArticle({ ...posts[0], body_markdown: `{{color:${color}|**Colored**}}` }, renderer);
-    assert.match(html, /class="blog-text-color-custom"/);
-    assert.ok(html.includes(`style="color:${color}"`), html);
+    assert.match(html, /class="blog-text-color-custom blog-color-readable"/);
+    assert.ok(html.includes(`data-color="${color}"`), html);
+    assert.match(html, /background-color:#(?:000000|ffffff)/);
     assert.match(html, /<strong>Colored<\/strong>/);
   }
   const invalid = "{{color:#abc;background:red|Literal}}";

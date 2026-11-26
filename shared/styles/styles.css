@@ -5865,6 +5865,53 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
  animation: blog-rainbow-text 5s linear infinite;
 }
 
+.blog-markdown .blog-color-readable,
+.blog-markdown .blog-rainbow-surface {
+ padding: 0.05em 0.22em;
+ box-decoration-break: clone;
+ -webkit-box-decoration-break: clone;
+}
+
+.blog-markdown .blog-rainbow-surface {
+ background: #10141a;
+}
+
+html .blog-markdown .blog-rainbow-surface .blog-text-color-rainbow {
+ background: linear-gradient(90deg, #ff5f6d, #ffc371, #66e890, #5ee7ef, #7597ff, #bd93f9, #ff79c6);
+ background-size: 200% 100%;
+ background-clip: text;
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+}
+
+.blog-markdown .blog-color-readable-accent {
+ color: color-mix(in srgb, var(--accent) 25%, var(--ink));
+}
+
+.blog-markdown [class*="blog-text-color-"]:not(.blog-text-color-rainbow) {
+ -webkit-text-fill-color: currentColor;
+}
+
+html .blog-page :is(.blog-markdown a, .blog-markdown h2, .blog-markdown h3, .blog-markdown h4, .blog-markdown h5, .blog-markdown h6, .blog-markdown th, .blog-toc a, .public-nav a, .blog-breadcrumbs a, .system-kicker, .blog-article-meta, .blog-article-meta time, .blog-article-meta span) {
+ color: color-mix(in srgb, var(--accent) 20%, var(--ink)) !important;
+}
+
+html .blog-page :is(.blog-article-excerpt, .blog-markdown blockquote) {
+ color: color-mix(in srgb, var(--muted) 20%, var(--ink)) !important;
+}
+
+html .blog-page .blog-markdown [class*="blog-text-color-"] a {
+ color: inherit !important;
+}
+
+.blog-post-page > .blog-shell {
+ z-index: 21;
+}
+
+html .blog-page :is(.blog-toc summary, .blog-toc a, .blog-markdown a, .public-nav a, .blog-theme-trigger, .blog-theme-settings :focus-visible):focus-visible {
+ outline-color: var(--ink) !important;
+}
+
 .blog-text-font-default { font-family: var(--font-family); }
 .blog-text-font-serif { font-family: Georgia, "Times New Roman", serif; }
 .blog-text-font-sans { font-family: Arial, Helvetica, sans-serif; }

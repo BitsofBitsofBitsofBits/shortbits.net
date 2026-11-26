@@ -73,3 +73,4 @@
 :root[data-interface-theme="ipod-classic"][data-contrast="high"] { --pod-line:#59636b;--muted:#30363a;--border:#59636b; }
 :root[data-interface-theme="ipod-classic"][data-color-scheme="dark"][data-contrast="high"] { --pod-line:#bac3ca;--muted:#edf1f4;--border:#bac3ca; }:root[data-interface-theme="ipod-classic"] button { color:var(--pod-ink);background-image:linear-gradient(180deg,var(--pod-screen),var(--pod-screen-2)); }
 :root[data-interface-theme="ipod-classic"] .window-button,:root[data-interface-theme="ipod-classic"] .desktop-window-controls button { color:var(--wheel-ink); }
+:root[data-interface-theme="ipod-classic"] .blog-shell { background:var(--pod-screen); }

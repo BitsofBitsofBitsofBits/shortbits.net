@@ -5,6 +5,26 @@ import { createRequire } from "node:module";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
 
+function solidTextContrast(node) {
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+  const ctx = canvas.getContext("2d");
+  const rgba = value => {
+    ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = value; ctx.fillRect(0, 0, 1, 1);
+    return [...ctx.getImageData(0, 0, 1, 1).data];
+  };
+  const composite = (color, background) => color.slice(0, 3)
+    .map((value, index) => value * color[3] / 255 + background[index] * (1 - color[3] / 255));
+  const ancestors = [];
+  for (let element = node; element; element = element.parentElement) ancestors.push(element);
+  let background = [255, 255, 255];
+  for (const element of ancestors.reverse()) background = composite(rgba(getComputedStyle(element).backgroundColor), background);
+  const luminance = values => values.map(value => value / 255)
+    .map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
+    .reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+  const a = luminance(composite(rgba(getComputedStyle(node).color), background)), b = luminance(background);
+  return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+}
+
 const rootIndex = process.argv.indexOf("--root");
 const shotsIndex = process.argv.indexOf("--screenshots");
 const shots = shotsIndex < 0 ? null : resolve(process.argv[shotsIndex + 1]);
@@ -22,7 +42,7 @@ try {
   for (const width of [390, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
     let rows = [{ ...fixture, title: "Edited live title", excerpt: "Edited live summary",
-      body_markdown: "# Overview\n\n## Live edit\n\n**Current body**, not the deployment snapshot.\n\n### Details\n\nMore details.\n\n## Live edit\n\nDuplicate heading.\n\n## Live edit 2\n\n<script>window.unsafe = true</script>" }];
+      body_markdown: "# Overview\n\n## Live edit\n\n**Current body**, not the deployment snapshot.\n\n{{color:#553fff|**Blurple**}} {{color:#0002|Alpha}} {{color:rainbow|Rainbow}}\n\n| Right to Left | Left to Right |\n| --- | --- |\n| Left | Right |\n\n### Details\n\nMore details.\n\n## Live edit\n\nDuplicate heading.\n\n## Live edit 2\n\n<script>window.unsafe = true</script>" }];
     let failure = false;
     let malformed = false;
     let serverNow = Date.parse("2026-11-14T12:00:00Z");
@@ -51,6 +71,22 @@ try {
     assert.equal(await page.locator("#blog-post-title").textContent(), "Edited live title");
     assert.match(await page.locator("#blog-post-body").textContent(), /Current body/);
     assert.equal(await page.evaluate(() => window.unsafe), undefined);
+    const blurple = page.locator('#blog-post-body [data-color="#553fff"]');
+    assert.equal(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
+    assert.equal(await blurple.evaluate(node => getComputedStyle(node).backgroundColor), "rgb(255, 255, 255)");
+    assert.equal(await page.locator("#blog-post-body .blog-rainbow-surface .blog-text-color-rainbow").count(), 1);
+    assert.equal(await page.locator('#blog-post-body [data-color="#0002"]').count(), 1);
+    await page.evaluate(() => window.BITS_THEME_PREFERENCE.apply("default", { scheme: "light" }));
+    const tableContrast = await page.locator("#blog-post-body th").first().evaluate(solidTextContrast);
+    assert.ok(tableContrast >= 4.5, `Light-mode table headers must meet AA; measured ${tableContrast}.`);
+    await page.evaluate(() => {
+      window.BITS_THEME_PREFERENCE.apply("tokyo-night", { scheme: "light" });
+      document.querySelector("[data-blog-theme-settings]").showModal();
+    });
+    const pickerContrast = await page.locator(".blog-theme-settings .theme-picker > summary").evaluate(solidTextContrast);
+    assert.ok(pickerContrast >= 4.5, `Tokyo Night light picker must meet AA; measured ${pickerContrast}.`);
+    await page.evaluate(() => document.querySelector("[data-blog-theme-settings]").close());
+    await page.evaluate(() => window.BITS_THEME_PREFERENCE.apply("default", { scheme: "dark" }));
     assert.equal(await page.locator('meta[name="description"]').getAttribute("content"), "Edited live summary");
     assert.equal(await page.locator('link[rel="canonical"]').count(), 1);
     assert.equal(await page.locator('link[rel="canonical"]').getAttribute("href"), "https://www.shortbits.net/blog/articles/first-lab-notes/");
@@ -91,12 +127,17 @@ try {
       { type: "heading", attrs: { level: 1 }, content: [{ type: "text", text: "Rich overview" }] },
       { type: "heading", attrs: { level: 3 }, content: [{ type: "text", text: "Rich child" }] },
       { type: "heading", attrs: { level: 6 }, content: [{ type: "text", text: "Rich deepest" }] },
-      { type: "paragraph", content: [{ type: "text", text: "Live rich body" }] },
+      { type: "paragraph", content: [{ type: "text", text: "Live rich body" },
+        { type: "text", text: "Linked Blurple", marks: [{ type: "link", attrs: { href: "/blog/" } }, { type: "style", attrs: { color: "#553fff" } }] },
+      ] },
     ] } } };
     await refresh();
     await toc.locator('a[href="#blog-heading-rich-deepest"]').waitFor();
     assert.deepEqual(await toc.locator("a").allTextContents(), ["Rich overview", "Rich child", "Rich deepest"]);
     assert.equal(await toc.evaluate(node => node.open), true, "Changed content preserves an explicitly opened disclosure");
+    assert.equal(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
+    assert.equal(await page.locator('#blog-post-body [data-color="#553fff"] a').evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)", "Linked rich text retains the author's enclosing color after live replacement");
+    assert.equal(await page.locator("#blog-post-body .blog-rainbow-surface").count(), 0, "Reconciliation removes previous color wrappers");
     if (shots) await page.screenshot({ path: join(shots, `toc-rich-${width}.png`), fullPage: true });
     assert.equal(await page.locator("#blog-heading-details").count(), 0);
     rows[0] = { ...rows[0], body_rich: null, body_markdown: "No body headings remain." };

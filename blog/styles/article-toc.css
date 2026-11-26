@@ -25,12 +25,12 @@
   display: inline-block;
   min-height: 44px;
   align-content: center;
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 25%, var(--ink));
   text-underline-offset: 3px;
 }
 
 .blog-toc :is(summary, a):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 

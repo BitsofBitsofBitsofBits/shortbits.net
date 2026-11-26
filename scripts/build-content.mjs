@@ -60,6 +60,10 @@ export function markdownRenderer(source, richSource) {
         if (!color) throw new Error("Unsupported Markdown color.");
         styles.push(`color:${color}`);
       }
+      if (this.style.backgroundColor !== undefined) {
+        if (!["#000000", "#ffffff"].includes(this.style.backgroundColor)) throw new Error("Unsupported Markdown color backing.");
+        styles.push(`background-color:${this.style.backgroundColor}`);
+      }
       if (this.style.fontFamily !== undefined) {
         const font = window.BITS_MARKDOWN.customFontFamily(this.style.fontFamily);
         if (!font) throw new Error("Unsupported Markdown font.");
@@ -89,7 +93,8 @@ export function markdownRenderer(source, richSource) {
   });
   vm.runInContext(source, context, { timeout: 1000, filename: "shared/scripts/markdown.js" });
   if (richSource) vm.runInContext(richSource, context, { timeout: 1000, filename: "shared/scripts/blog-content.js" });
-  const renderPost = post => post.body_rich ? window.BITS_BLOG_CONTENT.render(post.body_rich) : window.BITS_MARKDOWN.render(post.body_markdown);
+  const renderPost = post => post.body_rich ? window.BITS_BLOG_CONTENT.render(post.body_rich, { readableColors: true })
+    : window.BITS_MARKDOWN.render(post.body_markdown, { readableColors: true });
   return {
     render: (markdown) => String(window.BITS_MARKDOWN.render(markdown)),
     readingTime: window.BITS_MARKDOWN.readingTime,

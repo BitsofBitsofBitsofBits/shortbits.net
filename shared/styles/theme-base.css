@@ -2600,6 +2600,14 @@ footer span {
   color: var(--accent);
 }
 
+html .blog-page :is(.blog-markdown a, .blog-markdown h2, .blog-markdown h3, .blog-markdown h4, .blog-markdown h5, .blog-markdown h6, .blog-markdown th, .blog-toc a, .public-nav a, .blog-breadcrumbs a, .system-kicker, .blog-article-meta, .blog-article-meta time, .blog-article-meta span) {
+ color: color-mix(in srgb, var(--accent) 20%, var(--ink)) !important;
+}
+
+html .blog-page :is(.blog-toc summary, .blog-toc a, .blog-markdown a, .public-nav a, .blog-theme-trigger, .blog-theme-settings :focus-visible):focus-visible {
+ outline-color: var(--ink) !important;
+}
+
 .career-period-range,
 .career-period-duration {
   display: block;

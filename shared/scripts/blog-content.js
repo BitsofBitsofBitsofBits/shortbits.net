@@ -92,12 +92,12 @@
     if (JSON.stringify(value).length > 1000000) throw new Error("Article exceeds the rich-text limit.");
     return value;
   }
-  function render(value) {
+  function render(value, options = {}) {
     validate(value);
     const markdown = root.BITS_MARKDOWN;
     function renderNode(node) {
       const a = node.attrs ?? {};
-      if (node.type === "legacyMarkdown") return markdown.render(a.source);
+      if (node.type === "legacyMarkdown") return markdown.render(a.source, options);
       if (node.type === "text" || node.type === "hardBreak") {
         let element = node.type === "text" ? document.createTextNode(node.text) : document.createElement("br");
         for (const mark of node.marks ?? []) {
@@ -112,8 +112,19 @@
             const classes = [];
             if (style.color) {
               const hex = markdown.hexColor(style.color);
-              if (hex) wrapper.style.color = hex;
-              else classes.push(`blog-text-color-${style.color.toLowerCase()}`);
+              if (hex) {
+                wrapper.style.color = hex;
+                if (options.readableColors) {
+                  const presentation = markdown.readableHexColor(hex);
+                  classes.push("blog-text-color-custom", "blog-color-readable");
+                  wrapper.style.color = presentation.color;
+                  wrapper.style.backgroundColor = presentation.background;
+                  wrapper.dataset.color = presentation.original;
+                }
+              } else {
+                classes.push(`blog-text-color-${style.color.toLowerCase()}`);
+                if (options.readableColors && style.color.toLowerCase() === "accent") classes.push("blog-color-readable-accent");
+              }
             }
             if (style.font) {
               const custom = markdown.customFontFamily(style.font);
@@ -124,6 +135,12 @@
             wrapper.className = classes.join(" ");
           }
           wrapper.append(element); element = wrapper;
+          if (options.readableColors && mark.type === "style" && mark.attrs?.color?.toLowerCase() === "rainbow") {
+            const surface = document.createElement("span");
+            surface.className = "blog-rainbow-surface";
+            surface.append(element);
+            element = surface;
+          }
         }
         return element;
       }
@@ -167,7 +184,7 @@
     function content(node) { return node.text ?? (node.type === "legacyMarkdown" ? node.attrs.source : (node.content ?? []).map(content).join(" ")); }
     return content(value.doc);
   }
-  const api = Object.freeze({ validate, render, text, url, renderPost: post => post.body_rich ? render(post.body_rich) : root.BITS_MARKDOWN.render(post.body_markdown),
+  const api = Object.freeze({ validate, render, text, url, renderPost: (post, options = {}) => post.body_rich ? render(post.body_rich, options) : root.BITS_MARKDOWN.render(post.body_markdown, options),
     readingTime: post => root.BITS_MARKDOWN.readingTime(post.body_rich ? text(post.body_rich) : post.body_markdown) });
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.BITS_BLOG_CONTENT = api;
