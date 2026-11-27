@@ -2887,6 +2887,7 @@ function selectBlogPost(post) {
   blogPostForm.elements.title.value = post.title;
   blogPostForm.elements.slug.value = post.slug;
   blogPostForm.elements.excerpt.value = post.excerpt;
+  window.BITS_BLOG_TAXONOMY.populate(blogPostForm, post);
   blogPostForm.elements.body_markdown.value = post.body_markdown;
   blogPostForm.elements.published_at.value = toDatetimeLocal(post.published_at);
   blogLoadedTime = post.published_at || ""; blogLoadedTimeValue = blogPostForm.elements.published_at.value;
@@ -2921,6 +2922,7 @@ function createBlogPostButton(post) {
 }
 
 let blogPostsLoadSequence = 0;
+let blogTaxonomyCatalog = { tags: [], series: [] };
 function blogEditorPost(state) {
   return { ...state.snapshot, id: state.draft_id, published: Boolean(state.live?.published), editor_state: state };
 }
@@ -2936,11 +2938,24 @@ async function loadBlogPosts(preferredId = "") {
     return false;
   }
   const data = entries.map(blogEditorPost);
+  const { data: catalog, error: catalogError } = await adminClient.rpc("list_blog_taxonomy");
+  if (request !== blogPostsLoadSequence) return false;
+  if (catalogError) {
+    setAdminStatus(blogAdminStatus, `Blog tags and series failed to load: ${catalogError.message}`, "error");
+    window.BITS_PUBLISHING_UI.clear("Blog tags and series could not load; deployment comparison is unavailable.", "error", true);
+    return false;
+  }
+  try { window.BITS_BLOG_TAXONOMY.suggestions(blogPostForm, catalog); blogTaxonomyCatalog = catalog; }
+  catch (error) {
+    setAdminStatus(blogAdminStatus, error.message, "error");
+    window.BITS_PUBLISHING_UI.clear("Blog tags and series could not load; deployment comparison is unavailable.", "error", true);
+    return false;
+  }
   const publicData = [];
   for (;;) {
     const { data: page, error } = await adminClient
       .from("site_blog_public_posts")
-      .select("id, slug, title, excerpt, body_markdown, body_rich, published, published_at, created_at, updated_at")
+      .select("id, slug, title, excerpt, body_markdown, body_rich, published, published_at, created_at, updated_at, tags, series, series_order")
       .order("updated_at", { ascending: false })
       .order("id")
       .range(publicData.length, publicData.length + 499);
@@ -3048,6 +3063,7 @@ function showLogin() {
   blogAuthEpoch++;
   currentBlogState = null; currentBlogVersion = null; currentBlogRich = null;
   blogPostForm.reset(); blogAdminList.replaceChildren(); closeBlogPreview();
+  blogTaxonomyCatalog = { tags: [], series: [] }; window.BITS_BLOG_TAXONOMY.suggestions(blogPostForm, blogTaxonomyCatalog);
   blogPostsLoadSequence += 1;
   window.BITS_PUBLISHING_UI.clear();
   inboxView.hidden = true;
@@ -3073,6 +3089,9 @@ try {
 
 if (adminClient) {
   document.querySelector("#blog-writer-open").addEventListener("click", () => {
+    let taxonomy;
+    try { taxonomy = window.BITS_BLOG_TAXONOMY.fields(blogPostForm, currentBlogState?.snapshot, blogTaxonomyCatalog); }
+    catch (error) { setAdminStatus(blogAdminStatus, error.message, "error"); return; }
     const fingerprint = () => JSON.stringify([...new FormData(blogPostForm)]);
     const initial = fingerprint();
     const channel = crypto.randomUUID();
@@ -3088,6 +3107,7 @@ if (adminClient) {
       body_rich: currentBlogRich,
       published_at: date === blogLoadedTimeValue ? blogLoadedTime || null : date ? new Date(date).toISOString() : null,
       draft_version: currentBlogVersion,
+      ...taxonomy,
     };
     const receive = event => {
       if (event.origin !== location.origin || event.source !== writer || event.data?.channel !== channel) return;
@@ -3411,6 +3431,7 @@ if (adminClient) {
       body_markdown: blogPostMarkdown.value,
       body_rich: currentBlogRich,
       published_at: date === blogLoadedTimeValue ? blogLoadedTime || null : date ? new Date(date).toISOString() : null,
+      ...window.BITS_BLOG_TAXONOMY.captureFields(blogPostForm, currentBlogState?.snapshot, blogTaxonomyCatalog),
     };
   }
   async function blogRpc(name, args, epoch) {
@@ -3421,6 +3442,7 @@ if (adminClient) {
   }
   async function saveAdminDraft(epoch) {
     const submitted = adminDraftSnapshot();
+    window.BITS_BLOG_TAXONOMY.read(submitted);
     if (submitted.body_rich) window.BITS_BLOG_CONTENT.validate(submitted.body_rich);
     if (!currentBlogState) {
       currentBlogState = await blogRpc("load_blog_draft", { p_id: blogPostForm.elements.id.value || null }, epoch);

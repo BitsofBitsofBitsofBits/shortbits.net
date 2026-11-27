@@ -19,7 +19,7 @@ export const save = (db, state, s, request = nonce(), checkpoint = false) =>
   rpc(db, "save_blog_draft", [state.draft_id, state.version, state.base_public_version, s, request, checkpoint]);
 export const publish = (db, state, request = nonce(), accept = false, expected = state.live?.updated_at ?? null) =>
   rpc(db, "publish_blog_draft", [state.draft_id, state.version, request, expected, accept]);
-export async function database({ backups = false } = {}) {
+export async function database({ backups = false, taxonomy = false } = {}) {
   const db = new PGlite();
   await db.exec("create role anon; create role authenticated;");
   await migration(db, "20261016215500_create_blog_posts.sql");
@@ -50,6 +50,7 @@ export async function database({ backups = false } = {}) {
     await migration(db, "20261028180000_social_links.sql");
   }
   await migration(db, "20261123150000_private_blog_drafts.sql");
+  if (taxonomy) await migration(db, "20261126160000_blog_taxonomy.sql");
   await db.exec("set role authenticated;");
   return db;
 }

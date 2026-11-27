@@ -3,6 +3,7 @@ import { resolve, join } from "node:path";
 import { createRequire } from "node:module";
 import { chromium } from "playwright";
 import { startSiteServer } from "./site-server.mjs";
+import { applyThemeAndWait } from "./theme-picker-helpers.mjs";
 
 const option = name => {
   const index = process.argv.indexOf(`--${name}`);
@@ -79,7 +80,7 @@ function measure() {
   }
   const dialog = document.querySelector("[data-blog-theme-settings]");
   const roots = [document.querySelector("#blog-post-body"), document.querySelector("#blog-post-toc"), document.querySelector(".public-nav"),
-    document.querySelector("#blog-post > header"), dialog].filter(Boolean);
+    document.querySelector("#blog-post > header"), document.querySelector("#blog-series-navigation"), dialog].filter(Boolean);
   const results = [];
   for (const root of roots) {
     if (root === dialog) {
@@ -173,12 +174,10 @@ try {
         const toc = page.locator("#blog-post-toc details");
         if (await toc.count()) await toc.evaluate(element => { element.open = true; });
         for (const entry of matrix) {
-          await page.evaluate(entry => window.BITS_THEME_PREFERENCE.apply(entry.theme, { scheme: entry.scheme, variant: entry.variant }), entry);
-          await page.waitForFunction(id => {
-            const theme = window.BITS_THEME_PREFERENCE.getTheme(id);
-            return !theme.stylesheet && !theme.experimental || Boolean(document.querySelector("#bits-theme-stylesheet")?.sheet);
-          }, entry.theme);
-          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          await applyThemeAndWait(page, entry);
+          const colorBackings = await page.evaluate(() => [...document.querySelectorAll("#blog-post-body .blog-color-readable, #blog-post-body .blog-rainbow-surface")]
+            .filter(element => getComputedStyle(element).backgroundColor !== "rgba(0, 0, 0, 0)").length);
+          if (process.argv.includes("--assert") && colorBackings) throw new Error("Adaptive text must not add color backings.");
           const runs = await page.evaluate(measure);
           const failures = runs.filter(run => run.ratio < run.minimum);
           const result = { ...entry, post: post.slug, reader, width, textRuns: runs.length, failures: failures.length, worst: failures.sort((a, b) => a.ratio - b.ratio).slice(0, 12) };

@@ -40,9 +40,9 @@ try {
     ...(process.env.BITS_BROWSER_CHANNEL ? { channel: process.env.BITS_BROWSER_CHANNEL } : {}), headless: true,
   });
   for (const width of [390, 1440]) {
-    const context = await browser.newContext({ viewport: { width, height: 900 } });
+    const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
     let rows = [{ ...fixture, title: "Edited live title", excerpt: "Edited live summary",
-      body_markdown: "# Overview\n\n## Live edit\n\n**Current body**, not the deployment snapshot.\n\n{{color:#553fff|**Blurple**}} {{color:#0002|Alpha}} {{color:rainbow|Rainbow}}\n\n| Right to Left | Left to Right |\n| --- | --- |\n| Left | Right |\n\n### Details\n\nMore details.\n\n## Live edit\n\nDuplicate heading.\n\n## Live edit 2\n\n<script>window.unsafe = true</script>" }];
+      body_markdown: "# Overview\n\n## Live edit\n\n**Current body**, not the deployment snapshot.\n\n{{color:#553fff|**Blurple**}} {{color:#0002|Alpha}} {{color:rainbow|Rainbow}} {{color:white|White}}\n\n| Right to Left | Left to Right |\n| --- | --- |\n| Left | Right |\n\n### Details\n\nMore details.\n\n## Live edit\n\nDuplicate heading.\n\n## Live edit 2\n\n<script>window.unsafe = true</script>" }];
     let failure = false;
     let malformed = false;
     let serverNow = Date.parse("2026-11-14T12:00:00Z");
@@ -72,11 +72,12 @@ try {
     assert.match(await page.locator("#blog-post-body").textContent(), /Current body/);
     assert.equal(await page.evaluate(() => window.unsafe), undefined);
     const blurple = page.locator('#blog-post-body [data-color="#553fff"]');
-    assert.equal(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
-    assert.equal(await blurple.evaluate(node => getComputedStyle(node).backgroundColor), "rgb(255, 255, 255)");
+    assert.notEqual(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
+    assert.equal(await blurple.evaluate(node => getComputedStyle(node).backgroundColor), "rgba(0, 0, 0, 0)");
     assert.equal(await page.locator("#blog-post-body .blog-rainbow-surface .blog-text-color-rainbow").count(), 1);
     assert.equal(await page.locator('#blog-post-body [data-color="#0002"]').count(), 1);
     await page.evaluate(() => window.BITS_THEME_PREFERENCE.apply("default", { scheme: "light" }));
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#blog-post-body [data-color="#553fff"]')).color === "rgb(85, 63, 255)");
     const tableContrast = await page.locator("#blog-post-body th").first().evaluate(solidTextContrast);
     assert.ok(tableContrast >= 4.5, `Light-mode table headers must meet AA; measured ${tableContrast}.`);
     await page.evaluate(() => {
@@ -86,6 +87,14 @@ try {
     const pickerContrast = await page.locator(".blog-theme-settings .theme-picker > summary").evaluate(solidTextContrast);
     assert.ok(pickerContrast >= 4.5, `Tokyo Night light picker must meet AA; measured ${pickerContrast}.`);
     await page.evaluate(() => document.querySelector("[data-blog-theme-settings]").close());
+    await page.evaluate(() => window.BITS_THEME_PREFERENCE.apply("default", { scheme: "dark" }));
+    await page.evaluate(() => new Promise(resolveFrame => requestAnimationFrame(() => requestAnimationFrame(resolveFrame))));
+    await page.evaluate(async () => {
+      window.BITS_THEME_PREFERENCE.apply("default", { scheme: "light" });
+      await new Promise(resolveFrame => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
+    });
+    const whiteContrast = await page.locator('#blog-post-body [data-color="white"]').evaluate(solidTextContrast);
+    assert.ok(whiteContrast >= 4.5, `Reduced-motion theme switching must recolor white text; measured ${whiteContrast}.`);
     await page.evaluate(() => window.BITS_THEME_PREFERENCE.apply("default", { scheme: "dark" }));
     assert.equal(await page.locator('meta[name="description"]').getAttribute("content"), "Edited live summary");
     assert.equal(await page.locator('link[rel="canonical"]').count(), 1);
@@ -135,8 +144,9 @@ try {
     await toc.locator('a[href="#blog-heading-rich-deepest"]').waitFor();
     assert.deepEqual(await toc.locator("a").allTextContents(), ["Rich overview", "Rich child", "Rich deepest"]);
     assert.equal(await toc.evaluate(node => node.open), true, "Changed content preserves an explicitly opened disclosure");
-    assert.equal(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
-    assert.equal(await page.locator('#blog-post-body [data-color="#553fff"] a').evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)", "Linked rich text retains the author's enclosing color after live replacement");
+    assert.notEqual(await blurple.evaluate(node => getComputedStyle(node).color), "rgb(85, 63, 255)");
+    assert.equal(await page.locator('#blog-post-body [data-color="#553fff"] a').evaluate(node => getComputedStyle(node).color),
+      await blurple.evaluate(node => getComputedStyle(node).color), "Linked rich text inherits its adapted enclosing color");
     assert.equal(await page.locator("#blog-post-body .blog-rainbow-surface").count(), 0, "Reconciliation removes previous color wrappers");
     if (shots) await page.screenshot({ path: join(shots, `toc-rich-${width}.png`), fullPage: true });
     assert.equal(await page.locator("#blog-heading-details").count(), 0);

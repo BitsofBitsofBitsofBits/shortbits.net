@@ -12,15 +12,22 @@ function setup(pages, entries = []) {
   const reports = [];
   const context = {
     console: { error: () => {} },
-    window: { BITS_PUBLISHING_UI: { clear: (...args) => reports.push(args), update: (posts) => snapshots.push(posts) } },
+    window: {
+      BITS_PUBLISHING_UI: { clear: (...args) => reports.push(args), update: (posts) => snapshots.push(posts) },
+      BITS_BLOG_TAXONOMY: { suggestions() {} },
+    },
     document: { createElement: () => ({}) },
     blogAdminStatus: {},
     blogAdminList: { replaceChildren: () => {}, append: () => {} },
     createBlogPostButton: (post) => { listed.push(post); return post; },
     selectBlogPost: () => {},
     setAdminStatus: () => {},
+    blogPostForm: {},
     adminClient: {
-      async rpc(name) { assert.equal(name, "list_blog_editor_entries"); return { data: entries }; },
+      async rpc(name) {
+        if (name === "list_blog_taxonomy") return { data: { tags: [], series: [] } };
+        assert.equal(name, "list_blog_editor_entries"); return { data: entries };
+      },
       from(table) { assert.equal(table, "site_blog_public_posts"); return this; }, select() { return this; }, order() { return this; },
       range(start, end) { ranges.push([start, end]); return pages.shift(); },
     },

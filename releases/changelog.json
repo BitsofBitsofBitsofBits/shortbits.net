@@ -1,10 +1,18 @@
 {
-  "release_id": "blog-color-readability-v1",
+  "release_id": "blog-readable-taxonomy-v1",
   "version": "2.0.4",
   "notes": [
     {
       "title": "Readable blog colors without changing saved content",
-      "summary": "Markdown and rich articles display custom Hex colors on contrast-safe backings, preserve Blurple's exact hue and linked author colors, and keep rainbow text readable. Display-only alpha correction leaves saved colors, private drafts and history unchanged; generated and live article readers share the same presentation."
+      "summary": "Markdown and rich articles adapt displayed color shades to their reading surface only when needed, without highlight boxes. Already readable colors remain exact; Blurple, linked text and rainbow gradients retain their hues while meeting contrast thresholds. Saved Hex values, private drafts and history remain unchanged, and generated articles retain a readable no-JavaScript fallback."
+    },
+    {
+      "title": "A calmer blog reading layout",
+      "summary": "The archive and articles use comfortable centered reading widths, responsive gutters, larger text and metadata, clearer heading rhythm and quieter navigation while retaining selected theme fonts and colors. Search, RSS, live articles and the collapsed Table of Contents remain available, with a clean print layout."
+    },
+    {
+      "title": "Tags and ordered blog series",
+      "summary": "Both editors support multiple tags and an optional ordered series. Assignments autosave privately and travel with history and approved revisions; only publishing changes public membership. Public browsing, article labels and previous/next navigation update live, with generated category pages and search metadata available in deployment snapshots."
     },
     {
       "title": "Blog theme and navigation contrast",

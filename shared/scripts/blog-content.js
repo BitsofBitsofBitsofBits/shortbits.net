@@ -118,12 +118,14 @@
                   const presentation = markdown.readableHexColor(hex);
                   classes.push("blog-text-color-custom", "blog-color-readable");
                   wrapper.style.color = presentation.color;
-                  wrapper.style.backgroundColor = presentation.background;
                   wrapper.dataset.color = presentation.original;
                 }
               } else {
                 classes.push(`blog-text-color-${style.color.toLowerCase()}`);
-                if (options.readableColors && style.color.toLowerCase() === "accent") classes.push("blog-color-readable-accent");
+                if (options.readableColors && style.color.toLowerCase() !== "rainbow") {
+                  classes.push("blog-color-readable");
+                  wrapper.dataset.color = style.color.toLowerCase();
+                }
               }
             }
             if (style.font) {

@@ -5867,13 +5867,8 @@ html[data-interface-theme="terminal"] body.error-page.has-youtube-shortbit {
 
 .blog-markdown .blog-color-readable,
 .blog-markdown .blog-rainbow-surface {
- padding: 0.05em 0.22em;
- box-decoration-break: clone;
- -webkit-box-decoration-break: clone;
-}
-
-.blog-markdown .blog-rainbow-surface {
- background: #10141a;
+ padding: 0;
+ background: transparent;
 }
 
 html .blog-markdown .blog-rainbow-surface .blog-text-color-rainbow {
@@ -5882,10 +5877,6 @@ html .blog-markdown .blog-rainbow-surface .blog-text-color-rainbow {
  background-clip: text;
  -webkit-background-clip: text;
  -webkit-text-fill-color: transparent;
-}
-
-.blog-markdown .blog-color-readable-accent {
- color: color-mix(in srgb, var(--accent) 25%, var(--ink));
 }
 
 .blog-markdown [class*="blog-text-color-"]:not(.blog-text-color-rainbow) {

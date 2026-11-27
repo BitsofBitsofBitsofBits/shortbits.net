@@ -13,12 +13,14 @@
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-134">
     <link rel="stylesheet" href="/blog/styles/theme-settings.css">
     <link rel="stylesheet" href="/blog/styles/article-toc.css">
+    <link rel="stylesheet" href="/blog/styles/blog-layout.css">
     <script src="/shared/scripts/theme-picker.js?v=picker-1" defer></script>
     <script src="/blog/scripts/theme-settings.js" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
     <script src="/shared/scripts/blog-content.js" defer></script>
     <script src="/shared/scripts/blog-toc.js" defer></script>
     <script src="/shared/scripts/supabase-config.js" defer></script>
+    <script src="/shared/scripts/blog-taxonomy.js" defer></script>
     <script src="/shared/scripts/blog-data.js?v=blog-data-1" defer></script>
     <script src="/shared/scripts/blog-views.js?v=blog-views-1" defer></script>
     <script src="/blog/scripts/post.js?v=blog-2" defer></script>
@@ -58,10 +60,13 @@
             <span aria-hidden="true">//</span>
             <span id="blog-post-views" role="status"></span>
           </p>
+          <div id="blog-post-taxonomy" class="blog-post-taxonomy"></div>
         </header>
         <div id="blog-post-toc"></div>
         <div id="blog-post-body" class="blog-markdown"></div>
+        <nav id="blog-series-navigation" class="blog-series-navigation" aria-label="Series navigation"></nav>
       </article>
+      <footer class="blog-footer"><p><a href="/blog/">All posts</a> &middot; <a href="/blog/feed.xml">Subscribe via RSS</a> &middot; <a href="/professional/">Professional profile</a></p></footer>
     </main>
   </body>
 </html>

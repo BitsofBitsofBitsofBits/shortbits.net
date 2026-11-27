@@ -6,6 +6,13 @@
 .writer-settings, .writer-toolbar { gap: 6px; background: var(--panel); font-size: 0.875rem; }
 .writer-settings { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(220px, 1fr) auto auto; align-items: end; padding-block: 6px; }
 .writer-actions { display: flex; gap: 6px; min-width: 0; }
+.writer-taxonomy { background: var(--panel); border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+.writer-taxonomy > summary { min-height: 44px; box-sizing: border-box; padding: 10px 12px; cursor: pointer; }
+.writer-taxonomy-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+.writer-taxonomy-fields label { display: grid; gap: 4px; min-width: 0; }
+.writer-taxonomy-fields input { width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; padding: 6px; color: var(--ink); background: var(--panel); border: 1px solid var(--border-strong); font: inherit; }
+.writer-taxonomy-fields p { grid-column: 1 / -1; margin: 0; line-height: 1.6; }
+@media (max-width: 600px) { .writer-taxonomy-fields { grid-template-columns: 1fr; } }
 #writer-publication-state { display: flex; align-items: center; min-height: 44px; }
 #writer-recovery { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
 #writer-recovery button { min-height: 44px; color: var(--ink); background: var(--panel); border: 1px solid var(--border-strong); }

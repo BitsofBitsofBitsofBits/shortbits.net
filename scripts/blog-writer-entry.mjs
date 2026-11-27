@@ -7,6 +7,8 @@ import { DraftAutosave } from "./blog-draft-autosave.mjs";
 
 const content = window.BITS_BLOG_CONTENT;
 const markdown = window.BITS_MARKDOWN;
+const taxonomy = window.BITS_BLOG_TAXONOMY;
+let taxonomyCatalog = { tags: [], series: [] };
 const form = document.querySelector("#writer-form");
 const status = document.querySelector("#writer-status");
 const workspace = document.querySelector("#writer-workspace");
@@ -47,6 +49,7 @@ function draftSnapshot() {
     title: form.elements.title.value, slug: form.elements.slug.value.trim().toLowerCase(), excerpt: form.elements.excerpt.value,
     body_markdown: original, body_rich: { version: 1, doc: editor.getJSON() },
     published_at: input === loadedTimeValue ? loadedTime || null : input ? new Date(input).toISOString() : null,
+    ...taxonomy.captureFields(form, draftState?.snapshot, taxonomyCatalog),
   };
 }
 const dirty = () => authorized && Boolean(autosave?.dirty);
@@ -61,7 +64,8 @@ async function rpc(name, args, signal) {
 function updateDraftState(state) {
   if (!state?.draft_id || !state.snapshot || !Number.isInteger(state.revision) || state.revision < 0
     || (state.version !== null && !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(state.version))
-    || Object.keys(state.snapshot).sort().join() !== "body_markdown,body_rich,excerpt,published_at,slug,title") throw new Error("The server's draft state could not be confirmed.");
+    || Object.keys(state.snapshot).sort().join() !== "body_markdown,body_rich,excerpt,published_at,series,series_order,slug,tags,title") throw new Error("The server's draft state could not be confirmed. The taxonomy migration and compatible writer must be deployed together.");
+  taxonomy.read(state.snapshot);
   draftState = state; id = state.draft_id; version = state.version;
   document.querySelector("#writer-publication-state").textContent = state.live?.published ? "Live article" : state.scheduled_at ? "Scheduled" : "Private draft";
   document.querySelector("#writer-cancel-schedule").hidden = !state.scheduled_at;
@@ -73,6 +77,8 @@ function startAutosave() {
     save: (request, signal) => {
       try { content.validate(request.snapshot.body_rich); }
       catch (error) { throw Object.assign(error, { definitive: true }); }
+      try { taxonomy.read(request.snapshot); }
+      catch (error) { throw Object.assign(error, { definitive: true, taxonomyInput: true }); }
       return rpc("save_blog_draft", {
         p_id: id, p_expected_version: request.version, p_base_public_version: draftState.base_public_version,
         p_snapshot: request.snapshot, p_request_id: request.requestId, p_checkpoint: request.checkpoint,
@@ -97,7 +103,18 @@ function startAutosave() {
   baseline = snapshot();
   recovery.hidden = true;
 }
-function changed() { if (authorized && !loading && autosave && !busy) autosave.changed(); }
+function changed() {
+  if (!authorized || loading || !autosave || busy) return;
+  try {
+    taxonomy.read(draftSnapshot());
+    if (autosave.error?.taxonomyInput) autosave.error = null;
+    autosave.changed();
+  }
+  catch (error) {
+    autosave.clearTimer(); autosave.clearMaxTimer();
+    report(`${error.message} Complete valid tag and series details before autosaving. Local changes remain here.`, true);
+  }
+}
 function closeDropdowns() {
   for (const menu of document.querySelectorAll(".writer-dropdown[open]")) menu.open = false;
 }
@@ -219,6 +236,7 @@ function load(post) {
   original = post.body_markdown || "";
   if (post.body_rich) content.validate(post.body_rich);
   for (const name of ["title", "slug", "excerpt"]) form.elements[name].value = post[name] || "";
+  taxonomy.populate(form, post);
   loadedTime = post.published_at || "";
   if (post.published_at) {
     const date = new Date(post.published_at);
@@ -232,7 +250,10 @@ function load(post) {
   loading = false;
 }
 async function openDraft(identity) {
-  const state = await rpc("load_blog_draft", { p_id: identity || null });
+  const [state, catalog] = await Promise.all([
+    rpc("load_blog_draft", { p_id: identity || null }), rpc("list_blog_taxonomy", {}),
+  ]);
+  taxonomy.suggestions(form, catalog); taxonomyCatalog = catalog;
   updateDraftState(state); load(state.snapshot); startAutosave();
   report(original && !state.snapshot.body_rich ? "Original Markdown preserved. Autosaves stay private; import explicitly or edit its protected source." : "Autosave ready. Only Publish revision changes the live article.");
 }
@@ -318,6 +339,7 @@ async function initialize() {
       closeDropdowns();
       authorized = false; autosave?.stop(); historyRequest++; historyPreview.replaceChildren(); historyList.replaceChildren(); selectedRevision = null;
       workspace.hidden = true; editor.destroy(); editor = null; original = ""; baseline = ""; draftState = null;
+      form.reset(); taxonomyCatalog = { tags: [], series: [] }; taxonomy.suggestions(form, taxonomyCatalog);
       report("Signed out. Sign in through Admin to continue.");
     });
     if (opener && channel) {
@@ -347,7 +369,10 @@ document.querySelector(".writer-header a").addEventListener("click", event => {
   if (dirty() && !window.confirm("Leave without saving your article changes?")) event.preventDefault();
 });
 window.addEventListener("beforeunload", event => { if (dirty()) { event.preventDefault(); event.returnValue = ""; } });
-form.addEventListener("input", event => { if (event.target.name) changed(); });
+form.addEventListener("input", event => {
+  if (event.target.name === "series" && event.target.value.trim() && !form.elements.series_order.value) form.elements.series_order.value = "1";
+  if (event.target.name) changed();
+});
 for (const button of document.querySelectorAll("[data-command]")) {
   button.addEventListener("mousedown", event => event.preventDefault());
   button.addEventListener("click", () => {
@@ -547,7 +572,8 @@ document.querySelector("#writer-history-open").addEventListener("click", async (
           const result = await rpc("get_blog_draft_revision", { p_id: id, p_revision_id: revision.id });
           if (!historyDialog.open || selection !== historyRequest) return;
           const title = document.createElement("h2"); title.textContent = result.snapshot.title || "Untitled";
-          const meta = document.createElement("p"); meta.textContent = `Slug: ${result.snapshot.slug || "(incomplete)"} · Excerpt: ${result.snapshot.excerpt || "(incomplete)"}`;
+          const metadata = taxonomy.read(result.snapshot);
+          const meta = document.createElement("p"); meta.textContent = `Slug: ${result.snapshot.slug || "(incomplete)"} · Excerpt: ${result.snapshot.excerpt || "(incomplete)"} · Tags: ${metadata.tags.map(tag => tag.name).join(", ") || "None"} · Series: ${metadata.series ? `${metadata.series.name} (order ${metadata.series_order})` : "None"}`;
           const body = result.snapshot.body_rich ? content.render(result.snapshot.body_rich) : markdown.render(result.snapshot.body_markdown);
           historyPreview.replaceChildren(title, meta, body); selectedRevision = revision.id; restoreButton.disabled = false;
           historyStatus.textContent = "Preview only. Restore to draft does not publish.";

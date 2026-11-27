@@ -15,6 +15,7 @@
     <script src="/shared/scripts/supabase-config.js" defer></script>
     <script src="/shared/scripts/markdown.js?v=markdown-2" defer></script>
     <script src="/shared/scripts/blog-content.js" defer></script>
+    <script src="/shared/scripts/blog-taxonomy.js" defer></script>
     <script src="/admin/scripts/blog-paste.js?v=blog-paste-1" defer></script>
     <script src="/shared/scripts/shortbits.js?v=shortbits-1" defer></script>
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1" defer></script>
@@ -672,6 +673,14 @@
                   <input name="published_at" type="datetime-local">
                 </label>
               </div>
+              <div class="content-admin-profile-grid">
+                <label><span>TAGS</span><input name="tags" maxlength="1620" list="blog-tag-suggestions" aria-describedby="blog-taxonomy-help"></label>
+                <datalist id="blog-tag-suggestions" data-taxonomy-suggestions="tags"></datalist>
+                <label><span>SERIES</span><input name="series" maxlength="160" list="blog-series-suggestions" aria-describedby="blog-taxonomy-help"></label>
+                <datalist id="blog-series-suggestions" data-taxonomy-suggestions="series"></datalist>
+                <label><span>SERIES READING ORDER</span><input name="series_order" type="number" min="1" max="100000" step="1"></label>
+              </div>
+              <p id="blog-taxonomy-help">Optional: up to ten comma-separated tags and one series. Choose a suggestion or type a new name. Assignments stay private until Publish revision.</p>
               <label>
                 <span>EXCERPT</span>
                 <textarea name="excerpt" maxlength="500" required></textarea>

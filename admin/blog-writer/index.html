@@ -16,6 +16,7 @@
   <script src="/shared/scripts/supabase-config.js" defer></script>
   <script src="/shared/scripts/markdown.js" defer></script>
   <script src="/shared/scripts/blog-content.js" defer></script>
+  <script src="/shared/scripts/blog-taxonomy.js" defer></script>
   <script src="/shared/scripts/theme-picker.js" defer></script>
   <script src="/admin/scripts/blog-writer.js" defer></script>
 </head>
@@ -36,6 +37,17 @@
         <output id="writer-publication-state">Private draft</output>
         <div class="writer-actions"><button id="writer-save" type="submit">Save draft</button><button id="writer-publish" type="button">Publish revision</button></div>
       </aside>
+      <details id="writer-taxonomy" class="writer-taxonomy">
+        <summary>Tags and series</summary>
+        <div class="writer-taxonomy-fields">
+          <label>Tags<input name="tags" maxlength="1620" list="writer-tag-suggestions" aria-describedby="writer-taxonomy-help"></label>
+          <datalist id="writer-tag-suggestions" data-taxonomy-suggestions="tags"></datalist>
+          <label>Series<input name="series" maxlength="160" list="writer-series-suggestions" aria-describedby="writer-taxonomy-help"></label>
+          <datalist id="writer-series-suggestions" data-taxonomy-suggestions="series"></datalist>
+          <label>Series reading order<input name="series_order" type="number" min="1" max="100000" step="1"></label>
+          <p id="writer-taxonomy-help">Optional: up to ten comma-separated tags and one series. Choose existing names or type new ones. Metadata autosaves privately; Publish revision makes it public.</p>
+        </div>
+      </details>
       <div id="writer-recovery" hidden><button type="button" id="writer-retry">Retry save</button><button type="button" id="writer-reload">Reload latest draft</button><span>Local changes stay in this tab until saved or explicitly discarded.</span></div>
       <div class="writer-toolbar" role="toolbar" aria-label="Article formatting">
         <button type="button" data-command="bold" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>

@@ -19,13 +19,16 @@ try {
     let publishedFixture = null;
     await context.addInitScript(() => {
       window.__fixture = {
-        row: { id: "fixture", slug: "fixture-post", title: "Fixture article", excerpt: "Private local fixture", body_markdown: "# Preserved\n\nHello **writer**.", body_rich: null, published: false, published_at: null, updated_at: "2026-11-23T00:00:00Z" },
+        row: { id: "fixture", slug: "fixture-post", title: "Fixture article", excerpt: "Private local fixture", body_markdown: "# Preserved\n\nHello **writer**.", body_rich: null, tags: [], series: null, series_order: null, published: false, published_at: null, updated_at: "2026-11-23T00:00:00Z" },
         denied: false, fail: false, saves: [], fetches: 0, history: [], revision: 0,
       };
       const saved = sessionStorage.getItem("writer-fixture-row");
       if (saved) window.__fixture.row = JSON.parse(saved);
       window.__fixture.live = structuredClone(window.__fixture.row);
-      const snapshot = () => Object.fromEntries(["title", "slug", "excerpt", "body_markdown", "body_rich", "published_at"].map(key => [key, window.__fixture.row[key] ?? (key === "body_rich" || key === "published_at" ? null : "")]));
+      const snapshot = () => ({
+        ...Object.fromEntries(["title", "slug", "excerpt", "body_markdown", "body_rich", "published_at"].map(key => [key, window.__fixture.row[key] ?? (key === "body_rich" || key === "published_at" ? null : "")])),
+        tags: structuredClone(window.__fixture.row.tags || []), series: window.__fixture.row.series ?? null, series_order: window.__fixture.row.series_order ?? null,
+      });
       const state = () => ({
         draft_id: window.__fixture.row.id, post_id: window.__fixture.row.id,
         version: window.__fixture.row.draft_version || null, revision: window.__fixture.revision,
@@ -51,6 +54,7 @@ try {
             const f = window.__fixture;
             if (name === "load_blog_draft") { f.fetches++; return { data: state() }; }
             if (name === "list_blog_editor_entries") return { data: [state()] };
+            if (name === "list_blog_taxonomy") return { data: { tags: structuredClone(f.row.tags), series: f.row.series ? [structuredClone(f.row.series)] : [] } };
             if (name === "list_blog_draft_history") return { data: structuredClone(f.history) };
             if (name === "get_blog_draft_revision") return { data: structuredClone(f.history.find(row => row.id === args.p_revision_id)) };
             if (f.fail || args.p_expected_version !== (f.row.draft_version || null)) return { error: { message: "Fixture conflict", code: "40001" } };
@@ -124,6 +128,8 @@ try {
           settings: document.querySelector(".writer-settings").getBoundingClientRect().height,
           toolbar: toolbar.getBoundingClientRect().height,
           rows: new Set([...toolbar.children].map(node => Math.round(node.getBoundingClientRect().top))).size,
+          taxonomy: document.querySelector("#writer-taxonomy").getBoundingClientRect().height,
+          taxonomyOpen: document.querySelector("#writer-taxonomy").open,
           articleTop: document.querySelector(".writer-article").getBoundingClientRect().top + scrollY,
         };
       });
@@ -131,7 +137,9 @@ try {
       assert.ok(layout.settings <= (width > 800 ? 100 : 150), JSON.stringify(layout));
       assert.ok(layout.toolbar <= (width > 600 ? 64 : 176), JSON.stringify(layout));
       assert.ok(layout.rows <= (width > 600 ? 1 : 3), JSON.stringify(layout));
-      assert.ok(layout.articleTop < (width > 600 ? 250 : 455), JSON.stringify(layout));
+      assert.equal(layout.taxonomyOpen, false);
+      assert.ok(layout.taxonomy <= 50, JSON.stringify(layout));
+      assert.ok(layout.articleTop - layout.taxonomy < (width > 600 ? 250 : 455), JSON.stringify(layout));
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       return layout;
     };
@@ -155,6 +163,19 @@ try {
     assert.match(await page.evaluate(() => JSON.stringify(window.__fixture.saves[0].body_rich)), /"font":"serif"/);
     assert.equal(await page.evaluate(() => Object.hasOwn(window.__fixture.saves.at(-1), "published")), false);
     assert.match(await page.locator(".tiptap").textContent(), /New visual text/);
+    await page.locator("#writer-taxonomy > summary").click();
+    await page.locator('[name="tags"]').fill("Colors, Technology");
+    await page.locator('[name="series"]').fill("Color stories");
+    await page.locator('[name="series_order"]').fill("2");
+    await page.keyboard.press("Control+s");
+    await waitForSaved();
+    assert.deepEqual(await page.evaluate(() => window.__fixture.row.tags.map(tag => tag.slug)), ["colors", "technology"]);
+    assert.equal(await page.evaluate(() => window.__fixture.row.series_order), 2);
+    assert.deepEqual(await page.evaluate(() => window.__fixture.live.tags), []);
+    await page.locator('[name="tags"]').fill("Colors, colors");
+    await page.getByText("Blog tags must be unique;", { exact: false }).waitFor();
+    await page.locator('[name="tags"]').fill("Colors, Technology");
+    await page.locator("#writer-taxonomy > summary").click();
     await page.getByRole("button", { name: "Link", exact: true }).click();
     assert.equal(await page.getByRole("textbox", { name: "Text shown", exact: true }).inputValue(), "text");
     await page.getByRole("textbox", { name: "Link", exact: true }).fill("javascript:alert(1)");
@@ -277,7 +298,10 @@ try {
     const colorReader = await context.newPage();
     await colorReader.goto(`${server.origin}/blog/post.html?slug=fixture-post`);
     await colorReader.locator("#blog-post-body").filter({ hasText: "Custom color fixture" }).waitFor();
-    assert.equal(await colorReader.locator("#blog-post-body span").filter({ hasText: /^fixture$/ }).evaluate(node => node.style.color), "rgb(18, 52, 86)");
+    const displayedColor = colorReader.locator('#blog-post-body [data-color="#123456"]').filter({ hasText: /^fixture$/ });
+    assert.equal(await displayedColor.getAttribute("data-color"), "#123456");
+    assert.notEqual(await displayedColor.evaluate(node => node.style.color), "rgb(18, 52, 86)");
+    assert.equal(await displayedColor.evaluate(node => getComputedStyle(node).backgroundColor), "rgba(0, 0, 0, 0)");
     await colorReader.close();
     for (const [savedHex, pickerHex] of [["#1234", "#112233"], ["#ABCDEF77", "#abcdef"]]) {
       await page.evaluate(hex => {
@@ -488,7 +512,7 @@ try {
     assert.equal(await page.locator(".tiptap").count(), 0);
     assert.deepEqual(errors, []);
     await page.evaluate(() => sessionStorage.setItem("writer-fixture-row", JSON.stringify({
-      id: "unsupported", slug: "unsupported-post", title: "Unsupported source", excerpt: "Fixture", body_markdown: "{{font:display|Keep my custom font}}", body_rich: null, published: false, updated_at: "2026-11-23T00:00:00Z",
+      id: "unsupported", slug: "unsupported-post", title: "Unsupported source", excerpt: "Fixture", body_markdown: "{{font:display|Keep my custom font}}", body_rich: null, tags: [], series: null, series_order: null, published: false, updated_at: "2026-11-23T00:00:00Z",
     })));
     await page.goto(`${server.origin}/admin/blog-writer/?post=unsupported`);
     await page.getByText("Original Markdown preserved.", { exact: false }).first().waitFor();
@@ -515,10 +539,12 @@ try {
     assert.match(await popup.locator(".writer-legacy-block").textContent(), /Unsaved Admin source/);
     assert.doesNotMatch(popup.url(), /Unsaved|Transferred|source/);
     await parent.locator('#blog-post-form [name="title"]').fill("Newer independent Admin edits");
+    await parent.locator('#blog-post-form [name="tags"]').fill("Colors, colors");
     await popup.getByRole("button", { name: "Save draft", exact: true }).click();
     await popup.getByText("Private draft saved. The live article is unchanged.", { exact: true }).waitFor();
     await parent.getByText("Your separate Admin edits remain here", { exact: false }).waitFor();
     assert.equal(await parent.locator('#blog-post-form [name="title"]').inputValue(), "Newer independent Admin edits");
+    assert.equal(await parent.locator('#blog-post-form [name="tags"]').inputValue(), "Colors, colors");
     await popup.close(); await parent.close();
     await context.close();
   }

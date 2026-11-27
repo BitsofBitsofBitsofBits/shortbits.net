@@ -23,12 +23,15 @@
   }
 
   async function snapshot(posts, now = new Date()) {
+    const taxonomy = typeof module !== "undefined" && module.exports ? require("./blog-taxonomy.js") : root.BITS_BLOG_TAXONOMY;
     const entries = await Promise.all(normalizePosts(posts, now).map(async (post) => {
+      const metadata = taxonomy.read(post);
       const content = JSON.stringify([
         post.slug, post.title, post.excerpt, post.body_markdown,
         new Date(post.published_at).toISOString(),
         Number.isFinite(Date.parse(post.updated_at)) ? new Date(post.updated_at).toISOString() : null,
         ...(post.body_rich ? [post.body_rich] : []),
+        ...(metadata.tags.length || metadata.series ? [metadata] : []),
       ]);
       const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(content));
       return {

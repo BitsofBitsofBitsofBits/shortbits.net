@@ -13,21 +13,24 @@ vm.runInContext(source, context);
 const api = window.BITS_BLOG_CONTENT;
 const envelope = content => ({ version: 1, doc: { type: "doc", content } });
 const text = (value, marks = []) => ({ type: "text", text: value, marks });
-test("reader-only color backings meet normal-text AA without changing stored hex, alpha or import colors", () => {
+test("adaptive reader shades meet AA without backings or changes to saved/import colors", () => {
   const luminance = channels => channels.map(channel => channel / 255)
     .map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
     .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
   for (const original of ["#553fff", "#fff0", "#0002", "#ff000020", "#abc8", "#777"]) {
+    for (const background of [[11, 17, 23], [240, 240, 240], [255, 255, 255]]) {
+      const presentation = window.BITS_MARKDOWN.readableHexColor(original, [background]);
+      let digits = presentation.color.slice(1);
+      if (digits.length <= 4) digits = [...digits].map(digit => digit.repeat(2)).join("");
+      const rgb = digits.slice(0, 6).match(/../g).map(channel => parseInt(channel, 16));
+      const alpha = digits.length === 8 ? parseInt(digits.slice(6), 16) / 255 : 1;
+      const light = luminance(rgb.map((channel, index) => channel * alpha + background[index] * (1 - alpha)));
+      const back = luminance(background);
+      assert.ok((Math.max(light, back) + .05) / (Math.min(light, back) + .05) >= 4.5, original);
+      assert.equal(presentation.background, undefined);
+    }
     const presentation = window.BITS_MARKDOWN.readableHexColor(original);
-    let digits = presentation.color.slice(1);
-    if (digits.length <= 4) digits = [...digits].map(digit => digit.repeat(2)).join("");
-    const rgb = digits.slice(0, 6).match(/../g).map(channel => parseInt(channel, 16));
-    const alpha = digits.length === 8 ? parseInt(digits.slice(6), 16) / 255 : 1;
-    const back = presentation.background === "#ffffff" ? 255 : 0;
-    const light = luminance(rgb.map(channel => channel * alpha + back * (1 - alpha)));
-    assert.ok((back ? 1.05 / (light + .05) : (light + .05) / .05) >= 4.5, original);
     assert.equal(presentation.original, original);
-    if (original === "#553fff") assert.equal(presentation.color, original, "Opaque author hue stays exact");
     const value = envelope([{ type: "paragraph", content: [text("Colored", [{ type: "style", attrs: { color: original } }])] }]);
     const saved = JSON.stringify(value);
     const rich = document.createElement("div");
@@ -37,12 +40,27 @@ test("reader-only color backings meet normal-text AA without changing stored hex
     for (const body of [rich, md]) {
       assert.equal(body.querySelector(".blog-color-readable").dataset.color, original);
       assert.equal(body.querySelector(".blog-color-readable").style.color, presentation.color);
+      assert.ok(!body.querySelector(".blog-color-readable").style.backgroundColor);
     }
     const imported = document.createElement("div");
     imported.append(api.render(value));
     assert.equal(imported.querySelector("span").style.color, original, "Editorial/import rendering retains alpha");
     assert.equal(JSON.stringify(value), saved);
   }
+});
+
+test("adaptive shades leave readable colors exact and preserve Blurple hue when lightening", () => {
+  const api = window.BITS_MARKDOWN;
+  assert.equal(api.readableHexColor("#553fff", [[255, 255, 255]]).color, "#553fff");
+  const adjusted = api.readableHexColor("#553fff", [[11, 17, 23]]).color;
+  assert.notEqual(adjusted, "#553fff");
+  const rgb = adjusted.slice(1).match(/../g).map(channel => parseInt(channel, 16));
+  const hue = values => {
+    const max = Math.max(...values), min = Math.min(...values);
+    return 60 * ((values[0] - values[1]) / (max - min) + 4);
+  };
+  assert.ok(Math.abs(hue(rgb) - hue([85, 63, 255])) < 1, "Hue survives 8-bit rounding");
+  assert.throws(() => api.readableHexColor("#553fff", [[-1, 0, 0]]), /reading surface/);
 });
 
 test("reader color presentation covers headings, quotes, lists, tables, protected Markdown and nested rainbow", () => {

@@ -1,0 +1,167 @@
+html .blog-page > .blog-shell {
+  --blog-reading-size: clamp(1rem, 0.3vw + 1rem, 1.125rem);
+  width: min(1040px, calc(100% - 32px)) !important;
+  margin: clamp(16px, 3vw, 44px) auto !important;
+  padding: clamp(20px, 3.5vw, 48px) !important;
+  min-width: 0;
+  z-index: 21;
+}
+
+html .blog-post-page :is(.blog-article, .blog-footer) {
+  width: 100%;
+  max-width: 70ch;
+  margin-inline: auto;
+  font-size: var(--blog-reading-size) !important;
+  min-width: 0;
+}
+
+html .blog-page .public-nav {
+  margin-bottom: clamp(24px, 4vw, 40px);
+}
+
+html .blog-page .public-nav :is(a, .blog-theme-trigger) {
+  font-size: 0.8rem;
+}
+
+html .blog-page .blog-breadcrumbs {
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+}
+
+html .blog-page .blog-article > header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+}
+
+html .blog-page #blog-post-title {
+  max-width: none;
+  margin-block: 0.4rem 1rem;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem) !important;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+
+html .blog-page .blog-article-excerpt {
+  margin-block: 0 1.25rem;
+  font-size: 1em !important;
+  line-height: 1.65;
+}
+
+html .blog-page :is(.blog-article-meta, .blog-post-card-meta) {
+  gap: 0.4rem 0.85rem;
+  font-size: 0.875rem !important;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--accent) 20%, var(--ink)) !important;
+}
+
+html .blog-post-page .blog-markdown {
+  font-size: inherit !important;
+  line-height: 1.8;
+}
+
+html .blog-post-page .blog-markdown p {
+  margin-block: 0 1.35em;
+}
+
+html .blog-post-page .blog-markdown :is(h1, h2, h3, h4, h5, h6) {
+  max-width: none;
+  margin-block: 2em 0.75em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+html .blog-post-page .blog-markdown h1 { font-size: 1.9em !important; }
+html .blog-post-page .blog-markdown h2 { font-size: 1.55em !important; }
+html .blog-post-page .blog-markdown h3 { font-size: 1.3em !important; }
+html .blog-post-page .blog-markdown h4 { font-size: 1.15em !important; }
+html .blog-post-page .blog-markdown :is(h5, h6) { font-size: 1em !important; }
+
+html .blog-post-page .blog-markdown :is(ul, ol) {
+  padding-inline-start: 1.6em;
+  margin-block: 0 1.35em;
+}
+
+html .blog-post-page .blog-markdown li { margin-block: 0.35em; }
+html .blog-post-page .blog-markdown :is(img, table, pre, .blog-markdown-table) { max-width: 100%; }
+html .blog-post-page .blog-markdown figcaption { font-size: 0.875rem; line-height: 1.6; }
+
+html .blog-page .blog-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.75rem;
+}
+
+html .blog-page .blog-header h1 {
+  font-size: clamp(2rem, 5vw, 3.25rem) !important;
+  letter-spacing: -0.04em;
+}
+
+html .blog-page :is(.blog-header p, .blog-status, .blog-post-list article > p:not(.blog-post-card-meta)) {
+  max-width: 68ch;
+  color: color-mix(in srgb, var(--muted) 15%, var(--ink)) !important;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+html .blog-page :is(.blog-header h1, .blog-header a, .blog-post-list h3 a, .blog-footer a) {
+  color: color-mix(in srgb, var(--accent) 20%, var(--ink)) !important;
+}
+
+html .blog-page .blog-shell > section { min-width: 0; }
+html .blog-page .section-label { gap: 1rem; flex-wrap: wrap; }
+html .blog-page .section-label :is(h2, span) { font-size: 0.875rem !important; line-height: 1.5; color: var(--ink) !important; }
+html .blog-page label[for="blog-search"] { font-size: 0.875rem; color: var(--ink); }
+html .blog-page #blog-search { width: 100%; max-width: 38rem; min-width: 0; margin-block: 0.5rem 1.5rem; color: var(--ink) !important; background: var(--panel) !important; }
+html .blog-page #blog-search::placeholder { color: color-mix(in srgb, var(--muted) 15%, var(--ink)); opacity: 1; }
+html .blog-page .blog-post-list { gap: 1.5rem; }
+html .blog-page .blog-post-list article { padding: clamp(20px, 3vw, 32px); min-width: 0; overflow-wrap: anywhere; background: transparent !important; }
+html .blog-page .blog-post-list h3 { font-size: clamp(1.25rem, 2.5vw, 1.6rem) !important; line-height: 1.4; }
+html .blog-page :is(.blog-post-taxonomy, .blog-series-navigation, .blog-taxonomy-browse):empty { display: none; }
+html .blog-page .blog-post-taxonomy { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.875rem; line-height: 1.6; margin-block: 1rem; }
+html .blog-page .blog-taxonomy-browse { display: grid; gap: 1rem; margin-bottom: 2rem; }
+html .blog-page .blog-taxonomy-browse section { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+html .blog-page .blog-taxonomy-browse h2 { flex-basis: 100%; margin: 0; font-size: 1rem; line-height: 1.5; color: var(--ink) !important; }
+html .blog-page .blog-taxonomy-browse a { font-size: 0.875rem; line-height: 1.6; }
+html .blog-page .blog-series-navigation { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 1.5rem; font-size: 1rem; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+html .blog-page .blog-series-navigation p { flex-basis: 100%; margin: 0; }
+html .blog-page :is(.blog-post-taxonomy, .blog-series-navigation, .blog-taxonomy-browse) a { color: color-mix(in srgb, var(--accent) 15%, var(--ink)) !important; overflow-wrap: anywhere; }
+
+html .blog-page .blog-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+html .blog-page .blog-footer p { font-size: 0.875rem; line-height: 1.8; }
+html .blog-page .blog-footer a { display: inline-block; min-height: 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html .blog-page, html .blog-page .blog-shell, html .blog-page .blog-shell * {
+    transition-duration: 0s !important;
+  }
+}
+html[data-motion="reduced"] .blog-page,
+html[data-motion="reduced"] .blog-page .blog-shell,
+html[data-motion="reduced"] .blog-page .blog-shell * {
+  transition-duration: 0s !important;
+}
+
+@media (max-width: 600px) {
+  html .blog-page > .blog-shell {
+    width: calc(100% - 24px) !important;
+    padding: 16px !important;
+    margin-block: 12px !important;
+  }
+  html .blog-page .blog-breadcrumbs { margin-bottom: 1.25rem; }
+  html .blog-page .blog-post-list article { padding: 18px; }
+  html .blog-page .blog-toc { padding: 10px 12px; }
+}
+
+@media print {
+  html .blog-page { --ink: #000; --accent: #000; --bg: #fff; --panel: #fff; color: #000 !important; background: #fff !important; }
+  html .blog-page > .blog-shell { width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0; background: transparent !important; box-shadow: none; }
+  html .blog-page :is(.public-nav, .blog-breadcrumbs, .noise, .scanlines) { display: none !important; }
+  html .blog-post-page :is(.blog-article, .blog-footer) { font-size: 11pt !important; }
+  html .blog-page .blog-color-readable { color: #000 !important; }
+  html .blog-page .blog-text-color-rainbow { background: none !important; color: #000 !important; -webkit-text-fill-color: #000 !important; }
+}

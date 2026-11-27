@@ -55,6 +55,34 @@
   revision** cancels approval without hiding the currently live article.
   Deleting an article also permanently deletes its private draft, retained
   history and approved schedule; unpublishing retains its draft/history.
+- **Tags and series:** both authenticated editors offer optional comma-separated
+  tags (up to ten) and one series with a reading order from 1 to 100000.
+  Choose an existing suggestion or enter a new name (up to 80 characters).
+  Series names may contain commas; tag names may not. Names produce safe stable
+  identifiers, and choosing a known name retains its identifier. Duplicate tags
+  are rejected. Tied series positions sort by publication date, then article slug.
+  Tags, series and reading order belong to each revision: autosaves, restoring
+  history and editing an approved schedule never change current public membership.
+  Only explicit publication promotes them. Suggestions are authenticated and
+  derived from saved revisions, not a publicly mutable catalog. Changing a label
+  on one revision does not rewrite other posts' saved labels.
+  Public archives provide tag/series browsing; articles show labels and ordered
+  previous/next navigation using only eligible public members. These reconcile
+  live alongside articles. New groups use archive query links until a generated
+  route exists. Generated category pages, RSS categories, sitemap entries and
+  no-JavaScript membership/navigation remain deployment snapshots.
+- **Tags/series release order (not yet deployed):** obtain explicit migration and
+  release approval and a fresh private pre-migration backup; apply
+  `20261126160000_blog_taxonomy.sql`; export and verify a fresh exact-schema private
+  backup; then deploy the compatible Admin, bundled writer, public readers,
+  query contract and generator together. The migration adds metadata to existing
+  public and approved rows and private snapshots without assigning existing posts
+  or publishing anything. Existing loaded draft tokens and retry receipts are
+  invalidated; save/export local unsaved edits before migration and reopen editors
+  afterward. Old six-field clients fail closed. The backup table set is unchanged,
+  but older exact-schema exports lack the new columns and cannot be restored by
+  the post-migration content restore. Retain them privately for database-level
+  recovery; code rollback requires compatible nine-field clients and readers.
 - Existing Markdown is not converted by the database migration. On opening an
   old post, its exact source remains in a protected editable section.
   **Import original Markdown** adopts visual content only if a rendered-structure
@@ -112,6 +140,8 @@
   The public manifest contains only public slugs and SHA-256 fingerprints, not
   drafts, future post content, or admin credentials. This status does not trigger
   deployments; the editor links to the deployment workflow.
+  Fingerprints include normalized public tags, series and reading order, so
+  metadata-only edits also flag changed generated snapshots.
 - `/projects/` contains factual case studies for the home lab and this site.
   These describe implemented capabilities, not independently measured business
   outcomes.
@@ -149,17 +179,20 @@
   unchanged refreshes preserve its disclosure state. Generated articles include
   working disclosure and jump links without JavaScript. Articles without content
   headings omit the disclosure, and print output omits navigation.
-- Public Markdown and rich readers give custom Hex text a small black or white
-  backing, preserving its RGB hue, including Blurple's exact `#553fff`.
-  Transparent Hex colors increase display alpha only when needed for normal-text
-  AA contrast; the original value remains in the public document's `data-color`
-  attribute. Stored articles, private drafts/history and editor/import colors
-  are unchanged. Rainbow text keeps its gradient on a dark backing; linked
-  formatting inherits the enclosing author's color instead of the theme link
-  color. Headings, links, metadata and focus indicators use readable theme ink,
+- Public Markdown and rich readers adjust displayed text shades only when needed
+  for normal-text AA contrast, without adding highlight boxes. Already readable
+  colors stay exact; other shades lighten or darken while preserving their hue.
+  For example, Blurple remains stored as `#553fff` but can display lighter on a
+  dark reading surface. Original Hex/alpha remains in `data-color`; display
+  opacity increases only if the original opacity cannot support readable text.
+  Stored articles, private drafts/history and editor/import colors are unchanged.
+  Rainbow retains its gradient with jointly contrast-checked stops, and linked
+  formatting inherits its enclosing adapted color. Headings, metadata and focus
+  indicators use readable theme ink,
   and decorative page overlays stay behind the reading surface.
-  The same color presentation is generated in initial article HTML and used
-  for live replacements, so custom-color backings do not require JavaScript.
+  Generated initial HTML has readable default-dark colors without JavaScript.
+  Live replacements, theme changes, stylesheet loads and resizing recalculate
+  shades against the current reading surface, including gradient/alpha bounds.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do

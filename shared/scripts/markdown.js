@@ -25,38 +25,141 @@
       ? normalized.toLowerCase() : null;
   }
 
-  function readableHexColor(value) {
-    const original = hexColor(value);
-    if (!original) throw new Error("Invalid text color.");
-    let digits = original.slice(1);
-    if (digits.length <= 4) digits = [...digits].map(digit => digit.repeat(2)).join("");
-    const rgb = digits.slice(0, 6).match(/../g).map(channel => Number.parseInt(channel, 16));
-    const alpha = digits.length === 8 ? Number.parseInt(digits.slice(6), 16) / 255 : 1;
-    const luminance = channels => channels.map(channel => channel / 255)
+  const colorLuminance = channels => channels.map(channel => channel / 255)
       .map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
       .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
-    const contrast = (back, opacity) => {
-      const front = luminance(rgb.map(channel => channel * opacity + back * (1 - opacity)));
-      return back ? 1.05 / (front + 0.05) : (front + 0.05) / 0.05;
-    };
-    // Leave headroom for 8-bit alpha and browser color rounding.
+  const blendColor = (front, back) => front.slice(0, 3)
+    .map((channel, index) => channel * front[3] + back[index] * (1 - front[3]));
+  function hexChannels(value) {
+    const hex = hexColor(value);
+    if (!hex) throw new Error("Invalid text color.");
+    let digits = hex.slice(1);
+    if (digits.length <= 4) digits = [...digits].map(digit => digit.repeat(2)).join("");
+    return [...digits.slice(0, 6).match(/../g).map(channel => Number.parseInt(channel, 16)),
+      digits.length === 8 ? Number.parseInt(digits.slice(6), 16) / 255 : 1];
+  }
+  const channelsHex = channels => `#${channels.slice(0, channels[3] === 1 ? 3 : 4)
+    .map((value, index) => Math.round(index === 3 ? value * 255 : value).toString(16).padStart(2, "0")).join("")}`;
+
+  function readablePalette(values, backgrounds) {
+    const originals = values.map(hexColor);
+    const colors = originals.map(hexChannels);
+    if (!Array.isArray(backgrounds) || !backgrounds.length || backgrounds.some(back =>
+      !Array.isArray(back) || back.length !== 3 || back.some(channel => !Number.isFinite(channel) || channel < 0 || channel > 255))) {
+      throw new Error("Invalid reading surface.");
+    }
+    const samples = palette => palette.flatMap((color, index) => index
+      ? Array.from({ length: 21 }, (_, step) => color.map((channel, component) =>
+        channel * step / 20 + palette[index - 1][component] * (1 - step / 20))) : [color]);
+    const contrast = palette => Math.min(...samples(palette).map(front => {
+      const differences = backgrounds.map(back => colorLuminance(blendColor(front, back)) - colorLuminance(back));
+      if (Math.min(...differences) <= 0 && Math.max(...differences) >= 0) return 1;
+      return Math.min(...backgrounds.map(back => {
+        const a = colorLuminance(blendColor(front, back)), b = colorLuminance(back);
+        return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+      }));
+    }));
+    // Reserve headroom for the browser's 8-bit color rounding.
     const minimum = 4.55;
-    const choices = [0, 255].filter(back => contrast(back, 1) >= minimum).map(back => {
-      let low = alpha, high = 1;
-      if (contrast(back, alpha) >= minimum) return { back, alpha };
-      for (let index = 0; index < 24; index++) {
-        const middle = (low + high) / 2;
-        if (contrast(back, middle) >= minimum) high = middle;
-        else low = middle;
+    if (contrast(colors) >= minimum) return originals;
+    const candidates = [];
+    for (const opaque of [false, true]) {
+      for (const end of [0, 255]) {
+        const palette = amount => colors.map(color => [
+          ...color.slice(0, 3).map(channel => channel * (1 - amount) + end * amount),
+          opaque ? 1 : color[3],
+        ]);
+        if (contrast(palette(1)) < minimum) continue;
+        let low = 0, high = 1;
+        for (let index = 0; index < 24; index++) {
+          const middle = (low + high) / 2;
+          if (contrast(palette(middle)) >= minimum) high = middle;
+          else low = middle;
+        }
+        let amount = high;
+        let result = palette(amount).map(color => hexChannels(channelsHex(color)));
+        while (contrast(result) < minimum && amount < 1) {
+          amount = Math.min(1, amount + 1 / 1024);
+          result = palette(amount).map(color => hexChannels(channelsHex(color)));
+        }
+        const change = result.reduce((sum, color, index) => sum
+          + color.slice(0, 3).reduce((total, channel, component) => total + (channel - colors[index][component]) ** 2, 0), 0);
+        candidates.push({ result, change });
       }
-      return { back, alpha: Math.ceil(high * 255) / 255 };
-    }).sort((a, b) => a.alpha - b.alpha || contrast(b.back, b.alpha) - contrast(a.back, a.alpha));
-    const choice = choices[0];
-    return {
-      original,
-      color: choice.alpha === alpha ? original : `#${digits.slice(0, 6)}${Math.round(choice.alpha * 255).toString(16).padStart(2, "0")}`,
-      background: choice.back ? "#ffffff" : "#000000",
+      if (candidates.length) break;
+    }
+    if (!candidates.length) throw new Error("This reading surface cannot support readable colored text.");
+    candidates.sort((a, b) => a.change - b.change);
+    return candidates[0].result.map(channelsHex);
+  }
+
+  function readableHexColor(value, backgrounds = [[0, 0, 0], [35, 35, 35]]) {
+    const original = hexColor(value);
+    if (!original) throw new Error("Invalid text color.");
+    return { original, color: readablePalette([original], backgrounds)[0] };
+  }
+
+  function applyReadableColors(container) {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("Unable to measure article colors.");
+    const colors = new Map();
+    const color = value => {
+      if (!colors.has(value)) {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const data = [...context.getImageData(0, 0, 1, 1).data];
+        colors.set(value, [...data.slice(0, 3), data[3] / 255]);
+      }
+      return colors.get(value);
     };
+    const extremes = values => [
+      values.reduce((a, b) => colorLuminance(a) < colorLuminance(b) ? a : b),
+      values.reduce((a, b) => colorLuminance(a) > colorLuminance(b) ? a : b),
+    ];
+    const layers = value => {
+      const result = [];
+      let start = 0, depth = 0;
+      for (let index = 0; index < value.length; index++) {
+        if (value[index] === "(") depth++;
+        if (value[index] === ")") depth--;
+        if (value[index] === "," && !depth) { result.push(value.slice(start, index)); start = index + 1; }
+      }
+      result.push(value.slice(start));
+      return result;
+    };
+    const cache = new WeakMap();
+    const background = element => {
+      if (!element) return [[255, 255, 255]];
+      if (cache.has(element)) return cache.get(element);
+      const style = window.getComputedStyle(element);
+      let values = background(element.parentElement).map(back => blendColor(color(style.backgroundColor), back));
+      for (const layer of layers(style.backgroundImage).reverse()) {
+        if (layer.trim() === "none" || style.backgroundClip.includes("text")) continue;
+        const stops = layer.match(/(?:rgba?|color)\([^)]*\)|#[0-9a-f]{3,8}\b/gi);
+        values = !stops || layer.includes("url(") ? [[0, 0, 0], [255, 255, 255]]
+          : extremes(values.flatMap(back => stops.map(stop => blendColor(color(stop), back))));
+      }
+      cache.set(element, values);
+      return values;
+    };
+    for (const element of container.querySelectorAll(".blog-color-readable")) {
+      const original = hexColor(element.dataset.color);
+      if (original) element.style.color = original;
+      else element.style.removeProperty("color");
+      const foreground = original || channelsHex(color(window.getComputedStyle(element).color));
+      element.style.color = readableHexColor(foreground, background(element)).color;
+    }
+    for (const element of container.querySelectorAll(".blog-rainbow-surface .blog-text-color-rainbow")) {
+      element.style.removeProperty("background-image");
+      const gradient = window.getComputedStyle(element).backgroundImage;
+      const stops = gradient.match(/(?:rgba?|color)\([^)]*\)|#[0-9a-f]{3,8}\b/gi);
+      if (!stops?.length) throw new Error("Unable to measure article rainbow colors.");
+      const palette = readablePalette(stops.map(stop => channelsHex(color(stop))), background(element));
+      element.style.backgroundImage = `linear-gradient(90deg, ${palette.join(", ")})`;
+    }
   }
 
   function bindHexColorInputs(picker, field) {
@@ -187,11 +290,13 @@
             const presentation = readableHexColor(hex);
             element.className += " blog-color-readable";
             element.style.color = presentation.color;
-            element.style.backgroundColor = presentation.background;
             element.dataset.color = presentation.original;
           }
         }
-        if (options.readableColors && type === "color" && value === "accent") element.className += " blog-color-readable-accent";
+        if (options.readableColors && type === "color" && !hex && value !== "rainbow") {
+          element.className += " blog-color-readable";
+          element.dataset.color = value;
+        }
         if (custom) element.style.fontFamily = custom;
         appendInline(element, content, options);
         if (options.readableColors && type === "color" && value === "rainbow") {
@@ -458,6 +563,6 @@
   }
 
   window.BITS_MARKDOWN = Object.freeze({
-    fonts, hexColor, readableHexColor, bindHexColorInputs, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
+    fonts, hexColor, readableHexColor, applyReadableColors, bindHexColorInputs, customFontFamily, bindFormattingShortcuts, render, renderInline, readingTime,
   });
 })();

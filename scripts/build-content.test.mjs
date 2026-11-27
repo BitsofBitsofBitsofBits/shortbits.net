@@ -54,7 +54,7 @@ test("article has server-readable content, canonical social metadata and safe JS
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /<div id="blog-post-body" class="blog-markdown">/);
   assert.match(html, /\/blog\/scripts\/post\.js/);
-  assert.match(html, /<article id="blog-post" class="blog-article" data-blog-slug="safe-markdown">/);
+  assert.match(html, /<article id="blog-post" class="blog-article" data-blog-slug="safe-markdown" data-static-slugs=/);
   assert.match(html, /data-blog-slug="safe-markdown"/);
   assert.match(html, /shared\/scripts\/supabase-config\.js/);
   assert.match(html, /shared\/scripts\/blog-views\.js/);
@@ -77,7 +77,7 @@ test("static blog articles retain validated hex colors and nested formatting", (
     const html = renderArticle({ ...posts[0], body_markdown: `{{color:${color}|**Colored**}}` }, renderer);
     assert.match(html, /class="blog-text-color-custom blog-color-readable"/);
     assert.ok(html.includes(`data-color="${color}"`), html);
-    assert.match(html, /background-color:#(?:000000|ffffff)/);
+    assert.doesNotMatch(html, /background-color:/);
     assert.match(html, /<strong>Colored<\/strong>/);
   }
   const invalid = "{{color:#abc;background:red|Literal}}";
@@ -139,7 +139,7 @@ test("public fetch paginates, pins publication cutoff, and fails explicitly", as
     assert.equal(url.searchParams.get("published_at"), `lte.${now.toISOString()}`);
     assert.equal(url.searchParams.get("order"), "published_at.desc,slug.asc");
     assert.equal(url.searchParams.get("limit"), "500");
-    assert.equal(url.searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published,published_at,updated_at");
+    assert.equal(url.searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published,published_at,updated_at,tags,series,series_order");
   }
   assert.equal(calls[0].options.headers.apikey, "sb_publishable_example");
   await assert.rejects(fetchPosts({}, { fetchImpl: async () => ({ ok: false, status: 503 }) }), /HTTP 503/);
@@ -159,6 +159,7 @@ test("build writes persistent outputs, removes stale articles, and never overwri
       root: output, input: fixturePath, now,
       fetchImpl: async () => { networkCalls += 1; throw new Error("Network not permitted"); },
     });
+
     assert.equal(networkCalls, 0);
     const article = await readFile(join(output, "blog", "articles", "safe-markdown", "index.html"), "utf8");
     assert.match(article, /<h1 id="blog-post-title">/);
@@ -189,4 +190,40 @@ test("build writes persistent outputs, removes stale articles, and never overwri
   } finally {
     await rm(output, { recursive: true, force: true });
   }
+});
+
+test("generated taxonomy pages are escaped, ordered, public-only and removed when no longer used", async () => {
+  const output = join(root, `.taxonomy-content-test-${process.pid}`);
+  await mkdir(join(output, "blog"), { recursive: true });
+  try {
+    for (const file of ["shared/scripts/markdown.js", "shared/scripts/blog-content.js", "shared/scripts/supabase-config.js", "sitemap.xml", join("blog", "index.html")]) {
+      await cp(join(root, file), join(output, file));
+    }
+    const series = { name: 'Colors $& <safe> "quoted"', slug: "colors" };
+    const tag = { name: "Accessible $1 colors", slug: "accessible" };
+    const input = join(output, "posts.json");
+    const tagged = fixtures.map((post, index) => ({ ...post, tags: [tag], series, series_order: index === 0 ? 2 : 1 }));
+    await writeFile(input, JSON.stringify(tagged));
+    await buildContent({ root: output, input, now });
+    const category = await readFile(join(output, "blog", "series", "colors", "index.html"), "utf8");
+    assert.match(category, /<h1>Series: Colors \$&amp; &lt;safe&gt; &quot;quoted&quot;<\/h1>/);
+    assert.match(category, /<title>Series: Colors \$&amp; &lt;safe&gt; &quot;quoted&quot; \/\/ BitsofBitsofBits<\/title>/);
+    assert.ok(category.indexOf('href="/blog/articles/safe-markdown/"') < category.indexOf('href="/blog/articles/first-lab-notes/"'));
+    assert.doesNotMatch(category, /private-draft|future-post/);
+    const article = await readFile(join(output, "blog", "articles", "first-lab-notes", "index.html"), "utf8");
+    assert.match(article, /Previous: Escaping/);
+    assert.match(article, /Part 2 of 2/);
+    const schema = JSON.parse(/data-blog-schema>([\s\S]*?)<\/script>/.exec(article)[1]);
+    assert.deepEqual(schema.keywords, [tag.name]);
+    assert.equal(schema.isPartOf.name, series.name);
+    assert.match(await readFile(join(output, "blog", "feed.xml"), "utf8"), /<category>Accessible \$1 colors<\/category>/);
+    const sitemap = await readFile(join(output, "sitemap.xml"), "utf8");
+    assert.match(sitemap, /\/blog\/tags\/accessible\/<\/loc>/);
+    assert.match(sitemap, /\/blog\/series\/colors\/<\/loc>/);
+    await writeFile(input, JSON.stringify(fixtures));
+    await buildContent({ root: output, input, now });
+    await assert.rejects(access(join(output, "blog", "series", "colors")));
+    await assert.rejects(access(join(output, "blog", "tags", "accessible")));
+    await access(join(output, "blog", "series", "index.html"));
+  } finally { await rm(output, { recursive: true, force: true }); }
 });

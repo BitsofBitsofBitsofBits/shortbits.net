@@ -61,3 +61,21 @@ test("missing or malformed deployed snapshots never appear synchronized", async 
     { ...manifest, posts: [{ slug: "valid", fingerprint: "bad" }] },
   ]) assert.throws(() => publishing.compare(manifest, value));
 });
+
+test("taxonomy fingerprints detect assignments and ordering while preserving empty-metadata compatibility", async () => {
+  const baseline = await publishing.snapshot(fixtures, now);
+  const empty = fixtures.map(post => ({ ...post, tags: [], series: null, series_order: null }));
+  assert.deepEqual(await publishing.snapshot(empty, now), baseline);
+  const series = { name: "Colors", slug: "colors" };
+  for (const metadata of [
+    { tags: [{ name: "Colors", slug: "colors" }] },
+    { series, series_order: 1 },
+  ]) {
+    const changed = fixtures.map((post, index) => index ? post : { ...post, ...metadata });
+    assert.deepEqual(publishing.compare(await publishing.snapshot(changed, now), baseline).changed, [fixtures[0].slug]);
+  }
+  const first = [{ ...fixtures[0], series, series_order: 1, tags: [{ name: "B", slug: "b" }, { name: "A", slug: "a" }] }];
+  const manifest = await publishing.snapshot(first, now);
+  assert.deepEqual(await publishing.snapshot([{ ...first[0], tags: [...first[0].tags].reverse() }], now), manifest);
+  assert.deepEqual(publishing.compare(await publishing.snapshot([{ ...first[0], series_order: 2 }], now), manifest).changed, [fixtures[0].slug]);
+});

@@ -6,6 +6,7 @@ import vm from "node:vm";
 const archiveSource = await readFile(new URL("../blog/scripts/blog.js", import.meta.url), "utf8");
 const postSource = await readFile(new URL("../blog/scripts/post.js", import.meta.url), "utf8");
 const contractSource = await readFile(new URL("../shared/scripts/blog-data.js", import.meta.url), "utf8");
+const taxonomySource = await readFile(new URL("../shared/scripts/blog-taxonomy.js", import.meta.url), "utf8");
 
 class Element {
   constructor(tag = "") {
@@ -19,12 +20,16 @@ class Element {
   }
   set textContent(value) { this.text = String(value); this.children = []; }
   get textContent() { return this.text + this.children.map((child) => child.textContent || "").join(" "); }
-  append(...children) { this.children.push(...children); }
-  replaceChildren(...children) { this.text = ""; this.children = children; }
+  append(...children) { children.forEach(child => { child.parent = this; }); this.children.push(...children); }
+  replaceChildren(...children) { this.text = ""; this.children = []; this.append(...children); }
   addEventListener(event, listener) { this.listeners[event] = listener; }
+  setAttribute(name, value) { this[name] = String(value); }
+  removeAttribute(name) { delete this[name]; }
+  querySelector(selector) { return selector === "[data-series-error]" ? this.children.find(child => child.dataset?.seriesError !== undefined) : null; }
+  remove() { this.parent.children = this.parent.children.filter(child => child !== this); }
 }
 
-async function browserScript(source, { nodes, pages = [], slug = "existing-post", offline = false } = {}) {
+async function browserScript(source, { nodes, pages = [], slug = "existing-post", pathname = "/blog/", query, offline = false, adaptColors = () => {} } = {}) {
   const requests = [];
   const options = [];
   const listeners = {};
@@ -41,13 +46,15 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
     },
     window: {
       SUPABASE_CONFIG: { url: "https://example.supabase.co", anonKey: "sb_publishable_example" },
-      location: { search: `?slug=${slug}` },
-      BITS_MARKDOWN: { readingTime: () => 1, render: (text) => ({ textContent: text }) },
+      location: { pathname, search: query ?? `?slug=${slug}` },
+      BITS_MARKDOWN: { readingTime: () => 1, render: (text) => ({ textContent: text }), applyReadableColors: adaptColors },
       BITS_BLOG_CONTENT: { readingTime: () => 1, renderPost: post => ({ textContent: post.body_markdown }) },
       BITS_BLOG_TOC: { render: () => null },
       BITS_BLOG_VIEWS: { show() {} },
       addEventListener: (event, listener) => { listeners[event] = listener; },
       setInterval: (listener, delay) => { timers.push({ listener, delay }); },
+      requestAnimationFrame: callback => setImmediate(callback),
+      cancelAnimationFrame: handle => clearImmediate(handle),
     },
     URLSearchParams, AbortSignal, console: { error() {} },
     fetch: async (url, init) => {
@@ -59,7 +66,10 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
       return { ok: true, json: async () => page };
     },
   });
+  context.document.createElement = tag => Object.assign(new Element(tag), { ownerDocument: context.document });
+  Object.values(nodes).forEach(node => { node.ownerDocument = context.document; });
   vm.runInContext(contractSource, context);
+  vm.runInContext(taxonomySource, context);
   vm.runInContext(source, context);
   await new Promise((resolve) => setImmediate(resolve));
   return { requests, options, head, context, listeners, timers, refresh: async () => {
@@ -69,7 +79,7 @@ async function browserScript(source, { nodes, pages = [], slug = "existing-post"
 }
 
 function archiveNodes() {
-  const nodes = Object.fromEntries(["#blog-post-list", "#blog-status", "#blog-post-count", "#blog-search"].map((selector) => [selector, new Element()]));
+  const nodes = Object.fromEntries(["#blog-post-list", "#blog-status", "#blog-post-count", "#blog-search", "#blog-taxonomy-browse", ".blog-header h1"].map((selector) => [selector, new Element()]));
   nodes["#blog-post-list"].dataset.staticSlugs = '["existing-post"]';
   nodes["#blog-status"].textContent = "Published posts from the latest deployment.";
   return nodes;
@@ -88,7 +98,7 @@ test("archive links built posts statically and newer posts through the legacy re
   assert.equal(cards[0].children[0].children[0].href, "/blog/articles/existing-post/");
   assert.equal(cards[1].children[0].children[0].href, "/blog/post.html?slug=brand-new-post");
   assert.equal(requests.length, 1);
-  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,published_at");
+  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,published_at,tags,series,series_order");
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
   assert.equal(requests[0].searchParams.get("published_at"), null, "Database-time eligibility must not be overridden by a skewed client clock");
   assert.equal(requests[0].searchParams.get("order"), "published_at.desc,slug.asc");
@@ -135,10 +145,80 @@ function postNodes() {
   const nodes = Object.fromEntries([
     "#blog-post", "#blog-post-status", "#blog-post-title", "#blog-post-excerpt",
     "#blog-post-date", "#blog-post-reading-time", "#blog-post-body", "#blog-post-views", "#blog-post-toc",
+    "#blog-post-taxonomy", "#blog-series-navigation",
   ].map((selector) => [selector, new Element()]));
   nodes["#blog-post"].hidden = true;
   return nodes;
 }
+
+test("live taxonomy browsing combines tag and series filters, preserves reading order and uses fallback routes", async () => {
+  const nodes = archiveNodes();
+  const series = { name: "Colors", slug: "colors" };
+  const tag = { name: "Accessible colors", slug: "accessible" };
+  const posts = [
+    { slug: "second", title: "Second", excerpt: "Public", published_at: "2026-01-01", tags: [tag], series, series_order: 2 },
+    { slug: "first", title: "First", excerpt: "Public", published_at: "2026-01-01", tags: [tag], series, series_order: 1 },
+    { slug: "other", title: "Unassigned", excerpt: "Public", published_at: "2026-01-01", tags: [tag] },
+  ];
+  await browserScript(archiveSource, { nodes, pages: [posts], pathname: "/blog/series/colors/", query: "?tag=accessible" });
+  const cards = nodes["#blog-post-list"].children;
+  assert.deepEqual(cards.map(card => card.children[0].textContent), ["First", "Second"]);
+  assert.equal(nodes["#blog-post-count"].textContent, "2 POSTS");
+  assert.equal(cards[0].children[3].children[0].href, "/blog/?tag=accessible");
+  assert.equal(cards[0].children[3].children[1].href, "/blog/?series=colors");
+  assert.equal(nodes["#blog-status"].textContent, "Archive synchronized.");
+});
+
+test("series navigation refreshes independent of body, handles outages honestly and clears confirmed absence", async () => {
+  const nodes = postNodes();
+  nodes["#blog-post"].dataset.staticSlugs = '["before","existing-post"]';
+  const series = { name: "Colors", slug: "colors" };
+  const post = { slug: "existing-post", title: "Middle", excerpt: "Public", body_markdown: "Body", published_at: "2026-01-01", series, series_order: 2 };
+  const members = [
+    { ...post, slug: "after", title: "After", series_order: 3 },
+    { ...post, slug: "before", title: "Before", series_order: 1 }, post,
+  ];
+  const state = await browserScript(postSource, { nodes, pages: [[post], members, [post], members.slice(0, 1).concat(post), [post], new Error("Unavailable"), []] });
+  const navigation = nodes["#blog-series-navigation"];
+  assert.equal(nodes["#blog-post-status"].hidden, true);
+  assert.match(navigation.textContent, /Part 2 of 3/);
+  assert.equal(navigation.children.find(child => child.rel === "prev").href, "/blog/articles/before/");
+  assert.equal(navigation.children.find(child => child.rel === "next").href, "/blog/post.html?slug=after");
+  assert.equal(state.requests[1].searchParams.get("series->>slug"), "eq.colors");
+  const rendered = nodes["#blog-post-body"].children[0];
+  await state.refresh();
+  assert.equal(nodes["#blog-post-body"].children[0], rendered);
+  assert.match(navigation.textContent, /Part 1 of 2/);
+  assert.equal(navigation.children.some(child => child.rel === "prev"), false);
+  await state.refresh();
+  assert.match(navigation.textContent, /could not be refreshed and may be out of date/);
+  assert.equal(nodes["#blog-post-status"].hidden, true, "Series failure must not falsely report a body-fetch outage.");
+  await state.refresh();
+  assert.equal(nodes["#blog-post"].hidden, true);
+  assert.equal(navigation.children.length, 0);
+});
+
+test("theme and stylesheet changes refresh shades; color errors do not hide live content", async () => {
+  const nodes = postNodes();
+  const post = { slug: "existing-post", title: "Live", excerpt: "Public", body_markdown: "Live body", published_at: "2026-10-01T12:00:00Z" };
+  let calls = 0, fail = false;
+  const state = await browserScript(postSource, { nodes, pages: [[post]], adaptColors: () => {
+    calls++;
+    if (fail) throw new Error("Unsupported surface");
+  } });
+  const initial = calls;
+  state.listeners["bits:theme-applied"]();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.ok(calls > initial);
+  fail = true;
+  state.listeners.load({ target: { id: "bits-theme-stylesheet" } });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(nodes["#blog-post"].hidden, false);
+  assert.equal(nodes["#blog-post-body"].textContent, "Live body");
+  assert.match(nodes["#blog-post-status"].textContent, /colors could not be adjusted/);
+  assert.equal(nodes["#blog-post-status"].hidden, false);
+  assert.equal(state.requests.length, 1);
+});
 
 test("legacy links preserve unpublished semantics rather than redirecting to stale static copies", async () => {
   const nodes = postNodes();
@@ -149,7 +229,7 @@ test("legacy links preserve unpublished semantics rather than redirecting to sta
   assert.equal(requests[0].searchParams.get("published"), "eq.true");
   assert.equal(requests[0].searchParams.get("published_at"), null, "Database-time eligibility must not be overridden by a skewed client clock");
   assert.equal(requests[0].searchParams.get("slug"), "eq.existing-post");
-  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published_at,updated_at");
+  assert.equal(requests[0].searchParams.get("select"), "slug,title,excerpt,body_markdown,body_rich,published_at,updated_at,tags,series,series_order");
   assert.equal(requests[0].searchParams.get("limit"), "1");
 });
 

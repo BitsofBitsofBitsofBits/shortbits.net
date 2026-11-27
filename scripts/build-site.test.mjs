@@ -76,7 +76,7 @@ test("build preserves page routes and organized assets without shipping reposito
     const pages = await Promise.all((await filesUnder(directory)).filter(path => path.endsWith(".html"))
       .map(async (file) => ({ path: pagePath(relative(directory, file)), html: await readFile(file, "utf8") })));
     const sourceSitemap = await readFile(new URL("../sitemap.xml", import.meta.url), "utf8");
-    const expectedPages = [...sourceSitemap.matchAll(/<loc>/g)].length + 2;
+    const expectedPages = [...sourceSitemap.matchAll(/<loc>/g)].length + 4;
     assert.equal(validateSeo(pages, await readFile(join(directory, "sitemap.xml"), "utf8")), expectedPages);
     for (const page of pages.filter(page => page.html.includes('rel="canonical"')
       && !/<meta[^>]*content="noindex/i.test(page.html))) {

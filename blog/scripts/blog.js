@@ -3,6 +3,13 @@
   const status = document.querySelector("#blog-status");
   const count = document.querySelector("#blog-post-count");
   const search = document.querySelector("#blog-search");
+  const taxonomy = window.BITS_BLOG_TAXONOMY;
+  const route = window.location.pathname.match(/^\/blog\/(tags|series)\/([a-z0-9-]+)\/$/);
+  const params = new URLSearchParams(window.location.search);
+  const selectedTag = route?.[1] === "tags" ? route[2] : params.get("tag");
+  const selectedSeries = route?.[1] === "series" ? route[2] : params.get("series");
+  const browse = document.querySelector("#blog-taxonomy-browse");
+  const staticGroups = JSON.parse(browse?.dataset.staticTaxonomies || '{"tags":[],"series":[]}');
   const staticSlugs = new Set(JSON.parse(list.dataset.staticSlugs || "[]"));
   let archiveStatus = status.textContent.trim();
   let loading = false;
@@ -13,7 +20,9 @@
     const query = search.value.trim().toLocaleLowerCase();
     let visible = 0;
     for (const card of list.children) {
-      card.hidden = !card.textContent.toLocaleLowerCase().includes(query);
+      card.hidden = !card.textContent.toLocaleLowerCase().includes(query)
+        || Boolean(selectedTag && !JSON.parse(card.dataset.tags || "[]").includes(selectedTag))
+        || Boolean(selectedSeries && card.dataset.series !== selectedSeries);
       if (!card.hidden) visible += 1;
     }
     count.textContent = `${visible} POST${visible === 1 ? "" : "S"}`;
@@ -42,7 +51,13 @@
     });
     metadata.className = "blog-post-card-meta";
     metadata.append(date);
-    article.append(title, excerpt, metadata);
+    const labels = document.createElement("div");
+    labels.className = "blog-post-taxonomy";
+    taxonomy.renderMetadata(labels, post, staticGroups);
+    const organization = taxonomy.read(post);
+    article.dataset.tags = JSON.stringify(organization.tags.map(tag => tag.slug));
+    article.dataset.series = organization.series?.slug || "";
+    article.append(title, excerpt, metadata, labels);
     return article;
   }
 
@@ -74,17 +89,45 @@
           }
           if (seenSlugs.has(post.slug)) throw new Error("Archive pagination returned a repeated post.");
           seenSlugs.add(post.slug);
+          taxonomy.read(post);
         }
         posts.push(...page);
         if (page.length < 500) break;
       }
       const currentArchive = JSON.stringify(posts);
       if (currentArchive !== lastArchive) {
-        list.replaceChildren(...posts.map(createPostCard));
+        const sorted = selectedSeries ? taxonomy.ordered(posts, selectedSeries) : posts;
+        list.replaceChildren(...sorted.map(createPostCard));
+        if (browse) {
+          const groups = taxonomy.groups(posts);
+          const sections = [];
+          for (const kind of ["tags", "series"]) {
+            if (!groups[kind].length) continue;
+            const section = document.createElement("section");
+            const heading = document.createElement("h2");
+            heading.textContent = kind === "tags" ? "Browse tags" : "Browse series";
+            section.append(heading);
+            for (const item of groups[kind]) {
+              const anchor = document.createElement("a");
+              anchor.href = taxonomy.browsePath(kind, item.slug, staticGroups);
+              anchor.textContent = item.name; section.append(anchor);
+            }
+            sections.push(section);
+          }
+          browse.replaceChildren(...sections);
+          const selected = selectedTag ? groups.tags.find(item => item.slug === selectedTag)
+            : selectedSeries ? groups.series.find(item => item.slug === selectedSeries) : null;
+          if (selectedTag || selectedSeries) {
+            document.querySelector(".blog-header h1").textContent = `${selectedTag ? "Tag" : "Series"}: ${selected?.name || selectedTag || selectedSeries}`;
+          }
+        }
         lastArchive = currentArchive;
       }
       synchronized = true;
-      archiveStatus = posts.length ? "Archive synchronized." : "No posts have been published yet.";
+      const matching = posts.filter(post => (!selectedTag || taxonomy.read(post).tags.some(tag => tag.slug === selectedTag))
+        && (!selectedSeries || taxonomy.read(post).series?.slug === selectedSeries));
+      archiveStatus = matching.length ? "Archive synchronized." : selectedTag || selectedSeries
+        ? "No published posts match this tag or series." : "No posts have been published yet.";
       filterPosts();
     } catch (error) {
       console.error("Unable to load blog posts:", error);
