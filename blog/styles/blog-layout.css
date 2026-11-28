@@ -1,9 +1,25 @@
+html:is([data-interface-theme="m365"], [data-interface-theme="legacy-bios"]) .blog-page {
+  padding-inline: 0 !important;
+}
+
+@media screen and (min-width: 461px) {
+  html[data-interface-theme="m365"][data-m365-chrome="active"] .blog-page {
+    padding-inline-start: 52px !important;
+  }
+}
+
+@media screen and (min-width: 761px) {
+  html[data-interface-theme="m365"][data-m365-chrome="active"] .blog-page:not(.m365-nav-collapsed) {
+    padding-inline-start: 224px !important;
+  }
+}
+
 html .blog-page > .blog-shell {
   --blog-reading-size: clamp(1rem, 0.3vw + 1rem, 1.125rem);
-  --blog-shell-padding: clamp(16px, 2vw, 32px);
-  width: min(1200px, calc(100% - 32px)) !important;
+  --blog-shell-padding: clamp(12px, 1vw, 20px);
+  width: calc(100% - 16px) !important;
   max-width: none !important;
-  margin: clamp(16px, 3vw, 44px) auto !important;
+  margin: clamp(8px, 1vw, 16px) auto !important;
   padding: var(--blog-shell-padding) !important;
   box-sizing: border-box;
   min-width: 0;
@@ -15,19 +31,19 @@ html:is([data-interface-theme="windows-xp"], [data-interface-theme="playstation"
   margin-inline: calc(0px - var(--blog-shell-padding));
 }
 
-html[data-interface-theme="windows-10"] .blog-page > .blog-shell > .w10-caption {
+html:is([data-interface-theme="windows-10"], [data-interface-theme="windows-11"]) .blog-page > .blog-shell > :is(.w10-caption, .w11-titlebar) {
   margin-top: calc(0px - var(--blog-shell-padding));
   margin-inline: calc(0px - var(--blog-shell-padding));
 }
 
 html .blog-post-page :is(.blog-article, .blog-footer) {
   width: 100%;
-  max-width: 1000px;
+  max-width: none;
   margin-inline: auto;
   font-size: var(--blog-reading-size) !important;
   min-width: 0;
   box-sizing: border-box;
-  padding-inline: 0;
+  padding-inline: 0 !important;
 }
 
 html .blog-page .public-nav {
@@ -123,14 +139,14 @@ html .blog-page :is(.blog-header h1, .blog-header a, .blog-post-list h3 a, .blog
   color: color-mix(in srgb, var(--accent) 20%, var(--ink)) !important;
 }
 
-html .blog-page .blog-shell > section { min-width: 0; padding-inline: 0; }
+html .blog-page .blog-shell > section { min-width: 0; padding-inline: 0 !important; }
 html .blog-page .section-label { gap: 1rem; flex-wrap: wrap; }
 html .blog-page .section-label :is(h2, span) { font-size: 0.875rem !important; line-height: 1.5; color: var(--ink) !important; }
 html .blog-page label[for="blog-search"] { font-size: 0.875rem; color: var(--ink); }
 html .blog-page #blog-search { width: 100%; max-width: 38rem; min-width: 0; margin-block: 0.5rem 1.5rem; color: var(--ink) !important; background: var(--panel) !important; }
 html .blog-page #blog-search::placeholder { color: color-mix(in srgb, var(--muted) 15%, var(--ink)); opacity: 1; }
 html .blog-page .blog-post-list { gap: 1.5rem; }
-html .blog-page .blog-post-list article { padding: clamp(20px, 3vw, 32px); min-width: 0; overflow-wrap: anywhere; background: transparent !important; }
+html .blog-page .blog-post-list article { padding: clamp(12px, 1.25vw, 20px); min-width: 0; overflow-wrap: anywhere; background: transparent !important; }
 html .blog-page .blog-post-list h3 { font-size: clamp(1.25rem, 2.5vw, 1.6rem) !important; line-height: 1.4; }
 html .blog-page :is(.blog-post-taxonomy, .blog-series-navigation, .blog-taxonomy-browse):empty { display: none; }
 html .blog-page .blog-post-taxonomy { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.875rem; line-height: 1.6; margin-block: 1rem; }
@@ -164,21 +180,21 @@ html[data-motion="reduced"] .blog-page .blog-shell * {
 
 @media (max-width: 600px) {
   html .blog-page > .blog-shell {
-    --blog-shell-padding: 12px;
-    width: calc(100% - 12px) !important;
-    margin-block: 12px !important;
+    --blog-shell-padding: 8px;
+    width: calc(100% - 8px) !important;
+    margin-block: 8px !important;
   }
   html .blog-page .blog-breadcrumbs { margin-bottom: 1.25rem; }
-  html .blog-page .blog-post-list article { padding: 16px 12px !important; }
+  html .blog-page .blog-post-list article { padding: 12px 8px !important; }
   html .blog-page .blog-toc { padding: 10px 12px; }
 }
 
 @media print {
-  html .blog-page { --ink: #000; --accent: #000; --bg: #fff; --panel: #fff; color: #000 !important; background: #fff !important; }
+  html .blog-page { --ink: #000; --accent: #000; --bg: #fff; --panel: #fff; color: #000 !important; background: #fff !important; margin: 0 !important; padding: 0 !important; transition: none !important; }
   html .blog-page > .blog-shell { --blog-shell-padding: 0px; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0; background: transparent !important; box-shadow: none; }
   html .blog-page > .blog-shell::before,
   html .blog-page > .blog-shell::after,
-  html .blog-page > .blog-shell > .w10-caption { transition: none !important; }
+  html .blog-page > .blog-shell > :is(.w10-caption, .w11-titlebar) { transition: none !important; }
   html .blog-page :is(.public-nav, .blog-breadcrumbs, .noise, .scanlines) { display: none !important; }
   html .blog-post-page :is(.blog-article, .blog-footer) { font-size: 11pt !important; }
   html .blog-page .blog-color-readable { color: #000 !important; }

@@ -193,9 +193,10 @@
   Generated initial HTML has readable default-dark colors without JavaScript.
   Live replacements, theme changes, stylesheet loads and resizing recalculate
   shades against the current reading surface, including gradient/alpha bounds.
-- Blog layout uses a pixel-capped reading area rather than a font-dependent
-  character limit: up to 1000px within a 1200px shell, with smaller responsive
-  gutters. Theme-specific shell caps and nested section padding do not squeeze
+- Blog articles use the full available shell width without an inner pixel or
+  character cap. The shell has 8px outer side margins (4px on phones), compact
+  responsive padding, and respects theme sidebars. Theme-specific shell caps
+  and nested section padding do not squeeze
   the article or archive. Theme fonts, author formatting, colors, TOC and series
   navigation are retained. The phone layout reduces layered card padding while
   preserving theme navigation. `scripts/blog-layout-browser.mjs` measures usable

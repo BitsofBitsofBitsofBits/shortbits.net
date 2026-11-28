@@ -4,7 +4,7 @@
   "notes": [
     {
       "title": "More room for the blog",
-      "summary": "Articles use a wider reading area without font-dependent column limits, and the archive has more usable space. Smaller layered gutters and mobile card padding reduce cramped text while retaining theme fonts, colors, the Table of Contents, tags, series navigation and readable colored text."
+      "summary": "Articles use the full available reading width without inner column caps, and archive excerpts fill their cards. Compact outer margins, shell padding and mobile card gutters leave more space for content while retaining theme fonts, colors, the Table of Contents, tags, series navigation and readable colored text."
     }
   ]
 }

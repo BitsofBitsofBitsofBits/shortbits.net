@@ -66,7 +66,7 @@ try {
     { kind: "canonical", slug: post.slug, path: `/blog/articles/${post.slug}/` },
     { kind: "legacy", slug: post.slug, path: `/blog/post.html?slug=${post.slug}` },
   ])];
-  for (const width of [1440, 1024, 768, 390, 320]) {
+  for (const width of [1920, 1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const route of routes) {
       await page.goto(`${server.origin}${route.path}`, { waitUntil: "networkidle" });
@@ -108,11 +108,16 @@ try {
           const style = getComputedStyle(content);
           const card = document.querySelector("#blog-post-list article");
           const cardStyle = card && getComputedStyle(card);
+          const shell = document.querySelector(".blog-shell");
+          const shellStyle = getComputedStyle(shell);
+          const parentStyle = getComputedStyle(content.parentElement);
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
           context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
           return {
             width: rect.width, left: rect.left, rightGutter: innerWidth - rect.right,
+            availableWidth: shell.clientWidth - parseFloat(shellStyle.paddingLeft) - parseFloat(shellStyle.paddingRight)
+              - parseFloat(parentStyle.borderLeftWidth) - parseFloat(parentStyle.borderRightWidth),
             characters: rect.width / context.measureText("0").width,
             font: style.fontFamily, fontSize: parseFloat(style.fontSize), lineHeight: parseFloat(style.lineHeight),
             cardTextWidth: card && card.getBoundingClientRect().width - parseFloat(cardStyle.paddingLeft)
@@ -125,20 +130,22 @@ try {
         });
         const failures = [];
         if (measurements.overflow > 1) failures.push("Page overflow");
-        if (measurements.left < 16 || measurements.rightGutter < 16) failures.push("Gutters below 16px");
+        if (measurements.left < 12 || measurements.rightGutter < 12) failures.push("Gutters below 12px");
+        if (!Number.isFinite(measurements.availableWidth)
+          || Math.abs(measurements.width - measurements.availableWidth) > 1)
+          failures.push("Content does not use the available shell width");
         if (route.kind !== "archive") {
           if (measurements.fontSize < 16) failures.push("Reading text below 16px");
-          if (measurements.width > 1001) failures.push("Reading area exceeds desktop cap");
           if (["default", "google", "windows-95", "html"].includes(theme)
-            && measurements.width < Math.min(980, width - (width <= 600 ? 40 : 100)))
+            && measurements.width < width - (width <= 600 ? 32 : 80))
             failures.push("Usable reading area is still squeezed");
           if (measurements.lineHeight / measurements.fontSize < 1.6) failures.push("Insufficient paragraph rhythm");
         }
         if (route.kind === "archive" && ["default", "google", "windows-95", "html"].includes(theme)) {
           if (!Number.isFinite(measurements.cardExcerptWidth)) failures.push("Archive excerpt measurement is missing");
-          if (width <= 600 && measurements.cardExcerptWidth < width - 70)
+          if (width <= 600 && measurements.cardExcerptWidth < width - 52)
             failures.push("Archive excerpt is squeezed on phones");
-          if (width >= 1024 && measurements.cardExcerptWidth < Math.min(960, measurements.cardTextWidth - 1))
+          if (measurements.cardExcerptWidth < measurements.cardTextWidth - 1)
             failures.push("Archive excerpt retains an inner width limit");
         }
         if (measurements.colorBackings) failures.push("Colored text backing");
