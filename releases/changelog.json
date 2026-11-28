@@ -1,10 +1,10 @@
 {
-  "release_id": "blog-wider-layout-v1",
-  "version": "2.0.5",
+  "release_id": "blog-reading-width-v1",
+  "version": "2.0.8",
   "notes": [
     {
-      "title": "More room for the blog",
-      "summary": "Articles use the full available reading width without inner column caps, and archive excerpts fill their cards. Compact outer margins, shell padding and mobile card gutters leave more space for content while retaining theme fonts, colors, the Table of Contents, tags, series navigation and readable colored text."
+      "title": "Choose your blog reading width",
+      "summary": "A balanced Comfortable view leaves margins on very large displays without returning to the old narrow column. Blog Theme settings now offers Comfortable, Wide, and Full width, remembered only in your browser across articles and the archive. Phones keep their compact gutters; theme fonts, colors, article formatting and the Table of Contents stay intact."
     }
   ]
 }

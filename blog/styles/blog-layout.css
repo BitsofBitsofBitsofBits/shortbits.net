@@ -1,3 +1,15 @@
+html {
+  --blog-shell-max-width: 1280px;
+}
+
+html[data-blog-reading-width="wide"] {
+  --blog-shell-max-width: 1600px;
+}
+
+html[data-blog-reading-width="full"] {
+  --blog-shell-max-width: none;
+}
+
 html:is([data-interface-theme="m365"], [data-interface-theme="legacy-bios"]) .blog-page {
   padding-inline: 0 !important;
 }
@@ -18,7 +30,7 @@ html .blog-page > .blog-shell {
   --blog-reading-size: clamp(1rem, 0.3vw + 1rem, 1.125rem);
   --blog-shell-padding: clamp(12px, 1vw, 20px);
   width: calc(100% - 16px) !important;
-  max-width: none !important;
+  max-width: var(--blog-shell-max-width) !important;
   margin: clamp(8px, 1vw, 16px) auto !important;
   padding: var(--blog-shell-padding) !important;
   box-sizing: border-box;
@@ -191,7 +203,7 @@ html[data-motion="reduced"] .blog-page .blog-shell * {
 
 @media print {
   html .blog-page { --ink: #000; --accent: #000; --bg: #fff; --panel: #fff; color: #000 !important; background: #fff !important; margin: 0 !important; padding: 0 !important; transition: none !important; }
-  html .blog-page > .blog-shell { --blog-shell-padding: 0px; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0; background: transparent !important; box-shadow: none; }
+  html .blog-page > .blog-shell { --blog-shell-padding: 0px; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0; background: transparent !important; box-shadow: none; }
   html .blog-page > .blog-shell::before,
   html .blog-page > .blog-shell::after,
   html .blog-page > .blog-shell > :is(.w10-caption, .w11-titlebar) { transition: none !important; }

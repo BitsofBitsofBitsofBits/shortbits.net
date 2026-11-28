@@ -1,7 +1,7 @@
 (() => {
   const navigation = document.querySelector(".public-nav");
   const preference = window.BITS_THEME_PREFERENCE;
-  if (!navigation || !preference) return;
+  if (!navigation) return;
 
   const settings = document.createElement("dialog");
   settings.id = "blog-theme-settings";
@@ -41,22 +41,59 @@
   theme.autofocus = true;
   const scheme = createSelect("blog-scheme-select", "Color mode");
   const variant = createSelect("blog-variant-select", "Variant");
-  theme.replaceChildren(...preference.buildOptions());
+  const reading = window.BITS_BLOG_READING_WIDTH;
+  const width = createSelect("blog-reading-width-select", "Reading width");
+  width.setAttribute("aria-label", "Reading width");
+  for (const [value, label] of [["comfortable", "Comfortable (default)"], ["wide", "Wide"], ["full", "Full width"]]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    width.append(option);
+  }
+  const widthHelp = document.createElement("p");
+  widthHelp.className = "blog-reading-width-help";
+  widthHelp.textContent = "Comfortable leaves margins on large screens. Wide gives more room; Full width uses all available space. Phones keep the same compact gutters. This choice is saved only in this browser.";
+  const widthStatus = document.createElement("p");
+  widthStatus.id = "blog-reading-width-status";
+  widthStatus.className = "blog-reading-width-help";
+  widthStatus.setAttribute("role", "status");
+  widthStatus.setAttribute("aria-live", "polite");
+  widthHelp.id = "blog-reading-width-help";
+  width.setAttribute("aria-describedby", `${widthHelp.id} ${widthStatus.id}`);
+  const syncWidth = () => {
+    width.value = reading?.value || "comfortable";
+    width.disabled = !reading;
+    widthStatus.textContent = !reading ? "Reading width could not load. Reload the page to try again."
+      : reading.storageError ? "Browser storage is unavailable. Your reading width works here but may not be retained after navigation." : "";
+  };
+  width.addEventListener("change", () => reading?.select(width.value));
+  window.addEventListener("bits:blog-reading-width", syncWidth);
+  syncWidth();
+  if (preference) theme.replaceChildren(...preference.buildOptions());
   const sync = () => { theme.value = document.documentElement.dataset.interfaceTheme; };
   theme.addEventListener("change", () => {
     preference.select(theme.value);
     preference.apply(theme.value);
   });
-  preference.bindColorSchemeSelect(scheme);
-  preference.bindVariantSelect(variant);
-  window.BITS_THEME_PICKER.bind(theme, variant);
+  if (preference) {
+    preference.bindColorSchemeSelect(scheme);
+    preference.bindVariantSelect(variant);
+    window.BITS_THEME_PICKER.bind(theme, variant);
+  } else {
+    theme.disabled = scheme.disabled = variant.disabled = true;
+    const appearanceStatus = document.createElement("p");
+    appearanceStatus.className = "blog-reading-width-help";
+    appearanceStatus.textContent = "Appearance settings could not load. Reading width is still available; reload to retry appearance settings.";
+    controls.append(appearanceStatus);
+    console.error("Blog appearance settings are unavailable.");
+  }
   window.addEventListener("bits:theme-applied", sync);
   window.addEventListener("storage", (event) => {
-    if (event.key === null || ["bits-interface-theme", preference.choiceKey, preference.dismissalKey].includes(event.key)) {
+    if (preference && (event.key === null || ["bits-interface-theme", preference.choiceKey, preference.dismissalKey].includes(event.key))) {
       preference.apply(preference.resolve());
     }
   });
-  window.addEventListener("pageshow", () => preference.apply(preference.resolve()));
+  window.addEventListener("pageshow", () => { if (preference) preference.apply(preference.resolve()); });
   trigger.addEventListener("click", () => settings.showModal());
   close.addEventListener("click", () => settings.close());
   settings.addEventListener("click", (event) => {
@@ -68,7 +105,7 @@
     }
   });
   sync();
-  settings.append(heading, controls);
+  settings.append(heading, controls, widthHelp, widthStatus);
   document.body.append(settings);
   navigation.append(trigger);
 })();

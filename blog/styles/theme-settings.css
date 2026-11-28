@@ -82,6 +82,18 @@
   font-size: 1rem;
 }
 
+.blog-reading-width-help {
+  margin-block: 8px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+#blog-reading-width-status:empty {
+  display: none;
+}
+
 .public-nav .blog-theme-trigger:focus-visible,
 .blog-theme-settings :is(button, select):focus-visible {
   outline: 2px solid var(--ink);

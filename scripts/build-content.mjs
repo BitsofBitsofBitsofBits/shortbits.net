@@ -197,6 +197,7 @@ export function renderArticle(post, renderer, posts = [post]) {
     <script src="/shared/scripts/seasonal-calendar.js?v=calendar-1"></script>
     <script src="/shared/scripts/accessibility.js?v=accessibility-1"></script>
     <script src="/shared/scripts/theme-init.js?v=theme-27"></script>
+    <script src="/blog/scripts/reading-width.js"></script>
     <link rel="stylesheet" href="/shared/styles/styles.css?v=upgrade-132">
     <link rel="stylesheet" href="/blog/styles/theme-settings.css">
     <link rel="stylesheet" href="/blog/styles/article-toc.css">

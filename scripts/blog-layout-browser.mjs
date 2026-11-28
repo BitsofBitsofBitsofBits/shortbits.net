@@ -20,6 +20,10 @@ const server = originIndex < 0 ? await startSiteServer(option("root")) :
   { origin: new URL(process.argv[originIndex + 1]).origin, close: async () => {} };
 const cssOverride = process.argv.includes("--override-css")
   ? await readFile(new URL("../blog/styles/blog-layout.css", import.meta.url), "utf8") : null;
+const readingWidthIndex = process.argv.indexOf("--reading-width");
+const readingWidth = readingWidthIndex < 0 ? "comfortable" : process.argv[readingWidthIndex + 1];
+assert.ok(["comfortable", "wide", "full"].includes(readingWidth), "Choose a supported reading width.");
+const readingCap = { comfortable: 1280, wide: 1600, full: Infinity }[readingWidth];
 const browser = await chromium.launch({ headless: true });
 const checks = [];
 const accessibility = [];
@@ -39,6 +43,7 @@ try {
     localStorage.setItem("bits-seasonal-theme-dismissed", "thanksgiving");
     localStorage.setItem("bits-theme-debug", "enabled");
   });
+  await context.addInitScript(value => localStorage.setItem("bits-blog-reading-width", value), readingWidth);
   await context.route("**/*", route => {
     const url = new URL(route.request().url());
     if (url.pathname === "/__blog_layout_axe_test__.js")
@@ -66,7 +71,7 @@ try {
     { kind: "canonical", slug: post.slug, path: `/blog/articles/${post.slug}/` },
     { kind: "legacy", slug: post.slug, path: `/blog/post.html?slug=${post.slug}` },
   ])];
-  for (const width of [1920, 1440, 1024, 768, 390, 320]) {
+  for (const width of [2560, 1920, 1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const route of routes) {
       await page.goto(`${server.origin}${route.path}`, { waitUntil: "networkidle" });
@@ -124,11 +129,15 @@ try {
               - parseFloat(cardStyle.paddingRight) - parseFloat(cardStyle.borderLeftWidth) - parseFloat(cardStyle.borderRightWidth),
             cardExcerptWidth: card?.querySelector("p:not(.blog-post-card-meta)")?.getBoundingClientRect().width,
             overflow: document.documentElement.scrollWidth - innerWidth,
+            shellWidth: shell.getBoundingClientRect().width,
+            readingWidth: document.documentElement.dataset.blogReadingWidth,
             colorBackings: [...document.querySelectorAll(".blog-color-readable, .blog-rainbow-surface")]
               .filter(node => getComputedStyle(node).backgroundColor !== "rgba(0, 0, 0, 0)").length,
           };
         });
         const failures = [];
+        if (measurements.readingWidth !== readingWidth) failures.push("Reading preference was not applied");
+        if (measurements.shellWidth > readingCap + 1) failures.push("Reading width exceeds the selected cap");
         if (measurements.overflow > 1) failures.push("Page overflow");
         if (measurements.left < 12 || measurements.rightGutter < 12) failures.push("Gutters below 12px");
         if (!Number.isFinite(measurements.availableWidth)
@@ -137,7 +146,7 @@ try {
         if (route.kind !== "archive") {
           if (measurements.fontSize < 16) failures.push("Reading text below 16px");
           if (["default", "google", "windows-95", "html"].includes(theme)
-            && measurements.width < width - (width <= 600 ? 32 : 80))
+            && measurements.width < Math.min(width, readingCap) - (width <= 600 ? 32 : 80))
             failures.push("Usable reading area is still squeezed");
           if (measurements.lineHeight / measurements.fontSize < 1.6) failures.push("Insufficient paragraph rhythm");
         }

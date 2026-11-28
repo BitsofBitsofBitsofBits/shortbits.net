@@ -193,8 +193,12 @@
   Generated initial HTML has readable default-dark colors without JavaScript.
   Live replacements, theme changes, stylesheet loads and resizing recalculate
   shades against the current reading surface, including gradient/alpha bounds.
-- Blog articles use the full available shell width without an inner pixel or
-  character cap. The shell has 8px outer side margins (4px on phones), compact
+- Blog **Theme settings > Reading width** offers **Comfortable** (default,
+  1280px maximum shell), **Wide** (1600px), and **Full width** (uncapped).
+  The default gives more reading space than the old narrow layout while leaving
+  useful margins on very large displays. Articles use their shell's full width,
+  without a second inner pixel or character cap. The shell has minimum 8px outer
+  side margins (4px on phones), compact
   responsive padding, and respects theme sidebars. Theme-specific shell caps
   and nested section padding do not squeeze
   the article or archive. Theme fonts, author formatting, colors, TOC and series
@@ -204,6 +208,14 @@
   use `--origin https://www.shortbits.net --override-css` to review local CSS on
   the public readers without changing published records. Omit `--override-css`
   for the deployed baseline; `--all-themes` covers all registered theme families.
+  `--reading-width comfortable|wide|full` tests a chosen view, including 2560px
+  displays. The selected view is stored only on the visitor's device as
+  `bits-blog-reading-width`, shared across archive, generated and legacy readers,
+  and applied before the styles load. Clearing site data or choosing Comfortable
+  restores the default. If browser storage is blocked, settings explicitly
+  report that the choice may last only on this page. Fonts, content, TOC anchors
+  and public publishing eligibility do not change with width. No-JavaScript
+  readers use Comfortable; printing ignores the screen width choice.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do
