@@ -1,22 +1,10 @@
 {
-  "release_id": "blog-readable-taxonomy-v1",
-  "version": "2.0.4",
+  "release_id": "blog-wider-layout-v1",
+  "version": "2.0.5",
   "notes": [
     {
-      "title": "Readable blog colors without changing saved content",
-      "summary": "Markdown and rich articles adapt displayed color shades to their reading surface only when needed, without highlight boxes. Already readable colors remain exact; Blurple, linked text and rainbow gradients retain their hues while meeting contrast thresholds. Saved Hex values, private drafts and history remain unchanged, and generated articles retain a readable no-JavaScript fallback."
-    },
-    {
-      "title": "A calmer blog reading layout",
-      "summary": "The archive and articles use comfortable centered reading widths, responsive gutters, larger text and metadata, clearer heading rhythm and quieter navigation while retaining selected theme fonts and colors. Search, RSS, live articles and the collapsed Table of Contents remain available, with a clean print layout."
-    },
-    {
-      "title": "Tags and ordered blog series",
-      "summary": "Both editors support multiple tags and an optional ordered series. Assignments autosave privately and travel with history and approved revisions; only publishing changes public membership. Public browsing, article labels and previous/next navigation update live, with generated category pages and search metadata available in deployment snapshots."
-    },
-    {
-      "title": "Blog theme and navigation contrast",
-      "summary": "Article headings, links, metadata, Table of Contents and keyboard focus use readable theme colors. Appearance controls and iPod reading surfaces receive targeted contrast fixes while decorative page overlays remain behind the article."
+      "title": "More room for the blog",
+      "summary": "Articles use a wider reading area without font-dependent column limits, and the archive has more usable space. Smaller layered gutters and mobile card padding reduce cramped text while retaining theme fonts, colors, the Table of Contents, tags, series navigation and readable colored text."
     }
   ]
 }

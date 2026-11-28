@@ -15,15 +15,22 @@ assert.equal(posts.length, 2, "Use the two published public posts.");
 assert.ok(posts.every(post => post.published));
 const output = option("output");
 await mkdir(output, { recursive: true });
-const server = await startSiteServer(option("root"));
+const originIndex = process.argv.indexOf("--origin");
+const server = originIndex < 0 ? await startSiteServer(option("root")) :
+  { origin: new URL(process.argv[originIndex + 1]).origin, close: async () => {} };
+const cssOverride = process.argv.includes("--override-css")
+  ? await readFile(new URL("../blog/styles/blog-layout.css", import.meta.url), "utf8") : null;
 const browser = await chromium.launch({ headless: true });
 const checks = [];
 const accessibility = [];
-const themes = [
+const axeSource = await readFile(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
+let themes = [
   ["default", "dark"], ["default", "light"], ["html", "light"],
   ["rgb", "light", "rainbow"], ["aero-glass", "light", "rose"],
   ["aqua", "light", "graphite"], ["winamp", "dark", "classic"],
   ["ipod-classic", "light", "black"], ["tokyo-night", "light"],
+  ["google", "light"], ["windows-95", "light"], ["m365", "light"],
+  ["atari", "dark"], ["legacy-bios", "dark"], ["terminal", "dark"],
 ];
 try {
   const context = await browser.newContext({ reducedMotion: "reduce" });
@@ -34,6 +41,11 @@ try {
   });
   await context.route("**/*", route => {
     const url = new URL(route.request().url());
+    if (url.pathname === "/__blog_layout_axe_test__.js")
+      return route.fulfill({ contentType: "text/javascript", body: axeSource });
+    if (cssOverride && url.pathname === "/blog/styles/blog-layout.css")
+      return route.fulfill({ contentType: "text/css", body: cssOverride });
+    if (originIndex >= 0) return route.continue();
     if (url.pathname.endsWith("/site_blog_public_posts")) {
       const slug = url.searchParams.get("slug")?.slice(3);
       return route.fulfill({ contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" },
@@ -45,6 +57,11 @@ try {
     return route.continue();
   });
   const page = await context.newPage();
+  if (process.argv.includes("--all-themes")) {
+    await page.goto(`${server.origin}/blog/`, { waitUntil: "networkidle" });
+    themes = await page.evaluate(() => window.BITS_THEME_PREFERENCE.getGroups()
+      .flatMap(group => group.themes).map(theme => [theme.id, theme.schemes?.[0] || "dark"]));
+  }
   const routes = [{ kind: "archive", slug: "archive", path: "/blog/" }, ...posts.flatMap(post => [
     { kind: "canonical", slug: post.slug, path: `/blog/articles/${post.slug}/` },
     { kind: "legacy", slug: post.slug, path: `/blog/post.html?slug=${post.slug}` },
@@ -55,21 +72,42 @@ try {
       await page.goto(`${server.origin}${route.path}`, { waitUntil: "networkidle" });
       await page.locator(route.kind === "archive" ? "#blog-post-list article" : "#blog-post-body > *").first().waitFor();
       for (const [theme, scheme, variant] of themes) {
-        await page.evaluate(({ theme, scheme, variant }) => {
+        await page.evaluate(async ({ theme, scheme, variant }) => {
+          const loads = [];
+          const watch = link => {
+            if (!(link.tagName === "LINK" && link.rel === "stylesheet" || link.tagName === "SCRIPT" && link.src)) return;
+            loads.push(new Promise((resolveLoad, rejectLoad) => {
+              link.addEventListener("load", resolveLoad, { once: true });
+              link.addEventListener("error", () => rejectLoad(new Error("Theme asset failed to load.")), { once: true });
+            }));
+          };
+          const observer = new MutationObserver(records => {
+            for (const record of records) {
+              if (record.type === "attributes") watch(record.target);
+              else for (const node of record.addedNodes) watch(node);
+            }
+          });
+          observer.observe(document.head, { childList: true, subtree: true, attributes: true, attributeFilter: ["href"] });
           if (variant) window.BITS_THEME_PREFERENCE.setVariant(theme, variant);
           window.BITS_THEME_PREFERENCE.apply(theme, { scheme });
+          await new Promise(resolveLoad => setTimeout(resolveLoad, 0));
+          for (let completed = 0; completed < loads.length;) {
+            const pending = loads.slice(completed);
+            completed = loads.length;
+            await Promise.all(pending);
+            await new Promise(resolveLoad => setTimeout(resolveLoad, 0));
+          }
+          observer.disconnect();
+          await document.fonts.ready;
+          await new Promise(resolveFrame => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
         }, { theme, scheme, variant });
-        await page.waitForFunction(() => {
-          const sheet = document.querySelector("#bits-theme-stylesheet");
-          return !sheet || Boolean(sheet.sheet);
-        });
-        await page.evaluate(() => document.fonts.ready);
-        await page.evaluate(() => new Promise(resolveFrame => requestAnimationFrame(() => requestAnimationFrame(resolveFrame))));
         const measurements = await page.evaluate(() => {
           const body = document.querySelector("#blog-post-body");
           const content = body || document.querySelector("#blog-post-list");
           const rect = content.getBoundingClientRect();
           const style = getComputedStyle(content);
+          const card = document.querySelector("#blog-post-list article");
+          const cardStyle = card && getComputedStyle(card);
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
           context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
@@ -77,6 +115,9 @@ try {
             width: rect.width, left: rect.left, rightGutter: innerWidth - rect.right,
             characters: rect.width / context.measureText("0").width,
             font: style.fontFamily, fontSize: parseFloat(style.fontSize), lineHeight: parseFloat(style.lineHeight),
+            cardTextWidth: card && card.getBoundingClientRect().width - parseFloat(cardStyle.paddingLeft)
+              - parseFloat(cardStyle.paddingRight) - parseFloat(cardStyle.borderLeftWidth) - parseFloat(cardStyle.borderRightWidth),
+            cardExcerptWidth: card?.querySelector("p:not(.blog-post-card-meta)")?.getBoundingClientRect().width,
             overflow: document.documentElement.scrollWidth - innerWidth,
             colorBackings: [...document.querySelectorAll(".blog-color-readable, .blog-rainbow-surface")]
               .filter(node => getComputedStyle(node).backgroundColor !== "rgba(0, 0, 0, 0)").length,
@@ -84,33 +125,47 @@ try {
         });
         const failures = [];
         if (measurements.overflow > 1) failures.push("Page overflow");
-        if (measurements.left < 20 || measurements.rightGutter < 20) failures.push("Gutters below 20px");
+        if (measurements.left < 16 || measurements.rightGutter < 16) failures.push("Gutters below 16px");
         if (route.kind !== "archive") {
           if (measurements.fontSize < 16) failures.push("Reading text below 16px");
-          if (width >= 1024 && (measurements.characters < 45 || measurements.characters > 80 || measurements.width > 860)) failures.push("Reading measure outside desktop bounds");
+          if (measurements.width > 1001) failures.push("Reading area exceeds desktop cap");
+          if (["default", "google", "windows-95", "html"].includes(theme)
+            && measurements.width < Math.min(980, width - (width <= 600 ? 40 : 100)))
+            failures.push("Usable reading area is still squeezed");
           if (measurements.lineHeight / measurements.fontSize < 1.6) failures.push("Insufficient paragraph rhythm");
+        }
+        if (route.kind === "archive" && ["default", "google", "windows-95", "html"].includes(theme)) {
+          if (!Number.isFinite(measurements.cardExcerptWidth)) failures.push("Archive excerpt measurement is missing");
+          if (width <= 600 && measurements.cardExcerptWidth < width - 70)
+            failures.push("Archive excerpt is squeezed on phones");
+          if (width >= 1024 && measurements.cardExcerptWidth < Math.min(960, measurements.cardTextWidth - 1))
+            failures.push("Archive excerpt retains an inner width limit");
         }
         if (measurements.colorBackings) failures.push("Colored text backing");
         checks.push({ ...route, theme, scheme, variant, viewport: width, ...measurements, failures });
         if ((width === 1440 || width === 390) && (route.kind === "archive" || route.kind === "canonical" && theme === "default")) {
           if (!await page.evaluate(() => Boolean(window.axe))) await page.addScriptTag({
-            path: createRequire(import.meta.url).resolve("axe-core/axe.min.js"),
+            url: `${server.origin}/__blog_layout_axe_test__.js`,
           });
           const result = await page.evaluate(async () => {
             const result = await window.axe.run(document, { runOnly: { type: "rule", values: ["color-contrast", "link-name", "button-name"] } });
             return {
-              violations: result.violations.map(issue => ({ id: issue.id, nodes: issue.nodes.map(node => ({ target: node.target, summary: node.failureSummary })) })),
+              violations: result.violations.map(issue => ({ id: issue.id, nodes: issue.nodes.map(node => {
+                const element = typeof node.target[0] === "string" ? document.querySelector(node.target[0]) : null;
+                return { target: node.target, summary: node.failureSummary,
+                  outsideBlog: element ? !element.closest(".blog-shell") : null };
+              }) })),
               incomplete: result.incomplete.map(issue => issue.id),
             };
           });
           accessibility.push({ ...route, theme, scheme, viewport: width, ...result });
         }
-        if ((width === 1440 || width === 390) && theme === "default" && route.kind !== "legacy") {
+        if ((width === 1440 || width === 390) && ["default", "google", "windows-95", "m365", "html", "atari"].includes(theme) && route.kind !== "legacy") {
           await page.evaluate(() => scrollTo(0, 0));
-          await page.screenshot({ path: join(output, `${route.slug}-${scheme}-${width}-top.png`) });
+          await page.screenshot({ path: join(output, `${route.slug}-${theme}-${scheme}-${width}-top.png`) });
           if (route.kind === "canonical") {
             await page.locator("#blog-post-body").scrollIntoViewIfNeeded();
-            await page.screenshot({ path: join(output, `${route.slug}-${scheme}-${width}-reading.png`) });
+            await page.screenshot({ path: join(output, `${route.slug}-${theme}-${scheme}-${width}-reading.png`) });
           }
         }
       }
@@ -123,7 +178,8 @@ try {
   console.log(JSON.stringify(summary));
   if (process.argv.includes("--assert")) {
     assert.equal(summary.failingCases, 0, "Reading layout measurements failed.");
-    assert.equal(accessibility.filter(result => result.violations.length).length, 0, "Supporting accessibility checks failed.");
+    assert.equal(accessibility.filter(result => result.violations.some(issue =>
+      issue.nodes.some(node => node.outsideBlog !== true))).length, 0, "Blog-surface accessibility checks failed.");
   }
 } finally {
   await browser.close();

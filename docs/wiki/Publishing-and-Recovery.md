@@ -193,6 +193,16 @@
   Generated initial HTML has readable default-dark colors without JavaScript.
   Live replacements, theme changes, stylesheet loads and resizing recalculate
   shades against the current reading surface, including gradient/alpha bounds.
+- Blog layout uses a pixel-capped reading area rather than a font-dependent
+  character limit: up to 1000px within a 1200px shell, with smaller responsive
+  gutters. Theme-specific shell caps and nested section padding do not squeeze
+  the article or archive. Theme fonts, author formatting, colors, TOC and series
+  navigation are retained. The phone layout reduces layered card padding while
+  preserving theme navigation. `scripts/blog-layout-browser.mjs` measures usable
+  widths, captures desktop/mobile views and checks supporting accessibility;
+  use `--origin https://www.shortbits.net --override-css` to review local CSS on
+  the public readers without changing published records. Omit `--override-css`
+  for the deployed baseline; `--all-themes` covers all registered theme families.
 - Deployment still generates initial article HTML, article-specific metadata,
   `/blog/feed.xml`, archive cards, and sitemap entries. Static HTML is retained
   for SEO and no-JavaScript readers; search/social crawlers, RSS, and sitemap do
