@@ -71,7 +71,7 @@
   live alongside articles. New groups use archive query links until a generated
   route exists. Generated category pages, RSS categories, sitemap entries and
   no-JavaScript membership/navigation remain deployment snapshots.
-- **Tags/series release order (not yet deployed):** obtain explicit migration and
+- **Tags/series release order:** obtain explicit migration and
   release approval and a fresh private pre-migration backup; apply
   `20261126160000_blog_taxonomy.sql`; export and verify a fresh exact-schema private
   backup; then deploy the compatible Admin, bundled writer, public readers,

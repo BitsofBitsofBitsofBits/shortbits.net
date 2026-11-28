@@ -385,6 +385,13 @@ jobs:
             -e "ssh -p ${DEPLOY_PORT}" \
             .site-build/blog/articles/ \
             "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/blog/articles/"
+          for collection in tags series; do
+            rsync \
+              --archive --checksum --compress --delete --chmod=D755,F644 \
+              -e "ssh -p ${DEPLOY_PORT}" \
+              ".site-build/blog/${collection}/" \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:/srv/bitsofbits/blog/${collection}/"
+          done
 
       - name: Configure integrations, canonical host, and versioned asset caching
         shell: bash
